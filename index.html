@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗狗協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪回家 — 全台走失狗狗協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗狗平安回家。">
-<!-- BUILD v1.1.1 -->
+<!-- BUILD v1.1.2 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -194,7 +194,8 @@ footer a{color:var(--ink-2);margin:0 6px}
 .mk.found{background:var(--green)}
 /* v1.1 */
 .hero .actions .btn.lg{flex:1 1 220px}
-.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:18px 0 0;overflow-x:auto}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:18px 0 0;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+@media(max-width:640px){.tabs button{padding:10px 10px;font-size:14px}}
 .tabs button{border:none;background:none;padding:10px 14px;font-size:15px;font-weight:700;color:var(--ink-3);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
 .tabs button.on{color:var(--red);border-bottom-color:var(--red)}
 .tabs button .cnt{font-size:12px;background:#eee;color:var(--ink-2);border-radius:999px;padding:1px 7px;margin-left:4px}
@@ -262,7 +263,7 @@ footer a{color:var(--ink-2);margin:0 6px}
     <a href="#/about">關於本站</a><a href="#/resources">找狗攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料（每日更新）· 地圖 © OpenStreetMap 貢獻者</div>
-  <div class="small" style="margin-top:4px">BUILD v1.1.1</div>
+  <div class="small" style="margin-top:4px">BUILD v1.1.2</div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -279,7 +280,7 @@ const CONFIG = {
   CONTACT_EMAIL: '',         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.1.1';
+const BUILD = 'v1.1.2';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -408,7 +409,7 @@ async function renderHome(){
   <div id="recentWrap" class="hidden"><h2>👁 最新目擊</h2><div class="recent" id="recent"></div></div>
   <div class="tabs" id="tabs">
     <button data-t="lost">走失協尋<span class="cnt" id="cLost">…</span></button>
-    <button data-t="found">拾獲／目擊流浪<span class="cnt" id="cFound">…</span></button>
+    <button data-t="found">拾獲／目擊<span class="cnt" id="cFound">…</span></button>
     <button data-t="map">🗺 地圖</button>
   </div>
   <div class="toolbar">
