@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.2.2 -->
+<!-- BUILD v3.2.3 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -800,6 +800,8 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .med-off a{display:block;padding:6px 2px;color:var(--ink-2)}
 .logo .paw{width:38px!important;height:38px!important;background:none!important;box-shadow:0 3px 8px -2px rgba(226,69,42,.45)!important;border-radius:11px!important;overflow:hidden;transform:none!important}.logo .paw img{width:38px;height:38px;display:block}
 .offline{position:fixed;left:12px;right:12px;top:10px;z-index:200;background:#3A2A1E;color:#FFF6EA;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.25);text-align:center}
+.linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
+.photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -826,7 +828,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
       <a href="#/health?cal=1" class="link hide-sm">日曆同步</a>
       <a href="#/health/add" class="btn sm green hide-sm">＋ 新增紀錄</a>
     </span>
-    <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊">👤<span class="hide-sm"> 登入</span></a>
+    <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg><span class="hide-sm"> 登入</span></a>
   </div>
   <nav class="space" aria-label="切換功能">
     <a href="#/" data-s="lost"><span class="sp-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></span><span class="sp-t"><b>找毛孩</b><small>走失協尋・目擊回報・拾獲通報</small></span></a>
@@ -839,7 +841,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.2.2</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.2.3</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -859,7 +861,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.2.2';
+const BUILD = 'v3.2.3';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1457,7 +1459,7 @@ async function renderCase(id){
         </dl>
       </div>
       <div class="banner" style="margin-top:10px">看到請勿呼喊、追趕或包圍<small>請拍照，記下時間、位置及方向，立即回報</small></div>
-      ${c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">📞 ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
+      ${c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">${ic('phone')} ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
       <div class="actionbar">
         <a class="btn" href="#/report/${id}">${ic("eye")} 回報目擊</a>
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
@@ -1554,7 +1556,7 @@ function matchHTML(m){
     <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> <span class="score">相似 ${m.score}</span>
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
-      <div class="small">${m.shelter_tel?`📞 <a href="tel:${esc(m.shelter_tel)}">${esc(m.shelter_tel)}</a> · `:''}${esc(m.shelter_address||'')}</div>
+      <div class="small">${m.shelter_tel?`${ic('phone')} <a href="tel:${esc(m.shelter_tel)}">${esc(m.shelter_tel)}</a> · `:''}${esc(m.shelter_address||'')}</div>
       <a class="small" target="_blank" rel="noopener" href="https://asms.coa.gov.tw/Amlapp/App/AnimalApp.aspx?ID=${encodeURIComponent(m.animal_id)}">在全國收容系統查看 ↗</a>
     </div></div>`;
 }
@@ -1684,7 +1686,7 @@ function renderNew(){
 function renderCreated(id,token){
   const manage=`${CONFIG.SITE_URL}#/manage/${id}?t=${token}`;
   app.innerHTML=`<div class="card"><h1>登記完成</h1>
-  ${me()?'<div class="notice green"><b>✓ 已綁定到你的帳號</b>到右上角「👤 我的」就能管理，不需要金鑰。下面的金鑰可以當備用。</div>':'<div class="notice red"><b>請立刻保存這組管理金鑰（只會顯示這一次）</b>之後更新狀態、確認目擊、結案都要用它。遺失無法補發。<a href="#/login">登入</a>後可把案件綁定帳號。</div>'}
+  ${me()?'<div class="notice green"><b>✓ 已綁定到你的帳號</b>到「我的」頁面就能管理，不需要金鑰。下面的金鑰可以當備用。</div>':'<div class="notice red"><b>請立刻保存這組管理金鑰（只會顯示這一次）</b>之後更新狀態、確認目擊、結案都要用它。遺失無法補發。<a href="#/login">登入</a>後可把案件綁定帳號。</div>'}
   <p style="margin-top:12px"><b>管理連結</b>（建議直接加到書籤或傳給自己）</p>
   <div class="tokenbox" id="mlink">${esc(manage)}</div>
   <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="copy('${esc(manage)}')">複製管理連結</button><button class="btn sm ghost" onclick="copy('${esc(token)}')">只複製金鑰</button></div>
@@ -2088,7 +2090,7 @@ async function renderFound(id){
       ${f.notes?`<dt>補充</dt><dd>${esc(f.notes)}</dd>`:''}
       <dt>通報者</dt><dd>${esc(f.reporter_name||'熱心網友')}${f.reporter_line?' · LINE：'+esc(f.reporter_line):''}</dd>
     </dl></div>
-    ${f.reporter_phone?`<div class="phone"><a href="tel:${esc(f.reporter_phone)}">📞 ${esc(f.reporter_phone)}</a></div><p class="muted small" style="text-align:center">是你的毛孩嗎？請準備照片或晶片號碼證明</p>`:'<p class="muted small" style="text-align:center;margin-top:8px">通報者未公開電話。'+(f.reporter_line?'請用 LINE 聯絡。':'')+'</p>'}
+    ${f.reporter_phone?`<div class="phone"><a href="tel:${esc(f.reporter_phone)}">${ic('phone')} ${esc(f.reporter_phone)}</a></div><p class="muted small" style="text-align:center">是你的毛孩嗎？請準備照片或晶片號碼證明</p>`:'<p class="muted small" style="text-align:center;margin-top:8px">通報者未公開電話。'+(f.reporter_line?'請用 LINE 聯絡。':'')+'</p>'}
     <div class="sharebar"><a class="btn sm line" data-share="line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a><a class="btn sm fb" data-share="fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a><button class="btn sm ghost" data-share="copy">複製連結</button><button class="btn sm ghost" id="btnFM">${ic("key")} 通報者管理</button></div>
     <p class="small" style="text-align:right;margin:4px 0 0"><a href="javascript:void 0" id="btnReportF" style="color:var(--ink-3)">${ic("flag")} 檢舉</a></p>
     </div></div>
@@ -2162,7 +2164,7 @@ const REPORT_REASONS=[['fake','假案件／詐騙（例如要求先匯款）'],[
 function openReport(type,id){
   const d=document.createElement('div');d.className='lightbox';d.style.alignItems='flex-start';d.style.overflow='auto';
   d.innerHTML=`<div class="card" style="max-width:460px;width:100%;margin-top:40px" onclick="event.stopPropagation()">
-    <h2 style="margin-top:0">🚩 檢舉這則內容</h2>
+    <h2 style="margin-top:0">${ic('flag')} 檢舉這則內容</h2>
     <p class="muted small">站長會盡快處理。惡意檢舉不會讓內容自動下架。</p>
     ${REPORT_REASONS.map(([v,t],i)=>`<label class="chk"><input type="radio" name="rr" value="${v}" ${i===0?'checked':''}> ${t}</label>`).join('')}
     <label class="f"><span>補充說明（選填）</span><textarea id="rn" maxlength="500" style="min-height:70px"></textarea></label>
@@ -2236,7 +2238,7 @@ async function initAuth(){
 function updateAuthUI(){
   const a=$('#navMe');if(!a)return;
   const u=me();
-  a.innerHTML=u?`👤<span class="hide-sm"> 我的</span>`:`👤<span class="hide-sm"> 登入</span>`;
+  a.innerHTML=ic('user')+(u?`<span class="hide-sm"> 我的</span>`:`<span class="hide-sm"> 登入</span>`);a.setAttribute('aria-label',u?'我的':'登入');
   a.title=u?(u.email||'我的'):'登入／註冊';
 }
 function requireLogin(msg){
@@ -2845,7 +2847,7 @@ async function renderPoster(id){
 async function renderThanks(){
   setTitle('贊助感謝牆');
   const {data}=await sb.from('sponsors_public').select('*').limit(300);
-  const byMonth={};(data||[]).forEach(s=>{const k=s.sponsored_on.slice(0,7).replace('-','/');(byMonth[k]=byMonth[k]||[]).push(s)});
+  const byMonth={};(data||[]).forEach(s=>{s.nickname=s.nickname||'匿名';s.sponsored_on=String(s.sponsored_on||s.created_at||todayStr());const k=s.sponsored_on.slice(0,7).replace('-','/');(byMonth[k]=byMonth[k]||[]).push(s)});
   app.innerHTML=`<h1>贊助感謝牆</h1>
   <div class="card">
     <p>${esc(CONFIG.SITE_NAME)} 是免費的協尋平台，沒有廣告。伺服器、網域與每日比對都是站長自費。如果這個網站幫上了忙，歡迎請站長喝杯咖啡，讓它繼續運作。</p>
