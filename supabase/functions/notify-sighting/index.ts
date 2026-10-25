@@ -1,4 +1,4 @@
-// 汪喵回家 — 目擊回報即時通知飼主（Email）v1.0
+// 汪喵回家 — 目擊回報即時通知飼主（Email）v1.1（每案每小時最多 6 封）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-sighting  body: {"case_id":"<uuid>"}
 // 網友送出目擊後由網頁呼叫。本函式只會寄「這個案件 30 分鐘內、還沒通知過」的目擊，
 // 寄出後標記 notified，所以重複呼叫也不會重寄。需關閉 JWT 驗證（訪客也能回報）。
@@ -45,8 +45,14 @@ Deno.serve(async (req) => {
   if (ce) return json({ error: "lookup" }, 500);
   if (!c || c.hidden || !c.contact_email) return json({ sent: false, reason: "no_email" });
 
+  // 防灌爆：同一案件一小時最多 6 封；超過就先不寄，目擊留著下次一起寄
+  const hourAgo = new Date(Date.now() - 3600e3).toISOString();
+  const { count: sentLastHour } = await sb.from("case_mail_log").select("case_id", { count: "exact", head: true })
+    .eq("case_id", caseId).gte("sent_at", hourAgo);
+  if ((sentLastHour ?? 0) >= 6) return json({ sent: false, reason: "throttled" });
+
   // 先「搶」下尚未通知的目擊（原子更新），避免同時兩次呼叫重複寄
-  const since = new Date(Date.now() - 30 * 60e3).toISOString();
+  const since = new Date(Date.now() - 6 * 3600e3).toISOString();   // 被限流延後的目擊，6 小時內都會補寄
   const { data: ss, error: se } = await sb.from("sightings")
     .update({ notified: true })
     .eq("case_id", caseId).eq("notified", false).gte("created_at", since)
@@ -73,6 +79,7 @@ Deno.serve(async (req) => {
       subject: `【${SITE_NAME}】有人看到${c.name}了！`, content: lines.join("\n"),
     });
     await client.close();
+    await sb.from("case_mail_log").insert({ case_id: caseId });
     return json({ sent: true, count: ss.length });
   } catch (e) {
     try { await client.close(); } catch (_) { /* ignore */ }
