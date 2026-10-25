@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪回家 WangHome — 每日自動化腳本  v1.2.0
+汪回家 WangHome — 每日自動化腳本  v1.3.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -164,6 +164,7 @@ def _km(a_lat, a_lng, b_lat, b_lng):
 def found_score(c, f):
     """與前端 matchScore() 同邏輯。"""
     if norm_city(c["lost_city"]) != norm_city(f["city"]): return -1
+    if (c.get("species") or "dog") != (f.get("species") or "dog"): return -1
     try:
         lost = dt.datetime.fromisoformat(c["lost_at"].replace("Z", "+00:00"))
         seen = dt.datetime.fromisoformat(f["seen_at"].replace("Z", "+00:00"))
@@ -185,8 +186,8 @@ def found_score(c, f):
     return max(0, min(100, s))
 
 def run_found_matching():
-    cases = sb("GET", "cases", params={"select": "id,lost_city,lost_district,lost_at,lost_lat,lost_lng,colour,size,sex", "status": "eq.searching"}) or []
-    founds = sb("GET", "found_reports", params={"select": "id,city,district,seen_at,lat,lng,colour,size,sex", "status": "eq.open"}) or []
+    cases = sb("GET", "cases", params={"select": "id,species,lost_city,lost_district,lost_at,lost_lat,lost_lng,colour,size,sex", "status": "eq.searching"}) or []
+    founds = sb("GET", "found_reports", params={"select": "id,species,city,district,seen_at,lat,lng,colour,size,sex", "status": "eq.open"}) or []
     if not cases or not founds: print("拾獲比對：無資料"); return
     existing = sb("GET", "found_matches", params={"select": "case_id,found_id"}) or []
     seen = {(m["case_id"], m["found_id"]) for m in existing}
@@ -287,7 +288,7 @@ def run_notifications():
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.2.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.3.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode == "probe":
         try:
             data = fetch_moa()

@@ -1,10 +1,10 @@
-# 汪回家 WangHome — 安裝說明（v1.2.0）
+# 汪回家 WangHome — 安裝說明（v1.3.0）
 
 ## ✅ 目前已部署
 - 網站：https://frankf19-19.github.io/wanghome/
 - GitHub：https://github.com/frankf19-19/wanghome
 - Supabase 專案：wanghome（東京，ref `nopyhfpaykkiieudvoko`）
-  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql 已執行、publishable key 已填入 index.html
+  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql 已執行、publishable key 已填入 index.html
 - GitHub Actions：SUPABASE_URL / SITE_URL / SITE_NAME 已直接寫在 workflow
   - 只需要 Secret：`SUPABASE_SERVICE_KEY`（Supabase → Settings → API Keys → Secret key）
   - 選填 Secret：`GMAIL_USER`、`GMAIL_APP_PASSWORD`（寄通知）、`MOA_API_URL`
@@ -41,6 +41,7 @@ wanghome/
    - 最後一行會顯示 `WangHome schema v1.0.0 installed`
    - 再開一個 New query，貼上 `supabase/migration_v1.1.sql` → **Run**（拾獲通報、長度限制、防灌水）
    - 再跑 `supabase/migration_v1.2.sql`（收容所比對結果寫回）
+   - 再跑 `supabase/migration_v1.3.sql`（支援貓）
 3. 左側 **Project Settings → API**，記下兩個值：
    - **Project URL**（像 `https://abcdefgh.supabase.co`）
    - **Publishable key**（以 `sb_publishable_` 開頭；舊版 anon key 也可）
