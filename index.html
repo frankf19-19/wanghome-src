@@ -7,15 +7,25 @@
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.8.1 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://frankf19-19.github.io/wanghome/">
+<meta property="og:site_name" content="汪喵回家">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://frankf19-19.github.io/wanghome/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
+<!-- BUILD v1.8.2 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://data.moa.gov.tw">
 <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js" defer></script>
 <style>
 /* ============================================================
    汪喵回家 設計系統 v1.6
@@ -426,7 +436,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v1.8.1</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v1.8.2</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽">
@@ -451,7 +461,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.8.1';
+const BUILD = 'v1.8.2';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -517,8 +527,13 @@ function compressImage(file){return new Promise((res,rej)=>{const img=new Image(
 async function uploadPhoto(file,folder){const blob=await compressImage(file);const name=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;const {error}=await sb.storage.from('photos').upload(name,blob,{contentType:'image/jpeg',upsert:false});if(error)throw error;return sb.storage.from('photos').getPublicUrl(name).data.publicUrl}
 
 /* 從照片讀拍攝時間與 GPS（手機相簿常會移除位置，讀不到就略過） */
+const _scripts={};
+function loadScript(src){return _scripts[src]||(_scripts[src]=new Promise((ok,no)=>{const el=document.createElement('script');el.src=src;el.async=true;el.onload=ok;el.onerror=()=>{delete _scripts[src];no(new Error('load '+src))};document.head.appendChild(el)}))}
+const LIB={qr:'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',exif:'https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js'};
 async function readPhotoMeta(file){
-  if(!file||!window.exifr)return {};
+  if(!file)return {};
+  try{await loadScript(LIB.exif)}catch(_){return {}}
+  if(!window.exifr)return {};
   const out={};
   try{const d=await exifr.parse(file,['DateTimeOriginal','CreateDate']);const t=d?.DateTimeOriginal||d?.CreateDate;if(t instanceof Date&&!isNaN(t)&&t<=new Date(Date.now()+60000)&&t>new Date(Date.now()-90*86400000))out.date=t}catch(_){}
   try{const g=await exifr.gps(file);if(g&&isFinite(g.latitude)&&isFinite(g.longitude)&&g.latitude>21&&g.latitude<26.5&&g.longitude>118&&g.longitude<122.5){out.lat=g.latitude;out.lng=g.longitude}}catch(_){}
@@ -1911,7 +1926,8 @@ async function renderPoster(id){
   <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn" id="btnDl">${ic("download")} 下載海報 PNG</button><a class="btn ghost" href="#/case/${id}">回案件頁</a></div>
   <div id="qr" class="hidden"></div>`;
   const url=await getShareUrl('s',id);
-  new QRCode($('#qr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
+  try{await loadScript(LIB.qr)}catch(_){toast('QR Code 載入失敗，請重新整理')}
+  if(window.QRCode)new QRCode($('#qr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
   await new Promise(r=>setTimeout(r,80));
   try{await Promise.all(['900 96px "Noto Sans TC"','700 34px "Noto Sans TC"','500 30px "Noto Sans TC"'].map(f=>document.fonts.load(f,'尋狗貓啟事')));await document.fonts.ready}catch(_){}
   const qrc=$('#qr').querySelector('canvas');

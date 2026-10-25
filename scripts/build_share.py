@@ -36,7 +36,7 @@ def days_since(ts):
 
 def page(title, desc, image, target, canonical):
     t, d = html.escape(title), html.escape(desc)
-    img = html.escape(image or SITE_URL + "icon-512.png")
+    img = html.escape(image or SITE_URL + "og.png")
     tgt = html.escape(target)
     return f"""<!DOCTYPE html>
 <html lang="zh-Hant"><head><meta charset="utf-8">
