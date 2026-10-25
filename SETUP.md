@@ -195,3 +195,8 @@ Supabase 內建寄信每小時只能寄很少封，只適合測試。建議用 R
   - Supabase Edge Functions Secrets：`RESEND_API_KEY`
   - GitHub Actions Secrets：`RESEND_API_KEY`
   - 中文信件範本：supabase/email-templates/
+
+## 防濫用（v1.17 起）
+- 飼主 Email 要先點「確認信箱」信才會收到任何通知（登入會員填自己帳號的信箱會自動確認）
+- 每個人（依 Cloudflare 提供的 IP）有各自的送出上限：新案件每小時 10 件、拾獲通報每小時 20 筆、目擊 10 分鐘 20 筆、檢舉 10 分鐘 20 筆
+- 每天的排程會清掉沒人用、超過 3 天的公開照片；手動執行可在 Actions 選 `cleanup-dry`（試跑不刪）或 `cleanup`
