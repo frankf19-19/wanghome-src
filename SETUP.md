@@ -1,10 +1,10 @@
-# 汪喵回家 WangHome — 安裝說明（v1.5.0）
+# 汪喵回家 WangHome — 安裝說明（v1.7.0）
 
 ## ✅ 目前已部署
 - 網站：https://frankf19-19.github.io/wanghome/
 - GitHub：https://github.com/frankf19-19/wanghome
 - Supabase 專案：wanghome（東京，ref `nopyhfpaykkiieudvoko`）
-  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql + migration_v1.4.sql + migration_v1.5.sql 已執行、publishable key 已填入 index.html
+  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql + migration_v1.4.sql + migration_v1.5.sql + migration_v1.6.sql 已執行、publishable key 已填入 index.html
 - GitHub Actions：SUPABASE_URL / SITE_URL / SITE_NAME 已直接寫在 workflow
   - 只需要 Secret：`SUPABASE_SERVICE_KEY`（Supabase → Settings → API Keys → Secret key）
   - 選填 Secret：`GMAIL_USER`、`GMAIL_APP_PASSWORD`（寄通知）、`MOA_API_URL`
@@ -44,6 +44,7 @@ wanghome/
    - 再跑 `supabase/migration_v1.3.sql`（支援貓）
    - 再跑 `supabase/migration_v1.4.sql`（會員系統）
    - 再跑 `supabase/migration_v1.5.sql`（檢舉與管理後台）
+   - 再跑 `supabase/migration_v1.6.sql`（毛孩健康紀錄、私密照片空間）
 3. 左側 **Project Settings → API**，記下兩個值：
    - **Project URL**（像 `https://abcdefgh.supabase.co`）
    - **Publishable key**（以 `sb_publishable_` 開頭；舊版 anon key 也可）
@@ -170,3 +171,10 @@ Supabase 內建寄信每小時只能寄很少封，只適合測試。建議用 R
 `.github/workflows/share.yml` 每 30 分鐘執行 `scripts/build_share.py`，替每個案件產生 `s/<id>.html`、拾獲通報產生 `f/<id>.html`，
 貼到 LINE / Facebook 會顯示照片、名字、地點。只讀公開資料，不需要秘密金鑰。新案件最多 30 分鐘內就有預覽頁，之前會先用一般網址。
 本機推送前請先 `git pull --rebase`（機器人會自動 commit 分享頁）。
+
+
+## 毛孩健康紀錄（v1.7）
+- 會員在「我的 → 我的毛孩」點進寵物，可記錄看診、疫苗、驅蟲、用藥、手術、體重、美容；可設定下次到期日。
+- 收據／病歷照片存在私密空間 `pet-private`（非公開，只有本人能讀，顯示用 1 小時有效的簽名網址）。
+- 「給獸醫看」頁可列印或存成 PDF。
+- 到期前 7 天會寄 Email 提醒（每天 03:17 的排程，需 Gmail 設定）。

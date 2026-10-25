@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.6.1 -->
+<!-- BUILD v1.7.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -167,6 +167,7 @@ form.card h3:first-child{margin-top:0}
 .ccard:hover{text-decoration:none}
 .ccard:hover .ph img{transform:scale(1.03)}
 .ccard .ph{position:relative;aspect-ratio:4/3;background:var(--line);overflow:hidden}
+a.ph{display:block}
 .ccard .ph img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
 .ccard .ph.noimg::after{content:"🐕";position:absolute;inset:0;display:grid;place-items:center;font-size:46px;opacity:.45}
 .ccard .ph.noimg.cat::after{content:"🐈"}
@@ -296,6 +297,20 @@ form.card h3:first-child{margin-top:0}
 .pad-bottom{padding-bottom:84px}
 .exif-hint{font-size:12.5px;color:var(--green);margin-top:6px}
 
+/* 病歷表 */
+.rtable{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+.rtable th{text-align:left;font-size:12.5px;color:var(--ink-3);font-weight:700;border-bottom:1.5px solid var(--line);padding:6px 8px}
+.rtable td{border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
+@media print{
+  header,footer,.tabbar,.noprint,.sticky-cta,.toast,.install{display:none!important}
+  body{background:#fff!important;color:#000;padding:0}
+  main{max-width:none;padding:0}
+  .card{box-shadow:none!important;padding:0}
+  :root{--ink:#000;--ink-2:#333;--ink-3:#555;--line:#ccc;--sheet:#fff;--paper:#fff}
+  h3{break-after:avoid}
+  tr{break-inside:avoid}
+}
+
 /* ---------- 頁尾 ---------- */
 footer{max-width:1120px;margin:40px auto 0;padding:24px 20px 40px;color:var(--ink-3);font-size:13px;text-align:center;border-top:1px solid var(--line)}
 footer a{color:var(--ink-2);margin:0 6px}
@@ -370,7 +385,7 @@ footer a{color:var(--ink-2);margin:0 6px}
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料· 地圖 © OpenStreetMap 貢獻者</div>
   <div class="small" style="margin-top:6px"><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a></div>
-  <div class="small" style="margin-top:4px">BUILD v1.6.1</div>
+  <div class="small" style="margin-top:4px">BUILD v1.7.0</div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽">
@@ -395,7 +410,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.6.1';
+const BUILD = 'v1.7.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -518,7 +533,11 @@ function route(){
   if(path==='#/login')return renderLogin();
   if(path==='#/me')return renderMe();
   if(path==='#/admin')return renderAdmin();
-  if((m=path.match(/^#\/pet\/(new|[0-9a-f-]{36})$/)))return renderPet(m[1]);
+  if(path==='#/pet/new')return renderPet('new');
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})$/)))return renderPetView(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/edit$/)))return renderPet(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/print$/)))return renderPetPrint(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/record\/(new|[0-9a-f-]{36})$/)))return renderRecord(m[1],m[2]);
   if(path==='#/thanks')return renderThanks();
   if(path==='#/resources')return renderResources();
   if(path==='#/about')return renderAbout();
@@ -1469,19 +1488,23 @@ async function renderMe(){
   setTitle('我的');
   if(!me()){location.hash='#/login';return}
   app.innerHTML='<div class="empty">載入中…</div>';
-  const [prof,{data:cs},{data:fs},{data:pend},{data:fl},{data:pets}]=await Promise.all([
+  const [prof,{data:cs},{data:fs},{data:pend},{data:fl},{data:pets},{data:dues}]=await Promise.all([
     getProfile(), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
     sb.from('follows').select('case_id,created_at').order('created_at',{ascending:false}),
-    sb.from('pets').select('*').order('created_at')
+    sb.from('pets').select('*').order('created_at'),
+    sb.from('pet_records').select('id,pet_id,kind,title,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),1)).order('next_due').limit(20)
   ]);
+  const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const pendMap={};(pend||[]).forEach(p=>pendMap[p.case_id]=p.pending);
   let followed=[];
   if(fl&&fl.length){const {data}=await sb.from('cases_public').select('*').in('id',fl.map(f=>f.case_id));followed=data||[]}
   const p=prof||{};
   app.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="margin:0">👤 ${esc(p.display_name||me().email)}</h1><span class="muted small">${esc(me().email||'')}</span>${p.is_admin?'<a class="btn sm" href="#/admin">🛡 管理後台</a>':''}<button class="btn sm ghost" id="btnOut" style="margin-left:auto">登出</button></div>
 
-  <h2>🐾 我的寵物檔案 <a class="btn sm" href="#/pet/new" style="margin-left:auto">＋ 新增</a></h2>
-  <p class="muted small">只有你看得到。平時先建好，走失時按「走失了」就能一鍵轉成協尋案件。</p>
+  ${(dues||[]).length?`<h2>⏰ 近期到期</h2><div class="card" style="padding:6px 18px">${dues.map(r=>`<a class="sponsor" href="#/pet/${r.pet_id}" style="color:inherit"><div class="av">${REC_KINDS[r.kind][0]}</div><div class="b"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b><div class="msg">${r.next_due}・${dueText(r.next_due)}</div></div></a>`).join('')}</div>`:''}
+
+  <h2>🐾 我的毛孩 <a class="btn sm" href="#/pet/new" style="margin-left:auto">＋ 新增</a></h2>
+  <p class="muted small">只有你看得到。記錄看診、疫苗、驅蟲和體重；走失時按「走失了」就能一鍵轉成協尋案件。</p>
   <div class="grid">${(pets||[]).length?pets.map(petCardHTML).join(''):`<div class="empty-card"><div class="big">🐾</div><b>還沒有寵物檔案</b><p class="small">建好照片、晶片號碼和特徵，走失時省下最慌亂的填表時間。</p><div class="btns"><a class="btn" href="#/pet/new">建立第一隻</a></div></div>`}</div>
 
   <h2>📋 我登記的走失案件</h2>
@@ -1525,12 +1548,11 @@ async function renderMe(){
 }
 function petCardHTML(p){
   const ph=p.photos?.[0];
-  return `<div class="ccard" style="cursor:default">
-    <div class="ph ${ph?'':'noimg'} ${p.species==='cat'?'cat':''}" ${ph?`style="background-image:url('${esc(ph)}')"`:''}></div>
-    <div class="b"><div class="t">${sp(p.species).emoji} ${esc(p.name)}</div>
-      <div class="m">${esc([p.breed,SEX[p.sex],SIZE[p.size],p.colour].filter(Boolean).join(' · '))}</div>
-      <div class="loc">${p.has_chip?'有晶片':'無晶片'}${p.neutered?' · 已結紮':''}</div>
-      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><a class="btn sm ghost" href="#/pet/${p.id}">編輯</a><button class="btn sm" data-lost="${p.id}">🚨 走失了</button></div>
+  return `<div class="ccard">
+    <a href="#/pet/${p.id}" class="ph ${ph?'':'noimg'} ${p.species==='cat'?'cat':''}">${ph?`<img loading="lazy" src="${esc(ph)}" alt="${esc(p.name)}">`:''}</a>
+    <div class="b"><a href="#/pet/${p.id}" class="t" style="color:inherit">${sp(p.species).emoji} ${esc(p.name)}</a>
+      <div class="m">${esc([p.breed,SEX[p.sex],petAge(p.birthday)].filter(Boolean).join('、'))||'&nbsp;'}</div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><a class="btn sm ghost" href="#/pet/${p.id}">📋 健康紀錄</a><button class="btn sm" data-lost="${p.id}">🚨 走失了</button></div>
     </div></div>`;
 }
 async function renderPet(id){
@@ -1558,11 +1580,11 @@ async function renderPet(id){
       <label class="f" style="margin:0"><span>晶片號碼（私密）</span><input name="chip_no" maxlength="20" inputmode="numeric" value="${esc(p.chip_no||'')}"></label>
       <label class="f" style="margin:0"><span>結紮</span><select name="neutered"><option value="">不確定</option><option value="true" ${p.neutered===true?'selected':''}>已結紮</option><option value="false" ${p.neutered===false?'selected':''}>未結紮</option></select></label>
     </div>
-    <label class="f"><span>備註（疫苗、用藥、過敏、常去的醫院…）</span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
+    <label class="f"><span>過敏、慢性病與注意事項（會印在「給獸醫看」頁）</span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
     <h3>照片（最多 6 張）</h3>
     <div class="photos-preview" id="pv"></div>
     <label class="uploadbtn" style="margin-top:8px">📷 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" id="btnSave">儲存</button>${id!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="#/me">取消</a></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" id="btnSave">儲存</button>${id!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>
   </form>`;
   let species=p.species,photos=(p.photos||[]).slice();
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -1572,9 +1594,9 @@ async function renderPet(id){
   $('#pf').onsubmit=async e=>{
     e.preventDefault();const fd=new FormData(e.target);
     const row={species,name:fd.get('name').trim(),sex:fd.get('sex')||null,size:fd.get('size')||null,birthday:fd.get('birthday')||null,breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_no:fd.get('chip_no'),neutered:fd.get('neutered')===''?null:fd.get('neutered')==='true',notes:fd.get('notes'),photos,updated_at:new Date().toISOString()};
-    const q=id==='new'?sb.from('pets').insert(row):sb.from('pets').update(row).eq('id',id);
-    const {error}=await q;if(error)return toast('儲存失敗：'+error.message);
-    toast('已儲存');location.hash='#/me';
+    const {data:saved,error}=id==='new'?await sb.from('pets').insert(row).select('id').single():await sb.from('pets').update(row).eq('id',id).select('id').single();
+    if(error)return toast('儲存失敗：'+error.message);
+    toast('已儲存');location.hash='#/pet/'+(saved?.id||id);
   };
   if(id!=='new')$('#btnDel').onclick=async()=>{if(!confirm(`確定刪除 ${p.name} 的寵物檔案？`))return;const {error}=await sb.from('pets').delete().eq('id',id);if(error)return toast(error.message);location.hash='#/me'};
 }
@@ -1584,6 +1606,179 @@ async function toggleFollow(caseId,btn){
   const {error}=on?await sb.from('follows').delete().eq('case_id',caseId).eq('user_id',me().id):await sb.from('follows').insert({user_id:me().id,case_id:caseId});
   if(error)return toast(error.message);
   btn.dataset.on=on?'0':'1';btn.innerHTML=on?'⭐ 追蹤':'★ 追蹤中';toast(on?'已取消追蹤':'已追蹤，有新目擊會通知你');
+}
+
+/* ============================================================
+   毛孩健康紀錄（只有本人看得到）
+   ============================================================ */
+const REC_KINDS={vet:['🩺','看診'],vaccine:['💉','疫苗'],deworm:['🛡️','驅蟲／除蚤'],med:['💊','用藥'],surgery:['🏥','手術'],weight:['⚖️','體重'],grooming:['🛁','美容洗澡'],other:['📝','其他']};
+const REC_PRESETS={
+  vaccine:{dog:[['狂犬病疫苗',12],['八合一／十合一疫苗',12],['鉤端螺旋體疫苗',12],['犬舍咳疫苗',12]],cat:[['狂犬病疫苗',12],['三合一疫苗',12],['五合一疫苗',12],['貓白血病疫苗',12]]},
+  deworm:{dog:[['心絲蟲預防',1],['體內驅蟲',3],['體外除蚤蜱',1],['體內外驅蟲',1]],cat:[['體內外驅蟲',1],['體內驅蟲',3],['體外除蚤',1],['心絲蟲預防',1]]},
+  vet:{dog:[['年度健康檢查',12],['皮膚問題',0],['腸胃不適',0],['牙齒檢查',0]],cat:[['年度健康檢查',12],['泌尿道問題',0],['腸胃不適',0],['牙齒檢查',0]]},
+  grooming:{dog:[['洗澡',1],['美容剪毛',2],['剪指甲',1]],cat:[['洗澡',3],['剪指甲',1]]},
+  surgery:{dog:[['結紮手術',0],['洗牙',0]],cat:[['結紮手術',0],['洗牙',0]]},
+  med:{dog:[['口服藥',0],['外用藥',0],['眼藥／耳藥',0]],cat:[['口服藥',0],['外用藥',0],['眼藥／耳藥',0]]},
+  weight:{dog:[['量體重',0]],cat:[['量體重',0]]},other:{dog:[],cat:[]}
+};
+function addMonths(dateStr,m){const d=new Date(dateStr+'T00:00:00');d.setMonth(d.getMonth()+m);return d.toISOString().slice(0,10)}
+function todayStr(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function petAge(bd){if(!bd)return '';const b=new Date(bd),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
+function dueText(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return days<0?`已過期 ${-days} 天`:days===0?'今天到期':`${days} 天後`}
+function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new Date(r.next_due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return `<span class="tag ${days<0?'red':days<=14?'amber':'gray'}">下次 ${r.next_due.slice(5).replace('-','/')}・${dueText(r.next_due)}</span>`}
+async function uploadPrivate(file,petId){const blob=await compressImage(file);const path=`${me().id}/${petId}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;const {error}=await sb.storage.from('pet-private').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;return path}
+async function signedUrls(paths){if(!paths.length)return {};const {data}=await sb.storage.from('pet-private').createSignedUrls(paths,3600);const m={};(data||[]).forEach(x=>{if(x.signedUrl)m[x.path]=x.signedUrl});return m}
+
+function weightChart(points){
+  if(points.length<2)return '';
+  const W=640,H=180,P=28;const xs=points.map(p=>new Date(p.date).getTime()),ys=points.map(p=>+p.w);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys)*0.95,y1=Math.max(...ys)*1.05;
+  const X=t=>P+(x1===x0?0.5:(t-x0)/(x1-x0))*(W-2*P),Y=v=>H-P-(v-y0)/((y1-y0)||1)*(H-2*P);
+  const d=points.map((p,i)=>`${i?'L':'M'}${X(xs[i]).toFixed(1)},${Y(ys[i]).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="體重變化">
+    <path d="${d}" fill="none" stroke="var(--red)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    ${points.map((p,i)=>`<circle cx="${X(xs[i]).toFixed(1)}" cy="${Y(ys[i]).toFixed(1)}" r="4.5" fill="var(--sheet)" stroke="var(--red)" stroke-width="2.5"><title>${p.date}：${p.w} kg</title></circle>`).join('')}
+    <text x="${P}" y="${H-6}" font-size="12" fill="var(--ink-3)">${points[0].date}</text>
+    <text x="${W-P}" y="${H-6}" font-size="12" fill="var(--ink-3)" text-anchor="end">${points[points.length-1].date}</text>
+    <text x="${X(xs[xs.length-1])}" y="${Y(ys[ys.length-1])-12}" font-size="14" font-weight="800" fill="var(--ink)" text-anchor="end">${ys[ys.length-1]} kg</text>
+  </svg>`;
+}
+
+async function renderPetView(id){
+  if(!requireLogin())return;
+  app.innerHTML='<div class="empty">載入中…</div>';
+  const [{data:p},{data:recs}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false})]);
+  if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/me">回我的頁面</a></div>';return}
+  setTitle(p.name);
+  const rs=recs||[];
+  const filter=qs(location.hash).k||'';
+  const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
+  const weights=rs.filter(r=>r.weight_kg).map(r=>({date:r.date,w:r.weight_kg})).sort((a,b)=>a.date.localeCompare(b.date));
+  const year=String(new Date().getFullYear());
+  const costYear=rs.filter(r=>r.cost&&r.date.startsWith(year)).reduce((a,r)=>a+r.cost,0);
+  const lastVac=rs.find(r=>r.kind==='vaccine');
+  const shown=filter?rs.filter(r=>r.kind===filter):rs;
+  const ph=p.photos?.[0];
+  const byYear={};shown.forEach(r=>{(byYear[r.date.slice(0,4)]=byYear[r.date.slice(0,4)]||[]).push(r)});
+  app.innerHTML=`<p class="small"><a href="#/me">← 我的頁面</a></p>
+  <div class="detail-head">
+    <div class="gallery"><div class="main ${ph?'':'noimg'} ${p.species==='cat'?'cat':''}" ${ph?`style="background-image:url('${esc(ph)}')"`:''}></div></div>
+    <div>
+      <h1>${sp(p.species).emoji} ${esc(p.name)}</h1>
+      <p class="muted">${esc([p.breed,SEX[p.sex],SIZE[p.size]&&SIZE[p.size]+sp(p.species).unit,p.colour,petAge(p.birthday)].filter(Boolean).join('、'))}</p>
+      <div class="stats" style="margin-top:12px">
+        <div class="stat"><b>${weights.length?weights[weights.length-1].w:'—'}</b>最新體重 kg</div>
+        <div class="stat"><b>${lastVac?lastVac.date.slice(2).replace(/-/g,'/'):'—'}</b>上次疫苗</div>
+        <div class="stat"><b>${costYear?costYear.toLocaleString():'0'}</b>${year} 年花費</div>
+        <div class="stat"><b>${rs.length}</b>筆紀錄</div>
+      </div>
+      <div class="card" style="margin-top:14px"><dl class="kv">
+        <dt>晶片</dt><dd>${p.has_chip?(p.chip_no?esc(p.chip_no):'有'):'無／未填'}</dd>
+        <dt>結紮</dt><dd>${p.neutered===true?'已結紮':p.neutered===false?'未結紮':'未填'}</dd>
+        ${p.birthday?`<dt>生日</dt><dd>${esc(p.birthday)}</dd>`:''}
+        ${p.temperament?`<dt>個性</dt><dd>${esc(p.temperament)}</dd>`:''}
+        ${p.notes?`<dt>備註</dt><dd style="white-space:pre-wrap">${esc(p.notes)}</dd>`:''}
+      </dl></div>
+      <div class="actionbar">
+        <a class="btn" href="#/pet/${id}/record/new">＋ 新增紀錄</a>
+        <a class="btn ghost" href="#/pet/${id}/print">🩺 給獸醫看</a>
+        <a class="btn ghost" href="#/pet/${id}/edit">編輯資料</a>
+        <a class="btn ghost" href="#/new?pet=${id}">🚨 走失了</a>
+      </div>
+    </div>
+  </div>
+
+  ${due.length?`<h2>⏰ 下次到期</h2><div class="card" style="padding:6px 18px">${due.map(r=>`<div class="sponsor"><div class="av">${REC_KINDS[r.kind][0]}</div><div class="b"><b>${esc(r.title)}</b><div class="msg">${r.next_due}・${dueText(r.next_due)}</div></div><button class="btn sm ghost" data-done="${r.id}">已完成</button></div>`).join('')}</div>`:''}
+
+  ${weights.length>=2?`<h2>⚖️ 體重變化</h2><div class="card">${weightChart(weights)}</div>`:''}
+
+  <h2>📋 健康紀錄</h2>
+  <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[ic,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${ic} ${t}</button>`).join('')}</div>
+  ${shown.length?Object.entries(byYear).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:13px">${REC_KINDS[r.kind][0]}</div>
+      <a href="#/pet/${id}/record/${r.id}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}</div>
+      <div class="where">${esc([REC_KINDS[r.kind][1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
+      ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
+      <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">📎 ${r.files.length} 張附件</span>`:''}</div></a>
+    </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">📋</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{location.hash=`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:'')});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderPetView(id)});
+}
+
+async function renderRecord(petId,recId){
+  if(!requireLogin())return;
+  const {data:p}=await sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle();
+  if(!p){app.innerHTML='<div class="empty">找不到這隻寵物</div>';return}
+  let r={kind:qs(location.hash).kind||'vet',date:todayStr(),files:[]};
+  if(recId!=='new'){const {data}=await sb.from('pet_records').select('*').eq('id',recId).maybeSingle();if(!data){app.innerHTML='<div class="empty">找不到這筆紀錄</div>';return}r=data}
+  const {data:prev}=await sb.from('pet_records').select('clinic').eq('pet_id',petId).not('clinic','is',null).limit(200);
+  const clinics=[...new Set((prev||[]).map(x=>x.clinic).filter(Boolean))];
+  setTitle((recId==='new'?'新增紀錄':'編輯紀錄')+'－'+p.name);
+  app.innerHTML=`<p class="small"><a href="#/pet/${petId}">← ${esc(p.name)}</a></p>
+  <h1>${recId==='new'?'新增健康紀錄':'編輯紀錄'}</h1>
+  <form class="card" id="rf">
+    <div class="seg" id="segK">${Object.entries(REC_KINDS).map(([k,[ic,t]])=>`<button type="button" data-v="${k}" class="${r.kind===k?'on':''}">${ic} ${t}</button>`).join('')}</div>
+    <div class="row2">
+      <label class="f"><span>日期 <i class="req">*</i></span><input type="date" name="date" required value="${esc(r.date)}"></label>
+      <label class="f"><span>醫院／店家</span><input name="clinic" maxlength="60" list="clinicList" value="${esc(r.clinic||'')}" placeholder="例：淡水某某動物醫院"><datalist id="clinicList">${clinics.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label>
+    </div>
+    <label class="f"><span>項目 <i class="req">*</i></span><input name="title" required maxlength="60" value="${esc(r.title||'')}" placeholder="例：狂犬病疫苗、皮膚過敏回診"></label>
+    <div class="seg" id="presets" style="margin-top:8px"></div>
+    <div class="row2">
+      <label class="f" id="wWrap"><span>體重（kg）</span><input type="number" name="weight_kg" step="0.01" min="0" value="${r.weight_kg??''}"></label>
+      <label class="f"><span>費用（元）</span><input type="number" name="cost" step="1" min="0" value="${r.cost??''}"></label>
+    </div>
+    <label class="f"><span>備註（症狀、醫生說明、藥名與劑量…）</span><textarea name="notes" maxlength="2000">${esc(r.notes||'')}</textarea></label>
+    <label class="f"><span>下次到期／回診日</span><input type="date" name="next_due" value="${esc(r.next_due||'')}"></label>
+    <div class="seg" style="margin-top:8px"><button type="button" data-m="1">＋1 個月</button><button type="button" data-m="3">＋3 個月</button><button type="button" data-m="6">＋半年</button><button type="button" data-m="12">＋1 年</button><button type="button" data-m="0">不設定</button></div>
+    ${recId!=='new'&&r.next_due?`<label class="chk"><input type="checkbox" name="done" ${r.done?'checked':''}> 下次的已經完成了（不再提醒）</label>`:''}
+    <h3>收據、病歷照片（只有你看得到）</h3>
+    <div class="photos-preview" id="fv"></div>
+    <label class="uploadbtn" style="margin-top:8px">📎 加入照片<input type="file" id="fileIn" accept="image/*" multiple></label>
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn" id="btnSave">儲存紀錄</button>${recId!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="#/pet/${petId}">取消</a></div>
+  </form>`;
+  const f=$('#rf');let kind=r.kind,files=(r.files||[]).slice(),urls=await signedUrls(files);
+  const drawPresets=()=>{const list=(REC_PRESETS[kind]||{})[p.species==='cat'?'cat':'dog']||[];$('#presets').innerHTML=list.map(([t,m])=>`<button type="button" data-t="${esc(t)}" data-pm="${m}">${esc(t)}</button>`).join('');
+    $('#presets').querySelectorAll('button').forEach(b=>b.onclick=()=>{f.elements.title.value=b.dataset.t;const m=+b.dataset.pm;if(m&&!f.elements.next_due.value)f.elements.next_due.value=addMonths(f.elements.date.value||todayStr(),m)});
+    $('#wWrap').style.opacity=kind==='weight'||kind==='vet'?1:.55};
+  drawPresets();
+  $('#segK').querySelectorAll('button').forEach(b=>b.onclick=()=>{kind=b.dataset.v;$('#segK').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));drawPresets()});
+  f.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const m=+b.dataset.m;f.elements.next_due.value=m?addMonths(f.elements.date.value||todayStr(),m):''});
+  const fv=$('#fv');
+  const drawFiles=()=>{fv.innerHTML='';files.forEach((path,i)=>{const d=document.createElement('div');if(urls[path])d.style.backgroundImage=`url('${urls[path]}')`;d.style.cursor='zoom-in';d.onclick=()=>urls[path]&&lightbox(urls[path]);const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=e=>{e.stopPropagation();files.splice(i,1);drawFiles()};d.appendChild(x);fv.appendChild(d)})};drawFiles();
+  $('#fileIn').onchange=async e=>{for(const file of [...e.target.files].slice(0,6-files.length)){toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);urls[path]=URL.createObjectURL(file)}catch(err){toast('上傳失敗：'+err.message)}}drawFiles();e.target.value=''};
+  f.onsubmit=async e=>{
+    e.preventDefault();const fd=new FormData(f);
+    const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:fd.get('weight_kg')?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files};
+    if(f.elements.done)row.done=f.elements.done.checked;else if(recId==='new')row.done=false;
+    const {error}=recId==='new'?await sb.from('pet_records').insert(row):await sb.from('pet_records').update(row).eq('id',recId);
+    if(error)return toast('儲存失敗：'+error.message);
+    toast('已儲存');location.hash='#/pet/'+petId;
+  };
+  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('確定刪除這筆紀錄？'))return;if(files.length)await sb.storage.from('pet-private').remove(files);const {error}=await sb.from('pet_records').delete().eq('id',recId);if(error)return toast(error.message);location.hash='#/pet/'+petId};
+}
+
+async function renderPetPrint(id){
+  if(!requireLogin())return;
+  const [{data:p},{data:recs}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false})]);
+  if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}
+  setTitle(p.name+' 病歷摘要');
+  const rs=recs||[];const ph=p.photos?.[0];
+  const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
+  const weights=rs.filter(r=>r.weight_kg);
+  const row=r=>`<tr><td style="white-space:nowrap">${r.date}</td><td style="white-space:nowrap">${REC_KINDS[r.kind][1]}</td><td><b>${esc(r.title)}</b>${r.notes?`<div class="small" style="white-space:pre-wrap;color:var(--ink-2)">${esc(r.notes)}</div>`:''}</td><td>${esc(r.clinic||'')}</td></tr>`;
+  app.innerHTML=`<div class="noprint" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><a class="btn ghost sm" href="#/pet/${id}">← 返回</a><button class="btn sm" onclick="window.print()">🖨 列印／存成 PDF</button><span class="muted small" style="align-self:center">看診時直接把這頁給獸醫看也可以</span></div>
+  <div class="card printsheet">
+    <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      ${ph?`<img src="${esc(ph)}" alt="" style="width:110px;height:110px;object-fit:cover;border-radius:8px">`:''}
+      <div><h1 style="margin:0">${esc(p.name)} 的病歷摘要</h1>
+      <p style="margin:4px 0">${esc([sp(p.species).name,p.breed,SEX[p.sex],p.colour,p.birthday?`生日 ${p.birthday}（${petAge(p.birthday)}）`:''].filter(Boolean).join('、'))}</p>
+      <p class="small" style="margin:0">晶片：${p.has_chip?(esc(p.chip_no)||'有'):'無'}　結紮：${p.neutered===true?'是':p.neutered===false?'否':'未填'}${weights.length?`　最新體重：${weights[0].weight_kg} kg（${weights[0].date}）`:''}</p></div>
+    </div>
+    ${p.notes?`<h3>過敏、慢性病與注意事項</h3><p style="white-space:pre-wrap">${esc(p.notes)}</p>`:''}
+    ${due.length?`<h3>即將到期</h3><ul style="margin:0;padding-left:20px">${due.map(r=>`<li>${r.next_due}　${esc(r.title)}</li>`).join('')}</ul>`:''}
+    ${['vaccine','deworm','vet','surgery','med'].map(k=>{const list=rs.filter(r=>r.kind===k);return list.length?`<h3>${REC_KINDS[k][0]} ${REC_KINDS[k][1]}紀錄</h3><table class="rtable"><thead><tr><th>日期</th><th>類別</th><th>項目與說明</th><th>醫院</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table>`:''}).join('')}
+    <p class="muted small" style="margin-top:18px">由飼主自行記錄，僅供參考。產生於 ${todayStr()}・${esc(CONFIG.SITE_NAME)}</p>
+  </div>`;
 }
 
 /* ============================================================

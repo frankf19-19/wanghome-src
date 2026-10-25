@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪喵回家 WangHome — 每日自動化腳本  v1.5.0
+汪喵回家 WangHome — 每日自動化腳本  v1.7.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -325,6 +325,28 @@ def run_member_notifications():
         except Exception as e:
             print("追蹤通知寄送失敗：", e)
 
+# ---------------------------------------------------------------- 健康紀錄到期提醒
+def run_due_reminders():
+    if not (GMAIL_USER and GMAIL_PASS): return
+    rows = sb("POST", "rpc/due_targets", body={}) or []
+    by_user = {}
+    for r in rows: by_user.setdefault((r["user_id"], r["email"]), []).append(r)
+    today = dt.date.today()
+    for (uid, email), lst in by_user.items():
+        lines = ["毛孩的健康項目快到期了：", ""]
+        for r in sorted(lst, key=lambda x: x["next_due"]):
+            d = (dt.date.fromisoformat(r["next_due"]) - today).days
+            when = f"已過期 {-d} 天" if d < 0 else ("今天" if d == 0 else f"{d} 天後")
+            lines.append(f"・{r['pet_name']}｜{r['title']}　{r['next_due']}（{when}）")
+        lines += ["", f"完成後到「我的」頁標記已完成：{SITE_URL}#/me", f"— {SITE_NAME}"]
+        try:
+            send_mail(email, f"【{SITE_NAME}】毛孩健康提醒：{lst[0]['pet_name']} {lst[0]['title']}", "\n".join(lines))
+            sb("POST", "notify_log", body=[{"user_id": uid, "kind": "due", "ref_id": r["record_id"]} for r in lst],
+               prefer="return=minimal,resolution=ignore-duplicates")
+            print(f"到期提醒：{len(lst)} 筆 → 1 位會員")
+        except Exception as e:
+            print("到期提醒寄送失敗：", e)
+
 # ---------------------------------------------------------------- 檢舉通知站長
 def run_report_alerts():
     admin = os.environ.get("ADMIN_EMAIL") or GMAIL_USER
@@ -346,7 +368,7 @@ def run_report_alerts():
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.5.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.7.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode == "probe":
         try:
             data = fetch_moa()
@@ -364,5 +386,6 @@ if __name__ == "__main__":
     if mode in ("all", "notify"): run_notifications()
     if mode in ("all", "notify"): run_member_notifications()
     if mode in ("all", "notify"): run_report_alerts()
+    if mode in ("all",): run_due_reminders()
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})
     print("保活 OK", "有資料" if n else "空")
