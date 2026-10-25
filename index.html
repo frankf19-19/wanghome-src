@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v1.9.2 -->
+<!-- BUILD v2.0.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -139,6 +139,36 @@ a.stat:hover{text-decoration:none}a.stat:hover b{color:var(--red)}
 .stat b{display:block;font-family:var(--display);font-size:30px;font-weight:900;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
 .stat.good b{color:var(--green)}
 
+/* 兩個空間：找毛孩／健康手冊 */
+.space{display:flex;background:var(--sheet);border-radius:99px;padding:3px;box-shadow:inset 0 0 0 1px var(--line);margin-left:14px}
+.space a{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-weight:700;font-size:14px;color:var(--ink-2);white-space:nowrap;transition:background .15s,color .15s}
+.space a:hover{text-decoration:none;color:var(--ink)}
+.space svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+body[data-space="lost"] .space a[data-s="lost"]{background:var(--red);color:#fff}
+body[data-space="health"] .space a[data-s="health"]{background:var(--green);color:#fff}
+body[data-space="lost"] .health-only,body[data-space="health"] .lost-only{display:none!important}
+body[data-space="health"] header{box-shadow:inset 0 -3px 0 var(--green)}
+body[data-space="lost"] header{box-shadow:inset 0 -3px 0 var(--red)}
+body[data-space="health"] .tabbar a.cta2 .i{background:var(--green)}
+body[data-space="health"] h2 .ico{color:var(--green)}
+body[data-space="health"] main .btn:not(.ghost):not(.line):not(.fb):not([data-lost]){background:var(--green)}
+.promo.on-page{align-items:start}
+@media (max-width:640px){.space{margin-left:8px}.space a{padding:6px 10px;font-size:13px;gap:4px}.space svg{width:14px;height:14px}}
+@media (max-width:370px){#siteName{display:none}}
+.crosslink{display:flex;align-items:center;gap:14px;margin:34px 0 6px;padding:16px 18px;background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift),inset 4px 0 0 var(--green);color:var(--ink-2);font-size:14px;line-height:1.5}
+.crosslink:hover{text-decoration:none;background:color-mix(in srgb,var(--green) 6%,var(--sheet))}
+.crosslink b{display:block;color:var(--ink);font-size:15.5px}
+.crosslink .cl-ic{flex:none;width:42px;height:42px;border-radius:50%;background:color-mix(in srgb,var(--green) 14%,var(--sheet));display:grid;place-items:center}
+.crosslink .cl-ic .ico{width:22px;height:22px;color:var(--green)}
+.crosslink em{margin-left:auto;flex:none;font-style:normal;font-weight:700;color:var(--green);font-size:14px}
+@media (max-width:560px){.crosslink em{display:none}}
+.health-hero.row{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;justify-content:space-between}
+.health-hero.row .lede{margin:6px 0 0}
+.pickpet{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;margin-top:16px}
+.pickpet a{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:16px;text-align:center;color:var(--ink)}
+.pickpet a:hover{text-decoration:none;box-shadow:var(--lift),inset 0 0 0 2px var(--green)}
+.pp-ph{display:grid;place-items:center;width:84px;height:84px;margin:0 auto 10px;border-radius:50%;background:var(--line) center/cover;font-size:38px}
+.pickpet b{font-family:var(--display);font-size:17px}
 /* 首頁第三個主按鈕：健康手冊 */
 .hero .actions .btn.health{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;background:var(--sheet);color:var(--ink);box-shadow:inset 0 0 0 2px var(--green);text-align:left;padding:12px 16px}
 .hero .actions .btn.health>.ico{width:26px;height:26px;color:var(--green)}
@@ -485,13 +515,20 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <header>
   <div class="nav">
     <a href="#/" class="logo"><span class="paw">🐾</span><span id="siteName">汪喵回家</span></a>
+    <nav class="space" aria-label="切換功能">
+      <a href="#/" data-s="lost"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>找毛孩</a>
+      <a href="#/health" data-s="health"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M12 7v4M10 9h4"/></svg>健康手冊</a>
+    </nav>
     <div class="sp"></div>
-    <span class="navlinks" style="display:contents">
-      <a href="#/health" class="link hide-sm">健康手冊</a>
+    <span class="navlinks lost-only" style="display:contents">
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
       <a href="#/thanks" class="link hide-sm">感謝牆</a>
       <a href="#/found/new" class="btn sm green hide-sm">撿到毛孩</a>
       <a href="#/new" class="btn sm hide-sm">＋ 登記走失</a>
+    </span>
+    <span class="navlinks health-only" style="display:contents">
+      <a href="#/health?cal=1" class="link hide-sm">日曆同步</a>
+      <a href="#/health/add" class="btn sm green hide-sm">＋ 新增紀錄</a>
     </span>
     <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊">👤<span class="hide-sm"> 登入</span></a>
   </div>
@@ -502,16 +539,10 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v1.9.2</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.0.0</span></div>
 </footer>
 
-<nav class="tabbar" id="tabbar" aria-label="主要導覽">
-  <a href="#/" data-r="home"><svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/></svg>首頁</a>
-  <a href="#/health" data-r="health"><svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v6a4 4 0 0 0 8 0V3"/><path d="M10 13v2a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="11" r="2"/></svg>健康手冊</a>
-  <a href="#/new" class="cta" data-r="new"><span class="i"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>登記走失</a>
-  <a href="#/found/new" class="cta2" data-r="found"><span class="i"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="6.2" cy="10.6" r="2"/><circle cx="9.6" cy="6.6" r="2.1"/><circle cx="14.4" cy="6.6" r="2.1"/><circle cx="17.8" cy="10.6" r="2"/></svg></span>撿到毛孩</a>
-  <a href="#/me" data-r="me"><svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg>我的</a>
-</nav>
+<nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -527,7 +558,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.9.2';
+const BUILD = 'v2.0.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -637,13 +668,35 @@ async function init(){
   route();
 }
 let refreshTimer=null;
+
+const TI={
+ home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/>',
+ map:'<path d="M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+ me:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/>',
+ book:'<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+ bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+ cal:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'
+};
+const tbI=n=>`<svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TI[n]}</svg>`;
+const plusI='<span class="i"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>';
+const pawI='<span class="i"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="6.2" cy="10.6" r="2"/><circle cx="9.6" cy="6.6" r="2.1"/><circle cx="14.4" cy="6.6" r="2.1"/><circle cx="17.8" cy="10.6" r="2"/></svg></span>';
+function spaceOf(path){return (path.startsWith('#/health')||path.startsWith('#/pet'))?'health':'lost'}
+function renderChrome(path,h){
+  const space=spaceOf(path);document.body.dataset.space=space;
+  document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
+  const rk=path==='#/'||path==='#'?(qs(h).tab==='map'?'map':'home'):path==='#/new'?'new':path==='#/found/new'?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
+  const items=space==='health'
+   ?[['#/health','health',tbI('book')+'我的毛孩'],['#/health?cal=1','cal',tbI('cal')+'日曆同步'],['#/health/add','add',plusI+'新增紀錄','cta2'],['#/health?due=1','due',tbI('bell')+'到期提醒'],['#/me','me',tbI('me')+'我的']]
+   :[['#/','home',tbI('home')+'首頁'],['#/?tab=map','map',tbI('map')+'地圖'],['#/new','new',plusI+'登記走失','cta'],['#/found/new','found',pawI+'撿到毛孩','cta2'],['#/me','me',tbI('me')+'我的']];
+  const due=path==='#/health'&&qs(h).due;
+  $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${(r===rk&&!due)||(due&&r==='due')?'on':''}">${inner}</a>`).join('');
+}
 function route(){
   if(!sb)return;
   clearInterval(refreshTimer);refreshTimer=null;
   const h=location.hash||'#/';
   const path=h.split('?')[0];
-  const rk=path==='#/'||path==='#'?(qs(h).tab==='map'?'map':'home'):path==='#/new'?'new':path==='#/found/new'?'found':(path==='#/health'||path.startsWith('#/pet'))?'health':(path==='#/me'||path==='#/login')?'me':'';
-  document.querySelectorAll('#tabbar a').forEach(a=>a.classList.toggle('on',a.dataset.r===rk));
+  renderChrome(path,h);
   window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
@@ -665,6 +718,7 @@ function route(){
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/print$/)))return renderPetPrint(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/record\/(new|[0-9a-f-]{36})$/)))return renderRecord(m[1],m[2]);
   if(path==='#/health')return renderHealth();
+  if(path==='#/health/add')return renderHealthAdd();
   if(path==='#/thanks')return renderThanks();
   if(path==='#/resources')return renderResources();
   if(path==='#/about')return renderAbout();
@@ -697,13 +751,11 @@ async function renderHome(){
     <div class="actions">
       <a href="#/new" class="btn lg">我的毛孩走失了<small>登記協尋、產生海報</small></a>
       <a href="#/found/new" class="btn lg green">我撿到／看到一隻<small>幫牠找到主人</small></a>
-      <a href="#/health" class="btn lg health">${ic("steth")}<span>毛孩健康手冊<small>記錄回診、疫苗，到期自動提醒</small></span><em>免費</em></a>
     </div>
     <div class="stats" id="stats"></div>
     </div>
     <a class="hero-poster hidden" id="heroPoster" aria-label="最新走失案件"></a>
   </section>
-  ${promoHTML()}
   <ol class="how" aria-label="怎麼運作">
     <li><b>登記協尋</b><span>上傳照片、走失地點，自動比對收容所和拾獲通報，產生可列印的海報。</span></li>
     <li><b>大家幫忙看</b><span>網友回報目擊時間地點，附近會員收到通知，地圖上標出移動路線。</span></li>
@@ -729,6 +781,7 @@ async function renderHome(){
     <label class="chk" style="margin:0;justify-content:center"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 只看有獎金</label>
   </div>
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
+  <a class="crosslink" href="#/health"><span class="cl-ic">${ic("steth")}</span><span><b>想記錄自家毛孩的健康？</b>回診、疫苗、驅蟲到期自動提醒，同步手機日曆。到「健康手冊」免費使用</span><em>前往健康手冊</em></a>
   `;
   $('#fStatus').value=homeState.status;$('#fSp').value=homeState.species;
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));loadList()}});
@@ -754,7 +807,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
       <li>${ic("printer")}<span><b>給獸醫看</b>一鍵產生病歷摘要，換醫院不用重講</span></li>
       <li>${ic("siren")}<span><b>走失一鍵協尋</b>照片和特徵已建好，按「走失了」就能發出協尋</span></li>
     </ul>
-    <div class="promo-btns">${me()?`<a class="btn green" href="#/me">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費建立健康手冊</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">用 Email 登入，不用密碼</span>`}</div>
+    <div class="promo-btns">${me()?`<a class="btn green" href="#/health">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費建立健康手冊</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">用 Email 登入，不用密碼</span>`}</div>
   </div>
   <div class="promo-demo" aria-hidden="true">
     <div class="pd-card">
@@ -768,13 +821,33 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
 </section>`}
 async function renderHealth(){
   setTitle('毛孩健康手冊');
-  let pets=[];
-  if(me()){const {data}=await sb.from('pets').select('*').order('created_at');pets=data||[]}
+  if(!me())return renderHealthLanding();
+  app.innerHTML=`<div class="empty">載入中…</div>`;
+  const [prof,{data:pets},{data:dues}]=await Promise.all([
+    getProfile(), sb.from('pets').select('*').order('created_at'),
+    sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),2)).order('next_due').limit(40)
+  ]);
+  const p=prof||{};const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
+  const ds=dues||[];const overdue=ds.filter(r=>r.next_due<todayStr()).length;const soon=ds.filter(r=>r.next_due>=todayStr()&&r.next_due<=new Date(Date.now()+14*864e5).toISOString().slice(0,10)).length;
+  if(!(pets||[]).length){app.innerHTML=`<div class="health-hero"><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div>
+    <div class="empty-card" style="margin-top:16px"><div class="big">🐾</div><b>還沒有毛孩檔案</b><p class="small">名字、照片、晶片號碼、生日，一次填好；走失時也能一鍵轉成協尋案件。</p><div class="btns"><a class="btn green" href="#/pet/new">建立第一隻毛孩</a></div></div>`;return}
+  app.innerHTML=`<div class="health-hero row"><div><h1>毛孩健康手冊</h1><p class="lede">${overdue?`<b style="color:var(--red)">${overdue} 項已過期</b>，`:''}${soon?`${soon} 項兩週內到期`:ds.length?'近期沒有急著要做的事':'還沒有設定到期提醒'}</p></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
+  <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
+  <div class="grid">${pets.map(petCardHTML).join('')}</div>
+  <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
+  ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av">${REC_KINDS[r.kind][0]}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts">${calButtons(petName[r.pet_id]||'毛孩',r)}<button class="btn sm" data-done="${r.id}">已完成</button></div></div>`).join('')}</div>`:`<div class="card muted small">新增紀錄時填「下次到期日」（例如疫苗一年後），就會出現在這裡，到期前寄 Email 提醒你。</div>`}
+  <div id="calSec">${calSection(p)}</div>`;
+  bindCal(renderHealth);bindIcs(ds,r=>petName[r.pet_id]||'毛孩');
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderHealth()});
+  document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
+  const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
+  if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-70,behavior:'smooth'})},60);
+}
+function renderHealthLanding(){
   app.innerHTML=`<div class="health-hero">
     <h1>毛孩健康手冊</h1>
     <p class="lede">回診、疫苗、驅蟲、體重，全部記在同一個地方。到期前自動提醒，看醫生時一鍵給獸醫看。免費，只有你自己看得到。</p>
   </div>
-  ${me()&&pets.length?`<h2>${ic("paw")} 我的毛孩 <a class="btn sm green" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增</a></h2><div class="grid">${pets.map(petCardHTML).join('')}</div>`:''}
   ${promoHTML(true)}
   <h2>${ic("clipboard")} 怎麼開始</h2>
   <ol class="how">
@@ -782,8 +855,16 @@ async function renderHealth(){
     <li><b>建立毛孩檔案</b><span>名字、照片、晶片號碼、生日、特徵，一次填好。</span></li>
     <li><b>記下第一筆紀錄</b><span>選「疫苗」「驅蟲」等常用項目，下次到期日自動幫你算好。</span></li>
   </ol>
-  <div style="text-align:center;margin:26px 0 8px"><a class="btn lg green" href="${me()?'#/pet/new':'#/pet/new'}">${me()?(pets.length?'再新增一隻毛孩':'建立第一隻毛孩'):'免費開始使用'}</a></div>`;
-  document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
+  <div style="text-align:center;margin:26px 0 8px"><a class="btn lg green" href="#/pet/new">免費開始使用</a></div>`;
+}
+async function renderHealthAdd(){
+  setTitle('新增紀錄');
+  if(!requireLogin('請先登入，才能記錄毛孩健康'))return;
+  const {data:pets}=await sb.from('pets').select('id,name,species,photos').order('created_at');
+  if(!pets||!pets.length){location.hash='#/pet/new';return}
+  if(pets.length===1){location.replace('#/pet/'+pets[0].id+'/record/new');return}
+  app.innerHTML=`<h1>新增紀錄</h1><p class="muted">要記錄哪一隻？</p>
+  <div class="pickpet">${pets.map(x=>`<a href="#/pet/${x.id}/record/new"><span class="pp-ph ${x.photos?.[0]?'':'noimg'}" ${x.photos?.[0]?`style="background-image:url('${esc(x.photos[0])}')"`:''}>${x.photos?.[0]?'':sp(x.species).emoji}</span><b>${esc(x.name)}</b></a>`).join('')}</div>`;
 }
 async function loadFeatured(){
   const {data}=await sb.from('cases_public').select('id,name,species,breed,colour,photos,lost_city,lost_district,lost_place,lost_at,reward').eq('status','searching').order('lost_at',{ascending:false}).limit(8);
@@ -1693,6 +1774,10 @@ function calSubButtons(u,web){
   if(DEVICE==='ios')return a+g+o;
   return g+a+o;
 }
+function bindCal(rerender){
+  if($('#btnCalCopy'))$('#btnCalCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#calU').value);toast('已複製，貼到日曆 App 的「訂閱日曆」')}catch(_){$('#calU').select();toast('請長按複製')}};
+  if($('#btnCalReset'))$('#btnCalReset').onclick=async()=>{if(!confirm('重設後舊的訂閱網址會失效，要重新訂閱一次。確定嗎？'))return;const {error}=await sb.rpc('rotate_calendar_token');if(error)return toast('重設失敗：'+error.message);toast('已重設，請重新訂閱');rerender()};
+}
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
 
 async function getProfile(){
@@ -1751,13 +1836,7 @@ async function renderMe(){
   const p=prof||{};
   app.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="margin:0">${esc(p.display_name||me().email)}</h1><span class="muted small">${esc(me().email||'')}</span>${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}<button class="btn sm ghost" id="btnOut" style="margin-left:auto">登出</button></div>
 
-  ${(dues||[]).length?`<h2>${ic("clock")} 近期到期</h2><div class="card" style="padding:6px 18px">${dues.map(r=>`<a class="sponsor" href="#/pet/${r.pet_id}" style="color:inherit"><div class="av">${REC_KINDS[r.kind][0]}</div><div class="b"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b><div class="msg">${r.next_due}・${dueText(r.next_due)}</div></div></a>`).join('')}</div>`:''}
-
-  ${calSection(p)}
-
-  <h2>${ic("paw")} 我的毛孩 <a class="btn sm" href="#/pet/new" style="margin-left:auto">＋ 新增</a></h2>
-  <p class="muted small">只有你看得到。記錄看診、疫苗、驅蟲和體重；走失時按「走失了」就能一鍵轉成協尋案件。</p>
-  <div class="grid">${(pets||[]).length?pets.map(petCardHTML).join(''):`<div class="empty-card"><div class="big">🐾</div><b>還沒有寵物檔案</b><p class="small">建好照片、晶片號碼和特徵，走失時省下最慌亂的填表時間。</p><div class="btns"><a class="btn" href="#/pet/new">建立第一隻</a></div></div>`}</div>
+  <a class="crosslink" href="#/health" style="margin:18px 0 6px"><span class="cl-ic">${ic("steth")}</span><span><b>毛孩健康手冊${(pets||[]).length?`・${pets.length} 隻毛孩`:''}</b>${(dues||[]).length?`有 ${dues.length} 項一個月內到期`:'健康紀錄、到期提醒和日曆同步都在這裡'}</span><em>打開</em></a>
 
   <h2>${ic("clipboard")} 我登記的走失案件</h2>
   <div class="grid">${(cs||[]).length?cs.map(c=>cardHTML(c).replace('<a class="ccard" href="#/case/','<a class="ccard" href="#/manage/').replace('<div class="t">',`<div class="t">${pendMap[c.id]?`<span class="tag amber">${pendMap[c.id]} 筆目擊待確認</span>`:''}`)).join(''):'<p class="muted" style="grid-column:1/-1">沒有。用金鑰建立的舊案件，可在管理頁按「綁定到我的帳號」。</p>'}</div>
@@ -1785,8 +1864,6 @@ async function renderMe(){
     <button class="btn" style="margin-top:14px">儲存設定</button>
   </form>`;
   $('#btnOut').onclick=async()=>{await sb.auth.signOut();location.hash='#/'};
-  if($('#btnCalCopy'))$('#btnCalCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#calU').value);toast('已複製，貼到日曆 App 的「訂閱日曆」')}catch(_){$('#calU').select();toast('請長按複製')}};
-  if($('#btnCalReset'))$('#btnCalReset').onclick=async()=>{if(!confirm('重設後舊的訂閱網址會失效，要重新訂閱一次。確定嗎？'))return;const {error}=await sb.rpc('rotate_calendar_token');if(error)return toast('重設失敗：'+error.message);toast('已重設，請重新訂閱');renderMe()};
   const picker=pickerMap('hmap',p.home_lat?[p.home_lat,p.home_lng]:[23.9,121]);
   if(p.home_lat)picker.set(p.home_lat,p.home_lng);else picker.map.setZoom(7);
   $('#btnHome').onclick=picker.locate;
