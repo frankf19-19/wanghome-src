@@ -3,6 +3,11 @@
 # 程式說明、資料庫設定、排程程式（scripts/、supabase/、SETUP.md）不會出現在網站上。
 # 壓縮失敗時自動改用原始檔，網站照常更新。
 set -euo pipefail
+# 安全檢查：網頁裡的程式有語法錯誤就停止部署（Cloudflare 會繼續用上一個正常的版本）
+node -e '
+const s=require("fs").readFileSync("index.html","utf8");const re=/<script>([\s\S]*?)<\/script>/g;let m,i=0,bad=0;
+while((m=re.exec(s))){i++;try{new Function(m[1])}catch(e){bad++;console.error("script #"+i+" 語法錯誤："+e.message)}}
+if(bad)process.exit(1);console.log("syntax ok: "+i+" scripts");'
 rm -rf dist && mkdir -p dist
 cp sw.js manifest.webmanifest _headers dist/
 [ -f robots.txt ] && cp robots.txt dist/
