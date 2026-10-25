@@ -151,8 +151,8 @@ a.stat:hover{text-decoration:none}a.stat:hover b{color:var(--red)}
 .hero-duo-lg{display:none}
 @media (min-width:980px){.hero:not(.has-poster){display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:48px;align-items:center}.hero:not(.has-poster) .hero-duo-lg{display:block;width:100%;height:auto}}
 .health-hero.art{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.health-hero.art img{width:200px;height:auto;flex:none}
-@media (max-width:640px){.health-hero.art{display:block;position:relative}.health-hero.art h1{padding-right:104px}.health-hero.art img{position:absolute;right:0;top:4px;width:100px}}
+.health-hero.art img{width:200px;height:auto;flex:none;order:2}
+@media (max-width:640px){.health-hero.art{display:flow-root}.health-hero.art>div{display:contents}.health-hero.art img{float:right;width:100px;margin:0 0 6px 10px}}
 .login-card{text-align:left}
 .login-duo{display:block;width:140px;height:auto;margin:-6px auto 6px}
 .empty-card .big img{width:120px;height:auto}
@@ -908,7 +908,7 @@ async function renderHealth(){
   ]);
   const p=prof||{};const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const ds=dues||[];const overdue=ds.filter(r=>r.next_due<todayStr()).length;const soon=ds.filter(r=>r.next_due>=todayStr()&&r.next_due<=new Date(Date.now()+14*864e5).toISOString().slice(0,10)).length;
-  if(!(pets||[]).length){app.innerHTML=`<div class="health-hero art"><div><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div><img src="duo.svg" alt="" width="220" height="150"></div>
+  if(!(pets||[]).length){app.innerHTML=`<div class="health-hero art"><img src="duo.svg" alt="" width="220" height="150"><div><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div></div>
     <div class="empty-card" style="margin-top:16px"><div class="big"><img src="duo.svg" alt="" width="120" height="82"></div><b>還沒有毛孩檔案</b><p class="small">名字、照片、晶片號碼、生日，一次填好；走失時也能一鍵轉成協尋案件。</p><div class="btns"><a class="btn green" href="#/pet/new">建立第一隻毛孩</a></div></div>`;return}
   app.innerHTML=`<div class="health-hero row"><div><h1>毛孩健康手冊</h1><p class="lede">${overdue?`<b style="color:var(--red)">${overdue} 項已過期</b>，`:''}${soon?`${soon} 項兩週內到期`:ds.length?'近期沒有急著要做的事':'還沒有設定到期提醒'}</p></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
@@ -924,9 +924,9 @@ async function renderHealth(){
 }
 function renderHealthLanding(){
   app.innerHTML=`<div class="health-hero art">
+    <img class="hh-img" src="duo.svg" alt="" width="220" height="150">
     <div><h1>毛孩健康手冊</h1>
     <p class="lede">回診、疫苗、驅蟲、體重，全部記在同一個地方。到期前自動提醒，看醫生時一鍵給獸醫看。免費，只有你自己看得到。</p></div>
-    <img src="duo.svg" alt="" width="220" height="150">
   </div>
   ${promoHTML(true)}
   <h2>${ic("clipboard")} 怎麼開始</h2>
