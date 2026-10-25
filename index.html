@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗狗協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪回家 — 全台走失狗狗協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗狗平安回家。">
-<!-- BUILD v1.1.2 -->
+<!-- BUILD v1.2.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -262,8 +262,8 @@ footer a{color:var(--ink-2);margin:0 6px}
   <div style="margin-top:6px">
     <a href="#/about">關於本站</a><a href="#/resources">找狗攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
   </div>
-  <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料（每日更新）· 地圖 © OpenStreetMap 貢獻者</div>
-  <div class="small" style="margin-top:4px">BUILD v1.1.2</div>
+  <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料· 地圖 © OpenStreetMap 貢獻者</div>
+  <div class="small" style="margin-top:4px">BUILD v1.2.0</div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -280,7 +280,7 @@ const CONFIG = {
   CONTACT_EMAIL: '',         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.1.2';
+const BUILD = 'v1.2.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -401,7 +401,7 @@ async function renderHome(){
   <div class="install" id="installBar">📱 把汪回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
   <section class="hero">
     <h1>走失的狗狗，<b>一起幫牠回家</b></h1>
-    <p class="muted">飼主登記 · 路人回報目擊／拾獲 · 地圖時間軸 · 每天自動比對全台收容所</p>
+    <p class="muted">飼主登記 · 路人回報目擊／拾獲 · 地圖時間軸 · 自動比對全台收容所</p>
     <div class="actions"><a href="#/new" class="btn lg">🐕 我的狗走失了</a><a href="#/found/new" class="btn lg green">🙋 我撿到／看到一隻狗</a></div>
     <div class="stats" id="stats"></div>
   </section>
@@ -558,6 +558,50 @@ function matchScore(lost,found){
 }
 
 /* ============================================================
+   收容所比對（瀏覽器端）
+   農業部開放資料只接受台灣 IP，所以由訪客的瀏覽器抓取該縣市的收容犬，
+   比對後把新結果寫回資料庫（report_shelter_matches），供飼主管理頁與 Email 通知使用。
+   ============================================================ */
+const MOA_URL='https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL';
+const MOA_AREA={"臺北市":2,"新北市":3,"基隆市":4,"宜蘭縣":5,"桃園市":6,"新竹縣":7,"新竹市":8,"苗栗縣":9,"臺中市":10,"彰化縣":11,"南投縣":12,"雲林縣":13,"嘉義縣":14,"嘉義市":15,"臺南市":16,"高雄市":17,"屏東縣":18,"花蓮縣":19,"臺東縣":20,"澎湖縣":21,"金門縣":22,"連江縣":23};
+const MOA_SIZE={small:'SMALL',medium:'MEDIUM',large:'BIG'};
+const shelterCache={};
+async function fetchShelterDogs(city){
+  const area=MOA_AREA[city];if(!area)return [];
+  if(shelterCache[area])return shelterCache[area];
+  const key='wh_moa_'+area,today=new Date().toISOString().slice(0,10);
+  try{const c=JSON.parse(sessionStorage.getItem(key)||'null');if(c&&c.d===today)return shelterCache[area]=c.v}catch(_){}
+  const res=await fetch(`${MOA_URL}&animal_kind=${encodeURIComponent('狗')}&animal_area_pkid=${area}`);
+  if(!res.ok)throw new Error('收容所資料讀取失敗 '+res.status);
+  const all=await res.json();
+  const v=all.map(a=>({animal_id:String(a.animal_id),animal_subid:a.animal_subid,shelter_name:a.shelter_name,shelter_tel:a.shelter_tel,shelter_address:a.shelter_address,found_place:a.animal_foundplace,colour:a.animal_colour,bodytype:a.animal_bodytype,sex:a.animal_sex,age:a.animal_age,variety:(a.animal_Variety||'').trim(),photo_url:a.album_file,created:(a.animal_createtime||'').replace(/\//g,'-'),open_date:a.animal_opendate,status:a.animal_status}));
+  try{sessionStorage.setItem(key,JSON.stringify({d:today,v}))}catch(_){}
+  return shelterCache[area]=v;
+}
+function shelterScore(c,a){
+  if(a.status&&a.status!=='OPEN')return -1;
+  const lostDay=String(c.lost_at).slice(0,10);
+  const minDay=new Date(new Date(lostDay)-86400000).toISOString().slice(0,10);
+  if(!a.created||a.created<minDay)return -1;           // 走失前就已收容 → 不是
+  let s=40;                                            // 同縣市 + 時間吻合
+  const cs=colourSet(c.colour),as=colourSet(a.colour);
+  if(cs.size&&as.size){if(![...cs].some(x=>as.has(x)))return -1;s+=25}
+  if(c.size&&a.bodytype)s+=MOA_SIZE[c.size]===a.bodytype?15:-10;
+  if((c.sex==='male'||c.sex==='female')&&(a.sex==='M'||a.sex==='F'))s+=((c.sex==='male')===(a.sex==='M'))?15:-25;
+  if(c.lost_district&&(a.found_place||'').includes(c.lost_district.replace(/[區鄉鎮市]$/,'')))s+=10;
+  return Math.max(0,Math.min(100,s));
+}
+const MOA_BODY={SMALL:'小型',MEDIUM:'中型',BIG:'大型'};
+async function liveShelterMatch(c){
+  // 回傳本次比對到的（score>=55）結果，並把新的寫回資料庫
+  const dogs=await fetchShelterDogs(c.lost_city);
+  const hits=dogs.map(a=>({a,s:shelterScore(c,a)})).filter(x=>x.s>=55).sort((x,y)=>y.s-x.s||(y.a.created>x.a.created?1:-1)).slice(0,20);
+  const rows=hits.map(({a,s})=>({animal_id:a.animal_id,animal_subid:a.animal_subid,shelter_name:a.shelter_name,shelter_tel:a.shelter_tel,shelter_address:a.shelter_address,found_place:a.found_place,colour:a.colour,bodytype:MOA_BODY[a.bodytype]||a.bodytype,sex:a.sex==='M'?'公':a.sex==='F'?'母':'不明',age:a.age==='CHILD'?'幼犬':a.age==='ADULT'?'成犬':a.age,variety:a.variety,photo_url:a.photo_url,open_date:a.open_date,score:s}));
+  if(rows.length&&c.status==='searching'){try{await sb.rpc('report_shelter_matches',{p_case:c.id,p_rows:rows})}catch(_){}}
+  return rows;
+}
+
+/* ============================================================
    案件詳情
    ============================================================ */
 async function renderCase(id){
@@ -616,9 +660,7 @@ async function renderCase(id){
   <div id="map"></div>
   <div class="timeline" id="tl"></div>
 
-  ${matches&&matches.length?`<h2>🏠 收容所疑似比對 <span class="tag amber">${matches.length}</span></h2>
-  <p class="muted small">系統每天自動比對農業部全台收容所資料（依縣市、毛色、體型、性別）。請飼主親自到所比對，電話確認時請提供晶片號碼。</p>
-  ${matches.map(matchHTML).join('')}`:''}
+  <div id="shelterBox">${shelterBoxHTML(matches,c.status==='searching')}</div>
 
   <div id="foundMatches"></div>
 
@@ -660,6 +702,16 @@ async function renderCase(id){
     ${p.by?`<div class="small muted">回報者：${esc(p.by)}</div>`:''}
     ${p.photo?`<div class="ph" style="background-image:url('${esc(p.photo)}')" onclick="lightbox('${esc(p.photo)}')"></div>`:''}</div>`).join('');
 
+  // 收容所即時比對（瀏覽器端抓農業部資料）
+  if(c.status==='searching'){
+    liveShelterMatch({...c}).then(async()=>{
+      if(location.hash.split('?')[0]!=='#/case/'+id)return;
+      const {data:m2}=await sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false);
+      const box=$('#shelterBox');if(!box)return;
+      box.innerHTML=shelterBoxHTML(m2,false)||'<h2>🏠 收容所比對</h2><p class="muted small">目前 '+esc(c.lost_city)+' 收容所沒有走失日之後收容、特徵相符的狗。每次有人打開這頁都會重新比對最新資料。</p>';
+    }).catch(()=>{const st=$('#shelterStatus');if(st)st.textContent='收容所資料暫時讀取不到（農業部網站只接受台灣網路連線），稍後重新整理再試。'});
+  }
+
   // 可能相符的拾獲通報（即時計算）
   if(c.status==='searching'){
     const {data:fr}=await sb.from('found_public').select('*').eq('status','open').eq('city',c.lost_city).gte('seen_at',new Date(new Date(c.lost_at)-86400000).toISOString()).limit(200);
@@ -686,6 +738,13 @@ function matchHTML(m){
       <div class="small">${m.shelter_tel?`📞 <a href="tel:${esc(m.shelter_tel)}">${esc(m.shelter_tel)}</a> · `:''}${esc(m.shelter_address||'')}</div>
       <a class="small" target="_blank" rel="noopener" href="https://asms.coa.gov.tw/Amlapp/App/AnimalApp.aspx?ID=${encodeURIComponent(m.animal_id)}">在全國收容系統查看 ↗</a>
     </div></div>`;
+}
+function shelterBoxHTML(matches,loading){
+  const list=(matches||[]).filter(m=>!m.dismissed).sort((a,b)=>b.score-a.score);
+  if(!list.length)return loading?'<h2>🏠 收容所比對</h2><p class="muted small" id="shelterStatus">正在比對全台收容所資料…</p>':'';
+  return `<h2>🏠 收容所疑似比對 <span class="tag amber">${list.length}</span></h2>
+  <p class="muted small" id="shelterStatus">比對農業部收容所資料：走失後才被收容、同縣市、毛色、體型、性別相符的狗。請飼主打電話並提供晶片號碼，或親自到所確認。</p>
+  ${list.map(matchHTML).join('')}`;
 }
 function shareText(c,url){
   return `【尋狗啟事】${c.name}｜${c.lost_city}${c.lost_district||''}
@@ -793,7 +852,7 @@ function renderCreated(id,token){
   <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="copy('${esc(manage)}')">複製管理連結</button><button class="btn sm ghost" onclick="copy('${esc(token)}')">只複製金鑰</button></div>
   <p class="muted small">金鑰也已暫存在這台裝置的瀏覽器，但換裝置就沒有了。</p>
   <h3 style="margin-top:20px">接下來</h3>
-  <ol class="steps"><li><a href="#/poster/${id}">產生協尋海報</a>，貼到 FB 社團、LINE 群</li><li>分享案件連結：<a href="#/case/${id}">${esc(caseUrl(id))}</a></li><li>系統每天會自動比對全台收容所，有疑似會寄 Email 通知你</li><li>看 <a href="#/resources">找狗攻略</a>，照清單一項一項做</li></ol>
+  <ol class="steps"><li><a href="#/poster/${id}">產生協尋海報</a>，貼到 FB 社團、LINE 群</li><li>分享案件連結：<a href="#/case/${id}">${esc(caseUrl(id))}</a></li><li>每次有人打開案件頁，系統都會用最新的收容所資料比對，有疑似會顯示在案件頁和管理頁</li><li>看 <a href="#/resources">找狗攻略</a>，照清單一項一項做</li></ol>
   <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><a class="btn" href="#/poster/${id}">🖼 產生海報</a><a class="btn ghost" href="#/case/${id}">查看案件頁</a></div></div>`;
 }
 
@@ -850,6 +909,7 @@ async function renderManage(id,token){
   if(!token){try{token=localStorage.getItem('wh_token_'+id)}catch(_){}}
   if(!token){app.innerHTML=`<div class="card"><h1>🔑 飼主管理</h1><p>請輸入登記時取得的管理金鑰：</p><input type="text" id="tk"><button class="btn" style="margin-top:10px" onclick="location.hash='#/manage/${id}?t='+document.getElementById('tk').value.trim()">進入</button></div>`;return}
   app.innerHTML='<div class="empty">驗證中…</div>';
+  try{const {data:pc}=await sb.from('cases_public').select('id,status,lost_city,lost_district,lost_at,colour,size,sex').eq('id',id).single();if(pc&&pc.status==='searching')await liveShelterMatch(pc)}catch(_){}
   const [{data:c,error},{data:ss},{data:matches}]=await Promise.all([
     sb.rpc('owner_case',{p_id:id,p_token:token}),
     sb.rpc('owner_sightings',{p_id:id,p_token:token}),
@@ -883,8 +943,8 @@ async function renderManage(id,token){
     <div class="ops">${s.status!=='confirmed'?`<button class="btn sm green" data-s="${s.id}" data-v="confirmed">✓ 確認是牠</button>`:''}${s.status!=='rejected'?`<button class="btn sm ghost" data-s="${s.id}" data-v="rejected">× 退回</button>`:''}${s.status!=='pending'?`<button class="btn sm ghost" data-s="${s.id}" data-v="pending">改回待確認</button>`:''}</div></div>`).join(''):'<p class="muted">還沒有目擊回報。</p>'}</div>
 
   <h2>收容所比對 <span class="tag gray">${(matches||[]).length}</span></h2>
-  <p class="muted small">每天凌晨自動比對。相似分數只是粗略篩選，請親自看照片、打電話核對晶片。</p>
-  ${(matches||[]).length?matches.map(m=>`<div style="opacity:${m.dismissed?.5:1}">${matchHTML(m)}${m.dismissed?'':`<div style="text-align:right;margin:-4px 0 10px"><button class="btn sm ghost" data-m="${m.id}">不是牠，隱藏</button></div>`}</div>`).join(''):'<p class="muted">目前沒有疑似資料。新案件通常隔天凌晨才會有第一次比對結果。</p>'}
+  <p class="muted small">每次打開案件頁或這個管理頁都會用最新的農業部收容所資料重新比對。相似分數只是粗略篩選，請親自看照片、打電話核對晶片。</p>
+  ${(matches||[]).length?matches.map(m=>`<div style="opacity:${m.dismissed?.5:1}">${matchHTML(m)}${m.dismissed?'':`<div style="text-align:right;margin:-4px 0 10px"><button class="btn sm ghost" data-m="${m.id}">不是牠，隱藏</button></div>`}</div>`).join(''):'<p class="muted">目前沒有疑似資料：走失日之後，該縣市收容所沒有收容特徵相符的狗。</p>'}
 
   <h2>編輯資料</h2>
   <form class="card" id="fe">
@@ -1136,7 +1196,7 @@ function renderResources(){
   <div class="card"><ul class="checklist">
     <li><span class="n">1</span><div><b>回到走失點附近，安靜地找</b><div class="d">高齡、膽小的狗通常躲在走失點 1 公里內的草叢、車底、工地。清晨 5–7 點與傍晚最容易出來。帶牠的毯子或你穿過的衣服放在走失點留氣味。</div></div></li>
     <li><span class="n">2</span><div><b>在本站登記，產生海報</b><div class="d">案件頁有 QR Code，路人掃了就能回報目擊，比抄電話快。</div></div></li>
-    <li><span class="n">3</span><div><b>通報動保處與收容所，留晶片號碼</b><div class="d">被路人送到收容所的狗，飼主常常不知道。本站每天會自動比對，但親自打電話更快。</div></div></li>
+    <li><span class="n">3</span><div><b>通報動保處與收容所，留晶片號碼</b><div class="d">被路人送到收容所的狗，飼主常常不知道。本站會自動比對收容所資料，但親自打電話更快。</div></div></li>
     <li><span class="n">4</span><div><b>到農業部寵物登記網做「遺失申報」</b><div class="d">任何動物醫院、收容所掃到晶片都會看到走失註記。<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報 ↗</a></div></div></li>
     <li><span class="n">5</span><div><b>FB 協尋社團 + LINE 社區群</b><div class="d">用本站案件頁的「複製文案」直接貼。找走失地點那個區的社團，不要只貼全台大社團。</div></div></li>
     <li><span class="n">6</span><div><b>實體海報：半徑 2 公里</b><div class="d">便利商店、動物醫院、公園、里長辦公室、宮廟、公車站。海報用本站產生的版本，字要大，電話要大。</div></div></li>
@@ -1173,7 +1233,7 @@ function renderAbout(){
   setTitle('關於');
   app.innerHTML=`<h1>關於 ${esc(CONFIG.SITE_NAME)}</h1><div class="card">
   <p>這是一個免費、無廣告的走失狗狗協尋平台。我們相信找狗最有效的方式是：<b>讓目擊資訊快速集中到一張地圖上</b>，並且<b>主動比對收容所</b>。</p>
-  <h3>本站做什麼</h3><ul style="padding-left:20px"><li>飼主免註冊登記案件，產生含 QR Code 的海報</li><li>網友回報目擊：時間、位置、方向、照片，飼主確認後上地圖</li><li>每天自動比對農業部全台收容所資料，疑似立即 Email 通知</li><li>統計找回方式，讓後來的人知道什麼最有效</li></ul>
+  <h3>本站做什麼</h3><ul style="padding-left:20px"><li>飼主免註冊登記案件，產生含 QR Code 的海報</li><li>網友回報目擊：時間、位置、方向、照片，飼主確認後上地圖</li><li>自動比對農業部全台收容所資料（每次有人打開案件頁就用最新資料重比），疑似會顯示在案件頁</li><li>統計找回方式，讓後來的人知道什麼最有效</li></ul>
   <h3>本站不做什麼</h3><ul style="padding-left:20px"><li>不經手任何款項：尋獲獎金由飼主與尋獲者自行處理</li><li>不公開回報者聯絡方式：只有飼主看得到</li><li>不保證比對正確：收容所比對只是粗略篩選，請親自確認</li></ul>
   ${CONFIG.CONTACT_EMAIL?`<p>聯絡站長：<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a></p>`:''}
   <p class="muted small">BUILD ${BUILD}</p></div>`;

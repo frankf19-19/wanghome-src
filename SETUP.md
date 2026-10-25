@@ -1,10 +1,10 @@
-# 汪回家 WangHome — 安裝說明（v1.1.0）
+# 汪回家 WangHome — 安裝說明（v1.2.0）
 
 ## ✅ 目前已部署
 - 網站：https://frankf19-19.github.io/wanghome/
 - GitHub：https://github.com/frankf19-19/wanghome
 - Supabase 專案：wanghome（東京，ref `nopyhfpaykkiieudvoko`）
-  - 資料庫結構 schema.sql + migration_v1.1.sql 已執行、publishable key 已填入 index.html
+  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql 已執行、publishable key 已填入 index.html
 - GitHub Actions：SUPABASE_URL / SITE_URL / SITE_NAME 已直接寫在 workflow
   - 只需要 Secret：`SUPABASE_SERVICE_KEY`（Supabase → Settings → API Keys → Secret key）
   - 選填 Secret：`GMAIL_USER`、`GMAIL_APP_PASSWORD`（寄通知）、`MOA_API_URL`
@@ -40,6 +40,7 @@ wanghome/
 2. 建好後，左側 **SQL Editor** → New query → 把 `supabase/schema.sql` 全部貼上 → **Run**
    - 最後一行會顯示 `WangHome schema v1.0.0 installed`
    - 再開一個 New query，貼上 `supabase/migration_v1.1.sql` → **Run**（拾獲通報、長度限制、防灌水）
+   - 再跑 `supabase/migration_v1.2.sql`（收容所比對結果寫回）
 3. 左側 **Project Settings → API**，記下兩個值：
    - **Project URL**（像 `https://abcdefgh.supabase.co`）
    - **Publishable key**（以 `sb_publishable_` 開頭；舊版 anon key 也可）
@@ -123,3 +124,9 @@ repo → **Settings → Secrets and variables → Actions → New repository sec
 - `anon` key 可以公開（它只能做前端允許的事）
 - `service_role` key 等於管理員密碼，**只放 GitHub Secrets**
 - 所有飼主私密資料（Email、回報者聯絡方式、管理金鑰）都不會從公開 API 流出
+
+
+## 收容所比對為什麼在瀏覽器跑？
+農業部開放資料（data.moa.gov.tw）只接受台灣 IP，GitHub Actions（美國）和 Supabase（東京）都連不上。
+所以改成：任何人打開案件頁時，由他的瀏覽器抓「該縣市的收容犬」（約 1MB），比對後把新結果寫回資料庫。
+飼主管理頁打開時也會重新比對。若之後有台灣的代理伺服器，設定 GitHub Secret `MOA_API_URL` 即可恢復每日伺服器端比對。

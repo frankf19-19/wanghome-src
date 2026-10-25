@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪回家 WangHome — 每日自動化腳本  v1.1.0
+汪回家 WangHome — 每日自動化腳本  v1.2.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -60,7 +60,7 @@ def sb(method, path, body=None, params=None, prefer=None):
 # ---------------------------------------------------------------- 農業部資料
 def fetch_moa():
     req = urllib.request.Request(MOA_API_URL, headers={"User-Agent": UA, "Accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=120) as r:
+    with urllib.request.urlopen(req, timeout=25) as r:
         raw = r.read().decode("utf-8-sig")
     data = json.loads(raw)
     if isinstance(data, dict):  # 有些版本包在 {"data":[...]} 裡
@@ -120,6 +120,10 @@ def score(case, a):
     return max(0, min(100, s))
 
 def run_matching():
+    # 農業部開放資料擋台灣以外的 IP（GitHub Actions 連不上）。
+    # 收容所比對已改在瀏覽器端進行；只有設定了 MOA_API_URL（例如台灣的代理）才在這裡跑。
+    if not os.environ.get("MOA_API_URL"):
+        print("收容所比對：由網站前端執行（未設定 MOA_API_URL，略過）"); return
     cases = sb("GET", "cases", params={"select": "id,name,lost_city,lost_district,lost_at,colour,size,sex,contact_email", "status": "eq.searching"})
     if not cases: print("沒有協尋中案件"); return
     try:
@@ -283,9 +287,12 @@ def run_notifications():
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.1.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.2.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode == "probe":
-        data = fetch_moa()
+        try:
+            data = fetch_moa()
+        except Exception as e:
+            print("連不上農業部開放資料（多半是擋海外 IP）：", e); sys.exit(0)
         dogs = [x for x in data if (x.get("animal_kind") or "") == "狗"]
         print(f"其中狗：{len(dogs)} 筆")
         if data: print("欄位：", ", ".join(sorted(data[0].keys())))
