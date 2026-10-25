@@ -13,7 +13,7 @@ import os, sys, json, html, urllib.request, urllib.parse, datetime as dt, pathli
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://nopyhfpaykkiieudvoko.supabase.co").rstrip("/")
 ANON_KEY     = os.environ.get("SUPABASE_ANON_KEY", "sb_publishable_WCeVQIAPH0UEEzhTwovqkg_lJ8Qjydb")
-SITE_URL     = os.environ.get("SITE_URL", "https://frankf19-19.github.io/wanghome/").rstrip("/") + "/"
+SITE_URL     = os.environ.get("SITE_URL", "https://wangmiaotw.com/").rstrip("/") + "/"
 SITE_NAME    = os.environ.get("SITE_NAME", "汪喵回家")
 ROOT         = pathlib.Path(__file__).resolve().parent.parent
 

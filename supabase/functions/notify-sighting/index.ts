@@ -6,7 +6,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
-const SITE = "https://frankf19-19.github.io/wanghome/";
+const SITE = "https://wangmiaotw.com/";
 const SITE_NAME = "汪喵回家";
 const CORS = {
   "Access-Control-Allow-Origin": "*",

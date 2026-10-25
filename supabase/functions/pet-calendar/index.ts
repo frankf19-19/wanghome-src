@@ -3,7 +3,7 @@
 // 日曆 App 無法帶登入資訊，所以本函式需關閉 JWT 驗證；以 profiles.calendar_token 辨識使用者。
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const SITE = "https://frankf19-19.github.io/wanghome/";
+const SITE = "https://wangmiaotw.com/";
 const KIND: Record<string, string> = {
   vet: "回診", vaccine: "疫苗", deworm: "驅蟲／除蚤", med: "用藥",
   surgery: "手術", weight: "量體重", grooming: "美容洗澡", other: "提醒",

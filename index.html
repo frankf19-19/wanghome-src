@@ -3,20 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+/* 搬家：舊網址（github.io）自動轉到 wangmiaotw.com，並把這支手機存的「我登記過的」管理網址、登入狀態一起帶過去 */
+(function(){var H='wangmiaotw.com',MOVE=false,KEEP=/^(wh_(mine|theme|token_|ftoken_|draft)|sb-)/;
+try{var h=location.hash;
+if(h.indexOf('#mig=')===0){
+  var p=h.slice(5),i=p.indexOf('&h='),d=i<0?p:p.slice(0,i),back=i<0?'':decodeURIComponent(p.slice(i+3));
+  var o=JSON.parse(decodeURIComponent(escape(atob(d.replace(/-/g,'+').replace(/_/g,'/')))));
+  for(var k in o){if(!KEEP.test(k)||typeof o[k]!=='string')continue;var cur=localStorage.getItem(k);
+    if(cur==null)localStorage.setItem(k,o[k]);
+    else if(k==='wh_mine'){try{var a=JSON.parse(cur),b=JSON.parse(o[k]),ids={};a.forEach(function(x){ids[x.id]=1});
+      localStorage.setItem(k,JSON.stringify(a.concat(b.filter(function(x){return x&&!ids[x.id]})).slice(0,20)))}catch(_){}}}
+  history.replaceState(null,'',location.pathname+location.search+(back.charAt(0)==='#'?back:''));
+}else if(MOVE&&location.hostname==='frankf19-19.github.io'){
+  var o2={},n=0;for(var j=0;j<localStorage.length;j++){var k2=localStorage.key(j);if(KEEP.test(k2)){o2[k2]=localStorage.getItem(k2);n++}}
+  location.replace('https://'+H+'/'+location.search+(n?'#mig='+btoa(unescape(encodeURIComponent(JSON.stringify(o2)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')+'&h='+encodeURIComponent(location.hash):location.hash));
+}}catch(e){}})();
+</script>
 <title>汪喵回家 — 全台走失毛孩協尋平台</title>
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://frankf19-19.github.io/wanghome/">
+<meta property="og:url" content="https://wangmiaotw.com/">
 <meta property="og:site_name" content="汪喵回家">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:image" content="https://frankf19-19.github.io/wanghome/og.png">
+<meta property="og:image" content="https://wangmiaotw.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
+<link rel="canonical" href="https://wangmiaotw.com/">
 <!-- BUILD v3.8.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +44,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer fetchpriority="high"></script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"汪喵回家","alternateName":"全台走失毛孩協尋平台","url":"https://frankf19-19.github.io/wanghome/","inLanguage":"zh-TW","description":"全台走失狗貓協尋：登記協尋、目擊與拾獲回報、受傷毛孩通報、自動比對收容所，以及毛孩健康手冊。"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"汪喵回家","alternateName":"全台走失毛孩協尋平台","url":"https://wangmiaotw.com/","inLanguage":"zh-TW","description":"全台走失狗貓協尋：登記協尋、目擊與拾獲回報、受傷毛孩通報、自動比對收容所，以及毛孩健康手冊。"}</script>
 <style>
 /* ============================================================
    汪喵回家 設計系統 v1.6
@@ -987,7 +1004,8 @@ const CONFIG = {
   ECPAY_URL: '',             // 綠界實況主收款網址，例：https://p.ecpay.com.tw/XXXXXXX
   CONTACT_EMAIL: '',
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
-  SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
+  // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
+  SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
 const BUILD = 'v3.8.0';
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());

@@ -1,7 +1,7 @@
 # 汪喵回家 WangHome — 安裝說明（v1.7.0）
 
 ## ✅ 目前已部署
-- 網站：https://frankf19-19.github.io/wanghome/
+- 網站：https://wangmiaotw.com/
 - GitHub：https://github.com/frankf19-19/wanghome
 - Supabase 專案：wanghome（東京，ref `nopyhfpaykkiieudvoko`）
   - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql + migration_v1.4.sql + migration_v1.5.sql + migration_v1.6.sql 已執行、publishable key 已填入 index.html
@@ -139,8 +139,8 @@ repo → **Settings → Secrets and variables → Actions → New repository sec
 
 ## 會員登入設定（v1.4）
 Supabase → Authentication → URL Configuration：
-- Site URL：`https://frankf19-19.github.io/wanghome/`
-- Redirect URLs：加入 `https://frankf19-19.github.io/wanghome/**`
+- Site URL：`https://wangmiaotw.com/`
+- Redirect URLs：加入 `https://wangmiaotw.com/**`
 
 登入採用 Email 魔法連結（PKCE），不需要密碼。
 

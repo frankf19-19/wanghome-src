@@ -12,7 +12,7 @@
 需要的環境變數（放在 GitHub Secrets）：
   SUPABASE_URL              例 https://xxxx.supabase.co
   SUPABASE_SERVICE_KEY      Project Settings → API → service_role（絕不可放到前端）
-  SITE_URL                  例 https://你的帳號.github.io/wanghome/
+  SITE_URL                  例 https://wangmiaotw.com/
   GMAIL_USER                寄信用 Gmail 帳號（選填，不填就不寄信）
   GMAIL_APP_PASSWORD        Gmail 應用程式密碼（16 碼）
   MOA_API_URL               （選填）覆蓋農業部 API 網址
@@ -255,7 +255,7 @@ def run_notifications():
             if s.get("lat"): lines.append(f"  地圖 https://www.google.com/maps?q={s['lat']},{s['lng']}")
             if s.get("reporter_contact"): lines.append(f"  回報者聯絡：{s['reporter_contact']}")
             lines.append("")
-        lines += ["請到管理頁確認後才會顯示在公開地圖：", f"{SITE_URL}#/manage/{cid}", "（需要你的管理金鑰）", "", f"— {SITE_NAME}"]
+        lines += ["請到管理頁確認後才會顯示在公開地圖：", f"{SITE_URL}#/manage/{cid}", "（需要你的管理網址）", "", f"— {SITE_NAME}"]
         try:
             send_mail(c["contact_email"], f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines))
             print(f"已通知目擊：{c['name']} x{len(lst)}")
