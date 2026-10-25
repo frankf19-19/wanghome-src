@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.6.0 -->
+<!-- BUILD v3.0.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -641,12 +641,149 @@ select.pill{padding-right:34px!important;appearance:none;-webkit-appearance:none
 .pill .ico{width:16px;height:16px}
 .chkpill input{position:absolute;opacity:0;pointer-events:none}
 .pill.hidden{display:none}
+
+/* =====================================================================
+   v3.0 溫暖可愛主題（覆蓋以上所有樣式）
+   ===================================================================== */
+:root{
+  --paper:#FFF6EA; --sheet:#FFFFFF; --ink:#3A2A1E; --ink-2:#6B5240; --ink-3:#7E624E; --line:#EFDCC6;
+  --red:#C9401C; --red-ink:#A8320F; --red-soft:#FFE6DB; --red-fill:#DD4724;
+  --green:#127A50; --green-soft:#E2F4EA; --green-fill:#16855A;
+  --mark:#FFC83D; --mark-soft:#FFF1CC; --blue:#2F63B5; --amber:#9A5B00;
+  --beige:#F6E6D2; --cream2:#FFE7CF;
+  --r-card:22px; --r-ctl:14px;
+  --lift:0 1px 0 rgba(140,90,40,.06),0 8px 20px -10px rgba(150,90,40,.38);
+  --head:"Chiron GoRound TC","Noto Sans TC",system-ui,sans-serif;
+  --display:"Chiron GoRound TC","Noto Sans TC",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1C1611; --sheet:#28201A; --ink:#F8ECDE; --ink-2:#DCC7B1; --ink-3:#BCA48D; --line:#3D3128;
+  --red:#FF8A66; --red-ink:#FFB49B; --red-soft:#3B2219; --red-fill:#D64A26;
+  --green:#5FD39E; --green-soft:#183026; --green-fill:#17885B;
+  --mark:#FFC83D; --mark-soft:#3A2F14; --beige:#33281F; --cream2:#3A2B1E;
+  --lift:0 1px 0 rgba(0,0,0,.4),0 10px 24px -12px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --paper:#1C1611; --sheet:#28201A; --ink:#F8ECDE; --ink-2:#DCC7B1; --ink-3:#BCA48D; --line:#3D3128;
+  --red:#FF8A66; --red-ink:#FFB49B; --red-soft:#3B2219; --red-fill:#D64A26;
+  --green:#5FD39E; --green-soft:#183026; --green-fill:#17885B;
+  --mark:#FFC83D; --mark-soft:#3A2F14; --beige:#33281F; --cream2:#3A2B1E;
+  --lift:0 1px 0 rgba(0,0,0,.4),0 10px 24px -12px rgba(0,0,0,.8);
+}
+body{background:var(--paper)}
+body[data-space="health"]{background:var(--paper)}
+h1,h2,h3,.ccard .t,.space b,.stat b,.empty-card b,.how b,.reunite b,.recent a .b b,.pickpet b,footer .fb b{font-family:var(--head);font-weight:800}
+h1{font-size:clamp(28px,4.6vw,40px);letter-spacing:.01em}
+h2{font-size:21px}
+h2 .ico{color:var(--red)}
+/* 頁首 */
+header{background:color-mix(in srgb,var(--paper) 92%,transparent);border-bottom:0}
+.logo{font-family:var(--head)}
+.logo .paw{background:var(--red-fill);border-radius:12px;box-shadow:0 3px 0 color-mix(in srgb,var(--red-fill) 70%,#000)}
+.space{background:none}
+.space a{border-bottom:0!important;border-radius:14px}
+@media (min-width:641px){
+  .space{max-width:1120px;margin:0 auto 8px;padding:5px;background:var(--beige);border-radius:18px;gap:4px;display:grid;grid-template-columns:1fr 1fr;width:calc(100% - 40px)}
+  .space a{padding:9px 14px}
+  .space .sp-ic{width:36px;height:36px;border-radius:12px}
+}
+.space a{color:var(--ink-3)}
+body[data-space="lost"] .space a[data-s="lost"],body[data-space="health"] .space a[data-s="health"]{background:var(--sheet)!important;box-shadow:0 2px 8px rgba(150,90,40,.16)}
+body[data-space="lost"] .space a[data-s="lost"]{color:var(--red)!important}
+body[data-space="health"] .space a[data-s="health"]{color:var(--green)!important}
+body[data-space="lost"] .space a[data-s="lost"] .sp-ic{background:var(--red-fill)!important;color:#fff!important}
+body[data-space="health"] .space a[data-s="health"] .sp-ic{background:var(--green-fill)!important;color:#fff!important}
+@media (max-width:640px){
+  .space{margin:2px 14px 10px!important;background:var(--beige)!important;box-shadow:none!important;border-radius:16px!important;padding:4px!important}
+  .space a{padding:9px 6px!important;border-radius:12px!important}
+  body[data-space] .space a.on .sp-ic,body[data-space="lost"] .space a[data-s="lost"] .sp-ic,body[data-space="health"] .space a[data-s="health"] .sp-ic{background:none!important;color:inherit!important}
+  .space b{font-size:15.5px}
+}
+/* 按鈕 */
+.btn{border-radius:14px;font-weight:800;box-shadow:0 3px 0 color-mix(in srgb,var(--red-fill) 70%,#000)}
+.btn.green{box-shadow:0 3px 0 color-mix(in srgb,var(--green-fill) 70%,#000)}
+.btn.ghost{background:var(--sheet);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line),0 2px 0 var(--line)}
+.btn.sm{border-radius:12px}
+.btn.line,.btn.fb{box-shadow:none}
+.btn:active{transform:translateY(2px);box-shadow:none}
+/* 輸入 */
+select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=number],input[type=datetime-local],input[type=date],textarea{border-color:var(--line);border-radius:14px;background:var(--sheet)}
+select:focus,input:focus,textarea:focus{border-color:var(--red)}
+.card{border-radius:var(--r-card)}
+.notice{border-radius:14px}
+/* 首頁 hero */
+.hero{padding-top:6px}
+.hero-card{display:block!important;position:relative;background:linear-gradient(140deg,#FFE7CF,#FFDDBC)!important;border-radius:26px!important;padding:20px 20px 18px!important;box-shadow:none!important;overflow:hidden;min-height:180px}
+.hero .bubble{display:inline-block;background:var(--red-fill);color:#fff;font-family:var(--head);font-weight:800;font-size:13.5px;padding:4px 12px;border-radius:99px;margin-bottom:10px}
+.hero .rule{font-family:var(--head)!important;font-weight:800!important;font-size:clamp(26px,7vw,40px)!important;line-height:1.25!important;color:#4A2C17!important;margin:0}
+.hero .sub{color:#7A5A42!important;font-size:14.5px!important;margin-top:8px!important;padding-right:130px!important;min-height:0!important;max-width:34em}
+.hero-duo{display:block!important;position:absolute!important;right:-4px!important;bottom:-8px!important;width:150px!important;height:auto;margin:0!important}
+@media (min-width:980px){.hero-card{padding:30px 34px 28px!important;min-height:230px}.hero .sub{font-size:16px!important;padding-right:220px!important}.hero-duo{width:230px!important;right:10px!important}.hero-duo-lg{display:none!important}.hero:not(.has-poster){display:block!important}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero-card{background:linear-gradient(140deg,#3A2B1E,#33241A)!important}:root:not([data-theme="light"]) .hero .rule{color:#FFEBD6!important}:root:not([data-theme="light"]) .hero .sub{color:#E3C9B0!important}}
+:root[data-theme="dark"] .hero-card{background:linear-gradient(140deg,#3A2B1E,#33241A)!important}:root[data-theme="dark"] .hero .rule{color:#FFEBD6!important}:root[data-theme="dark"] .hero .sub{color:#E3C9B0!important}
+/* 2x2 大色塊 */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media (min-width:980px){.tiles{grid-template-columns:repeat(4,1fr);max-width:none}}
+.tile{display:flex;flex-direction:column;gap:2px;min-height:106px;padding:14px;border-radius:22px;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.14);transition:transform .12s}
+.tile:hover{text-decoration:none;transform:translateY(-2px)}
+.tile:active{transform:translateY(2px);box-shadow:none}
+.tile .t-ic{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.24);display:grid;place-items:center;margin-bottom:auto}
+.tile .t-ic .ico{width:20px;height:20px}
+.tile b{font-family:var(--head);font-weight:800;font-size:17px;line-height:1.3;margin-top:10px}
+.tile small{font-size:12.5px;opacity:.95}
+.t-red{background:var(--red-fill)}.t-green{background:var(--green-fill)}
+.t-yellow{background:var(--mark);color:#4A2C17;box-shadow:0 4px 0 #E3A91F}.t-yellow .t-ic{background:rgba(255,255,255,.55)}
+.t-white{background:var(--sheet);color:var(--ink);box-shadow:0 4px 0 var(--line)}.t-white .t-ic{background:var(--green-soft);color:var(--green)}
+.t-white small{color:var(--ink-2)}
+/* 統計 */
+.stats{background:var(--sheet);border-radius:18px;padding:12px 6px;box-shadow:var(--lift);margin-top:16px;max-width:none}
+.stat{border-left:1px solid var(--line);text-align:center;padding:2px 6px!important}
+.stat:first-child{border-left:0}
+.stat b{font-size:26px!important;color:var(--red)}
+.stat.good b{color:var(--green)}
+/* 分頁標籤、搜尋、膠囊 */
+.tabs{border-bottom:0;background:var(--beige);border-radius:16px;padding:4px;display:flex;gap:4px;margin-top:26px}
+.tabs button{flex:1;border-radius:12px;font-family:var(--head);font-weight:800;color:var(--ink-3);box-shadow:none!important;border:0!important;padding:10px 8px}
+.tabs button.on{background:var(--sheet);color:var(--red);box-shadow:0 2px 8px rgba(150,90,40,.16)!important}
+.tabs .cnt{background:var(--paper)}
+.searchbar{box-shadow:var(--lift),inset 0 0 0 1.5px var(--line)}
+.pill{border-color:var(--line)!important}
+.pill.on,.pill:has(input:checked){background:var(--red-fill);color:#fff;border-color:var(--red-fill)!important}
+/* 卡片 */
+.ccard{border-radius:22px;box-shadow:var(--lift);overflow:hidden;background:var(--sheet)}
+.ccard .ph{border-radius:0}
+.ccard .band{left:10px!important;top:10px;bottom:auto!important;border-radius:99px!important;padding:3px 10px!important;font-family:var(--head);font-size:12.5px!important;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.ccard .reward{border-radius:99px}
+.ccard .t{font-size:18px}
+.tag{border-radius:99px}
+.recent a{border-radius:18px;box-shadow:var(--lift),inset 4px 0 0 var(--mark)}
+.reunite .ph{border-color:var(--green-fill)}
+.how li{border-radius:18px}
+.how li::before{background:var(--red-fill)!important;color:#fff!important}
+.crosslink,.promo{border-radius:22px}
+.empty-card{border-radius:22px;border-color:var(--line)}
+/* 底部選單 */
+@media (max-width:760px){
+  .tabbar{border-radius:22px 22px 0 0;border-top:0;box-shadow:0 -4px 18px rgba(150,90,40,.14);background:var(--sheet)}
+  .tabbar a{color:var(--ink-3)}
+  .tabbar a.on{color:var(--red)}
+  body[data-space="health"] .tabbar a.on{color:var(--green)}
+  .tabbar a.cta,.tabbar a.cta2{font-size:0}
+  .tabbar a.cta .i,.tabbar a.cta2 .i{width:52px!important;height:52px!important;border-radius:18px!important;margin-top:-26px;background:var(--red-fill);box-shadow:0 4px 0 color-mix(in srgb,var(--red-fill) 70%,#000)}
+  body[data-space="health"] .tabbar a.cta2 .i{background:var(--green-fill);box-shadow:0 4px 0 color-mix(in srgb,var(--green-fill) 70%,#000)}
+  .tabbar a.cta .i svg,.tabbar a.cta2 .i svg{width:24px;height:24px}
+  .tabbar a.plainpaw .i{display:grid;place-items:center;width:24px;height:22px;color:inherit}
+}
+/* 頁尾 */
+footer{border-top:0;background:var(--beige);border-radius:26px 26px 0 0;max-width:none;padding-left:max(20px,calc((100% - 1080px)/2));padding-right:max(20px,calc((100% - 1080px)/2))}
+form.steps>h3::before{background:var(--red-fill)!important;color:#fff!important}
+body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#EFF2EE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1417" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFF6EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1611" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="汪喵回家">
 </head>
@@ -680,7 +817,7 @@ select.pill{padding-right:34px!important;appearance:none;-webkit-appearance:none
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.6.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.0.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -699,7 +836,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.6.0';
+const BUILD = 'v3.0.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -741,6 +878,7 @@ function sp(x){return SPECIES[x]||SPECIES.dog}
 const ICONS={"map": "<path d=\"M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z\"/><path d=\"M9 4v13.5M15 6.5V20\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "shelter": "<path d=\"M3 11.5 12 4l9 7.5\"/><path d=\"M5.5 10v10h13V10\"/><path d=\"M9.5 20v-4.5h5V20\"/>", "hand": "<path d=\"M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.3 14a1.5 1.5 0 0 1 2.4-1.8L8 15\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.2-4.2\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/>", "scale": "<path d=\"M12 4v16M5 20h14\"/><path d=\"m5 8 7-3 7 3\"/><path d=\"M5 8 2.5 14a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5h6v3H9zM8.5 12h7M8.5 16h5\"/>", "bell": "<path d=\"M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z\"/><path d=\"M10 20.5a2 2 0 0 0 4 0\"/>", "star": "<path d=\"m12 3.8 2.5 5.1 5.6.8-4 4 1 5.6-5.1-2.7-5 2.7.9-5.6-4-4 5.6-.8z\"/>", "image": "<rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"15\" rx=\"2\"/><circle cx=\"9\" cy=\"10\" r=\"1.8\"/><path d=\"m20.5 16-5-5-8.5 8.5\"/>", "key": "<circle cx=\"8\" cy=\"15\" r=\"4\"/><path d=\"m11 12 8.5-8.5M16 7l2.5 2.5M14 9l2 2\"/>", "flag": "<path d=\"M5 21V4.5M5 4.5h11l-2 4 2 4H5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "pin": "<path d=\"M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.4\"/>", "shield": "<path d=\"M12 3.5 19 6v5.5c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6z\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2\"/><path d=\"M3.5 9.5h17M8 3v4M16 3v4\"/>", "siren": "<path d=\"M7 18v-6a5 5 0 0 1 10 0v6\"/><path d=\"M4.5 18h15v2.5h-15zM12 3v1.5M4.4 6.4l1 1M19.6 6.4l-1 1\"/>", "printer": "<path d=\"M7 9V3.5h10V9\"/><rect x=\"3.5\" y=\"9\" width=\"17\" height=\"7.5\" rx=\"1.5\"/><path d=\"M7 14h10v6.5H7z\"/>", "steth": "<path d=\"M6 3.5v5a4 4 0 0 0 8 0v-5\"/><path d=\"M10 12.5v2a5 5 0 0 0 10 0v-1\"/><circle cx=\"20\" cy=\"11.5\" r=\"2\"/>", "download": "<path d=\"M12 4v11M7.5 10.5 12 15l4.5-4.5M4.5 19.5h15\"/>", "paw": "<ellipse cx=\"12\" cy=\"16\" rx=\"4.4\" ry=\"3.6\"/><circle cx=\"6.3\" cy=\"10.6\" r=\"1.9\"/><circle cx=\"9.6\" cy=\"6.7\" r=\"2\"/><circle cx=\"14.4\" cy=\"6.7\" r=\"2\"/><circle cx=\"17.7\" cy=\"10.6\" r=\"1.9\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "share": "<circle cx=\"17.5\" cy=\"5.5\" r=\"2.5\"/><circle cx=\"6.5\" cy=\"12\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"18.5\" r=\"2.5\"/><path d=\"m8.7 10.8 6.6-4M8.7 13.2l6.6 4\"/>"};
 ICONS.aid='<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7M12 10.5v6M9 13.5h6"/>';
 ICONS.phone='<path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z"/>';
+function pawSvg(){return '<svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="6.2" cy="10.6" r="2"/><circle cx="9.6" cy="6.6" r="2.1"/><circle cx="14.4" cy="6.6" r="2.1"/><circle cx="17.8" cy="10.6" r="2"/></svg>'}
 function ic(n,cls=''){return `<svg class="ico ${cls}" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`}
 
 const SIZE = {small:'小型',medium:'中型',large:'大型'};
@@ -842,7 +980,7 @@ function renderChrome(path,h){
   const rk=path==='#/'||path==='#'?(qs(h).tab==='map'?'map':'home'):path==='#/new'?'new':path==='#/found/new'?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
   const items=space==='health'
    ?[['#/health','health',tbI('book')+'我的毛孩'],['#/health?cal=1','cal',tbI('cal')+'日曆同步'],['#/health/add','add',plusI+'新增紀錄','cta2'],['#/health?due=1','due',tbI('bell')+'到期提醒'],['#/me','me',tbI('me')+'我的']]
-   :[['#/','home',tbI('home')+'首頁'],['#/?tab=map','map',tbI('map')+'地圖'],['#/new','new',plusI+'登記走失','cta'],['#/found/new','found',pawI+'撿到毛孩','cta2'],['#/me','me',tbI('me')+'我的']];
+   :[['#/','home',tbI('home')+'首頁'],['#/?tab=map','map',tbI('map')+'地圖'],['#/new','new',plusI+'登記走失','cta'],['#/found/new','found',pawI+'撿到毛孩','plainpaw'],['#/me','me',tbI('me')+'我的']];
   const due=path==='#/health'&&qs(h).due;
   $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${(r===rk&&!due)||(due&&r==='due')?'on':''}">${inner}</a>`).join('');
 }
@@ -905,15 +1043,17 @@ async function renderHome(){
     <div class="hero-main">
     <div class="hero-card">
       <div class="hc-txt">
-        <p class="rule">看到走失的狗貓，<br>別追。</p>
-        <p class="sub">拍照、記下時間和地點，回報給飼主。<b>追趕只會讓牠跑得更遠。</b></p>
+        <span class="bubble">看到走失的狗貓</span>
+        <p class="rule">先別追，<br>拍照回報就好</p>
+        <p class="sub">記下時間和地點，飼主馬上收到通知。追趕只會讓牠跑得更遠。</p>
       </div>
       <img class="hero-duo" src="duo.svg" alt="" width="132" height="90">
     </div>
-    <div class="actions">
-      <a href="#/new" class="btn lg">我的毛孩走失了<small>登記協尋、產生海報</small></a>
-      <a href="#/found/new" class="btn lg green">我撿到／看到一隻<small>幫牠找到主人</small></a>
-      <a href="#/injured" class="btn lg injured">${ic("aid")}<span>看到受傷的毛孩<small>一鍵定位通報，馬上撥 1959 動保專線</small></span><em>緊急</em></a>
+    <div class="tiles">
+      <a href="#/new" class="tile t-red"><span class="t-ic">${ic("search")}</span><b>我的毛孩走失了</b><small>登記協尋、產生海報</small></a>
+      <a href="#/found/new" class="tile t-green"><span class="t-ic">${pawSvg()}</span><b>我撿到一隻</b><small>幫牠找到主人</small></a>
+      <a href="#/injured" class="tile t-yellow"><span class="t-ic">${ic("aid")}</span><b>看到受傷毛孩</b><small>一鍵通報、撥 1959</small></a>
+      <a href="#/health" class="tile t-white"><span class="t-ic">${ic("steth")}</span><b>毛孩健康手冊</b><small>回診疫苗到期提醒</small></a>
     </div>
     <div class="stats" id="stats"></div>
     </div>
