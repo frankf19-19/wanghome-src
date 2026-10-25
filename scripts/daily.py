@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪回家 WangHome — 每日自動化腳本  v1.0.1
+汪回家 WangHome — 每日自動化腳本  v1.1.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -32,7 +32,8 @@ MOA_API_URL  = os.environ.get("MOA_API_URL") or \
 UA = "WangHome/1.0 (+lost-dog-matcher)"
 
 if not SUPABASE_URL or not SERVICE_KEY:
-    print("缺少 SUPABASE_URL / SUPABASE_SERVICE_KEY"); sys.exit(1)
+    # 尚未設定 Secret 時安靜略過，避免排程每次失敗寄錯誤信
+    print("尚未設定 SUPABASE_SERVICE_KEY，略過本次執行。請到 GitHub → Settings → Secrets → Actions 新增。"); sys.exit(0)
 
 # ---------------------------------------------------------------- Supabase REST
 def sb(method, path, body=None, params=None, prefer=None):
@@ -98,7 +99,8 @@ def score(case, a):
     # 毛色
     ct = colour_tokens(case.get("colour")); at = colour_tokens(a.get("animal_colour"))
     if ct and at:
-        s += 25 if ct & at else -15
+        if not (ct & at): return -1  # 毛色明顯不同直接排除
+        s += 25
     # 體型
     if case.get("size") and a.get("animal_bodytype"):
         s += 15 if SIZE_MAP.get(case["size"]) == a["animal_bodytype"] else -10
@@ -140,6 +142,51 @@ def run_matching():
     if rows:
         sb("POST", "shelter_matches", body=rows, prefer="return=minimal,resolution=ignore-duplicates")
     print(f"新增比對 {len(rows)} 筆")
+
+# ---------------------------------------------------------------- 拾獲通報 ↔ 案件
+import math
+def _km(a_lat, a_lng, b_lat, b_lng):
+    R = 6371; r = math.radians
+    h = math.sin(r(b_lat - a_lat) / 2) ** 2 + math.cos(r(a_lat)) * math.cos(r(b_lat)) * math.sin(r(b_lng - a_lng) / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(h))
+
+def found_score(c, f):
+    """與前端 matchScore() 同邏輯。"""
+    if norm_city(c["lost_city"]) != norm_city(f["city"]): return -1
+    try:
+        lost = dt.datetime.fromisoformat(c["lost_at"].replace("Z", "+00:00"))
+        seen = dt.datetime.fromisoformat(f["seen_at"].replace("Z", "+00:00"))
+        if seen < lost - dt.timedelta(days=1) or seen > lost + dt.timedelta(days=60): return -1
+    except Exception:
+        pass
+    s = 30
+    a, b = colour_tokens(c.get("colour")), colour_tokens(f.get("colour"))
+    if a and b:
+        if not (a & b): return -1   # 毛色明顯不同直接排除
+        s += 25
+    if c.get("size") and f.get("size"): s += 15 if c["size"] == f["size"] else -10
+    if c.get("sex") in ("male", "female") and f.get("sex") in ("male", "female"):
+        s += 15 if c["sex"] == f["sex"] else -20
+    if c.get("lost_district") and c.get("lost_district") == f.get("district"): s += 10
+    if c.get("lost_lat") and f.get("lat"):
+        d = _km(c["lost_lat"], c["lost_lng"], f["lat"], f["lng"])
+        s += 15 if d < 2 else 8 if d < 5 else -10 if d > 20 else 0
+    return max(0, min(100, s))
+
+def run_found_matching():
+    cases = sb("GET", "cases", params={"select": "id,lost_city,lost_district,lost_at,lost_lat,lost_lng,colour,size,sex", "status": "eq.searching"}) or []
+    founds = sb("GET", "found_reports", params={"select": "id,city,district,seen_at,lat,lng,colour,size,sex", "status": "eq.open"}) or []
+    if not cases or not founds: print("拾獲比對：無資料"); return
+    existing = sb("GET", "found_matches", params={"select": "case_id,found_id"}) or []
+    seen = {(m["case_id"], m["found_id"]) for m in existing}
+    rows = []
+    for c in cases:
+        for f in founds:
+            sc = found_score(c, f)
+            if sc >= 45 and (c["id"], f["id"]) not in seen:
+                rows.append({"case_id": c["id"], "found_id": f["id"], "score": sc})
+    if rows: sb("POST", "found_matches", body=rows, prefer="return=minimal,resolution=ignore-duplicates")
+    print(f"拾獲比對新增 {len(rows)} 筆")
 
 # ---------------------------------------------------------------- Email
 def send_mail(to, subject, body):
@@ -201,12 +248,37 @@ def run_notifications():
         except Exception as e:
             print("寄信失敗：", e); continue
         sb("PATCH", "shelter_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
+    # 拾獲通報比對
+    pend = sb("GET", "found_matches", params={"select": "id,case_id,found_id,score", "notified": "eq.false", "order": "score.desc"}) or []
+    by_case = {}
+    for m in pend: by_case.setdefault(m["case_id"], []).append(m)
+    if by_case:
+        fids = ",".join({m["found_id"] for m in pend})
+        fr = {f["id"]: f for f in (sb("GET", "found_reports", params={"select": "id,kind,seen_at,city,district,place_text,colour,size,current_place", "id": f"in.({fids})"}) or [])}
+    for cid, lst in by_case.items():
+        c = cases.get(cid)
+        if not c or not c.get("contact_email"): continue
+        lines = [f"有網友登記了 {len(lst)} 筆可能是「{c['name']}」的拾獲／目擊通報：", ""]
+        for m in lst[:10]:
+            f = fr.get(m["found_id"], {})
+            lines.append(f"・{'拾獲' if f.get('kind') == 'found' else '目擊'}  相似 {m['score']}  {fmt(f.get('seen_at', ''))}  {f.get('city', '')}{f.get('district') or ''} {f.get('place_text') or ''}")
+            if f.get("current_place"): lines.append(f"  目前在：{f['current_place']}")
+            lines.append(f"  {SITE_URL}#/found/{m['found_id']}")
+            lines.append("")
+        lines += ["請點連結看照片，並直接聯絡通報者。", "", f"— {SITE_NAME}"]
+        try:
+            send_mail(c["contact_email"], f"【{SITE_NAME}】有人可能撿到／看到 {c['name']}", "\n".join(lines))
+            print(f"已通知拾獲比對：{c['name']} x{len(lst)}")
+        except Exception as e:
+            print("寄信失敗：", e); continue
+        sb("PATCH", "found_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
 
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.0.1 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.1.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode in ("all", "match"): run_matching()
+    if mode in ("all", "match", "notify"): run_found_matching()
     if mode in ("all", "notify"): run_notifications()
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})
     print("保活 OK", "有資料" if n else "空")
