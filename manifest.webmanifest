@@ -75,8 +75,13 @@
           "src": "icon-192.png",
           "sizes": "192x192"
         }
-      ]
+      ],
+      "short_name": "健康手冊"
     }
   ],
-  "id": "./"
+  "id": "./",
+  "categories": [
+    "lifestyle",
+    "utilities"
+  ]
 }

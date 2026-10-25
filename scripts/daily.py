@@ -290,7 +290,7 @@ def run_notifications():
     old_cut = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=3)).isoformat()
     def skip_unverified(table, lst, key="created_at"):
         # 信箱還沒確認：先不寄、留著（確認後會一起寄）；超過 3 天的就標記掉，不再累積
-        old = [x["id"] for x in lst if (x.get(key) or "") < old_cut]
+        old = [x["id"] for x in lst if x.get(key) and x[key] < old_cut]   # 沒有時間欄位就先留著，不要誤刪
         if old: mark_notified(table, old)
     # 目擊
     pend = sb_all("sightings", {"select": "*", "notified": "eq.false", "status": "neq.rejected", "order": "created_at.asc"})
@@ -325,7 +325,7 @@ def run_notifications():
         if not c or not c.get("contact_email") or c.get("status") != "searching":
             mark_notified("shelter_matches", [m["id"] for m in lst]); continue
         if not c.get("email_verified"):
-            skip_unverified("shelter_matches", lst); continue
+            skip_unverified("shelter_matches", lst, key="matched_at"); continue
         lines = [f"系統在收容所資料中找到 {len(lst)} 筆與「{c['name']}」疑似相符的狗狗，請盡快親自確認：", ""]
         for m in lst[:10]:
             lines.append(f"・{m.get('shelter_name') or '收容所'}  相似 {m['score']}  {m.get('sex') or ''} {m.get('bodytype') or ''} {m.get('colour') or ''}")
@@ -343,7 +343,7 @@ def run_notifications():
             print("寄信失敗：", e); continue
         sb("PATCH", "shelter_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
     # 拾獲通報比對
-    pend = sb_all("found_matches", {"select": "id,case_id,found_id,score", "notified": "eq.false", "order": "score.desc"})
+    pend = sb_all("found_matches", {"select": "id,case_id,found_id,score,created_at", "notified": "eq.false", "order": "score.desc"})
     by_case = {}
     for m in pend: by_case.setdefault(m["case_id"], []).append(m)
     fr = {}

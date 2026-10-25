@@ -60,7 +60,11 @@ def page(title, desc, image, target, canonical):
 <meta property="og:description" content="{d}">
 <meta property="og:image" content="{img}">
 <meta property="og:url" content="{html.escape(canonical)}">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image:alt" content="{t}">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="{html.escape(canonical)}">
+<link rel="icon" href="{SITE_URL}icon.svg" type="image/svg+xml">
 <style>body{{font-family:system-ui,"PingFang TC","Microsoft JhengHei",sans-serif;text-align:center;padding:40px 16px;color:#333}}img{{max-width:280px;border-radius:12px}}a{{color:#c8201f}}</style>
 </head><body>
 <img src="{img}" alt=""><h1>{t}</h1><p>{d}</p><p><a href="{tgt}">前往{html.escape(SITE_NAME)}查看 →</a></p>
@@ -101,7 +105,7 @@ def main():
         img = (c.get("photos") or [None])[0]
         target = f"{SITE_URL}#/case/{c['id']}"
         fn = sdir / f"{c['id']}.html"
-        content = page(title, desc, img, target, f"{SITE_URL}s/{c['id']}.html")
+        content = page(title, desc, img, target, f"{SITE_URL}s/{c['id']}")
         want_s.add(fn.name)
         if not fn.exists() or fn.read_text(encoding="utf-8") != content:
             fn.write_text(content, encoding="utf-8"); changed += 1
@@ -116,7 +120,7 @@ def main():
         img = (f.get("photos") or [None])[0]
         target = f"{SITE_URL}#/found/{f['id']}"
         fn = fdir / f"{f['id']}.html"
-        content = page(title, desc, img, target, f"{SITE_URL}f/{f['id']}.html")
+        content = page(title, desc, img, target, f"{SITE_URL}f/{f['id']}")
         want_f.add(fn.name)
         if not fn.exists() or fn.read_text(encoding="utf-8") != content:
             fn.write_text(content, encoding="utf-8"); changed += 1

@@ -1,0 +1,9 @@
+{
+  "collapseWhitespace": true,
+  "conservativeCollapse": true,
+  "removeComments": true,
+  "minifyCSS": true,
+  "minifyJS": { "compress": { "passes": 2, "drop_debugger": true }, "mangle": { "toplevel": false }, "format": { "comments": false } },
+  "processConditionalComments": false,
+  "keepClosingSlash": true
+}
