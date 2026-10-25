@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>汪回家 — 全台走失狗狗協尋平台</title>
+<meta name="description" content="走失狗狗協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
+<meta property="og:title" content="汪回家 — 全台走失狗狗協尋平台">
+<meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗狗平安回家。">
+<!-- BUILD v1.0.0 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --red:#c8201f; --red-dark:#9e1616; --red-light:#fdeceb;
+  --ink:#1b1b1b; --ink-2:#4a4a4a; --ink-3:#8a8a8a;
+  --bg:#faf7f2; --card:#ffffff; --line:#e9e2d8;
+  --amber:#f5b400; --green:#1f8a4c; --green-light:#e4f4ea; --blue:#1f5fbf;
+  --radius:14px; --shadow:0 2px 10px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+a{color:var(--blue);text-decoration:none}
+button{font-family:inherit}
+img{max-width:100%;display:block}
+.hidden{display:none!important}
+
+/* header */
+header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line)}
+.nav{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:20px;color:var(--red);letter-spacing:.5px}
+.logo span.paw{font-size:22px}
+.nav .sp{flex:1}
+.nav a.link{color:var(--ink-2);font-size:14px;padding:6px 8px;border-radius:8px}
+.nav a.link:hover{background:var(--bg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;border-radius:10px;padding:10px 16px;font-size:15px;font-weight:700;background:var(--red);color:#fff;transition:.15s}
+.btn:hover{background:var(--red-dark)}
+.btn.sm{padding:7px 12px;font-size:14px;border-radius:8px}
+.btn.lg{padding:14px 22px;font-size:17px;border-radius:12px}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:var(--bg)}
+.btn.green{background:var(--green)}
+.btn.amber{background:var(--amber);color:#1b1b1b}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+h1{font-size:26px;margin:0 0 6px;font-weight:900}
+h2{font-size:19px;margin:22px 0 10px;font-weight:900;display:flex;align-items:center;gap:8px}
+h3{font-size:16px;margin:14px 0 6px}
+p{margin:6px 0}
+.muted{color:var(--ink-3);font-size:14px}
+.small{font-size:13px}
+
+/* hero */
+.hero{background:linear-gradient(135deg,#fff 0%,#fff3f2 100%);border:1px solid var(--line);border-radius:18px;padding:22px 18px;margin-bottom:16px}
+.hero h1{font-size:28px;line-height:1.25}
+.hero h1 b{color:var(--red)}
+.hero .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--ink-2)}
+.stat b{display:block;font-size:20px;color:var(--ink)}
+
+/* filters */
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.filters select,.filters input{width:100%}
+@media(min-width:700px){.filters{grid-template-columns:repeat(5,1fr)}}
+select,input[type=text],input[type=tel],input[type=email],input[type=number],input[type=datetime-local],input[type=date],textarea{
+  width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--red)}
+textarea{min-height:90px;resize:vertical}
+label.f{display:block;margin:12px 0 0}
+label.f>span{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+label.f>span .req{color:var(--red)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:15px}
+.chk input{width:20px;height:20px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;color:var(--ink-2)}
+.seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* case cards */
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.grid{grid-template-columns:1fr 1fr 1fr}}
+.ccard{display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;transition:.15s;color:inherit}
+.ccard:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+.ccard .ph{width:96px;height:96px;border-radius:10px;background:#eee center/cover no-repeat;flex:none;position:relative;overflow:hidden}
+.ccard .ph.noimg::after{content:"🐕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.5}
+.ccard .b{flex:1;min-width:0}
+.ccard .t{font-weight:900;font-size:17px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ccard .m{font-size:13px;color:var(--ink-2);margin-top:2px}
+.ccard .loc{font-size:13px;color:var(--ink-3);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eee;color:var(--ink-2);line-height:1.5}
+.tag.red{background:var(--red-light);color:var(--red)}
+.tag.green{background:var(--green-light);color:var(--green)}
+.tag.amber{background:#fff4cc;color:#8a6100}
+.tag.blue{background:#e6eefb;color:var(--blue)}
+.tag.gray{background:#efefef;color:#777}
+.empty{text-align:center;color:var(--ink-3);padding:40px 10px}
+
+/* detail */
+.detail-head{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:760px){.detail-head{grid-template-columns:5fr 6fr}}
+.gallery{display:grid;grid-template-columns:1fr;gap:8px}
+.gallery .main{aspect-ratio:1/1;border-radius:14px;background:#eee center/cover no-repeat;position:relative}
+.gallery .main.noimg::after{content:"🐕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:90px;opacity:.4}
+.gallery .thumbs{display:flex;gap:6px}
+.gallery .thumbs div{width:60px;height:60px;border-radius:8px;background:#eee center/cover no-repeat;cursor:pointer;border:2px solid transparent}
+.gallery .thumbs div.on{border-color:var(--red)}
+.banner{background:var(--red);color:#fff;border-radius:12px;padding:12px 14px;font-weight:900;font-size:17px;text-align:center;line-height:1.35}
+.banner small{display:block;font-weight:500;font-size:13px;opacity:.95;margin-top:4px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px}
+.kv dt{color:var(--ink-3);font-size:13px;padding-top:2px;white-space:nowrap}
+.kv dd{margin:0}
+.phone{font-size:30px;font-weight:900;color:var(--red);letter-spacing:1px;text-align:center;margin:8px 0 2px}
+.phone a{color:inherit}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-weight:900;font-size:14px}
+.status-pill.searching{background:var(--red-light);color:var(--red)}
+.status-pill.found{background:var(--green-light);color:var(--green)}
+.status-pill.closed{background:#eee;color:#666}
+.actionbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+@media(min-width:600px){.actionbar{grid-template-columns:repeat(4,1fr)}}
+#map,.map{height:320px;border-radius:14px;border:1px solid var(--line);z-index:1}
+.map.pick{height:260px}
+.timeline{position:relative;padding-left:26px;margin-top:10px}
+.timeline::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl{position:relative;margin-bottom:14px}
+.tl .dot{position:absolute;left:-26px;top:2px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.tl .dot.start{background:var(--ink)}
+.tl .dot.pending{background:var(--amber);color:#1b1b1b}
+.tl .when{font-weight:900;font-size:15px}
+.tl .where{font-size:14px;color:var(--ink-2)}
+.tl .note{font-size:14px;margin-top:2px}
+.tl .ph{margin-top:6px;width:120px;height:120px;border-radius:8px;background:#eee center/cover;cursor:pointer}
+.tl .ops{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.match{display:flex;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px;background:#fff}
+.match .ph{width:90px;height:90px;border-radius:8px;background:#eee center/cover;flex:none}
+.match .b{flex:1;font-size:14px}
+.match .b b{font-size:15px}
+.score{display:inline-block;background:var(--amber);color:#1b1b1b;font-weight:900;font-size:12px;padding:1px 8px;border-radius:999px}
+.notice{background:#fff8e1;border:1px solid #f3dd8a;border-radius:12px;padding:12px 14px;font-size:14px}
+.notice.red{background:var(--red-light);border-color:#f3b4b2}
+.notice.green{background:var(--green-light);border-color:#b7e2c7}
+.notice b{display:block;margin-bottom:2px}
+.tokenbox{font-family:ui-monospace,Menlo,monospace;background:#f3f3f3;border-radius:10px;padding:12px;word-break:break-all;font-size:14px}
+.photos-preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.photos-preview div{width:84px;height:84px;border-radius:10px;background:#eee center/cover;position:relative}
+.photos-preview div button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:var(--ink);color:#fff;font-size:12px;cursor:pointer}
+.uploadbtn{display:flex;align-items:center;justify-content:center;gap:8px;border:2px dashed var(--line);border-radius:12px;padding:16px;color:var(--ink-2);cursor:pointer;background:#fff;font-size:15px}
+.uploadbtn input{display:none}
+.progress{height:6px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px}
+.progress i{display:block;height:100%;background:var(--red);width:0;transition:.2s}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1b1b1b;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:999;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.sponsor{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.sponsor .av{width:38px;height:38px;border-radius:50%;background:var(--red-light);color:var(--red);display:flex;align-items:center;justify-content:center;font-weight:900;flex:none}
+.sponsor .b{flex:1}
+.sponsor .b b{font-size:15px}
+.sponsor .b .msg{font-size:14px;color:var(--ink-2)}
+.sponsor .d{font-size:12px;color:var(--ink-3);white-space:nowrap}
+.res-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:700px){.res-grid{grid-template-columns:1fr 1fr}}
+.res{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.res b{display:block;font-size:15px;margin-bottom:4px}
+.res ul{margin:4px 0 0 18px;padding:0;font-size:14px}
+.checklist{list-style:none;margin:0;padding:0}
+.checklist li{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.checklist li span.n{width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.checklist li .d{font-size:13px;color:var(--ink-2)}
+footer{max-width:1100px;margin:30px auto 0;padding:20px 16px 40px;color:var(--ink-3);font-size:13px;text-align:center;border-top:1px solid var(--line)}
+footer a{color:var(--ink-2);margin:0 6px}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:900;display:flex;align-items:center;justify-content:center;padding:20px}
+.lightbox img{max-height:90vh;object-fit:contain;border-radius:8px}
+.setup{max-width:760px;margin:40px auto}
+.setup code{background:#f3f3f3;padding:2px 6px;border-radius:6px}
+.posterwrap{text-align:center}
+.posterwrap canvas{max-width:100%;border-radius:12px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.steps{margin:0;padding-left:20px;font-size:15px}
+.steps li{margin:6px 0}
+.sticky-cta{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;z-index:40}
+@media(min-width:760px){.sticky-cta{display:none}}
+.pad-bottom{padding-bottom:80px}
+.leaflet-container{font:inherit}
+.mk{background:var(--red);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.mk.start{background:var(--ink)}
+.mk.pending{background:var(--amber);color:#1b1b1b}
+.mk.me{background:var(--blue)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="#/" class="logo"><span class="paw">🐾</span><span id="siteName">汪回家</span></a>
+    <div class="sp"></div>
+    <a href="#/resources" class="link">找狗攻略</a>
+    <a href="#/thanks" class="link">感謝牆</a>
+    <a href="#/new" class="btn sm">＋ 登記走失</a>
+  </div>
+</header>
+
+<main id="app"><div class="empty">載入中…</div></main>
+
+<footer>
+  <div><b id="footName">汪回家</b> · 全台走失狗狗協尋平台 · 免費使用</div>
+  <div style="margin-top:6px">
+    <a href="#/about">關於本站</a><a href="#/resources">找狗攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
+  </div>
+  <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料（每日更新）· 地圖 © OpenStreetMap 貢獻者</div>
+  <div class="small" style="margin-top:4px">BUILD v1.0.0</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   設定區：只需要改這裡
+   ============================================================ */
+const CONFIG = {
+  SITE_NAME: '汪回家',
+  SUPABASE_URL: '',          // 例：https://xxxxxxxx.supabase.co
+  SUPABASE_ANON_KEY: '',     // Supabase → Project Settings → API → anon public
+  ECPAY_URL: '',             // 綠界實況主收款網址，例：https://p.ecpay.com.tw/XXXXXXX
+  CONTACT_EMAIL: '',         // 站長聯絡信箱（顯示在關於頁）
+  SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
+};
+const BUILD = 'v1.0.0';
+
+/* ============================================================
+   台灣縣市 / 鄉鎮市區
+   ============================================================ */
+const TW = {
+"臺北市":["中正區","大同區","中山區","松山區","大安區","萬華區","信義區","士林區","北投區","內湖區","南港區","文山區"],
+"新北市":["板橋區","三重區","中和區","永和區","新莊區","新店區","樹林區","鶯歌區","三峽區","淡水區","汐止區","瑞芳區","土城區","蘆洲區","五股區","泰山區","林口區","深坑區","石碇區","坪林區","三芝區","石門區","八里區","平溪區","雙溪區","貢寮區","金山區","萬里區","烏來區"],
+"桃園市":["桃園區","中壢區","平鎮區","八德區","楊梅區","蘆竹區","大溪區","龍潭區","龜山區","大園區","觀音區","新屋區","復興區"],
+"臺中市":["中區","東區","南區","西區","北區","北屯區","西屯區","南屯區","太平區","大里區","霧峰區","烏日區","豐原區","后里區","石岡區","東勢區","和平區","新社區","潭子區","大雅區","神岡區","大肚區","沙鹿區","龍井區","梧棲區","清水區","大甲區","外埔區","大安區"],
+"臺南市":["中西區","東區","南區","北區","安平區","安南區","永康區","歸仁區","新化區","左鎮區","玉井區","楠西區","南化區","仁德區","關廟區","龍崎區","官田區","麻豆區","佳里區","西港區","七股區","將軍區","學甲區","北門區","新營區","後壁區","白河區","東山區","六甲區","下營區","柳營區","鹽水區","善化區","大內區","山上區","新市區","安定區"],
+"高雄市":["新興區","前金區","苓雅區","鹽埕區","鼓山區","旗津區","前鎮區","三民區","楠梓區","小港區","左營區","仁武區","大社區","岡山區","路竹區","阿蓮區","田寮區","燕巢區","橋頭區","梓官區","彌陀區","永安區","湖內區","鳳山區","大寮區","林園區","鳥松區","大樹區","旗山區","美濃區","六龜區","內門區","杉林區","甲仙區","桃源區","那瑪夏區","茂林區","茄萣區"],
+"基隆市":["仁愛區","信義區","中正區","中山區","安樂區","暖暖區","七堵區"],
+"新竹市":["東區","北區","香山區"],
+"新竹縣":["竹北市","竹東鎮","新埔鎮","關西鎮","湖口鄉","新豐鄉","芎林鄉","橫山鄉","北埔鄉","寶山鄉","峨眉鄉","尖石鄉","五峰鄉"],
+"苗栗縣":["苗栗市","頭份市","竹南鎮","後龍鎮","通霄鎮","苑裡鎮","卓蘭鎮","造橋鄉","西湖鄉","頭屋鄉","公館鄉","銅鑼鄉","三義鄉","大湖鄉","獅潭鄉","三灣鄉","南庄鄉","泰安鄉"],
+"彰化縣":["彰化市","員林市","和美鎮","鹿港鎮","溪湖鎮","二林鎮","田中鎮","北斗鎮","花壇鄉","芬園鄉","大村鄉","永靖鄉","伸港鄉","線西鄉","福興鄉","秀水鄉","埔心鄉","埔鹽鄉","大城鄉","芳苑鄉","竹塘鄉","社頭鄉","二水鄉","田尾鄉","埤頭鄉","溪州鄉"],
+"南投縣":["南投市","埔里鎮","草屯鎮","竹山鎮","集集鎮","名間鄉","鹿谷鄉","中寮鄉","魚池鄉","國姓鄉","水里鄉","信義鄉","仁愛鄉"],
+"雲林縣":["斗六市","斗南鎮","虎尾鎮","西螺鎮","土庫鎮","北港鎮","古坑鄉","大埤鄉","莿桐鄉","林內鄉","二崙鄉","崙背鄉","麥寮鄉","東勢鄉","褒忠鄉","臺西鄉","元長鄉","四湖鄉","口湖鄉","水林鄉"],
+"嘉義市":["東區","西區"],
+"嘉義縣":["太保市","朴子市","布袋鎮","大林鎮","民雄鄉","溪口鄉","新港鄉","六腳鄉","東石鄉","義竹鄉","鹿草鄉","水上鄉","中埔鄉","竹崎鄉","梅山鄉","番路鄉","大埔鄉","阿里山鄉"],
+"屏東縣":["屏東市","潮州鎮","東港鎮","恆春鎮","萬丹鄉","長治鄉","麟洛鄉","九如鄉","里港鄉","鹽埔鄉","高樹鄉","萬巒鄉","內埔鄉","竹田鄉","新埤鄉","枋寮鄉","新園鄉","崁頂鄉","林邊鄉","南州鄉","佳冬鄉","琉球鄉","車城鄉","滿州鄉","枋山鄉","三地門鄉","霧臺鄉","瑪家鄉","泰武鄉","來義鄉","春日鄉","獅子鄉","牡丹鄉"],
+"宜蘭縣":["宜蘭市","羅東鎮","蘇澳鎮","頭城鎮","礁溪鄉","壯圍鄉","員山鄉","冬山鄉","五結鄉","三星鄉","大同鄉","南澳鄉"],
+"花蓮縣":["花蓮市","鳳林鎮","玉里鎮","新城鄉","吉安鄉","壽豐鄉","光復鄉","豐濱鄉","瑞穗鄉","富里鄉","秀林鄉","萬榮鄉","卓溪鄉"],
+"臺東縣":["臺東市","成功鎮","關山鎮","卑南鄉","鹿野鄉","池上鄉","東河鄉","長濱鄉","太麻里鄉","大武鄉","綠島鄉","海端鄉","延平鄉","金峰鄉","達仁鄉","蘭嶼鄉"],
+"澎湖縣":["馬公市","湖西鄉","白沙鄉","西嶼鄉","望安鄉","七美鄉"],
+"金門縣":["金城鎮","金湖鎮","金沙鎮","金寧鄉","烈嶼鄉","烏坵鄉"],
+"連江縣":["南竿鄉","北竿鄉","莒光鄉","東引鄉"]
+};
+const CITY_CENTER = {"臺北市":[25.04,121.55],"新北市":[25.01,121.46],"桃園市":[24.99,121.3],"臺中市":[24.15,120.67],"臺南市":[22.99,120.21],"高雄市":[22.63,120.3],"基隆市":[25.13,121.74],"新竹市":[24.8,120.97],"新竹縣":[24.84,121.0],"苗栗縣":[24.56,120.82],"彰化縣":[24.07,120.54],"南投縣":[23.91,120.69],"雲林縣":[23.71,120.43],"嘉義市":[23.48,120.45],"嘉義縣":[23.46,120.3],"屏東縣":[22.67,120.49],"宜蘭縣":[24.75,121.75],"花蓮縣":[23.99,121.6],"臺東縣":[22.76,121.14],"澎湖縣":[23.57,119.58],"金門縣":[24.44,118.32],"連江縣":[26.15,119.93]};
+const SEX = {male:'公',female:'母',unknown:'不確定'};
+const SIZE = {small:'小型',medium:'中型',large:'大型'};
+const STATUS = {searching:'協尋中',found:'已找到',closed:'已結案'};
+const FOUND_METHODS = ['網友目擊回報','自己在附近找到','收容所／動保處通報','動物醫院掃晶片','FB／LINE 社團貼文','實體海報','鄰居／里長協助','外送員／郵差等看到','自己回家','其他'];
+
+/* ============================================================
+   工具
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const app = $('#app');
+let sb = null;
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
+function fmtDT(s){if(!s)return '';const d=new Date(s);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+function fmtDate(s){if(!s)return '';const d=new Date(s);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`}
+function daysSince(s){return Math.max(1,Math.floor((Date.now()-new Date(s).getTime())/86400000)+1)}
+function hoursAgo(s){return (Date.now()-new Date(s).getTime())/3600000}
+function nowLocalInput(d=new Date()){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
+function caseUrl(id){return CONFIG.SITE_URL+'#/case/'+id}
+function copy(t){navigator.clipboard?.writeText(t).then(()=>toast('已複製')).catch(()=>prompt('請手動複製：',t))}
+function share(title,url){if(navigator.share){navigator.share({title,url}).catch(()=>{})}else copy(url)}
+function cityOptions(sel){return '<option value="">選擇縣市</option>'+Object.keys(TW).map(c=>`<option ${c===sel?'selected':''}>${c}</option>`).join('')}
+function distOptions(city,sel){return '<option value="">選擇區</option>'+(TW[city]||[]).map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('')}
+function qs(h){const i=h.indexOf('?');if(i<0)return{};return Object.fromEntries(new URLSearchParams(h.slice(i+1)))}
+function setTitle(t){document.title=(t?t+' — ':'')+CONFIG.SITE_NAME}
+
+/* 圖片壓縮：最長邊 1280、JPEG 0.82 */
+function compressImage(file){return new Promise((res,rej)=>{const img=new Image();const u=URL.createObjectURL(file);img.onload=()=>{const max=1280;let w=img.width,h=img.height;const r=Math.min(1,max/Math.max(w,h));w=Math.round(w*r);h=Math.round(h*r);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);c.toBlob(b=>{URL.revokeObjectURL(u);b?res(b):rej(new Error('壓縮失敗'))},'image/jpeg',.82)};img.onerror=()=>rej(new Error('無法讀取圖片'));img.src=u})}
+async function uploadPhoto(file,folder){const blob=await compressImage(file);const name=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;const {error}=await sb.storage.from('photos').upload(name,blob,{contentType:'image/jpeg',upsert:false});if(error)throw error;return sb.storage.from('photos').getPublicUrl(name).data.publicUrl}
+
+/* Leaflet 地圖 */
+function makeMap(el,center,zoom=14){const m=L.map(el,{scrollWheelZoom:false}).setView(center,zoom);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(m);return m}
+function marker(latlng,label,cls=''){return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
+/* 地點選取器：回傳 {get(), set(lat,lng)} */
+function pickerMap(el,center){const m=makeMap(el,center,13);let mk=null,val=null;const set=(lat,lng,fly)=>{val={lat,lng};if(!mk){mk=marker([lat,lng],'📍','me').addTo(m)}else mk.setLatLng([lat,lng]);if(fly)m.setView([lat,lng],16)};m.on('click',e=>set(e.latlng.lat,e.latlng.lng));return{map:m,get:()=>val,set,locate(){if(!navigator.geolocation){toast('此裝置不支援定位');return}toast('定位中…');navigator.geolocation.getCurrentPosition(p=>set(p.coords.latitude,p.coords.longitude,true),()=>toast('無法取得定位，請直接點地圖'),{enableHighAccuracy:true,timeout:8000})}}}
+
+/* ============================================================
+   路由
+   ============================================================ */
+window.addEventListener('hashchange',route);
+window.addEventListener('load',init);
+
+function init(){
+  $('#siteName').textContent=CONFIG.SITE_NAME;$('#footName').textContent=CONFIG.SITE_NAME;
+  if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_ANON_KEY){return renderSetup()}
+  sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);
+  route();
+}
+function route(){
+  if(!sb)return;
+  const h=location.hash||'#/';
+  const path=h.split('?')[0];
+  window.scrollTo(0,0);
+  let m;
+  if(path==='#/'||path==='#')return renderHome();
+  if(path==='#/new')return renderNew();
+  if((m=path.match(/^#\/case\/([0-9a-f-]{36})$/)))return renderCase(m[1]);
+  if((m=path.match(/^#\/report\/([0-9a-f-]{36})$/)))return renderReport(m[1]);
+  if((m=path.match(/^#\/manage\/([0-9a-f-]{36})$/)))return renderManage(m[1],qs(h).t);
+  if((m=path.match(/^#\/poster\/([0-9a-f-]{36})$/)))return renderPoster(m[1]);
+  if(path==='#/thanks')return renderThanks();
+  if(path==='#/resources')return renderResources();
+  if(path==='#/about')return renderAbout();
+  if(path==='#/privacy')return renderPrivacy();
+  app.innerHTML='<div class="empty">找不到這個頁面 <br><a href="#/">回首頁</a></div>';
+}
+function renderSetup(){
+  setTitle('初始設定');
+  app.innerHTML=`<div class="setup card"><h1>🐾 還差一步就能上線</h1>
+  <p>請打開 <code>index.html</code>，找到最上方的 <code>CONFIG</code> 區塊，填入：</p>
+  <ol class="steps"><li><code>SUPABASE_URL</code>：Supabase → Project Settings → API → Project URL</li>
+  <li><code>SUPABASE_ANON_KEY</code>：同一頁的 <b>anon public</b> key</li>
+  <li>（選填）<code>ECPAY_URL</code>：綠界實況主收款網址</li></ol>
+  <p class="muted">資料庫結構請用 <code>supabase/schema.sql</code> 在 SQL Editor 執行一次。詳見 SETUP.md。</p></div>`;
+}
+
+/* ============================================================
+   首頁
+   ============================================================ */
+const homeState={city:'',status:'searching',reward:false,q:'',chip:''};
+async function renderHome(){
+  setTitle('');
+  app.innerHTML=`
+  <section class="hero">
+    <h1>走失的狗狗，<b>一起幫牠回家</b></h1>
+    <p class="muted">登記案件 → 網友目擊回報 → 地圖時間軸 → 每天自動比對全台收容所</p>
+    <div class="actions"><a href="#/new" class="btn lg">🐕 我的狗走失了</a><a href="#/resources" class="btn lg ghost">📘 找狗攻略</a></div>
+    <div class="stats" id="stats"></div>
+  </section>
+  <div class="notice red"><b>看到走失狗狗，請勿呼喊、追趕或包圍</b>請拍照，記下時間、位置、移動方向，到案件頁回報目擊。狗狗受驚會跑更遠。</div>
+  <div class="filters">
+    <select id="fCity">${cityOptions(homeState.city)}</select>
+    <select id="fStatus"><option value="searching">協尋中</option><option value="found">已找到</option><option value="">全部</option></select>
+    <input type="text" id="fChip" placeholder="晶片末四碼" maxlength="4" inputmode="numeric" value="${esc(homeState.chip)}">
+    <input type="text" id="fQ" placeholder="關鍵字：名字、品種、毛色、地點" value="${esc(homeState.q)}">
+    <label class="chk" style="margin:0;justify-content:center"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 只看有獎金</label>
+  </div>
+  <div id="list" class="grid"><div class="empty">載入中…</div></div>`;
+  $('#fStatus').value=homeState.status;
+  const run=()=>{homeState.city=$('#fCity').value;homeState.status=$('#fStatus').value;homeState.chip=$('#fChip').value.trim();homeState.q=$('#fQ').value.trim();homeState.reward=$('#fReward').checked;loadList()};
+  ['fCity','fStatus','fReward'].forEach(id=>$('#'+id).addEventListener('change',run));
+  let t;['fChip','fQ'].forEach(id=>$('#'+id).addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,400)}));
+  loadStats();loadList();
+}
+async function loadStats(){
+  const [a,b,c]=await Promise.all([
+    sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching'),
+    sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','found'),
+    sb.from('sightings_public').select('id',{count:'exact',head:true})
+  ]);
+  $('#stats').innerHTML=`<div class="stat"><b>${a.count??0}</b>協尋中</div><div class="stat"><b>${b.count??0}</b>已找到</div><div class="stat"><b>${c.count??0}</b>目擊回報</div>`;
+}
+async function loadList(){
+  const el=$('#list');if(!el)return;
+  let q=sb.from('cases_public').select('*').order('last_activity',{ascending:false}).limit(60);
+  if(homeState.status)q=q.eq('status',homeState.status);
+  if(homeState.city)q=q.eq('lost_city',homeState.city);
+  if(homeState.reward)q=q.gt('reward',0);
+  if(homeState.chip)q=q.eq('chip_last4',homeState.chip);
+  if(homeState.q){const k=`%${homeState.q}%`;q=q.or(`name.ilike.${k},breed.ilike.${k},colour.ilike.${k},lost_place.ilike.${k},lost_district.ilike.${k},features.ilike.${k}`)}
+  const {data,error}=await q;
+  if(error){el.innerHTML=`<div class="empty">載入失敗：${esc(error.message)}</div>`;return}
+  if(!data.length){el.innerHTML='<div class="empty">目前沒有符合的案件</div>';return}
+  el.innerHTML=data.map(cardHTML).join('');
+}
+function cardHTML(c){
+  const ph=c.photos?.[0];
+  const fresh=c.last_seen_at&&hoursAgo(c.last_seen_at)<24;
+  return `<a class="ccard" href="#/case/${c.id}">
+    <div class="ph ${ph?'':'noimg'}" ${ph?`style="background-image:url('${esc(ph)}')"`:''}></div>
+    <div class="b">
+      <div class="t">${esc(c.name)} <span class="tag ${c.status==='searching'?'red':c.status==='found'?'green':'gray'}">${STATUS[c.status]}</span>${fresh?'<span class="tag amber">24h內有目擊</span>':''}${c.reward>0?`<span class="tag blue">獎金 $${c.reward.toLocaleString()}</span>`:''}</div>
+      <div class="m">${esc([c.breed,SEX[c.sex],SIZE[c.size],c.colour].filter(Boolean).join(' · '))}</div>
+      <div class="loc">📍 ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</div>
+      <div class="loc">${c.status==='searching'?`走失第 ${daysSince(c.lost_at)} 天`:fmtDate(c.lost_at)+' 走失'} · 目擊 ${c.sighting_count} 次${c.has_chip?' · 有晶片':''}</div>
+    </div></a>`;
+}
+
+/* ============================================================
+   案件詳情
+   ============================================================ */
+async function renderCase(id){
+  app.innerHTML='<div class="empty">載入中…</div>';
+  const [{data:c,error},{data:sightings},{data:matches}]=await Promise.all([
+    sb.from('cases_public').select('*').eq('id',id).single(),
+    sb.from('sightings_public').select('*').eq('case_id',id).order('seen_at',{ascending:true}),
+    sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false).order('score',{ascending:false})
+  ]);
+  if(error||!c){app.innerHTML='<div class="empty">找不到這個案件<br><a href="#/">回首頁</a></div>';return}
+  sb.rpc('bump_view',{p_id:id}).then(()=>{});
+  setTitle(`尋狗 ${c.name}`);
+  const photos=c.photos||[];
+  const url=caseUrl(id);
+  app.innerHTML=`
+  <div class="pad-bottom">
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+    <span class="status-pill ${c.status}">${STATUS[c.status]}</span>
+    ${c.status==='searching'?`<span class="tag red">走失第 ${daysSince(c.lost_at)} 天</span>`:''}
+    ${c.reward>0?`<span class="tag blue">尋獲獎金 NT$${c.reward.toLocaleString()}</span>`:''}
+    <span class="tag gray">瀏覽 ${c.view_count+1}</span>
+  </div>
+  <h1>尋狗啟事｜${esc(c.name)}</h1>
+  <p class="muted">📍 ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')} · 走失於 ${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}</p>
+  ${c.status==='found'?`<div class="notice green"><b>🎉 ${esc(c.name)} 已經找到了！</b>${c.found_note?esc(c.found_note):'謝謝所有幫忙的人。'}${c.found_method?`<div class="small muted">找回方式：${esc(c.found_method)}</div>`:''}</div>`:''}
+  <div class="detail-head" style="margin-top:12px">
+    <div class="gallery">
+      <div class="main ${photos[0]?'':'noimg'}" id="gMain" ${photos[0]?`style="background-image:url('${esc(photos[0])}')"`:''}></div>
+      ${photos.length>1?`<div class="thumbs">${photos.map((p,i)=>`<div class="${i===0?'on':''}" data-i="${i}" style="background-image:url('${esc(p)}')"></div>`).join('')}</div>`:''}
+    </div>
+    <div>
+      <div class="card">
+        <dl class="kv">
+          <dt>特徵</dt><dd><b>${esc([c.breed||'混種',SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+'犬',c.colour,c.age_text].filter(Boolean).join(' · '))}</b></dd>
+          ${c.features?`<dt>辨識</dt><dd>${esc(c.features)}</dd>`:''}
+          ${c.collar_desc?`<dt>項圈</dt><dd>${esc(c.collar_desc)}</dd>`:''}
+          ${c.temperament?`<dt>個性</dt><dd>${esc(c.temperament)}</dd>`:''}
+          <dt>晶片</dt><dd>${c.has_chip?'有'+(c.chip_last4?`（末四碼 ${esc(c.chip_last4)}）`:''):'無／不確定'}${c.neutered===true?' · 已結紮':c.neutered===false?' · 未結紮':''}</dd>
+          ${c.last_seen_at?`<dt>最新目擊</dt><dd><b style="color:var(--red)">${fmtDT(c.last_seen_at)}</b>（共 ${c.sighting_count} 次）</dd>`:''}
+          ${c.notes?`<dt>補充</dt><dd>${esc(c.notes)}</dd>`:''}
+        </dl>
+      </div>
+      <div class="banner" style="margin-top:10px">看到請勿呼喊、追趕或包圍<small>請拍照，記下時間、位置及方向，立即回報</small></div>
+      ${c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">📞 ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
+      <div class="actionbar">
+        <a class="btn" href="#/report/${id}">👁 回報目擊</a>
+        <button class="btn ghost" id="btnShare">🔗 分享</button>
+        <a class="btn ghost" href="#/poster/${id}">🖼 產生海報</a>
+        <button class="btn ghost" id="btnManage">🔑 飼主管理</button>
+      </div>
+    </div>
+  </div>
+
+  <h2>🗺 目擊位置與時間軸</h2>
+  <div id="map"></div>
+  <div class="timeline" id="tl"></div>
+
+  ${matches&&matches.length?`<h2>🏠 收容所疑似比對 <span class="tag amber">${matches.length}</span></h2>
+  <p class="muted small">系統每天自動比對農業部全台收容所資料（依縣市、毛色、體型、性別）。請飼主親自到所比對，電話確認時請提供晶片號碼。</p>
+  ${matches.map(matchHTML).join('')}`:''}
+
+  <h2>📢 幫忙擴散</h2>
+  <div class="card">
+    <p class="small">複製以下文案，貼到當地協尋社團、LINE 群：</p>
+    <textarea id="shareText" readonly style="min-height:150px">${esc(shareText(c,url))}</textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製文案</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a><a class="btn sm ghost" href="#/resources">找狗攻略</a></div>
+  </div>
+  </div>
+  <div class="sticky-cta"><a class="btn block" href="#/report/${id}">👁 我看到牠了，回報目擊</a></div>`;
+
+  document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${photos[+t.dataset.i]}')`});
+  $('#gMain').onclick=()=>{const u=$('#gMain').style.backgroundImage.slice(5,-2);if(u)lightbox(u)};
+  $('#btnShare').onclick=()=>share(`尋狗啟事：${c.name}（${c.lost_city}${c.lost_district||''}）`,url);
+  $('#btnManage').onclick=()=>{const t=prompt('請輸入登記時取得的管理金鑰：');if(t)location.hash=`#/manage/${id}?t=${t.trim()}`};
+  $('#btnCopyText').onclick=()=>copy($('#shareText').value);
+
+  // 地圖 + 時間軸
+  const pts=[];
+  if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,label:'走',cls:'start',t:c.lost_at,title:'走失地點',where:c.lost_place});
+  sightings.forEach((s,i)=>pts.push({lat:s.lat,lng:s.lng,label:String(i+1),cls:'',t:s.seen_at,title:`目擊 ${i+1}`,where:s.place_text,dir:s.direction,note:s.note,photo:s.photo_url,by:s.reporter_name,onote:s.owner_note}));
+  const center=pts.find(p=>p.lat)?[pts.find(p=>p.lat).lat,pts.find(p=>p.lat).lng]:(CITY_CENTER[c.lost_city]||[23.7,121]);
+  const map=makeMap('map',center,pts.find(p=>p.lat)?15:10);
+  const bounds=[];
+  pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
+  if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]});
+  const tl=$('#tl');
+  if(!pts.length){tl.innerHTML='<p class="muted">還沒有目擊回報。</p>'}
+  else tl.innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div>
+    <div class="when">${esc(p.title)} · ${fmtDT(p.t)}</div>
+    <div class="where">📍 ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
+    ${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
+    ${p.by?`<div class="small muted">回報者：${esc(p.by)}</div>`:''}
+    ${p.photo?`<div class="ph" style="background-image:url('${esc(p.photo)}')" onclick="lightbox('${esc(p.photo)}')"></div>`:''}</div>`).join('');
+}
+function matchHTML(m){
+  return `<div class="match">
+    <div class="ph" ${m.photo_url?`style="background-image:url('${esc(m.photo_url)}')"`:''}></div>
+    <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> <span class="score">相似 ${m.score}</span>
+      <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
+      <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
+      <div class="small">${m.shelter_tel?`📞 <a href="tel:${esc(m.shelter_tel)}">${esc(m.shelter_tel)}</a> · `:''}${esc(m.shelter_address||'')}</div>
+      <a class="small" target="_blank" rel="noopener" href="https://asms.coa.gov.tw/Amlapp/App/AnimalApp.aspx?ID=${encodeURIComponent(m.animal_id)}">在全國收容系統查看 ↗</a>
+    </div></div>`;
+}
+function shareText(c,url){
+  return `【尋狗啟事】${c.name}｜${c.lost_city}${c.lost_district||''}
+走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}
+走失地點：${c.lost_place||c.lost_city+(c.lost_district||'')}
+特徵：${[c.breed||'混種',SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+'犬',c.colour,c.age_text].filter(Boolean).join('、')}${c.features?'；'+c.features:''}
+${c.has_chip?'有晶片'+(c.chip_last4?'（末四碼 '+c.chip_last4+'）':''):'無晶片'}${c.reward>0?'　尋獲獎金 NT$'+c.reward.toLocaleString():''}
+${c.contact_phone?'聯絡：'+c.contact_phone:''}
+⚠️ 看到請勿呼喊、追趕或包圍，請拍照記下時間位置方向，到這裡回報目擊：
+${url}`;
+}
+function lightbox(u){const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<img src="${esc(u)}">`;d.onclick=()=>d.remove();document.body.appendChild(d)}
+
+/* ============================================================
+   登記走失
+   ============================================================ */
+function renderNew(){
+  setTitle('登記走失');
+  app.innerHTML=`<h1>🐕 登記走失狗狗</h1><p class="muted">免費、不用註冊。送出後會給你一組「管理金鑰」，請務必保存，之後用它更新狀態與確認目擊。</p>
+  <form class="card" id="f" autocomplete="on">
+    <h3>基本資料</h3>
+    <label class="f"><span>狗狗名字 <i class="req">*</i></span><input type="text" name="name" required maxlength="30" placeholder="例：狗媽"></label>
+    <div class="row3">
+      <label class="f"><span>性別</span><select name="sex"><option value="">不確定</option><option value="male">公</option><option value="female">母</option></select></label>
+      <label class="f"><span>體型</span><select name="size"><option value="">—</option><option value="small">小型</option><option value="medium" selected>中型</option><option value="large">大型</option></select></label>
+      <label class="f"><span>年齡</span><input type="text" name="age_text" placeholder="例：10歲以上"></label>
+    </div>
+    <div class="row2">
+      <label class="f"><span>品種</span><input type="text" name="breed" placeholder="例：混種、柴犬、米克斯"></label>
+      <label class="f"><span>毛色 <i class="req">*</i></span><input type="text" name="colour" required placeholder="例：黑色、黃色、黑白"></label>
+    </div>
+    <label class="f"><span>辨識特徵（越具體越好）</span><textarea name="features" placeholder="例：眼睛、鼻子周圍及前胸有灰白毛；左耳缺角；走路微跛"></textarea></label>
+    <div class="row2">
+      <label class="f"><span>走失時配戴</span><input type="text" name="collar_desc" placeholder="例：褪色紅項圈、身上有牽繩（可能已脫落）"></label>
+      <label class="f"><span>個性</span><input type="text" name="temperament" placeholder="例：膽小怕人、會躲、親人"></label>
+    </div>
+    <div class="row3">
+      <label class="chk"><input type="checkbox" name="has_chip"> 有晶片</label>
+      <label class="f" style="margin:0"><span>晶片末四碼</span><input type="text" name="chip_last4" maxlength="4" inputmode="numeric" placeholder="1234"></label>
+      <label class="f" style="margin:0"><span>結紮</span><select name="neutered"><option value="">不確定</option><option value="true">已結紮</option><option value="false">未結紮</option></select></label>
+    </div>
+
+    <h3>照片（最多 4 張，第一張會當主圖）</h3>
+    <label class="uploadbtn">📷 選擇照片（可多選）<input type="file" id="photoIn" accept="image/*" multiple></label>
+    <div class="photos-preview" id="pv"></div>
+    <div class="progress hidden" id="pg"><i></i></div>
+
+    <h3>走失資訊</h3>
+    <label class="f"><span>走失時間 <i class="req">*</i></span><input type="datetime-local" name="lost_at" required value="${nowLocalInput()}"></label>
+    <div class="row2">
+      <label class="f"><span>縣市 <i class="req">*</i></span><select name="lost_city" id="city" required>${cityOptions('')}</select></label>
+      <label class="f"><span>鄉鎮市區</span><select name="lost_district" id="dist">${distOptions('')}</select></label>
+    </div>
+    <label class="f"><span>走失地點描述</span><input type="text" name="lost_place" placeholder="例：淡水漁人碼頭、沙崙沙灘附近"></label>
+    <label class="f"><span>在地圖上點選走失位置（建議）</span></label>
+    <div class="map pick" id="pmap"></div>
+    <div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm ghost" id="btnLoc">📍 用我目前位置</button><span class="muted small" style="align-self:center">點地圖任一點即可標記</span></div>
+
+    <h3>聯絡方式</h3>
+    <div class="row2">
+      <label class="f"><span>稱呼</span><input type="text" name="contact_name" placeholder="例：陳小姐"></label>
+      <label class="f"><span>電話 <i class="req">*</i></span><input type="tel" name="contact_phone" required placeholder="0912-345-678"></label>
+    </div>
+    <label class="chk"><input type="checkbox" name="phone_public" checked> 公開電話在案件頁（取消則只透過站內回報聯絡你）</label>
+    <div class="row2">
+      <label class="f"><span>Email（私密，用來寄目擊通知）<i class="req">*</i></span><input type="email" name="contact_email" required placeholder="you@example.com"></label>
+      <label class="f"><span>LINE ID（選填，會公開）</span><input type="text" name="contact_line"></label>
+    </div>
+    <label class="f"><span>尋獲獎金（選填，NT$；由飼主自行支付，本站不經手）</span><input type="number" name="reward" min="0" step="100" placeholder="0"></label>
+    <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：牠對食物反應很好，可用雞肉吸引；有在服藥需盡快找到"></textarea></label>
+    <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+    <p class="muted small">送出即表示同意本站公開上述資料（Email 除外）供協尋使用，找到後請記得回來結案。</p>
+    <button class="btn lg block" type="submit" id="btnSubmit">送出登記</button>
+  </form>`;
+  let photoFiles=[];
+  const pv=$('#pv');
+  $('#photoIn').onchange=e=>{photoFiles=photoFiles.concat([...e.target.files]).slice(0,4);drawPV();e.target.value=''};
+  function drawPV(){pv.innerHTML='';photoFiles.forEach((f,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${URL.createObjectURL(f)}')`;const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{photoFiles.splice(i,1);drawPV()};d.appendChild(b);pv.appendChild(d)})}
+  $('#city').onchange=()=>{$('#dist').innerHTML=distOptions($('#city').value);const c=CITY_CENTER[$('#city').value];if(c)picker.map.setView(c,12)};
+  const picker=pickerMap('pmap',[23.9,121]);picker.map.setZoom(7);
+  $('#btnLoc').onclick=picker.locate;
+  $('#f').onsubmit=async e=>{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    if(fd.get('website'))return;
+    const btn=$('#btnSubmit');btn.disabled=true;btn.textContent='上傳中…';
+    try{
+      const photos=[];const pg=$('#pg');pg.classList.remove('hidden');
+      for(let i=0;i<photoFiles.length;i++){photos.push(await uploadPhoto(photoFiles[i],'cases'));pg.querySelector('i').style.width=((i+1)/photoFiles.length*100)+'%'}
+      const loc=picker.get();
+      const p={name:fd.get('name').trim(),sex:fd.get('sex'),size:fd.get('size'),age_text:fd.get('age_text'),breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),collar_desc:fd.get('collar_desc'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_last4:fd.get('chip_last4'),neutered:fd.get('neutered')||null,photos,lost_at:new Date(fd.get('lost_at')).toISOString(),lost_city:fd.get('lost_city'),lost_district:fd.get('lost_district'),lost_place:fd.get('lost_place'),lost_lat:loc?.lat??null,lost_lng:loc?.lng??null,contact_name:fd.get('contact_name'),contact_phone:fd.get('contact_phone'),phone_public:!!fd.get('phone_public'),contact_email:fd.get('contact_email'),contact_line:fd.get('contact_line'),reward:+(fd.get('reward')||0),notes:fd.get('notes')};
+      const {data,error}=await sb.rpc('create_case',{p});
+      if(error)throw error;
+      try{localStorage.setItem('wh_token_'+data.id,data.token)}catch(_){}
+      renderCreated(data.id,data.token);
+    }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出登記'}
+  };
+}
+function renderCreated(id,token){
+  const manage=`${CONFIG.SITE_URL}#/manage/${id}?t=${token}`;
+  app.innerHTML=`<div class="card"><h1>✅ 登記完成</h1>
+  <div class="notice red"><b>請立刻保存這組管理金鑰（只會顯示這一次）</b>之後更新狀態、確認目擊、結案都要用它。遺失無法補發。</div>
+  <p style="margin-top:12px"><b>管理連結</b>（建議直接加到書籤或傳給自己）</p>
+  <div class="tokenbox" id="mlink">${esc(manage)}</div>
+  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="copy('${esc(manage)}')">複製管理連結</button><button class="btn sm ghost" onclick="copy('${esc(token)}')">只複製金鑰</button></div>
+  <p class="muted small">金鑰也已暫存在這台裝置的瀏覽器，但換裝置就沒有了。</p>
+  <h3 style="margin-top:20px">接下來</h3>
+  <ol class="steps"><li><a href="#/poster/${id}">產生協尋海報</a>，貼到 FB 社團、LINE 群</li><li>分享案件連結：<a href="#/case/${id}">${esc(caseUrl(id))}</a></li><li>系統每天會自動比對全台收容所，有疑似會寄 Email 通知你</li><li>看 <a href="#/resources">找狗攻略</a>，照清單一項一項做</li></ol>
+  <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><a class="btn" href="#/poster/${id}">🖼 產生海報</a><a class="btn ghost" href="#/case/${id}">查看案件頁</a></div></div>`;
+}
+
+/* ============================================================
+   回報目擊
+   ============================================================ */
+async function renderReport(id){
+  const {data:c}=await sb.from('cases_public').select('id,name,lost_city,lost_district,lost_lat,lost_lng,photos,status').eq('id',id).single();
+  if(!c){app.innerHTML='<div class="empty">找不到案件</div>';return}
+  setTitle(`回報目擊 ${c.name}`);
+  app.innerHTML=`<h1>👁 回報目擊：${esc(c.name)}</h1>
+  <div style="display:flex;gap:10px;align-items:center;margin:8px 0 12px">${c.photos?.[0]?`<img src="${esc(c.photos[0])}" style="width:70px;height:70px;border-radius:10px;object-fit:cover">`:''}<div class="small muted">${esc(c.lost_city)}${esc(c.lost_district||'')} · 不確定是不是牠也請回報，飼主會自行判斷。</div></div>
+  <div class="notice red"><b>請勿呼喊、追趕或包圍</b>保持距離觀察，先拍照、記下位置與方向，再填這個表單。</div>
+  <form class="card" id="f" style="margin-top:12px">
+    <label class="f"><span>看到的時間 <i class="req">*</i></span><input type="datetime-local" name="seen_at" required value="${nowLocalInput()}"></label>
+    <label class="f"><span>位置（點地圖，或按「用我目前位置」）<i class="req">*</i></span></label>
+    <div class="map pick" id="pmap"></div>
+    <div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm ghost" id="btnLoc">📍 用我目前位置</button></div>
+    <label class="f"><span>地點描述</span><input type="text" name="place_text" placeholder="例：福容大飯店正門前車道，面對飯店右側直立招牌旁"></label>
+    <div class="row2">
+      <label class="f"><span>移動方向</span><select name="direction"><option value="">不確定</option><option>北</option><option>東北</option><option>東</option><option>東南</option><option>南</option><option>西南</option><option>西</option><option>西北</option><option>停在原地</option></select></label>
+      <label class="f"><span>照片（可選）</span><input type="file" name="photo" accept="image/*"></label>
+    </div>
+    <label class="f"><span>狀況描述</span><textarea name="note" placeholder="例：往沙灘方向走，神情緊張，項圈好像還在；或已被某某收容所帶走"></textarea></label>
+    <div class="row2">
+      <label class="f"><span>你的稱呼</span><input type="text" name="reporter_name" placeholder="例：住附近的王先生"></label>
+      <label class="f"><span>聯絡方式（只有飼主看得到）</span><input type="text" name="reporter_contact" placeholder="電話或 LINE，方便飼主追問"></label>
+    </div>
+    <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+    <button class="btn lg block" type="submit" id="btnSubmit">送出回報</button>
+    <p class="muted small" style="text-align:center">回報會先通知飼主確認後才顯示在地圖上，避免誤導。</p>
+  </form>`;
+  const center=c.lost_lat?[c.lost_lat,c.lost_lng]:(CITY_CENTER[c.lost_city]||[23.9,121]);
+  const picker=pickerMap('pmap',center);
+  if(c.lost_lat)marker([c.lost_lat,c.lost_lng],'走','start').addTo(picker.map).bindPopup('走失地點');
+  $('#btnLoc').onclick=picker.locate;
+  $('#f').onsubmit=async e=>{
+    e.preventDefault();const fd=new FormData(e.target);if(fd.get('website'))return;
+    const loc=picker.get();if(!loc){toast('請在地圖上點選看到的位置');return}
+    const btn=$('#btnSubmit');btn.disabled=true;btn.textContent='送出中…';
+    try{
+      let photo_url=null;const f=fd.get('photo');if(f&&f.size)photo_url=await uploadPhoto(f,'sightings');
+      const {error}=await sb.from('sightings').insert({case_id:id,seen_at:new Date(fd.get('seen_at')).toISOString(),lat:loc.lat,lng:loc.lng,place_text:fd.get('place_text'),direction:fd.get('direction'),note:fd.get('note'),photo_url,reporter_name:fd.get('reporter_name'),reporter_contact:fd.get('reporter_contact')});
+      if(error)throw error;
+      app.innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:60px">🙏</div><h1>謝謝你的回報</h1><p>飼主會收到通知，確認後會顯示在案件地圖上。</p><p class="muted small">如果狗狗還在你視線內：保持距離、不要追、可以慢慢蹲下側身不直視牠，等飼主聯繫。</p><div style="margin-top:16px"><a class="btn" href="#/case/${id}">回案件頁</a></div></div>`;
+    }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出回報'}
+  };
+}
+
+/* ============================================================
+   飼主管理
+   ============================================================ */
+async function renderManage(id,token){
+  if(!token){try{token=localStorage.getItem('wh_token_'+id)}catch(_){}}
+  if(!token){app.innerHTML=`<div class="card"><h1>🔑 飼主管理</h1><p>請輸入登記時取得的管理金鑰：</p><input type="text" id="tk"><button class="btn" style="margin-top:10px" onclick="location.hash='#/manage/${id}?t='+document.getElementById('tk').value.trim()">進入</button></div>`;return}
+  app.innerHTML='<div class="empty">驗證中…</div>';
+  const [{data:c,error},{data:ss},{data:matches}]=await Promise.all([
+    sb.rpc('owner_case',{p_id:id,p_token:token}),
+    sb.rpc('owner_sightings',{p_id:id,p_token:token}),
+    sb.from('shelter_matches').select('*').eq('case_id',id).order('matched_at',{ascending:false})
+  ]);
+  if(error||!c){app.innerHTML=`<div class="card"><h1>金鑰無效</h1><p class="muted">${esc(error?.message||'')}</p><a href="#/case/${id}">回案件頁</a></div>`;return}
+  try{localStorage.setItem('wh_token_'+id,token)}catch(_){}
+  setTitle(`管理 ${c.name}`);
+  const pending=(ss||[]).filter(s=>s.status==='pending');
+  app.innerHTML=`<h1>🔑 管理：${esc(c.name)}</h1>
+  <p class="muted small">管理連結請勿公開。<a href="#/case/${id}">查看公開頁</a> · <a href="#/poster/${id}">產生海報</a></p>
+  ${pending.length?`<div class="notice"><b>有 ${pending.length} 筆目擊待你確認</b>確認後才會顯示在公開地圖上；明顯不是牠的請按「退回」。</div>`:''}
+
+  <h2>狀態</h2>
+  <div class="card">
+    <div class="seg" id="segStatus">${Object.entries(STATUS).map(([k,v])=>`<button type="button" data-v="${k}" class="${c.status===k?'on':''}">${v}</button>`).join('')}</div>
+    <div id="foundBox" class="${c.status==='found'?'':'hidden'}" style="margin-top:12px">
+      <label class="f"><span>怎麼找到的？（會公開，幫助其他飼主）</span><select id="foundMethod"><option value="">選擇</option>${FOUND_METHODS.map(m=>`<option ${c.found_method===m?'selected':''}>${m}</option>`).join('')}</select></label>
+      <label class="f"><span>找到的經過（會公開）</span><textarea id="foundNote">${esc(c.found_note||'')}</textarea></label>
+    </div>
+    <button class="btn" style="margin-top:12px" id="btnStatus">儲存狀態</button>
+  </div>
+
+  <h2>目擊回報 <span class="tag gray">${(ss||[]).length}</span></h2>
+  <div class="timeline">${(ss||[]).length?ss.map((s,i)=>`<div class="tl"><div class="dot ${s.status==='pending'?'pending':s.status==='rejected'?'start':''}">${s.status==='pending'?'?':s.status==='rejected'?'×':'✓'}</div>
+    <div class="when">${fmtDT(s.seen_at)} <span class="tag ${s.status==='pending'?'amber':s.status==='rejected'?'gray':'green'}">${s.status==='pending'?'待確認':s.status==='rejected'?'已退回':'已確認'}</span></div>
+    <div class="where">📍 ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} <a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a></div>
+    ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
+    <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
+    ${s.photo_url?`<div class="ph" style="background-image:url('${esc(s.photo_url)}')" onclick="lightbox('${esc(s.photo_url)}')"></div>`:''}
+    <div class="ops">${s.status!=='confirmed'?`<button class="btn sm green" data-s="${s.id}" data-v="confirmed">✓ 確認是牠</button>`:''}${s.status!=='rejected'?`<button class="btn sm ghost" data-s="${s.id}" data-v="rejected">× 退回</button>`:''}${s.status!=='pending'?`<button class="btn sm ghost" data-s="${s.id}" data-v="pending">改回待確認</button>`:''}</div></div>`).join(''):'<p class="muted">還沒有目擊回報。</p>'}</div>
+
+  <h2>收容所比對 <span class="tag gray">${(matches||[]).length}</span></h2>
+  <p class="muted small">每天凌晨自動比對。相似分數只是粗略篩選，請親自看照片、打電話核對晶片。</p>
+  ${(matches||[]).length?matches.map(m=>`<div style="opacity:${m.dismissed?.5:1}">${matchHTML(m)}${m.dismissed?'':`<div style="text-align:right;margin:-4px 0 10px"><button class="btn sm ghost" data-m="${m.id}">不是牠，隱藏</button></div>`}</div>`).join(''):'<p class="muted">目前沒有疑似資料。新案件通常隔天凌晨才會有第一次比對結果。</p>'}
+
+  <h2>編輯資料</h2>
+  <form class="card" id="fe">
+    <div class="row2"><label class="f"><span>名字</span><input name="name" value="${esc(c.name)}"></label><label class="f"><span>毛色</span><input name="colour" value="${esc(c.colour||'')}"></label></div>
+    <label class="f"><span>辨識特徵</span><textarea name="features">${esc(c.features||'')}</textarea></label>
+    <div class="row2"><label class="f"><span>走失時配戴</span><input name="collar_desc" value="${esc(c.collar_desc||'')}"></label><label class="f"><span>個性</span><input name="temperament" value="${esc(c.temperament||'')}"></label></div>
+    <label class="f"><span>走失地點描述</span><input name="lost_place" value="${esc(c.lost_place||'')}"></label>
+    <div class="row2"><label class="f"><span>稱呼</span><input name="contact_name" value="${esc(c.contact_name||'')}"></label><label class="f"><span>電話</span><input name="contact_phone" value="${esc(c.contact_phone||'')}"></label></div>
+    <label class="chk"><input type="checkbox" name="phone_public" ${c.phone_public?'checked':''}> 公開電話</label>
+    <div class="row2"><label class="f"><span>Email（私密）</span><input name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span>LINE ID</span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
+    <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" step="100"></label>
+    <label class="f"><span>補充</span><textarea name="notes">${esc(c.notes||'')}</textarea></label>
+    <h3>照片</h3>
+    <div class="photos-preview" id="pv"></div>
+    <label class="uploadbtn" style="margin-top:8px">📷 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
+    <button class="btn" type="submit" style="margin-top:12px">儲存資料</button>
+  </form>`;
+  let status=c.status;
+  $('#segStatus').querySelectorAll('button').forEach(b=>b.onclick=()=>{status=b.dataset.v;$('#segStatus').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#foundBox').classList.toggle('hidden',status!=='found')});
+  $('#btnStatus').onclick=async()=>{const p={status};if(status==='found'){p.found_method=$('#foundMethod').value;p.found_note=$('#foundNote').value}const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);toast(status==='found'?'🎉 恭喜！已標記為找到':'已儲存');if(status==='found')setTimeout(()=>location.hash='#/case/'+id,1200)};
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('set_sighting_status',{p_case:id,p_sighting:b.dataset.s,p_token:token,p_status:b.dataset.v});if(error)return toast(error.message);toast('已更新');renderManage(id,token)});
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error)return toast(error.message);renderManage(id,token)});
+  let photos=(c.photos||[]).slice();const pv=$('#pv');
+  const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${u}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
+  $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,4-photos.length)){toast('上傳中…');photos.push(await uploadPhoto(f,'cases'))}drawPV();e.target.value=''};
+  $('#fe').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target);const p={photos};['name','colour','features','collar_desc','temperament','lost_place','contact_name','contact_phone','contact_email','contact_line','notes'].forEach(k=>p[k]=fd.get(k));p.phone_public=!!fd.get('phone_public');p.reward=+(fd.get('reward')||0);const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);toast('已儲存')};
+}
+
+/* ============================================================
+   海報產生（Canvas 1080×1350）
+   ============================================================ */
+async function renderPoster(id){
+  const [{data:c},{data:ss}]=await Promise.all([sb.from('cases_public').select('*').eq('id',id).single(),sb.from('sightings_public').select('seen_at,place_text,direction').eq('case_id',id).order('seen_at',{ascending:false}).limit(1)]);
+  if(!c){app.innerHTML='<div class="empty">找不到案件</div>';return}
+  setTitle('海報');
+  app.innerHTML=`<h1>🖼 協尋海報</h1><p class="muted small">自動產生，長按或按下方按鈕儲存圖片，貼到 FB、LINE、IG 限動。掃 QR Code 就能回報目擊。</p>
+  <div class="posterwrap"><canvas id="pc" width="1080" height="1350"></canvas></div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn" id="btnDl">⬇ 下載海報 PNG</button><a class="btn ghost" href="#/case/${id}">回案件頁</a></div>
+  <div id="qr" class="hidden"></div>`;
+  const url=caseUrl(id);
+  new QRCode($('#qr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
+  await new Promise(r=>setTimeout(r,80));
+  const qrc=$('#qr').querySelector('canvas');
+  const cv=$('#pc'),ctx=cv.getContext('2d');
+  const W=1080,H=1350;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  const red='#c8201f';
+  const font=(w,s)=>`${w} ${s}px "Noto Sans TC",sans-serif`;
+  const wrap=(text,x,y,maxW,lh,maxLines=3)=>{const chars=[...String(text||'')];let line='',n=0;for(const ch of chars){const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);y+=lh;line=ch;if(++n>=maxLines-1){}}else line=t}if(line){ctx.fillText(line,x,y);y+=lh}return y};
+  // 標題
+  ctx.fillStyle='#1b1b1b';ctx.font=font(900,96);ctx.fillText('尋狗啟事',40,120);
+  ctx.fillStyle=red;ctx.font=font(900,96);const nm=c.name.length>4?c.name.slice(0,4):c.name;ctx.fillText(nm,40+ctx.measureText('尋狗啟事 ').width,120);
+  ctx.fillStyle='#1b1b1b';ctx.fillRect(40,145,W-80,6);
+  // 地點列
+  ctx.fillStyle='#1b1b1b';ctx.font=font(900,52);ctx.fillText('📍 '+(c.lost_city+(c.lost_district||'')+'・'+(c.lost_place||'')).slice(0,18),40,225);
+  // 紅色帶
+  ctx.fillStyle=red;ctx.fillRect(40,255,W-80,90);ctx.fillStyle='#fff';ctx.font=font(900,54);
+  const days=daysSince(c.lost_at);ctx.fillText(c.status==='found'?'已經找到了，謝謝大家！':`走失第 ${days} 天，急盼平安回家`,60,320);
+  // 照片
+  const ph=c.photos?.[0];
+  await new Promise(res=>{if(!ph){ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);ctx.font='200px sans-serif';ctx.fillText('🐕',150,740);return res()}const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const s=Math.max(500/im.width,500/im.height);const w=im.width*s,h=im.height*s;ctx.save();ctx.beginPath();ctx.roundRect(40,375,500,500,20);ctx.clip();ctx.drawImage(im,40+(500-w)/2,375+(500-h)/2,w,h);ctx.restore();res()};im.onerror=()=>{ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);res()};im.src=ph});
+  // 右側資訊
+  ctx.fillStyle='#fdeceb';ctx.beginPath();ctx.roundRect(570,375,470,500,20);ctx.fill();
+  ctx.fillStyle='#1b1b1b';ctx.font=font(900,40);let y=440;
+  y=wrap([SIZE[c.size]&&SIZE[c.size]+c.colour,SEX[c.sex],c.age_text].filter(Boolean).join('・')||c.colour,600,y,420,50,2);
+  ctx.font=font(500,30);ctx.fillStyle='#333';y+=6;
+  y=wrap([c.breed,c.has_chip?'有晶片'+(c.chip_last4?' 末四碼'+c.chip_last4:''):null,c.neutered===true?'已結紮':null].filter(Boolean).join('｜'),600,y,420,40,2);
+  y=wrap(c.features,600,y,420,40,4);
+  y=wrap(c.collar_desc,600,y,420,40,2);
+  if(c.reward>0){ctx.fillStyle='#1f5fbf';ctx.font=font(900,34);ctx.fillText(`尋獲獎金 NT$${c.reward.toLocaleString()}`,600,Math.min(y+10,850))}
+  // 最新目擊
+  let y2=925;
+  if(ss&&ss[0]){ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(40,900,W-80,70,12);ctx.fill();ctx.fillStyle='#fff';ctx.font=font(900,34);ctx.fillText(`最新目擊｜${fmtDT(ss[0].seen_at)}  ${(ss[0].place_text||'').slice(0,16)}${ss[0].direction?'  往'+ss[0].direction:''}`,60,948);y2=1000}
+  else{ctx.fillStyle='#333';ctx.font=font(700,34);ctx.fillText(`走失：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`,40,948);y2=1000}
+  // 警語
+  ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(40,y2,W-80,90,12);ctx.fill();ctx.fillStyle='#fff';ctx.font=font(900,48);ctx.fillText('看到請勿呼喊、追趕或包圍',60,y2+62);
+  // 電話 + QR
+  ctx.fillStyle='#1b1b1b';ctx.font=font(500,30);ctx.fillText('請拍照，記下時間、位置及方向，掃 QR 回報目擊',40,y2+140);
+  if(c.contact_phone){ctx.fillStyle=red;ctx.font=font(900,92);ctx.fillText('📞 '+c.contact_phone,40,y2+250)}
+  else{ctx.fillStyle=red;ctx.font=font(900,56);ctx.fillText('請掃 QR 線上回報',40,y2+230)}
+  if(qrc){ctx.fillStyle='#fff';ctx.fillRect(820,y2+110,220,220);ctx.drawImage(qrc,820,y2+110,220,220)}
+  ctx.fillStyle='#8a8a8a';ctx.font=font(500,24);ctx.fillText(`${CONFIG.SITE_NAME} ${url.replace(/^https?:\/\//,'')}`,40,H-30);
+  $('#btnDl').onclick=()=>{const a=document.createElement('a');a.download=`尋狗啟事-${c.name}.png`;a.href=cv.toDataURL('image/png');a.click()};
+}
+
+/* ============================================================
+   感謝牆
+   ============================================================ */
+async function renderThanks(){
+  setTitle('贊助感謝牆');
+  const {data}=await sb.from('sponsors_public').select('*').limit(300);
+  const byMonth={};(data||[]).forEach(s=>{const k=s.sponsored_on.slice(0,7).replace('-','/');(byMonth[k]=byMonth[k]||[]).push(s)});
+  app.innerHTML=`<h1>🙏 贊助感謝牆</h1>
+  <div class="card">
+    <p>${esc(CONFIG.SITE_NAME)} 是免費的協尋平台，沒有廣告。伺服器、網域與每日比對都是站長自費。如果這個網站幫上了忙，歡迎請站長喝杯咖啡，讓它繼續運作。</p>
+    ${CONFIG.ECPAY_URL?`<a class="btn lg" target="_blank" rel="noopener" href="${esc(CONFIG.ECPAY_URL)}">☕ 贊助本站（綠界）</a><p class="muted small">付款頁可填暱稱與留言，會顯示在這面牆上（金額預設不公開）。</p>`:'<p class="muted">贊助連結尚未設定。</p>'}
+    <p class="muted small">本頁為自願性贊助，非商品交易、非公益勸募，不開立捐款收據。尋獲獎金由飼主與尋獲者自行處理，本站不經手任何款項。</p>
+  </div>
+  <h2>感謝名單</h2>
+  ${Object.keys(byMonth).length?Object.entries(byMonth).map(([m,list])=>`<h3>${m}</h3><div class="card" style="padding:4px 18px">${list.map(s=>`<div class="sponsor"><div class="av">${esc(s.nickname.slice(0,1))}</div><div class="b"><b>${esc(s.nickname)}</b>${s.amount?` <span class="tag blue">NT$${s.amount.toLocaleString()}</span>`:''}<div class="msg">${esc(s.message||'')}</div></div><div class="d">${esc(s.sponsored_on.slice(5).replace('-','/'))}</div></div>`).join('')}</div>`).join(''):'<p class="muted">還沒有贊助紀錄。</p>'}`;
+}
+
+/* ============================================================
+   找狗攻略 / 資源
+   ============================================================ */
+function renderResources(){
+  setTitle('找狗攻略');
+  const cityKeys=Object.keys(TW);
+  app.innerHTML=`<h1>📘 找狗攻略</h1><p class="muted">依成功率排序。前 48 小時最關鍵，請一項一項做。</p>
+  <h2>第一步：黃金 48 小時</h2>
+  <div class="card"><ul class="checklist">
+    <li><span class="n">1</span><div><b>回到走失點附近，安靜地找</b><div class="d">高齡、膽小的狗通常躲在走失點 1 公里內的草叢、車底、工地。清晨 5–7 點與傍晚最容易出來。帶牠的毯子或你穿過的衣服放在走失點留氣味。</div></div></li>
+    <li><span class="n">2</span><div><b>在本站登記，產生海報</b><div class="d">案件頁有 QR Code，路人掃了就能回報目擊，比抄電話快。</div></div></li>
+    <li><span class="n">3</span><div><b>通報動保處與收容所，留晶片號碼</b><div class="d">被路人送到收容所的狗，飼主常常不知道。本站每天會自動比對，但親自打電話更快。</div></div></li>
+    <li><span class="n">4</span><div><b>到農業部寵物登記網做「遺失申報」</b><div class="d">任何動物醫院、收容所掃到晶片都會看到走失註記。<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報 ↗</a></div></div></li>
+    <li><span class="n">5</span><div><b>FB 協尋社團 + LINE 社區群</b><div class="d">用本站案件頁的「複製文案」直接貼。找走失地點那個區的社團，不要只貼全台大社團。</div></div></li>
+    <li><span class="n">6</span><div><b>實體海報：半徑 2 公里</b><div class="d">便利商店、動物醫院、公園、里長辦公室、宮廟、公車站。海報用本站產生的版本，字要大，電話要大。</div></div></li>
+    <li><span class="n">7</span><div><b>問「天天在巷弄跑的人」</b><div class="d">外送員、郵差、垃圾車清潔隊、早餐店、保全。他們看到走失狗的機率比任何人高。</div></div></li>
+    <li><span class="n">8</span><div><b>請里長協助調監視器、廣播</b><div class="d">里長可協助調閱里內監視器確認方向；鄉下宮廟廣播很有效。</div></div></li>
+    <li><span class="n">9</span><div><b>1999 問清潔隊／環保局</b><div class="d">很殘酷但必要：路殺動物由清潔隊處理，問一下可以避免白找。</div></div></li>
+    <li><span class="n">10</span><div><b>附近動物醫院留資料</b><div class="d">拾獲者最常先帶去醫院掃晶片。</div></div></li>
+  </ul></div>
+
+  <h2>看到走失狗該怎麼做</h2>
+  <div class="card">
+    <p><b>不要追、不要叫、不要圍。</b>走失狗處於驚恐狀態，被追會跑更遠、衝到馬路。</p>
+    <ul style="padding-left:20px;font-size:15px;margin:6px 0"><li>保持距離，先拍照、記時間、位置、方向</li><li>側身蹲低、不直視牠、不伸手，可以丟食物但不要靠近</li><li>立刻回報到案件頁或打飼主電話</li><li>若牠願意靠近且有項圈，可試著用牽繩，但不勉強</li><li>真的抓到了：送附近動物醫院掃晶片，或通知動保處</li></ul>
+  </div>
+
+  <h2>官方資源</h2>
+  <div class="res-grid">
+    <div class="res"><b>農業部 寵物登記管理資訊網</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報</a>（有晶片一定要做）</li><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/">晶片查詢 / 遺失啟事</a></li></ul></div>
+    <div class="res"><b>全國動物收容管理系統</b><ul><li><a target="_blank" rel="noopener" href="https://asms.coa.gov.tw/Amlapp/App/Default.aspx">查看各收容所拾獲動物</a></li><li>本站每日自動比對來源</li></ul></div>
+    <div class="res"><b>各縣市動保處</b><ul><li>市話 1999 轉動保處（多數縣市）</li><li>或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
+    <div class="res"><b>民間協尋平台（多貼一處多一分機會）</b><ul><li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li><li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li><li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li><li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li><li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各縣市 FB 協尋社團清單</a></li></ul></div>
+  </div>
+  <h2>找回統計</h2><div class="card" id="foundStats"><p class="muted">載入中…</p></div>`;
+  $('#selCity').onchange=()=>{const c=$('#selCity').value;$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
+  sb.from('found_stats').select('*').then(({data})=>{const el=$('#foundStats');if(!data||!data.length){el.innerHTML='<p class="muted">等第一批案件結案後，這裡會顯示「哪種方法最常找回」。</p>';return}const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:#eee;border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
+}
+function renderAbout(){
+  setTitle('關於');
+  app.innerHTML=`<h1>關於 ${esc(CONFIG.SITE_NAME)}</h1><div class="card">
+  <p>這是一個免費、無廣告的走失狗狗協尋平台。我們相信找狗最有效的方式是：<b>讓目擊資訊快速集中到一張地圖上</b>，並且<b>主動比對收容所</b>。</p>
+  <h3>本站做什麼</h3><ul style="padding-left:20px"><li>飼主免註冊登記案件，產生含 QR Code 的海報</li><li>網友回報目擊：時間、位置、方向、照片，飼主確認後上地圖</li><li>每天自動比對農業部全台收容所資料，疑似立即 Email 通知</li><li>統計找回方式，讓後來的人知道什麼最有效</li></ul>
+  <h3>本站不做什麼</h3><ul style="padding-left:20px"><li>不經手任何款項：尋獲獎金由飼主與尋獲者自行處理</li><li>不公開回報者聯絡方式：只有飼主看得到</li><li>不保證比對正確：收容所比對只是粗略篩選，請親自確認</li></ul>
+  ${CONFIG.CONTACT_EMAIL?`<p>聯絡站長：<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a></p>`:''}
+  <p class="muted small">BUILD ${BUILD}</p></div>`;
+}
+function renderPrivacy(){
+  setTitle('隱私聲明');
+  app.innerHTML=`<h1>隱私聲明</h1><div class="card">
+  <p>飼主登記的 <b>Email 不會公開</b>，僅用於寄送目擊與比對通知。電話可自行選擇是否公開。</p>
+  <p>目擊回報者留的聯絡方式<b>只有該案件飼主看得到</b>，不會顯示在公開頁面。</p>
+  <p>照片與案件內容會公開在本站供協尋使用，並可能被分享到社群平台。結案後資料仍保留作為統計與參考；若需刪除請聯絡站長。</p>
+  <p>本站使用 Supabase 儲存資料，OpenStreetMap 提供地圖。使用瀏覽器定位功能前會徵求你的同意。</p></div>`;
+}
+</script>
+</body>
+</html>
