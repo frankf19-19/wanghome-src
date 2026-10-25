@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.3.0 -->
+<!-- BUILD v1.3.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -264,7 +264,7 @@ footer a{color:var(--ink-2);margin:0 6px}
     <a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料· 地圖 © OpenStreetMap 貢獻者</div>
-  <div class="small" style="margin-top:4px">BUILD v1.3.0</div>
+  <div class="small" style="margin-top:4px">BUILD v1.3.1</div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -281,7 +281,7 @@ const CONFIG = {
   CONTACT_EMAIL: '',         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.3.0';
+const BUILD = 'v1.3.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1151,13 +1151,13 @@ async function renderPoster(id){
   ctx.fillStyle=red;ctx.font=font(900,96);const nm=c.name.length>4?c.name.slice(0,4):c.name;ctx.fillText(nm,40+ctx.measureText(PT+' ').width,120);
   ctx.fillStyle='#1b1b1b';ctx.fillRect(40,145,W-80,6);
   // 地點列
-  ctx.fillStyle='#1b1b1b';ctx.font=font(900,52);ctx.fillText('📍 '+(c.lost_city+(c.lost_district||'')+'・'+(c.lost_place||'')).slice(0,18),40,225);
+  ctx.fillStyle='#1b1b1b';ctx.font=font(900,52);ctx.fillText(('📍 '+c.lost_city+(c.lost_district||'')+(c.lost_place?'・'+c.lost_place:'')).slice(0,19),40,225);
   // 紅色帶
   ctx.fillStyle=red;ctx.fillRect(40,255,W-80,90);ctx.fillStyle='#fff';ctx.font=font(900,54);
   const days=daysSince(c.lost_at);ctx.fillText(c.status==='found'?'已經找到了，謝謝大家！':`走失第 ${days} 天，急盼平安回家`,60,320);
   // 照片
   const ph=c.photos?.[0];
-  await new Promise(res=>{if(!ph){ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);ctx.font='200px sans-serif';ctx.fillText('🐕',150,740);return res()}const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const s=Math.max(500/im.width,500/im.height);const w=im.width*s,h=im.height*s;ctx.save();ctx.beginPath();ctx.roundRect(40,375,500,500,20);ctx.clip();ctx.drawImage(im,40+(500-w)/2,375+(500-h)/2,w,h);ctx.restore();res()};im.onerror=()=>{ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);res()};im.src=ph});
+  await new Promise(res=>{if(!ph){ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);ctx.font='200px sans-serif';ctx.fillText(sp(c.species).emoji,150,740);return res()}const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const s=Math.max(500/im.width,500/im.height);const w=im.width*s,h=im.height*s;ctx.save();ctx.beginPath();ctx.roundRect(40,375,500,500,20);ctx.clip();ctx.drawImage(im,40+(500-w)/2,375+(500-h)/2,w,h);ctx.restore();res()};im.onerror=()=>{ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);res()};im.src=ph});
   // 右側資訊
   ctx.fillStyle='#fdeceb';ctx.beginPath();ctx.roundRect(570,375,470,500,20);ctx.fill();
   ctx.fillStyle='#1b1b1b';ctx.font=font(900,40);let y=440;
@@ -1178,7 +1178,7 @@ async function renderPoster(id){
   if(c.contact_phone){ctx.fillStyle=red;ctx.font=font(900,92);ctx.fillText('📞 '+c.contact_phone,40,y2+250)}
   else{ctx.fillStyle=red;ctx.font=font(900,56);ctx.fillText('請掃 QR 線上回報',40,y2+230)}
   if(qrc){ctx.fillStyle='#fff';ctx.fillRect(820,y2+110,220,220);ctx.drawImage(qrc,820,y2+110,220,220)}
-  ctx.fillStyle='#8a8a8a';ctx.font=font(500,24);ctx.fillText(`${CONFIG.SITE_NAME} ${url.replace(/^https?:\/\//,'')}`,40,H-30);
+  ctx.fillStyle='#8a8a8a';ctx.font=font(500,24);ctx.fillText(`${CONFIG.SITE_NAME}・${CONFIG.SITE_URL.replace(/^https?:\/\//,'').replace(/\/$/,'')}　掃 QR 看最新目擊`,40,H-30);
   $('#btnDl').onclick=()=>{const a=document.createElement('a');a.download=`${sp(c.species).poster}-${c.name}.png`;a.href=cv.toDataURL('image/png');a.click()};
 }
 
