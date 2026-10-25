@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.2.0 -->
+<!-- BUILD v3.2.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -839,7 +839,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.2.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.2.1</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -859,7 +859,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.2.0';
+const BUILD = 'v3.2.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1013,6 +1013,23 @@ function renderChrome(path,h){
   const due=path==='#/health'&&qs(h).due;
   $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${(r===rk&&!due)||(due&&r==='due')?'on':''}">${inner}</a>`).join('');
 }
+
+// ---- 導覽：redirect 不留歷史、彈出視窗可用「上一頁」關閉、返回時恢復捲動位置 ----
+function goReplace(h){location.replace(location.pathname+location.search+h)}
+try{history.scrollRestoration='manual'}catch(_){}
+const scrollMem={};let curHash=location.hash||'#/',navByPop=false,overlayOpen=null;
+window.addEventListener('popstate',e=>{
+  if(overlayOpen){const o=overlayOpen;overlayOpen=null;o.remove();return}   // 上一頁先關掉視窗
+  navByPop=true;
+});
+function openOverlay(el){
+  closeOverlays();document.body.appendChild(el);overlayOpen=el;
+  try{history.pushState({overlay:1},'',location.href)}catch(_){}
+}
+function closeOverlay(el){if(overlayOpen===el){overlayOpen=null;el.remove();try{history.back()}catch(_){}}else el.remove()}
+function closeOverlays(){document.querySelectorAll('.lightbox').forEach(x=>x.remove());overlayOpen=null}
+function restoreScroll(y){let n=0;const t=()=>{if(document.documentElement.scrollHeight>=y+innerHeight*0.5||n>40){window.scrollTo(0,y);return}n++;setTimeout(t,50)};t()}
+window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
 function route(){
   if(!sb)return;
   clearInterval(refreshTimer);refreshTimer=null;
@@ -1020,7 +1037,9 @@ function route(){
   const path=h.split('?')[0];
   renderChrome(path,h);
   document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
-  window.scrollTo(0,0);
+  closeOverlays();
+  const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;curHash=newHash;
+  if(wasPop&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
   if(path==='#/'||path==='#')return renderHome();
@@ -1197,7 +1216,7 @@ async function renderHealthAdd(){
   setTitle('新增紀錄');
   if(!requireLogin('請先登入，才能記錄毛孩健康'))return;
   const {data:pets}=await sb.from('pets').select('id,name,species,photos').order('created_at');
-  if(!pets||!pets.length){location.hash='#/pet/new';return}
+  if(!pets||!pets.length){goReplace('#/pet/new');return}
   if(pets.length===1){location.replace('#/pet/'+pets[0].id+'/record/new');return}
   app.innerHTML=`<h1>新增紀錄</h1><p class="muted">要記錄哪一隻？</p>
   <div class="pickpet">${pets.map(x=>`<a href="#/pet/${x.id}/record/new"><span class="pp-ph ${x.photos?.[0]?'':'noimg'}" ${x.photos?.[0]?`style="background-image:url('${esc(x.photos[0])}')"`:''}>${x.photos?.[0]?'':sp(x.species).emoji}</span><b>${esc(x.name)}</b></a>`).join('')}</div>`;
@@ -1556,7 +1575,7 @@ ${c.contact_phone?'聯絡：'+c.contact_phone:''}
 ⚠️ 看到請勿呼喊、追趕或包圍，請拍照記下時間位置方向，到這裡回報目擊：
 ${url}`;
 }
-function lightbox(u){const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<img src="${esc(u)}">`;d.onclick=()=>d.remove();document.body.appendChild(d)}
+function lightbox(u){const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<img src="${esc(u)}" alt="">`;d.onclick=()=>closeOverlay(d);openOverlay(d)}
 
 /* ============================================================
    登記走失
@@ -1795,7 +1814,7 @@ async function renderManage(id,token){
   if($('#btnClaim'))$('#btnClaim').onclick=async()=>{const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error)return toast(error.message);toast('✅ 已綁定');renderManage(id,token)};
   let status=c.status;
   $('#segStatus').querySelectorAll('button').forEach(b=>b.onclick=()=>{status=b.dataset.v;$('#segStatus').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#foundBox').classList.toggle('hidden',status!=='found')});
-  $('#btnStatus').onclick=async()=>{const p={status};if(status==='found'){p.found_method=$('#foundMethod').value;p.found_note=$('#foundNote').value}const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);toast(status==='found'?'🎉 恭喜！已標記為找到':'已儲存');if(status==='found')setTimeout(()=>location.hash='#/case/'+id,1200)};
+  $('#btnStatus').onclick=async()=>{const p={status};if(status==='found'){p.found_method=$('#foundMethod').value;p.found_note=$('#foundNote').value}const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);toast(status==='found'?'🎉 恭喜！已標記為找到':'已儲存');if(status==='found')setTimeout(()=>goReplace('#/case/'+id),1200)};
   document.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('set_sighting_status',{p_case:id,p_sighting:b.dataset.s,p_token:token,p_status:b.dataset.v});if(error)return toast(error.message);toast('已更新');renderManage(id,token)});
   document.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error)return toast(error.message);renderManage(id,token)});
   let photos=(c.photos||[]).slice();const pv=$('#pv');
@@ -1846,7 +1865,7 @@ function callScript(q){
 }
 async function quickReport(){
   const box=$('#quick');
-  if(!navigator.geolocation){toast('這支手機不支援定位，請用下方完整通報');location.hash='#/injured';return}
+  if(!navigator.geolocation){toast('這支手機不支援定位，請用下方完整通報');document.getElementById('fullForm')?.scrollIntoView({behavior:'smooth'});return}
   box.innerHTML=`<div class="q-wait">${ic("pin")} 正在定位…（請允許瀏覽器使用位置）</div>`;
   let pos;try{pos=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:true,timeout:15000,maximumAge:30000}))}
   catch(_){box.innerHTML=`<div class="notice red"><b>定位失敗</b>請確認已允許瀏覽器使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;$('#btnQuick').onclick=quickReport;return}
@@ -2096,7 +2115,7 @@ async function renderFound(id){
 }
 async function renderFoundManage(id,token){
   if(!token){try{token=localStorage.getItem('wh_ftoken_'+id)}catch(_){}}
-  if(!token&&!me()){location.hash='#/found/'+id;return}
+  if(!token&&!me()){goReplace('#/found/'+id);return}
   token=token||null;
   const {data:f,error}=await sb.rpc('owner_found',{p_id:id,p_token:token});
   if(error||!f){app.innerHTML=`<div class="card"><h1>${token?'金鑰無效':'這不是你的通報'}</h1><a href="#/found/${id}">回通報頁</a></div>`;return}
@@ -2149,13 +2168,13 @@ function openReport(type,id){
     <label class="f"><span>補充說明（選填）</span><textarea id="rn" maxlength="500" style="min-height:70px"></textarea></label>
     <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" id="rs">送出檢舉</button><button class="btn ghost" id="rc">取消</button></div>
   </div>`;
-  d.onclick=()=>d.remove();document.body.appendChild(d);
-  d.querySelector('#rc').onclick=()=>d.remove();
+  d.onclick=()=>closeOverlay(d);openOverlay(d);
+  d.querySelector('#rc').onclick=()=>closeOverlay(d);
   d.querySelector('#rs').onclick=async()=>{
     const reason=d.querySelector('input[name=rr]:checked').value;
     const {error}=await sb.rpc('report_content',{p_type:type,p_id:id,p_reason:reason,p_note:d.querySelector('#rn').value||null});
     if(error)return toast('送出失敗：'+error.message);
-    d.remove();toast('謝謝，已收到檢舉');
+    closeOverlay(d);toast('謝謝，已收到檢舉');
   };
 }
 function staleTag(c){
@@ -2170,7 +2189,7 @@ function staleTag(c){
 const REASON_TEXT=Object.fromEntries(REPORT_REASONS);
 async function renderAdmin(){
   setTitle('管理後台');
-  if(!me()){location.hash='#/login';return}
+  if(!me()){goReplace('#/login');return}
   const {data:isA}=await sb.rpc('is_admin');
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
   const showAll=qs(location.hash).all==='1';
@@ -2209,7 +2228,7 @@ async function initAuth(){
   }
   sb.auth.onAuthStateChange((ev,s)=>{
     const was=!!session;session=s;updateAuthUI();
-    if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash==='#/login')location.hash='#/me'}
+    if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash==='#/login'){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)}}
     if(ev==='SIGNED_OUT'){toast('已登出')}
   });
   updateAuthUI();
@@ -2223,7 +2242,7 @@ function updateAuthUI(){
 function requireLogin(msg){
   if(me())return true;
   try{localStorage.setItem('wh_return',location.hash||'#/')}catch(_){}
-  toast(msg||'請先登入');location.hash='#/login';return false;
+  toast(msg||'請先登入');goReplace('#/login');return false;
 }
 // ---- 日曆 ----
 function calUrl(token){return `${CONFIG.SUPABASE_URL}/functions/v1/pet-calendar?t=${token}`}
@@ -2287,7 +2306,7 @@ async function getProfile(){
 
 function renderLogin(){
   setTitle('登入');
-  if(me()){location.hash='#/me';return}
+  if(me()){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back);return}
   app.innerHTML=`<div class="card login-card" style="max-width:520px;margin:20px auto">
     <img class="login-duo" src="duo.svg" alt="" width="150" height="102">
     <h1>登入／註冊</h1>
@@ -2321,7 +2340,7 @@ function renderLogin(){
 
 async function renderMe(){
   setTitle('我的');
-  if(!me()){location.hash='#/login';return}
+  if(!me()){goReplace('#/login');return}
   app.innerHTML='<div class="empty">載入中…</div>';
   const [prof,{data:cs},{data:fs},{data:pend},{data:fl},{data:pets},{data:dues}]=await Promise.all([
     getProfile(), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
@@ -2363,7 +2382,7 @@ async function renderMe(){
     </div>
     <button class="btn" style="margin-top:14px">儲存設定</button>
   </form>`;
-  $('#btnOut').onclick=async()=>{await sb.auth.signOut();location.hash='#/'};
+  $('#btnOut').onclick=async()=>{await sb.auth.signOut();goReplace('#/')};
   const picker=pickerMap('hmap',p.home_lat?[p.home_lat,p.home_lng]:[23.9,121]);
   if(p.home_lat)picker.set(p.home_lat,p.home_lng);else picker.map.setZoom(7);
   $('#btnHome').onclick=picker.locate;
@@ -2427,9 +2446,9 @@ async function renderPet(id){
     const row={species,name:fd.get('name').trim(),sex:fd.get('sex')||null,size:fd.get('size')||null,birthday:fd.get('birthday')||null,breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_no:fd.get('chip_no'),neutered:fd.get('neutered')===''?null:fd.get('neutered')==='true',notes:fd.get('notes'),photos,updated_at:new Date().toISOString()};
     const {data:saved,error}=id==='new'?await sb.from('pets').insert(row).select('id').single():await sb.from('pets').update(row).eq('id',id).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
-    toast('已儲存');location.hash='#/pet/'+(saved?.id||id);
+    toast('已儲存');goReplace('#/pet/'+(saved?.id||id));
   };
-  if(id!=='new')$('#btnDel').onclick=async()=>{if(!confirm(`確定刪除 ${p.name} 的寵物檔案？`))return;const {error}=await sb.from('pets').delete().eq('id',id);if(error)return toast(error.message);location.hash='#/health'};
+  if(id!=='new')$('#btnDel').onclick=async()=>{if(!confirm(`確定刪除 ${p.name} 的寵物檔案？`))return;const {error}=await sb.from('pets').delete().eq('id',id);if(error)return toast(error.message);goReplace('#/health')};
 }
 async function toggleFollow(caseId,btn){
   if(!requireLogin('追蹤案件需要登入'))return;
@@ -2555,7 +2574,7 @@ async function renderPetView(id){
       ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
-  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{location.hash=`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:'')});
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderPetView(id)});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
   bindMedSlots(()=>renderPetView(id));
@@ -2612,9 +2631,9 @@ async function renderRecord(petId,recId){
     if(error)return toast('儲存失敗：'+error.message);
     const dueChanged=row.next_due&&!row.done&&(recId==='new'||row.next_due!==r.next_due);
     if(dueChanged&&saved?.id){try{sessionStorage.setItem('wh_cal_prompt',saved.id)}catch(_){}}
-    toast('已儲存');location.hash='#/pet/'+petId;
+    toast('已儲存');goReplace('#/pet/'+petId);
   };
-  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('確定刪除這筆紀錄？'))return;if(files.length)await sb.storage.from('pet-private').remove(files);const {error}=await sb.from('pet_records').delete().eq('id',recId);if(error)return toast(error.message);location.hash='#/pet/'+petId};
+  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('確定刪除這筆紀錄？'))return;if(files.length)await sb.storage.from('pet-private').remove(files);const {error}=await sb.from('pet_records').delete().eq('id',recId);if(error)return toast(error.message);goReplace('#/pet/'+petId)};
 }
 
 
@@ -2705,9 +2724,9 @@ async function renderMed(petId,medId){
     if(!row.name)return toast('請填名稱');
     const {error}=medId==='new'?await sb.from('pet_meds').insert(row):await sb.from('pet_meds').update(row).eq('id',medId);
     if(error)return toast('儲存失敗：'+error.message);
-    toast('已儲存');location.hash='#/pet/'+petId;
+    toast('已儲存');goReplace('#/pet/'+petId);
   };
-  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!confirm('確定刪除？給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。'))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);location.hash='#/pet/'+petId};
+  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!confirm('確定刪除？給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。'))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);goReplace('#/pet/'+petId)};
 }
 async function renderPetPrint(id){
   if(!requireLogin())return;
