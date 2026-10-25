@@ -17,12 +17,12 @@
   GMAIL_APP_PASSWORD        Gmail 應用程式密碼（16 碼）
   MOA_API_URL               （選填）覆蓋農業部 API 網址
 """
-import os, sys, json, smtplib, datetime as dt, urllib.request, urllib.parse, re
+import os, sys, json, smtplib, datetime as dt, urllib.request, urllib.parse, urllib.error, re
 from email.mime.text import MIMEText
 from email.header import Header
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
-SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "")
+SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "").strip().strip('"').strip("'")
 SITE_URL     = os.environ.get("SITE_URL", "").rstrip("/") + "/"
 GMAIL_USER   = os.environ.get("GMAIL_USER", "")
 GMAIL_PASS   = os.environ.get("GMAIL_APP_PASSWORD", "")
@@ -46,9 +46,16 @@ def sb(method, path, body=None, params=None, prefer=None):
         req.add_header("Authorization", f"Bearer {SERVICE_KEY}")
     req.add_header("Content-Type", "application/json")
     req.add_header("Prefer", prefer or "return=representation")
-    with urllib.request.urlopen(req, timeout=60) as r:
-        t = r.read().decode()
-        return json.loads(t) if t else None
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            t = r.read().decode()
+            return json.loads(t) if t else None
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")[:300]
+        kind = "sb_secret" if SERVICE_KEY.startswith("sb_secret_") else "sb_publishable(錯誤：這是公開金鑰)" if SERVICE_KEY.startswith("sb_publishable_") else "JWT" if SERVICE_KEY.startswith("eyJ") else "未知格式"
+        print(f"Supabase 回應 {e.code}：{body}")
+        print(f"金鑰檢查：類型={kind}，長度={len(SERVICE_KEY)}，含遮罩符號={'•' in SERVICE_KEY or '*' in SERVICE_KEY}")
+        raise
 
 # ---------------------------------------------------------------- 農業部資料
 def fetch_moa():
