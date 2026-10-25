@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.6.2 -->
+<!-- BUILD v3.6.3 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -803,9 +803,9 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 .recent a .ph,.reunite .ph{overflow:hidden}.recent a .ph img,.reunite .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
-/* v3.6.2 獎金移到照片左下，不再蓋住「走失第 N 天」 */
+/* v3.6.3 獎金移到照片左下，不再蓋住「走失第 N 天」 */
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* v3.6.2 中文斷行：不讓最後一行只剩一兩個字 */
+/* v3.6.3 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
 /* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
 body :is(p,li,div,small,label,span,dd,td,h1,h2,h3,h4,button,a){text-wrap:balance}
@@ -816,12 +816,12 @@ input,textarea,select{text-wrap:wrap}
 .hint.long{white-space:normal;text-wrap:pretty}
 .hint::before{content:'（'}.hint::after{content:'）'}
 .nw{white-space:nowrap}
-/* v3.6.2 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
+/* v3.6.3 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
 .row2,.row3{align-items:end}
 @media (max-width:520px){.row2:has(.hint),.row2:has(input[type=email]),.row2:has(input[name=reporter_contact]){grid-template-columns:1fr}}
 .hint.long{display:block;margin:3px 0 0;white-space:normal}
 .hint.long::before,.hint.long::after{content:none}
-/* v3.6.2 回報完成頁：大按鈕直接聯絡飼主 */
+/* v3.6.3 回報完成頁：大按鈕直接聯絡飼主 */
 .done-card{text-align:center;padding:32px 20px}
 .done-card .done-ic{width:64px;height:64px;margin:0 auto 8px;color:var(--green-fill)}.done-card .done-ic svg{width:100%;height:100%}
 .bigacts{display:grid;gap:10px;margin:14px 0}
@@ -829,8 +829,8 @@ input,textarea,select{text-wrap:wrap}
 .btn.big.call{background:var(--green-fill);color:#fff;border-color:transparent}
 .btn.big.line{background:#06C755;color:#fff;border-color:transparent}
 #msgTxt{font-size:15px;line-height:1.6}
-/* v3.6.2 給不太會用手機的人：字大一點、可選欄位收起來 */
-details.more{margin:14px 0 6px;border:1.5px dashed var(--line,#E8D9C6);border-radius:var(--r-ctl,14px);background:var(--card,#fff)}
+/* v3.6.3 給不太會用手機的人：字大一點、可選欄位收起來 */
+details.more{margin:14px 0 6px;border:1.5px dashed var(--line,#E8D9C6);border-radius:var(--r-ctl,14px);background:var(--sheet)}
 details.more>summary{list-style:none;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:700;font-size:16px;color:var(--ink-2,#5A4636)}
 details.more>summary::-webkit-details-marker{display:none}
 details.more>summary::before{content:'+';flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--beige,#F6E6D2);color:var(--ink,#3A2A1E);font-size:20px;line-height:1;font-weight:800}
@@ -850,7 +850,7 @@ details.more>:last-child{margin-bottom:14px}
   body .tag{font-size:13.5px}
   .health-hero.art .lede{clear:both}
 }
-/* v3.6.2 首頁三個大按鈕 */
+/* v3.6.3 首頁三個大按鈕 */
 .bigstart{display:grid;gap:12px;margin:6px 0 22px}
 .bs-hello{margin:0 2px;font-family:var(--head);font-size:22px;font-weight:800;color:var(--ink)}
 .bigbtn{display:flex;align-items:center;gap:14px;min-height:92px;padding:16px 18px;border-radius:var(--r-card,22px);text-decoration:none;color:var(--ink);border:2px solid transparent;box-shadow:0 4px 0 rgba(58,42,30,.12);text-align:left;font:inherit;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .08s}
@@ -864,13 +864,13 @@ details.more>:last-child{margin-bottom:14px}
 .bigbtn.b-red{background:var(--red-fill);color:#fff}
 .bigbtn.b-green{background:var(--green-fill);color:#fff}
 .bigbtn.b-yellow{background:var(--mark);color:#3A2A1E}.bigbtn.b-yellow .bb-ic{background:rgba(255,255,255,.5)}
-.bigbtn.b-white{background:var(--card,#fff);border-color:var(--line,#EBDCC8)}.bigbtn.b-white .bb-ic{background:var(--beige);color:var(--red-fill)}
+.bigbtn.b-white{background:var(--sheet);border-color:var(--line,#EBDCC8)}.bigbtn.b-white .bb-ic{background:var(--beige);color:var(--red-fill)}
 .bs-health{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:var(--r-ctl,14px);background:var(--beige);color:var(--ink);text-decoration:none;font-weight:700;font-size:16px;min-height:52px}
 .bs-health svg{width:22px;height:22px;color:var(--green-fill);flex:none}.bs-health span:nth-child(2){flex:1}
 .bs-rule{margin:4px 2px 0;font-size:15px;color:var(--ink-2)}
 .choose{display:grid;gap:12px;margin-top:14px}
 @media (min-width:900px){.bigstart{grid-template-columns:repeat(3,1fr)}.bs-hello,.bs-health,.bs-rule{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
-/* v3.6.2 分步驟表單 */
+/* v3.6.3 分步驟表單 */
 .wprog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;font-weight:700;color:var(--ink-2);font-size:15px}
 .wdots{display:flex;gap:6px}.wdots i{width:28px;height:8px;border-radius:8px;background:var(--beige)}
 .wdots i.done{background:var(--green-fill)}.wdots i.on{background:var(--red-fill)}
@@ -931,7 +931,7 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.2</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.3</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -951,7 +951,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.6.2';
+const BUILD = 'v3.6.3';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1137,6 +1137,7 @@ function openOverlay(el){
 }
 function closeOverlay(el){if(overlayOpen===el){overlayOpen=null;el.remove();try{history.back()}catch(_){}}else el.remove()}
 function closeOverlays(){document.querySelectorAll('.lightbox').forEach(x=>x.remove());overlayOpen=null}
+function rerender(fn){const y=scrollY;return Promise.resolve(fn()).then(()=>restoreScroll(y)).catch(()=>{})}
 function restoreScroll(y){let n=0;const t=()=>{if(document.documentElement.scrollHeight>=y+innerHeight*0.5||n>40){window.scrollTo(0,y);return}n++;setTimeout(t,50)};t()}
 window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
 function route(){
@@ -1254,12 +1255,7 @@ function renderSetup(){
    首頁 v1.1：走失 / 拾獲 / 地圖 三個分頁、我附近、最新目擊
    ============================================================ */
 const homeState={tab:'lost',species:'',city:'',status:'searching',reward:false,q:'',chip:'',near:null};
-async function renderHome(){const _n=navId;
-  setTitle('');
-  {const t=qs(location.hash).tab;if(t==='map'||t==='found'||t==='lost')homeState.tab=t;else if(!location.hash.includes('?'))homeState.tab=homeState.tab==='map'?'lost':homeState.tab}
-  (_n===navId?app:_void).innerHTML=`
-  <div class="install" id="installBar">📱 把汪喵回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
-  <section class="bigstart" aria-label="你需要什麼幫忙">
+function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     <p class="bs-hello">需要幫忙嗎？點一個就好</p>
     <a href="#/new" class="bigbtn b-red"><span class="bb-ic">${ic("search")}</span><span class="bb-t"><b>我的毛孩走失了</b><small>登記協尋、做尋狗尋貓海報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a href="#/seen" class="bigbtn b-green"><span class="bb-ic">${pawSvg()}</span><span class="bb-t"><b>我看到／撿到毛孩</b><small>受傷的毛孩也從這裡通報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
@@ -1268,6 +1264,13 @@ async function renderHome(){const _n=navId;
     <p class="bs-rule"><b>看到走失的狗貓：</b>先別追，拍照回報就好。</p>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   </section>
+`}
+async function renderHome(){const _n=navId;
+  setTitle('');
+  {const t=qs(location.hash).tab;if(t==='map'||t==='found'||t==='lost')homeState.tab=t;else if(!location.hash.includes('?'))homeState.tab=homeState.tab==='map'?'lost':homeState.tab}
+  (_n===navId?app:_void).innerHTML=`
+  <div class="install" id="installBar">📱 把汪喵回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
+${bigStartHTML()}
   <h2 id="listTitle">${ic("search")} 大家正在找的毛孩</h2>
   <div class="tabs" id="tabs">
     <button data-t="lost">走失協尋<span class="cnt" id="cLost">…</span></button>
@@ -1346,8 +1349,8 @@ async function renderHealth(){const _n=navId;
   <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
   ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts">${calButtons(petName[r.pet_id]||'毛孩',r)}<button class="btn sm" data-done="${r.id}">已完成</button></div></div>`).join('')}</div>`:`<div class="card muted small">新增紀錄時填「下次到期日」（例如疫苗一年後），就會出現在這裡，到期前寄 Email 提醒你。</div>`}
   <div id="calSec">${calSection(p)}</div>`;
-  bindCal(renderHealth);bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(renderHealth);
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderHealth()});
+  bindCal(renderHealth);bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');rerender(renderHealth)});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:'smooth'})},60);
@@ -1590,12 +1593,14 @@ async function liveShelterMatch(c){
 async function renderCase(id){const _n=navId;
   clearInterval(refreshTimer);refreshTimer=null;
   if(!app.querySelector('#map'))(_n===navId?app:_void).innerHTML='<div class="empty">載入中…</div>';
-  const [{data:c,error},{data:sightings},{data:matches}]=await Promise.all([
+  let [{data:c,error},{data:sightings},{data:matches}]=await Promise.all([
     sb.from('cases_public').select('*').eq('id',id).single(),
     sb.from('sightings_public').select('*').eq('case_id',id).order('seen_at',{ascending:true}),
     sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false).order('score',{ascending:false})
   ]);
-  if(error||!c){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這個案件<br><a href="#/">回首頁</a></div>';return}
+  if((error||!c)&&me()){try{const {data:ac}=await sb.rpc('admin_get_case',{p_id:id});if(ac)c=ac}catch(_){}}
+  if(!c){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這個案件<br><a href="#/">回首頁</a></div>';return}
+  if(c.hidden)setTimeout(()=>{const h=document.querySelector('#app h1');if(h)h.insertAdjacentHTML('beforebegin','<div class="notice red"><b>這個案件目前被隱藏</b>只有管理員看得到，到管理後台可以恢復顯示。</div>')},0);
   sb.rpc('bump_view',{p_id:id}).then(()=>{});
   setTitle(`${sp(c.species).short} ${c.name}`);
   const photos=c.photos||[];
@@ -1811,7 +1816,7 @@ function renderNew(){
     <label class="f"><span><b class="lbl">Email</b> <i class="req">*</i><small class="hint long">有人回報時，我們會寄信通知你（不會公開）</small></span><input type="email" name="contact_email" required inputmode="email" autocomplete="email" placeholder="you@example.com"></label>
     <details class="more"><summary>LINE、獎金（可以不填）</summary>
     <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line"></label>
-    <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" step="100" inputmode="numeric" placeholder="0"></label>
+    <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" max="10000000" step="100" inputmode="numeric" placeholder="0"></label>
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：可以用雞肉吸引牠"></textarea></label>
     </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
@@ -1955,7 +1960,7 @@ async function renderManage(id,token){const _n=navId;
   if(!token&&!me()){(_n===navId?app:_void).innerHTML=`<div class="card"><h1>飼主管理</h1><p>請輸入登記時取得的管理金鑰：</p><input type="text" id="tk"><button class="btn" style="margin-top:10px" onclick="location.hash='#/manage/${id}?t='+document.getElementById('tk').value.trim()">進入</button><p class="muted small" style="margin-top:12px">登入時登記的案件，<a href="#/login">登入</a>後就能直接管理。</p></div>`;return}
   token=token||null;
   (_n===navId?app:_void).innerHTML='<div class="empty">驗證中…</div>';
-  try{const {data:pc}=await sb.from('cases_public').select('id,species,status,lost_city,lost_district,lost_at,colour,size,sex').eq('id',id).single();if(pc&&pc.status==='searching')await liveShelterMatch(pc)}catch(_){}
+  try{const {data:pc}=await sb.from('cases_public').select('id,species,status,lost_city,lost_district,lost_at,colour,size,sex').eq('id',id).single();if(pc&&pc.status==='searching')await Promise.race([liveShelterMatch(pc),new Promise(r=>setTimeout(r,6000))])}catch(_){}
   const [{data:c,error},{data:ss},{data:matches}]=await Promise.all([
     sb.rpc('owner_case',{p_id:id,p_token:token}),
     sb.rpc('owner_sightings',{p_id:id,p_token:token}),
@@ -1975,7 +1980,7 @@ async function renderManage(id,token){const _n=navId;
     <div class="seg" id="segStatus">${Object.entries(STATUS).map(([k,v])=>`<button type="button" data-v="${k}" class="${c.status===k?'on':''}">${v}</button>`).join('')}</div>
     <div id="foundBox" class="${c.status==='found'?'':'hidden'}" style="margin-top:12px">
       <label class="f"><span><b class="lbl">怎麼找到的？</b><small class="hint">會公開，幫助其他飼主</small></span><select id="foundMethod"><option value="">選擇</option>${FOUND_METHODS.map(m=>`<option ${c.found_method===m?'selected':''}>${m}</option>`).join('')}</select></label>
-      <label class="f"><span><b class="lbl">找到的經過</b><small class="hint">會公開</small></span><textarea id="foundNote">${esc(c.found_note||'')}</textarea></label>
+      <label class="f"><span><b class="lbl">找到的經過</b><small class="hint">會公開</small></span><textarea id="foundNote" maxlength="1000">${esc(c.found_note||'')}</textarea></label>
     </div>
     <button class="btn" style="margin-top:12px" id="btnStatus">儲存狀態</button>
   </div>
@@ -2002,7 +2007,7 @@ async function renderManage(id,token){const _n=navId;
     <div class="row2"><label class="f"><span>稱呼</span><input name="contact_name" value="${esc(c.contact_name||'')}"></label><label class="f"><span>電話</span><input name="contact_phone" value="${esc(c.contact_phone||'')}"></label></div>
     <label class="chk"><input type="checkbox" name="phone_public" ${c.phone_public?'checked':''}> 公開電話</label>
     <div class="row2"><label class="f"><span><b class="lbl">Email</b><small class="hint">私密</small></span><input name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span>LINE ID</span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
-    <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" step="100"></label>
+    <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" max="10000000" step="100" inputmode="numeric"></label>
     <label class="f"><span>補充</span><textarea name="notes">${esc(c.notes||'')}</textarea></label>
     <h3>照片</h3>
     <div class="photos-preview" id="pv"></div>
@@ -2013,8 +2018,8 @@ async function renderManage(id,token){const _n=navId;
   let status=c.status;
   $('#segStatus').querySelectorAll('button').forEach(b=>b.onclick=()=>{status=b.dataset.v;$('#segStatus').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#foundBox').classList.toggle('hidden',status!=='found')});
   $('#btnStatus').onclick=async()=>{const p={status};if(status==='found'){p.found_method=$('#foundMethod').value;p.found_note=$('#foundNote').value}const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);toast(status==='found'?'🎉 恭喜！已標記為找到':'已儲存');if(status==='found')setTimeout(()=>goReplace('#/case/'+id),1200)};
-  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('set_sighting_status',{p_case:id,p_sighting:b.dataset.s,p_token:token,p_status:b.dataset.v});if(error)return toast(error.message);toast('已更新');renderManage(id,token)});
-  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error)return toast(error.message);renderManage(id,token)});
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('set_sighting_status',{p_case:id,p_sighting:b.dataset.s,p_token:token,p_status:b.dataset.v});if(error)return toast(error.message);toast('已更新');rerender(()=>renderManage(id,token))});
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error)return toast(error.message);rerender(()=>renderManage(id,token))});
   let photos=(c.photos||[]).slice();const pv=$('#pv');
   const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
   $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,4-photos.length)){toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
@@ -2393,7 +2398,7 @@ function staleTag(c){
 const REASON_TEXT=Object.fromEntries(REPORT_REASONS);
 async function renderAdmin(){const _n=navId;
   setTitle('管理後台');
-  if(!me()){goReplace('#/login');return}
+  if(!requireLogin())return;
   const {data:isA}=await sb.rpc('is_admin');
   if(!isA){(_n===navId?app:_void).innerHTML='<div class="empty">需要管理員權限</div>';return}
   const showAll=qs(location.hash).all==='1';
@@ -2544,7 +2549,7 @@ function renderLogin(){
 
 async function renderMe(){const _n=navId;
   setTitle('我的');
-  if(!me()){goReplace('#/login');return}
+  if(!requireLogin())return;
   (_n===navId?app:_void).innerHTML='<div class="empty">載入中…</div>';
   const [prof,{data:cs},{data:fs},{data:pend},{data:fl},{data:pets},{data:dues}]=await Promise.all([
     getProfile(), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
@@ -2614,7 +2619,7 @@ async function renderPet(id){const _n=navId;
   let p={species:'dog',photos:[]};
   if(id!=='new'){const {data}=await sb.from('pets').select('*').eq('id',id).maybeSingle();if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}p=data}
   setTitle(id==='new'?'新增寵物檔案':'編輯 '+p.name);
-  (_n===navId?app:_void).innerHTML=`<h1>${id==='new'?'新增寵物檔案':'✏️ '+esc(p.name)}</h1><p class="muted small">只有你看得到。照片越多越好：正面、側面、特徵特寫。</p>
+  (_n===navId?app:_void).innerHTML=`<h1>${id==='new'?'新增寵物檔案':'✏️ '+esc(p.name)}</h1><p class="muted small">這份檔案只有你看得到。照片越多越好：正面、側面、特徵特寫。</p>
   <form class="card" id="pf">
     <div class="seg" id="segSp"><button type="button" data-v="dog" class="${p.species!=='cat'?'on':''}">${spIc("dog")} 狗</button><button type="button" data-v="cat" class="${p.species==='cat'?'on':''}">${spIc("cat")} 貓</button></div>
     <label class="f"><span>名字 <i class="req">*</i></span><input name="name" required maxlength="30" value="${esc(p.name||'')}"></label>
@@ -2780,9 +2785,9 @@ async function renderPetView(id){const _n=navId;
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderPetView(id)});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');rerender(()=>renderPetView(id))});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
-  bindMedSlots(()=>renderPetView(id));
+  bindMedSlots(()=>rerender(()=>renderPetView(id)));
   if($('#calPromptX'))$('#calPromptX').onclick=()=>$('#calPrompt').remove();
 }
 
@@ -3133,6 +3138,9 @@ function renderPrivacy(){
   <p>照片與案件內容會公開在本站供協尋使用，並可能被分享到社群平台。結案後資料仍保留作為統計與參考；若需刪除請聯絡站長。</p>
   <p>本站使用 Supabase 儲存資料，OpenStreetMap 提供地圖。使用瀏覽器定位功能前會徵求你的同意。</p></div>`;
 }
+
+// 首頁先畫出三個大按鈕（不用等資料庫元件下載完），之後 renderHome 會補上名單
+try{const h=location.hash||'#/';if(h==='#/'||h==='#'){renderChrome('#/','#/');app.innerHTML=bigStartHTML()}}catch(_){}
 </script>
 </body>
 </html>
