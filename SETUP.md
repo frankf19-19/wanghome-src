@@ -1,4 +1,17 @@
-# 汪回家 WangHome — 安裝說明（v1.0.0）
+# 汪回家 WangHome — 安裝說明（v1.0.1）
+
+## ✅ 目前已部署
+- 網站：https://frankf19-19.github.io/wanghome/
+- GitHub：https://github.com/frankf19-19/wanghome
+- Supabase 專案：wanghome（東京，ref `nopyhfpaykkiieudvoko`）
+  - 資料庫結構已執行、publishable key 已填入 index.html
+- GitHub Actions：SUPABASE_URL / SITE_URL / SITE_NAME 已直接寫在 workflow
+  - 只需要 Secret：`SUPABASE_SERVICE_KEY`（Supabase → Settings → API Keys → Secret key）
+  - 選填 Secret：`GMAIL_USER`、`GMAIL_APP_PASSWORD`（寄通知）、`MOA_API_URL`
+
+以下為從零安裝的完整步驟（重建時參考）。
+
+---
 
 全部免費：GitHub Pages（前端）＋ Supabase（資料庫/照片）＋ GitHub Actions（每日比對、通知）。
 整個流程約 30 分鐘，不需要寫任何程式。
@@ -28,8 +41,8 @@ wanghome/
    - 最後一行會顯示 `WangHome schema v1.0.0 installed`
 3. 左側 **Project Settings → API**，記下兩個值：
    - **Project URL**（像 `https://abcdefgh.supabase.co`）
-   - **anon public** key（很長一串，以 `eyJ` 開頭）
-   - 同頁下面的 **service_role** key 等一下 GitHub 要用，**絕對不能貼進 index.html**
+   - **Publishable key**（以 `sb_publishable_` 開頭；舊版 anon key 也可）
+   - 同頁下面的 **Secret key**（`sb_secret_` 開頭，或舊版 service_role）等一下 GitHub 要用，**絕對不能貼進 index.html**
 4. 左側 **Storage** 確認有一個 `photos` bucket（schema.sql 會自動建）。如果沒有：New bucket → 名稱 `photos` → Public bucket 打勾。
 
 ## 第 2 步：設定前端（2 分鐘）
