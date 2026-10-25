@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.8.0 -->
+<!-- BUILD v1.8.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -352,6 +352,9 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 .calurl{display:flex;gap:6px;margin-top:6px}
 .calurl input{flex:1;min-width:0;font-size:12.5px;padding:8px 10px;color:var(--ink-2);background:var(--paper)}
 .sponsor .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.calhelp{margin:4px 0 6px;font-size:14px}.calhelp summary{cursor:pointer;font-weight:700;color:var(--ink-2)}.calhelp ol{margin:6px 0 0;padding-left:20px;line-height:1.7}
+.calprompt{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--sheet);border-radius:var(--r-card);padding:14px 16px;margin:0 0 16px;box-shadow:var(--lift),inset 4px 0 0 var(--green)}
+.calprompt .b{flex:1 1 220px;font-size:14.5px}.calprompt .acts{display:flex;gap:6px;flex-wrap:wrap}
 @media (max-width:520px){.calbox{grid-template-columns:1fr}.calbox .calic{display:none}}
 .sponsor.due{flex-wrap:wrap}.sponsor.due .b{flex:1 1 160px;min-width:0}
 @media (max-width:560px){.sponsor.due .acts{flex-basis:100%;justify-content:flex-start;padding-left:52px}}
@@ -423,7 +426,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v1.8.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v1.8.1</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽">
@@ -448,7 +451,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.8.0';
+const BUILD = 'v1.8.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1520,21 +1523,33 @@ function downloadIcs(pet,r){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${pet}-${r.next_due}.ics`;document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
 }
-function calButtons(pet,r){return `<a class="btn sm ghost" target="_blank" rel="noopener" href="${esc(gcalLink(pet,r))}" title="加到 Google 日曆">${ic('calendar')} Google</a><button type="button" class="btn sm ghost" data-ics="${r.id}" title="下載 .ics（iPhone、Outlook）">${ic('download')} .ics</button>`}
+const UA=navigator.userAgent||'';
+const DEVICE=/android/i.test(UA)?'android':(/iphone|ipad|ipod/i.test(UA)||(/macintosh/i.test(UA)&&navigator.maxTouchPoints>1))?'ios':/macintosh/i.test(UA)?'mac':'other';
+function calButtons(pet,r){
+  const g=`<a class="btn sm ghost" target="_blank" rel="noopener" href="${esc(gcalLink(pet,r))}" title="加到 Google 日曆">${ic('calendar')} Google 日曆</a>`;
+  const i=`<button type="button" class="btn sm ghost" data-ics="${r.id}" title="加到 iPhone／Mac／Outlook 日曆">${ic('download')} ${DEVICE==='ios'||DEVICE==='mac'?'Apple 日曆':'.ics 檔'}</button>`;
+  return DEVICE==='ios'||DEVICE==='mac'?i+g:g+i;
+}
 function calSection(p){
   if(!p.calendar_token)return `<h2>${ic("calendar")} 日曆同步</h2><div class="notice">日曆同步功能準備中，請稍後再來。</div>`;
   const u=calUrl(p.calendar_token);const web=u.replace(/^https:/,'webcal:');
   return `<h2>${ic("calendar")} 日曆同步</h2>
   <div class="card calbox"><div class="calic" aria-hidden="true">${new Date().getDate()}</div><div>
-    <p style="margin:0">訂閱一次，所有毛孩的回診、疫苗、驅蟲到期日就會自動出現在你手機的日曆裡，前一天早上 9 點提醒。新增或標記完成後，日曆約 6 小時內自動更新。</p>
-    <div class="calbtns">
-      <a class="btn sm" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?cid=${encodeURIComponent(web)}">${ic('calendar')} Google 日曆</a>
-      <a class="btn sm" href="${esc(web)}">${ic('calendar')} iPhone／Mac 日曆</a>
-      <a class="btn sm ghost" target="_blank" rel="noopener" href="https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(u)}&name=${encodeURIComponent('汪喵回家・毛孩健康提醒')}">Outlook</a>
-    </div>
+    <p style="margin:0">訂閱一次，所有毛孩的回診、疫苗、驅蟲到期日就會自動出現在你手機的日曆裡，前一天早上 9 點提醒。</p>
+    <div class="calbtns">${calSubButtons(u,web)}</div>
+    ${DEVICE==='android'?`<details class="calhelp"><summary>Android 手機訂閱步驟</summary><ol><li>按上面的「Google 日曆」，在跳出的網頁按「新增」。</li><li>打開手機的 Google 日曆 App → 左上選單 → 設定。</li><li>找到「汪喵回家・毛孩健康提醒」，打開「同步處理」。</li></ol></details>`:''}
+    <p class="muted small" style="margin:8px 0 0">更新速度：iPhone／Mac 日曆約幾小時內；Google 日曆由 Google 決定，通常要半天到一天。很急的回診，建議在毛孩頁面用單筆「加到日曆」。</p>
     <div class="calurl"><input type="text" id="calU" readonly value="${esc(u)}" aria-label="日曆訂閱網址"><button type="button" class="btn sm ghost" id="btnCalCopy">${ic('link')} 複製</button></div>
     <p class="muted small" style="margin:8px 0 0">這是你的私人網址，拿到的人都能看到你的提醒標題。不小心外流就按 <a href="javascript:void 0" id="btnCalReset">重設網址</a>（舊的會立刻失效，要重新訂閱）。</p>
   </div></div>`;
+}
+function calSubButtons(u,web){
+  const g=`<a class="btn sm" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?cid=${encodeURIComponent(web)}">${ic('calendar')} Google 日曆</a>`;
+  const a=`<a class="btn sm" href="${esc(web)}">${ic('calendar')} iPhone／Mac 日曆</a>`;
+  const o=`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(u)}&name=${encodeURIComponent('汪喵回家・毛孩健康提醒')}">Outlook</a>`;
+  if(DEVICE==='android')return g+o;
+  if(DEVICE==='ios')return a+g+o;
+  return g+a+o;
 }
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
 
@@ -1750,6 +1765,7 @@ async function renderPetView(id){
   const rs=recs||[];
   const filter=qs(location.hash).k||'';
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
+  let calPrompt=null;try{const cid=sessionStorage.getItem('wh_cal_prompt');if(cid){sessionStorage.removeItem('wh_cal_prompt');calPrompt=rs.find(x=>x.id===cid&&x.next_due&&!x.done)||null}}catch(_){}
   const weights=rs.filter(r=>r.weight_kg).map(r=>({date:r.date,w:r.weight_kg})).sort((a,b)=>a.date.localeCompare(b.date));
   const year=String(new Date().getFullYear());
   const costYear=rs.filter(r=>r.cost&&r.date.startsWith(year)).reduce((a,r)=>a+r.cost,0);
@@ -1785,6 +1801,7 @@ async function renderPetView(id){
     </div>
   </div>
 
+  ${calPrompt?`<div class="calprompt" id="calPrompt"><div class="b"><b>已設定提醒：${esc(calPrompt.title)}</b><br><span class="muted">${calPrompt.next_due}・${dueText(calPrompt.next_due)}，要順便加到手機日曆嗎？</span></div><div class="acts">${calButtons(p.name,calPrompt)}<button type="button" class="btn sm ghost" id="calPromptX">不用</button></div></div>`:''}
   ${due.length?`<h2>${ic("clock")} 下次到期</h2><div class="card" style="padding:6px 18px">${due.map(r=>`<div class="sponsor due"><div class="av">${REC_KINDS[r.kind][0]}</div><div class="b"><b>${esc(r.title)}</b><div class="msg">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts">${calButtons(p.name,r)}<button class="btn sm" data-done="${r.id}">已完成</button></div></div>`).join('')}<p class="muted small" style="margin:4px 0 10px">想讓所有到期日自動進日曆？到 <a href="#/me">我的</a> 訂閱日曆同步。</p></div>`:''}
 
   ${weights.length>=2?`<h2>${ic("scale")} 體重變化</h2><div class="card">${weightChart(weights)}</div>`:''}
@@ -1799,7 +1816,8 @@ async function renderPetView(id){
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">📋</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{location.hash=`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:'')});
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderPetView(id)});
-  bindIcs(due,()=>p.name);
+  bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
+  if($('#calPromptX'))$('#calPromptX').onclick=()=>$('#calPrompt').remove();
 }
 
 async function renderRecord(petId,recId){
@@ -1848,8 +1866,10 @@ async function renderRecord(petId,recId){
     e.preventDefault();const fd=new FormData(f);
     const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:fd.get('weight_kg')?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files};
     if(f.elements.done)row.done=f.elements.done.checked;else if(recId==='new')row.done=false;
-    const {error}=recId==='new'?await sb.from('pet_records').insert(row):await sb.from('pet_records').update(row).eq('id',recId);
+    const {data:saved,error}=recId==='new'?await sb.from('pet_records').insert(row).select('id').single():await sb.from('pet_records').update(row).eq('id',recId).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
+    const dueChanged=row.next_due&&!row.done&&(recId==='new'||row.next_due!==r.next_due);
+    if(dueChanged&&saved?.id){try{sessionStorage.setItem('wh_cal_prompt',saved.id)}catch(_){}}
     toast('已儲存');location.hash='#/pet/'+petId;
   };
   if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('確定刪除這筆紀錄？'))return;if(files.length)await sb.storage.from('pet-private').remove(files);const {error}=await sb.from('pet_records').delete().eq('id',recId);if(error)return toast(error.message);location.hash='#/pet/'+petId};
