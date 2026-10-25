@@ -65,15 +65,18 @@ def sb(method, path, body=None, params=None, prefer=None):
         print(f"金鑰檢查：類型={kind}，長度={len(SERVICE_KEY)}，含遮罩符號={'•' in SERVICE_KEY or '*' in SERVICE_KEY}")
         raise
 
-def sb_all(path, params, page=1000, cap=50000):
+def sb_all(path, params, page=1000, cap=50000, strict=False):
     """PostgREST 單次最多回 1000 筆；分頁抓完整清單。"""
     out, off = [], 0
-    while off < cap:
+    while True:
+        if off >= cap:
+            if strict: raise RuntimeError(f"{path} 超過 {cap} 筆，資料可能不完整")
+            break
         p = dict(params); p["limit"] = str(page); p["offset"] = str(off); p.setdefault("order", "id")
         rows = sb("GET", path, params=p) or []
         out += rows
-        if len(rows) < page: break
-        off += page
+        if not rows: break
+        off += len(rows)   # 伺服器單次上限比 page 小時也能抓完整
     return out
 
 # ---------------------------------------------------------------- 農業部資料
@@ -241,6 +244,33 @@ def send_mail(to, subject, body):
             s.login(GMAIL_USER, GMAIL_PASS); s.sendmail(GMAIL_USER, [to], msg.as_string())
     return True
 
+# 寄給「案件飼主信箱」的上限（和 Edge Function 共用 case_mail_log）：同一信箱每小時 6 封、全站每小時 150 封
+def case_mail_ok(to):
+    hour = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=1)).isoformat()
+    def cnt(params):
+        url = f"{SUPABASE_URL}/rest/v1/case_mail_log?" + urllib.parse.urlencode({**params, "select": "case_id"}, safe=",.*()")
+        req = urllib.request.Request(url, method="HEAD")
+        req.add_header("apikey", SERVICE_KEY)
+        if SERVICE_KEY.startswith("eyJ"): req.add_header("Authorization", f"Bearer {SERVICE_KEY}")
+        req.add_header("Prefer", "count=exact")
+        with urllib.request.urlopen(req, timeout=30) as r:
+            cr = r.headers.get("Content-Range", "*/0")
+        return int(cr.split("/")[-1] or 0) if cr.split("/")[-1] != "*" else 0
+    try:
+        return cnt({"to_email": f"eq.{to.lower()}", "sent_at": f"gte.{hour}"}) < 6 and cnt({"sent_at": f"gte.{hour}"}) < 150
+    except Exception as e:
+        print("查寄信上限失敗，這次先不寄：", e); return False
+
+def send_case_mail(c, subject, body):
+    """寄給案件飼主：只寄已確認的信箱、遵守上限、寄完記錄。回傳 True 才算寄出。"""
+    to = (c.get("contact_email") or "").strip().lower()
+    if not to or not c.get("email_verified"): return False
+    if not case_mail_ok(to): print("達寄信上限，下次再寄：", c.get("name")); return False
+    if not send_mail(to, subject, body): return False
+    try: sb("POST", "case_mail_log", body={"case_id": c["id"], "to_email": to}, prefer="return=minimal")
+    except Exception as e: print("寫入寄信紀錄失敗：", e)
+    return True
+
 def fmt(ts):
     try:
         d = dt.datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(dt.timezone(dt.timedelta(hours=8)))
@@ -256,15 +286,22 @@ def mark_notified(table, ids):
 def run_notifications():
     if not MAIL_OK:
         print("未設定寄信，略過通知"); return
-    cases = {c["id"]: c for c in sb_all("cases", {"select": "id,name,contact_email,hidden"}) if not c.get("hidden")}
+    cases = {c["id"]: c for c in sb_all("cases", {"select": "id,name,contact_email,hidden,email_verified,status"}) if not c.get("hidden")}
+    old_cut = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=3)).isoformat()
+    def skip_unverified(table, lst, key="created_at"):
+        # 信箱還沒確認：先不寄、留著（確認後會一起寄）；超過 3 天的就標記掉，不再累積
+        old = [x["id"] for x in lst if (x.get(key) or "") < old_cut]
+        if old: mark_notified(table, old)
     # 目擊
-    pend = sb_all("sightings", {"select": "*", "notified": "eq.false", "order": "created_at.asc"})
+    pend = sb_all("sightings", {"select": "*", "notified": "eq.false", "status": "neq.rejected", "order": "created_at.asc"})
     by_case = {}
     for s in pend: by_case.setdefault(s["case_id"], []).append(s)
     for cid, lst in by_case.items():
         c = cases.get(cid)
-        if not c or not c.get("contact_email"):
+        if not c or not c.get("contact_email") or c.get("status") != "searching":
             mark_notified("sightings", [s["id"] for s in lst]); continue
+        if not c.get("email_verified"):
+            skip_unverified("sightings", lst); continue
         lines = [f"你的案件「{c['name']}」有 {len(lst)} 筆新的目擊回報：", ""]
         for s in lst:
             lines.append(f"・{fmt(s['seen_at'])}  {s.get('place_text') or '（見地圖）'}  {('往'+s['direction']) if s.get('direction') else ''}")
@@ -274,7 +311,7 @@ def run_notifications():
             lines.append("")
         lines += ["請到管理頁確認後才會顯示在公開地圖：", f"{SITE_URL}#/manage/{cid}", "（需要你的管理網址）", "", f"— {SITE_NAME}"]
         try:
-            send_mail(c["contact_email"], f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines))
+            if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines)): continue
             print(f"已通知目擊：{c['name']} x{len(lst)}")
         except Exception as e:
             print("寄信失敗：", e); continue
@@ -285,8 +322,10 @@ def run_notifications():
     for m in pend: by_case.setdefault(m["case_id"], []).append(m)
     for cid, lst in by_case.items():
         c = cases.get(cid)
-        if not c or not c.get("contact_email"):
+        if not c or not c.get("contact_email") or c.get("status") != "searching":
             mark_notified("shelter_matches", [m["id"] for m in lst]); continue
+        if not c.get("email_verified"):
+            skip_unverified("shelter_matches", lst); continue
         lines = [f"系統在收容所資料中找到 {len(lst)} 筆與「{c['name']}」疑似相符的狗狗，請盡快親自確認：", ""]
         for m in lst[:10]:
             lines.append(f"・{m.get('shelter_name') or '收容所'}  相似 {m['score']}  {m.get('sex') or ''} {m.get('bodytype') or ''} {m.get('colour') or ''}")
@@ -298,7 +337,7 @@ def run_notifications():
             lines.append("")
         lines += ["這只是粗略比對，請打電話到收容所提供晶片號碼核對，或親自到所比對。", f"案件頁：{SITE_URL}#/case/{cid}", "", f"— {SITE_NAME}"]
         try:
-            send_mail(c["contact_email"], f"【{SITE_NAME}】收容所有疑似 {c['name']} 的狗狗", "\n".join(lines))
+            if not send_case_mail(c, f"【{SITE_NAME}】收容所有疑似 {c['name']} 的毛孩", "\n".join(lines)): continue
             print(f"已通知比對：{c['name']} x{len(lst)}")
         except Exception as e:
             print("寄信失敗：", e); continue
@@ -315,8 +354,10 @@ def run_notifications():
     for cid, lst in by_case.items():
         c = cases.get(cid)
         lst = [m for m in lst if m["found_id"] in fr] if c else lst
-        if not c or not c.get("contact_email") or not lst:
+        if not c or not c.get("contact_email") or not lst or c.get("status") != "searching":
             mark_notified("found_matches", [m["id"] for m in by_case[cid]]); continue
+        if not c.get("email_verified"):
+            skip_unverified("found_matches", lst); continue
         lines = [f"有網友登記了 {len(lst)} 筆可能是「{c['name']}」的拾獲／目擊通報：", ""]
         for m in lst[:10]:
             f = fr.get(m["found_id"], {})
@@ -326,7 +367,7 @@ def run_notifications():
             lines.append("")
         lines += ["請點連結看照片，並直接聯絡通報者。", "", f"— {SITE_NAME}"]
         try:
-            send_mail(c["contact_email"], f"【{SITE_NAME}】有人可能撿到／看到 {c['name']}", "\n".join(lines))
+            if not send_case_mail(c, f"【{SITE_NAME}】有人可能撿到／看到 {c['name']}", "\n".join(lines)): continue
             print(f"已通知拾獲比對：{c['name']} x{len(lst)}")
         except Exception as e:
             print("寄信失敗：", e); continue
@@ -434,9 +475,9 @@ def run_photo_cleanup(dry=False):
         if isinstance(u, str) and PUBLIC_PREFIX in u:
             k = urllib.parse.unquote(u.split(PUBLIC_PREFIX, 1)[1].split("?")[0])
             used.add(k); used.add(re.sub(r"\.jpg$", "_t.jpg", k))
-    for r in sb_all("cases", {"select": "id,photos"}): [add(u) for u in (r.get("photos") or [])]
-    for r in sb_all("found_reports", {"select": "id,photos"}): [add(u) for u in (r.get("photos") or [])]
-    for r in sb_all("sightings", {"select": "id,photo_url"}): add(r.get("photo_url"))
+    for r in sb_all("cases", {"select": "id,photos"}, cap=10**7, strict=True): [add(u) for u in (r.get("photos") or [])]
+    for r in sb_all("found_reports", {"select": "id,photos"}, cap=10**7, strict=True): [add(u) for u in (r.get("photos") or [])]
+    for r in sb_all("sightings", {"select": "id,photo_url"}, cap=10**7, strict=True): add(r.get("photo_url"))
     if not used:
         print("照片清理：找不到任何使用中的照片，為了安全這次不刪"); return
     cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=3)

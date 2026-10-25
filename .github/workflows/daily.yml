@@ -7,8 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "all / match / notify / probe"
+        description: "要執行的項目"
+        type: choice
+        options: [all, match, notify, probe, cleanup, cleanup-dry]
         default: "all"
+
+permissions:
+  contents: read
 
 jobs:
   run:
@@ -20,10 +25,15 @@ jobs:
           python-version: "3.12"
       - name: Decide mode
         id: mode
+        env:
+          EVENT: ${{ github.event_name }}
+          SCHED: ${{ github.event.schedule }}
+          INPUT_MODE: ${{ github.event.inputs.mode }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then echo "mode=${{ github.event.inputs.mode }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "17 19 * * *" ]; then echo "mode=all" >> $GITHUB_OUTPUT
-          else echo "mode=notify" >> $GITHUB_OUTPUT; fi
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            case "$INPUT_MODE" in all|match|notify|probe|cleanup|cleanup-dry) echo "mode=$INPUT_MODE" >> "$GITHUB_OUTPUT";; *) echo "mode=all" >> "$GITHUB_OUTPUT";; esac
+          elif [ "$SCHED" = "17 19 * * *" ]; then echo "mode=all" >> "$GITHUB_OUTPUT"
+          else echo "mode=notify" >> "$GITHUB_OUTPUT"; fi
       - name: Run
         env:
           SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
@@ -34,4 +44,5 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MOA_API_URL: ${{ secrets.MOA_API_URL }}
-        run: python scripts/daily.py ${{ steps.mode.outputs.mode }}
+          MODE: ${{ steps.mode.outputs.mode }}
+        run: python scripts/daily.py "$MODE"
