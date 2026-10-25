@@ -27,6 +27,17 @@ def get(path, params):
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.loads(r.read().decode())
 
+def get_all(path, params, page=1000, cap=20000):
+    """PostgREST 單次最多回 1000 筆；分頁抓完，避免分享頁被誤刪。"""
+    out, off = [], 0
+    while off < cap:
+        p = dict(params); p["limit"] = str(page); p["offset"] = str(off); p.setdefault("order", "id")
+        rows = get(path, p)
+        out += rows
+        if len(rows) < page: break
+        off += page
+    return out
+
 def days_since(ts):
     try:
         d = dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
@@ -59,10 +70,10 @@ def page(title, desc, image, target, canonical):
 
 def main():
     since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=60)).isoformat()
-    cases = get("cases_public", {"select": "id,species,name,status,breed,sex,size,colour,features,lost_city,lost_district,lost_place,lost_at,photos,reward,last_seen_at,updated_at",
-                                 "or": f"(status.eq.searching,updated_at.gte.{since})", "limit": "2000"})
-    founds = get("found_public", {"select": "id,species,kind,status,colour,size,sex,city,district,place_text,seen_at,photos,current_place,updated_at,injury",
-                                  "or": f"(status.eq.open,updated_at.gte.{since})", "limit": "2000"})
+    cases = get_all("cases_public", {"select": "id,species,name,status,breed,sex,size,colour,features,lost_city,lost_district,lost_place,lost_at,photos,reward,last_seen_at,updated_at",
+                                 "or": f"(status.eq.searching,updated_at.gte.{since})"})
+    founds = get_all("found_public", {"select": "id,species,kind,status,colour,size,sex,city,district,place_text,seen_at,photos,current_place,updated_at,injury",
+                                  "or": f"(status.eq.open,updated_at.gte.{since})"})
     sdir, fdir = ROOT / "s", ROOT / "f"
     sdir.mkdir(exist_ok=True); fdir.mkdir(exist_ok=True)
     want_s, want_f, changed = set(), set(), 0

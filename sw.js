@@ -1,6 +1,6 @@
-// 汪喵回家 service worker v3.3.0
+// 汪喵回家 service worker v3.4.0
 // 只快取網站外殼，讓離線時也能打開；資料（Supabase）一律走網路，不快取。
-const CACHE = 'wanghome-v3.3.0';
+const CACHE = 'wanghome-v3.4.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './duo.svg'];
 
 self.addEventListener('install', e => {
@@ -14,9 +14,12 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;           // CDN、Supabase、地圖圖磚不處理
-  if (req.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
-    // 網頁：先拿最新版，失敗才用快取
-    e.respondWith(fetch(req).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put('./index.html', c)); return r; })
+  const scope = new URL(self.registration.scope).pathname;
+  const isShell = url.pathname === scope || url.pathname === scope + 'index.html';
+  if (req.mode === 'navigate' && !isShell) return;      // 分享頁（/s/、/f/）等直接走網路，不覆蓋快取
+  if (isShell) {
+    // 網頁：先拿最新版，失敗才用快取；只快取正常回應
+    e.respondWith(fetch(req).then(r => { if (r.ok && r.type === 'basic') { const c = r.clone(); caches.open(CACHE).then(x => x.put('./index.html', c)); } return r; })
       .catch(() => caches.match('./index.html')));
     return;
   }

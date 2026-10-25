@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪喵回家 WangHome — 每日自動化腳本  v1.7.0
+汪喵回家 WangHome — 每日自動化腳本  v1.8.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -20,6 +20,9 @@
 import os, sys, json, smtplib, datetime as dt, urllib.request, urllib.parse, urllib.error, re
 from email.mime.text import MIMEText
 from email.header import Header
+from email.utils import formataddr
+from zoneinfo import ZoneInfo
+TPE = ZoneInfo("Asia/Taipei")
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "").strip().strip('"').strip("'")
@@ -56,6 +59,17 @@ def sb(method, path, body=None, params=None, prefer=None):
         print(f"Supabase 回應 {e.code}：{body}")
         print(f"金鑰檢查：類型={kind}，長度={len(SERVICE_KEY)}，含遮罩符號={'•' in SERVICE_KEY or '*' in SERVICE_KEY}")
         raise
+
+def sb_all(path, params, page=1000, cap=50000):
+    """PostgREST 單次最多回 1000 筆；分頁抓完整清單。"""
+    out, off = [], 0
+    while off < cap:
+        p = dict(params); p["limit"] = str(page); p["offset"] = str(off); p.setdefault("order", "id")
+        rows = sb("GET", path, params=p) or []
+        out += rows
+        if len(rows) < page: break
+        off += page
+    return out
 
 # ---------------------------------------------------------------- 農業部資料
 def fetch_moa():
@@ -124,13 +138,13 @@ def run_matching():
     # 收容所比對已改在瀏覽器端進行；只有設定了 MOA_API_URL（例如台灣的代理）才在這裡跑。
     if not os.environ.get("MOA_API_URL"):
         print("收容所比對：由網站前端執行（未設定 MOA_API_URL，略過）"); return
-    cases = sb("GET", "cases", params={"select": "id,name,lost_city,lost_district,lost_at,colour,size,sex,contact_email", "status": "eq.searching"})
+    cases = sb_all("cases", {"select": "id,name,lost_city,lost_district,lost_at,colour,size,sex,contact_email", "status": "eq.searching", "hidden": "eq.false"})
     if not cases: print("沒有協尋中案件"); return
     try:
         animals = fetch_moa()
     except Exception as e:
         print("抓取農業部資料失敗：", e); return
-    existing = sb("GET", "shelter_matches", params={"select": "case_id,animal_id"}) or []
+    existing = sb_all("shelter_matches", {"select": "id,case_id,animal_id"})
     seen = {(m["case_id"], str(m["animal_id"])) for m in existing}
     rows = []
     for c in cases:
@@ -186,10 +200,10 @@ def found_score(c, f):
     return max(0, min(100, s))
 
 def run_found_matching():
-    cases = sb("GET", "cases", params={"select": "id,species,lost_city,lost_district,lost_at,lost_lat,lost_lng,colour,size,sex", "status": "eq.searching"}) or []
-    founds = sb("GET", "found_reports", params={"select": "id,species,city,district,seen_at,lat,lng,colour,size,sex", "status": "eq.open"}) or []
+    cases = sb_all("cases", {"select": "id,species,lost_city,lost_district,lost_at,lost_lat,lost_lng,colour,size,sex", "status": "eq.searching", "hidden": "eq.false"})
+    founds = sb_all("found_reports", {"select": "id,species,city,district,seen_at,lat,lng,colour,size,sex", "status": "eq.open", "hidden": "eq.false"})
     if not cases or not founds: print("拾獲比對：無資料"); return
-    existing = sb("GET", "found_matches", params={"select": "case_id,found_id"}) or []
+    existing = sb_all("found_matches", {"select": "id,case_id,found_id"})
     seen = {(m["case_id"], m["found_id"]) for m in existing}
     rows = []
     for c in cases:
@@ -204,7 +218,7 @@ def run_found_matching():
 def send_mail(to, subject, body):
     if not (GMAIL_USER and GMAIL_PASS and to): return False
     msg = MIMEText(body, "plain", "utf-8")
-    msg["Subject"] = Header(subject, "utf-8"); msg["From"] = f"{SITE_NAME} <{GMAIL_USER}>"; msg["To"] = to
+    msg["Subject"] = Header(subject, "utf-8"); msg["From"] = formataddr((SITE_NAME, GMAIL_USER)); msg["To"] = to
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as s:
         s.login(GMAIL_USER, GMAIL_PASS); s.sendmail(GMAIL_USER, [to], msg.as_string())
     return True
@@ -218,7 +232,7 @@ def fmt(ts):
 def run_notifications():
     if not (GMAIL_USER and GMAIL_PASS):
         print("未設定 Gmail，略過通知"); return
-    cases = {c["id"]: c for c in (sb("GET", "cases", params={"select": "id,name,contact_email,edit_token"}) or [])}
+    cases = {c["id"]: c for c in sb_all("cases", {"select": "id,name,contact_email,hidden"}) if not c.get("hidden")}
     # 目擊
     pend = sb("GET", "sightings", params={"select": "*", "notified": "eq.false", "order": "created_at.asc"}) or []
     by_case = {}
@@ -331,7 +345,7 @@ def run_due_reminders():
     rows = sb("POST", "rpc/due_targets", body={}) or []
     by_user = {}
     for r in rows: by_user.setdefault((r["user_id"], r["email"]), []).append(r)
-    today = dt.date.today()
+    today = dt.datetime.now(TPE).date()
     for (uid, email), lst in by_user.items():
         lines = ["毛孩的健康項目快到期了：", ""]
         for r in sorted(lst, key=lambda x: x["next_due"]):
@@ -368,7 +382,7 @@ def run_report_alerts():
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.7.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.8.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode == "probe":
         try:
             data = fetch_moa()

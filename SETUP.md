@@ -45,6 +45,7 @@ wanghome/
    - 再跑 `supabase/migration_v1.4.sql`（會員系統）
    - 再跑 `supabase/migration_v1.5.sql`（檢舉與管理後台）
    - 再跑 `supabase/migration_v1.6.sql`（毛孩健康紀錄、私密照片空間）
+   - 再依序跑 `migration_v1.7.sql`（日曆）、`v1.8`（受傷通報）、`v1.9`（用藥）、`v1.10`（照片網址檢查、通知修正）
 3. 左側 **Project Settings → API**，記下兩個值：
    - **Project URL**（像 `https://abcdefgh.supabase.co`）
    - **Publishable key**（以 `sb_publishable_` 開頭；舊版 anon key 也可）
