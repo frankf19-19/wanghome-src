@@ -1,6 +1,6 @@
-// 汪喵回家 service worker v3.5.1
+// 汪喵回家 service worker v3.6.0
 // 只快取網站外殼，讓離線時也能打開；資料（Supabase）一律走網路，不快取。
-const CACHE = 'wanghome-v3.5.1';
+const CACHE = 'wanghome-v3.6.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './duo.svg'];
 
 self.addEventListener('install', e => {
