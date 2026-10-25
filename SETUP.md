@@ -185,3 +185,13 @@ Supabase 內建寄信每小時只能寄很少封，只適合測試。建議用 R
 2. Supabase → Edge Functions → 建立函式 `pet-calendar`，貼上 `supabase/functions/pet-calendar/index.ts`，
    並**關閉 Verify JWT**（日曆 App 無法帶登入資訊，改用私人 token 辨識）。
 3. 會員在「我的」頁面按 Google／iPhone／Outlook 即可訂閱；每筆到期提醒也可單獨加到 Google 日曆或下載 .ics。
+
+## 網域與寄信（2026-10 起）
+- 網站：https://wangmiaotw.com（Cloudflare Pages，從 GitHub main 自動部署，建置指令 `bash build.sh`，輸出 `dist`）
+- 舊網址 frankf19-19.github.io/wanghome 會自動轉到新網址（index.html 開頭的搬家程式）
+- 客服信箱 service@wangmiaotw.com → Cloudflare Email Routing 轉寄到站長 Gmail
+- 所有寄信（登入信、加入會員信、目擊通知、每日通知）都用 Resend，寄件人「汪喵回家 noreply@wangmiaotw.com」
+  - Supabase → Authentication → Emails → SMTP：smtp.resend.com / 465 / resend / 密碼＝Resend 金鑰
+  - Supabase Edge Functions Secrets：`RESEND_API_KEY`
+  - GitHub Actions Secrets：`RESEND_API_KEY`
+  - 中文信件範本：supabase/email-templates/
