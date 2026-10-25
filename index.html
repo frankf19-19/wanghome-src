@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.4.4 -->
+<!-- BUILD v3.5.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -803,9 +803,9 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 .recent a .ph,.reunite .ph{overflow:hidden}.recent a .ph img,.reunite .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
-/* v3.4.4 獎金移到照片左下，不再蓋住「走失第 N 天」 */
+/* v3.5.0 獎金移到照片左下，不再蓋住「走失第 N 天」 */
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* v3.4.4 中文斷行：不讓最後一行只剩一兩個字 */
+/* v3.5.0 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
 /* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
 body :is(p,li,div,small,label,span,dd,td,h1,h2,h3,h4,button,a){text-wrap:balance}
@@ -816,11 +816,19 @@ input,textarea,select{text-wrap:wrap}
 .hint.long{white-space:normal;text-wrap:pretty}
 .hint::before{content:'（'}.hint::after{content:'）'}
 .nw{white-space:nowrap}
-/* v3.4.4 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
+/* v3.5.0 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
 .row2,.row3{align-items:end}
 @media (max-width:520px){.row2:has(.hint),.row2:has(input[type=email]),.row2:has(input[name=reporter_contact]){grid-template-columns:1fr}}
 .hint.long{display:block;margin:3px 0 0;white-space:normal}
 .hint.long::before,.hint.long::after{content:none}
+/* v3.5.0 回報完成頁：大按鈕直接聯絡飼主 */
+.done-card{text-align:center;padding:32px 20px}
+.done-card .done-ic{width:64px;height:64px;margin:0 auto 8px;color:var(--green-fill)}.done-card .done-ic svg{width:100%;height:100%}
+.bigacts{display:grid;gap:10px;margin:14px 0}
+.btn.big{min-height:56px;font-size:18px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn.big.call{background:var(--green-fill);color:#fff;border-color:transparent}
+.btn.big.line{background:#06C755;color:#fff;border-color:transparent}
+#msgTxt{font-size:15px;line-height:1.6}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -860,7 +868,7 @@ input,textarea,select{text-wrap:wrap}
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.4.4</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.5.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -880,7 +888,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.4.4';
+const BUILD = 'v3.5.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1743,7 +1751,7 @@ function renderCreated(id,token){
    回報目擊
    ============================================================ */
 async function renderReport(id){const _n=navId;
-  const {data:c}=await sb.from('cases_public').select('id,name,lost_city,lost_district,lost_lat,lost_lng,photos,status').eq('id',id).single();
+  const {data:c}=await sb.from('cases_public').select('id,name,lost_city,lost_district,lost_lat,lost_lng,photos,status,contact_name,contact_phone,contact_line').eq('id',id).single();
   if(!c){(_n===navId?app:_void).innerHTML='<div class="empty">找不到案件</div>';return}
   setTitle(`回報目擊 ${c.name}`);
   (_n===navId?app:_void).innerHTML=`<h1>回報目擊：${esc(c.name)}</h1>
@@ -1789,7 +1797,21 @@ async function renderReport(id){const _n=navId;
       let photo_url=null;const f=fd.get('photo');if(f&&f.size)photo_url=await uploadPhoto(f,'sightings');
       const {error}=await sb.from('sightings').insert({case_id:id,seen_at:new Date(fd.get('seen_at')).toISOString(),lat:loc.lat,lng:loc.lng,place_text:fd.get('place_text'),direction:fd.get('direction'),note:fd.get('note'),photo_url,reporter_name:fd.get('reporter_name'),reporter_contact:fd.get('reporter_contact')});
       if(error)throw error;
-      (_n===navId?app:_void).innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:60px">🙏</div><h1>謝謝你的回報</h1><p>飼主會收到通知，確認後會顯示在案件地圖上。</p><p class="muted small">如果牠還在你視線內：保持距離、不要追、可以慢慢蹲下側身不直視牠，等飼主聯繫。</p><div style="margin-top:16px"><a class="btn" href="#/case/${id}">回案件頁</a></div></div>`;
+      // 立即寄 Email 給飼主（最多等 8 秒；失敗不影響回報）
+      let mailed=false;try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),8000);const r=await fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-sighting',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY},body:JSON.stringify({case_id:id}),signal:ctl.signal});clearTimeout(tt);mailed=!!(await r.json()).sent}catch(_){}
+      const place=fd.get('place_text')||`${c.lost_city||''}${c.lost_district||''}附近`;const dir=fd.get('direction');const note=fd.get('note');
+      const msg=`你好，我在汪喵回家看到你在找「${c.name}」。\n我在 ${fmtDT(new Date(fd.get('seen_at')).toISOString())} 於「${place}」看到疑似牠${dir&&dir!=='不確定'?'，往'+dir+'走':''}。${note?'\n狀況：'+note:''}\n地圖：https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+      const tel=String(c.contact_phone||'').replace(/[^\d+]/g,'');const lineId=String(c.contact_line||'').trim().replace(/^@?/,m=>m);
+      (_n===navId?app:_void).innerHTML=`<div class="card done-card"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！回報已送出</h1>
+      <p class="lede">${tel||lineId?`${mailed?'系統已經寄 Email 通知飼主了。':''}<b>最快的方法是直接告訴飼主：</b>`:mailed?'系統已經寄 Email 通知飼主了，飼主確認後會跟你聯絡。':'回報已經存好，飼主打開網站就會看到。'}</p>
+      <div class="bigacts">${tel?`<a class="btn big call" href="tel:${esc(tel)}">${ic('phone')} 打電話給${esc(c.contact_name||'飼主')}</a>`:''}
+      ${lineId?`<a class="btn big line" href="https://line.me/R/ti/p/~${encodeURIComponent(lineId)}" target="_blank" rel="noopener">加飼主 LINE（${esc(lineId)}）</a>`:''}
+      ${tel||lineId?`<a class="btn big ghost" href="https://line.me/R/share?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">用 LINE 傳這段話</a>`:''}</div>
+      ${tel||lineId?`<label class="f" style="text-align:left;margin-top:14px"><span>要傳給飼主的話（可以複製）</span><textarea id="msgTxt" rows="5" readonly>${esc(msg)}</textarea></label>
+      <button class="btn ghost" id="cpMsg" type="button">複製這段話</button>`:''}
+      <p class="small muted" style="margin-top:14px">如果牠還在你視線內：保持距離、不要追，蹲低側身不直視牠，等飼主來。</p>
+      <a class="btn ghost" href="#/case/${id}">回案件頁</a></div>`;
+      const cp=$('#cpMsg');if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(msg);toast('已複製，可以貼到 LINE 或簡訊')}catch(_){const t=$('#msgTxt');t.select();document.execCommand('copy');toast('已複製')}};
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出回報'}
   };
 }
