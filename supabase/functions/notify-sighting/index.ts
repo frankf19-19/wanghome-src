@@ -50,6 +50,13 @@ Deno.serve(async (req) => {
   const { count: sentLastHour } = await sb.from("case_mail_log").select("case_id", { count: "exact", head: true })
     .eq("case_id", caseId).gte("sent_at", hourAgo);
   if ((sentLastHour ?? 0) >= 6) return json({ sent: false, reason: "throttled" });
+  // 同一個收件信箱每小時最多 6 封、全站每小時最多 150 封（防止有人拿別人的信箱登記來灌信）
+  const { count: toLastHour } = await sb.from("case_mail_log").select("case_id", { count: "exact", head: true })
+    .eq("to_email", String(c.contact_email).toLowerCase()).gte("sent_at", hourAgo);
+  if ((toLastHour ?? 0) >= 6) return json({ sent: false, reason: "throttled" });
+  const { count: allLastHour } = await sb.from("case_mail_log").select("case_id", { count: "exact", head: true })
+    .gte("sent_at", hourAgo);
+  if ((allLastHour ?? 0) >= 150) return json({ sent: false, reason: "throttled" });
 
   // 先「搶」下尚未通知的目擊（原子更新），避免同時兩次呼叫重複寄
   const since = new Date(Date.now() - 6 * 3600e3).toISOString();   // 被限流延後的目擊，6 小時內都會補寄
@@ -79,7 +86,7 @@ Deno.serve(async (req) => {
       subject: `【${SITE_NAME}】有人看到${c.name}了！`, content: lines.join("\n"),
     });
     await client.close();
-    await sb.from("case_mail_log").insert({ case_id: caseId });
+    await sb.from("case_mail_log").insert({ case_id: caseId, to_email: String(c.contact_email).toLowerCase() });
     return json({ sent: true, count: ss.length });
   } catch (e) {
     try { await client.close(); } catch (_) { /* ignore */ }
