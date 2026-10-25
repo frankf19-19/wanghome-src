@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗狗協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪回家 — 全台走失狗狗協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗狗平安回家。">
-<!-- BUILD v1.0.0 -->
+<!-- BUILD v1.0.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -213,7 +213,7 @@ footer a{color:var(--ink-2);margin:0 6px}
     <a href="#/about">關於本站</a><a href="#/resources">找狗攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料（每日更新）· 地圖 © OpenStreetMap 貢獻者</div>
-  <div class="small" style="margin-top:4px">BUILD v1.0.0</div>
+  <div class="small" style="margin-top:4px">BUILD v1.0.1</div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -224,13 +224,13 @@ footer a{color:var(--ink-2);margin:0 6px}
    ============================================================ */
 const CONFIG = {
   SITE_NAME: '汪回家',
-  SUPABASE_URL: '',          // 例：https://xxxxxxxx.supabase.co
-  SUPABASE_ANON_KEY: '',     // Supabase → Project Settings → API → anon public
+  SUPABASE_URL: 'https://nopyhfpaykkiieudvoko.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_WCeVQIAPH0UEEzhTwovqkg_lJ8Qjydb',  // publishable key（可公開）
   ECPAY_URL: '',             // 綠界實況主收款網址，例：https://p.ecpay.com.tw/XXXXXXX
   CONTACT_EMAIL: '',         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.0.0';
+const BUILD = 'v1.0.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區

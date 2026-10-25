@@ -26,10 +26,10 @@ jobs:
           else echo "mode=notify" >> $GITHUB_OUTPUT; fi
       - name: Run
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          SITE_URL: ${{ secrets.SITE_URL }}
-          SITE_NAME: ${{ secrets.SITE_NAME }}
+          SITE_URL: https://frankf19-19.github.io/wanghome/
+          SITE_NAME: 汪回家
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MOA_API_URL: ${{ secrets.MOA_API_URL }}

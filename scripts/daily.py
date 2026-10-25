@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪回家 WangHome — 每日自動化腳本  v1.0.0
+汪回家 WangHome — 每日自動化腳本  v1.0.1
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -41,7 +41,8 @@ def sb(method, path, body=None, params=None, prefer=None):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method)
     req.add_header("apikey", SERVICE_KEY)
-    req.add_header("Authorization", f"Bearer {SERVICE_KEY}")
+    if SERVICE_KEY.startswith("eyJ"):  # 舊版 JWT service_role；新版 sb_secret_ 只需 apikey header
+        req.add_header("Authorization", f"Bearer {SERVICE_KEY}")
     req.add_header("Content-Type", "application/json")
     req.add_header("Prefer", prefer or "return=representation")
     with urllib.request.urlopen(req, timeout=60) as r:
@@ -204,7 +205,7 @@ def run_notifications():
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.0.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.0.1 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode in ("all", "match"): run_matching()
     if mode in ("all", "notify"): run_notifications()
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})
