@@ -1,10 +1,10 @@
-# 汪回家 WangHome — 安裝說明（v1.3.0）
+# 汪回家 WangHome — 安裝說明（v1.4.0）
 
 ## ✅ 目前已部署
 - 網站：https://frankf19-19.github.io/wanghome/
 - GitHub：https://github.com/frankf19-19/wanghome
 - Supabase 專案：wanghome（東京，ref `nopyhfpaykkiieudvoko`）
-  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql 已執行、publishable key 已填入 index.html
+  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql + migration_v1.4.sql 已執行、publishable key 已填入 index.html
 - GitHub Actions：SUPABASE_URL / SITE_URL / SITE_NAME 已直接寫在 workflow
   - 只需要 Secret：`SUPABASE_SERVICE_KEY`（Supabase → Settings → API Keys → Secret key）
   - 選填 Secret：`GMAIL_USER`、`GMAIL_APP_PASSWORD`（寄通知）、`MOA_API_URL`
@@ -42,6 +42,7 @@ wanghome/
    - 再開一個 New query，貼上 `supabase/migration_v1.1.sql` → **Run**（拾獲通報、長度限制、防灌水）
    - 再跑 `supabase/migration_v1.2.sql`（收容所比對結果寫回）
    - 再跑 `supabase/migration_v1.3.sql`（支援貓）
+   - 再跑 `supabase/migration_v1.4.sql`（會員系統）
 3. 左側 **Project Settings → API**，記下兩個值：
    - **Project URL**（像 `https://abcdefgh.supabase.co`）
    - **Publishable key**（以 `sb_publishable_` 開頭；舊版 anon key 也可）
@@ -131,3 +132,28 @@ repo → **Settings → Secrets and variables → Actions → New repository sec
 農業部開放資料（data.moa.gov.tw）只接受台灣 IP，GitHub Actions（美國）和 Supabase（東京）都連不上。
 所以改成：任何人打開案件頁時，由他的瀏覽器抓「該縣市的收容犬」（約 1MB），比對後把新結果寫回資料庫。
 飼主管理頁打開時也會重新比對。若之後有台灣的代理伺服器，設定 GitHub Secret `MOA_API_URL` 即可恢復每日伺服器端比對。
+
+
+## 會員登入設定（v1.4）
+Supabase → Authentication → URL Configuration：
+- Site URL：`https://frankf19-19.github.io/wanghome/`
+- Redirect URLs：加入 `https://frankf19-19.github.io/wanghome/**`
+
+登入採用 Email 魔法連結（PKCE），不需要密碼。
+
+### 正式使用前務必設定自己的寄信服務（SMTP）
+Supabase 內建寄信每小時只能寄很少封，只適合測試。建議用 Resend（免費每月 3,000 封）：
+1. 註冊 https://resend.com ，建立 API Key
+2. Supabase → Authentication → Emails → SMTP Settings → Enable custom SMTP
+   - Host：`smtp.resend.com`，Port：`465`，Username：`resend`，Password：你的 Resend API Key
+   - Sender email：沒有自己的網域時用 `onboarding@resend.dev`（只能寄給自己測試），正式使用需在 Resend 驗證網域
+3. Authentication → Rate Limits 可把每小時寄信上限調高
+
+### Google 登入（選用）
+1. Google Cloud Console → APIs & Services → Credentials → 建立 OAuth Client ID（Web application）
+   - Authorized redirect URI：`https://nopyhfpaykkiieudvoko.supabase.co/auth/v1/callback`
+2. Supabase → Authentication → Sign In / Providers → Google → 貼上 Client ID 與 Client Secret → 啟用
+3. `index.html` 的 CONFIG 把 `GOOGLE_LOGIN` 改成 `true`
+
+### 會員通知
+附近走失、追蹤案件的 Email 通知由 GitHub Actions 每 2 小時寄出，需要設定 Secrets：`GMAIL_USER`、`GMAIL_APP_PASSWORD`。

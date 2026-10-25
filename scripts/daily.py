@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪回家 WangHome — 每日自動化腳本  v1.3.0
+汪回家 WangHome — 每日自動化腳本  v1.4.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -285,10 +285,50 @@ def run_notifications():
             print("寄信失敗：", e); continue
         sb("PATCH", "found_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
 
+# ---------------------------------------------------------------- 會員通知
+SP_NAME = {"dog": "狗", "cat": "貓"}
+def run_member_notifications():
+    if not (GMAIL_USER and GMAIL_PASS):
+        print("未設定 Gmail，略過會員通知"); return
+    # 附近新案件
+    rows = sb("POST", "rpc/nearby_targets", body={"p_hours": 26}) or []
+    by_user = {}
+    for r in rows: by_user.setdefault((r["user_id"], r["email"]), []).append(r)
+    for (uid, email), lst in by_user.items():
+        lines = [f"你家附近有 {len(lst)} 隻毛孩走失了，看到請拍照回報、不要追：", ""]
+        for r in lst[:10]:
+            lines.append(f"・{SP_NAME.get(r['species'], '')} {r['case_name']}（距離約 {r['distance_km']:.1f} 公里）{r['lost_city']}{r.get('lost_district') or ''} {r.get('lost_place') or ''}")
+            lines.append(f"  {SITE_URL}#/case/{r['case_id']}")
+        lines += ["", f"不想再收到？到「我的 → 通知設定」關閉：{SITE_URL}#/me", f"— {SITE_NAME}"]
+        try:
+            send_mail(email, f"【{SITE_NAME}】你家附近有毛孩走失", "\n".join(lines))
+            sb("POST", "notify_log", body=[{"user_id": uid, "kind": "nearby", "ref_id": r["case_id"]} for r in lst],
+               prefer="return=minimal,resolution=ignore-duplicates")
+            print(f"附近通知：{len(lst)} 筆 → 1 位會員")
+        except Exception as e:
+            print("附近通知寄送失敗：", e)
+    # 追蹤案件新目擊
+    rows = sb("POST", "rpc/follow_targets", body={"p_hours": 26}) or []
+    by_user = {}
+    for r in rows: by_user.setdefault((r["user_id"], r["email"]), []).append(r)
+    for (uid, email), lst in by_user.items():
+        lines = ["你追蹤的案件有新的目擊：", ""]
+        for r in lst[:15]:
+            lines.append(f"・{r['case_name']}  {fmt(r['seen_at'])}  {r.get('place_text') or '（見地圖）'}")
+            lines.append(f"  {SITE_URL}#/case/{r['case_id']}")
+        lines += ["", f"管理追蹤與通知：{SITE_URL}#/me", f"— {SITE_NAME}"]
+        try:
+            send_mail(email, f"【{SITE_NAME}】追蹤的案件有新目擊", "\n".join(lines))
+            sb("POST", "notify_log", body=[{"user_id": uid, "kind": "follow", "ref_id": r["sighting_id"]} for r in lst],
+               prefer="return=minimal,resolution=ignore-duplicates")
+            print(f"追蹤通知：{len(lst)} 筆 → 1 位會員")
+        except Exception as e:
+            print("追蹤通知寄送失敗：", e)
+
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.3.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.4.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode == "probe":
         try:
             data = fetch_moa()
@@ -304,5 +344,6 @@ if __name__ == "__main__":
     if mode in ("all", "match"): run_matching()
     if mode in ("all", "match", "notify"): run_found_matching()
     if mode in ("all", "notify"): run_notifications()
+    if mode in ("all", "notify"): run_member_notifications()
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})
     print("保活 OK", "有資料" if n else "空")
