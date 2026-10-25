@@ -2,7 +2,7 @@ name: Build share preview pages
 
 on:
   schedule:
-    - cron: "7,37 * * * *"   # 每 30 分鐘
+    - cron: "8,38 * * * *"   # 每 30 分鐘
   workflow_dispatch:
 
 permissions:
