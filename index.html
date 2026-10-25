@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.0.0 -->
+<!-- BUILD v3.1.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -778,6 +778,24 @@ select:focus,input:focus,textarea:focus{border-color:var(--red)}
 footer{border-top:0;background:var(--beige);border-radius:26px 26px 0 0;max-width:none;padding-left:max(20px,calc((100% - 1080px)/2));padding-right:max(20px,calc((100% - 1080px)/2))}
 form.steps>h3::before{background:var(--red-fill)!important;color:#fff!important}
 body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!important}
+/* 用藥與保養品 */
+.med-card{padding:6px 16px 10px}
+.med-title{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--head);font-weight:800;font-size:16px;padding:10px 0 4px}
+.med-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.med-row:first-of-type{border-top:0}
+.med-h{display:flex;gap:10px;align-items:center;flex:1 1 200px;min-width:0}
+.med-ic{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--red-soft);color:var(--red)}
+.med-ic.supplement{background:var(--green-soft);color:var(--green)}
+.med-ic .ico{width:19px;height:19px}
+.sponsor .av.med-ic{border-radius:12px;background:var(--red-soft)!important;color:var(--red)}
+.sponsor .av.med-ic.supplement{background:var(--green-soft)!important;color:var(--green)}
+.med-b b{display:block;font-size:15.5px}.med-b small{display:block;color:var(--ink-2);font-size:13.5px}
+.med-slots{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.slot{min-height:40px;padding:0 14px;border-radius:12px;border:1.5px dashed var(--line);background:var(--paper);color:var(--ink-2);font:inherit;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.slot.done{border-style:solid;border-color:var(--green-fill);background:var(--green-fill);color:#fff}
+.slot .ico{width:15px;height:15px}
+.med-off{margin-top:10px;font-size:14px}.med-off summary{cursor:pointer;color:var(--ink-3);font-weight:700}
+.med-off a{display:block;padding:6px 2px;color:var(--ink-2)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -817,7 +835,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.0.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.1.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -836,7 +854,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.0.0';
+const BUILD = 'v3.1.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -990,7 +1008,7 @@ function route(){
   const h=location.hash||'#/';
   const path=h.split('?')[0];
   renderChrome(path,h);
-  document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record))/.test(path));
+  document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
@@ -1012,6 +1030,7 @@ function route(){
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/edit$/)))return renderPet(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/print$/)))return renderPetPrint(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/record\/(new|[0-9a-f-]{36})$/)))return renderRecord(m[1],m[2]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/med\/(new|[0-9a-f-]{36})$/)))return renderMed(m[1],m[2]);
   if(path==='#/health')return renderHealth();
   if(path==='#/health/add')return renderHealthAdd();
   if(path==='#/thanks')return renderThanks();
@@ -1125,10 +1144,12 @@ async function renderHealth(){
   setTitle('毛孩健康手冊');
   if(!me())return renderHealthLanding();
   app.innerHTML=`<div class="empty">載入中…</div>`;
-  const [prof,{data:pets},{data:dues}]=await Promise.all([
+  const [prof,{data:pets},{data:dues},{data:medsA}]=await Promise.all([
     getProfile(), sb.from('pets').select('*').order('created_at'),
-    sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),2)).order('next_due').limit(40)
+    sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),2)).order('next_due').limit(40),
+    sb.from('pet_meds').select('*').eq('active',true).order('created_at')
   ]);
+  const hMeds=medsA||[];let hLogs=[];if(hMeds.length){const {data}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',hMeds.map(x=>x.id)).gte('given_at',todayStartISO());hLogs=data||[]}
   const p=prof||{};const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const ds=dues||[];const overdue=ds.filter(r=>r.next_due<todayStr()).length;const soon=ds.filter(r=>r.next_due>=todayStr()&&r.next_due<=new Date(Date.now()+14*864e5).toISOString().slice(0,10)).length;
   if(!(pets||[]).length){app.innerHTML=`<div class="health-hero art"><img src="duo.svg" alt="" width="220" height="150"><div><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div></div>
@@ -1136,10 +1157,11 @@ async function renderHealth(){
   app.innerHTML=`<div class="health-hero row"><div><h1>毛孩健康手冊</h1><p class="lede">${overdue?`<b style="color:var(--red)">${overdue} 項已過期</b>，`:''}${soon?`${soon} 項兩週內到期`:ds.length?'近期沒有急著要做的事':'還沒有設定到期提醒'}</p></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
   <div class="grid">${pets.map(petCardHTML).join('')}</div>
+  ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2>${ic("pill")} 今天的用藥與保養品</h2><div class="card med-card">${rows.join('')}</div>`:''})()}
   <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
   ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts">${calButtons(petName[r.pet_id]||'毛孩',r)}<button class="btn sm" data-done="${r.id}">已完成</button></div></div>`).join('')}</div>`:`<div class="card muted small">新增紀錄時填「下次到期日」（例如疫苗一年後），就會出現在這裡，到期前寄 Email 提醒你。</div>`}
   <div id="calSec">${calSection(p)}</div>`;
-  bindCal(renderHealth);bindIcs(ds,r=>petName[r.pet_id]||'毛孩');
+  bindCal(renderHealth);bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(renderHealth);
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderHealth()});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
@@ -2457,9 +2479,12 @@ function weightChart(points){
 async function renderPetView(id){
   if(!requireLogin())return;
   app.innerHTML='<div class="empty">載入中…</div>';
-  const [{data:p},{data:recs}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false})]);
+  const [{data:p},{data:recs},{data:medsAll}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).order('created_at')]);
   if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   setTitle(p.name);
+  const meds=(medsAll||[]).filter(x=>x.active),medsOff=(medsAll||[]).filter(x=>!x.active);
+  let mlogs=[];if(meds.length){const {data}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',meds.map(x=>x.id)).gte('given_at',todayStartISO());mlogs=data||[]}
+  const medToday=meds.map(x=>medTodayHTML(x,mlogs)).filter(Boolean);
   const rs=recs||[];
   const filter=qs(location.hash).k||'';
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
@@ -2492,6 +2517,7 @@ async function renderPetView(id){
       </dl></div>
       <div class="actionbar">
         <a class="btn" href="#/pet/${id}/record/new">＋ 新增紀錄</a>
+        <a class="btn ghost" href="#/pet/${id}/med/new">${ic('pill')} 新增用藥／保養品</a>
         <a class="btn ghost" href="#/pet/${id}/print">${ic("steth")} 給獸醫看</a>
         <a class="btn ghost" href="#/pet/${id}/edit">編輯資料</a>
         <a class="btn ghost" href="#/new?pet=${id}">${ic("siren")} 走失了</a>
@@ -2500,6 +2526,12 @@ async function renderPetView(id){
   </div>
 
   ${calPrompt?`<div class="calprompt" id="calPrompt"><div class="b"><b>已設定提醒：${esc(calPrompt.title)}</b><br><span class="muted">${calPrompt.next_due}・${dueText(calPrompt.next_due)}，要順便加到手機日曆嗎？</span></div><div class="acts">${calButtons(p.name,calPrompt)}<button type="button" class="btn sm ghost" id="calPromptX">不用</button></div></div>`:''}
+  <h2>${ic("pill")} 用藥與保養品 <a class="btn sm ghost" href="#/pet/${id}/med/new" style="margin-left:auto">${ic("plus")} 新增</a></h2>
+  ${meds.length?`${medToday.length?`<div class="card med-card"><div class="med-title">今天吃了沒？<span class="muted small">餵完點一下</span></div>${medToday.join('')}</div>`:''}
+  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span></b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a>`).join('')}</div>`
+  :`<div class="empty-card"><div class="big">${ic("pill")}</div><b>還沒有記錄用藥或保養品</b><p class="small">記下藥名、每次劑量和一天幾次，家人餵藥時就不會搞錯或重複餵。</p><div class="btns"><a class="btn green" href="#/pet/${id}/med/new">新增藥品</a><a class="btn ghost" href="#/pet/${id}/med/new?kind=supplement">新增保養品</a></div></div>`}
+  ${medsOff.length?`<details class="med-off"><summary>已停用 ${medsOff.length} 項</summary>${medsOff.map(x=>`<a href="#/pet/${id}/med/${x.id}">${esc(x.name)}・${esc(medLine(x))}${x.end_date?`・到 ${x.end_date}`:''}</a>`).join('')}</details>`:''}
+
   ${due.length?`<h2>${ic("clock")} 下次到期</h2><div class="card" style="padding:6px 18px">${due.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><b>${esc(r.title)}</b><div class="msg">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts">${calButtons(p.name,r)}<button class="btn sm" data-done="${r.id}">已完成</button></div></div>`).join('')}<p class="muted small" style="margin:4px 0 10px">想讓所有到期日自動進日曆？到 <a href="#/health?cal=1">健康手冊的日曆同步</a> 訂閱一次就好。</p></div>`:''}
 
   ${weights.length>=2?`<h2>${ic("scale")} 體重變化</h2><div class="card">${weightChart(weights)}</div>`:''}
@@ -2515,6 +2547,7 @@ async function renderPetView(id){
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{location.hash=`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:'')});
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderPetView(id)});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
+  bindMedSlots(()=>renderPetView(id));
   if($('#calPromptX'))$('#calPromptX').onclick=()=>$('#calPrompt').remove();
 }
 
@@ -2573,11 +2606,104 @@ async function renderRecord(petId,recId){
   if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('確定刪除這筆紀錄？'))return;if(files.length)await sb.storage.from('pet-private').remove(files);const {error}=await sb.from('pet_records').delete().eq('id',recId);if(error)return toast(error.message);location.hash='#/pet/'+petId};
 }
 
+
+/* ============================================================
+   藥品與保養品（劑量、頻率、今天吃了沒）
+   ============================================================ */
+const MED_UNITS=['顆','錠','膠囊','ml','mg','g','包','滴','匙','片','噴','條'];
+const MED_FREQ={daily1:'每天 1 次',daily2:'每天 2 次',daily3:'每天 3 次',every_other:'隔天 1 次',weekly:'每週 1 次',asneeded:'需要時',other:'其他（看備註）'};
+const MED_TIMES=['早上','中午','晚上','睡前'];
+const MED_PRESETS={
+  supplement:{dog:['關節保健（葡萄糖胺）','魚油','益生菌','綜合維他命','皮毛保健','護眼保健','腸胃保健','潔牙保健'],cat:['離胺酸','魚油','益生菌','化毛膏','泌尿保健','腸胃保健','綜合維他命','關節保健']},
+  med:{dog:['抗生素','消炎止痛藥','止癢藥','胃藥','心臟藥','眼藥水','耳藥','皮膚外用藥'],cat:['抗生素','消炎止痛藥','腎臟用藥','甲狀腺藥','胃藥','眼藥水','耳藥','皮膚外用藥']}
+};
+ICONS.pill='<rect x="2.8" y="8.5" width="18.4" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="m8.5 8.5 7 7"/>';
+ICONS.leaf='<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/>';
+function doseText(m){const a=m.dose_amount!=null?String(+m.dose_amount):'';return a?`${a} ${m.dose_unit||''}`.trim():''}
+function medSlots(m,dateStr){
+  if(m.freq==='asneeded')return [];
+  const d=dateStr||todayStr();
+  if(m.start_date&&d<m.start_date)return null;
+  if(m.end_date&&d>m.end_date)return null;
+  const days=Math.round((new Date(d+'T00:00:00')-new Date((m.start_date||d)+'T00:00:00'))/86400000);
+  if(m.freq==='every_other'&&days%2!==0)return null;
+  if(m.freq==='weekly'&&days%7!==0)return null;
+  if(m.times&&m.times.length)return m.times;
+  return {daily2:['早上','晚上'],daily3:['早上','中午','晚上']}[m.freq]||['今天'];
+}
+function medLine(m){return [doseText(m),MED_FREQ[m.freq],m.times?.length?m.times.join('、'):''].filter(Boolean).join('・')}
+function todayStartISO(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString()}
+// 今天的勾選列（毛孩頁與健康手冊共用）
+function medTodayHTML(m,logs,petName){
+  const mine=logs.filter(l=>l.med_id===m.id);
+  const slots=medSlots(m);
+  const head=`<div class="med-h"><span class="med-ic ${m.kind}">${ic(m.kind==='supplement'?'leaf':'pill')}</span><div class="med-b"><b>${petName?esc(petName)+'｜':''}${esc(m.name)}</b><small>${esc(medLine(m))}${m.purpose?'・'+esc(m.purpose):''}</small></div></div>`;
+  if(m.freq==='asneeded')return `<div class="med-row">${head}<div class="med-slots"><button type="button" class="slot" data-medlog="${m.id}" data-slot="需要時">${ic('plus')} 記一次</button>${mine.length?`<span class="muted small">今天已給 ${mine.length} 次</span>`:''}</div></div>`;
+  if(!slots)return '';
+  return `<div class="med-row">${head}<div class="med-slots">${slots.map(sl=>{const l=mine.find(x=>x.slot===sl);return `<button type="button" class="slot ${l?'done':''}" data-medlog="${m.id}" data-slot="${esc(sl)}" ${l?`data-logid="${l.id}"`:''}>${l?'✓ ':''}${esc(sl)}</button>`}).join('')}</div></div>`;
+}
+function bindMedSlots(rerender){
+  document.querySelectorAll('[data-medlog]').forEach(b=>b.onclick=async()=>{
+    b.disabled=true;
+    if(b.dataset.logid){const {error}=await sb.from('pet_med_logs').delete().eq('id',b.dataset.logid);if(error){b.disabled=false;return toast(error.message)}}
+    else{const {error}=await sb.from('pet_med_logs').insert({med_id:b.dataset.medlog,slot:b.dataset.slot});if(error){b.disabled=false;return toast(error.message)}toast(b.dataset.slot==='需要時'?'已記錄':'已勾選：'+b.dataset.slot)}
+    rerender();
+  });
+}
+async function renderMed(petId,medId){
+  if(!requireLogin())return;
+  const {data:p}=await sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle();
+  if(!p){app.innerHTML='<div class="empty">找不到這隻寵物</div>';return}
+  let m={kind:qs(location.hash).kind==='supplement'?'supplement':'med',freq:'daily1',times:[],start_date:todayStr(),active:true,dose_unit:'顆'};
+  if(medId!=='new'){const {data}=await sb.from('pet_meds').select('*').eq('id',medId).maybeSingle();if(!data){app.innerHTML='<div class="empty">找不到這筆資料</div>';return}m=data}
+  setTitle((medId==='new'?'新增':'編輯')+'藥品／保養品');
+  app.innerHTML=`<p class="small"><a href="#/pet/${petId}">← ${esc(p.name)}</a></p>
+  <h1>${medId==='new'?'新增藥品／保養品':'編輯藥品／保養品'}</h1>
+  <form class="card" id="mf">
+    <div class="seg" id="segMK"><button type="button" data-v="med" class="${m.kind==='med'?'on':''}">${ic('pill')} 藥品</button><button type="button" data-v="supplement" class="${m.kind==='supplement'?'on':''}">${ic('leaf')} 保養品</button></div>
+    <label class="f"><span>名稱 <i class="req">*</i></span><input type="text" name="name" required maxlength="60" value="${esc(m.name||'')}" placeholder="例：關節保健、消炎藥（藥袋上的名稱）"></label>
+    <div class="seg" id="mPresets" style="margin-top:8px"></div>
+    <div class="row2">
+      <label class="f"><span>每次劑量</span><input type="number" name="dose_amount" step="0.01" min="0" inputmode="decimal" value="${m.dose_amount??''}" placeholder="例：0.5"></label>
+      <label class="f"><span>單位</span><select name="dose_unit">${MED_UNITS.map(u=>`<option ${u===(m.dose_unit||'顆')?'selected':''}>${u}</option>`).join('')}</select></label>
+    </div>
+    <p class="muted small" style="margin:4px 0 0">半顆請填 0.5；藥水填 ml。請照藥袋或獸醫的指示，網站不會建議劑量。</p>
+    <label class="f"><span>多久吃一次</span><select name="freq">${Object.entries(MED_FREQ).map(([k,t])=>`<option value="${k}" ${k===m.freq?'selected':''}>${t}</option>`).join('')}</select></label>
+    <label class="f"><span>什麼時候吃（可複選，選填）</span></label>
+    <div class="seg multi" id="mTimes">${MED_TIMES.map(t=>`<button type="button" data-v="${t}" class="${(m.times||[]).includes(t)?'on':''}">${t}</button>`).join('')}</div>
+    <div class="row2">
+      <label class="f"><span>開始日期</span><input type="date" name="start_date" value="${m.start_date||todayStr()}"></label>
+      <label class="f"><span>吃到哪天（不填＝持續吃）</span><input type="date" name="end_date" value="${m.end_date||''}"></label>
+    </div>
+    <label class="f"><span>用途</span><input type="text" name="purpose" maxlength="100" value="${esc(m.purpose||'')}" placeholder="例：關節保養、皮膚炎、術後消炎"></label>
+    <label class="f"><span>醫院／購買來源</span><input type="text" name="clinic" maxlength="60" value="${esc(m.clinic||'')}" placeholder="例：仁愛動物醫院"></label>
+    <label class="f"><span>備註</span><textarea name="notes" maxlength="500" placeholder="例：飯後吃、磨成粉拌飯、冷藏保存">${esc(m.notes||'')}</textarea></label>
+    ${medId!=='new'?`<label class="chk"><input type="checkbox" name="active" ${m.active?'checked':''}> 目前還在吃（取消勾選＝停用，紀錄會保留）</label>`:''}
+    <div class="submitbar row"><button class="btn green">儲存</button>${medId!=='new'?'<button type="button" class="btn ghost" id="btnDelM">刪除</button>':''}<a class="btn ghost" href="#/pet/${petId}">取消</a></div>
+  </form>`;
+  const f=$('#mf');let kind=m.kind;const times=new Set(m.times||[]);
+  const drawP=()=>{const list=(MED_PRESETS[kind]||{})[p.species==='cat'?'cat':'dog']||[];$('#mPresets').innerHTML=list.map(t=>`<button type="button" data-t="${esc(t)}">${esc(t)}</button>`).join('');$('#mPresets').querySelectorAll('button').forEach(b=>b.onclick=()=>{f.elements.name.value=b.dataset.t;if(!f.elements.purpose.value&&kind==='supplement')f.elements.purpose.value=b.dataset.t.replace(/（.*）/,'')})};
+  drawP();
+  $('#segMK').querySelectorAll('button').forEach(b=>b.onclick=()=>{kind=b.dataset.v;$('#segMK').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));drawP()});
+  $('#mTimes').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;times.has(v)?times.delete(v):times.add(v);b.classList.toggle('on',times.has(v))});
+  f.onsubmit=async e=>{
+    e.preventDefault();const fd=new FormData(f);
+    const sd=fd.get('start_date')||todayStr(),ed=fd.get('end_date')||null;
+    if(ed&&ed<sd)return toast('結束日期不能早於開始日期');
+    const row={pet_id:petId,kind,name:fd.get('name').trim(),dose_amount:fd.get('dose_amount')?+fd.get('dose_amount'):null,dose_unit:fd.get('dose_unit'),freq:fd.get('freq'),times:MED_TIMES.filter(t=>times.has(t)),start_date:sd,end_date:ed,purpose:fd.get('purpose')||null,clinic:fd.get('clinic')||null,notes:fd.get('notes')||null,active:medId==='new'?true:!!f.elements.active.checked};
+    if(!row.name)return toast('請填名稱');
+    const {error}=medId==='new'?await sb.from('pet_meds').insert(row):await sb.from('pet_meds').update(row).eq('id',medId);
+    if(error)return toast('儲存失敗：'+error.message);
+    toast('已儲存');location.hash='#/pet/'+petId;
+  };
+  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!confirm('確定刪除？給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。'))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);location.hash='#/pet/'+petId};
+}
 async function renderPetPrint(id){
   if(!requireLogin())return;
-  const [{data:p},{data:recs}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false})]);
+  const [{data:p},{data:recs},{data:pmeds}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).eq('active',true).order('kind').order('created_at')]);
   if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}
   setTitle(p.name+' 病歷摘要');
+  const curMeds=pmeds||[];
   const rs=recs||[];const ph=p.photos?.[0];
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
   const weights=rs.filter(r=>r.weight_kg);
@@ -2591,6 +2717,7 @@ async function renderPetPrint(id){
       <p class="small" style="margin:0">晶片：${p.has_chip?(esc(p.chip_no)||'有'):'無'}　結紮：${p.neutered===true?'是':p.neutered===false?'否':'未填'}${weights.length?`　最新體重：${weights[0].weight_kg} kg（${weights[0].date}）`:''}</p></div>
     </div>
     ${p.notes?`<h3>過敏、慢性病與注意事項</h3><p style="white-space:pre-wrap">${esc(p.notes)}</p>`:''}
+    ${curMeds.length?`<h3>目前用藥與保養品</h3><table class="rtable"><thead><tr><th>名稱</th><th>類別</th><th>劑量與頻率</th><th>用途／期間</th></tr></thead><tbody>${curMeds.map(x=>`<tr><td><b>${esc(x.name)}</b>${x.clinic?`<div class="small">${esc(x.clinic)}</div>`:''}</td><td style="white-space:nowrap">${x.kind==='supplement'?'保養品':'藥品'}</td><td>${esc(medLine(x)||'—')}</td><td>${esc([x.purpose,`${x.start_date} 起`,x.end_date?`到 ${x.end_date}`:'持續'].filter(Boolean).join('，'))}${x.notes?`<div class="small">${esc(x.notes)}</div>`:''}</td></tr>`).join('')}</tbody></table>`:''}
     ${due.length?`<h3>即將到期</h3><ul style="margin:0;padding-left:20px">${due.map(r=>`<li>${r.next_due}　${esc(r.title)}</li>`).join('')}</ul>`:''}
     ${['vaccine','deworm','vet','surgery','med'].map(k=>{const list=rs.filter(r=>r.kind===k);return list.length?`<h3>${REC_KINDS[k][1]}紀錄</h3><table class="rtable"><thead><tr><th>日期</th><th>類別</th><th>項目與說明</th><th>醫院</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table>`:''}).join('')}
     <p class="muted small" style="margin-top:18px">由飼主自行記錄，僅供參考。產生於 ${todayStr()}・${esc(CONFIG.SITE_NAME)}</p>
