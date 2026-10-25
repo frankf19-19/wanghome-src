@@ -298,7 +298,9 @@ a.ph{display:block}
 .exif-hint{font-size:12.5px;color:var(--green);margin-top:6px}
 
 /* 病歷表 */
-.rtable{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+.rtable{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px;table-layout:fixed}
+.rtable th:nth-child(1){width:112px}.rtable th:nth-child(2){width:96px}.rtable th:nth-child(4){width:30%}
+@media(max-width:560px){.rtable th:nth-child(2),.rtable td:nth-child(2){display:none}.rtable th:nth-child(1){width:92px}}
 .rtable th{text-align:left;font-size:12.5px;color:var(--ink-3);font-weight:700;border-bottom:1.5px solid var(--line);padding:6px 8px}
 .rtable td{border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
 @media print{
