@@ -45,7 +45,7 @@ if(h.indexOf('#mig=')===0){
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://wangmiaotw.com/">
-<!-- BUILD v3.11.0 -->
+<!-- BUILD v3.12.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -513,6 +513,8 @@ a.ph{display:block}
 .statushelp{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:2px}
 .logintabs{display:grid;grid-template-columns:1fr 1fr;margin:-4px 0 14px}.logintabs button{min-height:48px;font-weight:800}
 .more-row{grid-column:1/-1;display:flex;justify-content:center;margin:8px 0 4px}
+.citygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:12px}.citygrid .btn{padding:10px 6px}
+.adopt-card .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .telrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 6px}.telrow .btn{flex:1 1 160px}
 .calmenu{position:relative;display:inline-block}
 .calmenu>summary{list-style:none;cursor:pointer}.calmenu>summary::-webkit-details-marker{display:none}
@@ -1011,8 +1013,8 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/seen">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>© 2026 汪喵回家 版權所有</span><span>BUILD v3.11.0</span></div>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/seen">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>© 2026 汪喵回家 版權所有</span><span>BUILD v3.12.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -1033,7 +1035,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.11.0';
+const BUILD = 'v3.12.0';
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
 
@@ -1205,7 +1207,7 @@ function spaceOf(path){
   return sp;
 }
 // 底部「我的」：沒登入時寫「註冊／登入」，讓新朋友知道可以加入
-function meLabel(){return (typeof session!=='undefined'&&session?.user)?'我的':'註冊／登入'}
+function meLabel(){try{return session?.user?'我的':'註冊／登入'}catch(_){return '註冊／登入'}}
 function renderChrome(path,h){
   const space=spaceOf(path);document.body.dataset.space=space;
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
@@ -1265,6 +1267,8 @@ function route(){
   if((m=path.match(/^#\/found-manage\/([0-9a-f-]{36})$/)))return renderFoundManage(m[1],qs(h).t);
   if(path==='#/verify'){handleVerify().then(()=>route());return}
   if(path==='#/verify-email')return renderVerifyEmail(qs(h));
+  if(path==='#/adopt')return renderAdopt();
+  if((m=path.match(/^#\/adopt\/(\d{1,10})$/)))return renderAdoptOne(m[1]);
   if(path==='#/login')return renderLogin();
   if(path==='#/me')return renderMe();
   if(path==='#/admin')return renderAdmin();
@@ -1357,7 +1361,7 @@ function renderSetup(){
    首頁 v1.1：走失 / 拾獲 / 地圖 三個分頁、我附近、最新目擊
    ============================================================ */
 const homeState={tab:'lost',species:'',city:'',status:'searching',reward:false,q:'',chip:'',near:null,limit:60};
-function setHomeTab(t){const h=t==='lost'?'#/':'#/?tab='+t;if(location.hash===h)return;try{history.replaceState(history.state,'',location.pathname+location.search+h)}catch(_){}curHash=location.hash;renderChrome('#/',location.hash)}
+function setHomeTab(t){const h=t==='lost'?'#/':'#/?tab='+t;if(location.hash===h)return;try{history.replaceState(history.state,'',location.pathname+location.search+h)}catch(_){}curHash=location.hash;scrollMem[curHash]=scrollY;renderChrome('#/',location.hash)}
 
 // 這支手機登記過的案件／通報（不用登入也找得回來）
 function getMine(){try{const l=JSON.parse(localStorage.getItem('wh_mine')||'[]');return Array.isArray(l)?l.filter(x=>x&&/^[0-9a-f-]{36}$/.test(x.id)&&(x.t==='case'||x.t==='found')):[]}catch(_){return []}}
@@ -1413,6 +1417,7 @@ ${bigStartHTML()}
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
   <div id="recentWrap" class="hidden"><h2>${ic("eye")} 最新目擊</h2><div class="recent" id="recent"></div></div>
   <div id="homeWrap" class="hidden"><h2>${ic("paw")} 最近回家的毛孩</h2><div class="reunite" id="reunite"></div></div>
+  <a class="crosslink" href="#/adopt"><span class="cl-ic">${ic("shelter")}</span><span><b>想領養毛孩？</b>全台公立收容所有上千隻狗狗、貓咪在等一個家。依縣市看照片，一鍵打電話給收容所</span><em>看等待領養的毛孩</em></a>
   <a class="crosslink" href="#/health"><span class="cl-ic">${ic("steth")}</span><span><b>想記錄自家毛孩的健康？</b>回診、疫苗、驅蟲到期自動提醒，同步手機日曆。到「健康手冊」免費使用</span><em>前往健康手冊</em></a>
   `;
   $('#fStatus').value=homeState.status;$('#fSp').value=homeState.species;
@@ -1558,7 +1563,7 @@ async function loadList(){
   const el=$('#list');if(!el)return;
   $('#lostFilters').classList.toggle('hidden',homeState.tab!=='lost');document.querySelectorAll('.lost-f').forEach(x=>x.classList.toggle('hidden',homeState.tab!=='lost'));
   if(homeState.tab==='map')return loadMapAll(el);
-  el.className='grid';el.innerHTML=skel();
+  el.className='grid';if(homeState._more)homeState._more=false;else el.innerHTML=skel();   // 「顯示更多」時保留原本的卡片，不閃空
   if(homeState.tab==='found')return loadFoundList(el);
   const lim=homeState.near?200:(homeState.limit||60);
   let q=sb.from('cases_public').select('*').order('last_activity',{ascending:false}).limit(lim);
@@ -1583,7 +1588,7 @@ async function loadList(){
 }
 // 清單一次 60 筆，滿了就顯示「顯示更多」
 function moreBtn(n,lim){return !homeState.near&&n>=lim?`<div class="more-row"><button type="button" class="btn ghost big" id="btnMore">顯示更多（目前 ${n} 筆）</button></div>`:''}
-function bindMore(el){const b=el.querySelector('#btnMore');if(b)b.onclick=()=>{homeState.limit=(homeState.limit||60)+60;const y=scrollY;const r=loadList();if(r&&r.then)r.then(()=>window.scrollTo(0,y))}}
+function bindMore(el){const b=el.querySelector('#btnMore');if(b)b.onclick=()=>{homeState.limit=(homeState.limit||60)+60;homeState._more=true;b.disabled=true;b.textContent='載入中…';const y=scrollY;const r=loadList();if(r&&r.then)r.then(()=>window.scrollTo(0,y))}}
 async function loadFoundList(el){
   const my=listSeq;
   const lim=homeState.near?200:(homeState.limit||60);
@@ -1782,7 +1787,7 @@ async function renderCase(id){const _n=navId;
         </dl>
       </div>
       ${active?`<div class="banner" style="margin-top:10px">看到請勿呼喊、追趕或包圍<small>請拍照，記下時間、位置及方向，立即回報</small></div>`:''}
-      ${active&&c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">${ic('phone')} ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
+      ${!active?'':c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">${ic('phone')} ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
       <div class="actionbar">
         ${active?`<a class="btn" href="#/report/${id}">${ic("eye")} 回報目擊</a>`:''}
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
@@ -2563,6 +2568,7 @@ async function renderFound(id){const _n=navId;
   <div id="caseMatches"></div>`;
   document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${safeU(photos[+t.dataset.i])}')`});
   $('#gMain').onclick=()=>{const u=$('#gMain').style.backgroundImage.slice(5,-2);if(u)lightbox(u)};
+  app.querySelectorAll('.gallery [role=button]').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click()}}));
   applyShareUrl(url,title);getShareUrl('f',id).then(u=>{if(u!==url)applyShareUrl(u,title)});
   $('#btnReportF').onclick=()=>openReport('found',id);
   $('#btnFM').onclick=async()=>{
@@ -2651,6 +2657,100 @@ function openReport(type,id){
     if(error){btn.disabled=false;btn.textContent='送出檢舉';return toast('送出失敗：'+error.message)}
     closeOverlay(d);toast('謝謝，已收到檢舉');
   };
+}
+/* ============================================================
+   領養：農業部「動物認領養」開放資料（全台公立收容所），依縣市載入
+   ============================================================ */
+const ADOPT_SIZE={SMALL:'小型',MEDIUM:'中型',BIG:'大型'},ADOPT_AGE={CHILD:'幼年',ADULT:'成年'};
+const adoptCache={};
+function adoptRow(a){return {id:String(a.animal_id),subid:String(a.animal_subid||''),pk:a.animal_shelter_pkid,kind:a.animal_kind,variety:(a.animal_Variety||'').trim(),sex:a.animal_sex,size:a.animal_bodytype,colour:(a.animal_colour||'').trim(),age:a.animal_age,ster:a.animal_sterilization,bac:a.animal_bacterin,found:(a.animal_foundplace||'').trim(),remark:(a.animal_remark||'').trim(),photo:/^https:\/\//.test(a.album_file||'')?a.album_file:'',created:(a.animal_createtime||'').replace(/\//g,'-'),open:a.animal_opendate,shelter:a.shelter_name||a.animal_place||'',tel:(a.shelter_tel||'').trim(),addr:(a.shelter_address||'').trim(),status:a.animal_status}}
+async function fetchAdopt(city,kind){
+  const area=MOA_AREA[city];if(!area)return [];
+  const ck=area+'_'+kind;if(adoptCache[ck])return adoptCache[ck];
+  const res=await fetch(`${MOA_URL}&animal_kind=${encodeURIComponent(kind)}&animal_area_pkid=${area}`);
+  if(!res.ok)throw new Error('收容所資料讀取失敗（'+res.status+'）');
+  return adoptCache[ck]=(await res.json()).filter(a=>a.animal_status==='OPEN').map(adoptRow);
+}
+// 官方公告頁網址：收容編號開頭 5 碼是收容所代碼；臺北市動物之家用數字編號，代碼是 BAAAG；其他數字編號的收容所只給清單頁
+function adoptLink(r){const b=x=>encodeURIComponent(btoa(x));const ut=/^[A-Z]{5}[0-9A-Z]/.test(r.subid)?r.subid.slice(0,5):(r.pk===49?'BAAAG':'');
+  return ut?`https://www.pet.gov.tw/AnimalApp/AnnounceSingle.aspx?PageType=Adopt&AcNum=${b(r.subid)}&UT=${b(ut)}`:''}
+function adoptTitle(r){return [r.variety||'混種',r.sex==='M'?'公':r.sex==='F'?'母':'',ADOPT_SIZE[r.size]||'',ADOPT_AGE[r.age]||''].filter(Boolean).join('・')}
+function waitDays(r){return r.created?daysSince(r.created+'T00:00:00+08:00'):null}
+let adoptState={city:'',kind:'狗',size:'',sex:'',age:'',sort:'new',photo:true,limit:30};
+try{const v=JSON.parse(localStorage.getItem('wh_adopt')||'null');if(v&&typeof v==='object')Object.assign(adoptState,{city:v.city||'',kind:v.kind==='貓'?'貓':'狗'})}catch(_){}
+async function renderAdopt(){const _n=navId;
+  setTitle('領養毛孩');
+  const st=adoptState;st.limit=30;
+  const opt=(arr,cur)=>arr.map(([v,t])=>`<option value="${v}" ${v===cur?'selected':''}>${t}</option>`).join('');
+  app.innerHTML=`<h1>領養毛孩</h1>
+  <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
+  <div class="notice green"><b>想領養？先打電話給收容所</b>確認牠還在、問清楚領養流程與要帶的證件（通常要帶身分證），再親自去看看牠。各收容所規定不同，以收容所說明為準。</div>
+  <div class="card adopt-f">
+    <div class="seg" id="aKind" role="group" aria-label="狗或貓"><button type="button" data-v="狗" class="${st.kind==='狗'?'on':''}">${spIc('dog')} 狗</button><button type="button" data-v="貓" class="${st.kind==='貓'?'on':''}">${spIc('cat')} 貓</button></div>
+    <div class="row2" style="margin-top:10px">
+      <label class="f" style="margin:0"><span>縣市</span><select id="aCity">${cityOptions(st.city)}</select></label>
+      <label class="f" style="margin:0"><span>排序</span><select id="aSort">${opt([['new','最新進收容所'],['old','等最久的先']],st.sort)}</select></label>
+    </div>
+    <details class="more" style="margin-top:8px"><summary>更多條件（體型、性別、年紀）</summary>
+      <div class="row3">
+        <label class="f" style="margin:0"><span>體型</span><select id="aSize">${opt([['','不限'],['SMALL','小型'],['MEDIUM','中型'],['BIG','大型']],st.size)}</select></label>
+        <label class="f" style="margin:0"><span>性別</span><select id="aSex">${opt([['','不限'],['M','公'],['F','母']],st.sex)}</select></label>
+        <label class="f" style="margin:0"><span>年紀</span><select id="aAge">${opt([['','不限'],['CHILD','幼年'],['ADULT','成年']],st.age)}</select></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="aPhoto" ${st.photo?'checked':''}> 只看有照片的</label>
+    </details>
+  </div>
+  <div id="aList" style="margin-top:14px"></div>`;
+  const save=()=>{try{localStorage.setItem('wh_adopt',JSON.stringify({city:st.city,kind:st.kind}))}catch(_){}};
+  const load=async()=>{const el=$('#aList');if(!el)return;save();
+    if(!st.city){el.innerHTML=`<div class="empty-card"><div class="big">${ic('pin')}</div><b>先選你住的縣市</b><p class="small">選好就會列出那裡收容所等待領養的${st.kind==='貓'?'貓':'狗'}。</p><div class="citygrid">${Object.keys(MOA_AREA).map(c=>`<button type="button" class="btn ghost" data-city="${c}">${c}</button>`).join('')}</div></div>`;
+      el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;$('#aCity').value=st.city;load()});return}
+    el.innerHTML='<div class="empty">讀取收容所資料中…</div>';const my=navId;
+    let rows;try{rows=await fetchAdopt(st.city,st.kind)}catch(e){if(my!==navId||!el.isConnected)return;el.innerHTML=`<div class="empty">${esc(e.message)}<br><button type="button" class="btn" id="aRetry">再試一次</button></div>`;$('#aRetry').onclick=load;return}
+    if(my!==navId||!el.isConnected)return;
+    let list=rows.filter(r=>(!st.size||r.size===st.size)&&(!st.sex||r.sex===st.sex)&&(!st.age||r.age===st.age)&&(!st.photo||r.photo));
+    list.sort((a,b)=>st.sort==='old'?(a.created||'9').localeCompare(b.created||'9'):(b.created||'').localeCompare(a.created||''));
+    if(!list.length){el.innerHTML=`<div class="empty-card"><div class="big">${ic('search')}</div><b>${esc(st.city)}目前沒有符合條件的${st.kind==='貓'?'貓':'狗'}</b><p class="small">試試放寬條件，或換個縣市看看。</p></div>`;return}
+    const shown=list.slice(0,st.limit);
+    el.innerHTML=`<p class="small muted" style="margin:0 0 8px">${esc(st.city)}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
+      <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}${d&&d>=180?`<span class="band">等了 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}</div>
+      <div class="b"><div class="t">${esc(adoptTitle(r))}</div><div class="small muted">${esc(r.colour)}${r.ster==='T'?'・已結紮':''}</div><div class="small">${ic('pin')} ${esc(r.shelter)}</div></div></a>`}).join('')}</div>
+      ${list.length>shown.length?`<div class="more-row"><button type="button" class="btn ghost big" id="aMore">顯示更多（還有 ${list.length-shown.length} 隻）</button></div>`:''}
+      <p class="small muted" style="margin-top:12px">資料來源：農業部「動物認領養」開放資料。實際狀況以收容所為準，可能已被領養。</p>`;
+    const m=$('#aMore');if(m)m.onclick=()=>{st.limit+=30;const y=scrollY;load().then(()=>scrollTo(0,y))}};
+  $('#aKind').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.kind=b.dataset.v;st.limit=30;$('#aKind').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));load()});
+  [['#aCity','city'],['#aSort','sort'],['#aSize','size'],['#aSex','sex'],['#aAge','age']].forEach(([sel,k])=>$(sel).onchange=e=>{st[k]=e.target.value;st.limit=30;load()});
+  $('#aPhoto').onchange=e=>{st.photo=e.target.checked;st.limit=30;load()};
+  load();
+}
+async function renderAdoptOne(id){const _n=navId;
+  setTitle('領養毛孩');
+  let r=Object.values(adoptCache).flat().find(x=>x.id===id);
+  if(!r){app.innerHTML='<div class="empty">讀取中…</div>';try{const res=await fetch(`${MOA_URL}&animal_id=${encodeURIComponent(id)}`);const j=res.ok?await res.json():[];if(j[0])r=adoptRow(j[0])}catch(_){}if(_n!==navId)return}
+  if(!r){app.innerHTML='<div class="empty">找不到這隻毛孩，可能已經被領養了 🎉<br><a href="#/adopt">看其他等待領養的毛孩</a></div>';return}
+  setTitle(`領養 ${adoptTitle(r)}`);
+  const link=adoptLink(r),d=waitDays(r),map=r.addr?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.shelter+' '+r.addr)}`:'';
+  app.innerHTML=`<p class="small"><a class="backlink" href="#/adopt">‹ 回領養清單</a></p>
+  <div class="detail-head">
+    <div class="gallery"><div class="main ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}" ${r.photo?`role="img" aria-label="${esc(adoptTitle(r))}" style="background-image:url('${esc(safeU(r.photo))}')"`:''}></div></div>
+    <div>
+      <h1 style="margin-top:0">${esc(adoptTitle(r))}</h1>
+      <div class="card"><dl class="kv">
+        <dt>毛色</dt><dd>${esc(r.colour||'—')}</dd>
+        <dt>結紮</dt><dd>${r.ster==='T'?'已結紮':r.ster==='F'?'未結紮':'未註明'}</dd>
+        <dt>狂犬病疫苗</dt><dd>${r.bac==='T'?'已施打':r.bac==='F'?'未施打':'未註明'}</dd>
+        ${r.found?`<dt>發現地點</dt><dd>${esc(r.found)}</dd>`:''}
+        ${d?`<dt>在收容所</dt><dd>${d} 天</dd>`:''}
+        ${r.remark?`<dt>備註</dt><dd>${esc(r.remark)}</dd>`:''}
+        <dt>收容編號</dt><dd>${esc(r.subid)}</dd>
+      </dl></div>
+      <div class="card" style="margin-top:10px"><b>${esc(r.shelter)}</b>${r.addr?`<div class="small muted">${esc(r.addr)}</div>`:''}
+        <div class="bigacts" style="margin-top:10px">${r.tel?`<a class="btn big" href="tel:${esc(r.tel.replace(/[^\d#+]/g,''))}">${ic('phone')} 打電話給收容所</a>`:''}${map?`<a class="btn big ghost" target="_blank" rel="noopener" href="${esc(map)}">${ic('map')} 導航到收容所</a>`:''}</div>
+        <p class="small muted" style="margin:8px 0 0">打電話時說「我想領養，收容編號 ${esc(r.subid)}」。</p>
+      </div>
+      <p class="small" style="margin-top:10px">${link?`<a target="_blank" rel="noopener" href="${esc(link)}">看農業部官方公告 ↗</a>　`:''}<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent.aspx?PageType=Adopt">全國認領養公告 ↗</a></p>
+    </div>
+  </div>`;
 }
 // 農業部「全國動物收容管理系統」單筆公告網址（舊的 asms.coa.gov.tw 已停用）
 // AcNum＝收容編號、UT＝收容單位代碼（收容編號前 5 碼），兩個都要 Base64
@@ -2741,7 +2841,7 @@ async function initAuth(){
   }
   sb.auth.onAuthStateChange((ev,s)=>{
     const was=!!session;session=s;updateAuthUI();
-    if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash==='#/login'){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)}}
+    if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)}}
     if(ev==='SIGNED_OUT'){toast('已登出')}
   });
   updateAuthUI();
@@ -2829,6 +2929,7 @@ function renderLogin(){
   if(me()){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back);return}
   // 預設：這支手機登入過 → 「登入」；沒登入過 → 「免費註冊」。網址 ?mode=signup / ?mode=login 可以指定
   let mode=qs(location.hash).mode;if(mode!=='signup'&&mode!=='login'){let was='';try{was=localStorage.getItem('wh_registered')||''}catch(_){}mode=was?'login':'signup'}
+  let sending=false;
   const draw=()=>{
     const su=mode==='signup';setTitle(su?'免費註冊':'登入');
     app.innerHTML=`<div class="card login-card" style="max-width:520px;margin:20px auto">
@@ -2853,19 +2954,20 @@ function renderLogin(){
     </ul>
     <p class="muted small">完全免費。不加入會員也可以使用所有協尋功能。</p>
   </div>`;
-    app.querySelectorAll('.logintabs button').forEach(b=>b.onclick=()=>{if(b.dataset.m===mode)return;const v=$('#em').value;mode=b.dataset.m;draw();$('#em').value=v});
+    app.querySelectorAll('.logintabs button').forEach(b=>b.onclick=()=>{if(sending||b.dataset.m===mode)return;const v=$('#em').value,f=document.activeElement&&document.activeElement.id==='em';mode=b.dataset.m;draw();$('#em').value=v;if(f)$('#em').focus()});
     $('#lf').onsubmit=async e=>{
-      e.preventDefault();const email=$('#em').value.trim();const btn=$('#btnSend');const label=btn.textContent;btn.disabled=true;btn.textContent='寄送中…';$('#lmsg').textContent='';
+      e.preventDefault();if(sending)return;const email=$('#em').value.trim();const btn=$('#btnSend');const n=navId,sm=mode;sending=true;const label=btn.textContent;btn.disabled=true;btn.textContent='寄送中…';$('#lmsg').textContent='';
       let ret='#/me';try{ret=localStorage.getItem('wh_return')||'#/me';localStorage.setItem('wh_return',ret)}catch(_){}
-      const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:mode==='signup'}});
+      const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:sm==='signup'}});
+      sending=false;if(n!==navId||!btn.isConnected)return;   // 寄信途中已經換頁：不要蓋掉新頁面
       if(error){btn.disabled=false;btn.textContent=label;
         // 選「登入」但這個 Email 還沒註冊：直接問要不要註冊
-        if(mode==='login'&&/signup|not allowed|not found|otp_disabled/i.test((error.code||'')+' '+error.message)){
+        if(sm==='login'&&/signup|not allowed|not found|otp_disabled/i.test((error.code||'')+' '+error.message)){
           $('#lmsg').innerHTML='這個 Email 還沒註冊過。<button type="button" class="btn sm" id="goSu" style="margin-left:6px">改成免費註冊</button>';
-          $('#goSu').onclick=()=>{mode='signup';draw();$('#em').value=email;$('#lf').requestSubmit()};return}
+          $('#goSu').onclick=()=>{mode='signup';draw();$('#em').value=email;const f=$('#lf');f.requestSubmit?f.requestSubmit():$('#btnSend').click()};return}
         return toast('寄送失敗：'+(/rate|limit/i.test(error.message)?'寄信次數已達上限，請稍後再試':error.message),5000)}
       try{localStorage.setItem('wh_registered','1')}catch(_){}
-      const su=mode==='signup';
+      const su=sm==='signup';
       app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div style="font-size:56px">📬</div><h1>請收信</h1><p>${su?'確認信':'登入信'}已寄到 <b>${esc(email)}</b></p><p class="muted small">按信裡的大按鈕就會${su?'完成註冊並':''}登入。幾分鐘沒收到請看垃圾郵件匣。${su?'（如果這個 Email 之前註冊過，會收到「你的登入連結」，一樣按按鈕就好）':''}</p><button type="button" class="btn ghost" id="btnReLogin">換一個 Email</button></div>`;
       $('#btnReLogin').onclick=()=>draw();
     };

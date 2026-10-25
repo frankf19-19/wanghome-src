@@ -4,10 +4,11 @@
 # 壓縮失敗時自動改用原始檔，網站照常更新。
 set -euo pipefail
 # 安全檢查：網頁裡的程式有語法錯誤就停止部署（Cloudflare 會繼續用上一個正常的版本）
-node -e '
-const s=require("fs").readFileSync("index.html","utf8");const re=/<script>([\s\S]*?)<\/script>/g;let m,i=0,bad=0;
-while((m=re.exec(s))){i++;try{new Function(m[1])}catch(e){bad++;console.error("script #"+i+" 語法錯誤："+e.message)}}
-if(bad)process.exit(1);console.log("syntax ok: "+i+" scripts");'
+check(){ node -e '
+const vm=require("vm");const f=process.argv[1];const s=require("fs").readFileSync(f,"utf8");const re=/<script>([\s\S]*?)<\/script>/g;let m,i=0,bad=0;
+while((m=re.exec(s))){i++;try{new vm.Script(m[1],{filename:f+"#"+i})}catch(e){bad++;console.error(f+" script #"+i+" 語法錯誤："+e.message)}}
+if(!i){console.error(f+" 找不到程式");process.exit(1)}if(bad)process.exit(1);console.log(f+" syntax ok: "+i+" scripts");' "$1"; }
+check index.html
 rm -rf dist && mkdir -p dist
 cp sw.js manifest.webmanifest _headers dist/
 [ -f robots.txt ] && cp robots.txt dist/
@@ -22,4 +23,5 @@ else
   echo "minify failed, using original:"; cat /tmp/minify.log || true
   cp index.html dist/index.html
 fi
+check dist/index.html
 echo "built: $(find dist -type f | wc -l) files"
