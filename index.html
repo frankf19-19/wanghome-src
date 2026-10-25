@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.0.0 -->
+<!-- BUILD v2.0.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -140,20 +140,21 @@ a.stat:hover{text-decoration:none}a.stat:hover b{color:var(--red)}
 .stat.good b{color:var(--green)}
 
 /* 兩個空間：找毛孩／健康手冊 */
-.space{display:flex;background:var(--sheet);border-radius:99px;padding:3px;box-shadow:inset 0 0 0 1px var(--line);margin-left:14px}
-.space a{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-weight:700;font-size:14px;color:var(--ink-2);white-space:nowrap;transition:background .15s,color .15s}
-.space a:hover{text-decoration:none;color:var(--ink)}
-.space svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-body[data-space="lost"] .space a[data-s="lost"]{background:var(--red);color:#fff}
-body[data-space="health"] .space a[data-s="health"]{background:var(--green);color:#fff}
+.space{max-width:1120px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:0}
+.space a{display:flex;align-items:center;gap:12px;padding:12px 16px 13px;color:var(--ink-3);border-bottom:4px solid transparent;transition:background .15s,color .15s,border-color .15s}
+.space a:hover{text-decoration:none;color:var(--ink);background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.space .sp-ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--sheet);box-shadow:inset 0 0 0 1px var(--line)}
+.space svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.space .sp-t{display:flex;flex-direction:column;min-width:0}
+.space b{font-family:var(--display);font-size:19px;line-height:1.2;color:inherit}
+.space small{font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body[data-space="lost"] .space a[data-s="lost"]{color:var(--red);border-bottom-color:var(--red);background:color-mix(in srgb,var(--red) 6%,transparent)}
+body[data-space="lost"] .space a[data-s="lost"] .sp-ic{background:var(--red);color:#fff;box-shadow:none}
+body[data-space="health"] .space a[data-s="health"]{color:var(--green);border-bottom-color:var(--green);background:color-mix(in srgb,var(--green) 7%,transparent)}
+body[data-space="health"] .space a[data-s="health"] .sp-ic{background:var(--green);color:#fff;box-shadow:none}
 body[data-space="lost"] .health-only,body[data-space="health"] .lost-only{display:none!important}
-body[data-space="health"] header{box-shadow:inset 0 -3px 0 var(--green)}
-body[data-space="lost"] header{box-shadow:inset 0 -3px 0 var(--red)}
 body[data-space="health"] .tabbar a.cta2 .i{background:var(--green)}
-body[data-space="health"] h2 .ico{color:var(--green)}
-body[data-space="health"] main .btn:not(.ghost):not(.line):not(.fb):not([data-lost]){background:var(--green)}
-.promo.on-page{align-items:start}
-@media (max-width:640px){.space{margin-left:8px}.space a{padding:6px 10px;font-size:13px;gap:4px}.space svg{width:14px;height:14px}}
+@media (max-width:640px){header{position:relative}.space{padding:0}.space a{flex-direction:column;gap:4px;padding:9px 6px 8px;text-align:center}.space .sp-ic{width:34px;height:34px;border-radius:10px}.space svg{width:19px;height:19px}.space b{font-size:16px}.space small{font-size:11px;white-space:normal}}
 @media (max-width:370px){#siteName{display:none}}
 .crosslink{display:flex;align-items:center;gap:14px;margin:34px 0 6px;padding:16px 18px;background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift),inset 4px 0 0 var(--green);color:var(--ink-2);font-size:14px;line-height:1.5}
 .crosslink:hover{text-decoration:none;background:color-mix(in srgb,var(--green) 6%,var(--sheet))}
@@ -219,7 +220,7 @@ body[data-space="health"] main .btn:not(.ghost):not(.line):not(.fb):not([data-lo
 /* 案件頁：地圖＋時間軸並排（桌機） */
 @media (min-width:900px){
   .trail{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:28px;align-items:start}
-  .trail-map{position:sticky;top:76px}
+  .trail-map{position:sticky;top:150px}
   .trail #map{height:460px}
   .trail .timeline{margin-top:0;max-height:460px;overflow:auto;padding-right:6px}
 }
@@ -515,10 +516,6 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <header>
   <div class="nav">
     <a href="#/" class="logo"><span class="paw">🐾</span><span id="siteName">汪喵回家</span></a>
-    <nav class="space" aria-label="切換功能">
-      <a href="#/" data-s="lost"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>找毛孩</a>
-      <a href="#/health" data-s="health"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M12 7v4M10 9h4"/></svg>健康手冊</a>
-    </nav>
     <div class="sp"></div>
     <span class="navlinks lost-only" style="display:contents">
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
@@ -532,6 +529,10 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
     </span>
     <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊">👤<span class="hide-sm"> 登入</span></a>
   </div>
+  <nav class="space" aria-label="切換功能">
+    <a href="#/" data-s="lost"><span class="sp-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></span><span class="sp-t"><b>找毛孩</b><small>走失協尋・目擊回報・拾獲通報</small></span></a>
+    <a href="#/health" data-s="health"><span class="sp-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M12 7v4M10 9h4"/></svg></span><span class="sp-t"><b>毛孩健康手冊</b><small>健康紀錄・到期提醒・日曆同步</small></span></a>
+  </nav>
 </header>
 
 <main id="app"><div class="empty">載入中…</div></main>
@@ -539,7 +540,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.0.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.0.1</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -558,7 +559,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.0.0';
+const BUILD = 'v2.0.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -841,7 +842,7 @@ async function renderHealth(){
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);toast('已標記完成');renderHealth()});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
-  if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-70,behavior:'smooth'})},60);
+  if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:'smooth'})},60);
 }
 function renderHealthLanding(){
   app.innerHTML=`<div class="health-hero">
