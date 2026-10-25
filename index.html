@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.4.0 -->
+<!-- BUILD v2.5.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -597,6 +597,29 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
   body[data-space] .space a.on .sp-ic{color:#fff}
   header{border-bottom:0}
 }
+/* 受傷通報 */
+.hero .actions .btn.injured{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;background:#FFF1E6;color:#7A2E06;box-shadow:inset 0 0 0 2px #F08A3E;text-align:left;padding:12px 16px}
+.hero .actions .btn.injured>.ico{width:26px;height:26px;color:#D9590B;flex:none}
+.hero .actions .btn.injured span{display:flex;flex-direction:column;font-weight:800}
+.hero .actions .btn.injured small{color:#8A4A22;opacity:1;font-weight:500}
+.hero .actions .btn.injured em{margin-left:auto;font-style:normal;background:#D9590B;color:#fff;font-size:13px;padding:3px 10px;border-radius:99px;flex:none}
+.hero .actions .btn.injured:hover{background:#FFE6D3}
+.ccard .band.injured{background:#D9590B}
+.er{background:#FFF4EC;border-radius:var(--r-card);box-shadow:inset 0 0 0 2px #F6B88A;padding:18px 18px 12px;margin-top:14px;color:#3A1D0B}
+.er-head{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px;color:#B4430A;margin-bottom:6px}
+.er-head .ico{width:24px;height:24px}
+.er-steps{margin:0;padding:0;list-style:none;counter-reset:er}
+.er-steps li{position:relative;padding:10px 0 10px 40px;border-top:1px solid #F6D3B8;counter-increment:er}
+.er-steps li:first-child{border-top:0}
+.er-steps li::before{content:counter(er);position:absolute;left:0;top:10px;width:28px;height:28px;border-radius:50%;background:#D9590B;color:#fff;font-weight:900;display:grid;place-items:center;font-size:15px}
+.er-steps b{display:block;font-size:16px}
+.er-steps span{display:block;font-size:14.5px;color:#5B3A22;line-height:1.6}
+.er-call{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.er-call .btn{background:#D9590B}.er-call .btn.ghost{background:#fff;color:#7A2E06;box-shadow:inset 0 0 0 1.5px #F0A877}
+.er-foot{color:#7A5236;margin:6px 0 0}.er-foot a{color:#B4430A}
+.seg.multi button.on{background:#D9590B;color:#fff;border-color:#D9590B}
+.notice.red{background:var(--red-soft);border-left-color:var(--red)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .er{background:#2A1A10;color:#F6E2D3;box-shadow:inset 0 0 0 2px #6B3A1C}:root:not([data-theme="light"]) .er-steps span,:root:not([data-theme="light"]) .er-foot{color:#E0C2AC}:root:not([data-theme="light"]) .er-steps li{border-color:#4A2A16}:root:not([data-theme="light"]) .hero .actions .btn.injured{background:#2A1A10;color:#FFD9BF}:root:not([data-theme="light"]) .hero .actions .btn.injured small{color:#E0C2AC}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -613,6 +636,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
     <a href="#/" class="logo"><span class="paw"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M256 96 92 226M256 96l164 130" fill="none" stroke="currentColor" stroke-width="40" stroke-linecap="round"/><g fill="currentColor"><ellipse cx="256" cy="350" rx="84" ry="72"/><ellipse cx="165" cy="258" rx="34" ry="45" transform="rotate(-18 165 258)"/><ellipse cx="223" cy="205" rx="34" ry="46" transform="rotate(-6 223 205)"/><ellipse cx="289" cy="205" rx="34" ry="46" transform="rotate(6 289 205)"/><ellipse cx="347" cy="258" rx="34" ry="45" transform="rotate(18 347 258)"/></g><path d="M256 396l-30-26a19 19 0 0 1 30-24 19 19 0 0 1 30 24z" fill="var(--red-fill)"/></svg></span><span id="siteName">汪喵回家</span></a>
     <div class="sp"></div>
     <span class="navlinks lost-only" style="display:contents">
+      <a href="#/injured" class="link hide-sm">受傷通報</a>
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
       <a href="#/thanks" class="link hide-sm">感謝牆</a>
       <a href="#/found/new" class="btn sm green hide-sm">撿到毛孩</a>
@@ -634,8 +658,8 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.4.0</span></div>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.5.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -654,7 +678,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.4.0';
+const BUILD = 'v2.5.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -694,6 +718,8 @@ const PAW_BIG='<svg class="paw-big" viewBox="0 0 512 512" aria-hidden="true"><g 
 const SPECIES = {dog:{name:'狗',emoji:'🐕',poster:'尋狗啟事',short:'尋狗',unit:'犬',moa:'狗'},cat:{name:'貓',emoji:'🐈',poster:'尋貓啟事',short:'尋貓',unit:'貓',moa:'貓'}};
 function sp(x){return SPECIES[x]||SPECIES.dog}
 const ICONS={"map": "<path d=\"M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z\"/><path d=\"M9 4v13.5M15 6.5V20\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "shelter": "<path d=\"M3 11.5 12 4l9 7.5\"/><path d=\"M5.5 10v10h13V10\"/><path d=\"M9.5 20v-4.5h5V20\"/>", "hand": "<path d=\"M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.3 14a1.5 1.5 0 0 1 2.4-1.8L8 15\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.2-4.2\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/>", "scale": "<path d=\"M12 4v16M5 20h14\"/><path d=\"m5 8 7-3 7 3\"/><path d=\"M5 8 2.5 14a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5h6v3H9zM8.5 12h7M8.5 16h5\"/>", "bell": "<path d=\"M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z\"/><path d=\"M10 20.5a2 2 0 0 0 4 0\"/>", "star": "<path d=\"m12 3.8 2.5 5.1 5.6.8-4 4 1 5.6-5.1-2.7-5 2.7.9-5.6-4-4 5.6-.8z\"/>", "image": "<rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"15\" rx=\"2\"/><circle cx=\"9\" cy=\"10\" r=\"1.8\"/><path d=\"m20.5 16-5-5-8.5 8.5\"/>", "key": "<circle cx=\"8\" cy=\"15\" r=\"4\"/><path d=\"m11 12 8.5-8.5M16 7l2.5 2.5M14 9l2 2\"/>", "flag": "<path d=\"M5 21V4.5M5 4.5h11l-2 4 2 4H5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "pin": "<path d=\"M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.4\"/>", "shield": "<path d=\"M12 3.5 19 6v5.5c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6z\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2\"/><path d=\"M3.5 9.5h17M8 3v4M16 3v4\"/>", "siren": "<path d=\"M7 18v-6a5 5 0 0 1 10 0v6\"/><path d=\"M4.5 18h15v2.5h-15zM12 3v1.5M4.4 6.4l1 1M19.6 6.4l-1 1\"/>", "printer": "<path d=\"M7 9V3.5h10V9\"/><rect x=\"3.5\" y=\"9\" width=\"17\" height=\"7.5\" rx=\"1.5\"/><path d=\"M7 14h10v6.5H7z\"/>", "steth": "<path d=\"M6 3.5v5a4 4 0 0 0 8 0v-5\"/><path d=\"M10 12.5v2a5 5 0 0 0 10 0v-1\"/><circle cx=\"20\" cy=\"11.5\" r=\"2\"/>", "download": "<path d=\"M12 4v11M7.5 10.5 12 15l4.5-4.5M4.5 19.5h15\"/>", "paw": "<ellipse cx=\"12\" cy=\"16\" rx=\"4.4\" ry=\"3.6\"/><circle cx=\"6.3\" cy=\"10.6\" r=\"1.9\"/><circle cx=\"9.6\" cy=\"6.7\" r=\"2\"/><circle cx=\"14.4\" cy=\"6.7\" r=\"2\"/><circle cx=\"17.7\" cy=\"10.6\" r=\"1.9\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "share": "<circle cx=\"17.5\" cy=\"5.5\" r=\"2.5\"/><circle cx=\"6.5\" cy=\"12\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"18.5\" r=\"2.5\"/><path d=\"m8.7 10.8 6.6-4M8.7 13.2l6.6 4\"/>"};
+ICONS.aid='<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7M12 10.5v6M9 13.5h6"/>';
+ICONS.phone='<path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z"/>';
 function ic(n,cls=''){return `<svg class="ico ${cls}" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`}
 
 const SIZE = {small:'小型',medium:'中型',large:'大型'};
@@ -805,7 +831,7 @@ function route(){
   const h=location.hash||'#/';
   const path=h.split('?')[0];
   renderChrome(path,h);
-  document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record))/.test(path));
+  document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record))/.test(path));
   window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
@@ -816,6 +842,7 @@ function route(){
   if((m=path.match(/^#\/manage\/([0-9a-f-]{36})$/)))return renderManage(m[1],qs(h).t);
   if((m=path.match(/^#\/poster\/([0-9a-f-]{36})$/)))return renderPoster(m[1]);
   if(path==='#/found/new')return renderFoundNew();
+  if(path==='#/injured')return renderInjured();
   if((m=path.match(/^#\/found\/([0-9a-f-]{36})$/)))return renderFound(m[1]);
   if((m=path.match(/^#\/found-manage\/([0-9a-f-]{36})$/)))return renderFoundManage(m[1],qs(h).t);
   if(path==='#/login')return renderLogin();
@@ -865,6 +892,7 @@ async function renderHome(){
     <div class="actions">
       <a href="#/new" class="btn lg">我的毛孩走失了<small>登記協尋、產生海報</small></a>
       <a href="#/found/new" class="btn lg green">我撿到／看到一隻<small>幫牠找到主人</small></a>
+      <a href="#/injured" class="btn lg injured">${ic("aid")}<span>看到受傷的毛孩<small>先看緊急處理，再通報位置</small></span><em>緊急</em></a>
     </div>
     <div class="stats" id="stats"></div>
     </div>
@@ -1070,7 +1098,7 @@ async function loadMapAll(el){
   const last={};(ls||[]).forEach(s=>{if(!last[s.case_id]&&s.lat)last[s.case_id]=s});
   const pts=[];
   (cs||[]).forEach(c=>{const p=last[c.id]||(c.lost_lat?{lat:c.lost_lat,lng:c.lost_lng}:null);if(!p)return;pts.push([p.lat,p.lng]);marker([p.lat,p.lng],c.species==='cat'?'貓':'狗','').addTo(map).bindPopup(`<a href="#/case/${c.id}"><b>${esc(c.name)}</b></a><br>${esc(c.lost_city)}${esc(c.lost_district||'')}<br>${last[c.id]?'最後目擊 '+fmtDT(last[c.id].seen_at):'走失地點'}`)});
-  (fs||[]).forEach(f=>{if(!f.lat)return;pts.push([f.lat,f.lng]);marker([f.lat,f.lng],f.kind==='found'?'拾':'見','found').addTo(map).bindPopup(`<a href="#/found/${f.id}"><b>${f.kind==='found'?'拾獲':'目擊'}：${esc([SIZE[f.size],f.colour].filter(Boolean).join('')+sp(f.species).name)}</b></a><br>${esc(f.city)}${esc(f.district||'')}<br>${fmtDT(f.seen_at)}`)});
+  (fs||[]).forEach(f=>{if(!f.lat)return;pts.push([f.lat,f.lng]);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(map).bindPopup(`<a href="#/found/${f.id}"><b>${f.kind==='found'?'拾獲':'目擊'}：${esc([SIZE[f.size],f.colour].filter(Boolean).join('')+sp(f.species).name)}</b></a><br>${esc(f.city)}${esc(f.district||'')}<br>${fmtDT(f.seen_at)}`)});
   if(homeState.near)marker([homeState.near.lat,homeState.near.lng],'我','me').addTo(map);
   if(pts.length&&!homeState.near&&!homeState.city)map.fitBounds(pts,{padding:[30,30],maxZoom:13});
   if(!pts.length)toast('目前地圖上沒有資料');
@@ -1090,7 +1118,7 @@ function cardHTML(c){
 }
 function foundCardHTML(f){
   const ph=f.photos?.[0];
-  const band=f.status!=='open'?'<span class="band closed">已結案</span>':f.kind==='found'?'<span class="band found">已收留</span>':'<span class="band seen">有人看到</span>';
+  const band=f.status!=='open'?'<span class="band closed">已結案</span>':f.kind==='injured'?'<span class="band injured">受傷</span>':f.kind==='found'?'<span class="band found">已收留</span>':'<span class="band seen">有人看到</span>';
   return `<a class="ccard found-card" href="#/found/${f.id}">
     <div class="ph ${ph?'':'noimg'} ${f.species==='cat'?'cat':''}">${ph?`<img loading="lazy" decoding="async" src="${esc(ph)}" alt="">`:''}${band}</div>
     <div class="b">
@@ -1587,6 +1615,93 @@ async function renderManage(id,token){
 /* ============================================================
    拾獲通報：撿到／看到一隻狗
    ============================================================ */
+
+const INJURIES=['被車撞','流血','不能走／拖著腳','骨折或腳受傷','意識不清／躺著不動','很虛弱','皮膚病','被夾到／卡住'];
+function emergencyHTML(){
+  return `<div class="er">
+    <div class="er-head">${ic("aid")} 先做這幾件事</div>
+    <ol class="er-steps">
+      <li><b>先顧好自己的安全</b><span>不要站到車道上；在馬路邊請開警示燈、拿手電筒，必要時請旁人幫忙指揮車流。</span></li>
+      <li><b>打電話請求救援</b><span>撥 1999 市民專線，或動物保護專線 1959，說清楚地點、傷勢，以及牠還在不在原地。</span>
+        <div class="er-call"><a class="btn" href="tel:1999">${ic("phone")} 撥打 1999</a><a class="btn ghost" href="tel:1959">${ic("phone")} 動保專線 1959</a></div></li>
+      <li><b>小心靠近</b><span>受傷的動物會因為疼痛和害怕咬人。不確定就保持距離、等救援；要移動時先用毛巾或外套包住身體，平穩地抱起。</span></li>
+      <li><b>送到動物醫院</b><span>能安全移動的話，就近送醫並請醫院掃晶片。</span>
+        <div class="er-call"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/24%E5%B0%8F%E6%99%82%E5%8B%95%E7%89%A9%E9%86%AB%E9%99%A2">${ic("map")} 找附近 24 小時動物醫院</a></div></li>
+    </ol>
+    <p class="small er-foot">各縣市動物保護單位電話：<a target="_blank" rel="noopener" href="https://www.moa.gov.tw/ws.php?id=20036">農業部「各縣市動物保護申訴電話」</a></p>
+  </div>`;
+}
+function renderInjured(){
+  setTitle('受傷毛孩通報');
+  app.innerHTML=`<h1>看到受傷的毛孩</h1>
+  <p class="muted">救援要靠當地動保單位，請先打電話。通報到這裡，讓飼主和附近的人知道牠在哪裡；如果牠是走失的毛孩，系統也會通知飼主。</p>
+  ${emergencyHTML()}
+  <form class="card steps" id="f" style="margin-top:16px">
+    <h3>牠的狀況</h3>
+    <div class="seg" id="segSp"><button type="button" data-v="dog" class="on">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
+    <label class="f"><span>傷勢（可複選）</span></label>
+    <div class="seg multi" id="segInj">${INJURIES.map(t=>`<button type="button" data-v="${t}">${t}</button>`).join('')}</div>
+    <div class="seg" id="segWhere" style="margin-top:12px"><button type="button" data-v="here" class="on">牠還在原地</button><button type="button" data-v="taken">我已經送醫／帶走</button></div>
+    <label class="f hidden" id="curWrap"><span>牠現在在哪裡</span><input type="text" name="current_place" maxlength="200" placeholder="例：已送 XX 動物醫院／動保處已帶走"></label>
+    <h3>在哪裡</h3>
+    <label class="f"><span>時間 <i class="req">*</i></span><input type="datetime-local" name="seen_at" required value="${nowLocalInput()}"></label>
+    <div class="row2">
+      <label class="f"><span>縣市 <i class="req">*</i></span><select name="city" id="city" required>${cityOptions('')}</select></label>
+      <label class="f"><span>鄉鎮市區</span><select name="district" id="dist">${distOptions('')}</select></label>
+    </div>
+    <div class="map pick" id="pmap" style="margin-top:10px"></div>
+    <div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm" id="btnLoc">${ic("pin")} 用我目前位置</button></div>
+    <label class="f"><span>地點描述</span><input type="text" name="place_text" maxlength="200" placeholder="例：台 1 線南下 120 公里處路肩、XX 國小後門"></label>
+    <h3>照片和樣子</h3>
+    <label class="uploadbtn">${ic("image")} 拍照或選擇照片<input type="file" id="photoIn" accept="image/*" multiple></label>
+    <div class="photos-preview" id="pv"></div>
+    <div class="exif-hint" id="exifHintF"></div>
+    <div class="progress hidden" id="pg"><i></i></div>
+    <div class="row2">
+      <label class="f"><span>毛色</span><input type="text" name="colour" maxlength="50" placeholder="例：黃色、黑白"></label>
+      <label class="f"><span>體型</span><select name="size"><option value="">—</option><option value="small">小型</option><option value="medium">中型</option><option value="large">大型</option></select></label>
+    </div>
+    <label class="f"><span>項圈／其他特徵</span><input type="text" name="features" maxlength="500" placeholder="例：紅色項圈、左耳剪耳（結紮過的街貓）"></label>
+    <h3>你的聯絡方式（選填）</h3>
+    <div class="row2">
+      <label class="f"><span>稱呼</span><input type="text" name="reporter_name" maxlength="50"></label>
+      <label class="f"><span>電話</span><input type="tel" name="reporter_phone" maxlength="30"></label>
+    </div>
+    <label class="chk"><input type="checkbox" name="phone_public"> 公開電話，讓飼主或救援的人聯絡我</label>
+    <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000" placeholder="例：已打 1999，動保處說 30 分鐘內到"></textarea></label>
+    <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+    <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出受傷通報</button></div>
+  </form>`;
+  let species='dog',where='here';const inj=new Set();
+  $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#segInj').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;inj.has(v)?inj.delete(v):inj.add(v);b.classList.toggle('on',inj.has(v))});
+  $('#segWhere').querySelectorAll('button').forEach(b=>b.onclick=()=>{where=b.dataset.v;$('#segWhere').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#curWrap').classList.toggle('hidden',where!=='taken')});
+  let photoFiles=[];const pv=$('#pv');
+  const picker=pickerMap('pmap',[23.9,121]);picker.map.setZoom(7);
+  $('#photoIn').onchange=async e=>{const first=!photoFiles.length&&e.target.files[0];photoFiles=photoFiles.concat([...e.target.files]).slice(0,4);drawPV();e.target.value='';
+    if(first){const meta=await readPhotoMeta(first);if(meta.date||meta.lat){applyPhotoMeta(meta,{dateInput:$('#f').elements['seen_at'],picker,hintEl:$('#exifHintF')})}}};
+  function drawPV(){pv.innerHTML='';photoFiles.forEach((f,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${URL.createObjectURL(f)}')`;const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{photoFiles.splice(i,1);drawPV()};d.appendChild(b);pv.appendChild(d)})}
+  $('#city').onchange=()=>{$('#dist').innerHTML=distOptions($('#city').value);const c=CITY_CENTER[$('#city').value];if(c)picker.map.setView(c,12)};
+  $('#btnLoc').onclick=picker.locate;
+  $('#f').onsubmit=async e=>{
+    e.preventDefault();const fd=new FormData(e.target);if(fd.get('website'))return;
+    const loc=picker.get();
+    if(!loc&&!fd.get('place_text')){toast('請在地圖上點位置，或寫下地點描述');return}
+    const btn=$('#btnSubmit');btn.disabled=true;btn.textContent='上傳中…';
+    try{
+      const photos=[];const pg=$('#pg');if(photoFiles.length)pg.classList.remove('hidden');
+      for(let i=0;i<photoFiles.length;i++){photos.push(await uploadPhoto(photoFiles[i],'found'));pg.querySelector('i').style.width=((i+1)/photoFiles.length*100)+'%'}
+      const p={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date(fd.get('seen_at')).toISOString(),city:fd.get('city'),district:fd.get('district'),place_text:fd.get('place_text'),lat:loc?.lat??null,lng:loc?.lng??null,current_place:where==='taken'?(fd.get('current_place')||'通報者已送醫／帶走'):'仍在原地',size:fd.get('size'),colour:fd.get('colour'),features:fd.get('features'),photos,reporter_name:fd.get('reporter_name'),reporter_phone:fd.get('reporter_phone'),phone_public:!!fd.get('phone_public'),notes:fd.get('notes')};
+      const {data,error}=await sb.rpc('create_found',{p});if(error)throw error;
+      try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
+      const manage=`${CONFIG.SITE_URL}#/found-manage/${data.id}?t=${data.token}`;
+      app.innerHTML=`<div class="card"><h1>謝謝你停下來幫牠</h1><p>受傷通報已公開，附近的人和可能的飼主都看得到。</p>
+      <div class="notice red"><b>還沒打電話的話，請現在打</b>網站沒辦法派人救援，請撥 <a href="tel:1999">1999</a> 或動物保護專線 <a href="tel:1959">1959</a>。</div>
+      <div class="notice"><b>管理連結（牠被救走或送醫後，用它更新狀況）</b><div class="tokenbox" style="margin-top:6px">${esc(manage)}</div><button class="btn sm" style="margin-top:8px" onclick="copy('${esc(manage)}')">複製管理連結</button></div>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><a class="btn" href="#/found/${data.id}">查看通報</a><a class="btn ghost" href="#/">回首頁</a></div></div>`;
+    }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出受傷通報'}
+  };
+}
 function renderFoundNew(){
   setTitle('我撿到／看到毛孩');
   app.innerHTML=`<h1>我撿到／看到毛孩</h1>
@@ -1669,17 +1784,19 @@ async function renderFound(id){
   app.innerHTML='<div class="empty">載入中…</div>';
   const {data:f}=await sb.from('found_public').select('*').eq('id',id).single();
   if(!f){app.innerHTML='<div class="empty">找不到這筆通報<br><a href="#/">回首頁</a></div>';return}
-  const title=`${f.kind==='found'?'拾獲':'目擊'}：${[SIZE[f.size],f.colour].filter(Boolean).join('')}${sp(f.species).name}`;
+  const title=`${f.kind==='injured'?'受傷':f.kind==='found'?'拾獲':'目擊'}：${[SIZE[f.size],f.colour].filter(Boolean).join('')}${sp(f.species).name}`;
   setTitle(title);
   const photos=f.photos||[];const url=CONFIG.SITE_URL+'#/found/'+id;
   app.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span class="status-pill ${f.status==='open'?'found':'closed'}">${f.status==='open'?(f.kind==='found'?'等待飼主認領':'目擊通報'):f.status==='reunited'?'已回到主人身邊':'已結案'}</span></div>
   <h1>${esc(title)}</h1>
+  ${f.kind==='injured'&&f.status==='open'?`<div class="notice red" style="margin:10px 0"><b>這隻毛孩受傷了</b>如果你在附近，請撥 <a href="tel:1999">1999</a> 或動物保護專線 <a href="tel:1959">1959</a> 通報救援；靠近時小心，受傷的動物可能因疼痛咬人。</div>`:''}
   <p class="muted">${ic("pin")} ${esc(f.city)}${esc(f.district||'')} ${esc(f.place_text||'')} · ${fmtDate(f.seen_at)} ${fmtDT(f.seen_at).split(' ')[1]}</p>
   <div class="detail-head" style="margin-top:12px">
     <div class="gallery"><div class="main ${photos[0]?'':'noimg'} ${f.species==='cat'?'cat':''}" id="gMain" ${photos[0]?`style="background-image:url('${esc(photos[0])}')"`:''}></div>
       ${photos.length>1?`<div class="thumbs">${photos.map((p,i)=>`<div class="${i===0?'on':''}" data-i="${i}" style="background-image:url('${esc(p)}')"></div>`).join('')}</div>`:''}</div>
     <div><div class="card"><dl class="kv">
       <dt>樣子</dt><dd><b>${esc([f.breed,SEX[f.sex],SIZE[f.size]&&SIZE[f.size]+sp(f.species).unit,f.colour].filter(Boolean).join(' · ')||'—')}</b></dd>
+      ${f.injury?`<dt>傷勢</dt><dd><b style="color:var(--red)">${esc(f.injury)}</b></dd>`:''}
       ${f.features?`<dt>特徵</dt><dd>${esc(f.features)}</dd>`:''}
       ${f.collar_desc?`<dt>項圈</dt><dd>${esc(f.collar_desc)}</dd>`:''}
       ${f.current_place?`<dt>目前在</dt><dd><b>${esc(f.current_place)}</b></dd>`:''}
@@ -1700,7 +1817,7 @@ async function renderFound(id){
     let t=null;try{t=localStorage.getItem('wh_ftoken_'+id)}catch(_){}
     if(t||me()){const {data}=await sb.rpc('can_manage_found',{p_id:id,p_token:t});if(data){location.hash=`#/found-manage/${id}`;return}}
     t=prompt('請輸入通報時取得的管理金鑰（管理連結最後 t= 後面那段）：');if(t)location.hash=`#/found-manage/${id}?t=${t.trim()}`};
-  if(f.lat){const m=makeMap('map',[f.lat,f.lng],15);marker([f.lat,f.lng],f.kind==='found'?'拾':'見','found').addTo(m)}
+  if(f.lat){const m=makeMap('map',[f.lat,f.lng],15);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(m)}
   // 可能的飼主（走失案件）
   const since=new Date(new Date(f.seen_at)-60*86400000).toISOString();
   const {data:cs}=await sb.from('cases_public').select('*').eq('status','searching').eq('lost_city',f.city).eq('species',f.species||'dog').lte('lost_at',new Date(new Date(f.seen_at).getTime()+86400000).toISOString()).gte('lost_at',since).limit(200);
