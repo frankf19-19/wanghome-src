@@ -341,5 +341,13 @@ from public.cases where status = 'found' and found_method is not null
 group by found_method order by n desc;
 grant select on public.found_stats to anon, authenticated;
 
+-- ------------------------------------------------------------
+-- 11. 後台腳本（GitHub Actions 用 service_role）需要完整權限
+--     （專案若關閉「Automatically expose new tables」就必須明確授權）
+-- ------------------------------------------------------------
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to service_role;
+grant all on all functions in schema public to service_role;
+
 -- 完成
 select 'WangHome schema v1.0.0 installed' as result;
