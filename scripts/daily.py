@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪回家 WangHome — 每日自動化腳本  v1.4.0
+汪喵回家 WangHome — 每日自動化腳本  v1.4.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -26,7 +26,7 @@ SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "").strip().strip('"').str
 SITE_URL     = os.environ.get("SITE_URL", "").rstrip("/") + "/"
 GMAIL_USER   = os.environ.get("GMAIL_USER", "")
 GMAIL_PASS   = os.environ.get("GMAIL_APP_PASSWORD", "")
-SITE_NAME    = os.environ.get("SITE_NAME", "汪回家")
+SITE_NAME    = os.environ.get("SITE_NAME", "汪喵回家")
 MOA_API_URL  = os.environ.get("MOA_API_URL") or \
     "https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL"
 UA = "WangHome/1.0 (+lost-dog-matcher)"

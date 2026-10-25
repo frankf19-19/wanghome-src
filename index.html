@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>汪回家 — 全台走失毛孩協尋平台</title>
+<title>汪喵回家 — 全台走失毛孩協尋平台</title>
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
-<meta property="og:title" content="汪回家 — 全台走失毛孩協尋平台">
+<meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.4.0 -->
+<!-- BUILD v1.4.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -241,13 +241,13 @@ footer a{color:var(--ink-2);margin:0 6px}
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#c8201f">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="汪回家">
+<meta name="apple-mobile-web-app-title" content="汪喵回家">
 </head>
 <body>
 
 <header>
   <div class="nav">
-    <a href="#/" class="logo"><span class="paw">🐾</span><span id="siteName">汪回家</span></a>
+    <a href="#/" class="logo"><span class="paw">🐾</span><span id="siteName">汪喵回家</span></a>
     <div class="sp"></div>
     <a href="#/resources" class="link">協尋攻略</a>
     <a href="#/thanks" class="link">感謝牆</a>
@@ -260,12 +260,12 @@ footer a{color:var(--ink-2);margin:0 6px}
 <main id="app"><div class="empty">載入中…</div></main>
 
 <footer>
-  <div><b id="footName">汪回家</b> · 全台走失毛孩協尋平台 · 免費使用</div>
+  <div><b id="footName">汪喵回家</b> · 全台走失毛孩協尋平台 · 免費使用</div>
   <div style="margin-top:6px">
     <a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料· 地圖 © OpenStreetMap 貢獻者</div>
-  <div class="small" style="margin-top:4px">BUILD v1.4.0</div>
+  <div class="small" style="margin-top:4px">BUILD v1.4.1</div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -275,7 +275,7 @@ footer a{color:var(--ink-2);margin:0 6px}
    設定區：只需要改這裡
    ============================================================ */
 const CONFIG = {
-  SITE_NAME: '汪回家',
+  SITE_NAME: '汪喵回家',
   SUPABASE_URL: 'https://nopyhfpaykkiieudvoko.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_WCeVQIAPH0UEEzhTwovqkg_lJ8Qjydb',  // publishable key（可公開）
   ECPAY_URL: '',             // 綠界實況主收款網址，例：https://p.ecpay.com.tw/XXXXXXX
@@ -283,7 +283,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.4.0';
+const BUILD = 'v1.4.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -407,7 +407,7 @@ const homeState={tab:'lost',species:'',city:'',status:'searching',reward:false,q
 async function renderHome(){
   setTitle('');
   app.innerHTML=`
-  <div class="install" id="installBar">📱 把汪回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
+  <div class="install" id="installBar">📱 把汪喵回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
   <section class="hero">
     <h1>走失的毛孩，<b>一起幫牠回家</b></h1>
     <p class="muted">飼主登記 · 路人回報目擊／拾獲 · 地圖時間軸 · 自動比對全台收容所</p>

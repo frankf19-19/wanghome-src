@@ -29,7 +29,7 @@ jobs:
           SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SITE_URL: https://frankf19-19.github.io/wanghome/
-          SITE_NAME: 汪回家
+          SITE_NAME: 汪喵回家
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MOA_API_URL: ${{ secrets.MOA_API_URL }}

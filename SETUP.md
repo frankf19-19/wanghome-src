@@ -1,4 +1,4 @@
-# 汪回家 WangHome — 安裝說明（v1.4.0）
+# 汪喵回家 WangHome — 安裝說明（v1.4.0）
 
 ## ✅ 目前已部署
 - 網站：https://frankf19-19.github.io/wanghome/
@@ -55,7 +55,7 @@ wanghome/
 
 ```js
 const CONFIG = {
-  SITE_NAME: '汪回家',
+  SITE_NAME: '汪喵回家',
   SUPABASE_URL: '',          // ← 貼 Project URL
   SUPABASE_ANON_KEY: '',     // ← 貼 anon public key
   ECPAY_URL: '',             // ← 綠界實況主收款網址（可晚點填）
@@ -82,7 +82,7 @@ repo → **Settings → Secrets and variables → Actions → New repository sec
 | `SUPABASE_URL` | 第 1 步的 Project URL |
 | `SUPABASE_SERVICE_KEY` | 第 1 步的 **service_role** key |
 | `SITE_URL` | `https://你的帳號.github.io/wanghome/` |
-| `SITE_NAME` | 汪回家（或你改的名字） |
+| `SITE_NAME` | 汪喵回家（或你改的名字） |
 | `GMAIL_USER` | 用來寄通知的 Gmail 帳號 |
 | `GMAIL_APP_PASSWORD` | Gmail 應用程式密碼（見下方） |
 
