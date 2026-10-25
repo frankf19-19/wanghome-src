@@ -178,3 +178,9 @@ Supabase 內建寄信每小時只能寄很少封，只適合測試。建議用 R
 - 收據／病歷照片存在私密空間 `pet-private`（非公開，只有本人能讀，顯示用 1 小時有效的簽名網址）。
 - 「給獸醫看」頁可列印或存成 PDF。
 - 到期前 7 天會寄 Email 提醒（每天 03:17 的排程，需 Gmail 設定）。
+
+## v1.8：日曆同步
+1. Supabase SQL Editor 執行 `supabase/migration_v1.7.sql`（新增 profiles.calendar_token）。
+2. Supabase → Edge Functions → 建立函式 `pet-calendar`，貼上 `supabase/functions/pet-calendar/index.ts`，
+   並**關閉 Verify JWT**（日曆 App 無法帶登入資訊，改用私人 token 辨識）。
+3. 會員在「我的」頁面按 Google／iPhone／Outlook 即可訂閱；每筆到期提醒也可單獨加到 Google 日曆或下載 .ics。
