@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-汪喵回家 WangHome — 每日自動化腳本  v1.4.0
+汪喵回家 WangHome — 每日自動化腳本  v1.5.0
 
 做三件事：
   1. 抓農業部「動物認領養」開放資料，和協尋中的案件比對（縣市/毛色/體型/性別/日期），
@@ -325,10 +325,28 @@ def run_member_notifications():
         except Exception as e:
             print("追蹤通知寄送失敗：", e)
 
+# ---------------------------------------------------------------- 檢舉通知站長
+def run_report_alerts():
+    admin = os.environ.get("ADMIN_EMAIL") or GMAIL_USER
+    if not (GMAIL_USER and GMAIL_PASS and admin): return
+    rows = sb("GET", "reports", params={"select": "id,target_type,target_id,reason,note,created_at", "notified": "eq.false", "order": "created_at.asc"}) or []
+    if not rows: return
+    names = {"case": "走失案件", "found": "拾獲通報", "sighting": "目擊"}
+    lines = [f"有 {len(rows)} 則新檢舉待處理：", ""]
+    for r in rows[:30]:
+        lines.append(f"・{names.get(r['target_type'], r['target_type'])}  原因：{r['reason']}  {r.get('note') or ''}")
+    lines += ["", f"管理後台：{SITE_URL}#/admin", f"— {SITE_NAME}"]
+    try:
+        send_mail(admin, f"【{SITE_NAME}】{len(rows)} 則新檢舉", "\n".join(lines))
+        sb("PATCH", "reports", body={"notified": True}, params={"id": "in.(" + ",".join(r["id"] for r in rows) + ")"}, prefer="return=minimal")
+        print(f"已通知站長 {len(rows)} 則檢舉")
+    except Exception as e:
+        print("檢舉通知失敗：", e)
+
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.4.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.5.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode == "probe":
         try:
             data = fetch_moa()
@@ -345,5 +363,6 @@ if __name__ == "__main__":
     if mode in ("all", "match", "notify"): run_found_matching()
     if mode in ("all", "notify"): run_notifications()
     if mode in ("all", "notify"): run_member_notifications()
+    if mode in ("all", "notify"): run_report_alerts()
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})
     print("保活 OK", "有資料" if n else "空")

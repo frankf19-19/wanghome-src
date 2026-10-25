@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.4.2 -->
+<!-- BUILD v1.5.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -265,7 +265,7 @@ footer a{color:var(--ink-2);margin:0 6px}
     <a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料· 地圖 © OpenStreetMap 貢獻者</div>
-  <div class="small" style="margin-top:4px">BUILD v1.4.2</div>
+  <div class="small" style="margin-top:4px">BUILD v1.5.0</div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -283,7 +283,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.4.2';
+const BUILD = 'v1.5.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -383,6 +383,7 @@ function route(){
   if((m=path.match(/^#\/found-manage\/([0-9a-f-]{36})$/)))return renderFoundManage(m[1],qs(h).t);
   if(path==='#/login')return renderLogin();
   if(path==='#/me')return renderMe();
+  if(path==='#/admin')return renderAdmin();
   if((m=path.match(/^#\/pet\/(new|[0-9a-f-]{36})$/)))return renderPet(m[1]);
   if(path==='#/thanks')return renderThanks();
   if(path==='#/resources')return renderResources();
@@ -526,7 +527,7 @@ function cardHTML(c){
   return `<a class="ccard" href="#/case/${c.id}">
     <div class="ph ${ph?'':'noimg'} ${c.species==='cat'?'cat':''}" ${ph?`style="background-image:url('${esc(ph)}')"`:''}></div>
     <div class="b">
-      <div class="t">${sp(c.species).emoji} ${esc(c.name)} <span class="tag ${c.status==='searching'?'red':c.status==='found'?'green':'gray'}">${STATUS[c.status]}</span>${fresh?'<span class="tag amber">24h內有目擊</span>':''}${c.reward>0?`<span class="tag blue">獎金 $${c.reward.toLocaleString()}</span>`:''}</div>
+      <div class="t">${sp(c.species).emoji} ${esc(c.name)} <span class="tag ${c.status==='searching'?'red':c.status==='found'?'green':'gray'}">${STATUS[c.status]}</span>${fresh?'<span class="tag amber">24h內有目擊</span>':''}${staleTag(c)}${c.reward>0?`<span class="tag blue">獎金 $${c.reward.toLocaleString()}</span>`:''}</div>
       <div class="m">${esc([c.breed,SEX[c.sex],SIZE[c.size],c.colour].filter(Boolean).join(' · '))}</div>
       <div class="loc">📍 ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</div>
       <div class="loc">${c.status==='searching'?`走失第 ${daysSince(c.lost_at)} 天`:fmtDate(c.lost_at)+' 走失'} · 目擊 ${c.sighting_count} 次${c.has_chip?' · 有晶片':''} ${distText(c.lost_lat,c.lost_lng)}</div>
@@ -664,11 +665,12 @@ async function renderCase(id){
       ${c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">📞 ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
       <div class="actionbar">
         <a class="btn" href="#/report/${id}">👁 回報目擊</a>
-        <button class="btn ghost" id="btnShare">🔗 分享</button>
+        <button class="btn ghost" id="btnShare" data-share="native">🔗 分享</button>
         <button class="btn ghost" id="btnFollow" data-on="0">⭐ 追蹤</button>
         <a class="btn ghost" href="#/poster/${id}">🖼 產生海報</a>
         <button class="btn ghost" id="btnManage">🔑 飼主管理</button>
       </div>
+      <p class="small" style="text-align:right;margin:0"><a href="javascript:void 0" id="btnReport" style="color:var(--ink-3)">🚩 檢舉</a></p>
     </div>
   </div>
 
@@ -682,9 +684,9 @@ async function renderCase(id){
 
   <h2>📢 幫忙擴散</h2>
   <div class="sharebar">
-    <a class="btn sm line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a>
-    <a class="btn sm fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a>
-    <button class="btn sm ghost" onclick="copy('${esc(url)}')">複製連結</button>
+    <a class="btn sm line" data-share="line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a>
+    <a class="btn sm fb" data-share="fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a>
+    <button class="btn sm ghost" data-share="copy">複製連結</button>
   </div>
   <div class="card">
     <p class="small">複製以下文案，貼到當地協尋社團、LINE 群：</p>
@@ -696,7 +698,10 @@ async function renderCase(id){
 
   document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${photos[+t.dataset.i]}')`});
   $('#gMain').onclick=()=>{const u=$('#gMain').style.backgroundImage.slice(5,-2);if(u)lightbox(u)};
-  $('#btnShare').onclick=()=>share(`${sp(c.species).poster}：${c.name}（${c.lost_city}${c.lost_district||''}）`,url);
+  const shareTitle=`${sp(c.species).poster}：${c.name}（${c.lost_city}${c.lost_district||''}）`;
+  applyShareUrl(url,shareTitle);
+  getShareUrl('s',id).then(u=>{if(u===url||location.hash.split('?')[0]!=='#/case/'+id)return;applyShareUrl(u,shareTitle);const t=$('#shareText');if(t)t.value=shareText(c,u)});
+  $('#btnReport').onclick=()=>openReport('case',id);
   $('#btnManage').onclick=async()=>{
     let t=null;try{t=localStorage.getItem('wh_token_'+id)}catch(_){}
     if(t||me()){const {data}=await sb.rpc('can_manage_case',{p_id:id,p_token:t});if(data){location.hash=`#/manage/${id}`;return}}
@@ -1111,12 +1116,15 @@ async function renderFound(id){
       <dt>通報者</dt><dd>${esc(f.reporter_name||'熱心網友')}${f.reporter_line?' · LINE：'+esc(f.reporter_line):''}</dd>
     </dl></div>
     ${f.reporter_phone?`<div class="phone"><a href="tel:${esc(f.reporter_phone)}">📞 ${esc(f.reporter_phone)}</a></div><p class="muted small" style="text-align:center">是你的毛孩嗎？請準備照片或晶片號碼證明</p>`:'<p class="muted small" style="text-align:center;margin-top:8px">通報者未公開電話。'+(f.reporter_line?'請用 LINE 聯絡。':'')+'</p>'}
-    <div class="sharebar"><a class="btn sm line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a><a class="btn sm fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a><button class="btn sm ghost" id="btnFM">🔑 通報者管理</button></div>
+    <div class="sharebar"><a class="btn sm line" data-share="line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a><a class="btn sm fb" data-share="fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a><button class="btn sm ghost" data-share="copy">複製連結</button><button class="btn sm ghost" id="btnFM">🔑 通報者管理</button></div>
+    <p class="small" style="text-align:right;margin:4px 0 0"><a href="javascript:void 0" id="btnReportF" style="color:var(--ink-3)">🚩 檢舉</a></p>
     </div></div>
   ${f.lat?'<h2>🗺 位置</h2><div id="map"></div>':''}
   <div id="caseMatches"></div>`;
   document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${photos[+t.dataset.i]}')`});
   $('#gMain').onclick=()=>{const u=$('#gMain').style.backgroundImage.slice(5,-2);if(u)lightbox(u)};
+  applyShareUrl(url,title);getShareUrl('f',id).then(u=>{if(u!==url)applyShareUrl(u,title)});
+  $('#btnReportF').onclick=()=>openReport('found',id);
   $('#btnFM').onclick=async()=>{
     let t=null;try{t=localStorage.getItem('wh_ftoken_'+id)}catch(_){}
     if(t||me()){const {data}=await sb.rpc('can_manage_found',{p_id:id,p_token:t});if(data){location.hash=`#/found-manage/${id}`;return}}
@@ -1154,6 +1162,81 @@ async function renderFoundManage(id,token){
   let st=f.status;
   $('#seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{st=b.dataset.v;$('#seg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
   $('#save').onclick=async()=>{const {error}=await sb.rpc('update_found',{p_id:id,p_token:token,p:{status:st,current_place:$('#cur').value,reporter_phone:$('#ph').value,phone_public:$('#pp').checked,notes:$('#nt').value}});if(error)return toast('儲存失敗：'+error.message);toast(st==='reunited'?'🎉 太好了，謝謝你！':'已儲存')};
+}
+
+/* ============================================================
+   分享預覽頁網址（GitHub Actions 每 30 分鐘產生 s/<id>.html、f/<id>.html，
+   貼到 LINE／FB 會顯示照片與標題；新案件還沒產生前先用一般網址）
+   ============================================================ */
+const shareCache={};
+async function getShareUrl(kind,id){
+  const k=kind+id;if(shareCache[k])return shareCache[k];
+  const pretty=`${CONFIG.SITE_URL}${kind}/${id}.html`;
+  const fallback=CONFIG.SITE_URL+(kind==='s'?'#/case/':'#/found/')+id;
+  try{const r=await fetch(pretty,{method:'HEAD',cache:'no-store'});shareCache[k]=r.ok?pretty:fallback}catch(_){shareCache[k]=fallback}
+  return shareCache[k];
+}
+function applyShareUrl(url,title){
+  const enc=encodeURIComponent(url);
+  document.querySelectorAll('[data-share="line"]').forEach(a=>a.href='https://social-plugins.line.me/lineit/share?url='+enc);
+  document.querySelectorAll('[data-share="fb"]').forEach(a=>a.href='https://www.facebook.com/sharer/sharer.php?u='+enc);
+  document.querySelectorAll('[data-share="copy"]').forEach(b=>b.onclick=()=>copy(url));
+  document.querySelectorAll('[data-share="native"]').forEach(b=>b.onclick=()=>share(title,url));
+}
+
+/* 檢舉 */
+const REPORT_REASONS=[['fake','假案件／詐騙（例如要求先匯款）'],['spam','廣告或與協尋無關'],['inappropriate','不當照片或言論'],['privacy','洩漏他人個資'],['resolved','已經找到了但沒有結案'],['other','其他']];
+function openReport(type,id){
+  const d=document.createElement('div');d.className='lightbox';d.style.alignItems='flex-start';d.style.overflow='auto';
+  d.innerHTML=`<div class="card" style="max-width:460px;width:100%;margin-top:40px" onclick="event.stopPropagation()">
+    <h2 style="margin-top:0">🚩 檢舉這則內容</h2>
+    <p class="muted small">站長會盡快處理。惡意檢舉不會讓內容自動下架。</p>
+    ${REPORT_REASONS.map(([v,t],i)=>`<label class="chk"><input type="radio" name="rr" value="${v}" ${i===0?'checked':''}> ${t}</label>`).join('')}
+    <label class="f"><span>補充說明（選填）</span><textarea id="rn" maxlength="500" style="min-height:70px"></textarea></label>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" id="rs">送出檢舉</button><button class="btn ghost" id="rc">取消</button></div>
+  </div>`;
+  d.onclick=()=>d.remove();document.body.appendChild(d);
+  d.querySelector('#rc').onclick=()=>d.remove();
+  d.querySelector('#rs').onclick=async()=>{
+    const reason=d.querySelector('input[name=rr]:checked').value;
+    const {error}=await sb.rpc('report_content',{p_type:type,p_id:id,p_reason:reason,p_note:d.querySelector('#rn').value||null});
+    if(error)return toast('送出失敗：'+error.message);
+    d.remove();toast('謝謝，已收到檢舉');
+  };
+}
+function staleTag(c){
+  if(c.status!=='searching'||!c.last_activity)return '';
+  const d=Math.floor((Date.now()-new Date(c.last_activity))/86400000);
+  return d>=30?`<span class="tag gray">${d} 天未更新</span>`:'';
+}
+
+/* ============================================================
+   管理後台（profiles.is_admin = true 的會員）
+   ============================================================ */
+const REASON_TEXT=Object.fromEntries(REPORT_REASONS);
+async function renderAdmin(){
+  setTitle('管理後台');
+  if(!me()){location.hash='#/login';return}
+  const {data:isA}=await sb.rpc('is_admin');
+  if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
+  const showAll=qs(location.hash).all==='1';
+  const [{data:st},{data:rs,error}]=await Promise.all([sb.rpc('admin_stats'),sb.rpc('admin_reports',{p_include_resolved:showAll})]);
+  if(error){app.innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+  const groups={};(rs||[]).forEach(r=>{(groups[r.target_id]=groups[r.target_id]||{...r,items:[]}).items.push(r)});
+  const link=(t,id)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:null;
+  app.innerHTML=`<h1>🛡 管理後台</h1>
+  <div class="stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已找回'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??0}</b>${t}</div>`).join('')}</div>
+  <h2>檢舉 <a class="small" style="margin-left:auto" href="#/admin${showAll?'':'?all=1'}">${showAll?'只看待處理':'顯示已處理'}</a></h2>
+  ${Object.values(groups).length?Object.values(groups).map(g=>`<div class="card" style="margin-bottom:10px">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag ${g.target_type==='case'?'red':g.target_type==='found'?'green':'blue'}">${g.target_type==='case'?'走失案件':g.target_type==='found'?'拾獲通報':'目擊'}</span><b>${esc(g.target_title||'(已刪除)')}</b>${g.target_hidden?'<span class="tag gray">已隱藏</span>':''}<span class="tag amber">${g.items.length} 則檢舉</span>${g.resolved?'<span class="tag green">已處理</span>':''}</div>
+    <ul class="small" style="margin:8px 0 0 18px;padding:0">${g.items.map(r=>`<li>${fmtDT(r.created_at)}　${esc(REASON_TEXT[r.reason]||r.reason)}${r.note?'：'+esc(r.note):''}</li>`).join('')}</ul>
+    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+      ${link(g.target_type,g.target_id)?`<a class="btn sm ghost" target="_blank" href="${link(g.target_type,g.target_id)}">查看</a>`:''}
+      <button class="btn sm" data-hide="${g.target_type}|${g.target_id}|${g.target_hidden?0:1}">${g.target_hidden?'恢復顯示':(g.target_type==='sighting'?'退回目擊':'隱藏')}</button>
+      ${g.resolved?'':`<button class="btn sm green" data-res="${g.target_id}">標記已處理</button>`}
+    </div></div>`).join(''):'<p class="muted">目前沒有待處理的檢舉 🎉</p>'}`;
+  document.querySelectorAll('[data-hide]').forEach(b=>b.onclick=async()=>{const [t,id,h]=b.dataset.hide.split('|');const {error}=await sb.rpc('admin_set_hidden',{p_type:t,p_id:id,p_hidden:h==='1'});if(error)return toast(error.message);toast(h==='1'?'已隱藏':'已恢復');renderAdmin()});
+  document.querySelectorAll('[data-res]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('admin_resolve',{p_target:b.dataset.res});if(error)return toast(error.message);toast('已標記處理');renderAdmin()});
 }
 
 /* ============================================================
@@ -1239,7 +1322,7 @@ async function renderMe(){
   let followed=[];
   if(fl&&fl.length){const {data}=await sb.from('cases_public').select('*').in('id',fl.map(f=>f.case_id));followed=data||[]}
   const p=prof||{};
-  app.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="margin:0">👤 ${esc(p.display_name||me().email)}</h1><span class="muted small">${esc(me().email||'')}</span><button class="btn sm ghost" id="btnOut" style="margin-left:auto">登出</button></div>
+  app.innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="margin:0">👤 ${esc(p.display_name||me().email)}</h1><span class="muted small">${esc(me().email||'')}</span>${p.is_admin?'<a class="btn sm" href="#/admin">🛡 管理後台</a>':''}<button class="btn sm ghost" id="btnOut" style="margin-left:auto">登出</button></div>
 
   <h2>🐾 我的寵物檔案 <a class="btn sm" href="#/pet/new" style="margin-left:auto">＋ 新增</a></h2>
   <p class="muted small">只有你看得到。平時先建好，走失時按「走失了」就能一鍵轉成協尋案件。</p>
@@ -1279,8 +1362,8 @@ async function renderMe(){
   $('#nf').onsubmit=async e=>{
     e.preventDefault();const loc=picker.get();
     if($('#nOn').checked&&!loc)return toast('請在地圖上點選你家附近的位置');
-    const row={id:me().id,display_name:$('#dn').value.trim()||null,notify_follow:$('#nFollow').checked,notify_enabled:$('#nOn').checked,home_radius_km:+$('#nR').value,notify_species:$('#nSp').value,home_lat:loc?.lat??null,home_lng:loc?.lng??null};
-    const {error}=await sb.from('profiles').upsert(row);
+    const row={display_name:$('#dn').value.trim()||null,notify_follow:$('#nFollow').checked,notify_enabled:$('#nOn').checked,home_radius_km:+$('#nR').value,notify_species:$('#nSp').value,home_lat:loc?.lat??null,home_lng:loc?.lng??null};
+    const {error}=await sb.from('profiles').update(row).eq('id',me().id);
     if(error)return toast('儲存失敗：'+error.message);toast('已儲存');
   };
 }
@@ -1358,7 +1441,7 @@ async function renderPoster(id){
   <div class="posterwrap"><canvas id="pc" width="1080" height="1350"></canvas></div>
   <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn" id="btnDl">⬇ 下載海報 PNG</button><a class="btn ghost" href="#/case/${id}">回案件頁</a></div>
   <div id="qr" class="hidden"></div>`;
-  const url=caseUrl(id);
+  const url=await getShareUrl('s',id);
   new QRCode($('#qr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
   await new Promise(r=>setTimeout(r,80));
   try{await Promise.all(['900 96px "Noto Sans TC"','700 34px "Noto Sans TC"','500 30px "Noto Sans TC"'].map(f=>document.fonts.load(f,'尋狗貓啟事')));await document.fonts.ready}catch(_){}

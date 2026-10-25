@@ -1,10 +1,10 @@
-# 汪喵回家 WangHome — 安裝說明（v1.4.0）
+# 汪喵回家 WangHome — 安裝說明（v1.5.0）
 
 ## ✅ 目前已部署
 - 網站：https://frankf19-19.github.io/wanghome/
 - GitHub：https://github.com/frankf19-19/wanghome
 - Supabase 專案：wanghome（東京，ref `nopyhfpaykkiieudvoko`）
-  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql + migration_v1.4.sql 已執行、publishable key 已填入 index.html
+  - 資料庫結構 schema.sql + migration_v1.1.sql + migration_v1.2.sql + migration_v1.3.sql + migration_v1.4.sql + migration_v1.5.sql 已執行、publishable key 已填入 index.html
 - GitHub Actions：SUPABASE_URL / SITE_URL / SITE_NAME 已直接寫在 workflow
   - 只需要 Secret：`SUPABASE_SERVICE_KEY`（Supabase → Settings → API Keys → Secret key）
   - 選填 Secret：`GMAIL_USER`、`GMAIL_APP_PASSWORD`（寄通知）、`MOA_API_URL`
@@ -43,6 +43,7 @@ wanghome/
    - 再跑 `supabase/migration_v1.2.sql`（收容所比對結果寫回）
    - 再跑 `supabase/migration_v1.3.sql`（支援貓）
    - 再跑 `supabase/migration_v1.4.sql`（會員系統）
+   - 再跑 `supabase/migration_v1.5.sql`（檢舉與管理後台）
 3. 左側 **Project Settings → API**，記下兩個值：
    - **Project URL**（像 `https://abcdefgh.supabase.co`）
    - **Publishable key**（以 `sb_publishable_` 開頭；舊版 anon key 也可）
@@ -157,3 +158,15 @@ Supabase 內建寄信每小時只能寄很少封，只適合測試。建議用 R
 
 ### 會員通知
 附近走失、追蹤案件的 Email 通知由 GitHub Actions 每 2 小時寄出，需要設定 Secrets：`GMAIL_USER`、`GMAIL_APP_PASSWORD`。
+
+
+## 管理後台與檢舉（v1.5）
+- 設定管理員（在 Supabase SQL Editor 執行，email 換成你登入用的信箱）：
+  `update public.profiles set is_admin = true where id = (select id from auth.users where email = '你的信箱');`
+- 管理員登入後，「👤 我的」頁會出現「🛡 管理後台」，可隱藏案件、退回目擊、標記檢舉已處理。
+- 有新檢舉時，daily 排程會寄信到 `ADMIN_EMAIL`（未設定則寄到 `GMAIL_USER`）。
+
+## 分享預覽頁（v1.5）
+`.github/workflows/share.yml` 每 30 分鐘執行 `scripts/build_share.py`，替每個案件產生 `s/<id>.html`、拾獲通報產生 `f/<id>.html`，
+貼到 LINE / Facebook 會顯示照片、名字、地點。只讀公開資料，不需要秘密金鑰。新案件最多 30 分鐘內就有預覽頁，之前會先用一般網址。
+本機推送前請先 `git pull --rebase`（機器人會自動 commit 分享頁）。
