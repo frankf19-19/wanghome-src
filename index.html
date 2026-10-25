@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.5.2 -->
+<!-- BUILD v2.6.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -627,6 +627,20 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 .q-done{display:flex;flex-direction:column;gap:2px;background:var(--green-soft);border-radius:12px;padding:12px 14px}
 .q-done b{display:flex;align-items:center;gap:6px;color:var(--green);font-size:17px}.q-done span{color:var(--ink-2);font-size:14.5px}
 .status-pill.injured{background:#D9590B;color:#fff}
+/* 搜尋列與篩選膠囊 */
+.searchbar{display:flex;align-items:center;gap:10px;background:var(--sheet);border-radius:999px;padding:0 6px 0 16px;box-shadow:var(--lift),inset 0 0 0 1.5px var(--line);margin-top:14px}
+.searchbar:focus-within{box-shadow:var(--lift),inset 0 0 0 2px var(--ink-2)}
+.searchbar>.ico{width:20px;height:20px;color:var(--ink-3);flex:none}
+.searchbar input{flex:1;min-width:0;width:100%;font-family:inherit;color:var(--ink);border:0!important;background:transparent!important;padding:13px 6px 13px 0!important;box-shadow:none!important;font-size:16px}
+.searchbar input:focus{outline:none}
+.pillbar{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pillbar::-webkit-scrollbar{display:none}
+.pill{flex:none;width:auto!important;display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px!important;border-radius:999px!important;border:1.5px solid var(--line)!important;background:var(--sheet);color:var(--ink);font-size:14.5px!important;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
+select.pill{padding-right:34px!important;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2356636A' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:14px}
+.pill.on,.pill:has(input:checked){background:var(--ink);color:var(--paper);border-color:var(--ink)!important}
+.pill .ico{width:16px;height:16px}
+.chkpill input{position:absolute;opacity:0;pointer-events:none}
+.pill.hidden{display:none}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -666,7 +680,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.5.2</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.6.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -685,7 +699,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.5.2';
+const BUILD = 'v2.6.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -906,11 +920,6 @@ async function renderHome(){
     <a class="hero-poster hidden" id="heroPoster" aria-label="最新走失案件"></a>
     <img class="hero-duo-lg" id="heroDuo" src="duo.svg" alt="" width="320" height="218">
   </section>
-  <ol class="how" aria-label="怎麼運作">
-    <li><b>登記協尋</b><span>上傳照片、走失地點，自動比對收容所和拾獲通報，產生可列印的海報。</span></li>
-    <li><b>大家幫忙看</b><span>網友回報目擊時間地點，附近會員收到通知，地圖上標出移動路線。</span></li>
-    <li><b>線索直達飼主</b><span>每則新目擊即時寄給飼主；找到後標記「回家了」，大家就知道可以停了。</span></li>
-  </ol>
   <div id="recentWrap" class="hidden"><h2>${ic("eye")} 最新目擊</h2><div class="recent" id="recent"></div></div>
   <div id="homeWrap" class="hidden"><h2>${ic("paw")} 最近回家的毛孩</h2><div class="reunite" id="reunite"></div></div>
   <div class="tabs" id="tabs">
@@ -918,31 +927,34 @@ async function renderHome(){
     <button data-t="found">拾獲／目擊<span class="cnt" id="cFound">…</span></button>
     <button data-t="map">${ic("map")} 地圖</button>
   </div>
-  <div class="toolbar">
-    <select id="fSp" style="max-width:110px"><option value="">狗＋貓</option><option value="dog">狗</option><option value="cat">貓</option></select>
-    <select id="fCity" style="max-width:160px">${cityOptions(homeState.city)}</select>
-    <button class="btn sm ghost" id="btnNear">${ic('pin')} ${homeState.near?'依距離排序中':'我附近'}</button>
-    <span class="muted small" id="nearInfo"></span>
+  <div class="searchbar" id="lostFilters">${ic("search")}<input type="search" id="fQ" enterkeyhint="search" placeholder="搜尋名字、品種、地點、晶片末4碼" value="${esc(homeState.chip||homeState.q)}"></div>
+  <div class="pillbar">
+    <select id="fSp" class="pill" aria-label="種類"><option value="">狗＋貓</option><option value="dog">只看狗</option><option value="cat">只看貓</option></select>
+    <select id="fCity" class="pill" aria-label="縣市">${cityOptions(homeState.city).replace('選擇縣市','全台')}</select>
+    <button type="button" class="pill" id="btnNear">${ic('pin')} ${homeState.near?'依距離排序中':'我附近'}</button>
+    <select id="fStatus" class="pill lost-f" aria-label="狀態"><option value="searching">協尋中</option><option value="found">已找到</option><option value="">全部狀態</option></select>
+    <label class="pill chkpill lost-f"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 有獎金</label>
   </div>
-  <div class="filters" id="lostFilters">
-    <select id="fStatus"><option value="searching">協尋中</option><option value="found">已找到</option><option value="">全部</option></select>
-    <input type="text" id="fChip" placeholder="晶片末四碼" maxlength="4" inputmode="numeric" value="${esc(homeState.chip)}">
-    <input type="text" id="fQ" placeholder="關鍵字：名字、品種、毛色、地點" value="${esc(homeState.q)}">
-    <label class="chk" style="margin:0;justify-content:center"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 只看有獎金</label>
-  </div>
+  <p class="muted small" id="nearInfo" style="margin:6px 2px 0"></p>
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
+  <h2>${ic("clipboard")} 汪喵回家怎麼幫忙找</h2>
+  <ol class="how" aria-label="怎麼運作">
+    <li><b>登記協尋</b><span>上傳照片、走失地點，自動比對收容所和拾獲通報，產生可列印的海報。</span></li>
+    <li><b>大家幫忙看</b><span>網友回報目擊時間地點，附近會員收到通知，地圖上標出移動路線。</span></li>
+    <li><b>線索直達飼主</b><span>每則新目擊即時寄給飼主；找到後標記「回家了」，大家就知道可以停了。</span></li>
+  </ol>
   <a class="crosslink" href="#/health"><span class="cl-ic">${ic("steth")}</span><span><b>想記錄自家毛孩的健康？</b>回診、疫苗、驅蟲到期自動提醒，同步手機日曆。到「健康手冊」免費使用</span><em>前往健康手冊</em></a>
   `;
   $('#fStatus').value=homeState.status;$('#fSp').value=homeState.species;
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));loadList()}});
-  const run=()=>{homeState.species=$('#fSp').value;homeState.city=$('#fCity').value;homeState.status=$('#fStatus').value;homeState.chip=$('#fChip').value.trim();homeState.q=$('#fQ').value.trim();homeState.reward=$('#fReward').checked;loadList()};
+  const run=()=>{homeState.species=$('#fSp').value;homeState.city=$('#fCity').value;homeState.status=$('#fStatus').value;const qv=$('#fQ').value.trim();if(/^\d{4}$/.test(qv)){homeState.chip=qv;homeState.q=''}else{homeState.chip='';homeState.q=qv}document.querySelector('.chkpill').classList.toggle('on',$('#fReward').checked);homeState.reward=$('#fReward').checked;loadList()};
   ['fSp','fCity','fStatus','fReward'].forEach(id=>$('#'+id).addEventListener('change',run));
-  let t;['fChip','fQ'].forEach(id=>$('#'+id).addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,400)}));
+  let t;['fQ'].forEach(id=>$('#'+id).addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,400)}));
   $('#btnNear').onclick=()=>{
-    if(homeState.near){homeState.near=null;$('#btnNear').innerHTML=ic('pin')+' 我附近';$('#nearInfo').textContent='';return loadList()}
+    if(homeState.near){homeState.near=null;$('#btnNear').innerHTML=ic('pin')+' 我附近';$('#btnNear').classList.remove('on');$('#nearInfo').textContent='';return loadList()}
     if(!navigator.geolocation)return toast('此裝置不支援定位');
     toast('定位中…');
-    navigator.geolocation.getCurrentPosition(p=>{homeState.near={lat:p.coords.latitude,lng:p.coords.longitude};$('#btnNear').textContent='✕ 取消距離排序';$('#nearInfo').textContent='依離你的距離排序（不會儲存你的位置）';loadList()},()=>toast('無法取得定位'),{enableHighAccuracy:false,timeout:8000});
+    navigator.geolocation.getCurrentPosition(p=>{homeState.near={lat:p.coords.latitude,lng:p.coords.longitude};$('#btnNear').textContent='✕ 取消距離排序';$('#btnNear').classList.add('on');$('#nearInfo').textContent='依離你的距離排序（不會儲存你的位置）';loadList()},()=>toast('無法取得定位'),{enableHighAccuracy:false,timeout:8000});
   };
   setupInstall();
   loadStats();loadFeatured();loadRecent();loadReunited();loadList();
@@ -1061,7 +1073,7 @@ function distText(lat,lng){if(!homeState.near||lat==null)return '';const d=km(ho
 function sortNear(arr,latK,lngK){if(!homeState.near)return arr;return arr.slice().sort((a,b)=>{const da=a[latK]==null?1e9:km(homeState.near,{lat:a[latK],lng:a[lngK]});const db=b[latK]==null?1e9:km(homeState.near,{lat:b[latK],lng:b[lngK]});return da-db})}
 async function loadList(){
   const el=$('#list');if(!el)return;
-  $('#lostFilters').classList.toggle('hidden',homeState.tab!=='lost');
+  $('#lostFilters').classList.toggle('hidden',homeState.tab!=='lost');document.querySelectorAll('.lost-f').forEach(x=>x.classList.toggle('hidden',homeState.tab!=='lost'));
   if(homeState.tab==='map')return loadMapAll(el);
   el.className='grid';el.innerHTML=skel();
   if(homeState.tab==='found')return loadFoundList(el);
@@ -1120,7 +1132,7 @@ function cardHTML(c){
       <div class="t">${esc(c.name)}</div>
       <div class="m">${esc([sp(c.species).name,c.breed,SEX[c.sex],c.colour].filter(Boolean).join('、'))}</div>
       <div class="loc">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</div>
-      <div class="chips">${fresh?`<span class="tag amber">24 小時內有目擊・共 ${c.sighting_count||1} 次</span>`:c.sighting_count?`<span class="tag">目擊 ${c.sighting_count} 次</span>`:''}${staleTag(c)}${distText(c.lost_lat,c.lost_lng)}</div>
+      <div class="chips">${fresh?`<span class="tag amber">24 小時內有目擊</span>`:''}${c.sighting_count?`<span class="tag">目擊 ${c.sighting_count} 次</span>`:''}${staleTag(c)}${distText(c.lost_lat,c.lost_lng)}</div>
     </div></a>`;
 }
 function foundCardHTML(f){
