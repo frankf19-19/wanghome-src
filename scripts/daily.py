@@ -272,8 +272,11 @@ def run_notifications():
             mark_notified("shelter_matches", [m["id"] for m in lst]); continue
         lines = [f"系統在收容所資料中找到 {len(lst)} 筆與「{c['name']}」疑似相符的狗狗，請盡快親自確認：", ""]
         for m in lst[:10]:
-            lines.append(f"・{m.get('shelter_name')}  相似 {m['score']}  {m.get('sex') or ''} {m.get('bodytype') or ''} {m.get('colour') or ''}")
-            lines.append(f"  拾獲地：{m.get('found_place') or '未註明'}  電話：{m.get('shelter_tel') or ''}")
+            lines.append(f"・{m.get('shelter_name') or '收容所'}  相似 {m['score']}  {m.get('sex') or ''} {m.get('bodytype') or ''} {m.get('colour') or ''}")
+            if m.get("shelter_tel"):
+                lines.append(f"  拾獲地：{m.get('found_place') or '未註明'}  電話：{m['shelter_tel']}")
+            else:
+                lines.append(f"  收容所電話與地址：請打開你的管理頁查看（會即時向農業部查詢）")
             if m.get("photo_url"): lines.append(f"  照片：{m['photo_url']}")
             lines.append("")
         lines += ["這只是粗略比對，請打電話到收容所提供晶片號碼核對，或親自到所比對。", f"案件頁：{SITE_URL}#/case/{cid}", "", f"— {SITE_NAME}"]
