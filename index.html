@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.6.1 -->
+<!-- BUILD v3.6.2 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -803,9 +803,9 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 .recent a .ph,.reunite .ph{overflow:hidden}.recent a .ph img,.reunite .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
-/* v3.6.1 獎金移到照片左下，不再蓋住「走失第 N 天」 */
+/* v3.6.2 獎金移到照片左下，不再蓋住「走失第 N 天」 */
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* v3.6.1 中文斷行：不讓最後一行只剩一兩個字 */
+/* v3.6.2 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
 /* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
 body :is(p,li,div,small,label,span,dd,td,h1,h2,h3,h4,button,a){text-wrap:balance}
@@ -816,12 +816,12 @@ input,textarea,select{text-wrap:wrap}
 .hint.long{white-space:normal;text-wrap:pretty}
 .hint::before{content:'（'}.hint::after{content:'）'}
 .nw{white-space:nowrap}
-/* v3.6.1 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
+/* v3.6.2 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
 .row2,.row3{align-items:end}
 @media (max-width:520px){.row2:has(.hint),.row2:has(input[type=email]),.row2:has(input[name=reporter_contact]){grid-template-columns:1fr}}
 .hint.long{display:block;margin:3px 0 0;white-space:normal}
 .hint.long::before,.hint.long::after{content:none}
-/* v3.6.1 回報完成頁：大按鈕直接聯絡飼主 */
+/* v3.6.2 回報完成頁：大按鈕直接聯絡飼主 */
 .done-card{text-align:center;padding:32px 20px}
 .done-card .done-ic{width:64px;height:64px;margin:0 auto 8px;color:var(--green-fill)}.done-card .done-ic svg{width:100%;height:100%}
 .bigacts{display:grid;gap:10px;margin:14px 0}
@@ -829,7 +829,7 @@ input,textarea,select{text-wrap:wrap}
 .btn.big.call{background:var(--green-fill);color:#fff;border-color:transparent}
 .btn.big.line{background:#06C755;color:#fff;border-color:transparent}
 #msgTxt{font-size:15px;line-height:1.6}
-/* v3.6.1 給不太會用手機的人：字大一點、可選欄位收起來 */
+/* v3.6.2 給不太會用手機的人：字大一點、可選欄位收起來 */
 details.more{margin:14px 0 6px;border:1.5px dashed var(--line,#E8D9C6);border-radius:var(--r-ctl,14px);background:var(--card,#fff)}
 details.more>summary{list-style:none;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:700;font-size:16px;color:var(--ink-2,#5A4636)}
 details.more>summary::-webkit-details-marker{display:none}
@@ -850,7 +850,7 @@ details.more>:last-child{margin-bottom:14px}
   body .tag{font-size:13.5px}
   .health-hero.art .lede{clear:both}
 }
-/* v3.6.1 首頁三個大按鈕 */
+/* v3.6.2 首頁三個大按鈕 */
 .bigstart{display:grid;gap:12px;margin:6px 0 22px}
 .bs-hello{margin:0 2px;font-family:var(--head);font-size:22px;font-weight:800;color:var(--ink)}
 .bigbtn{display:flex;align-items:center;gap:14px;min-height:92px;padding:16px 18px;border-radius:var(--r-card,22px);text-decoration:none;color:var(--ink);border:2px solid transparent;box-shadow:0 4px 0 rgba(58,42,30,.12);text-align:left;font:inherit;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .08s}
@@ -870,7 +870,7 @@ details.more>:last-child{margin-bottom:14px}
 .bs-rule{margin:4px 2px 0;font-size:15px;color:var(--ink-2)}
 .choose{display:grid;gap:12px;margin-top:14px}
 @media (min-width:900px){.bigstart{grid-template-columns:repeat(3,1fr)}.bs-hello,.bs-health,.bs-rule{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
-/* v3.6.1 分步驟表單 */
+/* v3.6.2 分步驟表單 */
 .wprog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;font-weight:700;color:var(--ink-2);font-size:15px}
 .wdots{display:flex;gap:6px}.wdots i{width:28px;height:8px;border-radius:8px;background:var(--beige)}
 .wdots i.done{background:var(--green-fill)}.wdots i.on{background:var(--red-fill)}
@@ -888,6 +888,10 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 .wstep .seg:has(button:nth-child(3)) button{font-size:16px!important;min-height:52px;padding:6px 8px;line-height:1.3}
 /* 新版本提示 */
 .updbar{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:9999;min-height:52px;border:0;border-radius:16px;background:var(--green-fill);color:#fff;font:700 17px/1.3 inherit;font-family:inherit;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer}
+/* 地點、時間各自成一段，不會從中間斷開 */
+.meta-line{text-wrap:wrap!important}.meta-line .mu{display:inline-block;margin-right:10px;text-wrap:balance}
+/* 底部儲存列：按鈕加大，好按 */
+@media (max-width:640px){.submitbar .btn{min-height:52px;font-size:17px;padding-left:20px;padding-right:20px}.submitbar.row{display:flex;gap:10px}.submitbar.row>.btn:first-child{flex:1}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -927,7 +931,7 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.1</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.2</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -947,7 +951,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.6.1';
+const BUILD = 'v3.6.2';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1137,7 +1141,7 @@ function restoreScroll(y){let n=0;const t=()=>{if(document.documentElement.scrol
 window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
 function route(){
   if(!sb)return;
-  navId++;__wiz=null;
+  navId++;__wiz=null;__dirty=false;
   clearInterval(refreshTimer);refreshTimer=null;
   const h=location.hash||'#/';
   const path=h.split('?')[0];
@@ -1183,7 +1187,8 @@ function route(){
    - 大大的「下一步」，最後一步才出現送出鈕
    - 手機返回鍵＝回上一步
    ============================================================ */
-let __wiz=null;
+let __wiz=null,__dirty=false;
+document.addEventListener('input',e=>{if(e.target.closest&&e.target.closest('#app form'))__dirty=true},true);
 function wizard(form,checks={}){
   if(!form||form.dataset.wiz)return;form.dataset.wiz=1;form.noValidate=true;
   const sb=form.querySelector(':scope>.submitbar');const submit=sb&&sb.querySelector('[type=submit]');
@@ -1198,7 +1203,11 @@ function wizard(form,checks={}){
   // 送出鈕跟下一步同一排
   nav.appendChild(submit);submit.classList.add('wsubmit');
   const hash=location.hash;let i=0;
+  // 從「上一頁」回到舊的步驟紀錄：表單是新的，從第 1 步開始，順便清掉舊紀錄
+  if(history.state&&history.state.wiz){try{history.replaceState(null,'',location.href)}catch(_){}}
   const firstBad=st=>[...st.querySelectorAll('input,select,textarea')].find(el=>!el.disabled&&el.offsetParent!==null&&!el.checkValidity());
+  // 送出前檢查所有步驟（隱藏的步驟也要看；收起來的選填區塊與隱藏欄位不算）
+  const firstBadAll=st=>[...st.querySelectorAll('input,select,textarea')].find(el=>!el.disabled&&el.type!=='hidden'&&!el.closest('details:not([open]),.hidden')&&!el.checkValidity());
   const stepOk=k=>{const bad=firstBad(steps[k]);if(bad){bad.reportValidity();try{bad.focus({preventScroll:false})}catch(_){}return false}
     const fn=checks[titles[k]];const msg=fn&&fn();if(msg){toast(msg);return false}return true};
   const show=(k,scroll=true)=>{i=Math.max(0,Math.min(N-1,k));steps.forEach((st,j)=>st.hidden=j!==i);
@@ -1210,10 +1219,13 @@ function wizard(form,checks={}){
   bNext.onclick=()=>{if(!stepOk(i))return;try{history.pushState({wiz:i+1},'',location.href)}catch(_){}show(i+1)};
   bBack.onclick=()=>{if(history.state&&history.state.wiz)history.back();else show(i-1)};
   __wiz={form,
-    onPop(e){if(location.hash!==hash)return false;if(!form.isConnected){if(e.state&&e.state.wiz)history.back();return true}show((e.state&&e.state.wiz)||0);return true},
+    onPop(e){if(location.hash!==hash)return false;if(!form.isConnected){__wiz=null;return true}show((e.state&&e.state.wiz)||0);return true},
     onSubmit(e){if(i<N-1){e.preventDefault();e.stopImmediatePropagation();bNext.click();return}
-      for(let k=0;k<N;k++){const bad=firstBad(steps[k])||((checks[titles[k]]||(()=>''))()&&steps[k]);if(bad){e.preventDefault();e.stopImmediatePropagation();show(k);setTimeout(()=>stepOk(k),350);return}}}};
+      for(let k=0;k<N;k++){const bad=firstBadAll(steps[k])||((checks[titles[k]]||(()=>''))()&&steps[k]);if(bad){e.preventDefault();e.stopImmediatePropagation();show(k);setTimeout(()=>stepOk(k),350);return}}}};
   show(0,false);
+  const mo=new MutationObserver(()=>{if(form.isConnected)return;mo.disconnect();
+    if(location.hash===hash){const k=history.state&&history.state.wiz;if(k){try{history.go(-k)}catch(_){}}else if(__wiz&&__wiz.form===form)__wiz=null}});
+  mo.observe(app,{childList:true});
 }
 document.addEventListener('submit',e=>{if(__wiz&&e.target===__wiz.form)__wiz.onSubmit(e)},true);
 
@@ -1287,7 +1299,7 @@ async function renderHome(){const _n=navId;
     toast('定位中…');
     navigator.geolocation.getCurrentPosition(p=>{homeState.near={lat:p.coords.latitude,lng:p.coords.longitude};$('#btnNear').textContent='✕ 取消距離排序';$('#btnNear').classList.add('on');$('#nearInfo').textContent='依離你的距離排序（不會儲存你的位置）';loadList()},()=>toast('無法取得定位'),{enableHighAccuracy:false,timeout:8000});
   };
-  $('#bigNear').onclick=()=>{homeState.tab='lost';document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:'smooth',block:'start'});if(!homeState.near)$('#btnNear').click();else loadList()};
+  $('#bigNear').onclick=()=>{homeState.tab='lost';document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   loadStats();loadRecent();loadReunited();loadList();
 }
@@ -1500,7 +1512,7 @@ async function checkUpdate(){
   try{
     const t=await fetch(location.pathname+'?u='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'');
     const v=(t.match(/const BUILD = '([^']+)'/)||[])[1];if(!v||v===BUILD)return;
-    const busy=__wiz||document.body.classList.contains('formpage');
+    const busy=__wiz||__dirty||document.body.classList.contains('formpage');
     if(!busy){let done='';try{done=sessionStorage.getItem('wh_upd')||''}catch(_){}if(done!==v){try{sessionStorage.setItem('wh_upd',v)}catch(_){}location.reload();return}}
     if(!$('#updBar')){const d=document.createElement('button');d.id='updBar';d.type='button';d.className='updbar';d.textContent='網站有新版本，點這裡更新';d.onclick=()=>location.reload();document.body.appendChild(d)}
   }catch(_){}
@@ -1596,7 +1608,7 @@ async function renderCase(id){const _n=navId;
     <span class="tag gray">瀏覽 ${c.view_count+1}</span>
   </div>
   <h1>${sp(c.species).poster}｜${esc(c.name)}</h1>
-  <p class="muted">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')} · 走失於 ${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}</p>
+  <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}</span></p>
   ${c.status==='found'?`<div class="notice green"><b>🎉 ${esc(c.name)} 已經找到了！</b>${c.found_note?esc(c.found_note):'謝謝所有幫忙的人。'}${c.found_method?`<div class="small muted">找回方式：${esc(c.found_method)}</div>`:''}</div>`:''}
   <div class="detail-head" style="margin-top:12px">
     <div class="gallery">
@@ -1919,11 +1931,11 @@ async function renderReport(id){const _n=navId;
       let mailed=false;try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),8000);const r=await fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-sighting',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY},body:JSON.stringify({case_id:id}),signal:ctl.signal});clearTimeout(tt);mailed=!!(await r.json()).sent}catch(_){}
       const place=fd.get('place_text')||`${c.lost_city||''}${c.lost_district||''}附近`;const dir=fd.get('direction');const note=fd.get('note');
       const msg=`你好，我在汪喵回家看到你在找「${c.name}」。\n我在 ${fmtDT(new Date(fd.get('seen_at')).toISOString())} 於「${place}」看到疑似牠${dir&&dir!=='不確定'?'，往'+dir+'走':''}。${note?'\n狀況：'+note:''}\n地圖：https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
-      const tel=String(c.contact_phone||'').replace(/[^\d+]/g,'');const lineId=String(c.contact_line||'').trim().replace(/^@?/,m=>m);
+      const tel=String(c.contact_phone||'').replace(/[^\d+]/g,'');const lineRaw=String(c.contact_line||'').trim();const lineId=lineRaw.replace(/^@/,'');const lineUrl=lineRaw.startsWith('@')?`https://line.me/R/ti/p/@${encodeURIComponent(lineId)}`:`https://line.me/R/ti/p/~${encodeURIComponent(lineId)}`;
       (_n===navId?app:_void).innerHTML=`<div class="card done-card"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！回報已送出</h1>
       <p class="lede">${tel||lineId?`${mailed?'系統已經寄 Email 通知飼主了。':''}<b>最快的方法是直接告訴飼主：</b>`:mailed?'系統已經寄 Email 通知飼主了，飼主確認後會跟你聯絡。':'回報已經存好，飼主打開網站就會看到。'}</p>
       <div class="bigacts">${tel?`<a class="btn big call" href="tel:${esc(tel)}">${ic('phone')} 打電話給${esc(c.contact_name||'飼主')}</a>`:''}
-      ${lineId?`<a class="btn big line" href="https://line.me/R/ti/p/~${encodeURIComponent(lineId)}" target="_blank" rel="noopener">加飼主 LINE（${esc(lineId)}）</a>`:''}
+      ${lineId?`<a class="btn big line" href="${lineUrl}" target="_blank" rel="noopener">加飼主 LINE（${esc(lineId)}）</a>`:''}
       ${tel||lineId?`<a class="btn big ghost" href="https://line.me/R/share?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">用 LINE 傳這段話</a>`:''}</div>
       ${tel||lineId?`<label class="f" style="text-align:left;margin-top:14px"><span>要傳給飼主的話（可以複製）</span><textarea id="msgTxt" rows="5" readonly>${esc(msg)}</textarea></label>
       <button class="btn ghost" id="cpMsg" type="button">複製這段話</button>`:''}
@@ -2267,7 +2279,7 @@ async function renderFound(id){const _n=navId;
   (_n===navId?app:_void).innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span class="status-pill ${f.status==='open'?(f.kind==='injured'?'injured':'found'):'closed'}">${f.status==='open'?(f.kind==='injured'?'受傷通報':f.kind==='found'?'等待飼主認領':'目擊通報'):f.status==='reunited'?'已回到主人身邊':'已結案'}</span></div>
   <h1>${esc(title)}</h1>
   ${f.kind==='injured'&&f.status==='open'?`<div class="notice red" style="margin:10px 0"><b>這隻毛孩受傷了</b>如果你在附近，請撥全國動保專線 <a href="tel:1959">1959</a>（接不通改撥 <a href="tel:1999">1999</a>）通報救援；靠近時小心，受傷的動物可能因疼痛咬人。</div>`:''}
-  <p class="muted">${ic("pin")} ${esc(f.city)}${esc(f.district||'')} ${esc(f.place_text||'')} · ${fmtDate(f.seen_at)} ${fmtDT(f.seen_at).split(' ')[1]}</p>
+  <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(f.city)}${esc(f.district||'')} ${esc(f.place_text||'')}</span> <span class="mu">${fmtDate(f.seen_at)} ${fmtDT(f.seen_at).split(' ')[1]}</span></p>
   <div class="detail-head" style="margin-top:12px">
     <div class="gallery"><div class="main ${photos[0]?'':'noimg'} ${f.species==='cat'?'cat':''}" id="gMain" ${photos[0]?`style="background-image:url('${esc(safeU(photos[0]))}')"`:''}></div>
       ${photos.length>1?`<div class="thumbs">${photos.map((p,i)=>`<div class="${i===0?'on':''}" data-i="${i}" style="background-image:url('${esc(safeU(thumbUrl(p)))}'),url('${esc(safeU(p))}')"></div>`).join('')}</div>`:''}</div>
@@ -3038,7 +3050,7 @@ async function renderPoster(id){const _n=navId;
 async function renderThanks(){const _n=navId;
   setTitle('贊助感謝牆');
   const {data}=await sb.from('sponsors_public').select('*').limit(300);
-  const byMonth={};(data||[]).forEach(s=>{s.nickname=s.nickname||'匿名';s.sponsored_on=String(s.sponsored_on||s.created_at||todayStr());const k=s.sponsored_on.slice(0,7).replace('-','/');(byMonth[k]=byMonth[k]||[]).push(s)});
+  const byMonth={};(data||[]).forEach(s=>{s.nickname=s.nickname||'匿名';{let v=String(s.sponsored_on||s.created_at||todayStr());if(v.includes('T')){const d=new Date(v);v=new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}s.sponsored_on=v}const k=s.sponsored_on.slice(0,7).replace('-','/');(byMonth[k]=byMonth[k]||[]).push(s)});
   (_n===navId?app:_void).innerHTML=`<h1>贊助感謝牆</h1>
   <div class="card">
     <p>${esc(CONFIG.SITE_NAME)} 是免費的協尋平台，沒有廣告。伺服器、網域與每日比對都是站長自費。如果這個網站幫上了忙，歡迎請站長喝杯咖啡，讓它繼續運作。</p>
