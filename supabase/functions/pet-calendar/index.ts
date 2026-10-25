@@ -49,7 +49,8 @@ Deno.serve(async (req) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), {
     auth: { persistSession: false },
   });
-  const { data: prof } = await sb.from("profiles").select("id").eq("calendar_token", t).maybeSingle();
+  const { data: prof, error: e1 } = await sb.from("profiles").select("id").eq("calendar_token", t).maybeSingle();
+  if (e1) return new Response("Error", { status: 500 });
   if (!prof) return new Response("Not found", { status: 404 });
 
   const since = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
