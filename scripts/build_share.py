@@ -82,6 +82,8 @@ def main():
         name, poster, unit = SP.get(c.get("species") or "dog", SP["dog"])
         if c["status"] == "found":
             title = f"🎉 {c['name']} 已經找到了！｜{SITE_NAME}"
+        elif c["status"] != "searching":
+            title = f"{c['name']}（協尋已結束）｜{SITE_NAME}"
         else:
             dd = days_since(c["lost_at"])
             title = f"【{poster}】{c['name']}｜{c['lost_city']}{c.get('lost_district') or ''}" + (f"・走失第 {dd} 天" if dd else "")
@@ -89,7 +91,7 @@ def main():
         bits = [look, c.get("features") or ""]
         if c.get("reward"): bits.append(f"尋獲獎金 NT${c['reward']:,}")
         if c.get("lost_place"): bits.append("走失地點：" + c["lost_place"])
-        bits.append("看到請勿呼喊追趕，拍照記下時間地點，點連結回報目擊。")
+        if c["status"] == "searching": bits.append("看到請勿呼喊追趕，拍照記下時間地點，點連結回報目擊。")
         desc = "　".join(b for b in bits if b)[:190]
         img = (c.get("photos") or [None])[0]
         target = f"{SITE_URL}#/case/{c['id']}"
@@ -102,7 +104,8 @@ def main():
     for f in founds:
         name, _, _ = SP.get(f.get("species") or "dog", SP["dog"])
         kind = "受傷" if f["kind"] == "injured" else "拾獲" if f["kind"] == "found" else "目擊"
-        title = f"【{kind}{name}】{(SIZE.get(f.get('size')) or '')}{f.get('colour') or ''}{name}｜{f['city']}{f.get('district') or ''}｜這是你的毛孩嗎？"
+        tail = "這是你的毛孩嗎？" if f.get("status") == "open" else ("已經回到主人身邊" if f.get("status") == "reunited" else "通報已結束")
+        title = f"【{kind}{name}】{(SIZE.get(f.get('size')) or '')}{f.get('colour') or ''}{name}｜{f['city']}{f.get('district') or ''}｜{tail}"
         bits = [("傷勢：" + f["injury"]) if f.get("injury") else "", f.get("place_text") or "", ("目前在：" + f["current_place"]) if f.get("current_place") else "", "點連結看照片並聯絡通報者。"]
         desc = "　".join(b for b in bits if b)[:190]
         img = (f.get("photos") or [None])[0]

@@ -153,6 +153,7 @@ def run_matching():
             if sc < 45: continue
             aid = str(a.get("animal_id"))
             if (c["id"], aid) in seen: continue
+            seen.add((c["id"], aid))
             photo = a.get("album_file") or ""
             rows.append({
                 "case_id": c["id"], "animal_id": aid, "animal_subid": a.get("animal_subid"),
@@ -165,7 +166,7 @@ def run_matching():
                 "open_date": (a.get("animal_opendate") or None), "score": sc,
             })
     if rows:
-        sb("POST", "shelter_matches", body=rows, prefer="return=minimal,resolution=ignore-duplicates")
+        sb("POST", "shelter_matches?on_conflict=case_id,animal_id", body=rows, prefer="return=minimal,resolution=ignore-duplicates")
     print(f"新增比對 {len(rows)} 筆")
 
 # ---------------------------------------------------------------- 拾獲通報 ↔ 案件
@@ -211,7 +212,7 @@ def run_found_matching():
             sc = found_score(c, f)
             if sc >= 45 and (c["id"], f["id"]) not in seen:
                 rows.append({"case_id": c["id"], "found_id": f["id"], "score": sc})
-    if rows: sb("POST", "found_matches", body=rows, prefer="return=minimal,resolution=ignore-duplicates")
+    if rows: sb("POST", "found_matches?on_conflict=case_id,found_id", body=rows, prefer="return=minimal,resolution=ignore-duplicates")
     print(f"拾獲比對新增 {len(rows)} 筆")
 
 # ---------------------------------------------------------------- Email
@@ -229,17 +230,24 @@ def fmt(ts):
         return d.strftime("%m/%d %H:%M")
     except Exception: return ts or ""
 
+def mark_notified(table, ids):
+    """把已處理（或不可能寄出、例如案件已隱藏或沒 Email）的紀錄標記為已通知，避免卡住後面的通知。"""
+    ids = list(ids)
+    for i in range(0, len(ids), 150):
+        sb("PATCH", table, body={"notified": True}, params={"id": "in.(" + ",".join(ids[i:i+150]) + ")"}, prefer="return=minimal")
+
 def run_notifications():
     if not (GMAIL_USER and GMAIL_PASS):
         print("未設定 Gmail，略過通知"); return
     cases = {c["id"]: c for c in sb_all("cases", {"select": "id,name,contact_email,hidden"}) if not c.get("hidden")}
     # 目擊
-    pend = sb("GET", "sightings", params={"select": "*", "notified": "eq.false", "order": "created_at.asc"}) or []
+    pend = sb_all("sightings", {"select": "*", "notified": "eq.false", "order": "created_at.asc"})
     by_case = {}
     for s in pend: by_case.setdefault(s["case_id"], []).append(s)
     for cid, lst in by_case.items():
         c = cases.get(cid)
-        if not c or not c.get("contact_email"): continue
+        if not c or not c.get("contact_email"):
+            mark_notified("sightings", [s["id"] for s in lst]); continue
         lines = [f"你的案件「{c['name']}」有 {len(lst)} 筆新的目擊回報：", ""]
         for s in lst:
             lines.append(f"・{fmt(s['seen_at'])}  {s.get('place_text') or '（見地圖）'}  {('往'+s['direction']) if s.get('direction') else ''}")
@@ -255,15 +263,16 @@ def run_notifications():
             print("寄信失敗：", e); continue
         sb("PATCH", "sightings", body={"notified": True}, params={"id": "in.(" + ",".join(s["id"] for s in lst) + ")"}, prefer="return=minimal")
     # 收容所比對
-    pend = sb("GET", "shelter_matches", params={"select": "*", "notified": "eq.false", "order": "score.desc"}) or []
+    pend = sb_all("shelter_matches", {"select": "*", "notified": "eq.false", "dismissed": "eq.false", "order": "score.desc"})
     by_case = {}
     for m in pend: by_case.setdefault(m["case_id"], []).append(m)
     for cid, lst in by_case.items():
         c = cases.get(cid)
-        if not c or not c.get("contact_email"): continue
+        if not c or not c.get("contact_email"):
+            mark_notified("shelter_matches", [m["id"] for m in lst]); continue
         lines = [f"系統在收容所資料中找到 {len(lst)} 筆與「{c['name']}」疑似相符的狗狗，請盡快親自確認：", ""]
         for m in lst[:10]:
-            lines.append(f"・{m.get('shelter_name')}  相似 {m['score']}  {m.get('sex','')} {m.get('bodytype','')} {m.get('colour','')}")
+            lines.append(f"・{m.get('shelter_name')}  相似 {m['score']}  {m.get('sex') or ''} {m.get('bodytype') or ''} {m.get('colour') or ''}")
             lines.append(f"  拾獲地：{m.get('found_place') or '未註明'}  電話：{m.get('shelter_tel') or ''}")
             if m.get("photo_url"): lines.append(f"  照片：{m['photo_url']}")
             lines.append("")
@@ -275,15 +284,19 @@ def run_notifications():
             print("寄信失敗：", e); continue
         sb("PATCH", "shelter_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
     # 拾獲通報比對
-    pend = sb("GET", "found_matches", params={"select": "id,case_id,found_id,score", "notified": "eq.false", "order": "score.desc"}) or []
+    pend = sb_all("found_matches", {"select": "id,case_id,found_id,score", "notified": "eq.false", "order": "score.desc"})
     by_case = {}
     for m in pend: by_case.setdefault(m["case_id"], []).append(m)
-    if by_case:
-        fids = ",".join({m["found_id"] for m in pend})
-        fr = {f["id"]: f for f in (sb("GET", "found_reports", params={"select": "id,kind,seen_at,city,district,place_text,colour,size,current_place", "id": f"in.({fids})"}) or [])}
+    fr = {}
+    fid_list = sorted({m["found_id"] for m in pend})
+    for i in range(0, len(fid_list), 100):
+        for f in (sb("GET", "found_reports", params={"select": "id,kind,seen_at,city,district,place_text,colour,size,current_place,hidden", "id": "in.(" + ",".join(fid_list[i:i+100]) + ")"}) or []):
+            if not f.get("hidden"): fr[f["id"]] = f
     for cid, lst in by_case.items():
         c = cases.get(cid)
-        if not c or not c.get("contact_email"): continue
+        lst = [m for m in lst if m["found_id"] in fr] if c else lst
+        if not c or not c.get("contact_email") or not lst:
+            mark_notified("found_matches", [m["id"] for m in by_case[cid]]); continue
         lines = [f"有網友登記了 {len(lst)} 筆可能是「{c['name']}」的拾獲／目擊通報：", ""]
         for m in lst[:10]:
             f = fr.get(m["found_id"], {})
@@ -355,7 +368,7 @@ def run_due_reminders():
         lines += ["", f"完成後到「我的」頁標記已完成：{SITE_URL}#/me", f"— {SITE_NAME}"]
         try:
             send_mail(email, f"【{SITE_NAME}】毛孩健康提醒：{lst[0]['pet_name']} {lst[0]['title']}", "\n".join(lines))
-            sb("POST", "notify_log", body=[{"user_id": uid, "kind": "due", "ref_id": r["record_id"]} for r in lst],
+            sb("POST", "notify_log", body=[{"user_id": uid, "kind": f"due:{r['next_due']}", "ref_id": r["record_id"]} for r in lst],
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"到期提醒：{len(lst)} 筆 → 1 位會員")
         except Exception as e:
@@ -365,7 +378,7 @@ def run_due_reminders():
 def run_report_alerts():
     admin = os.environ.get("ADMIN_EMAIL") or GMAIL_USER
     if not (GMAIL_USER and GMAIL_PASS and admin): return
-    rows = sb("GET", "reports", params={"select": "id,target_type,target_id,reason,note,created_at", "notified": "eq.false", "order": "created_at.asc"}) or []
+    rows = sb_all("reports", {"select": "id,target_type,target_id,reason,note,created_at", "notified": "eq.false", "order": "created_at.asc"})
     if not rows: return
     names = {"case": "走失案件", "found": "拾獲通報", "sighting": "目擊"}
     lines = [f"有 {len(rows)} 則新檢舉待處理：", ""]
@@ -374,7 +387,7 @@ def run_report_alerts():
     lines += ["", f"管理後台：{SITE_URL}#/admin", f"— {SITE_NAME}"]
     try:
         send_mail(admin, f"【{SITE_NAME}】{len(rows)} 則新檢舉", "\n".join(lines))
-        sb("PATCH", "reports", body={"notified": True}, params={"id": "in.(" + ",".join(r["id"] for r in rows) + ")"}, prefer="return=minimal")
+        mark_notified("reports", [r["id"] for r in rows])
         print(f"已通知站長 {len(rows)} 則檢舉")
     except Exception as e:
         print("檢舉通知失敗：", e)

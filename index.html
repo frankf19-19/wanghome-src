@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.6.3 -->
+<!-- BUILD v3.6.5 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -113,8 +113,8 @@ header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper
 .btn.amber{background:var(--mark);color:#1F2A2E}
 .btn.block{width:100%}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-.btn.line{background:#06C755}.btn.line:hover{background:#05A648}
-.btn.fb{background:#1877F2}.btn.fb:hover{background:#1361C7}
+.btn.line{background:#06803E}.btn.line:hover{background:#05A648}
+.btn.fb{background:#1464D0}.btn.fb:hover{background:#1361C7}
 
 /* ---------- 版面與字 ---------- */
 main{max-width:1120px;margin:0 auto;padding:20px}
@@ -356,7 +356,7 @@ a.ph{display:block}
 .tag.green{background:var(--green-soft);color:var(--green)}
 .tag.amber{background:var(--mark);color:#1F2A2E}
 .tag.blue{background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue)}
-.tag.gray{background:var(--line);color:var(--ink-3)}
+.tag.gray{background:var(--line);color:var(--ink-2)}
 .dist{font-size:13px;color:var(--blue);font-weight:700}
 .empty-card{grid-column:1/-1;text-align:center;background:var(--sheet);border:2px dashed var(--line);border-radius:var(--r-card);padding:36px 18px;color:var(--ink-2)}
 .empty-card .big{font-size:44px;line-height:1}
@@ -601,25 +601,25 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 }
 /* 受傷通報 */
 .hero .actions .btn.injured{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;background:#FFF1E6;color:#7A2E06;box-shadow:inset 0 0 0 2px #F08A3E;text-align:left;padding:12px 16px}
-.hero .actions .btn.injured>.ico{width:26px;height:26px;color:#D9590B;flex:none}
+.hero .actions .btn.injured>.ico{width:26px;height:26px;color:#B8480A;flex:none}
 .hero .actions .btn.injured span{display:flex;flex-direction:column;font-weight:800}
 .hero .actions .btn.injured small{color:#8A4A22;opacity:1;font-weight:500}
-.hero .actions .btn.injured em{margin-left:auto;font-style:normal;background:#D9590B;color:#fff;font-size:13px;padding:3px 10px;border-radius:99px;flex:none}
+.hero .actions .btn.injured em{margin-left:auto;font-style:normal;background:#B8480A;color:#fff;font-size:13px;padding:3px 10px;border-radius:99px;flex:none}
 .hero .actions .btn.injured:hover{background:#FFE6D3}
-.ccard .band.injured{background:#D9590B}
+.ccard .band.injured{background:#B8480A}
 .er{background:#FFF4EC;border-radius:var(--r-card);box-shadow:inset 0 0 0 2px #F6B88A;padding:18px 18px 12px;margin-top:14px;color:#3A1D0B}
 .er-head{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px;color:#B4430A;margin-bottom:6px}
 .er-head .ico{width:24px;height:24px}
 .er-steps{margin:0;padding:0;list-style:none;counter-reset:er}
 .er-steps li{position:relative;padding:10px 0 10px 40px;border-top:1px solid #F6D3B8;counter-increment:er}
 .er-steps li:first-child{border-top:0}
-.er-steps li::before{content:counter(er);position:absolute;left:0;top:10px;width:28px;height:28px;border-radius:50%;background:#D9590B;color:#fff;font-weight:900;display:grid;place-items:center;font-size:15px}
+.er-steps li::before{content:counter(er);position:absolute;left:0;top:10px;width:28px;height:28px;border-radius:50%;background:#B8480A;color:#fff;font-weight:900;display:grid;place-items:center;font-size:15px}
 .er-steps b{display:block;font-size:16px}
 .er-steps span{display:block;font-size:14.5px;color:#5B3A22;line-height:1.6}
 .er-call{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.er-call .btn{background:#D9590B}.er-call .btn.line{background:#06C755;color:#fff}.er-call .btn.ghost{background:#fff;color:#7A2E06;box-shadow:inset 0 0 0 1.5px #F0A877}
+.er-call .btn{background:#B8480A}.er-call .btn.line{background:#06803E;color:#fff}.er-call .btn.ghost{background:#fff;color:#7A2E06;box-shadow:inset 0 0 0 1.5px #F0A877}
 .er-foot{color:#7A5236;margin:6px 0 0}.er-foot a{color:#B4430A}
-.seg.multi button.on{background:#D9590B;color:#fff;border-color:#D9590B}
+.seg.multi button.on{background:#B8480A;color:#fff;border-color:#B8480A}
 .notice.red{background:var(--red-soft);border-left-color:var(--red)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .er{background:#2A1A10;color:#F6E2D3;box-shadow:inset 0 0 0 2px #6B3A1C}:root:not([data-theme="light"]) .er-steps span,:root:not([data-theme="light"]) .er-foot{color:#E0C2AC}:root:not([data-theme="light"]) .er-steps li{border-color:#4A2A16}:root:not([data-theme="light"]) .hero .actions .btn.injured{background:#2A1A10;color:#FFD9BF}:root:not([data-theme="light"]) .hero .actions .btn.injured small{color:#E0C2AC}}
 .quick{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift),inset 0 0 0 2px var(--red);padding:16px;margin-top:14px}
@@ -628,7 +628,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 .q-loc b{display:block;font-size:16.5px}.q-loc small{color:var(--ink-3)}
 .q-done{display:flex;flex-direction:column;gap:2px;background:var(--green-soft);border-radius:12px;padding:12px 14px}
 .q-done b{display:flex;align-items:center;gap:6px;color:var(--green);font-size:17px}.q-done span{color:var(--ink-2);font-size:14.5px}
-.status-pill.injured{background:#D9590B;color:#fff}
+.status-pill.injured{background:#B8480A;color:#fff}
 /* 搜尋列與篩選膠囊 */
 .searchbar{display:flex;align-items:center;gap:10px;background:var(--sheet);border-radius:999px;padding:0 6px 0 16px;box-shadow:var(--lift),inset 0 0 0 1.5px var(--line);margin-top:14px}
 .searchbar:focus-within{box-shadow:var(--lift),inset 0 0 0 2px var(--ink-2)}
@@ -649,7 +649,7 @@ select.pill{padding-right:34px!important;appearance:none;-webkit-appearance:none
    ===================================================================== */
 :root{
   --paper:#FFF6EA; --sheet:#FFFFFF; --ink:#3A2A1E; --ink-2:#6B5240; --ink-3:#7E624E; --line:#EFDCC6;
-  --red:#C9401C; --red-ink:#A8320F; --red-soft:#FFE6DB; --red-fill:#DD4724;
+  --red:#C9401C; --red-ink:#A8320F; --red-soft:#FFE6DB; --red-fill:#CC3F1E;
   --green:#127A50; --green-soft:#E2F4EA; --green-fill:#16855A;
   --mark:#FFC83D; --mark-soft:#FFF1CC; --blue:#2F63B5; --amber:#9A5B00;
   --beige:#F6E6D2; --cream2:#FFE7CF;
@@ -660,15 +660,15 @@ select.pill{padding-right:34px!important;appearance:none;-webkit-appearance:none
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#1C1611; --sheet:#28201A; --ink:#F8ECDE; --ink-2:#DCC7B1; --ink-3:#BCA48D; --line:#3D3128;
-  --red:#FF8A66; --red-ink:#FFB49B; --red-soft:#3B2219; --red-fill:#D64A26;
-  --green:#5FD39E; --green-soft:#183026; --green-fill:#17885B;
+  --red:#FF8A66; --red-ink:#FFB49B; --red-soft:#3B2219; --red-fill:#C93D1C;
+  --green:#5FD39E; --green-soft:#183026; --green-fill:#137B53;
   --mark:#FFC83D; --mark-soft:#3A2F14; --beige:#33281F; --cream2:#3A2B1E;
   --lift:0 1px 0 rgba(0,0,0,.4),0 10px 24px -12px rgba(0,0,0,.8);
 }}
 :root[data-theme="dark"]{
   --paper:#1C1611; --sheet:#28201A; --ink:#F8ECDE; --ink-2:#DCC7B1; --ink-3:#BCA48D; --line:#3D3128;
-  --red:#FF8A66; --red-ink:#FFB49B; --red-soft:#3B2219; --red-fill:#D64A26;
-  --green:#5FD39E; --green-soft:#183026; --green-fill:#17885B;
+  --red:#FF8A66; --red-ink:#FFB49B; --red-soft:#3B2219; --red-fill:#C93D1C;
+  --green:#5FD39E; --green-soft:#183026; --green-fill:#137B53;
   --mark:#FFC83D; --mark-soft:#3A2F14; --beige:#33281F; --cream2:#3A2B1E;
   --lift:0 1px 0 rgba(0,0,0,.4),0 10px 24px -12px rgba(0,0,0,.8);
 }
@@ -803,9 +803,9 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 .recent a .ph,.reunite .ph{overflow:hidden}.recent a .ph img,.reunite .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
-/* v3.6.3 獎金移到照片左下，不再蓋住「走失第 N 天」 */
+/* v3.6.5 獎金移到照片左下，不再蓋住「走失第 N 天」 */
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* v3.6.3 中文斷行：不讓最後一行只剩一兩個字 */
+/* v3.6.5 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
 /* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
 body :is(p,li,div,small,label,span,dd,td,h1,h2,h3,h4,button,a){text-wrap:balance}
@@ -816,20 +816,20 @@ input,textarea,select{text-wrap:wrap}
 .hint.long{white-space:normal;text-wrap:pretty}
 .hint::before{content:'（'}.hint::after{content:'）'}
 .nw{white-space:nowrap}
-/* v3.6.3 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
+/* v3.6.5 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
 .row2,.row3{align-items:end}
 @media (max-width:520px){.row2:has(.hint),.row2:has(input[type=email]),.row2:has(input[name=reporter_contact]){grid-template-columns:1fr}}
 .hint.long{display:block;margin:3px 0 0;white-space:normal}
 .hint.long::before,.hint.long::after{content:none}
-/* v3.6.3 回報完成頁：大按鈕直接聯絡飼主 */
+/* v3.6.5 回報完成頁：大按鈕直接聯絡飼主 */
 .done-card{text-align:center;padding:32px 20px}
 .done-card .done-ic{width:64px;height:64px;margin:0 auto 8px;color:var(--green-fill)}.done-card .done-ic svg{width:100%;height:100%}
 .bigacts{display:grid;gap:10px;margin:14px 0}
 .btn.big{min-height:56px;font-size:18px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
 .btn.big.call{background:var(--green-fill);color:#fff;border-color:transparent}
-.btn.big.line{background:#06C755;color:#fff;border-color:transparent}
+.btn.big.line{background:#06803E;color:#fff;border-color:transparent}
 #msgTxt{font-size:15px;line-height:1.6}
-/* v3.6.3 給不太會用手機的人：字大一點、可選欄位收起來 */
+/* v3.6.5 給不太會用手機的人：字大一點、可選欄位收起來 */
 details.more{margin:14px 0 6px;border:1.5px dashed var(--line,#E8D9C6);border-radius:var(--r-ctl,14px);background:var(--sheet)}
 details.more>summary{list-style:none;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:700;font-size:16px;color:var(--ink-2,#5A4636)}
 details.more>summary::-webkit-details-marker{display:none}
@@ -850,7 +850,7 @@ details.more>:last-child{margin-bottom:14px}
   body .tag{font-size:13.5px}
   .health-hero.art .lede{clear:both}
 }
-/* v3.6.3 首頁三個大按鈕 */
+/* v3.6.5 首頁三個大按鈕 */
 .bigstart{display:grid;gap:12px;margin:6px 0 22px}
 .bs-hello{margin:0 2px;font-family:var(--head);font-size:22px;font-weight:800;color:var(--ink)}
 .bigbtn{display:flex;align-items:center;gap:14px;min-height:92px;padding:16px 18px;border-radius:var(--r-card,22px);text-decoration:none;color:var(--ink);border:2px solid transparent;box-shadow:0 4px 0 rgba(58,42,30,.12);text-align:left;font:inherit;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .08s}
@@ -859,7 +859,7 @@ details.more>:last-child{margin-bottom:14px}
 .bigbtn .bb-ic svg{width:30px;height:30px}
 .bigbtn .bb-t{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
 .bigbtn b{font-family:var(--head);font-size:22px;line-height:1.25;font-weight:800}
-.bigbtn small{font-size:15px;opacity:.92;line-height:1.4}
+.bigbtn small{font-size:15px;line-height:1.4}
 .bigbtn .bb-go{flex:none;font-size:34px;line-height:1;opacity:.8;font-weight:300}
 .bigbtn.b-red{background:var(--red-fill);color:#fff}
 .bigbtn.b-green{background:var(--green-fill);color:#fff}
@@ -870,7 +870,7 @@ details.more>:last-child{margin-bottom:14px}
 .bs-rule{margin:4px 2px 0;font-size:15px;color:var(--ink-2)}
 .choose{display:grid;gap:12px;margin-top:14px}
 @media (min-width:900px){.bigstart{grid-template-columns:repeat(3,1fr)}.bs-hello,.bs-health,.bs-rule{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
-/* v3.6.3 分步驟表單 */
+/* v3.6.5 分步驟表單 */
 .wprog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;font-weight:700;color:var(--ink-2);font-size:15px}
 .wdots{display:flex;gap:6px}.wdots i{width:28px;height:8px;border-radius:8px;background:var(--beige)}
 .wdots i.done{background:var(--green-fill)}.wdots i.on{background:var(--red-fill)}
@@ -892,6 +892,11 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 .meta-line{text-wrap:wrap!important}.meta-line .mu{display:inline-block;margin-right:10px;text-wrap:balance}
 /* 底部儲存列：按鈕加大，好按 */
 @media (max-width:640px){.submitbar .btn{min-height:52px;font-size:17px;padding-left:20px;padding-right:20px}.submitbar.row{display:flex;gap:10px}.submitbar.row>.btn:first-child{flex:1}}
+/* 段落裡的連結加底線，跟一般文字分得出來 */
+:is(p,li,.small,.muted,.notice,.er-foot,.d) a:not(.btn):not(.pill):not(.chip){text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+/* 深色模式：救援區塊的標題與連結改亮橘，看得清楚 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .er-head,:root:not([data-theme="light"]) .er-foot a{color:#F5A97A}}
+:root[data-theme="dark"] .er-head,:root[data-theme="dark"] .er-foot a{color:#F5A97A}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -931,7 +936,7 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.3</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.5</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -951,7 +956,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.6.3';
+const BUILD = 'v3.6.5';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1073,7 +1078,7 @@ function pickerMap(el,center){const m=makeMap(el,center,13);let mk=null,val=null
 window.addEventListener('hashchange',route);
 // 離線提示：斷線時顯示，恢復後重新載入目前頁面
 function netState(){const o=$('#offline');if(!o)return;const off=!navigator.onLine;o.hidden=!off;document.body.classList.toggle('is-offline',off)}
-window.addEventListener('offline',netState);window.addEventListener('online',()=>{netState();if(typeof sb!=='undefined'&&sb)route()});
+window.addEventListener('offline',netState);window.addEventListener('online',()=>{netState();if(typeof sb!=='undefined'&&sb)route();else location.reload()});
 // 等 HTML 與 defer 腳本完成就開始（不必等字型和圖片全部下載完）
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 
@@ -1659,7 +1664,7 @@ async function renderCase(id){const _n=navId;
   </div>
   <div class="card">
     <p class="small">複製以下文案，貼到當地協尋社團、LINE 群：</p>
-    <textarea id="shareText" readonly style="min-height:150px">${esc(shareText(c,url))}</textarea>
+    <textarea id="shareText" aria-label="分享文案" readonly style="min-height:150px">${esc(shareText(c,url))}</textarea>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製文案</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a><a class="btn sm ghost" href="#/resources">協尋攻略</a></div>
   </div>
   </div>
@@ -1816,7 +1821,7 @@ function renderNew(){
     <label class="f"><span><b class="lbl">Email</b> <i class="req">*</i><small class="hint long">有人回報時，我們會寄信通知你（不會公開）</small></span><input type="email" name="contact_email" required inputmode="email" autocomplete="email" placeholder="you@example.com"></label>
     <details class="more"><summary>LINE、獎金（可以不填）</summary>
     <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line"></label>
-    <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" max="10000000" step="100" inputmode="numeric" placeholder="0"></label>
+    <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" step="100" inputmode="numeric" placeholder="0"></label>
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：可以用雞肉吸引牠"></textarea></label>
     </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
@@ -2007,7 +2012,7 @@ async function renderManage(id,token){const _n=navId;
     <div class="row2"><label class="f"><span>稱呼</span><input name="contact_name" value="${esc(c.contact_name||'')}"></label><label class="f"><span>電話</span><input name="contact_phone" value="${esc(c.contact_phone||'')}"></label></div>
     <label class="chk"><input type="checkbox" name="phone_public" ${c.phone_public?'checked':''}> 公開電話</label>
     <div class="row2"><label class="f"><span><b class="lbl">Email</b><small class="hint">私密</small></span><input name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span>LINE ID</span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
-    <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" max="10000000" step="100" inputmode="numeric"></label>
+    <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" step="100" inputmode="numeric"></label>
     <label class="f"><span>補充</span><textarea name="notes">${esc(c.notes||'')}</textarea></label>
     <h3>照片</h3>
     <div class="photos-preview" id="pv"></div>
@@ -2049,22 +2054,24 @@ function emergencyHTML(){
 // ---- 一鍵通報：定位 → 反查地址 → 選狗貓與傷勢 → 送出 → 通報稿 ----
 function nearestCity(lat,lng){let best=null,bd=1e9;for(const [c,[a,b]] of Object.entries(CITY_CENTER)){const d=(a-lat)**2+(b-lng)**2;if(d<bd){bd=d;best=c}}return best}
 async function reverseGeo(lat,lng){
-  let city=nearestCity(lat,lng),district='',address='',geoOk=false;
+  const inTW=lat>=21.7&&lat<=26.6&&lng>=117.8&&lng<=122.3;
+  let city=inTW?nearestCity(lat,lng):'',district='',address='',geoOk=false;
   try{
-    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&accept-language=zh-TW`,{headers:{'Accept':'application/json'}});
+    const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),6000);   // 查地址最多等 6 秒，不能卡住救援流程
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&accept-language=zh-TW`,{headers:{'Accept':'application/json'},signal:ctl.signal});clearTimeout(tt);
     if(r.ok){const j=await r.json();const a=j.address||{};
       const norm=x=>String(x||'').replace(/^台/,'臺');
       const c=[a.county,a.city,a.state,a.province].map(norm).find(x=>TW[x]);
       if(c){city=c;geoOk=true}
       const cand=[a.city,a.town,a.city_district,a.suburb,a.district,a.municipality,a.village].filter(Boolean).map(norm);district=cand.find(x=>(TW[city]||[]).includes(x))||'';
       address=[a.road,a.house_number&&a.house_number+'號'].filter(Boolean).join('')||(j.name||'');
-      address=`${city}${district}${address}`;}
+      address=geoOk||inTW?`${city}${district}${address}`:'';}
   }catch(_){}
-  return {city,district,address:address||`${city}${district}`,geoOk};
+  return {city,district,address:address||(city?`${city}${district}`:'目前位置（請在下方選縣市）'),geoOk};
 }
 function callScript(q){
   const t=new Date(q.seen_at);const hm=`${t.getHours()}點${String(t.getMinutes()).padStart(2,'0')}分`;
-  return `您好，我要通報路上受傷的${sp(q.species).name}。\n地點：${q.address}${q.place_text?'（'+q.place_text+'）':''}\nGPS 座標：${q.lat.toFixed(5)}, ${q.lng.toFixed(5)}\n時間：今天 ${hm}\n狀況：${q.injury||'受傷'}，${q.where==='taken'?'我已經帶走／送醫':'牠還在原地'}。\n照片和地圖：${q.url}`;
+  return `您好，我要通報路上受傷的${sp(q.species).name}。\n地點：${q.address}${q.place_text?'（'+q.place_text+'）':''}\nGPS 座標：${q.lat.toFixed(5)}, ${q.lng.toFixed(5)}\n時間：今天 ${hm}\n狀況：${q.injury||'受傷'}，${q.where==='taken'?'我已經帶走／送醫':'牠還在原地'}。${q.url?'\n照片和地圖：'+q.url:''}`;
 }
 async function quickReport(){
   const box=$('#quick');
@@ -2096,9 +2103,10 @@ async function quickReport(){
     if(!qCity){toast('請選擇縣市');return}
     if(qCity!==g.city){g.address=qCity+(qDist||'')+($('#qPlace').value.trim()?'':'（GPS 位置）');}
     const btn=$('#qSend');btn.disabled=true;btn.textContent='送出中…';
+    let q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),lat,lng};
     try{
       const photos=photo?[await uploadPhoto(photo,'found')]:[];
-      const q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),city:qCity,district:qDist||null,place_text:$('#qPlace').value.trim()||g.address,lat,lng,current_place:where==='taken'?'通報者已帶走／送醫':'通報時仍在原地',photos,phone_public:false};
+      q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),city:qCity,district:qDist||null,place_text:$('#qPlace').value.trim()||g.address,lat,lng,current_place:where==='taken'?'通報者已帶走／送醫':'通報時仍在原地',photos,phone_public:false};
       const {data,error}=await sb.rpc('create_found',{p:q});if(error)throw error;
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
       const url=`${CONFIG.SITE_URL}#/found/${data.id}`;
@@ -2110,7 +2118,12 @@ async function quickReport(){
         <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報稿</button><a class="btn sm line" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(script)}">用 LINE 傳送</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} 在 Google 地圖打開</a><a class="btn sm ghost" href="#/found/${data.id}">查看通報頁</a></div>`;
       $('#qCopy').onclick=()=>copy($('#qScript').value);
       window.scrollTo({top:box.getBoundingClientRect().top+scrollY-20,behavior:'smooth'});
-    }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出通報'}
+    }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='再送一次';
+      // 網站沒送出也要能馬上打電話求救：顯示撥號按鈕與通報稿（沒有網址）
+      if(!$('#qFail')){const sc=callScript({...q,address:g.address,where,place_text:$('#qPlace').value.trim(),url:''});
+        box.insertAdjacentHTML('afterbegin',`<div id="qFail" class="notice red" style="margin-bottom:10px"><b>網站暫時沒送出，先打電話救援</b>可以等一下再按「再送一次」。</div>
+        <div class="er-call" style="margin:0 0 10px"><a class="btn lg" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a><a class="btn lg ghost" href="tel:1999">${ic("phone")} 接不通改撥 1999</a></div>
+        <label class="f"><span>電話通報稿</span><textarea readonly style="min-height:150px">${esc(sc)}</textarea></label>`)}}
   };
 }
 function renderInjured(){
@@ -3113,7 +3126,7 @@ function renderResources(){
   <div class="res-grid">
     <div class="res"><b>農業部 寵物登記管理資訊網</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報</a>（有晶片一定要做）</li><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/">晶片查詢 / 遺失啟事</a></li></ul></div>
     <div class="res"><b>全國動物收容管理系統</b><ul><li><a target="_blank" rel="noopener" href="https://asms.coa.gov.tw/Amlapp/App/Default.aspx">查看各收容所拾獲動物</a></li><li>本站每日自動比對來源</li></ul></div>
-    <div class="res"><b>各縣市動保處</b><ul><li>市話 1999 轉動保處（多數縣市）</li><li>或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
+    <div class="res"><b>各縣市動保處</b><ul><li>市話 1999 轉動保處（多數縣市）</li><li>或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" aria-label="選擇縣市" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
     <div class="res"><b>民間協尋平台（多貼一處多一分機會）</b><ul><li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li><li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li><li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li><li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li><li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各縣市 FB 協尋社團清單</a></li></ul></div>
   </div>
   <h2>找回統計</h2><div class="card" id="foundStats"><p class="muted">載入中…</p></div>`;
