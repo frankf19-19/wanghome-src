@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.7.2 -->
+<!-- BUILD v3.8.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -803,9 +803,9 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 .recent a .ph,.reunite .ph{overflow:hidden}.recent a .ph img,.reunite .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
-/* v3.7.2 獎金移到照片左下，不再蓋住「走失第 N 天」 */
+/* v3.8.0 獎金移到照片左下，不再蓋住「走失第 N 天」 */
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* v3.7.2 中文斷行：不讓最後一行只剩一兩個字 */
+/* v3.8.0 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
 /* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
 body :is(p,li,div,small,label,span,dd,td,h1,h2,h3,h4,button,a){text-wrap:balance}
@@ -816,12 +816,12 @@ input,textarea,select{text-wrap:wrap}
 .hint.long{white-space:normal;text-wrap:pretty}
 .hint::before{content:'（'}.hint::after{content:'）'}
 .nw{white-space:nowrap}
-/* v3.7.2 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
+/* v3.8.0 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
 .row2,.row3{align-items:end}
 @media (max-width:520px){.row2:has(.hint),.row2:has(input[type=email]),.row2:has(input[name=reporter_contact]){grid-template-columns:1fr}}
 .hint.long{display:block;margin:3px 0 0;white-space:normal}
 .hint.long::before,.hint.long::after{content:none}
-/* v3.7.2 回報完成頁：大按鈕直接聯絡飼主 */
+/* v3.8.0 回報完成頁：大按鈕直接聯絡飼主 */
 .done-card{text-align:center;padding:32px 20px}
 .done-card .done-ic{width:64px;height:64px;margin:0 auto 8px;color:var(--green-fill)}.done-card .done-ic svg{width:100%;height:100%}
 .bigacts{display:grid;gap:10px;margin:14px 0}
@@ -829,7 +829,7 @@ input,textarea,select{text-wrap:wrap}
 .btn.big.call{background:var(--green-fill);color:#fff;border-color:transparent}
 .btn.big.line{background:#06803E;color:#fff;border-color:transparent}
 #msgTxt{font-size:15px;line-height:1.6}
-/* v3.7.2 給不太會用手機的人：字大一點、可選欄位收起來 */
+/* v3.8.0 給不太會用手機的人：字大一點、可選欄位收起來 */
 details.more{margin:14px 0 6px;border:1.5px dashed var(--line,#E8D9C6);border-radius:var(--r-ctl,14px);background:var(--sheet)}
 details.more>summary{list-style:none;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:700;font-size:16px;color:var(--ink-2,#5A4636)}
 details.more>summary::-webkit-details-marker{display:none}
@@ -850,7 +850,7 @@ details.more>:last-child{margin-bottom:14px}
   body .tag{font-size:13.5px}
   .health-hero.art .lede{clear:both}
 }
-/* v3.7.2 首頁三個大按鈕 */
+/* v3.8.0 首頁三個大按鈕 */
 .bigstart{display:grid;gap:12px;margin:6px 0 22px}
 .bs-hello{margin:0 2px;font-family:var(--head);font-size:22px;font-weight:800;color:var(--ink)}
 .bigbtn{display:flex;align-items:center;gap:14px;min-height:92px;padding:16px 18px;border-radius:var(--r-card,22px);text-decoration:none;color:var(--ink);border:2px solid transparent;box-shadow:0 4px 0 rgba(58,42,30,.12);text-align:left;font:inherit;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .08s}
@@ -870,7 +870,7 @@ details.more>:last-child{margin-bottom:14px}
 .bs-rule{margin:4px 2px 0;font-size:15px;color:var(--ink-2)}
 .choose{display:grid;gap:12px;margin-top:14px}
 @media (min-width:900px){.bigstart{grid-template-columns:repeat(3,1fr)}.bs-hello,.bs-health,.bs-rule{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
-/* v3.7.2 分步驟表單 */
+/* v3.8.0 分步驟表單 */
 .wprog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;font-weight:700;color:var(--ink-2);font-size:15px}
 .wdots{display:flex;gap:6px}.wdots i{width:28px;height:8px;border-radius:8px;background:var(--beige)}
 .wdots i.done{background:var(--green-fill)}.wdots i.on{background:var(--red-fill)}
@@ -924,6 +924,12 @@ a.bigbtn.b-red,a.bigbtn.b-red *,a.bigbtn.b-green,a.bigbtn.b-green *{color:#fff!i
 a.bigbtn.b-yellow,a.bigbtn.b-yellow *{color:#3A2A1E!important}
 a.bigbtn.b-white,a.bigbtn.b-white b,a.bigbtn.b-white small,a.bigbtn.b-white .bb-go{color:var(--ink)!important}
 a.bigbtn{opacity:1!important;text-decoration:none!important}
+/* 危險操作 */
+.danger-zone{border-color:#E8B4A8}.danger-zone>summary{color:#B42318}
+.btn.danger{background:#B42318!important;color:#fff!important;border-color:transparent!important}
+/* 條款頁 */
+.legal h2{font-size:18px;margin:20px 0 8px}.legal ul{padding-left:20px;line-height:1.75}.legal li{margin-bottom:6px}.legal p{line-height:1.75}
+.is-app .app-hide{display:none!important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -962,8 +968,8 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.7.2</span></div>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/seen">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.8.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -983,7 +989,9 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.7.2';
+const BUILD = 'v3.8.0';
+const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+if(IS_APP)document.documentElement.classList.add('is-app');
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1214,6 +1222,8 @@ function route(){
   if(path==='#/resources')return renderResources();
   if(path==='#/about')return renderAbout();
   if(path==='#/privacy')return renderPrivacy();
+  if(path==='#/terms')return renderTerms();
+  if(path==='#/contact')return renderContact();
   app.innerHTML='<div class="empty">找不到這個頁面 <br><a href="#/">回首頁</a></div>';
 }
 
@@ -1889,7 +1899,7 @@ function renderNew(){
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：可以用雞肉吸引牠"></textarea></label>
     </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-    <p class="muted small">送出即表示同意本站公開上述資料（Email 除外）供協尋使用，找到後請記得回來結案。</p>
+    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>，並同意本站公開上述資料（Email 除外）供協尋使用。找到後請記得回來結案。</p>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出登記</button></div>
   </form>`;
   let photoFiles=[],presetPhotos=[],species='dog';
@@ -1989,6 +1999,7 @@ async function renderReport(id){const _n=navId;
       <label class="f"><span><b class="lbl">聯絡方式</b><small class="hint">只有飼主看得到</small></span><input type="text" name="reporter_contact" placeholder="電話或 LINE"></label>
     </div>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>。</p>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出回報</button></div>
   </form>
   <p class="muted small" style="text-align:center">回報會先通知飼主確認後才顯示在地圖上，避免誤導。</p>`;
@@ -2093,7 +2104,11 @@ async function renderManage(id,token){const _n=navId;
     <div class="photos-preview" id="pv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
     <button class="btn" type="submit" style="margin-top:12px">儲存資料</button>
-  </form>`;
+  </form>
+  <details class="more danger-zone" style="margin-top:28px"><summary>刪除這個案件</summary>
+    <p>會永久刪除這個案件、所有目擊回報和比對結果，網站上就找不到了。<b>找到了的話，建議改按「已找到」</b>，讓大家知道牠回家了。</p>
+    <button type="button" class="btn big danger" id="btnDelCase">永久刪除這個案件</button>
+  </details>`;
   if($('#btnClaim'))$('#btnClaim').onclick=async()=>{const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error)return toast(error.message);toast('✅ 已綁定');renderManage(id,token)};
   let status=c.status;
   if($('#btnHome'))$('#btnHome').onclick=async()=>{if(!confirm(`確定 ${c.name} 已經回家了嗎？按「確定」會把案件標記為「已找到」，大家就知道可以不用再找了。`))return;
@@ -2108,6 +2123,9 @@ async function renderManage(id,token){const _n=navId;
   let photos=(c.photos||[]).slice();const pv=$('#pv');
   const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
   $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,4-photos.length)){toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
+  $('#btnDelCase').onclick=async()=>{if(!confirm(`確定要永久刪除「${c.name}」這個案件嗎？刪除後無法復原。`))return;if(!confirm('最後確認：真的要刪除嗎？'))return;
+    const {error}=await sb.rpc('delete_case',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
+    try{localStorage.removeItem('wh_token_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這個案件',3000);goReplace('#/')};
   $('#fe').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target);const p={photos};['name','colour','features','collar_desc','temperament','lost_place','contact_name','contact_phone','contact_email','contact_line','notes'].forEach(k=>p[k]=String(fd.get(k)??'').trim());p.phone_public=!!fd.get('phone_public');p.reward=+(fd.get('reward')||0);const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);toast('已儲存')};
 }
 
@@ -2251,6 +2269,7 @@ function renderInjured(){
     <label class="chk"><input type="checkbox" name="phone_public"> 公開電話，讓飼主或救援的人聯絡我</label>
     <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000" placeholder="例：已打 1999，動保處說 30 分鐘內到"></textarea></label>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>。</p>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出受傷通報</button></div>
   </form>`;
   $('#btnQuick').onclick=quickReport;
@@ -2340,6 +2359,7 @@ function renderFoundNew(){
     <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000"></textarea></label>
     </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>。</p>
     <div class="submitbar"><button class="btn lg block green" type="submit" id="btnSubmit">送出拾獲通報</button></div>
   </form>`;
   let kind='found',species='dog';
@@ -2453,7 +2473,13 @@ async function renderFoundManage(id,token){const _n=navId;
     <label class="chk"><input type="checkbox" id="pp" ${f.phone_public?'checked':''}> 公開電話</label>
     <label class="f"><span>補充</span><textarea id="nt" maxlength="1000">${esc(f.notes||'')}</textarea></label>
     <button class="btn" style="margin-top:12px" id="save">儲存</button>
-  </div>`;
+  </div>
+  <details class="more danger-zone" style="margin-top:28px"><summary>刪除這則通報</summary>
+    <p>會永久刪除這則通報和照片連結，網站上就找不到了。</p>
+    <button type="button" class="btn big danger" id="btnDelFound">永久刪除這則通報</button>
+  </details>`;
+  $('#btnDelFound').onclick=async()=>{if(!confirm('確定要永久刪除這則通報嗎？刪除後無法復原。'))return;const {error}=await sb.rpc('delete_found',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
+    try{localStorage.removeItem('wh_ftoken_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這則通報',3000);goReplace('#/')};
   if($('#btnClaimF'))$('#btnClaimF').onclick=async()=>{const {error}=await sb.rpc('claim_found',{p_id:id,p_token:token});if(error)return toast(error.message);toast('✅ 已綁定');renderFoundManage(id,token)};
   let st=f.status;
   $('#seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{st=b.dataset.v;$('#seg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -2705,8 +2731,28 @@ async function renderMe(){const _n=navId;
       <button type="button" class="btn sm ghost" id="btnHome" style="margin-top:8px">${ic("pin")} 用我目前位置</button>
     </div>
     <button class="btn" style="margin-top:14px">儲存設定</button>
-  </form>`;
+  </form>
+  <details class="more danger-zone" style="margin-top:28px"><summary>刪除帳號</summary>
+    <p>刪除後會<b>永久刪除</b>：你的會員資料、毛孩檔案與照片、健康紀錄、用藥紀錄、收據病歷照片、追蹤與通知設定。無法復原。</p>
+    <p class="small muted">你登記過的走失案件與拾獲通報會保留在網站上繼續協尋，但不再屬於這個帳號；想一起刪除，請先到案件的管理頁按「刪除這個案件」。</p>
+    <button type="button" class="btn big danger" id="btnDelAcct">永久刪除我的帳號</button>
+  </details>`;
   $('#btnOut').onclick=async()=>{await sb.auth.signOut();goReplace('#/')};
+  $('#btnDelAcct').onclick=async()=>{
+    if(!confirm('確定要永久刪除你的帳號和所有毛孩資料嗎？刪除後無法復原。'))return;
+    if(!confirm('最後確認：真的要刪除嗎？'))return;
+    const b=$('#btnDelAcct');b.disabled=true;b.textContent='刪除中…';
+    try{
+      // 先清掉自己上傳的照片（失敗不影響刪帳號）
+      try{const [{data:ps},{data:rs}]=await Promise.all([sb.from('pets').select('photos'),sb.from('pet_records').select('files')]);
+        const pub=(ps||[]).flatMap(x=>x.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(Boolean);
+        const thumbs=pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'));
+        if(pub.length)await sb.storage.from('photos').remove([...pub,...thumbs]);
+        const priv=(rs||[]).flatMap(x=>x.files||[]);if(priv.length)await sb.storage.from('pet-private').remove(priv);}catch(_){}
+      const {error}=await sb.rpc('delete_my_account');if(error)throw error;
+      await sb.auth.signOut().catch(()=>{});toast('帳號已刪除，謝謝你曾經使用汪喵回家',4000);goReplace('#/');
+    }catch(err){toast('刪除失敗：'+(err.message||err));b.disabled=false;b.textContent='永久刪除我的帳號'}
+  };
   const picker=pickerMap('hmap',p.home_lat?[p.home_lat,p.home_lng]:[23.9,121]);
   if(p.home_lat)picker.set(p.home_lat,p.home_lng);else picker.map.setZoom(7);
   $('#btnHome').onclick=picker.locate;
@@ -3176,7 +3222,7 @@ async function renderThanks(){const _n=navId;
   (_n===navId?app:_void).innerHTML=`<h1>贊助感謝牆</h1>
   <div class="card">
     <p>${esc(CONFIG.SITE_NAME)} 是免費的協尋平台，沒有廣告。伺服器、網域與每日比對都是站長自費。如果這個網站幫上了忙，歡迎請站長喝杯咖啡，讓它繼續運作。</p>
-    ${CONFIG.ECPAY_URL?`<a class="btn lg" target="_blank" rel="noopener" href="${esc(CONFIG.ECPAY_URL)}">☕ 贊助本站（綠界）</a><p class="muted small">付款頁可填暱稱與留言，會顯示在這面牆上（金額預設不公開）。</p>`:'<p class="muted">贊助連結尚未設定。</p>'}
+    ${CONFIG.ECPAY_URL&&!IS_APP?`<a class="btn lg" target="_blank" rel="noopener" href="${esc(CONFIG.ECPAY_URL)}">☕ 贊助本站（綠界）</a><p class="muted small">付款頁可填暱稱與留言，會顯示在這面牆上（金額預設不公開）。</p>`:'<p class="muted">贊助連結尚未設定。</p>'}
     <p class="muted small">本頁為自願性贊助，非商品交易、非公益勸募，不開立捐款收據。尋獲獎金由飼主與尋獲者自行處理，本站不經手任何款項。</p>
   </div>
   <h2>感謝名單</h2>
@@ -3246,14 +3292,92 @@ function renderAbout(){
   ${CONFIG.CONTACT_EMAIL?`<p>聯絡站長：<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a></p>`:''}
   <p class="muted small">BUILD ${BUILD}</p></div>`;
 }
+const LEGAL_DATE='2026 年 10 月 25 日';
+function contactLine(){return CONFIG.CONTACT_EMAIL?`<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a>`:'網站客服信箱（設定中，暫時請用各頁面的「檢舉」按鈕聯絡站長）'}
 function renderPrivacy(){
-  setTitle('隱私聲明');
-  app.innerHTML=`<h1>隱私聲明</h1><div class="card">
-  <p>會員登入只用 Email（或 Google），我們不會公開你的 Email；寵物檔案只有你本人看得到；附近通知的中心點只用來計算距離，不會公開。</p>
-  <p>飼主登記的 <b>Email 不會公開</b>，僅用於寄送目擊與比對通知。電話可自行選擇是否公開。</p>
-  <p>目擊回報者留的聯絡方式<b>只有該案件飼主看得到</b>，不會顯示在公開頁面。</p>
-  <p>照片與案件內容會公開在本站供協尋使用，並可能被分享到社群平台。結案後資料仍保留作為統計與參考；若需刪除請聯絡站長。</p>
-  <p>本站使用 Supabase 儲存資料，OpenStreetMap 提供地圖。使用瀏覽器定位功能前會徵求你的同意。</p></div>`;
+  setTitle('隱私權政策');
+  app.innerHTML=`<h1>隱私權政策</h1><p class="muted small">最後更新：${LEGAL_DATE}</p><div class="card legal">
+  <p>「${esc(CONFIG.SITE_NAME)}」（以下稱本站，含網站與 App）重視你的隱私。本政策說明我們收集哪些資料、做什麼用、和誰分享、保存多久，以及你可以怎麼查詢、更正或刪除。</p>
+  <h2>一、我們收集的資料</h2>
+  <ul>
+    <li><b>登記走失：</b>毛孩名字、種類、外觀特徵、照片、走失時間與地點；飼主稱呼、電話、Email（可不填）、LINE ID（可不填）。</li>
+    <li><b>目擊／拾獲／受傷通報：</b>時間、地點（你點選或同意定位的位置）、照片、狀況說明、通報者稱呼與聯絡方式（可不填）。</li>
+    <li><b>會員（可不註冊）：</b>Email、顯示名稱、通知設定與「家附近」中心點、毛孩檔案、健康紀錄、用藥紀錄、收據與病歷照片、追蹤的案件。</li>
+    <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址，只存在你的手機裡，不會上傳。</li>
+    <li><b>定位與相機：</b>只有在你按下「用我目前位置」或選擇照片時才會使用，並會先徵求你的同意。照片的拍攝時間與地點只用來幫你自動填表。</li>
+    <li><b>技術紀錄：</b>為了網站運作與防止濫用，主機服務商會保存一般連線紀錄（例如 IP 位址、時間）。</li>
+  </ul>
+  <h2>二、哪些會公開、哪些不會</h2>
+  <ul>
+    <li><b>會公開：</b>走失案件與通報的內容與照片、飼主稱呼；飼主選擇公開時的電話與 LINE ID。這些是協尋需要，可能被分享到 LINE、Facebook 等社群。</li>
+    <li><b>不會公開：</b>飼主的 Email、選擇不公開的電話、目擊回報者的聯絡方式（只有該案件飼主看得到）、會員的毛孩檔案與健康紀錄（只有你自己看得到）、家附近中心點。</li>
+  </ul>
+  <h2>三、使用目的</h2>
+  <p>協尋走失毛孩、比對收容所與拾獲通報、通知飼主有新的目擊、寄送健康到期提醒、統計找回方式、防止詐騙與濫用。我們<b>不販售資料、不放廣告、不做廣告追蹤</b>。</p>
+  <h2>四、合作的服務商</h2>
+  <ul>
+    <li>Supabase：資料庫、會員登入與寄信程式主機。</li>
+    <li>GitHub Pages：網站主機。</li>
+    <li>寄信服務：寄送通知信與登入信。</li>
+    <li>OpenStreetMap／Nominatim：地圖與地址查詢（會傳送你選的座標）。</li>
+    <li>農業部「動物認領養」開放資料：收容所比對，由你的手機直接查詢。</li>
+    <li>Google 地圖、LINE、Facebook：只在你點選開啟或分享時才會連過去，適用它們自己的隱私政策。</li>
+  </ul>
+  <h2>五、保存期間</h2>
+  <ul>
+    <li>走失案件與通報：保存到你刪除、或站方因違規下架為止；結案後仍保留，作為找回方式的統計。</li>
+    <li>會員資料、毛孩檔案與健康紀錄：保存到你刪除帳號為止。</li>
+    <li>通知寄送紀錄：用來避免重複寄信，保存到帳號或案件刪除為止。</li>
+  </ul>
+  <h2>六、你的權利（個人資料保護法第 3 條）</h2>
+  <p>你可以查詢、閱覽、複製、補充或更正、要求停止使用、或刪除你的個人資料：</p>
+  <ul>
+    <li><b>刪除走失案件：</b>到案件的管理頁，按「刪除這個案件」。</li>
+    <li><b>刪除通報：</b>到通報的管理頁，按「刪除這則通報」。</li>
+    <li><b>刪除帳號：</b>登入後到「我的」最下方，按「刪除帳號」，會永久刪除會員資料、毛孩檔案、健康與用藥紀錄、照片。</li>
+    <li>其他需求請聯絡：${contactLine()}。</li>
+  </ul>
+  <h2>七、未成年人</h2>
+  <p>未滿 18 歲請在家長或法定代理人陪同下使用，特別是公開電話等聯絡資料時。</p>
+  <h2>八、政策修改</h2>
+  <p>政策如有修改，會更新在本頁並標示日期；重大變更會在網站上公告。</p>
+  </div>`;
+}
+function renderTerms(){
+  setTitle('使用條款');
+  app.innerHTML=`<h1>使用條款</h1><p class="muted small">最後更新：${LEGAL_DATE}</p><div class="card legal">
+  <p>使用「${esc(CONFIG.SITE_NAME)}」（含網站與 App）即表示你同意以下條款。</p>
+  <h2>一、服務內容</h2>
+  <p>本站是免費的走失毛孩協尋平台，提供登記走失、目擊與拾獲通報、受傷毛孩通報、收容所比對、毛孩健康手冊等功能。本站<b>不保證一定找回</b>，也<b>無法派人救援</b>；遇到受傷動物請撥全國動保專線 1959（或 1999），有交通危險請撥 110。</p>
+  <h2>二、你發布的內容</h2>
+  <p>你保證提供的資料真實，且你有權使用上傳的照片。你同意本站為協尋目的，公開展示你發布的案件與通報、製作海報與分享頁。</p>
+  <h2>三、禁止的行為</h2>
+  <ul>
+    <li>張貼不實或惡作劇的走失、目擊、拾獲資訊。</li>
+    <li>詐騙：假冒飼主、收容所或動保單位，要求匯款、訂金或酬金。</li>
+    <li>騷擾、恐嚇、歧視、仇恨、色情或暴力內容；冒用他人身分或公開他人隱私。</li>
+    <li>買賣動物、廣告、垃圾訊息、大量灌資料或干擾網站運作。</li>
+  </ul>
+  <h2>四、檢舉與站方處理</h2>
+  <p>每個案件、通報、目擊回報都有「檢舉」按鈕。站方收到檢舉後原則上 24 小時內處理，可能隱藏或刪除違規內容，並限制違規者繼續使用。飼主也可以在管理頁直接退回不正確的目擊回報。</p>
+  <h2>五、防詐提醒</h2>
+  <p>本站不經手任何金錢。尋獲獎金由飼主與尋獲者自行處理；任何要求你「先匯款」的人都可能是詐騙，請先和飼主本人確認，或撥 165 反詐騙專線。</p>
+  <h2>六、免責</h2>
+  <p>網友發布的內容由發布者自行負責。本站會盡力維持服務正常，但不保證不中斷或資料完全正確；收容所比對與相似度只是參考，請親自確認。</p>
+  <h2>七、條款修改與適用法律</h2>
+  <p>條款修改會更新在本頁。本條款以中華民國法律為準據法。</p>
+  <h2>八、聯絡我們</h2>
+  <p>${contactLine()}</p>
+  </div>`;
+}
+function renderContact(){
+  setTitle('聯絡我們');
+  app.innerHTML=`<h1>聯絡我們</h1><div class="card legal">
+  <p><b>客服信箱：</b>${contactLine()}</p>
+  <p><b>看到不實、詐騙或不當內容？</b>請直接按該頁面的「檢舉」按鈕，站方原則上 24 小時內處理。</p>
+  <p><b>要刪除自己的資料？</b>案件與通報請到各自的管理頁刪除；會員請到「我的」最下方刪除帳號。詳見<a href="#/privacy">隱私權政策</a>。</p>
+  <p><b>緊急狀況：</b>路上有受傷的動物，請撥全國動保專線 <a href="tel:1959">1959</a>（接不通改撥 1999），有交通危險請撥 110。本站無法派人救援。</p>
+  </div>`;
 }
 
 // 首頁先畫出三個大按鈕（不用等資料庫元件下載完），之後 renderHome 會補上名單
