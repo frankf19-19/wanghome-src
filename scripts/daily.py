@@ -226,10 +226,16 @@ def send_mail(to, subject, body):
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = Header(subject, "utf-8"); msg["To"] = to
     if RESEND_KEY:   # 用自己的網域寄（Resend SMTP）
-        msg["From"] = formataddr((SITE_NAME, MAIL_FROM)); msg["Reply-To"] = REPLY_TO
-        with smtplib.SMTP_SSL("smtp.resend.com", 465, timeout=30) as s:
-            s.login("resend", RESEND_KEY); s.sendmail(MAIL_FROM, [to], msg.as_string())
-    else:
+        try:
+            msg["From"] = formataddr((SITE_NAME, MAIL_FROM)); msg["Reply-To"] = REPLY_TO
+            with smtplib.SMTP_SSL("smtp.resend.com", 465, timeout=30) as s:
+                s.login("resend", RESEND_KEY); s.sendmail(MAIL_FROM, [to], msg.as_string())
+            return True
+        except Exception as e:
+            if not (GMAIL_USER and GMAIL_PASS): raise
+            print("Resend 寄信失敗，改用 Gmail：", e)
+            del msg["From"]; del msg["Reply-To"]
+    if True:
         msg["From"] = formataddr((SITE_NAME, GMAIL_USER))
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as s:
             s.login(GMAIL_USER, GMAIL_PASS); s.sendmail(GMAIL_USER, [to], msg.as_string())
@@ -407,6 +413,56 @@ def run_report_alerts():
         print("檢舉通知失敗：", e)
 
 # ---------------------------------------------------------------- main
+# ---------------------------------------------------------------- 清掉沒人用的公開照片
+# 案件／通報被刪除、或編輯時換掉的照片，會留在 storage。每天清一次：
+# 只看 cases/、found/、sightings/ 三個資料夾（寵物照片由會員自己管理），
+# 只刪「沒有任何資料用到」而且「上傳超過 3 天」的檔案（避免刪到正在填表、還沒送出的照片）。
+PUBLIC_PREFIX = "/storage/v1/object/public/photos/"
+def storage(method, path, body=None):
+    url = f"{SUPABASE_URL}/storage/v1/{path}"
+    req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None, method=method)
+    req.add_header("apikey", SERVICE_KEY)
+    req.add_header("Authorization", f"Bearer {SERVICE_KEY}")
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=60) as r:
+        t = r.read().decode()
+        return json.loads(t) if t else None
+
+def run_photo_cleanup(dry=False):
+    used = set()
+    def add(u):
+        if isinstance(u, str) and PUBLIC_PREFIX in u:
+            k = urllib.parse.unquote(u.split(PUBLIC_PREFIX, 1)[1].split("?")[0])
+            used.add(k); used.add(re.sub(r"\.jpg$", "_t.jpg", k))
+    for r in sb_all("cases", {"select": "id,photos"}): [add(u) for u in (r.get("photos") or [])]
+    for r in sb_all("found_reports", {"select": "id,photos"}): [add(u) for u in (r.get("photos") or [])]
+    for r in sb_all("sightings", {"select": "id,photo_url"}): add(r.get("photo_url"))
+    if not used:
+        print("照片清理：找不到任何使用中的照片，為了安全這次不刪"); return
+    cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=3)
+    stale, total = [], 0
+    for folder in ("cases", "found", "sightings"):
+        off = 0
+        while True:
+            items = storage("POST", "object/list/photos", {"prefix": folder + "/", "limit": 1000, "offset": off, "sortBy": {"column": "name", "order": "asc"}}) or []
+            for it in items:
+                name = it.get("name") or ""
+                if not name or it.get("id") is None: continue          # 子資料夾
+                total += 1
+                key = f"{folder}/{name}"
+                ts = it.get("created_at") or it.get("updated_at") or ""
+                try: old = dt.datetime.fromisoformat(ts.replace("Z", "+00:00")) < cutoff
+                except Exception: old = False
+                if old and key not in used: stale.append(key)
+            if len(items) < 1000: break
+            off += 1000
+    if total and len(stale) > total * 0.8 and len(stale) > 20:
+        print(f"照片清理：要刪的比例異常（{len(stale)}/{total}），為了安全這次不刪"); return
+    print(f"照片清理：共 {total} 個檔案，使用中 {len(used)//2}，要刪 {len(stale)}")
+    if dry: print("（試跑，不刪除）", stale[:20]); return
+    for i in range(0, len(stale), 100):
+        storage("DELETE", "object/photos", {"prefixes": stale[i:i+100]})
+
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
     print("WangHome daily v1.8.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
@@ -428,5 +484,8 @@ if __name__ == "__main__":
     if mode in ("all", "notify"): run_member_notifications()
     if mode in ("all", "notify"): run_report_alerts()
     if mode in ("all",): run_due_reminders()
+    if mode in ("all", "cleanup", "cleanup-dry"):
+        try: run_photo_cleanup(dry=(mode == "cleanup-dry"))
+        except Exception as e: print("照片清理失敗（不影響其他功能）：", e)
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})
     print("保活 OK", "有資料" if n else "空")
