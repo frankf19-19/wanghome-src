@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.1.0 -->
+<!-- BUILD v2.2.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -49,7 +49,7 @@
   --green-soft:#DFF1E7;
   --blue:#1D58A8;
   --amber:#8F5D00;
-  --r-card:10px; --r-ctl:12px; --r-pill:999px;
+  --r-card:16px; --r-ctl:14px; --r-pill:999px;
   --lift:0 1px 0 rgba(31,42,46,.06),0 6px 18px -10px rgba(31,42,46,.35);
   --display:"Chiron GoRound TC","Noto Sans TC",system-ui,sans-serif;   /* 只用在 logo、首頁大標、海報 */
   --head:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;  /* 標題：清楚銳利 */
@@ -144,6 +144,35 @@ a.stat:hover{text-decoration:none}a.stat:hover b{color:var(--red)}
 .stat.good b{color:var(--green)}
 @media (max-width:420px){.stat{font-size:12.5px;padding:2px 10px;white-space:nowrap}.stat b{font-size:26px}}
 
+/* 溫度：插畫、柔和底色 */
+.tape-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.hero-duo{display:none}
+@media (max-width:979px){.hero-duo{display:block;width:118px;height:auto;margin:0 -4px -10px 0;flex:none}}
+.hero-duo-lg{display:none}
+@media (min-width:980px){.hero:not(.has-poster){display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:48px;align-items:center}.hero:not(.has-poster) .hero-duo-lg{display:block;width:100%;height:auto}}
+.health-hero.art{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.health-hero.art img{width:200px;height:auto;flex:none}
+@media (max-width:640px){.health-hero.art{display:block;position:relative}.health-hero.art h1{padding-right:104px}.health-hero.art img{position:absolute;right:0;top:4px;width:100px}}
+.login-card{text-align:left}
+.login-duo{display:block;width:140px;height:auto;margin:-6px auto 6px}
+.empty-card .big img{width:120px;height:auto}
+body[data-space="health"]{background:color-mix(in srgb,var(--green) 6%,var(--paper))}
+.how li,.card,.ccard,.promo,.crosslink{border-radius:var(--r-card)}
+/* 手機填表：送出按鈕固定在下方、隱藏底部選單 */
+@media (max-width:760px){
+  body.formpage{--tabbar-h:0px}
+  body.formpage .tabbar{display:none}
+  .submitbar{position:sticky;bottom:0;z-index:20;margin:18px -20px 0;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--sheet) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+}
+.submitbar{margin-top:18px}
+.submitbar.row{display:flex;gap:8px;flex-wrap:wrap}
+/* 手機：按鈕和選項更好按 */
+@media (pointer:coarse){
+  .btn.sm{min-height:40px;padding:9px 15px}
+  .seg button,.chipset button,#presets button{min-height:42px}
+  .chk{min-height:40px}
+  .chk input{width:22px;height:22px}
+}
 /* 物種圖示、空狀態、海報進場 */
 .ico.sp-i{width:1.05em;height:1.05em;vertical-align:-.16em}
 .empty-card .big{color:var(--ink-3)}
@@ -575,7 +604,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.1.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.2.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -594,7 +623,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.1.0';
+const BUILD = 'v2.2.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -745,6 +774,7 @@ function route(){
   const h=location.hash||'#/';
   const path=h.split('?')[0];
   renderChrome(path,h);
+  document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record))/.test(path));
   window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
@@ -795,7 +825,7 @@ async function renderHome(){
   <section class="hero" id="hero">
     <div class="hero-main">
     <p class="rule"><span class="nb">看到走失的狗貓，</span><span class="nb">別追。</span><span class="l2"><span class="nb">拍照、記下時間地點，</span><span class="nb">回報給飼主。</span></span></p>
-    <span class="tape">追趕只會讓牠跑得更遠</span>
+    <div class="tape-row"><span class="tape">追趕只會讓牠跑得更遠</span><img class="hero-duo" src="duo.svg" alt="" width="132" height="90"></div>
     <div class="actions">
       <a href="#/new" class="btn lg">我的毛孩走失了<small>登記協尋、產生海報</small></a>
       <a href="#/found/new" class="btn lg green">我撿到／看到一隻<small>幫牠找到主人</small></a>
@@ -803,6 +833,7 @@ async function renderHome(){
     <div class="stats" id="stats"></div>
     </div>
     <a class="hero-poster hidden" id="heroPoster" aria-label="最新走失案件"></a>
+    <img class="hero-duo-lg" id="heroDuo" src="duo.svg" alt="" width="320" height="218">
   </section>
   <ol class="how" aria-label="怎麼運作">
     <li><b>登記協尋</b><span>上傳照片、走失地點，自動比對收容所和拾獲通報，產生可列印的海報。</span></li>
@@ -877,8 +908,8 @@ async function renderHealth(){
   ]);
   const p=prof||{};const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const ds=dues||[];const overdue=ds.filter(r=>r.next_due<todayStr()).length;const soon=ds.filter(r=>r.next_due>=todayStr()&&r.next_due<=new Date(Date.now()+14*864e5).toISOString().slice(0,10)).length;
-  if(!(pets||[]).length){app.innerHTML=`<div class="health-hero"><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div>
-    <div class="empty-card" style="margin-top:16px"><div class="big">${PAW_BIG}</div><b>還沒有毛孩檔案</b><p class="small">名字、照片、晶片號碼、生日，一次填好；走失時也能一鍵轉成協尋案件。</p><div class="btns"><a class="btn green" href="#/pet/new">建立第一隻毛孩</a></div></div>`;return}
+  if(!(pets||[]).length){app.innerHTML=`<div class="health-hero art"><div><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div><img src="duo.svg" alt="" width="220" height="150"></div>
+    <div class="empty-card" style="margin-top:16px"><div class="big"><img src="duo.svg" alt="" width="120" height="82"></div><b>還沒有毛孩檔案</b><p class="small">名字、照片、晶片號碼、生日，一次填好；走失時也能一鍵轉成協尋案件。</p><div class="btns"><a class="btn green" href="#/pet/new">建立第一隻毛孩</a></div></div>`;return}
   app.innerHTML=`<div class="health-hero row"><div><h1>毛孩健康手冊</h1><p class="lede">${overdue?`<b style="color:var(--red)">${overdue} 項已過期</b>，`:''}${soon?`${soon} 項兩週內到期`:ds.length?'近期沒有急著要做的事':'還沒有設定到期提醒'}</p></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
   <div class="grid">${pets.map(petCardHTML).join('')}</div>
@@ -892,9 +923,10 @@ async function renderHealth(){
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:'smooth'})},60);
 }
 function renderHealthLanding(){
-  app.innerHTML=`<div class="health-hero">
-    <h1>毛孩健康手冊</h1>
-    <p class="lede">回診、疫苗、驅蟲、體重，全部記在同一個地方。到期前自動提醒，看醫生時一鍵給獸醫看。免費，只有你自己看得到。</p>
+  app.innerHTML=`<div class="health-hero art">
+    <div><h1>毛孩健康手冊</h1>
+    <p class="lede">回診、疫苗、驅蟲、體重，全部記在同一個地方。到期前自動提醒，看醫生時一鍵給獸醫看。免費，只有你自己看得到。</p></div>
+    <img src="duo.svg" alt="" width="220" height="150">
   </div>
   ${promoHTML(true)}
   <h2>${ic("clipboard")} 怎麼開始</h2>
@@ -925,7 +957,7 @@ async function loadFeatured(){
     <div class="hp-b"><b>${esc(c.name)}</b><span>${esc([c.breed,c.colour].filter(Boolean).join('・'))}</span><span class="hp-loc">${ic('pin')} ${esc(c.lost_city)}${esc(c.lost_district||'')}</span>
     ${c.reward>0?`<span class="hp-rw">尋獲獎金 NT$${c.reward.toLocaleString()}</span>`:''}</div>
     <div class="hp-cta">${ic('eye')} 看過牠？點我回報</div>`;
-  el.classList.remove('hidden');$('#hero').classList.add('has-poster');
+  el.classList.remove('hidden');$('#hero').classList.add('has-poster');if($('#heroDuo'))$('#heroDuo').remove();
 }
 async function loadStats(){
   const [a,b,c,d]=await Promise.all([
@@ -985,7 +1017,7 @@ async function loadFoundList(el){
 function emptyCard(kind){
   const where=homeState.city?`${esc(homeState.city)}`:'目前';
   return kind==='lost'
-   ?`<div class="empty-card"><div class="big">${PAW_BIG}</div><b>${where}沒有協尋中的走失案件</b><p class="small">這是好消息！如果你的毛孩走失了，越早登記越好，黃金時間是前 48 小時。</p><div class="btns"><a class="btn" href="#/new">登記走失</a><a class="btn ghost" href="#/resources">先看協尋攻略</a></div></div>`
+   ?`<div class="empty-card"><div class="big"><img src="duo.svg" alt="" width="120" height="82"></div><b>${where}沒有協尋中的走失案件</b><p class="small">這是好消息！如果你的毛孩走失了，越早登記越好，黃金時間是前 48 小時。</p><div class="btns"><a class="btn" href="#/new">登記走失</a><a class="btn ghost" href="#/resources">先看協尋攻略</a></div></div>`
    :`<div class="empty-card"><div class="big">${ic("hand")}</div><b>${where}沒有拾獲通報</b><p class="small">撿到或看到疑似走失的狗貓？登記後系統會自動比對附近的走失案件，通知飼主。</p><div class="btns"><a class="btn green" href="#/found/new">我撿到／看到毛孩</a></div></div>`;
 }
 async function loadMapAll(el){
@@ -1330,7 +1362,7 @@ function renderNew(){
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：牠對食物反應很好，可用雞肉吸引；有在服藥需盡快找到"></textarea></label>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
     <p class="muted small">送出即表示同意本站公開上述資料（Email 除外）供協尋使用，找到後請記得回來結案。</p>
-    <button class="btn lg block" type="submit" id="btnSubmit">送出登記</button>
+    <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出登記</button></div>
   </form>`;
   let photoFiles=[],presetPhotos=[],species='dog';
   const setSp=v=>{species=v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v))};
@@ -1414,7 +1446,7 @@ async function renderReport(id){
       <label class="f"><span>聯絡方式（只有飼主看得到）</span><input type="text" name="reporter_contact" placeholder="電話或 LINE，方便飼主追問"></label>
     </div>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-    <button style="margin-top:18px" class="btn lg block" type="submit" id="btnSubmit">送出回報</button>
+    <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出回報</button></div>
     <p class="muted small" style="text-align:center">回報會先通知飼主確認後才顯示在地圖上，避免誤導。</p>
   </form>`;
   if(me())getProfile().then(pr=>{const f=$('#f');if(f&&pr?.display_name&&!f.elements['reporter_name'].value)f.elements['reporter_name'].value=pr.display_name});
@@ -1566,7 +1598,7 @@ function renderFoundNew(){
     </div>
     <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000"></textarea></label>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-    <button class="btn lg block green" type="submit" id="btnSubmit">送出拾獲通報</button>
+    <div class="submitbar"><button class="btn lg block green" type="submit" id="btnSubmit">送出拾獲通報</button></div>
   </form>`;
   let kind='found',species='dog';
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -1836,7 +1868,8 @@ async function getProfile(){
 function renderLogin(){
   setTitle('登入');
   if(me()){location.hash='#/me';return}
-  app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto">
+  app.innerHTML=`<div class="card login-card" style="max-width:520px;margin:20px auto">
+    <img class="login-duo" src="duo.svg" alt="" width="150" height="102">
     <h1>登入／註冊</h1>
     <p class="muted">不用密碼。輸入 Email，我們會寄一封登入連結給你，點了就登入（第一次就是註冊）。</p>
     <form id="lf">
@@ -1962,7 +1995,7 @@ async function renderPet(id){
     <h3>照片（最多 6 張）</h3>
     <div class="photos-preview" id="pv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" id="btnSave">儲存</button>${id!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>
+    <div class="submitbar row"><button class="btn" id="btnSave">儲存</button>${id!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>
   </form>`;
   let species=p.species,photos=(p.photos||[]).slice();
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -2128,7 +2161,7 @@ async function renderRecord(petId,recId){
     <h3>收據、病歷照片（只有你看得到）</h3>
     <div class="photos-preview" id="fv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 加入照片<input type="file" id="fileIn" accept="image/*" multiple></label>
-    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn" id="btnSave">儲存紀錄</button>${recId!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="#/pet/${petId}">取消</a></div>
+    <div class="submitbar row"><button class="btn" id="btnSave">儲存紀錄</button>${recId!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="#/pet/${petId}">取消</a></div>
   </form>`;
   const f=$('#rf');let kind=r.kind,files=(r.files||[]).slice(),urls=await signedUrls(files);
   const drawPresets=()=>{const list=(REC_PRESETS[kind]||{})[p.species==='cat'?'cat':'dog']||[];$('#presets').innerHTML=list.map(([t,m])=>`<button type="button" data-t="${esc(t)}" data-pm="${m}">${esc(t)}</button>`).join('');
