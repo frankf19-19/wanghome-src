@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v1.9.0 -->
+<!-- BUILD v1.9.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -138,6 +138,25 @@ p{margin:6px 0}
 a.stat:hover{text-decoration:none}a.stat:hover b{color:var(--red)}
 .stat b{display:block;font-family:var(--display);font-size:30px;font-weight:900;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
 .stat.good b{color:var(--green)}
+
+/* 首頁：毛孩健康手冊介紹 */
+.promo{margin:44px 0 8px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:36px;align-items:center;background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:30px 32px;border-top:5px solid var(--green)}
+.promo h2{margin:0 0 6px}.promo h2 .ico{color:var(--green)}
+.promo p{margin:0 0 14px;color:var(--ink-2);max-width:40em}
+.promo ul{list-style:none;padding:0;margin:0 0 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+.promo li{display:flex;gap:10px;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.promo li .ico{width:20px;height:20px;color:var(--green);margin-top:2px}
+.promo li b{display:block;color:var(--ink);font-size:14.5px}
+.promo-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.promo-demo{display:flex;justify-content:center}
+.pd-card{width:100%;max-width:300px;background:var(--paper);border-radius:14px;padding:16px;box-shadow:inset 0 0 0 1px var(--line);transform:rotate(-1.2deg)}
+.pd-top{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.pd-av{width:42px;height:42px;border-radius:50%;background:var(--sheet);display:grid;place-items:center;font-size:22px;box-shadow:inset 0 0 0 1px var(--line)}
+.pd-top b,.pd-due b{display:block;font-size:14.5px;color:var(--ink)}.pd-top small,.pd-due small{color:var(--ink-3);font-size:12.5px}
+.pd-due{display:flex;align-items:center;gap:10px;background:var(--sheet);border-radius:10px;padding:9px 10px;margin-top:8px}
+.pd-ic{font-size:18px}.pd-tag{margin-left:auto;background:var(--mark);color:#1F2A2E;font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:99px}
+.pd-w{width:100%;height:56px;margin-top:10px}.pd-cap{color:var(--ink-3);font-size:12px}
+@media (max-width:760px){.promo{grid-template-columns:1fr;padding:22px 18px;gap:20px}.promo ul{grid-template-columns:1fr}.promo-demo{display:none}}
 /* 首頁精選海報（桌機） */
 .hero-poster{display:none}
 @media (min-width:980px){
@@ -458,6 +477,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
     <a href="#/" class="logo"><span class="paw">🐾</span><span id="siteName">汪喵回家</span></a>
     <div class="sp"></div>
     <span class="navlinks" style="display:contents">
+      <a href="#/me" class="link hide-sm">健康手冊</a>
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
       <a href="#/thanks" class="link hide-sm">感謝牆</a>
       <a href="#/found/new" class="btn sm green hide-sm">撿到毛孩</a>
@@ -471,8 +491,8 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v1.9.0</span></div>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/me">毛孩健康手冊</a><a href="#/found/new">通報拾獲</a></nav>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v1.9.1</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽">
@@ -497,7 +517,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.9.0';
+const BUILD = 'v1.9.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -695,7 +715,29 @@ async function renderHome(){
     <input type="text" id="fQ" placeholder="關鍵字：名字、品種、毛色、地點" value="${esc(homeState.q)}">
     <label class="chk" style="margin:0;justify-content:center"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 只看有獎金</label>
   </div>
-  <div id="list" class="grid" style="margin-top:14px">${skel()}</div>`;
+  <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
+  <section class="promo" aria-labelledby="promoT">
+    <div class="promo-txt">
+      <h2 id="promoT">${ic("steth")} 毛孩健康手冊</h2>
+      <p>平常就把回診、疫苗、驅蟲、體重記下來，到期自動提醒，看醫生時整份病歷一目了然。免費，只有你自己看得到。</p>
+      <ul>
+        <li>${ic("clipboard")}<span><b>健康紀錄</b>看診、疫苗、驅蟲、用藥、手術、體重，收據病歷也能拍照存</span></li>
+        <li>${ic("calendar")}<span><b>到期提醒</b>寄 Email，也能同步到 iPhone、Google 日曆</span></li>
+        <li>${ic("printer")}<span><b>給獸醫看</b>一鍵產生病歷摘要，換醫院不用重講</span></li>
+        <li>${ic("siren")}<span><b>走失一鍵協尋</b>照片和特徵已建好，按「走失了」就能發出協尋</span></li>
+      </ul>
+      <div class="promo-btns">${me()?`<a class="btn green" href="#/me">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費建立健康手冊</a><span class="muted small">用 Email 登入，不用密碼</span>`}</div>
+    </div>
+    <div class="promo-demo" aria-hidden="true">
+      <div class="pd-card">
+        <div class="pd-top"><span class="pd-av">🐕</span><div><b>小麥</b><small>米克斯・5 歲</small></div></div>
+        <div class="pd-due"><span class="pd-ic">💉</span><div><b>狂犬病疫苗</b><small>5 天後到期</small></div><span class="pd-tag">提醒</span></div>
+        <div class="pd-due"><span class="pd-ic">🛡️</span><div><b>心絲蟲預防</b><small>12 天後到期</small></div></div>
+        <svg class="pd-w" viewBox="0 0 220 60"><polyline points="4,46 50,40 96,42 142,28 188,22 216,18" fill="none" stroke="var(--red)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <small class="pd-cap">體重 12.4 → 12.9 kg</small>
+      </div>
+    </div>
+  </section>`;
   $('#fStatus').value=homeState.status;$('#fSp').value=homeState.species;
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));loadList()}});
   const run=()=>{homeState.species=$('#fSp').value;homeState.city=$('#fCity').value;homeState.status=$('#fStatus').value;homeState.chip=$('#fChip').value.trim();homeState.q=$('#fQ').value.trim();homeState.reward=$('#fReward').checked;loadList()};
@@ -1641,6 +1683,7 @@ function renderLogin(){
     <h3 style="margin-top:20px">登入有什麼好處？</h3>
     <ul style="padding-left:20px;font-size:15px;margin:6px 0">
       <li><b>不怕金鑰遺失</b>：你登記的案件綁在帳號上，換手機也能管理</li>
+      <li><b>毛孩健康手冊</b>：記錄回診、疫苗、驅蟲、體重，到期自動提醒，可同步到手機日曆</li>
       <li><b>寵物檔案</b>：平時先建好照片和特徵，走失時一鍵變成協尋案件</li>
       <li><b>附近走失通知</b>：家附近有毛孩走失時通知你，一起幫忙找</li>
       <li><b>追蹤案件</b>：關心的案件有新目擊時通知你</li>
