@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.6.5 -->
+<!-- BUILD v3.6.6 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -803,9 +803,9 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 .recent a .ph,.reunite .ph{overflow:hidden}.recent a .ph img,.reunite .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
-/* v3.6.5 獎金移到照片左下，不再蓋住「走失第 N 天」 */
+/* v3.6.6 獎金移到照片左下，不再蓋住「走失第 N 天」 */
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* v3.6.5 中文斷行：不讓最後一行只剩一兩個字 */
+/* v3.6.6 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
 /* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
 body :is(p,li,div,small,label,span,dd,td,h1,h2,h3,h4,button,a){text-wrap:balance}
@@ -816,12 +816,12 @@ input,textarea,select{text-wrap:wrap}
 .hint.long{white-space:normal;text-wrap:pretty}
 .hint::before{content:'（'}.hint::after{content:'）'}
 .nw{white-space:nowrap}
-/* v3.6.5 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
+/* v3.6.6 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
 .row2,.row3{align-items:end}
 @media (max-width:520px){.row2:has(.hint),.row2:has(input[type=email]),.row2:has(input[name=reporter_contact]){grid-template-columns:1fr}}
 .hint.long{display:block;margin:3px 0 0;white-space:normal}
 .hint.long::before,.hint.long::after{content:none}
-/* v3.6.5 回報完成頁：大按鈕直接聯絡飼主 */
+/* v3.6.6 回報完成頁：大按鈕直接聯絡飼主 */
 .done-card{text-align:center;padding:32px 20px}
 .done-card .done-ic{width:64px;height:64px;margin:0 auto 8px;color:var(--green-fill)}.done-card .done-ic svg{width:100%;height:100%}
 .bigacts{display:grid;gap:10px;margin:14px 0}
@@ -829,7 +829,7 @@ input,textarea,select{text-wrap:wrap}
 .btn.big.call{background:var(--green-fill);color:#fff;border-color:transparent}
 .btn.big.line{background:#06803E;color:#fff;border-color:transparent}
 #msgTxt{font-size:15px;line-height:1.6}
-/* v3.6.5 給不太會用手機的人：字大一點、可選欄位收起來 */
+/* v3.6.6 給不太會用手機的人：字大一點、可選欄位收起來 */
 details.more{margin:14px 0 6px;border:1.5px dashed var(--line,#E8D9C6);border-radius:var(--r-ctl,14px);background:var(--sheet)}
 details.more>summary{list-style:none;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:700;font-size:16px;color:var(--ink-2,#5A4636)}
 details.more>summary::-webkit-details-marker{display:none}
@@ -850,7 +850,7 @@ details.more>:last-child{margin-bottom:14px}
   body .tag{font-size:13.5px}
   .health-hero.art .lede{clear:both}
 }
-/* v3.6.5 首頁三個大按鈕 */
+/* v3.6.6 首頁三個大按鈕 */
 .bigstart{display:grid;gap:12px;margin:6px 0 22px}
 .bs-hello{margin:0 2px;font-family:var(--head);font-size:22px;font-weight:800;color:var(--ink)}
 .bigbtn{display:flex;align-items:center;gap:14px;min-height:92px;padding:16px 18px;border-radius:var(--r-card,22px);text-decoration:none;color:var(--ink);border:2px solid transparent;box-shadow:0 4px 0 rgba(58,42,30,.12);text-align:left;font:inherit;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .08s}
@@ -870,7 +870,7 @@ details.more>:last-child{margin-bottom:14px}
 .bs-rule{margin:4px 2px 0;font-size:15px;color:var(--ink-2)}
 .choose{display:grid;gap:12px;margin-top:14px}
 @media (min-width:900px){.bigstart{grid-template-columns:repeat(3,1fr)}.bs-hello,.bs-health,.bs-rule{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
-/* v3.6.5 分步驟表單 */
+/* v3.6.6 分步驟表單 */
 .wprog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;font-weight:700;color:var(--ink-2);font-size:15px}
 .wdots{display:flex;gap:6px}.wdots i{width:28px;height:8px;border-radius:8px;background:var(--beige)}
 .wdots i.done{background:var(--green-fill)}.wdots i.on{background:var(--red-fill)}
@@ -897,6 +897,11 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 /* 深色模式：救援區塊的標題與連結改亮橘，看得清楚 */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .er-head,:root:not([data-theme="light"]) .er-foot a{color:#F5A97A}}
 :root[data-theme="dark"] .er-head,:root[data-theme="dark"] .er-foot a{color:#F5A97A}
+/* 登記完成頁 */
+.created{text-align:left}.created h1,.created .done-ic,.created>.lede{text-align:center}
+.cstep{border-top:1px dashed var(--line);padding-top:16px;margin-top:16px}
+.cstep h2{display:flex;align-items:center;gap:10px;font-size:20px;margin:0 0 8px}
+.cnum{flex:none;width:30px;height:30px;border-radius:50%;background:var(--red-fill);color:#fff;display:grid;place-items:center;font-size:17px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -936,7 +941,7 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.5</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.6.6</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -956,7 +961,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.6.5';
+const BUILD = 'v3.6.6';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1871,16 +1876,24 @@ function renderNew(){
   wizard($('#f'));
 }
 function renderCreated(id,token){
-  const manage=`${CONFIG.SITE_URL}#/manage/${id}?t=${token}`;
-  app.innerHTML=`<div class="card"><h1>登記完成</h1>
-  ${me()?'<div class="notice green"><b>✓ 已綁定到你的帳號</b>到「我的」頁面就能管理，不需要金鑰。下面的金鑰可以當備用。</div>':'<div class="notice red"><b>請立刻保存這組管理金鑰（只會顯示這一次）</b>之後更新狀態、確認目擊、結案都要用它。遺失無法補發。<a href="#/login">登入</a>後可把案件綁定帳號。</div>'}
-  <p style="margin-top:12px"><b>管理連結</b>（建議直接加到書籤或傳給自己）</p>
-  <div class="tokenbox" id="mlink">${esc(manage)}</div>
-  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" onclick="copy('${esc(manage)}')">複製管理連結</button><button class="btn sm ghost" onclick="copy('${esc(token)}')">只複製金鑰</button></div>
-  <p class="muted small">金鑰也已暫存在這台裝置的瀏覽器，但換裝置就沒有了。</p>
-  <h3 style="margin-top:20px">接下來</h3>
-  <ol class="steps"><li><a href="#/poster/${id}">產生協尋海報</a>，貼到 FB 社團、LINE 群</li><li>分享案件連結：<a href="#/case/${id}">${esc(caseUrl(id))}</a></li><li>每次有人打開案件頁，系統都會用最新的收容所資料比對，有疑似會顯示在案件頁和管理頁</li><li>看 <a href="#/resources">協尋攻略</a>，照清單一項一項做</li></ol>
-  <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><a class="btn" href="#/poster/${id}">${ic("image")} 產生海報</a><a class="btn ghost" href="#/case/${id}">查看案件頁</a></div></div>`;
+  const manage=`${CONFIG.SITE_URL}#/manage/${id}?t=${token}`;const cUrl=caseUrl(id);
+  const saveMsg=`汪喵回家｜我的走失案件管理網址（請勿外流）\n${manage}`;
+  app.innerHTML=`<div class="card done-card created"><div class="done-ic">${pawSvg()}</div><h1>登記完成了</h1>
+  <p class="lede">還差兩件事，照著做就好。</p>
+  <section class="cstep"><h2><span class="cnum">1</span>先把「管理網址」存起來</h2>
+    <p>之後要確認目擊、修改資料、標記「找到了」，都要從這個網址進去。${me()?'你已登入，在「我的」也找得到，這個網址當備用。':'<b>這個網址只會出現這一次，請一定要存。</b>'}</p>
+    <div class="bigacts"><a class="btn big line" href="https://line.me/R/share?text=${encodeURIComponent(saveMsg)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a>
+    <button type="button" class="btn big ghost" id="cpManage">複製管理網址</button></div>
+    <details class="more"><summary>看網址、只複製金鑰</summary><div class="tokenbox" id="mlink">${esc(manage)}</div><button type="button" class="btn sm ghost" id="cpToken" style="margin-top:8px">只複製金鑰</button>
+    <p class="muted small">這台手機的瀏覽器也會暫時記住，但換手機就沒有了。${me()?'':'<a href="#/login">登入</a>後可以把案件綁定帳號，換手機也能管理。'}</p></details>
+  </section>
+  <section class="cstep"><h2><span class="cnum">2</span>做海報、分享出去</h2>
+    <p>貼到附近的 FB 社團、LINE 群組，看到的人越多越好找。</p>
+    <div class="bigacts"><a class="btn big" href="#/poster/${id}">${ic("image")} 做協尋海報</a>
+    <a class="btn big ghost" href="https://line.me/R/share?text=${encodeURIComponent('請幫忙協尋，看到請回報：\n'+cUrl)}" target="_blank" rel="noopener">用 LINE 分享案件</a></div>
+  </section>
+  <p class="small muted" style="margin-top:6px">還可以：<a href="#/resources">看協尋攻略</a>、<a href="#/case/${id}">打開案件頁</a></p></div>`;
+  $('#cpManage').onclick=()=>copy(manage);$('#cpToken').onclick=()=>copy(token);
 }
 
 /* ============================================================
@@ -2197,9 +2210,12 @@ function renderInjured(){
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
       const manage=`${CONFIG.SITE_URL}#/found-manage/${data.id}?t=${data.token}`;
       app.innerHTML=`<div class="card"><h1>謝謝你停下來幫牠</h1><p>受傷通報已公開，附近的人和可能的飼主都看得到。</p>
-      <div class="notice red"><b>還沒打電話的話，請現在打</b>本站無法派人救援。請撥全國動保專線 <a href="tel:1959">1959</a>，接不通改撥 <a href="tel:1999">1999</a>。</div>
-      <div class="notice"><b>管理連結（牠被救走或送醫後，用它更新狀況）</b><div class="tokenbox" style="margin-top:6px">${esc(manage)}</div><button class="btn sm" style="margin-top:8px" onclick="copy('${esc(manage)}')">複製管理連結</button></div>
-      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><a class="btn" href="#/found/${data.id}">查看通報</a><a class="btn ghost" href="#/">回首頁</a></div></div>`;
+      <div class="notice red"><b>還沒打電話的話，請現在打</b>本站無法派人救援。</div>
+      <div class="bigacts"><a class="btn big" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a><a class="btn big ghost" href="tel:1999">${ic("phone")} 接不通改撥 1999</a></div>
+      <section class="cstep"><h2><span class="cnum">✓</span>把「管理網址」存起來</h2><p>牠被救走或送醫後，用這個網址更新狀況。</p>
+        <div class="bigacts"><a class="btn big line" href="https://line.me/R/share?text=${encodeURIComponent('汪喵回家｜受傷通報管理網址（請勿外流）\n'+manage)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a><button type="button" class="btn big ghost" id="cpIManage">複製管理網址</button></div></section>
+      <div class="bigacts"><a class="btn big ghost" href="#/found/${data.id}">查看通報</a></div></div>`;
+      $('#cpIManage').onclick=()=>copy(manage);
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出受傷通報'}
   };
   wizard($('#f'),{'在哪裡':()=>picker.get()||$('#f').elements.place_text.value.trim()?'':'請在地圖上點位置，或寫下地點描述'});
@@ -2280,9 +2296,17 @@ function renderFoundNew(){
       const {data,error}=await sb.rpc('create_found',{p});if(error)throw error;
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
       const manage=`${CONFIG.SITE_URL}#/found-manage/${data.id}?t=${data.token}`;
-      app.innerHTML=`<div class="card"><h1>謝謝你！</h1><p>拾獲通報已公開，系統會比對附近的走失案件。</p>
-      <div class="notice"><b>管理連結（牠回到主人身邊後，用它標記結案）</b><div class="tokenbox" style="margin-top:6px">${esc(manage)}</div><button class="btn sm" style="margin-top:8px" onclick="copy('${esc(manage)}')">複製管理連結</button></div>
-      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><a class="btn green" href="#/found/${data.id}">查看通報與可能的飼主</a><a class="btn ghost" href="#/">回首頁</a></div></div>`;
+      app.innerHTML=`<div class="card done-card created"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！通報已送出</h1>
+      <p class="lede">系統會自動比對附近的走失案件，飼主登記時也會看到你。</p>
+      <section class="cstep"><h2><span class="cnum">1</span>把「管理網址」存起來</h2>
+        <p>牠回到主人身邊後，用這個網址標記「已回家」。網址只會出現這一次。</p>
+        <div class="bigacts"><a class="btn big line" href="https://line.me/R/share?text=${encodeURIComponent('汪喵回家｜我的拾獲通報管理網址（請勿外流）\n'+manage)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a>
+        <button type="button" class="btn big ghost" id="cpFManage">複製管理網址</button></div>
+      </section>
+      <section class="cstep"><h2><span class="cnum">2</span>看看有沒有人在找牠</h2>
+        <div class="bigacts"><a class="btn big green" href="#/found/${data.id}">查看可能的飼主</a><a class="btn big ghost" href="#/">回首頁</a></div>
+      </section></div>`;
+      $('#cpFManage').onclick=()=>copy(manage);
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出拾獲通報'}
   };
   wizard($('#f'));

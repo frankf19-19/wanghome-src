@@ -85,8 +85,13 @@ def main():
         elif c["status"] != "searching":
             title = f"{c['name']}（協尋已結束）｜{SITE_NAME}"
         else:
-            dd = days_since(c["lost_at"])
-            title = f"【{poster}】{c['name']}｜{c['lost_city']}{c.get('lost_district') or ''}" + (f"・走失第 {dd} 天" if dd else "")
+            # 用「走失日期」而不是「第幾天」：分享預覽頁不常重新產生，天數會過期
+            try:
+                ld = dt.datetime.fromisoformat(c["lost_at"].replace("Z", "+00:00")).astimezone(dt.timezone(dt.timedelta(hours=8)))
+                when = f"・{ld.month}/{ld.day} 走失"
+            except Exception:
+                when = ""
+            title = f"【{poster}】{c['name']}｜{c['lost_city']}{c.get('lost_district') or ''}{when}"
         look = "・".join(x for x in [c.get("breed"), SEX.get(c.get("sex")), (SIZE.get(c.get("size")) or "") + unit if c.get("size") else None, c.get("colour")] if x)
         bits = [look, c.get("features") or ""]
         if c.get("reward"): bits.append(f"尋獲獎金 NT${c['reward']:,}")
