@@ -13,8 +13,9 @@
   SUPABASE_URL              例 https://xxxx.supabase.co
   SUPABASE_SERVICE_KEY      Project Settings → API → service_role（絕不可放到前端）
   SITE_URL                  例 https://wangmiaotw.com/
-  GMAIL_USER                寄信用 Gmail 帳號（選填，不填就不寄信）
-  GMAIL_APP_PASSWORD        Gmail 應用程式密碼（16 碼）
+  RESEND_API_KEY            Resend 金鑰（建議；用 noreply@wangmiaotw.com 寄信）
+  GMAIL_USER                （舊方式，沒有 Resend 金鑰時才用）寄信用 Gmail 帳號
+  GMAIL_APP_PASSWORD        （舊方式）Gmail 應用程式密碼（16 碼）
   MOA_API_URL               （選填）覆蓋農業部 API 網址
 """
 import os, sys, json, smtplib, datetime as dt, urllib.request, urllib.parse, urllib.error, re
@@ -29,6 +30,10 @@ SERVICE_KEY  = os.environ.get("SUPABASE_SERVICE_KEY", "").strip().strip('"').str
 SITE_URL     = os.environ.get("SITE_URL", "").rstrip("/") + "/"
 GMAIL_USER   = os.environ.get("GMAIL_USER", "")
 GMAIL_PASS   = os.environ.get("GMAIL_APP_PASSWORD", "")
+RESEND_KEY   = os.environ.get("RESEND_API_KEY", "").strip()
+MAIL_FROM    = os.environ.get("MAIL_FROM", "noreply@wangmiaotw.com")
+REPLY_TO     = "service@wangmiaotw.com"
+MAIL_OK      = bool(RESEND_KEY or (GMAIL_USER and GMAIL_PASS))
 SITE_NAME    = os.environ.get("SITE_NAME", "汪喵回家")
 MOA_API_URL  = os.environ.get("MOA_API_URL") or \
     "https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL"
@@ -217,11 +222,17 @@ def run_found_matching():
 
 # ---------------------------------------------------------------- Email
 def send_mail(to, subject, body):
-    if not (GMAIL_USER and GMAIL_PASS and to): return False
+    if not (MAIL_OK and to): return False
     msg = MIMEText(body, "plain", "utf-8")
-    msg["Subject"] = Header(subject, "utf-8"); msg["From"] = formataddr((SITE_NAME, GMAIL_USER)); msg["To"] = to
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as s:
-        s.login(GMAIL_USER, GMAIL_PASS); s.sendmail(GMAIL_USER, [to], msg.as_string())
+    msg["Subject"] = Header(subject, "utf-8"); msg["To"] = to
+    if RESEND_KEY:   # 用自己的網域寄（Resend SMTP）
+        msg["From"] = formataddr((SITE_NAME, MAIL_FROM)); msg["Reply-To"] = REPLY_TO
+        with smtplib.SMTP_SSL("smtp.resend.com", 465, timeout=30) as s:
+            s.login("resend", RESEND_KEY); s.sendmail(MAIL_FROM, [to], msg.as_string())
+    else:
+        msg["From"] = formataddr((SITE_NAME, GMAIL_USER))
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as s:
+            s.login(GMAIL_USER, GMAIL_PASS); s.sendmail(GMAIL_USER, [to], msg.as_string())
     return True
 
 def fmt(ts):
@@ -237,8 +248,8 @@ def mark_notified(table, ids):
         sb("PATCH", table, body={"notified": True}, params={"id": "in.(" + ",".join(ids[i:i+150]) + ")"}, prefer="return=minimal")
 
 def run_notifications():
-    if not (GMAIL_USER and GMAIL_PASS):
-        print("未設定 Gmail，略過通知"); return
+    if not MAIL_OK:
+        print("未設定寄信，略過通知"); return
     cases = {c["id"]: c for c in sb_all("cases", {"select": "id,name,contact_email,hidden"}) if not c.get("hidden")}
     # 目擊
     pend = sb_all("sightings", {"select": "*", "notified": "eq.false", "order": "created_at.asc"})
@@ -318,8 +329,8 @@ def run_notifications():
 # ---------------------------------------------------------------- 會員通知
 SP_NAME = {"dog": "狗", "cat": "貓"}
 def run_member_notifications():
-    if not (GMAIL_USER and GMAIL_PASS):
-        print("未設定 Gmail，略過會員通知"); return
+    if not MAIL_OK:
+        print("未設定寄信，略過會員通知"); return
     # 附近新案件
     rows = sb("POST", "rpc/nearby_targets", body={"p_hours": 26}) or []
     by_user = {}
@@ -357,7 +368,7 @@ def run_member_notifications():
 
 # ---------------------------------------------------------------- 健康紀錄到期提醒
 def run_due_reminders():
-    if not (GMAIL_USER and GMAIL_PASS): return
+    if not MAIL_OK: return
     rows = sb("POST", "rpc/due_targets", body={}) or []
     by_user = {}
     for r in rows: by_user.setdefault((r["user_id"], r["email"]), []).append(r)
@@ -379,8 +390,8 @@ def run_due_reminders():
 
 # ---------------------------------------------------------------- 檢舉通知站長
 def run_report_alerts():
-    admin = os.environ.get("ADMIN_EMAIL") or GMAIL_USER
-    if not (GMAIL_USER and GMAIL_PASS and admin): return
+    admin = os.environ.get("ADMIN_EMAIL") or GMAIL_USER or REPLY_TO
+    if not (MAIL_OK and admin): return
     rows = sb_all("reports", {"select": "id,target_type,target_id,reason,note,created_at", "notified": "eq.false", "order": "created_at.asc"})
     if not rows: return
     names = {"case": "走失案件", "found": "拾獲通報", "sighting": "目擊"}

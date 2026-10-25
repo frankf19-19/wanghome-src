@@ -1,13 +1,14 @@
-// 汪喵回家 — 目擊回報即時通知飼主（Email）v1.1（每案每小時最多 6 封）
+// 汪喵回家 — 目擊回報即時通知飼主（Email）v1.2（每案每小時最多 6 封；用 Resend 從 noreply@wangmiaotw.com 寄出）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-sighting  body: {"case_id":"<uuid>"}
 // 網友送出目擊後由網頁呼叫。本函式只會寄「這個案件 30 分鐘內、還沒通知過」的目擊，
 // 寄出後標記 notified，所以重複呼叫也不會重寄。需關閉 JWT 驗證（訪客也能回報）。
-// 需要的 Secrets（Supabase → Edge Functions → Secrets）：GMAIL_USER、GMAIL_APP_PASSWORD
+// 需要的 Secrets（Supabase → Edge Functions → Secrets）：RESEND_API_KEY（建議）；或舊方式 GMAIL_USER、GMAIL_APP_PASSWORD
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const SITE = "https://wangmiaotw.com/";
 const SITE_NAME = "汪喵回家";
+const MAIL_FROM = "noreply@wangmiaotw.com", REPLY_TO = "service@wangmiaotw.com";
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -37,8 +38,9 @@ Deno.serve(async (req) => {
   try { caseId = String((await req.json()).case_id ?? ""); } catch (_) { /* ignore */ }
   if (!/^[0-9a-f-]{36}$/.test(caseId)) return json({ error: "bad case_id" }, 400);
 
+  const resendKey = (Deno.env.get("RESEND_API_KEY") ?? "").trim();
   const user = Deno.env.get("GMAIL_USER") ?? "", pass = (Deno.env.get("GMAIL_APP_PASSWORD") ?? "").replace(/\s/g, "");
-  if (!user || !pass) return json({ sent: false, reason: "not_configured" });
+  if (!resendKey && (!user || !pass)) return json({ sent: false, reason: "not_configured" });
 
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), { auth: { persistSession: false } });
   const { data: c, error: ce } = await sb.from("cases").select("id,name,contact_email,hidden").eq("id", caseId).maybeSingle();
@@ -79,17 +81,23 @@ Deno.serve(async (req) => {
   lines.push("確認後才會顯示在公開地圖上，請到管理頁處理（需要你的管理連結）：",
     `${SITE}#/manage/${caseId}`, "", "看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。", "", `— ${SITE_NAME}`);
 
-  const client = new SMTPClient({ connection: { hostname: "smtp.gmail.com", port: 465, tls: true, auth: { username: user, password: pass } } });
+  const subject = `【${SITE_NAME}】有人看到${c.name}了！`, content = lines.join("\n");
   try {
-    await client.send({
-      from: `${SITE_NAME} <${user}>`, to: c.contact_email,
-      subject: `【${SITE_NAME}】有人看到${c.name}了！`, content: lines.join("\n"),
-    });
-    await client.close();
+    if (resendKey) {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${resendKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ from: `${SITE_NAME} <${MAIL_FROM}>`, to: [c.contact_email], reply_to: REPLY_TO, subject, text: content }),
+      });
+      if (!r.ok) throw new Error(`resend ${r.status} ${(await r.text()).slice(0, 200)}`);
+    } else {
+      const client = new SMTPClient({ connection: { hostname: "smtp.gmail.com", port: 465, tls: true, auth: { username: user, password: pass } } });
+      try { await client.send({ from: `${SITE_NAME} <${user}>`, to: c.contact_email, subject, content }); }
+      finally { try { await client.close(); } catch (_) { /* ignore */ } }
+    }
     await sb.from("case_mail_log").insert({ case_id: caseId, to_email: String(c.contact_email).toLowerCase() });
     return json({ sent: true, count: ss.length });
   } catch (e) {
-    try { await client.close(); } catch (_) { /* ignore */ }
     // 寄失敗：還原成未通知，之後的每日排程或下次呼叫會再寄
     await sb.from("sightings").update({ notified: false }).in("id", ss.map((s) => s.id));
     console.error("send failed", String(e));
