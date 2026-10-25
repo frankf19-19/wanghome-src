@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.2.1 -->
+<!-- BUILD v3.2.2 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -839,7 +839,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.2.1</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.2.2</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -859,7 +859,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.2.1';
+const BUILD = 'v3.2.2';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -2761,56 +2761,82 @@ async function renderPoster(id){
   const [{data:c},{data:ss}]=await Promise.all([sb.from('cases_public').select('*').eq('id',id).single(),sb.from('sightings_public').select('seen_at,place_text,direction').eq('case_id',id).order('seen_at',{ascending:false}).limit(1)]);
   if(!c){app.innerHTML='<div class="empty">找不到案件</div>';return}
   setTitle('海報');
-  app.innerHTML=`<h1>協尋海報</h1><p class="muted small">自動產生，長按或按下方按鈕儲存圖片，貼到 FB、LINE、IG 限動。掃 QR Code 就能回報目擊。</p>
-  <div class="posterwrap"><canvas id="pc" width="1080" height="1350"></canvas></div>
-  <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn" id="btnDl">${ic("download")} 下載海報 PNG</button><a class="btn ghost" href="#/case/${id}">回案件頁</a></div>
+  app.innerHTML=`<h1>協尋海報</h1><p class="muted small">自動產生。手機請按「儲存或分享」存到相簿、傳到 LINE，或長按下方圖片儲存；掃 QR Code 就能回報目擊。</p>
+  <div class="posterwrap"><img id="pimg" alt="協尋海報" style="display:none;width:100%;height:auto;border-radius:12px;box-shadow:var(--lift)"><div id="pwait" class="empty">海報產生中…</div></div>
+  <canvas id="pc" width="1080" height="1350" style="display:none"></canvas>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn" id="btnShareP" disabled>${ic("share")} 儲存或分享圖片</button><button class="btn ghost" id="btnDl" disabled>${ic("download")} 下載 PNG</button><a class="btn ghost" href="#/case/${id}">回案件頁</a></div>
   <div id="qr" class="hidden"></div>`;
   const url=await getShareUrl('s',id);
-  try{await loadScript(LIB.qr)}catch(_){toast('QR Code 載入失敗，請重新整理')}
-  if(window.QRCode)new QRCode($('#qr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
+  try{await loadScript(LIB.qr)}catch(_){toast('QR Code 載入失敗，海報會改顯示網址')}
+  if(window.QRCode)new QRCode($('#qr'),{text:url,width:240,height:240,correctLevel:QRCode.CorrectLevel.M});
   await new Promise(r=>setTimeout(r,80));
-  try{await Promise.all(['900 96px "Noto Sans TC"','700 34px "Noto Sans TC"','500 30px "Noto Sans TC"'].map(f=>document.fonts.load(f,'尋狗貓啟事')));await document.fonts.ready}catch(_){}
+  // 等字型（字型樣式表是非同步載入，先確保套用，再要求下載海報用到的字重）
+  try{document.querySelectorAll('link[rel=stylesheet][media=print]').forEach(l=>l.media='all');await Promise.race([Promise.all(['900 96px "Noto Sans TC"','700 34px "Noto Sans TC"','400 30px "Noto Sans TC"'].map(f=>document.fonts.load(f,'尋狗貓啟事0123456789走失目擊'))),new Promise(r=>setTimeout(r,4000))])}catch(_){}
   const qrc=$('#qr').querySelector('canvas');
   const cv=$('#pc'),ctx=cv.getContext('2d');
-  const W=1080,H=1350;
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-  const red='#c8201f';
-  const font=(w,s)=>`${w} ${s}px "Noto Sans TC",sans-serif`;
-  const wrap=(text,x,y,maxW,lh,maxLines=3)=>{const chars=[...String(text||'')];let line='',n=0;for(const ch of chars){const t=line+ch;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y);y+=lh;line=ch;if(++n>=maxLines-1){}}else line=t}if(line){ctx.fillText(line,x,y);y+=lh}return y};
-  // 標題
-  ctx.fillStyle='#1b1b1b';ctx.font=font(900,96);const PT=sp(c.species).poster;ctx.fillText(PT,40,120);
-  ctx.fillStyle=red;ctx.font=font(900,96);const nm=c.name.length>4?c.name.slice(0,4):c.name;ctx.fillText(nm,40+ctx.measureText(PT+' ').width,120);
-  ctx.fillStyle='#1b1b1b';ctx.fillRect(40,145,W-80,6);
-  // 地點列
-  ctx.fillStyle='#1b1b1b';ctx.font=font(900,52);ctx.fillText(('📍 '+c.lost_city+(c.lost_district||'')+(c.lost_place?'・'+c.lost_place:'')).slice(0,19),40,225);
+  const W=1080,H=1350,M=40,red='#C8201F',ink='#1B1B1B';
+  const font=(w,sz)=>`${w} ${sz}px "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif`;
+  // 一行放不下：先縮字，縮到最小還放不下就加「…」
+  const fit=(text,maxW,w,size,min)=>{text=String(text||'');let sz=size;ctx.font=font(w,sz);while(ctx.measureText(text).width>maxW&&sz>min){sz-=2;ctx.font=font(w,sz)}if(ctx.measureText(text).width>maxW){while(text.length>1&&ctx.measureText(text+'…').width>maxW)text=text.slice(0,-1);text+='…'}return text};
+  // 多行：限制行數，超過的最後一行加「…」；回傳下一行的 y
+  const wrap=(text,x,y,maxW,lh,maxLines)=>{const chars=String(text||'').match(/[A-Za-z0-9][A-Za-z0-9.\-:$#/+]*|[\s\S]/gu)||[];if(!chars.length)return y;const lines=[];let line='';for(const ch of chars){if(ch==='\n'){lines.push(line);line='';continue}const t=line+ch;if(ctx.measureText(t).width>maxW&&line&&!NOSTART.includes(ch)){lines.push(line);line=ch}else line=t}if(line)lines.push(line);
+    const out=lines.slice(0,maxLines);if(lines.length>maxLines){let last=out[maxLines-1];while(last.length>1&&ctx.measureText(last+'…').width>maxW)last=last.slice(0,-1);out[maxLines-1]=last+'…'}
+    out.forEach(l=>{ctx.fillText(l,x,y);y+=lh});return y};
+  const NOSTART='，。、；：！？）」』》〉…｜,.;:!?)%';
+  const icon=(d,x,y,size,color)=>{ctx.save();ctx.translate(x,y);ctx.scale(size/24,size/24);ctx.strokeStyle=color;ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke(new Path2D(d));ctx.restore()};
+  const PIN='M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z M14.3 9.8a2.3 2.3 0 1 1-4.6 0a2.3 2.3 0 1 1 4.6 0';
+  const PHONE='M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z';
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.textBaseline='alphabetic';
+  // 標題：尋狗啟事＋名字（名字太長就縮字）
+  const PT=sp(c.species).poster;ctx.fillStyle=ink;ctx.font=font(900,96);ctx.fillText(PT,M,120);
+  const ptW=ctx.measureText(PT+' ').width;ctx.fillStyle=red;const nm=fit(c.name,W-M*2-ptW,900,96,52);ctx.fillText(nm,M+ptW,120);
+  ctx.fillStyle=ink;ctx.fillRect(M,145,W-M*2,6);
+  // 地點
+  icon(PIN,M-2,178,54,ink);ctx.fillStyle=ink;const loc=fit(c.lost_city+(c.lost_district||'')+(c.lost_place?'・'+c.lost_place:''),W-M*2-64,900,52,34);ctx.fillText(loc,M+62,225);
   // 紅色帶
-  ctx.fillStyle=red;ctx.fillRect(40,255,W-80,90);ctx.fillStyle='#fff';ctx.font=font(900,54);
-  const days=daysSince(c.lost_at);ctx.fillText(c.status==='found'?'已經找到了，謝謝大家！':`走失第 ${days} 天，急盼平安回家`,60,320);
+  ctx.fillStyle=red;ctx.fillRect(M,255,W-M*2,90);ctx.fillStyle='#fff';
+  const days=daysSince(c.lost_at);ctx.fillText(fit(c.status==='found'?'已經找到了，謝謝大家！':`走失第 ${days} 天，急盼平安回家`,W-M*2-40,900,54,36),M+20,320);
   // 照片
   const ph=c.photos?.[0];
-  await new Promise(res=>{if(!ph){ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);ctx.font='200px sans-serif';ctx.fillText(sp(c.species).emoji,150,740);return res()}const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const s=Math.max(500/im.width,500/im.height);const w=im.width*s,h=im.height*s;ctx.save();ctx.beginPath();ctx.roundRect(40,375,500,500,20);ctx.clip();ctx.drawImage(im,40+(500-w)/2,375+(500-h)/2,w,h);ctx.restore();res()};im.onerror=()=>{ctx.fillStyle='#eee';ctx.fillRect(40,375,500,500);res()};im.src=ph});
-  // 右側資訊
-  ctx.fillStyle='#fdeceb';ctx.beginPath();ctx.roundRect(570,375,470,500,20);ctx.fill();
-  ctx.fillStyle='#1b1b1b';ctx.font=font(900,40);let y=440;
-  y=wrap([SIZE[c.size]&&SIZE[c.size]+c.colour,SEX[c.sex],c.age_text].filter(Boolean).join('・')||c.colour,600,y,420,50,2);
-  ctx.font=font(500,30);ctx.fillStyle='#333';y+=6;
-  y=wrap([c.breed,c.has_chip?'有晶片'+(c.chip_last4?' 末四碼'+c.chip_last4:''):null,c.neutered===true?'已結紮':null].filter(Boolean).join('｜'),600,y,420,40,2);
-  y=wrap(c.features,600,y,420,40,4);
-  y=wrap(c.collar_desc,600,y,420,40,2);
-  if(c.reward>0){ctx.fillStyle='#1f5fbf';ctx.font=font(900,34);ctx.fillText(`尋獲獎金 NT$${c.reward.toLocaleString()}`,600,Math.min(y+10,850))}
+  const noPhoto=()=>{ctx.fillStyle='#EEE';ctx.beginPath();ctx.roundRect(M,375,500,500,20);ctx.fill();ctx.fillStyle='#999';ctx.font=font(700,40);ctx.textAlign='center';ctx.fillText('（沒有照片）',M+250,635);ctx.textAlign='left'};
+  await new Promise(res=>{if(!ph){noPhoto();return res()}const im=new Image();im.crossOrigin='anonymous';const to=setTimeout(()=>{im.src='';noPhoto();res()},12000);im.onload=()=>{clearTimeout(to);const sc=Math.max(500/im.width,500/im.height);const w=im.width*sc,h=im.height*sc;ctx.save();ctx.beginPath();ctx.roundRect(M,375,500,500,20);ctx.clip();ctx.drawImage(im,M+(500-w)/2,375+(500-h)/2,w,h);ctx.restore();res()};im.onerror=()=>{clearTimeout(to);noPhoto();res()};im.src=ph});
+  // 右側資訊（固定在粉紅框內，不會壓到下面）
+  const BX=570,BY=375,BW=470,BH=500,TX=BX+30,TW=BW-92;
+  ctx.fillStyle='#FDECEB';ctx.beginPath();ctx.roundRect(BX,BY,BW,BH,20);ctx.fill();
+  const rewardH=c.reward>0?70:0;const bottom=BY+BH-24-rewardH;
+  ctx.fillStyle=ink;ctx.font=font(900,40);let y=BY+65;
+  y=wrap([c.colour,SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,SEX[c.sex],c.age_text].filter(Boolean).join('・')||sp(c.species).name,TX,y,TW,50,2);
+  ctx.font=font(400,30);ctx.fillStyle='#333';y+=8;
+  const lh=40,left=()=>Math.max(0,Math.floor((bottom-y+10)/lh));
+  y=wrap([c.breed,c.has_chip?'有晶片'+(c.chip_last4?' 末四碼 '+c.chip_last4:''):null,c.neutered===true?'已結紮':null].filter(Boolean).join('｜'),TX,y,TW,lh,Math.min(2,left()));
+  if(c.features&&left()>0)y=wrap(c.features,TX,y,TW,lh,Math.min(5,left()-(c.collar_desc?1:0)||1));
+  if(c.collar_desc&&left()>0)y=wrap('項圈：'+c.collar_desc,TX,y,TW,lh,Math.min(2,left()));
+  if(c.reward>0){ctx.fillStyle='#1F5FBF';ctx.beginPath();ctx.roundRect(TX-6,BY+BH-24-56,TW+12,56,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit(`尋獲獎金 NT$${c.reward.toLocaleString()}`,TW-12,900,34,24),TX+6,BY+BH-24-16)}
   // 最新目擊
-  let y2=925;
-  if(ss&&ss[0]){ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(40,900,W-80,70,12);ctx.fill();ctx.fillStyle='#fff';ctx.font=font(900,34);ctx.fillText(`最新目擊｜${fmtDT(ss[0].seen_at)}  ${(ss[0].place_text||'').slice(0,16)}${ss[0].direction?'  往'+ss[0].direction:''}`,60,948);y2=1000}
-  else{ctx.fillStyle='#333';ctx.font=font(700,34);ctx.fillText(`走失：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`,40,948);y2=1000}
+  let y2=1000;
+  if(ss&&ss[0]){ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(M,900,W-M*2,70,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit(`最新目擊｜${fmtDT(ss[0].seen_at)}  ${ss[0].place_text||''}${ss[0].direction?'  往'+ss[0].direction:''}`,W-M*2-40,900,34,24),M+20,948)}
+  else{ctx.fillStyle='#333';ctx.fillText(fit(`走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`,W-M*2,700,34,24),M,948)}
   // 警語
-  ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(40,y2,W-80,90,12);ctx.fill();ctx.fillStyle='#fff';ctx.font=font(900,48);ctx.fillText('看到請勿呼喊、追趕或包圍',60,y2+62);
-  // 電話 + QR
-  ctx.fillStyle='#1b1b1b';ctx.font=font(500,30);ctx.fillText('請拍照，記下時間、位置及方向，掃 QR 回報目擊',40,y2+140);
-  if(c.contact_phone){ctx.fillStyle=red;ctx.font=font(900,92);ctx.fillText('📞 '+c.contact_phone,40,y2+250)}
-  else{ctx.fillStyle=red;ctx.font=font(900,56);ctx.fillText('請掃 QR 線上回報',40,y2+230)}
-  if(qrc){ctx.fillStyle='#fff';ctx.fillRect(820,y2+110,220,220);ctx.drawImage(qrc,820,y2+110,220,220)}
-  ctx.fillStyle='#8a8a8a';ctx.font=font(500,24);ctx.fillText(`${CONFIG.SITE_NAME}・${CONFIG.SITE_URL.replace(/^https?:\/\//,'').replace(/\/$/,'')}　掃 QR 看最新目擊`,40,H-30);
-  $('#btnDl').onclick=()=>{const a=document.createElement('a');a.download=`${sp(c.species).poster}-${c.name}.png`;a.href=cv.toDataURL('image/png');a.click()};
+  ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(M,y2,W-M*2,90,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit('看到請勿呼喊、追趕或包圍',W-M*2-40,900,48,32),M+20,y2+62);
+  // 電話（寬度只到 QR Code 左邊）＋ QR
+  const QX=W-M-240,QY=y2+105,leftW=QX-M-20;
+  ctx.fillStyle=ink;ctx.fillText(fit('請拍照，記下時間、位置及方向，掃 QR 回報目擊',leftW,400,30,22),M,y2+140);
+  if(c.contact_phone){icon(PHONE,M,y2+180,72,red);ctx.fillStyle=red;ctx.fillText(fit(c.contact_phone,leftW-90,900,92,44),M+90,y2+245)}
+  else{ctx.fillStyle=red;ctx.fillText(fit(qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,56,34),M,y2+230)}
+  if(qrc){ctx.fillStyle='#fff';ctx.fillRect(QX,QY,240,240);ctx.drawImage(qrc,QX+8,QY+8,224,224)}
+  ctx.fillStyle='#8A8A8A';ctx.fillText(fit(`${CONFIG.SITE_NAME}・${CONFIG.SITE_URL.replace(/^https?:\/\//,'').replace(/\/$/,'')}`,leftW,400,24,18),M,H-30);
+  // 顯示成圖片（手機可長按儲存），並準備分享／下載
+  const fname=`${sp(c.species).poster}-${c.name}.png`;
+  let dataUrl='';try{dataUrl=cv.toDataURL('image/png')}catch(e){$('#pwait').textContent='照片無法放進海報（來源不允許），請重新整理再試';return}
+  $('#pimg').src=dataUrl;$('#pimg').style.display='block';$('#pwait').remove();
+  $('#btnDl').disabled=false;$('#btnShareP').disabled=false;
+  $('#btnDl').onclick=()=>{const a=document.createElement('a');a.download=fname;a.href=dataUrl;document.body.appendChild(a);a.click();a.remove()};
+  $('#btnShareP').onclick=async()=>{
+    try{const blob=await new Promise(r=>cv.toBlob(r,'image/png'));const file=new File([blob],fname,{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:`${PT}：${c.name}`,text:`${PT}：${c.name}（${c.lost_city}${c.lost_district||''}）${url}`});return}
+    }catch(e){if(e&&e.name==='AbortError')return}
+    $('#btnDl').click();toast('已下載海報；手機也可以長按圖片儲存');
+  };
 }
 
 /* ============================================================
