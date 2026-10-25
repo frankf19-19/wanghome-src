@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.7.0 -->
+<!-- BUILD v1.7.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -385,7 +385,7 @@ footer a{color:var(--ink-2);margin:0 6px}
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料· 地圖 © OpenStreetMap 貢獻者</div>
   <div class="small" style="margin-top:6px"><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a></div>
-  <div class="small" style="margin-top:4px">BUILD v1.7.0</div>
+  <div class="small" style="margin-top:4px">BUILD v1.7.1</div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽">
@@ -410,7 +410,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.7.0';
+const BUILD = 'v1.7.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1623,6 +1623,7 @@ const REC_PRESETS={
 };
 function addMonths(dateStr,m){const d=new Date(dateStr+'T00:00:00');d.setMonth(d.getMonth()+m);return d.toISOString().slice(0,10)}
 function todayStr(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function agoText(d){const m=Math.round((Date.now()-new Date(d+'T00:00:00'))/2629800000);return m<1?'本月':m<12?`${m} 個月前`:`${Math.floor(m/12)} 年${m%12?m%12+'個月':''}前`}
 function petAge(bd){if(!bd)return '';const b=new Date(bd),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
 function dueText(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return days<0?`已過期 ${-days} 天`:days===0?'今天到期':`${days} 天後`}
 function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new Date(r.next_due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return `<span class="tag ${days<0?'red':days<=14?'amber':'gray'}">下次 ${r.next_due.slice(5).replace('-','/')}・${dueText(r.next_due)}</span>`}
@@ -1668,7 +1669,7 @@ async function renderPetView(id){
       <p class="muted">${esc([p.breed,SEX[p.sex],SIZE[p.size]&&SIZE[p.size]+sp(p.species).unit,p.colour,petAge(p.birthday)].filter(Boolean).join('、'))}</p>
       <div class="stats" style="margin-top:12px">
         <div class="stat"><b>${weights.length?weights[weights.length-1].w:'—'}</b>最新體重 kg</div>
-        <div class="stat"><b>${lastVac?lastVac.date.slice(2).replace(/-/g,'/'):'—'}</b>上次疫苗</div>
+        <div class="stat"><b>${lastVac?agoText(lastVac.date):'—'}</b>上次疫苗</div>
         <div class="stat"><b>${costYear?costYear.toLocaleString():'0'}</b>${year} 年花費</div>
         <div class="stat"><b>${rs.length}</b>筆紀錄</div>
       </div>
@@ -1694,7 +1695,7 @@ async function renderPetView(id){
 
   <h2>📋 健康紀錄</h2>
   <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[ic,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${ic} ${t}</button>`).join('')}</div>
-  ${shown.length?Object.entries(byYear).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:13px">${REC_KINDS[r.kind][0]}</div>
+  ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:13px">${REC_KINDS[r.kind][0]}</div>
       <a href="#/pet/${id}/record/${r.id}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}</div>
       <div class="where">${esc([REC_KINDS[r.kind][1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
       ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
