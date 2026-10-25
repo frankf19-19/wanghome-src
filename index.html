@@ -1892,7 +1892,7 @@ function matchHTML(m){
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
       <div class="small">${m.shelter_tel?`${ic('phone')} <a href="tel:${esc(m.shelter_tel)}">${esc(m.shelter_tel)}</a> · `:''}${esc(m.shelter_address||'')}</div>
-      <a class="small" target="_blank" rel="noopener" href="https://asms.coa.gov.tw/Amlapp/App/AnimalApp.aspx?ID=${encodeURIComponent(m.animal_id)}">在全國收容系統查看 ↗</a>
+      <div class="small" style="display:flex;flex-wrap:wrap;gap:4px 14px">${shelterLink(m.animal_subid)?`<a target="_blank" rel="noopener" href="${esc(shelterLink(m.animal_subid))}">看收容所公告（照片、電話、地址）↗</a>`:''}<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">打不開？到全國收容公告查收容編號 ↗</a></div>
     </div></div>`;
 }
 function shelterBoxHTML(matches,loading){
@@ -2652,6 +2652,10 @@ function openReport(type,id){
     closeOverlay(d);toast('謝謝，已收到檢舉');
   };
 }
+// 農業部「全國動物收容管理系統」單筆公告網址（舊的 asms.coa.gov.tw 已停用）
+// AcNum＝收容編號、UT＝收容單位代碼（收容編號前 5 碼），兩個都要 Base64
+function shelterLink(subid){subid=String(subid||'').trim();if(!/^[A-Z]{5}[0-9]{6,}$/.test(subid))return '';
+  const b=x=>encodeURIComponent(btoa(x));return `https://www.pet.gov.tw/AnimalApp/AnnounceSingle.aspx?PageType=Announce&AcNum=${b(subid)}&UT=${b(subid.slice(0,5))}`}
 function staleTag(c){
   if(c.status!=='searching'||!c.last_activity)return '';
   const d=Math.floor((Date.now()-new Date(c.last_activity))/86400000);
@@ -3486,7 +3490,7 @@ function renderResources(){
   <h2>官方資源</h2>
   <div class="res-grid">
     <div class="res"><b>農業部 寵物登記管理資訊網</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報</a>（有晶片一定要做）</li><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/">晶片查詢 / 遺失啟事</a></li></ul></div>
-    <div class="res"><b>全國動物收容管理系統</b><ul><li><a target="_blank" rel="noopener" href="https://asms.coa.gov.tw/Amlapp/App/Default.aspx">查看各收容所拾獲動物</a></li><li>本站每日自動比對來源</li></ul></div>
+    <div class="res"><b>全國動物收容管理系統</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">查看各收容所收容公告</a></li><li>本站每日自動比對來源</li></ul></div>
     <div class="res"><b>各縣市動保處</b><ul><li>市話 1999 轉動保處（多數縣市）</li><li>或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" aria-label="選擇縣市" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
     <div class="res"><b>民間協尋平台（多貼一處多一分機會）</b><ul><li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li><li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li><li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li><li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li><li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各縣市 FB 協尋社團清單</a></li></ul></div>
   </div>
