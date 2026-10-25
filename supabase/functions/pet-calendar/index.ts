@@ -31,12 +31,22 @@ function nextDay(d: string) {
   return t.toISOString().slice(0, 10).replaceAll("-", "");
 }
 
+// 新版金鑰（SUPABASE_SECRET_KEYS，JSON）優先，沒有就用舊版 service_role
+function serviceKey(): string {
+  try {
+    const j = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}");
+    const k = j.default ?? Object.values(j)[0];
+    if (typeof k === "string" && k) return k;
+  } catch (_) { /* ignore */ }
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+}
+
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   const t = url.searchParams.get("t") ?? "";
   if (!/^[0-9a-f-]{36}$/i.test(t)) return new Response("Not found", { status: 404 });
 
-  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), {
     auth: { persistSession: false },
   });
   const { data: prof } = await sb.from("profiles").select("id").eq("calendar_token", t).maybeSingle();
