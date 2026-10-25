@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.5.0 -->
+<!-- BUILD v2.5.1 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -615,11 +615,17 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 .er-steps b{display:block;font-size:16px}
 .er-steps span{display:block;font-size:14.5px;color:#5B3A22;line-height:1.6}
 .er-call{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.er-call .btn{background:#D9590B}.er-call .btn.ghost{background:#fff;color:#7A2E06;box-shadow:inset 0 0 0 1.5px #F0A877}
+.er-call .btn{background:#D9590B}.er-call .btn.line{background:#06C755;color:#fff}.er-call .btn.ghost{background:#fff;color:#7A2E06;box-shadow:inset 0 0 0 1.5px #F0A877}
 .er-foot{color:#7A5236;margin:6px 0 0}.er-foot a{color:#B4430A}
 .seg.multi button.on{background:#D9590B;color:#fff;border-color:#D9590B}
 .notice.red{background:var(--red-soft);border-left-color:var(--red)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .er{background:#2A1A10;color:#F6E2D3;box-shadow:inset 0 0 0 2px #6B3A1C}:root:not([data-theme="light"]) .er-steps span,:root:not([data-theme="light"]) .er-foot{color:#E0C2AC}:root:not([data-theme="light"]) .er-steps li{border-color:#4A2A16}:root:not([data-theme="light"]) .hero .actions .btn.injured{background:#2A1A10;color:#FFD9BF}:root:not([data-theme="light"]) .hero .actions .btn.injured small{color:#E0C2AC}}
+.quick{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift),inset 0 0 0 2px var(--red);padding:16px;margin-top:14px}
+.q-wait{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink-2);padding:10px 0}
+.q-loc{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}.q-loc .ico{width:22px;height:22px;color:var(--red);flex:none;margin-top:2px}
+.q-loc b{display:block;font-size:16.5px}.q-loc small{color:var(--ink-3)}
+.q-done{display:flex;flex-direction:column;gap:2px;background:var(--green-soft);border-radius:12px;padding:12px 14px}
+.q-done b{display:flex;align-items:center;gap:6px;color:var(--green);font-size:17px}.q-done span{color:var(--ink-2);font-size:14.5px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -659,7 +665,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.5.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.5.1</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -678,7 +684,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.5.0';
+const BUILD = 'v2.5.1';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -892,7 +898,7 @@ async function renderHome(){
     <div class="actions">
       <a href="#/new" class="btn lg">我的毛孩走失了<small>登記協尋、產生海報</small></a>
       <a href="#/found/new" class="btn lg green">我撿到／看到一隻<small>幫牠找到主人</small></a>
-      <a href="#/injured" class="btn lg injured">${ic("aid")}<span>看到受傷的毛孩<small>先看緊急處理，再通報位置</small></span><em>緊急</em></a>
+      <a href="#/injured" class="btn lg injured">${ic("aid")}<span>看到受傷的毛孩<small>一鍵定位通報，馬上撥打救援電話</small></span><em>緊急</em></a>
     </div>
     <div class="stats" id="stats"></div>
     </div>
@@ -1631,12 +1637,76 @@ function emergencyHTML(){
     <p class="small er-foot">各縣市動物保護單位電話：<a target="_blank" rel="noopener" href="https://www.moa.gov.tw/ws.php?id=20036">農業部「各縣市動物保護申訴電話」</a></p>
   </div>`;
 }
+
+// ---- 一鍵通報：定位 → 反查地址 → 選狗貓與傷勢 → 送出 → 通報稿 ----
+function nearestCity(lat,lng){let best=null,bd=1e9;for(const [c,[a,b]] of Object.entries(CITY_CENTER)){const d=(a-lat)**2+(b-lng)**2;if(d<bd){bd=d;best=c}}return best}
+async function reverseGeo(lat,lng){
+  let city=nearestCity(lat,lng),district='',address='';
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&accept-language=zh-TW`,{headers:{'Accept':'application/json'}});
+    if(r.ok){const j=await r.json();const a=j.address||{};
+      const c=(a.city||a.county||a.state||'').replace(/^台/,'臺');if(TW[c])city=c;
+      const cand=[a.city_district,a.suburb,a.town,a.district,a.village].filter(Boolean);district=cand.find(x=>(TW[city]||[]).includes(x))||'';
+      address=[a.road,a.house_number&&a.house_number+'號'].filter(Boolean).join('')||(j.name||'');
+      address=`${city}${district}${address}`;}
+  }catch(_){}
+  return {city,district,address:address||`${city}${district}`};
+}
+function callScript(q){
+  const t=new Date(q.seen_at);const hm=`${t.getHours()}點${String(t.getMinutes()).padStart(2,'0')}分`;
+  return `您好，我要通報路上受傷的${sp(q.species).name}。\n地點：${q.address}${q.place_text?'（'+q.place_text+'）':''}\nGPS 座標：${q.lat.toFixed(5)}, ${q.lng.toFixed(5)}\n時間：今天 ${hm}\n狀況：${q.injury||'受傷'}，${q.where==='taken'?'我已經帶走／送醫':'牠還在原地'}。\n照片和地圖：${q.url}`;
+}
+async function quickReport(){
+  const box=$('#quick');
+  if(!navigator.geolocation){toast('這支手機不支援定位，請用下方完整通報');location.hash='#/injured';return}
+  box.innerHTML=`<div class="q-wait">${ic("pin")} 正在定位…（請允許瀏覽器使用位置）</div>`;
+  let pos;try{pos=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:true,timeout:15000,maximumAge:30000}))}
+  catch(_){box.innerHTML=`<div class="notice red"><b>定位失敗</b>請確認已允許瀏覽器使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;$('#btnQuick').onclick=quickReport;return}
+  const lat=pos.coords.latitude,lng=pos.coords.longitude;
+  box.innerHTML=`<div class="q-wait">${ic("pin")} 已定位，查詢地址中…</div>`;
+  const g=await reverseGeo(lat,lng);
+  let species='dog',where='here';const inj=new Set();let photo=null;
+  box.innerHTML=`<div class="q-loc">${ic("pin")}<div><b>${esc(g.address)}</b><small>誤差約 ${Math.round(pos.coords.accuracy)} 公尺</small></div></div>
+    <div class="seg" id="qSp"><button type="button" data-v="dog" class="on">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
+    <div class="seg multi" id="qInj" style="margin-top:10px">${INJURIES.slice(0,6).map(t=>`<button type="button" data-v="${t}">${t}</button>`).join('')}</div>
+    <div class="seg" id="qWhere" style="margin-top:10px"><button type="button" data-v="here" class="on">牠還在原地</button><button type="button" data-v="taken">我已帶走／送醫</button></div>
+    <input type="text" id="qPlace" maxlength="200" placeholder="補充地點（選填）：例如 7-11 對面、路肩" style="margin-top:10px">
+    <label class="uploadbtn" style="margin-top:10px" id="qPhL">${ic("image")} <span>拍一張照片（選填）</span><input type="file" id="qPhoto" accept="image/*" capture="environment"></label>
+    <button type="button" class="btn lg block" id="qSend" style="margin-top:12px">送出通報</button>`;
+  const segOne=(id,set)=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{set(b.dataset.v);$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
+  segOne('#qSp',v=>species=v);segOne('#qWhere',v=>where=v);
+  $('#qInj').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;inj.has(v)?inj.delete(v):inj.add(v);b.classList.toggle('on',inj.has(v))});
+  $('#qPhoto').onchange=e=>{photo=e.target.files[0]||null;if(photo)$('#qPhL').querySelector('span').textContent='已選 1 張照片（點這裡換一張）'};
+  $('#qSend').onclick=async()=>{
+    const btn=$('#qSend');btn.disabled=true;btn.textContent='送出中…';
+    try{
+      const photos=photo?[await uploadPhoto(photo,'found')]:[];
+      const q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),city:g.city,district:g.district||null,place_text:$('#qPlace').value.trim()||g.address,lat,lng,current_place:where==='taken'?'通報者已帶走／送醫':'仍在原地',photos,phone_public:false};
+      const {data,error}=await sb.rpc('create_found',{p:q});if(error)throw error;
+      try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
+      const url=`${CONFIG.SITE_URL}#/found/${data.id}`;
+      const script=callScript({...q,address:g.address,where,place_text:$('#qPlace').value.trim(),url});
+      const mapUrl=`https://www.google.com/maps?q=${lat},${lng}`;
+      box.innerHTML=`<div class="q-done"><b>${ic("aid")} 已送出通報</b><span>下一步：現在打電話請求救援，照著下面的通報稿唸就好。</span></div>
+        <div class="er-call" style="margin:10px 0"><a class="btn lg" href="tel:1999">${ic("phone")} 撥打 1999</a><a class="btn lg ghost" href="tel:1959">${ic("phone")} 動保專線 1959</a></div>
+        <label class="f"><span>電話通報稿</span><textarea id="qScript" readonly style="min-height:170px">${esc(script)}</textarea></label>
+        <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報稿</button><a class="btn sm line" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(script)}">用 LINE 傳送</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} 在 Google 地圖打開</a><a class="btn sm ghost" href="#/found/${data.id}">查看通報頁</a></div>`;
+      $('#qCopy').onclick=()=>copy($('#qScript').value);
+      window.scrollTo({top:box.getBoundingClientRect().top+scrollY-20,behavior:'smooth'});
+    }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出通報'}
+  };
+}
 function renderInjured(){
   setTitle('受傷毛孩通報');
   app.innerHTML=`<h1>看到受傷的毛孩</h1>
-  <p class="muted">救援要靠當地動保單位，請先打電話。通報到這裡，讓飼主和附近的人知道牠在哪裡；如果牠是走失的毛孩，系統也會通知飼主。</p>
+  <p class="muted">救援要靠當地動保單位打電話派人。這裡幫你一鍵定位、留下通報，並產生打電話時可以照著唸的通報稿。</p>
+  <div class="quick" id="quick">
+    <button type="button" class="btn lg block" id="btnQuick">${ic("pin")} 一鍵通報我現在的位置</button>
+    <p class="small muted" style="margin:8px 2px 0">會用手機定位抓地址，不需要註冊。也可以往下看緊急處理步驟，或填完整通報。</p>
+  </div>
   ${emergencyHTML()}
-  <form class="card steps" id="f" style="margin-top:16px">
+  <h2 id="fullForm">${ic("clipboard")} 完整通報（定位不到時用）</h2>
+  <form class="card steps" id="f" style="margin-top:8px">
     <h3>牠的狀況</h3>
     <div class="seg" id="segSp"><button type="button" data-v="dog" class="on">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
     <label class="f"><span>傷勢（可複選）</span></label>
@@ -1672,6 +1742,7 @@ function renderInjured(){
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出受傷通報</button></div>
   </form>`;
+  $('#btnQuick').onclick=quickReport;
   let species='dog',where='here';const inj=new Set();
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
   $('#segInj').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;inj.has(v)?inj.delete(v):inj.add(v);b.classList.toggle('on',inj.has(v))});
