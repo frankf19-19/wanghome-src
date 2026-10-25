@@ -7,7 +7,7 @@
   "scope": "./",
   "display": "standalone",
   "background_color": "#FFF6EA",
-  "theme_color": "#C81E16",
+  "theme_color": "#FFF6EA",
   "icons": [
     {
       "src": "icon-192.png",
@@ -35,7 +35,8 @@
   ],
   "shortcuts": [
     {
-      "name": "登記走失",
+      "name": "我的毛孩走失了",
+      "short_name": "登記走失",
       "url": "./#/new",
       "icons": [
         {
@@ -45,8 +46,20 @@
       ]
     },
     {
-      "name": "我撿到毛孩",
-      "url": "./#/found/new",
+      "name": "我看到／撿到毛孩",
+      "short_name": "看到／撿到",
+      "url": "./#/seen",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "路上有受傷的毛孩",
+      "short_name": "受傷通報",
+      "url": "./#/injured",
       "icons": [
         {
           "src": "icon-192.png",
@@ -64,5 +77,6 @@
         }
       ]
     }
-  ]
+  ],
+  "id": "./"
 }
