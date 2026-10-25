@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "all / match / notify"
+        description: "all / match / notify / probe"
         default: "all"
 
 jobs:

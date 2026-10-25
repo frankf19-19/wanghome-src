@@ -284,6 +284,15 @@ def run_notifications():
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
     print("WangHome daily v1.1.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    if mode == "probe":
+        data = fetch_moa()
+        dogs = [x for x in data if (x.get("animal_kind") or "") == "狗"]
+        print(f"其中狗：{len(dogs)} 筆")
+        if data: print("欄位：", ", ".join(sorted(data[0].keys())))
+        if dogs:
+            d = dogs[0]
+            print("範例：", {k: d.get(k) for k in ("shelter_name", "animal_colour", "animal_bodytype", "animal_sex", "animal_foundplace", "animal_createtime", "album_file")})
+        sys.exit(0)
     if mode in ("all", "match"): run_matching()
     if mode in ("all", "match", "notify"): run_found_matching()
     if mode in ("all", "notify"): run_notifications()
