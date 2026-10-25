@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.2.0 -->
+<!-- BUILD v2.3.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -92,8 +92,8 @@ header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper
 .nav{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 20px}
 .logo{display:flex;align-items:center;gap:8px;color:var(--ink);font-family:var(--display);font-weight:900;font-size:21px;letter-spacing:.02em}
 .logo:hover{text-decoration:none}
-.logo .paw{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--red-fill);color:#fff;transform:rotate(-6deg);box-shadow:0 2px 0 color-mix(in srgb,var(--red) 60%,#000)}
-.logo .paw svg{width:22px;height:22px}
+.logo .paw{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(#E5352C,#C21A13);color:#fff;box-shadow:0 2px 6px -2px rgba(200,30,22,.55)}
+.logo .paw svg{width:26px;height:26px}
 .nav .sp{flex:1}
 .nav a.link{color:var(--ink-2);font-size:14px;font-weight:500;padding:7px 10px;border-radius:var(--r-pill)}
 .nav a.link:hover{background:var(--sheet);text-decoration:none}
@@ -569,9 +569,9 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#F5F6F3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#11171A" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#EFF2EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1417" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="汪喵回家">
 </head>
@@ -579,7 +579,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 
 <header>
   <div class="nav">
-    <a href="#/" class="logo"><span class="paw"><svg viewBox="0 0 512 512" aria-hidden="true"><g fill="currentColor"><ellipse cx="256" cy="330" rx="98" ry="84"/><ellipse cx="150" cy="222" rx="40" ry="52" transform="rotate(-18 150 222)"/><ellipse cx="218" cy="160" rx="40" ry="54" transform="rotate(-6 218 160)"/><ellipse cx="294" cy="160" rx="40" ry="54" transform="rotate(6 294 160)"/><ellipse cx="362" cy="222" rx="40" ry="52" transform="rotate(18 362 222)"/></g><path d="M256 384 l-34-30 a22 22 0 0 1 34-28 a22 22 0 0 1 34 28 z" fill="var(--red)"/></svg></span><span id="siteName">汪喵回家</span></a>
+    <a href="#/" class="logo"><span class="paw"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M256 96 92 226M256 96l164 130" fill="none" stroke="currentColor" stroke-width="40" stroke-linecap="round"/><g fill="currentColor"><ellipse cx="256" cy="350" rx="84" ry="72"/><ellipse cx="165" cy="258" rx="34" ry="45" transform="rotate(-18 165 258)"/><ellipse cx="223" cy="205" rx="34" ry="46" transform="rotate(-6 223 205)"/><ellipse cx="289" cy="205" rx="34" ry="46" transform="rotate(6 289 205)"/><ellipse cx="347" cy="258" rx="34" ry="45" transform="rotate(18 347 258)"/></g><path d="M256 396l-30-26a19 19 0 0 1 30-24 19 19 0 0 1 30 24z" fill="var(--red-fill)"/></svg></span><span id="siteName">汪喵回家</span></a>
     <div class="sp"></div>
     <span class="navlinks lost-only" style="display:contents">
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
@@ -604,7 +604,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.2.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.3.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -623,7 +623,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.2.0';
+const BUILD = 'v2.3.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
