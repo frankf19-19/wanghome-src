@@ -3,7 +3,7 @@ name: WangHome daily match & notify
 on:
   schedule:
     - cron: "17 19 * * *"   # 每天 03:17 台灣時間：收容所比對 + 通知 + 保活
-    - cron: "23 */2 * * *"  # 每 2 小時：目擊通知
+    - cron: "21 */2 * * *"  # 每 2 小時：目擊通知
   workflow_dispatch:
     inputs:
       mode:
