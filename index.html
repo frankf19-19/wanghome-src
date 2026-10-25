@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v2.3.0 -->
+<!-- BUILD v2.4.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -38,14 +38,14 @@
   --ink-2:#36454B;      /* 次要文字：對比 9:1 */
   --ink-3:#56636A;      /* 說明文字：對比 5.6:1（原本 3.3） */
   --line:#D3DAD7;
-  --red:#C81E16;        /* 海報紅：白字對比 5.8:1 */
+  --red:#D42A1E;        /* 海報紅：白字對比 5.0:1 */
   --red-ink:#9E140D;
   --red-fill:var(--red);     /* 白字底色用 */
   --green-fill:var(--green);
   --red-soft:#FBE4E2;
   --mark:#FFD23F;       /* 螢光黃：最新目擊 */
   --mark-soft:#FFF5CC;
-  --green:#13774A;      /* 拾獲／健康手冊：白字對比 5.6:1 */
+  --green:#15803D;      /* 拾獲／健康手冊：白字對比 5.0:1 */
   --green-soft:#DFF1E7;
   --blue:#1D58A8;
   --amber:#8F5D00;
@@ -147,7 +147,6 @@ a.stat:hover{text-decoration:none}a.stat:hover b{color:var(--red)}
 /* 溫度：插畫、柔和底色 */
 .tape-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
 .hero-duo{display:none}
-@media (max-width:979px){.hero-duo{display:block;width:118px;height:auto;margin:0 -4px -10px 0;flex:none}}
 .hero-duo-lg{display:none}
 @media (min-width:980px){.hero:not(.has-poster){display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:48px;align-items:center}.hero:not(.has-poster) .hero-duo-lg{display:block;width:100%;height:auto}}
 .health-hero.art{display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -553,7 +552,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
   .nav .navlinks{display:none}
   .hide-sm{display:none}
   .nav{padding:10px 14px}
-  main{padding:14px}
+  main{padding:6px 14px 14px}
   .hero{padding-top:14px}
   .hero .actions{grid-template-columns:1fr 1fr}
   .stats{gap:16px}
@@ -566,6 +565,38 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 .mk.me{background:var(--blue)}
 .mk.found{background:var(--green-fill)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .leaflet-tile-pane{filter:brightness(.8) contrast(1.05) saturate(.8)}}
+/* 首頁 hero（v2.4）：一張溫暖的提示卡 */
+.hero .rule{font-family:var(--head)!important;font-weight:900;letter-spacing:0;line-height:1.15}
+.hero-card{position:relative}
+.hero .sub{margin:12px 0 0;font-size:17px;line-height:1.6;color:var(--ink-2);max-width:30em}
+.hero .sub b{color:var(--red);font-weight:800}
+.hero-duo{display:none}
+@media (max-width:979px){
+  .hero{padding-top:2px}
+  .hero-card{display:block;background:linear-gradient(135deg,#FFF6E8,#FFEFD9);border-radius:20px;padding:18px 18px 16px;box-shadow:inset 0 0 0 1px #F5E1C4;overflow:hidden}
+  .hero .rule{font-size:clamp(26px,7.4vw,34px)!important;color:#2A1B10}
+  .hero .sub{font-size:15px;color:#5A4636;margin-top:8px}
+  .hero-duo{display:block;position:absolute;right:8px;bottom:-4px;width:104px;height:auto}
+  .hero .sub{padding-right:100px;min-height:62px}
+  .hero .actions{margin-top:14px}
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero-card{background:linear-gradient(135deg,#2A2118,#231B14);box-shadow:inset 0 0 0 1px #3A2E22}:root:not([data-theme="light"]) .hero .rule{color:#FFF1E2}:root:not([data-theme="light"]) .hero .sub{color:#D8C6B4}}
+:root[data-theme="dark"] .hero-card{background:linear-gradient(135deg,#2A2118,#231B14);box-shadow:inset 0 0 0 1px #3A2E22}
+:root[data-theme="dark"] .hero .rule{color:#FFF1E2}:root[data-theme="dark"] .hero .sub{color:#D8C6B4}
+/* 手機頁首：一排就好 */
+@media (max-width:640px){
+  header .nav{padding-top:8px;padding-bottom:6px}
+  .space{margin:0 14px 10px;padding:4px;border-radius:14px;background:var(--sheet);box-shadow:inset 0 0 0 1px var(--line);gap:4px}
+  .space a{flex-direction:row;justify-content:center;gap:7px;padding:9px 6px;border-radius:10px;border-bottom:0!important}
+  .space .sp-ic{width:auto;height:auto;background:none!important;box-shadow:none!important;border-radius:0}
+  .space svg{width:18px;height:18px}
+  .space b{font-size:16px}
+  .space small{display:none}
+  body[data-space="lost"] .space a[data-s="lost"]{background:var(--red-fill);color:#fff}
+  body[data-space="health"] .space a[data-s="health"]{background:var(--green-fill);color:#fff}
+  body[data-space] .space a.on .sp-ic{color:#fff}
+  header{border-bottom:0}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -604,7 +635,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.3.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v2.4.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -623,7 +654,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v2.3.0';
+const BUILD = 'v2.4.0';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -824,8 +855,13 @@ async function renderHome(){
   <div class="install" id="installBar">📱 把汪喵回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
   <section class="hero" id="hero">
     <div class="hero-main">
-    <p class="rule"><span class="nb">看到走失的狗貓，</span><span class="nb">別追。</span><span class="l2"><span class="nb">拍照、記下時間地點，</span><span class="nb">回報給飼主。</span></span></p>
-    <div class="tape-row"><span class="tape">追趕只會讓牠跑得更遠</span><img class="hero-duo" src="duo.svg" alt="" width="132" height="90"></div>
+    <div class="hero-card">
+      <div class="hc-txt">
+        <p class="rule">看到走失的狗貓，<br>別追。</p>
+        <p class="sub">拍照、記下時間和地點，回報給飼主。<b>追趕只會讓牠跑得更遠。</b></p>
+      </div>
+      <img class="hero-duo" src="duo.svg" alt="" width="132" height="90">
+    </div>
     <div class="actions">
       <a href="#/new" class="btn lg">我的毛孩走失了<small>登記協尋、產生海報</small></a>
       <a href="#/found/new" class="btn lg green">我撿到／看到一隻<small>幫牠找到主人</small></a>
@@ -967,6 +1003,7 @@ async function loadStats(){
     sb.from('found_public').select('id',{count:'exact',head:true}).eq('status','open')
   ]);
   const el=$('#stats');if(!el)return;
+  if(!((a.count||0)+(b.count||0)+(c.count||0)+(d.count||0))){el.remove();if($('#cLost'))$('#cLost').textContent=0;if($('#cFound'))$('#cFound').textContent=0;return}
   el.innerHTML=`<a class="stat" href="#/?tab=lost"><b>${(a.count??0).toLocaleString()}</b>協尋中</a><div class="stat good"><b>${(b.count??0).toLocaleString()}</b>已回家</div><div class="stat"><b>${(c.count??0).toLocaleString()}</b>則目擊</div><a class="stat" href="#/?tab=found"><b>${(d.count??0).toLocaleString()}</b>拾獲通報</a>`;
   if($('#cLost'))$('#cLost').textContent=a.count??0;
   if($('#cFound'))$('#cFound').textContent=d.count??0;
