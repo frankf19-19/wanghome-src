@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://frankf19-19.github.io/wanghome/">
-<!-- BUILD v3.4.2 -->
+<!-- BUILD v3.4.3 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -803,8 +803,19 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .linkbtn,.ownerline a{min-height:40px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .photos-preview div button{width:36px!important;height:36px!important;top:-12px!important;right:-12px!important;font-size:17px!important}
 .recent a .ph,.reunite .ph{overflow:hidden}.recent a .ph img,.reunite .ph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
-/* v3.4.2 獎金移到照片左下，不再蓋住「走失第 N 天」 */
+/* v3.4.3 獎金移到照片左下，不再蓋住「走失第 N 天」 */
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* v3.4.3 中文斷行：不讓最後一行只剩一兩個字 */
+body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
+/* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
+body :is(p,li,div,small,label,span,dd,td,h1,h2,h3,h4,button,a){text-wrap:balance}
+.longtext :is(p,li),.legal :is(p,li){text-wrap:pretty}
+input,textarea,select{text-wrap:wrap}
+.lbl{font-weight:inherit;white-space:nowrap}
+.hint{font-weight:500;font-size:.86em;color:var(--muted);margin-left:2px;white-space:nowrap}
+.hint.long{white-space:normal;text-wrap:pretty}
+.hint::before{content:'（'}.hint::after{content:'）'}
+.nw{white-space:nowrap}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -844,7 +855,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/found/new">通報拾獲</a><a href="#/injured">受傷毛孩通報</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.4.2</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>BUILD v3.4.3</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -864,7 +875,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v3.4.2';
+const BUILD = 'v3.4.3';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1626,7 +1637,7 @@ function renderNew(){
       <label class="f"><span>品種</span><input type="text" name="breed" placeholder="例：米克斯、柴犬、橘貓、英短"></label>
       <label class="f"><span>毛色 <i class="req">*</i></span><input type="text" name="colour" required placeholder="例：黑色、黃色、黑白"></label>
     </div>
-    <label class="f"><span>辨識特徵（越具體越好）</span><textarea name="features" placeholder="例：眼睛、鼻子周圍及前胸有灰白毛；左耳缺角；走路微跛"></textarea></label>
+    <label class="f"><span><b class="lbl">辨識特徵</b><small class="hint">越具體越好</small></span><textarea name="features" placeholder="例：眼睛、鼻子周圍及前胸有灰白毛；左耳缺角；走路微跛"></textarea></label>
     <div class="row2">
       <label class="f"><span>走失時配戴</span><input type="text" name="collar_desc" placeholder="例：褪色紅項圈、身上有牽繩（可能已脫落）"></label>
       <label class="f"><span>個性</span><input type="text" name="temperament" placeholder="例：膽小怕人、會躲、親人"></label>
@@ -1649,7 +1660,7 @@ function renderNew(){
       <label class="f"><span>鄉鎮市區</span><select name="lost_district" id="dist">${distOptions('')}</select></label>
     </div>
     <label class="f"><span>走失地點描述</span><input type="text" name="lost_place" placeholder="例：淡水漁人碼頭、沙崙沙灘附近"></label>
-    <label class="f"><span>在地圖上點選走失位置（建議）</span></label>
+    <label class="f"><span><b class="lbl">在地圖上點選走失位置</b><small class="hint">建議</small></span></label>
     <div class="map pick" id="pmap"></div>
     <div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm ghost" id="btnLoc">${ic("pin")} 用我目前位置</button><span class="muted small" style="align-self:center">點地圖任一點即可標記</span></div>
 
@@ -1661,9 +1672,9 @@ function renderNew(){
     <label class="chk"><input type="checkbox" name="phone_public" checked> 公開電話在案件頁（取消則只透過站內回報聯絡你）</label>
     <div class="row2">
       <label class="f"><span>Email（私密，用來寄目擊通知）<i class="req">*</i></span><input type="email" name="contact_email" required placeholder="you@example.com"></label>
-      <label class="f"><span>LINE ID（選填，會公開）</span><input type="text" name="contact_line"></label>
+      <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">選填，會公開</small></span><input type="text" name="contact_line"></label>
     </div>
-    <label class="f"><span>尋獲獎金（選填，NT$；由飼主自行支付，本站不經手）</span><input type="number" name="reward" min="0" step="100" placeholder="0"></label>
+    <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">選填，NT$；由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" step="100" placeholder="0"></label>
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：牠對食物反應很好，可用雞肉吸引；有在服藥需盡快找到"></textarea></label>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
     <p class="muted small">送出即表示同意本站公開上述資料（Email 除外）供協尋使用，找到後請記得回來結案。</p>
@@ -1731,10 +1742,10 @@ async function renderReport(id){const _n=navId;
   if(!c){(_n===navId?app:_void).innerHTML='<div class="empty">找不到案件</div>';return}
   setTitle(`回報目擊 ${c.name}`);
   (_n===navId?app:_void).innerHTML=`<h1>回報目擊：${esc(c.name)}</h1>
-  <div style="display:flex;gap:10px;align-items:center;margin:8px 0 12px">${c.photos?.[0]?thumbImg(c.photos[0],'','style="width:70px;height:70px;border-radius:10px;object-fit:cover"'):''}<div class="small muted">${esc(c.lost_city)}${esc(c.lost_district||'')} · 不確定是不是牠也請回報，飼主會自行判斷。</div></div>
+  <div style="display:flex;gap:10px;align-items:center;margin:8px 0 12px">${c.photos?.[0]?thumbImg(c.photos[0],'','style="width:70px;height:70px;border-radius:10px;object-fit:cover"'):''}<div class="small muted"><b>${esc(c.lost_city)}${esc(c.lost_district||'')}</b><br>不確定是不是牠也請回報，飼主會自行判斷。</div></div>
   <div class="notice red"><b>請勿呼喊、追趕或包圍</b>保持距離觀察，先拍照、記下位置與方向，再填這個表單。</div>
   <form class="card" id="f" style="margin-top:12px">
-    <label class="uploadbtn" id="phLabel">${ic("image")} <span>先選照片（建議）</span><input type="file" name="photo" accept="image/*"></label>
+    <label class="uploadbtn" id="phLabel">${ic("image")} <span><b class="lbl">先選照片</b><small class="hint">建議</small></span><input type="file" name="photo" accept="image/*"></label>
     <div class="exif-hint" id="exifHint">有照片的話，會自動帶入拍攝時間和地點</div>
     <div class="photos-preview" id="sPv"></div>
     <label class="f"><span>看到的時間 <i class="req">*</i></span><input type="datetime-local" name="seen_at" required value="${nowLocalInput()}"></label>
@@ -1747,8 +1758,8 @@ async function renderReport(id){const _n=navId;
     </div>
     <label class="f"><span>狀況描述</span><textarea name="note" placeholder="例：往沙灘方向走，神情緊張，項圈好像還在；或已被某某收容所帶走"></textarea></label>
     <div class="row2">
-      <label class="f"><span>你的稱呼</span><input type="text" name="reporter_name" placeholder="例：住附近的王先生"></label>
-      <label class="f"><span>聯絡方式（只有飼主看得到）</span><input type="text" name="reporter_contact" placeholder="電話或 LINE，方便飼主追問"></label>
+      <label class="f"><span>你的稱呼</span><input type="text" name="reporter_name" placeholder="例：王先生"></label>
+      <label class="f"><span><b class="lbl">聯絡方式</b><small class="hint">只有飼主看得到</small></span><input type="text" name="reporter_contact" placeholder="電話或 LINE"></label>
     </div>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出回報</button></div>
@@ -1805,8 +1816,8 @@ async function renderManage(id,token){const _n=navId;
   <div class="card">
     <div class="seg" id="segStatus">${Object.entries(STATUS).map(([k,v])=>`<button type="button" data-v="${k}" class="${c.status===k?'on':''}">${v}</button>`).join('')}</div>
     <div id="foundBox" class="${c.status==='found'?'':'hidden'}" style="margin-top:12px">
-      <label class="f"><span>怎麼找到的？（會公開，幫助其他飼主）</span><select id="foundMethod"><option value="">選擇</option>${FOUND_METHODS.map(m=>`<option ${c.found_method===m?'selected':''}>${m}</option>`).join('')}</select></label>
-      <label class="f"><span>找到的經過（會公開）</span><textarea id="foundNote">${esc(c.found_note||'')}</textarea></label>
+      <label class="f"><span><b class="lbl">怎麼找到的？</b><small class="hint">會公開，幫助其他飼主</small></span><select id="foundMethod"><option value="">選擇</option>${FOUND_METHODS.map(m=>`<option ${c.found_method===m?'selected':''}>${m}</option>`).join('')}</select></label>
+      <label class="f"><span><b class="lbl">找到的經過</b><small class="hint">會公開</small></span><textarea id="foundNote">${esc(c.found_note||'')}</textarea></label>
     </div>
     <button class="btn" style="margin-top:12px" id="btnStatus">儲存狀態</button>
   </div>
@@ -1832,7 +1843,7 @@ async function renderManage(id,token){const _n=navId;
     <label class="f"><span>走失地點描述</span><input name="lost_place" value="${esc(c.lost_place||'')}"></label>
     <div class="row2"><label class="f"><span>稱呼</span><input name="contact_name" value="${esc(c.contact_name||'')}"></label><label class="f"><span>電話</span><input name="contact_phone" value="${esc(c.contact_phone||'')}"></label></div>
     <label class="chk"><input type="checkbox" name="phone_public" ${c.phone_public?'checked':''}> 公開電話</label>
-    <div class="row2"><label class="f"><span>Email（私密）</span><input name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span>LINE ID</span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
+    <div class="row2"><label class="f"><span><b class="lbl">Email</b><small class="hint">私密</small></span><input name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span>LINE ID</span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
     <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" step="100"></label>
     <label class="f"><span>補充</span><textarea name="notes">${esc(c.notes||'')}</textarea></label>
     <h3>照片</h3>
@@ -1910,7 +1921,7 @@ async function quickReport(){
     <div class="seg multi" id="qInj" style="margin-top:10px">${INJURIES.slice(0,6).map(t=>`<button type="button" data-v="${t}">${t}</button>`).join('')}</div>
     <div class="seg" id="qWhere" style="margin-top:10px"><button type="button" data-v="here" class="on">牠還在原地</button><button type="button" data-v="taken">我已帶走／送醫</button></div>
     <input type="text" id="qPlace" maxlength="200" placeholder="補充地點（選填）：例如 7-11 對面、路肩" style="margin-top:10px">
-    <label class="uploadbtn" style="margin-top:10px" id="qPhL">${ic("image")} <span>拍一張照片（選填）</span><input type="file" id="qPhoto" accept="image/*"></label>
+    <label class="uploadbtn" style="margin-top:10px" id="qPhL">${ic("image")} <span><b class="lbl">拍一張照片</b><small class="hint">選填</small></span><input type="file" id="qPhoto" accept="image/*"></label>
     <button type="button" class="btn lg block" id="qSend" style="margin-top:12px">送出通報</button>`;
   const segOne=(id,set)=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{set(b.dataset.v);$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
   segOne('#qSp',v=>species=v);segOne('#qWhere',v=>where=v);
@@ -1952,7 +1963,7 @@ function renderInjured(){
   <form class="card steps" id="f" style="margin-top:8px">
     <h3>牠的狀況</h3>
     <div class="seg" id="segSp"><button type="button" data-v="dog" class="on">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
-    <label class="f"><span>傷勢（可複選）</span></label>
+    <label class="f"><span><b class="lbl">傷勢</b><small class="hint">可複選</small></span></label>
     <div class="seg multi" id="segInj">${INJURIES.map(t=>`<button type="button" data-v="${t}">${t}</button>`).join('')}</div>
     <div class="seg" id="segWhere" style="margin-top:12px"><button type="button" data-v="here" class="on">牠還在原地</button><button type="button" data-v="taken">我已經送醫／帶走</button></div>
     <label class="f hidden" id="curWrap"><span>牠現在在哪裡</span><input type="text" name="current_place" maxlength="200" placeholder="例：已送 XX 動物醫院／動保處已帶走"></label>
@@ -2031,7 +2042,7 @@ function renderFoundNew(){
       <label class="f"><span>縣市 <i class="req">*</i></span><select name="city" id="city" required>${cityOptions('')}</select></label>
       <label class="f"><span>鄉鎮市區</span><select name="district" id="dist">${distOptions('')}</select></label>
     </div>
-    <label class="f"><span>位置（點地圖或用目前位置）</span></label>
+    <label class="f"><span><b class="lbl">位置</b><small class="hint">點地圖或用目前位置</small></span></label>
     <div class="map pick" id="pmap"></div>
     <div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn sm ghost" id="btnLoc">${ic("pin")} 用我目前位置</button></div>
     <label class="f"><span>地點描述</span><input type="text" name="place_text" maxlength="200" placeholder="例：中正路 7-11 門口"></label>
@@ -2043,7 +2054,7 @@ function renderFoundNew(){
       <label class="f"><span>性別</span><select name="sex"><option value="">不確定</option><option value="male">公</option><option value="female">母</option></select></label>
       <label class="f"><span>毛色 <i class="req">*</i></span><input type="text" name="colour" required maxlength="50" placeholder="例：黑色"></label>
     </div>
-    <label class="f"><span>品種（看得出來再填）</span><input type="text" name="breed" maxlength="50" placeholder="例：柴犬、米克斯"></label>
+    <label class="f"><span><b class="lbl">品種</b><small class="hint">看得出來再填</small></span><input type="text" name="breed" maxlength="50" placeholder="例：柴犬、米克斯"></label>
     <label class="f"><span>特徵</span><textarea name="features" maxlength="1000" placeholder="例：嘴邊灰白毛、左耳下垂、很親人"></textarea></label>
     <label class="f"><span>項圈／牽繩／衣服</span><input type="text" name="collar_desc" maxlength="200" placeholder="例：紅色項圈，有鈴鐺，沒有名牌"></label>
     <h3>照片（最多 4 張）</h3>
@@ -2059,8 +2070,8 @@ function renderFoundNew(){
     </div>
     <label class="chk"><input type="checkbox" name="phone_public" checked> 公開電話，讓飼主直接聯絡我</label>
     <div class="row2">
-      <label class="f"><span>Email（私密，選填）</span><input type="email" name="reporter_email"></label>
-      <label class="f"><span>LINE ID（選填，會公開）</span><input type="text" name="reporter_line" maxlength="50"></label>
+      <label class="f"><span><b class="lbl">Email</b><small class="hint">私密，選填</small></span><input type="email" name="reporter_email"></label>
+      <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">選填，會公開</small></span><input type="text" name="reporter_line" maxlength="50"></label>
     </div>
     <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000"></textarea></label>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
@@ -2194,7 +2205,7 @@ function openReport(type,id){
     <h2 style="margin-top:0">${ic('flag')} 檢舉這則內容</h2>
     <p class="muted small">站長會盡快處理。惡意檢舉不會讓內容自動下架。</p>
     ${REPORT_REASONS.map(([v,t],i)=>`<label class="chk"><input type="radio" name="rr" value="${v}" ${i===0?'checked':''}> ${t}</label>`).join('')}
-    <label class="f"><span>補充說明（選填）</span><textarea id="rn" maxlength="500" style="min-height:70px"></textarea></label>
+    <label class="f"><span><b class="lbl">補充說明</b><small class="hint">選填</small></span><textarea id="rn" maxlength="500" style="min-height:70px"></textarea></label>
     <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" id="rs">送出檢舉</button><button class="btn ghost" id="rc">取消</button></div>
   </div>`;
   d.onclick=()=>closeOverlay(d);openOverlay(d);
@@ -2397,7 +2408,7 @@ async function renderMe(){const _n=navId;
 
   <h2>${ic("bell")} 通知設定</h2>
   <form class="card" id="nf">
-    <label class="f"><span>顯示名稱（回報目擊時預設使用）</span><input type="text" id="dn" maxlength="30" value="${esc(p.display_name||'')}"></label>
+    <label class="f"><span><b class="lbl">顯示名稱</b><small class="hint">回報目擊時預設使用</small></span><input type="text" id="dn" maxlength="30" value="${esc(p.display_name||'')}"></label>
     <label class="chk"><input type="checkbox" id="nFollow" ${p.notify_follow!==false?'checked':''}> 追蹤的案件有新目擊時，寄 Email 通知我</label>
     <label class="chk"><input type="checkbox" id="nOn" ${p.notify_enabled?'checked':''}> 我家附近有毛孩走失時，寄 Email 通知我</label>
     <div id="nearBox" class="${p.notify_enabled?'':'hidden'}">
@@ -2405,7 +2416,7 @@ async function renderMe(){const _n=navId;
         <label class="f"><span>範圍</span><select id="nR">${[1,2,3,5,10,20].map(r=>`<option value="${r}" ${p.home_radius_km==r?'selected':''}>${r} 公里內</option>`).join('')}</select></label>
         <label class="f"><span>種類</span><select id="nSp"><option value="all" ${p.notify_species==='all'?'selected':''}>狗＋貓</option><option value="dog" ${p.notify_species==='dog'?'selected':''}>只要狗</option><option value="cat" ${p.notify_species==='cat'?'selected':''}>只要貓</option></select></label>
       </div>
-      <label class="f"><span>中心點（點地圖，不必精確，只用來算距離，不會公開）</span></label>
+      <label class="f"><span><b class="lbl">中心點</b><small class="hint long">點地圖，不必精確，只用來算距離，不會公開</small></span></label>
       <div class="map pick" id="hmap"></div>
       <button type="button" class="btn sm ghost" id="btnHome" style="margin-top:8px">${ic("pin")} 用我目前位置</button>
     </div>
@@ -2456,10 +2467,10 @@ async function renderPet(id){const _n=navId;
     <label class="f"><span>個性</span><input name="temperament" maxlength="200" value="${esc(p.temperament||'')}"></label>
     <div class="row3">
       <label class="chk"><input type="checkbox" name="has_chip" ${p.has_chip?'checked':''}> 有晶片</label>
-      <label class="f" style="margin:0"><span>晶片號碼（私密）</span><input name="chip_no" maxlength="20" inputmode="numeric" value="${esc(p.chip_no||'')}"></label>
+      <label class="f" style="margin:0"><span><b class="lbl">晶片號碼</b><small class="hint">私密</small></span><input name="chip_no" maxlength="20" inputmode="numeric" value="${esc(p.chip_no||'')}"></label>
       <label class="f" style="margin:0"><span>結紮</span><select name="neutered"><option value="">不確定</option><option value="true" ${p.neutered===true?'selected':''}>已結紮</option><option value="false" ${p.neutered===false?'selected':''}>未結紮</option></select></label>
     </div>
-    <label class="f"><span>過敏、慢性病與注意事項（會印在「給獸醫看」頁）</span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
+    <label class="f"><span><b class="lbl">過敏、慢性病與注意事項</b><small class="hint">會印在「給獸醫看」頁</small></span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
     <h3>照片（最多 6 張）</h3>
     <div class="photos-preview" id="pv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
@@ -2631,10 +2642,10 @@ async function renderRecord(petId,recId){const _n=navId;
     <label class="f"><span>項目 <i class="req">*</i></span><input name="title" required maxlength="60" value="${esc(r.title||'')}" placeholder="例：狂犬病疫苗、皮膚過敏回診"></label>
     <div class="seg" id="presets" style="margin-top:8px"></div>
     <div class="row2">
-      <label class="f" id="wWrap"><span>體重（kg）</span><input type="number" name="weight_kg" step="0.01" min="0.01" max="199.99" inputmode="decimal" value="${r.weight_kg??''}"></label>
-      <label class="f"><span>費用（元）</span><input type="number" name="cost" step="1" min="0" value="${r.cost??''}"></label>
+      <label class="f" id="wWrap"><span><b class="lbl">體重</b><small class="hint">kg</small></span><input type="number" name="weight_kg" step="0.01" min="0.01" max="199.99" inputmode="decimal" value="${r.weight_kg??''}"></label>
+      <label class="f"><span><b class="lbl">費用</b><small class="hint">元</small></span><input type="number" name="cost" step="1" min="0" value="${r.cost??''}"></label>
     </div>
-    <label class="f"><span>備註（症狀、醫生說明、藥名與劑量…）</span><textarea name="notes" maxlength="2000">${esc(r.notes||'')}</textarea></label>
+    <label class="f"><span><b class="lbl">備註</b><small class="hint long">症狀、醫生說明、藥名與劑量…</small></span><textarea name="notes" maxlength="2000">${esc(r.notes||'')}</textarea></label>
     <label class="f"><span>下次到期／回診日</span><input type="date" name="next_due" value="${esc(r.next_due||'')}"></label>
     <div class="seg" style="margin-top:8px"><button type="button" data-m="1">＋1 個月</button><button type="button" data-m="3">＋3 個月</button><button type="button" data-m="6">＋半年</button><button type="button" data-m="12">＋1 年</button><button type="button" data-m="0">不設定</button></div>
     ${recId!=='new'&&r.next_due?`<label class="chk"><input type="checkbox" name="done" ${r.done?'checked':''}> 下次的已經完成了（不再提醒）</label>`:''}
@@ -2729,11 +2740,11 @@ async function renderMed(petId,medId){const _n=navId;
     </div>
     <p class="muted small" style="margin:4px 0 0">半顆請填 0.5；藥水填 ml。請照藥袋或獸醫的指示，網站不會建議劑量。</p>
     <label class="f"><span>多久吃一次</span><select name="freq">${Object.entries(MED_FREQ).map(([k,t])=>`<option value="${k}" ${k===m.freq?'selected':''}>${t}</option>`).join('')}</select></label>
-    <label class="f"><span>什麼時候吃（可複選，選填）</span></label>
+    <label class="f"><span><b class="lbl">什麼時候吃</b><small class="hint">可複選，選填</small></span></label>
     <div class="seg multi" id="mTimes">${MED_TIMES.map(t=>`<button type="button" data-v="${t}" class="${(m.times||[]).includes(t)?'on':''}">${t}</button>`).join('')}</div>
     <div class="row2">
       <label class="f"><span>開始日期</span><input type="date" name="start_date" value="${m.start_date||todayStr()}"></label>
-      <label class="f"><span>吃到哪天（不填＝持續吃）</span><input type="date" name="end_date" value="${m.end_date||''}"></label>
+      <label class="f"><span><b class="lbl">吃到哪天</b><small class="hint">不填＝持續吃</small></span><input type="date" name="end_date" value="${m.end_date||''}"></label>
     </div>
     <label class="f"><span>用途</span><input type="text" name="purpose" maxlength="100" value="${esc(m.purpose||'')}" placeholder="例：關節保養、皮膚炎、術後消炎"></label>
     <label class="f"><span>醫院／購買來源</span><input type="text" name="clinic" maxlength="60" value="${esc(m.clinic||'')}" placeholder="例：仁愛動物醫院"></label>
