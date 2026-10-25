@@ -7,7 +7,7 @@
 <meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
-<!-- BUILD v1.4.1 -->
+<!-- BUILD v1.4.2 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -265,7 +265,7 @@ footer a{color:var(--ink-2);margin:0 6px}
     <a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/thanks">贊助感謝牆</a><a href="#/privacy">隱私聲明</a>
   </div>
   <div class="small" style="margin-top:8px">收容所資料來源：農業部「動物認領養」開放資料· 地圖 © OpenStreetMap 貢獻者</div>
-  <div class="small" style="margin-top:4px">BUILD v1.4.1</div>
+  <div class="small" style="margin-top:4px">BUILD v1.4.2</div>
 </footer>
 
 <div class="toast" id="toast"></div>
@@ -283,7 +283,7 @@ const CONFIG = {
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   SITE_URL: location.origin + location.pathname  // 用來產生 QR Code
 };
-const BUILD = 'v1.4.1';
+const BUILD = 'v1.4.2';
 
 /* ============================================================
    台灣縣市 / 鄉鎮市區
@@ -1205,7 +1205,7 @@ function renderLogin(){
       <button class="btn lg block" style="margin-top:12px" id="btnSend">寄送登入連結</button>
     </form>
     ${CONFIG.GOOGLE_LOGIN?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google 登入</button>`:''}
-    <div class="notice" style="margin-top:16px"><b>請用同一支手機、同一個瀏覽器打開信裡的連結</b>在 LINE 或 Gmail App 裡點開若登入失敗，請長按連結選「用瀏覽器開啟」。沒收到信請看垃圾郵件匣。</div>
+    <div class="notice" style="margin-top:16px"><b>請用同一支手機、同一個瀏覽器打開信裡的連結</b>在 LINE 或 Gmail App 裡點開若登入失敗，請長按連結選「用瀏覽器開啟」。沒收到信請看垃圾郵件匣。<br>信件目前是英文，寄件者「Supabase Auth」，標題「Your Magic Link」，點信裡的「Log In」即可。</div>
     <h3 style="margin-top:20px">登入有什麼好處？</h3>
     <ul style="padding-left:20px;font-size:15px;margin:6px 0">
       <li><b>不怕金鑰遺失</b>：你登記的案件綁在帳號上，換手機也能管理</li>
