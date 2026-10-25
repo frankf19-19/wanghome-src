@@ -273,7 +273,7 @@ def run_notifications():
         lines = [f"有網友登記了 {len(lst)} 筆可能是「{c['name']}」的拾獲／目擊通報：", ""]
         for m in lst[:10]:
             f = fr.get(m["found_id"], {})
-            lines.append(f"・{'拾獲' if f.get('kind') == 'found' else '目擊'}  相似 {m['score']}  {fmt(f.get('seen_at', ''))}  {f.get('city', '')}{f.get('district') or ''} {f.get('place_text') or ''}")
+            lines.append(f"・{'受傷' if f.get('kind') == 'injured' else '拾獲' if f.get('kind') == 'found' else '目擊'}  相似 {m['score']}  {fmt(f.get('seen_at', ''))}  {f.get('city', '')}{f.get('district') or ''} {f.get('place_text') or ''}")
             if f.get("current_place"): lines.append(f"  目前在：{f['current_place']}")
             lines.append(f"  {SITE_URL}#/found/{m['found_id']}")
             lines.append("")

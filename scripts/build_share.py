@@ -61,7 +61,7 @@ def main():
     since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=60)).isoformat()
     cases = get("cases_public", {"select": "id,species,name,status,breed,sex,size,colour,features,lost_city,lost_district,lost_place,lost_at,photos,reward,last_seen_at,updated_at",
                                  "or": f"(status.eq.searching,updated_at.gte.{since})", "limit": "2000"})
-    founds = get("found_public", {"select": "id,species,kind,status,colour,size,sex,city,district,place_text,seen_at,photos,current_place,updated_at",
+    founds = get("found_public", {"select": "id,species,kind,status,colour,size,sex,city,district,place_text,seen_at,photos,current_place,updated_at,injury",
                                   "or": f"(status.eq.open,updated_at.gte.{since})", "limit": "2000"})
     sdir, fdir = ROOT / "s", ROOT / "f"
     sdir.mkdir(exist_ok=True); fdir.mkdir(exist_ok=True)
@@ -90,9 +90,9 @@ def main():
 
     for f in founds:
         name, _, _ = SP.get(f.get("species") or "dog", SP["dog"])
-        kind = "拾獲" if f["kind"] == "found" else "目擊"
+        kind = "受傷" if f["kind"] == "injured" else "拾獲" if f["kind"] == "found" else "目擊"
         title = f"【{kind}{name}】{(SIZE.get(f.get('size')) or '')}{f.get('colour') or ''}{name}｜{f['city']}{f.get('district') or ''}｜這是你的毛孩嗎？"
-        bits = [f.get("place_text") or "", ("目前在：" + f["current_place"]) if f.get("current_place") else "", "點連結看照片並聯絡通報者。"]
+        bits = [("傷勢：" + f["injury"]) if f.get("injury") else "", f.get("place_text") or "", ("目前在：" + f["current_place"]) if f.get("current_place") else "", "點連結看照片並聯絡通報者。"]
         desc = "　".join(b for b in bits if b)[:190]
         img = (f.get("photos") or [None])[0]
         target = f"{SITE_URL}#/found/{f['id']}"
