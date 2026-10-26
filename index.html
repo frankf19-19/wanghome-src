@@ -1422,7 +1422,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.8.3';
+const BUILD = 'v4.8.4';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -2021,7 +2021,6 @@ async function renderHome(){const _n=navId;
   const LO=isListOnly();app.classList.toggle('listonly',LO);if(LO)setTitle('正在協尋的毛孩');
   {const t=qs(location.hash).tab;homeState.tab=(t==='map'||t==='found')?t:'lost'}   // 分頁記在網址上，按「上一頁」會回到原本的分頁
   (_n===navId?app:_void).innerHTML=`
-  <div class="install" id="installBar">📱 把汪喵回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
 <h1 class="sr-only">汪喵回家：全台走失狗貓協尋平台</h1>
 ${bigStartHTML()}
   <div class="homelist">
