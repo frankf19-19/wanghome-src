@@ -553,7 +553,9 @@ if __name__ == "__main__":
     if mode in ("all", "notify"): run_report_alerts()
     if mode in ("all",): run_due_reminders()
     if mode == "all":
-        try: print("定期清理：", sb("POST", "rpc/retention_cleanup", body={}))
+        try:
+            print("定期清理：", sb("POST", "rpc/retention_cleanup", body={}))
+            print("清除 30 天前的網路位址：", sb("POST", "rpc/clear_old_ips", body={}))
         except Exception as e: print("定期清理失敗（不影響其他功能）：", type(e).__name__)
     # 照片清理要列出所有檔案（流量大）：每週日跑一次，或手動執行
     weekly = mode == "all" and dt.datetime.now(TPE).weekday() == 6
