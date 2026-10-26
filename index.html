@@ -1056,7 +1056,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.17.1';
+const BUILD = 'v3.17.2';
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
 /* ============================================================
@@ -3192,7 +3192,9 @@ async function lnToggle(btn){
   await lnSync(true);toast('已開啟：到期前一天早上 9 點、用藥時間會提醒你',4500);if(btn)btn.outerHTML=lnBtnHTML();bindLnBtn();
 }
 function lnBtnHTML(){return lnOn()?`<button type="button" class="btn sm ghost" id="btnLn">${ic('bell')} 關閉手機通知</button>`:`<button type="button" class="btn sm" id="btnLn">${ic('bell')} 開啟手機通知</button>`}
-function bindLnBtn(){const b=$('#btnLn');if(b)b.onclick=()=>lnToggle(b)}
+function bindLnBtn(){const b=$('#btnLn');if(!b)return;b.onclick=()=>lnToggle(b);
+  // 開著提醒、但使用者到手機設定把通知關掉了：提示一下，不然會以為有在提醒
+  const LN=capPlugin('LocalNotifications');if(lnOn()&&LN)LN.checkPermissions().then(p=>{if(p.display!=='granted'&&b.isConnected&&!$('#lnWarn'))b.insertAdjacentHTML('afterend','<p class="notice" id="lnWarn" style="margin:10px 0 0">手機的通知權限被關掉了，提醒不會跳出來。請到手機「設定」→「汪喵回家」→「通知」打開。</p>')}).catch(()=>{})}
 function lnSection(){if(!IS_APP)return '';
   return `<h2>${ic("bell")} 手機通知提醒</h2><div class="card"><p style="margin:0 0 10px">回診、疫苗、驅蟲到期前一天早上 9 點，還有每天的用藥時間，手機會直接跳通知。</p>${lnBtnHTML()}<p class="muted small" style="margin:8px 0 0">提醒只存在這支手機上；換手機或重新安裝要再開一次。</p></div>`}
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
