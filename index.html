@@ -402,6 +402,7 @@ a.ph{display:block}
 /* ---------- 案件頁：海報版頭 ---------- */
 .poster-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
 .detail-head{display:grid;grid-template-columns:1fr;gap:18px}
+.detail-head>*{min-width:0}.gallery .main{overflow:hidden}.gallery .main .aph img{max-width:100%}
 @media(min-width:800px){.detail-head{grid-template-columns:5fr 6fr}}
 .gallery{display:grid;gap:8px}
 .gallery .main{aspect-ratio:1/1;border-radius:var(--r-card);background:var(--line) center/cover no-repeat;position:relative;cursor:zoom-in;box-shadow:var(--lift)}
@@ -1443,7 +1444,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.1';
+const BUILD = 'v4.9.2';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
