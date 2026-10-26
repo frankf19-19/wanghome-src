@@ -1082,13 +1082,111 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
   .tl .dot{font-size:14px}.tl .when,.tl .small{font-size:14.5px}.dist,.score{font-size:14px}
   details.more>summary,details.danger-zone>summary{min-height:44px;display:flex;align-items:center}
 }
+
+/* =====================================================================
+   v4.0 馬卡龍粉彩主題（覆蓋以上所有顏色）：粉嫩底色、圓圓卡片、貓耳朵四宮格
+   ===================================================================== */
+:root{
+  --paper:#FFF6F8; --sheet:#FFFFFF; --ink:#4A3442; --ink-2:#6E5568; --ink-3:#715A6A; --line:#F4D9E2;
+  --red:#B8335F; --red-ink:#9E2752; --red-soft:#FFE3EC; --red-fill:#B83563;
+  --green:#18704F; --green-soft:#DDF4EA; --green-fill:#1F7F59;
+  --mark:#FFD86B; --mark-soft:#FFF4D1; --beige:#FCE9EF; --cream2:#FFE3EC;
+  --pink:#FFD3DF; --mint:#C9F0DF; --butter:#FFEBB0; --lav:#E4DEFF;
+  --r-card:26px; --r-ctl:16px;
+  --lift:0 1px 0 rgba(200,90,130,.05),0 10px 24px -12px rgba(220,100,150,.38);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1E171C; --sheet:#2A2028; --ink:#F9EAF1; --ink-2:#E0C8D4; --ink-3:#C2A9B6; --line:#3E2F39;
+  --red:#FF8FB5; --red-ink:#FFB6CE; --red-soft:#3D2230; --red-fill:#B83563;
+  --green:#6FD8AB; --green-soft:#183027; --green-fill:#1F7F59;
+  --mark:#FFD86B; --mark-soft:#3A3216; --beige:#382A33; --cream2:#40303B;
+  --pink:#5A3346; --mint:#24453A; --butter:#4D4123; --lav:#3A3459;
+  --lift:0 1px 0 rgba(0,0,0,.4),0 10px 24px -12px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --paper:#1E171C; --sheet:#2A2028; --ink:#F9EAF1; --ink-2:#E0C8D4; --ink-3:#C2A9B6; --line:#3E2F39;
+  --red:#FF8FB5; --red-ink:#FFB6CE; --red-soft:#3D2230; --red-fill:#B83563;
+  --green:#6FD8AB; --green-soft:#183027; --green-fill:#1F7F59;
+  --mark:#FFD86B; --mark-soft:#3A3216; --beige:#382A33; --cream2:#40303B;
+  --pink:#5A3346; --mint:#24453A; --butter:#4D4123; --lav:#3A3459;
+  --lift:0 1px 0 rgba(0,0,0,.4),0 10px 24px -12px rgba(0,0,0,.8);
+}
+/* 首頁打招呼 */
+.bs-hello{display:block!important;font-family:var(--head);font-size:24px!important;line-height:1.35!important;margin:4px 2px 4px!important}
+.bs-hello em{font-style:normal;color:var(--red)}
+/* 貓耳朵四宮格 */
+.tiles4{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px;padding-top:12px}
+@media (min-width:900px){.tiles4{grid-template-columns:repeat(4,1fr);grid-column:1/-1}}
+.tile4{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:118px;padding:18px 10px 14px;border:0;border-radius:30px;
+  text-align:center;text-decoration:none!important;color:#4A3442!important;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.tile4::before,.tile4::after{content:"";position:absolute;top:-10px;width:32px;height:32px;border-radius:50% 50% 9px 9px;background:inherit;z-index:-0}
+.tile4::before{left:20px;transform:rotate(-18deg)}.tile4::after{right:20px;transform:rotate(18deg)}
+.tile4:active{transform:scale(.97)}
+.tile4 .te{font-size:36px;line-height:1.1}
+.tile4 b{font-family:var(--head);font-size:18px;line-height:1.3;margin-top:4px}
+.tile4 small{font-size:13px;opacity:.78}
+.tile4.tp{background:#FFC6D3}.tile4.tm{background:#BFEBD9}.tile4.tb{background:#FFE7A8}.tile4.tl{background:#D9D2FF}
+:root[data-theme="dark"] .tile4{filter:saturate(.85) brightness(.92)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4{filter:saturate(.85) brightness(.92)}}
+.bigstart .bs-rule{background:var(--sheet);border-color:var(--line)}
+/* 卡片與按鈕 */
+.ccard{border-radius:26px!important;box-shadow:var(--lift)!important}
+.btn{border-radius:99px}
+.btn.ghost{background:var(--sheet);box-shadow:0 0 0 1.5px var(--line) inset}
+.tag{background:var(--beige)}
+.tag.amber{background:var(--mark);color:#4A3442}
+.ccard .band{background:var(--red-fill)!important}
+.band,.banner,.banner small{color:#fff!important}
+.ccard .reward{background:var(--mark)!important;color:#4A3442!important}
+input,select,textarea{border-radius:16px!important}
+input:focus,select:focus,textarea:focus{border-color:var(--red)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--red) 18%,transparent)!important;outline:none}
+.logo .paw{box-shadow:0 3px 0 rgba(160,50,90,.25)!important}
+/* 其他頁的大按鈕也換成粉彩（看到撿到、受傷等） */
+.bigbtn.b-red{background:#FFC6D3!important}.bigbtn.b-green{background:#BFEBD9!important}.bigbtn.b-yellow{background:#FFE7A8!important}.bigbtn.b-white{background:var(--sheet)!important;border-color:var(--line)!important}
+a.bigbtn.b-red,a.bigbtn.b-red *,a.bigbtn.b-green,a.bigbtn.b-green *,a.bigbtn.b-yellow,a.bigbtn.b-yellow *,button.bigbtn.b-red,button.bigbtn.b-green{color:#4A3442!important}
+.bigbtn{box-shadow:0 8px 20px -10px rgba(220,100,150,.45)!important;border-radius:28px!important}
+.bigbtn .bb-ic{background:rgba(255,255,255,.65)!important}
+.bigbtn.b-red::after,.bigbtn.b-green::after{filter:invert(.7) sepia(1) hue-rotate(290deg);opacity:.18!important}
+/* 我的毛孩：粉紅圈 */
+.mp-ph{box-shadow:0 0 0 3px #FFB3C7!important}
+.mp-cta{background:var(--lav)!important}.mp-cta-ic{background:#8E7CE0!important}
+/* 標題圖示圓底：粉色 */
+h2 > .ico:first-child{background:var(--red-soft)!important}
+/* 頁首分頁（找毛孩／健康手冊）：粉嫩膠囊 */
+@media (max-width:760px){
+  .space{background:var(--beige)!important;border-radius:22px!important;margin:4px 14px 8px!important;padding:5px!important;display:grid!important;grid-template-columns:1fr 1fr;gap:4px}
+  .space a{border-radius:18px!important;color:var(--ink-3)!important}
+  .space a.on{background:var(--sheet)!important;color:var(--red)!important;box-shadow:0 4px 12px -6px rgba(220,100,150,.5)}
+  body[data-space="health"] .space a.on{color:var(--green)!important}
+  .tabbar{border-radius:26px 26px 0 0!important;box-shadow:0 -6px 22px rgba(220,100,150,.16)!important}
+  .tabbar a.on{color:var(--red)!important}
+  .tabbar a.on:not(.cta):not(.cta2) .i{background:var(--red-soft)!important}
+  .mbar{background:color-mix(in srgb,var(--paper) 92%,transparent)!important}
+  .mb-back svg{color:var(--red)!important}
+  footer{background:var(--beige)!important}
+}
+
+/* 手機：篩選收起來（狀態、有獎金），列表上方只留最常用的 */
+.m-only{display:none}
+@media (max-width:760px){
+  .m-only{display:inline-flex}
+  .pillbar:not(.open) .mf{display:none!important}
+  .pillbar.open #btnMoreF{background:var(--red-soft);color:var(--red)}
+  /* 好按：小按鈕至少 44px 高 */
+  .btn.sm{min-height:44px}
+  .pill{min-height:44px}
+  .linkbtn{min-height:40px;display:inline-flex;align-items:center}
+  details>summary{min-height:44px;display:flex;align-items:center;gap:6px}
+  .pwmore summary{display:inline-flex}
+  .ccard .t{display:inline-block;padding:6px 0}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#FFF6EA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1C1611" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFF6F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1E171C" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="汪喵回家">
 </head>
@@ -1145,7 +1243,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.20.0';
+const BUILD = 'v4.0.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1622,20 +1720,23 @@ function bindEntry(kind,id){const go=()=>{const t=extractToken($('#tk').value);i
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
 // 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
 async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
-  const cta=`<a class="mp-cta" href="#/health"><span class="mp-cta-ic">${pawSvg()}</span><span class="bb-t"><b>我的毛孩</b><small>記下生日、年齡，疫苗回診到期提醒</small></span><span aria-hidden="true">›</span></a>`;
-  if(!me()){el.innerHTML=cta;return}
+  if(!me()){el.innerHTML='';return}   // 沒登入：四宮格裡已經有「健康手冊」，不再重複
+  getProfile().then(p=>{const n=(p&&p.display_name||'').trim();const h=$('#hiName');if(n&&h&&_n===navId)h.textContent=' '+n.slice(0,12)}).catch(()=>{});
   const {data,error}=await sb.from('pets').select('id,name,species,photos,birthday').order('created_at').limit(12);
   if(_n!==navId||!el.isConnected)return;
-  if(error||!data||!data.length){el.innerHTML=error?'':cta;return}
+  if(error||!data||!data.length){el.innerHTML='';return}
   el.innerHTML=`<div class="mp-h"><b>${pawSvg()} 我的毛孩</b><a href="#/health">健康手冊 ›</a></div><div class="mp-row">${data.map(p=>{const ph=p.photos?.[0];const b=bdayInfo(p.birthday);
     return `<a class="mp" href="#/pet/${p.id}"><span class="mp-ph ${p.species==='cat'?'cat':''}">${ph?thumbImg(ph,p.name):spIc(p.species)}${b&&b.days===0?'<i class="mp-cake" aria-hidden="true">🎂</i>':''}</span><b>${esc(p.name)}</b><small>${esc(petAge(p.birthday)||(p.species==='cat'?'貓咪':'狗狗'))}</small>${b&&b.days<=30?`<em class="bd-chip soon">${b.days===0?'今天生日':`${b.days} 天後生日`}</em>`:''}</a>`}).join('')}<a class="mp add" href="#/pet/new"><span class="mp-ph">${ic('plus')}</span><b>新增</b><small>&nbsp;</small></a></div>`;
 }
 function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     ${mineHTML()}
-    <p class="bs-hello"><img src="duo.svg" alt="" width="66" height="45" class="bs-duo"><span class="bs-hi"><span class="nw">需要幫忙嗎？</span><span class="nw">點一個就好</span></span></p>
-    <a href="#/new" class="bigbtn b-red"><span class="bb-ic">${ic("search")}</span><span class="bb-t"><b>我的毛孩走失了</b><small>登記協尋、做尋狗尋貓海報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
-    <a href="#/seen" class="bigbtn b-green"><span class="bb-ic">${pawSvg()}</span><span class="bb-t"><b>我看到／撿到毛孩</b><small>受傷的毛孩也從這裡通報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
-    <button type="button" class="bigbtn b-white" id="bigNear"><span class="bb-ic">${ic("pin")}</span><span class="bb-t"><b>看我附近走失的毛孩</b><small>依離你的距離排好</small></span><span class="bb-go" aria-hidden="true">›</span></button>
+    <p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>
+    <div class="tiles4">
+      <a href="#/new" class="tile4 tp"><span class="te" aria-hidden="true">🔍</span><b>毛孩走失了</b><small>登記・做協尋海報</small></a>
+      <a href="#/seen" class="tile4 tm"><span class="te" aria-hidden="true">👀</span><b>看到／撿到</b><small>拍照回報給飼主</small></a>
+      <button type="button" class="tile4 tb" id="bigNear"><span class="te" aria-hidden="true">📍</span><b>附近走失</b><small>離我最近的毛孩</small></button>
+      <a href="#/health" class="tile4 tl"><span class="te" aria-hidden="true">🩺</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
+    </div>
     <div id="myPets" class="mypets"></div>
     <p class="bs-rule"><span class="bs-paw">${pawSvg()}</span><span><b>看到走失的狗貓：</b>先別追，拍照回報就好。</span></p>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
@@ -1659,8 +1760,9 @@ ${bigStartHTML()}
     <select id="fSp" class="pill" aria-label="種類"><option value="">狗＋貓</option><option value="dog">只看狗</option><option value="cat">只看貓</option></select>
     <select id="fCity" class="pill" aria-label="縣市">${cityOptions(homeState.city).replace('選擇縣市','全台')}</select>
     <button type="button" class="pill" id="btnNear">${ic('pin')} ${homeState.near?'依距離排序中':'我附近'}</button>
-    <select id="fStatus" class="pill lost-f" aria-label="狀態"><option value="searching">協尋中</option><option value="found">已找到</option><option value="">全部狀態</option></select>
-    <label class="pill chkpill lost-f"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 有獎金</label>
+    <button type="button" class="pill m-only" id="btnMoreF" aria-expanded="false">⚙️ 篩選</button>
+    <select id="fStatus" class="pill lost-f mf" aria-label="狀態"><option value="searching">協尋中</option><option value="found">已找到</option><option value="">全部狀態</option></select>
+    <label class="pill chkpill lost-f mf"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 有獎金</label>
   </div>
   <p class="muted small" id="nearInfo" style="margin:6px 2px 0"></p>
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
@@ -1670,6 +1772,8 @@ ${bigStartHTML()}
   <a class="crosslink m-hide" href="#/health"><span class="cl-ic">${ic("steth")}</span><span><b>想記錄自家毛孩的健康？</b>回診、疫苗、驅蟲到期自動提醒，同步手機日曆。到「健康手冊」免費使用</span><em>前往健康手冊</em></a>
   `;
   $('#fStatus').value=homeState.status;$('#fSp').value=homeState.species;
+  {const pb=document.querySelector('.pillbar'),mb=$('#btnMoreF');if(pb&&mb){if(homeState.status!=='searching'||homeState.reward)pb.classList.add('open');mb.setAttribute('aria-expanded',pb.classList.contains('open'));
+    mb.onclick=()=>{pb.classList.toggle('open');mb.setAttribute('aria-expanded',pb.classList.contains('open'))}}}
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;homeState.limit=60;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));setHomeTab(homeState.tab);loadList()}});
   const run=()=>{homeState.species=$('#fSp').value;homeState.city=$('#fCity').value;homeState.status=$('#fStatus').value;const qv=$('#fQ').value.trim();homeState.chip='';homeState.q=qv;homeState.limit=60;document.querySelector('.chkpill').classList.toggle('on',$('#fReward').checked);homeState.reward=$('#fReward').checked;loadList()};
   ['fSp','fCity','fStatus','fReward'].forEach(id=>$('#'+id).addEventListener('change',run));

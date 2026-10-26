@@ -2,7 +2,7 @@
   "appId": "com.wangmiaotw.app",
   "appName": "汪喵回家",
   "webDir": "www",
-  "backgroundColor": "#EFF2EE",
+  "backgroundColor": "#FFF6F8",
   "loggingBehavior": "none",
   "appendUserAgent": "WangMiaoApp",
   "ios": {
@@ -20,7 +20,7 @@
     "SplashScreen": {
       "launchShowDuration": 1200,
       "launchAutoHide": true,
-      "backgroundColor": "#CC3F1E",
+      "backgroundColor": "#FFD3DF",
       "showSpinner": false,
       "androidScaleType": "CENTER_CROP"
     },
