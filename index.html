@@ -1265,6 +1265,40 @@ body{touch-action:manipulation}
   body[data-route="me"] #app .grid>p.muted{background:var(--sheet);border-radius:20px;padding:14px 16px;margin:0;box-shadow:var(--lift);font-size:14.5px}
   body[data-route="me"] .crosslink{border-left:0!important;box-shadow:var(--lift)}
 }
+
+/* ===== v4.4 協尋名單分頁、首頁協尋預覽 ===== */
+@media (max-width:760px){
+  #app:not(.listonly) .homelist{display:none}
+}
+#app.listonly .bigstart,#app.listonly #recentWrap,#app.listonly #homeWrap,#app.listonly .crosslink,#app.listonly .install{display:none!important}
+#app.listonly .homelist>h2:first-child{margin-top:4px;font-size:26px}
+#app.listonly .homelist>h2:first-child .ico{display:none}
+.lostprev:empty{display:none}
+.lostprev{min-width:0}
+.lp-n{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 7px;border-radius:99px;background:var(--red-fill);color:#fff;font:700 13px var(--body);margin-left:4px}
+.lostprev .mp-h b .ico{color:var(--red)}
+.lostprev .mp-h a{color:var(--red)}
+.lp-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}.lp-row::-webkit-scrollbar{display:none}
+.lp{flex:none;width:118px;scroll-snap-align:start;text-decoration:none!important;color:var(--ink)!important;display:flex;flex-direction:column;gap:1px}
+.lp-ph{position:relative;width:118px;height:118px;border-radius:22px;overflow:hidden;background:var(--beige);display:grid;place-items:center;box-shadow:var(--lift);color:var(--ink-3)}
+.lp-ph img{width:100%;height:100%;object-fit:cover}.lp-ph .ico{width:34px;height:34px}
+.lp-ph em{position:absolute;left:6px;top:6px;font-style:normal;background:var(--red-fill);color:#fff;font-size:11.5px;font-weight:800;padding:1px 7px;border-radius:99px}
+.lp b{font-size:15px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp small{font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp-all .lp-ph{background:var(--red-soft);color:var(--red)}.lp-all .lp-ph .ico{width:30px;height:30px}
+.sri.s5{background:#FFD9C7;color:#B5502A}
+
+/* 首頁快捷：領養、受傷、攻略 */
+.qrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (min-width:900px){.qrow{grid-column:1/-1}}
+.qk{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px;border-radius:20px;background:var(--sheet);box-shadow:var(--lift);text-decoration:none!important;color:var(--ink)!important;min-width:0}
+.qk:active{transform:scale(.97)}
+.qi{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;margin-bottom:6px}.qi .ico{width:21px;height:21px}
+.qi.q1{background:#BFEBD9;color:#18704F}.qi.q2{background:#FFD9C7;color:#B5502A}.qi.q3{background:#D9D2FF;color:#5A46C4}
+.qk b{font-size:15px;line-height:1.3}.qk small{font-size:12px;color:var(--ink-3);line-height:1.35}
+.sri.s6{background:#BFEBD9;color:#18704F}
+/* 首頁手機版：底部的領養推薦已經在上面快捷，不重複 */
+@media (max-width:760px){#app:not(.listonly) a.crosslink[href="#/adopt"]{display:none}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1329,7 +1363,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.3.0';
+const BUILD = 'v4.4.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1589,15 +1623,18 @@ function spaceOf(path){
 // 底部「我的」：沒登入時寫「註冊／登入」，讓新朋友知道可以加入
 function meLabel(){try{return session?.user?'我的':'註冊／登入'}catch(_){return '註冊／登入'}}
 // 底部選單：固定 5 個（像一般 App），中間「＋」打開新增選單
-function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/health','health',tbI('book')+'健康'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/?near=1','near',tbI('map')+'附近'],['#/me','me',tbI('me')+'我的']]}
+const TI_SEARCH='<svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>';
+function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/health','health',tbI('book')+'健康'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/lost','lost',TI_SEARCH+'協尋'],['#/me','me',tbI('me')+'我的']]}
 function openAddSheet(){
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   const r=(h,i,c,t,d)=>`<a class="srow" href="${h}"><span class="sri ${c}">${i}</span><span class="srt"><b>${t}</b><small>${d}</small></span>${ic('chev','mrc')}</a>`;
   el.innerHTML=`<div class="sheet" role="dialog" aria-label="新增"><div class="grab" aria-hidden="true"></div><p class="sh-t">要做什麼呢？</p>
-    ${r('#/new',ic('search'),'s1','我的毛孩走失了','登記協尋，自動做海報')}
+    ${r('#/new',ic('megaphone'),'s1','我的毛孩走失了','登記協尋，自動做海報')}
     ${r('#/seen',ic('eye'),'s2','我看到／撿到毛孩','拍照回報給飼主')}
     ${r('#/health/add',ic('clipboard'),'s3','新增健康紀錄','看診、疫苗、驅蟲、體重')}
     ${r('#/pet/new',ic('paw'),'s4','新增毛孩檔案','生日、晶片、照片')}
+    ${r('#/lost',ic('search'),'s5','看正在協尋的毛孩','幫忙找、分享出去')}
+    ${r('#/adopt',ic('shelter'),'s6','我想領養毛孩','全台公立收容所，依縣市看照片')}
     <button type="button" class="btn ghost block sh-x">取消</button></div>`;
   el.onclick=e=>{const a=e.target.closest('a.srow');if(a){e.preventDefault();const h=a.getAttribute('href');closeOverlay(el);setTimeout(()=>{location.hash=h},80);return}
     if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};
@@ -1608,7 +1645,7 @@ function renderChrome(path,h){
   document.body.dataset.route=(path.replace(/^#\/?/,'').split('/')[0]||'home');
   const space=spaceOf(path);document.body.dataset.space=space;
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
-  const rk=path==='#/'||path==='#'?(qs(h).near?'near':'home'):(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
+  const rk=(path==='#/lost'||((path==='#/'||path==='#')&&qs(h).tab))?'lost':path==='#/'||path==='#'?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
   const items=space==='health'
    ?TABS():TABS();
   $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${r===rk?'on':''}"${r==='add'?' role="button" aria-label="新增"':''}>${inner}</a>`).join('');
@@ -1649,7 +1686,7 @@ function trackDepth(wasPop){const st=history.state,h=location.hash||'#/';
   if(st&&typeof st.d==='number'&&st.h===h){const trav=!__firstRoute;navDepth=st.d;__firstRoute=false;__replacing=false;return trav}
   if(__firstRoute)navDepth=0;else if(!__replacing)navDepth=navDepth+1;__firstRoute=false;   // 新的一頁（瀏覽器在換 #網址時也會發 popstate，所以不能靠它判斷是不是上一頁）
   __replacing=false;try{history.replaceState(Object.assign({},st||{},{d:navDepth,h}),'')}catch(_){}return false}
-const TOP_PAGES=/^#\/?(\?.*)?$|^#\/(health|me|login|seen)(\?.*)?$/;
+const TOP_PAGES=/^#\/?(\?.*)?$|^#\/(health|me|login|seen|lost)(\?.*)?$/;
 function parentOf(h){const p=h.split('?')[0];let m;
   if((m=p.match(/^#\/(report|manage|poster)\/([0-9a-f-]{36})/)))return '#/case/'+m[2];
   if((m=p.match(/^#\/found-manage\/([0-9a-f-]{36})/)))return '#/found/'+m[1];
@@ -1690,7 +1727,7 @@ function route(){
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
   if(!window.L&&!leafletGaveUp&&/^#\/(new$|case\/|report\/|found\/new|injured$|found\/[0-9a-f-]{36}$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
-  if(path==='#/'||path==='#')return renderHome();
+  if(path==='#/'||path==='#'||path==='#/lost')return renderHome();
   if(path==='#/new')return renderNew();
   if((m=path.match(/^#\/case\/([0-9a-f-]{36})$/)))return renderCase(m[1]);
   if((m=path.match(/^#\/report\/([0-9a-f-]{36})$/)))return renderReport(m[1]);
@@ -1807,7 +1844,7 @@ function renderSetup(){
    首頁 v1.1：走失 / 拾獲 / 地圖 三個分頁、我附近、最新目擊
    ============================================================ */
 const homeState={tab:'lost',species:'',city:'',status:'searching',reward:false,q:'',chip:'',near:null,limit:60};
-function setHomeTab(t){const h=t==='lost'?'#/':'#/?tab='+t;if(location.hash===h)return;try{history.replaceState(history.state,'',location.pathname+location.search+h)}catch(_){}curHash=location.hash;scrollMem[curHash]=scrollY;renderChrome('#/',location.hash)}
+function setHomeTab(t){const base=(location.hash||'#/').split('?')[0]==='#/lost'?'#/lost':'#/';const h=t==='lost'?base:base+'?tab='+t;if(location.hash===h)return;try{history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h)}catch(_){}curHash=location.hash;scrollMem[curHash]=scrollY;renderChrome(base,location.hash)}
 
 // 這支手機登記過的案件／通報（不用登入也找得回來）
 function getMine(){try{const l=JSON.parse(localStorage.getItem('wh_mine')||'[]');return Array.isArray(l)?l.filter(x=>x&&/^[0-9a-f-]{36}$/.test(x.id)&&(x.t==='case'||x.t==='found')):[]}catch(_){return []}}
@@ -1829,6 +1866,17 @@ function entryHTML(kind,id){const what=kind==='case'?'走失案件':'通報';
 function bindEntry(kind,id){const go=()=>{const t=extractToken($('#tk').value);if(!t)return toast('請先貼上管理網址');location.hash=`#/${kind==='case'?'manage':'found-manage'}/${id}?t=${encodeURIComponent(t)}`};
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
 // 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
+// 首頁：正在協尋的毛孩（左右滑的預覽），點「看全部」到協尋名單
+async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
+  const [{data,error},{count}]=await Promise.all([sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,lost_at,status,poster').eq('status','searching').order('lost_at',{ascending:false}).limit(10),
+    sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching')]);
+  if(_n!==navId||!el.isConnected||error||!data)return;
+  const list=data.filter(c=>!userHidden(c));
+  if(!list.length){el.innerHTML='';return}
+  el.innerHTML=`<div class="mp-h"><b>${ic('search')} 正在協尋的毛孩${count?` <span class="lp-n">${count}</span>`:''}</b><a href="#/lost">看全部 ›</a></div>
+  <div class="lp-row">${list.map(c=>{const ph=c.photos?.[0];return `<a class="lp" href="#/case/${c.id}"><span class="lp-ph ${ph?'':'noimg'} ${c.species==='cat'?'cat':''}">${ph?thumbImg(ph,c.name):spIc(c.species)}<em>第 ${daysSince(c.lost_at)} 天</em></span><b>${esc(c.name)}</b><small>${esc((c.lost_city||'')+(c.lost_district||''))}</small></a>`}).join('')}
+  <a class="lp lp-all" href="#/lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>&nbsp;</small></a></div>`;
+}
 async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
   if(!me()){el.innerHTML='';return}   // 沒登入：四宮格裡已經有「健康手冊」，不再重複
   getProfile().then(p=>{const n=(p&&p.display_name||'').trim();const h=$('#hiName');if(n&&h&&_n===navId)h.textContent=' '+n.slice(0,12)}).catch(()=>{});
@@ -1847,19 +1895,29 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <button type="button" class="tile4 tb" id="bigNear"><span class="te">${ic("pin")}</span><b>附近走失</b><small>離我最近的毛孩</small></button>
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
+    <div id="lostPrev" class="lostprev"></div>
+    <div class="qrow" aria-label="更多服務">
+      <a href="#/adopt" class="qk"><span class="qi q1">${ic('shelter')}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
+      <a href="#/injured" class="qk"><span class="qi q2">${ic('siren')}</span><b>受傷通報</b><small>一鍵撥打 1959</small></a>
+      <a href="#/resources" class="qk"><span class="qi q3">${ic('clipboard')}</span><b>協尋攻略</b><small>黃金 48 小時</small></a>
+    </div>
     <div id="myPets" class="mypets"></div>
     <p class="bs-rule"><span class="bs-paw">${pawSvg()}</span><span><b>看到走失的狗貓：</b>先別追，拍照回報就好。</span></p>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   </section>
 `}
+// 「協尋」分頁（#/lost）＝只看名單；首頁（#/）＝四宮格＋協尋預覽。帶 ?tab= 的舊連結也直接進名單
+function isListOnly(){const h=location.hash||'#/';return h.split('?')[0]==='#/lost'||!!qs(h).tab}
 async function renderHome(){const _n=navId;
   document.title='汪喵回家 — 全台走失毛孩協尋平台';
+  const LO=isListOnly();app.classList.toggle('listonly',LO);if(LO)setTitle('正在協尋的毛孩');
   {const t=qs(location.hash).tab;homeState.tab=(t==='map'||t==='found')?t:'lost'}   // 分頁記在網址上，按「上一頁」會回到原本的分頁
   (_n===navId?app:_void).innerHTML=`
   <div class="install" id="installBar">📱 把汪喵回家加到主畫面，像 App 一樣使用<button class="btn sm" id="btnInstall">安裝</button></div>
 <h1 class="sr-only">汪喵回家：全台走失狗貓協尋平台</h1>
 ${bigStartHTML()}
-  <h2 id="listTitle">${ic("search")} 大家正在找的毛孩</h2>
+  <div class="homelist">
+  <h2 id="listTitle">${ic("search")} ${isListOnly()?'正在協尋的毛孩':'大家正在找的毛孩'}</h2>
   <div class="tabs" id="tabs">
     <button data-t="lost">走失協尋<span class="cnt" id="cLost">…</span></button>
     <button data-t="found">拾獲／目擊<span class="cnt" id="cFound">…</span></button>
@@ -1876,6 +1934,7 @@ ${bigStartHTML()}
   </div>
   <p class="muted small" id="nearInfo" style="margin:6px 2px 0"></p>
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
+  </div>
   <div id="recentWrap" class="hidden"><h2>${ic("eye")} 最新目擊</h2><div class="recent" id="recent"></div></div>
   <div id="homeWrap" class="hidden"><h2>${ic("paw")} 最近回家的毛孩</h2><div class="reunite" id="reunite"></div></div>
   <a class="crosslink" href="#/adopt"><span class="cl-ic">${ic("shelter")}</span><span><b>想領養毛孩？</b>全台公立收容所有上千隻狗狗、貓咪在等一個家。依縣市看照片，一鍵打電話給收容所</span><em>看等待領養的毛孩</em></a>
@@ -1894,10 +1953,10 @@ ${bigStartHTML()}
     toast('定位中…');
     navigator.geolocation.getCurrentPosition(p=>{homeState.near={lat:p.coords.latitude,lng:p.coords.longitude};$('#btnNear').textContent='✕ 取消距離排序';$('#btnNear').classList.add('on');$('#nearInfo').textContent='依離你的距離排序（不會儲存你的位置）';loadList()},err=>toast(err&&err.code===1?(IS_APP?'你沒有允許定位。請到手機「設定」→ 汪喵回家，允許使用位置後再試一次':'你沒有允許定位。請到瀏覽器或手機設定，允許這個網站使用位置後再試一次'):'暫時抓不到你的位置（訊號不好或逾時），請稍後再試',6000),{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
   };
-  if(qs(location.hash).near)setTimeout(()=>{const b=$('#bigNear');if(b&&_n===navId)b.click()},50);
-  $('#bigNear').onclick=()=>{homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
+  if(qs(location.hash).near)setTimeout(()=>{if(_n!==navId)return;if(!homeState.near&&$('#btnNear'))$('#btnNear').click()},80);
+  if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
-  loadStats();loadRecent();loadReunited();loadList();loadMyPets(_n);
+  loadStats();loadRecent();loadReunited();loadList();loadMyPets(_n);if(!LO)loadLostPrev(_n);
 }
 function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" aria-labelledby="promoT">
   <div class="promo-txt">
