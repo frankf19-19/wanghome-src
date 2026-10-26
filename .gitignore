@@ -1,3 +1,11 @@
 dist/
 __pycache__/
 *.pyc
+app/node_modules/
+app/www/
+app/android/.gradle/
+app/android/app/build/
+app/android/build/
+app/android/local.properties
+app/ios/App/build/
+app/ios/DerivedData/
