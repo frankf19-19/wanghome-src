@@ -1309,6 +1309,21 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 .mphbox img{width:100%;max-height:62vh;object-fit:contain;background:#000}
 .mph-b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;color:var(--ink)}
 .mph-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.mph-acts .btn{flex:1 1 40%;min-height:48px;white-space:nowrap}.mph-acts a.btn:first-child{flex-basis:100%}
+
+/* 多選標籤（篩選） */
+.fgrp{margin-top:12px}.fgrp>b{display:block;font-size:14px;color:var(--ink-2);margin:0 2px 6px}
+.fchips{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{min-height:40px;padding:6px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--sheet);color:var(--ink);font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.fchip i{font-style:normal;font-size:12px;color:var(--ink-3);font-weight:600}
+.fchip.on{background:var(--red-fill);border-color:var(--red-fill);color:#fff}.fchip.on i{color:rgba(255,255,255,.85)}
+.fchip.on::before{content:"✓";font-weight:800;margin-right:2px}
+.fchip.more{border-style:dashed;color:var(--ink-3)}
+.fsum{margin-top:10px;font-size:14px;color:var(--ink-2)}.fsum:empty{display:none}
+
+.fbtn .fcnt{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:99px;background:var(--red-fill);color:#fff;font-size:12px;margin-left:4px}.fbtn .fcnt:empty{display:none}
+.pill.fact{background:var(--red-soft);color:var(--red);border-color:transparent!important;font-weight:700}
+.fsheet{max-height:86vh;overflow-y:auto}
+.fs-acts{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:var(--paper);padding-top:8px}.fs-acts .btn{flex:1;min-height:50px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1373,7 +1388,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.4.2';
+const BUILD = 'v4.6.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1853,7 +1868,29 @@ function renderSetup(){
 /* ============================================================
    首頁 v1.1：走失 / 拾獲 / 地圖 三個分頁、我附近、最新目擊
    ============================================================ */
-const homeState={tab:'lost',species:'',city:'',status:'searching',reward:false,q:'',chip:'',near:null,limit:60};
+const homeState={tab:'lost',species:[],city:[],status:['searching'],reward:false,q:'',chip:'',near:null,limit:60};
+// 多選篩選：一個就用 eq，多個用 in；狗＋貓都選＝不限
+function fIn(q,col,arr){return !arr||!arr.length?q:arr.length===1?q.eq(col,arr[0]):q.in(col,arr)}
+function fSp(q){return homeState.species.length===1?q.eq('species',homeState.species[0]):q}
+function fCount(){return (homeState.species.length===1?1:0)+homeState.city.length+((homeState.status.length===1&&homeState.status[0]==='searching')?0:1)+(homeState.reward?1:0)}
+function openFilterSheet(after){const st={species:[...homeState.species],city:[...homeState.city],status:[...homeState.status],reward:homeState.reward};
+  const ch=(k,v,t)=>`<button type="button" class="fchip ${st[k].includes(v)?'on':''}" data-k="${k}" data-v="${v}" aria-pressed="${st[k].includes(v)}">${t}</button>`;
+  const el=document.createElement('div');el.className='lightbox sheet-bg';
+  el.innerHTML=`<div class="sheet fsheet" role="dialog" aria-label="篩選"><div class="grab" aria-hidden="true"></div><p class="sh-t">篩選（可以多選）</p>
+   <div class="fgrp"><b>種類</b><div class="fchips">${ch('species','dog','狗')}${ch('species','cat','貓')}</div></div>
+   ${homeState.tab==='found'?'':`<div class="fgrp"><b>狀態</b><div class="fchips">${ch('status','searching','協尋中')}${ch('status','found','已找到')}${ch('status','closed','已結案')}</div></div>`}
+   <div class="fgrp"><b>縣市</b><div class="fchips">${Object.keys(CITY_CENTER).map(c=>ch('city',c,c)).join('')}</div></div>
+   ${homeState.tab==='found'?'':`<div class="fgrp"><b>其他</b><div class="fchips"><button type="button" class="fchip ${st.reward?'on':''}" data-rw="1" aria-pressed="${st.reward}">有獎金</button></div></div>`}
+   <div class="fs-acts"><button type="button" class="btn ghost" data-clear>全部清除</button><button type="button" class="btn" data-apply>套用</button></div></div>`;
+  el.onclick=e=>{const c=e.target.closest('.fchip[data-k]');if(c){const a=st[c.dataset.k],v=c.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);c.classList.toggle('on',i<0);c.setAttribute('aria-pressed',i<0);return}
+    const r=e.target.closest('[data-rw]');if(r){st.reward=!st.reward;r.classList.toggle('on',st.reward);r.setAttribute('aria-pressed',st.reward);return}
+    if(e.target.closest('[data-clear]')){st.species=[];st.city=[];st.status=['searching'];st.reward=false;el.querySelectorAll('.fchip').forEach(x=>{const on=x.dataset.k==='status'&&x.dataset.v==='searching';x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});return}
+    if(e.target.closest('[data-apply]')){if(!st.status.length)st.status=['searching'];Object.assign(homeState,st,{limit:60});closeOverlay(el);after&&after();return}
+    if(e.target===el)closeOverlay(el)};
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
+function fActiveHTML(){const a=[];homeState.species.length===1&&a.push(['sp',homeState.species[0]==='dog'?'狗':'貓']);homeState.city.forEach(c=>a.push(['city',c,c]));
+  if(!(homeState.status.length===1&&homeState.status[0]==='searching'))a.push(['st',homeState.status.map(x=>({searching:'協尋中',found:'已找到',closed:'已結案'})[x]).join('＋')]);homeState.reward&&a.push(['rw','有獎金']);
+  return a.map(([k,t,v])=>`<button type="button" class="pill fact" data-rm="${k}" data-v="${esc(v||'')}" aria-label="取消 ${esc(t)}">${esc(t)} ✕</button>`).join('')}
 function setHomeTab(t){const base=(location.hash||'#/').split('?')[0]==='#/lost'?'#/lost':'#/';const h=t==='lost'?base:base+'?tab='+t;if(location.hash===h)return;try{history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h)}catch(_){}curHash=location.hash;scrollMem[curHash]=scrollY;renderChrome(base,location.hash)}
 
 // 這支手機登記過的案件／通報（不用登入也找得回來）
@@ -1935,12 +1972,9 @@ ${bigStartHTML()}
   </div>
   <div class="searchbar" id="lostFilters">${ic("search")}<input type="search" id="fQ" aria-label="搜尋走失毛孩" enterkeyhint="search" placeholder="搜尋名字、品種、地點、晶片末4碼" value="${esc(homeState.chip||homeState.q)}"></div>
   <div class="pillbar">
-    <select id="fSp" class="pill" aria-label="種類"><option value="">狗＋貓</option><option value="dog">只看狗</option><option value="cat">只看貓</option></select>
-    <select id="fCity" class="pill" aria-label="縣市">${cityOptions(homeState.city).replace('選擇縣市','全台')}</select>
+    <button type="button" class="pill fbtn" id="btnFilter">⚙️ 篩選<span class="fcnt" id="fCnt"></span></button>
     <button type="button" class="pill" id="btnNear">${ic('pin')} ${homeState.near?'依距離排序中':'我附近'}</button>
-    <button type="button" class="pill m-only" id="btnMoreF" aria-expanded="false">⚙️ 篩選</button>
-    <select id="fStatus" class="pill lost-f mf" aria-label="狀態"><option value="searching">協尋中</option><option value="found">已找到</option><option value="">全部狀態</option></select>
-    <label class="pill chkpill lost-f mf"><input type="checkbox" id="fReward" ${homeState.reward?'checked':''}> 有獎金</label>
+    <span id="fActive" style="display:contents"></span>
   </div>
   <p class="muted small" id="nearInfo" style="margin:6px 2px 0"></p>
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
@@ -1950,12 +1984,11 @@ ${bigStartHTML()}
   <a class="crosslink" href="#/adopt"><span class="cl-ic">${ic("shelter")}</span><span><b>想領養毛孩？</b>全台公立收容所有上千隻狗狗、貓咪在等一個家。依縣市看照片，一鍵打電話給收容所</span><em>看等待領養的毛孩</em></a>
   <a class="crosslink m-hide" href="#/health"><span class="cl-ic">${ic("steth")}</span><span><b>想記錄自家毛孩的健康？</b>回診、疫苗、驅蟲到期自動提醒，同步手機日曆。到「健康手冊」免費使用</span><em>前往健康手冊</em></a>
   `;
-  $('#fStatus').value=homeState.status;$('#fSp').value=homeState.species;
-  {const pb=document.querySelector('.pillbar'),mb=$('#btnMoreF');if(pb&&mb){if(homeState.status!=='searching'||homeState.reward)pb.classList.add('open');mb.setAttribute('aria-expanded',pb.classList.contains('open'));
-    mb.onclick=()=>{pb.classList.toggle('open');mb.setAttribute('aria-expanded',pb.classList.contains('open'))}}}
+  const showF=()=>{const n=fCount();const c=$('#fCnt');if(c)c.textContent=n?` ${n}`:'';const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
+  $('#btnFilter').onclick=()=>openFilterSheet(()=>{showF();loadList()});
+  $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;homeState.limit=60;showF();loadList()};
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;homeState.limit=60;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));setHomeTab(homeState.tab);loadList()}});
-  const run=()=>{homeState.species=$('#fSp').value;homeState.city=$('#fCity').value;homeState.status=$('#fStatus').value;const qv=$('#fQ').value.trim();homeState.chip='';homeState.q=qv;homeState.limit=60;document.querySelector('.chkpill').classList.toggle('on',$('#fReward').checked);homeState.reward=$('#fReward').checked;loadList()};
-  ['fSp','fCity','fStatus','fReward'].forEach(id=>$('#'+id).addEventListener('change',run));
+  const run=()=>{const qv=$('#fQ').value.trim();homeState.chip='';homeState.q=qv;homeState.limit=60;loadList()};
   let t;['fQ'].forEach(id=>$('#'+id).addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,400)}));
   $('#btnNear').onclick=()=>{
     if(homeState.near){homeState.near=null;$('#btnNear').innerHTML=ic('pin')+' 我附近';$('#btnNear').classList.remove('on');$('#nearInfo').textContent='';return loadList()}
@@ -2103,9 +2136,7 @@ async function loadList(){
   if(homeState.tab==='found')return loadFoundList(el);
   const lim=homeState.near?200:(homeState.limit||60);
   let q=sb.from('cases_public').select('*').order('last_activity',{ascending:false}).limit(lim);
-  if(homeState.status)q=q.eq('status',homeState.status);
-  if(homeState.species)q=q.eq('species',homeState.species);
-  if(homeState.city)q=q.eq('lost_city',homeState.city);
+  q=fIn(q,'status',homeState.status);q=fSp(q);q=fIn(q,'lost_city',homeState.city);
   if(homeState.reward)q=q.gt('reward',0);
   // 搜尋：名字、品種、毛色、地點、縣市、特徵都找；「台」「臺」都算；4 位數字同時比對晶片末四碼
   const kw=(homeState.q||homeState.chip||'').replace(/[%,()*\\]/g,'').trim();
@@ -2116,9 +2147,9 @@ async function loadList(){
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
   if(error){el.innerHTML=`<div class="empty">網路好像不太穩，清單沒有載入。<br><button type="button" class="btn" style="margin-top:10px" onclick="loadList()">再試一次</button></div>`;return}
   if(!data.length){
-    const filtered=homeState.q||homeState.chip||homeState.reward||homeState.status!=='searching'||homeState.species||homeState.city;
+    const filtered=homeState.q||homeState.chip||fCount()>0;
     if(filtered){el.innerHTML=`<div class="empty-card"><div class="big">${ic("search")}</div><b>找不到符合條件的案件</b><p class="small">試試別的關鍵字，或清除篩選看全部。</p><button type="button" class="btn" id="btnClearF">清除篩選</button></div>`;
-      $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:'searching',species:'',city:''});$('#fQ').value='';$('#fSp').value='';$('#fCity').value='';$('#fStatus').value='searching';$('#fReward').checked=false;loadList()};return}
+      $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
     el.innerHTML=emptyCard('lost');return}
   el.innerHTML=sortNear(data,'lost_lat','lost_lng').map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
 }
@@ -2129,15 +2160,14 @@ async function loadFoundList(el){
   const my=listSeq;
   const lim=homeState.near?200:(homeState.limit||60);
   let q=sb.from('found_public').select('*').eq('status','open').order('seen_at',{ascending:false}).limit(lim);
-  if(homeState.city)q=q.eq('city',homeState.city);
-  if(homeState.species)q=q.eq('species',homeState.species);
+  q=fIn(q,'city',homeState.city);q=fSp(q);
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
   if(error){el.innerHTML=`<div class="empty">網路好像不太穩，清單沒有載入。<br><button type="button" class="btn" style="margin-top:10px" onclick="loadList()">再試一次</button></div>`;return}
   if(!data.length){el.innerHTML=emptyCard('found');return}
   el.innerHTML=sortNear(data,'lat','lng').map(foundCardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
 }
 function emptyCard(kind){
-  const where=homeState.city?`${esc(homeState.city)}`:'目前';
+  const where=homeState.city.length?`${esc(homeState.city.join('、'))}`:'目前';
   return kind==='lost'
    ?`<div class="empty-card"><div class="big"><img src="duo.svg" alt="" width="120" height="82"></div><b>${where}沒有協尋中的走失案件</b><p class="small">這是好消息！如果你的毛孩走失了，越早登記越好，黃金時間是前 48 小時。</p><div class="btns"><a class="btn" href="#/new">登記走失</a><a class="btn ghost" href="#/resources">先看協尋攻略</a></div></div>`
    :`<div class="empty-card"><div class="big">${ic("hand")}</div><b>${where}沒有拾獲通報</b><p class="small">撿到或看到疑似走失的狗貓？登記後系統會自動比對附近的走失案件，通知飼主。</p><div class="btns"><a class="btn green" href="#/found/new">我看到／撿到毛孩</a></div></div>`;
@@ -2146,19 +2176,18 @@ async function loadMapAll(el){const my=listSeq;
   if(!window.L&&!leafletGaveUp){el.innerHTML='<div class="empty">地圖載入中…</div>';await waitLeaflet();if(my!==listSeq||!el.isConnected)return}
   el.className='';
   el.innerHTML='<div id="mapAll" class="map-all"></div><p class="muted small">紅點＝走失案件（最後目擊位置），綠點＝拾獲／目擊流浪通報。點標記看詳情。</p>';
-  const center=homeState.near?[homeState.near.lat,homeState.near.lng]:(homeState.city&&CITY_CENTER[homeState.city])||[23.7,120.95];
-  const map=makeMap('mapAll',center,homeState.near?13:homeState.city?11:7);
+  const center=homeState.near?[homeState.near.lat,homeState.near.lng]:(homeState.city.length===1&&CITY_CENTER[homeState.city[0]])||[23.7,120.95];
+  const map=makeMap('mapAll',center,homeState.near?13:homeState.city.length===1?11:7);
   let qc=sb.from('cases_public').select('id,species,name,lost_lat,lost_lng,lost_city,lost_district,photos,last_seen_at,poster').eq('status','searching').order('last_activity',{ascending:false}).limit(500);   // 案件很多時，先顯示最近有動靜的
   let qf=sb.from('found_public').select('id,species,kind,lat,lng,city,district,colour,size,photos,seen_at,poster').eq('status','open').order('seen_at',{ascending:false}).limit(500);
-  if(homeState.city){qc=qc.eq('lost_city',homeState.city);qf=qf.eq('city',homeState.city)}
-  if(homeState.species){qc=qc.eq('species',homeState.species);qf=qf.eq('species',homeState.species)}
+  qc=fIn(qc,'lost_city',homeState.city);qf=fIn(qf,'city',homeState.city);qc=fSp(qc);qf=fSp(qf);
   const [{data:cs},{data:fs},{data:ls}]=await Promise.all([qc,qf,sb.from('sightings_public').select('case_id,lat,lng,seen_at').order('seen_at',{ascending:false}).limit(1000)]);if(my!==listSeq||!el.isConnected)return;
   const last={};(ls||[]).forEach(s=>{if(!last[s.case_id]&&s.lat)last[s.case_id]=s});
   const pts=[];
   (cs||[]).filter(c=>!userHidden(c)).forEach(c=>{const p=last[c.id]||(c.lost_lat?{lat:c.lost_lat,lng:c.lost_lng}:null);if(!p)return;pts.push([p.lat,p.lng]);marker([p.lat,p.lng],c.species==='cat'?'貓':'狗','').addTo(map).bindPopup(`<a href="#/case/${c.id}"><b>${esc(c.name)}</b></a><br>${esc(c.lost_city)}${esc(c.lost_district||'')}<br>${last[c.id]?'最後目擊 '+fmtDT(last[c.id].seen_at):'走失地點'}`)});
   (fs||[]).filter(f=>!userHidden(f)).forEach(f=>{if(!f.lat)return;pts.push([f.lat,f.lng]);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(map).bindPopup(`<a href="#/found/${f.id}"><b>${f.kind==='injured'?'受傷':f.kind==='found'?'拾獲':'目擊'}：${esc([SIZE[f.size],f.colour].filter(Boolean).join('')+sp(f.species).name)}</b></a><br>${esc(f.city)}${esc(f.district||'')}<br>${fmtDT(f.seen_at)}`)});
   if(homeState.near)marker([homeState.near.lat,homeState.near.lng],'我','me').addTo(map);
-  if(pts.length&&!homeState.near&&!homeState.city)map.fitBounds(pts,{padding:[30,30],maxZoom:13});
+  if(pts.length&&!homeState.near&&homeState.city.length!==1)map.fitBounds(pts,{padding:[30,30],maxZoom:13});
   if(!pts.length)toast('目前地圖上沒有資料');
 }
 function cardHTML(c){
@@ -3269,12 +3298,16 @@ function adoptTel(r){return (String(r.tel||'').match(/[\d()+-]{7,}(#\d+)?/)||[''
 function adoptTitle(r){return [r.variety||'混種',r.sex==='M'?'公':r.sex==='F'?'母':'',ADOPT_SIZE[r.size]||'',ADOPT_AGE[r.age]||''].filter(Boolean).join('・')}
 function waitDays(r){return r.created?daysSince(r.created+'T00:00:00+08:00'):null}
 let adoptSeq=0;
-let adoptState={city:'',dist:'',kind:'狗',size:'',sex:'',age:'',sort:'new',photo:true,limit:30};
-try{const v=JSON.parse(localStorage.getItem('wh_adopt')||'null');if(v&&typeof v==='object')Object.assign(adoptState,{city:MOA_AREA[v.city]?v.city:'',dist:typeof v.dist==='string'?v.dist:'',kind:v.kind==='貓'?'貓':'狗'})}catch(_){}
+let adoptState={city:'',dist:[],kind:'狗',size:[],sex:[],age:[],variety:[],colour:[],ster:[],sort:'new',photo:true,limit:30};
+try{const v=JSON.parse(localStorage.getItem('wh_adopt')||'null');if(v&&typeof v==='object')Object.assign(adoptState,{city:MOA_AREA[v.city]?v.city:'',dist:Array.isArray(v.dist)?v.dist.filter(x=>typeof x==='string').slice(0,20):(typeof v.dist==='string'&&v.dist?[v.dist]:[]),kind:v.kind==='貓'?'貓':'狗'})}catch(_){}
 async function renderAdopt(){const _n=navId;
   setTitle('領養毛孩');
   const st=adoptState;   // 篩選、顯示幾筆都保留：從單筆頁返回時回到原本位置
   const opt=(arr,cur)=>arr.map(([v,t])=>`<option value="${v}" ${v===cur?'selected':''}>${t}</option>`).join('');
+  const SZ=[['SMALL','小型'],['MEDIUM','中型'],['BIG','大型']],SX=[['M','公'],['F','母']],AG=[['CHILD','幼年'],['ADULT','成年']],STR=[['T','已結紮'],['F','還沒結紮']];
+  // 可以多選的標籤：點了變色就是選了；都不選＝不限
+  const chips=(k,arr)=>arr.map(([v,t,n])=>`<button type="button" class="fchip ${st[k].includes(v)?'on':''}" data-k="${k}" data-v="${esc(v)}" aria-pressed="${st[k].includes(v)}">${esc(t)}${n!=null?` <i>${n}</i>`:''}</button>`).join('');
+  const nMore=()=>st.size.length+st.sex.length+st.age.length+(st.photo?0:1);
   app.innerHTML=`<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
   <div class="notice green"><b>想領養？先打電話給收容所</b>確認牠還在、問清楚領養流程與要帶的證件（通常要帶身分證），再親自去看看牠。各收容所規定不同，以收容所說明為準。</div>
@@ -3282,47 +3315,56 @@ async function renderAdopt(){const _n=navId;
     <div class="seg" id="aKind" role="group" aria-label="狗或貓"><button type="button" data-v="狗" aria-pressed="${st.kind==='狗'}" class="${st.kind==='狗'?'on':''}">${spIc('dog')} 狗</button><button type="button" data-v="貓" aria-pressed="${st.kind==='貓'}" class="${st.kind==='貓'?'on':''}">${spIc('cat')} 貓</button></div>
     <div class="row2" style="margin-top:10px">
       <label class="f" style="margin:0"><span>縣市</span><select id="aCity">${cityOptions(st.city)}</select></label>
-      <label class="f hidden" style="margin:0" id="aDistWrap"><span>地區</span><select id="aDist"></select></label>
+      <label class="f" style="margin:0"><span>先看哪些</span><select id="aSort">${opt([['new','剛進收容所的'],['old','在收容所最久的']],st.sort)}</select></label>
     </div>
-    <label class="f" style="margin:10px 0 0"><span>排序</span><select id="aSort">${opt([['new','最新進收容所'],['old','等最久的先']],st.sort)}</select></label>
-    <details class="more" style="margin-top:8px" ${st.size||st.sex||st.age||!st.photo?'open':''}><summary>更多條件（體型、性別、年紀）</summary>
-      <div class="row3">
-        <label class="f" style="margin:0"><span>體型</span><select id="aSize">${opt([['','不限'],['SMALL','小型'],['MEDIUM','中型'],['BIG','大型']],st.size)}</select></label>
-        <label class="f" style="margin:0"><span>性別</span><select id="aSex">${opt([['','不限'],['M','公'],['F','母']],st.sex)}</select></label>
-        <label class="f" style="margin:0"><span>年紀</span><select id="aAge">${opt([['','不限'],['CHILD','幼年'],['ADULT','成年']],st.age)}</select></label>
-      </div>
+    <div id="aDyn"></div>
+    <div class="fgrp"><b>結紮</b><div class="fchips">${chips('ster',STR)}</div></div>
+    <details class="more" style="margin-top:8px" ${nMore()?'open':''}><summary>更多條件（體型、性別、年紀）</summary>
+      <div class="fgrp"><b>體型</b><div class="fchips">${chips('size',SZ)}</div></div>
+      <div class="fgrp"><b>性別</b><div class="fchips">${chips('sex',SX)}</div></div>
+      <div class="fgrp"><b>年紀</b><div class="fchips">${chips('age',AG)}</div></div>
       <label class="chk"><input type="checkbox" id="aPhoto" ${st.photo?'checked':''}> 只看有照片的</label>
     </details>
+    <div class="fsum" id="aSum"></div>
   </div>
   <div id="aList" style="margin-top:14px" aria-live="polite"></div>`;
   const save=()=>{try{localStorage.setItem('wh_adopt',JSON.stringify({city:st.city,dist:st.dist,kind:st.kind}))}catch(_){}};
-  const load=async()=>{const el=$('#aList');if(!el)return;save();
-    const dw=$('#aDistWrap');dw.classList.add('hidden');
+  const sum=()=>{const n=st.dist.length+st.variety.length+st.colour.length+st.ster.length+nMore();const e=$('#aSum');if(e)e.innerHTML=n?`已選 ${n} 個條件 <button type="button" class="linkbtn" id="aClear">全部清除</button>`:'';const c=$('#aClear');if(c)c.onclick=()=>{['dist','variety','colour','ster','size','sex','age'].forEach(k=>st[k]=[]);st.photo=true;st.limit=30;renderAdopt()}};
+  const load=async()=>{const el=$('#aList');if(!el)return;save();sum();
     if(!st.city){el.innerHTML=`<div class="empty-card"><div class="big">${ic('pin')}</div><b>先選你住的縣市</b><p class="small">選好就會列出那裡收容所等待領養的${st.kind==='貓'?'貓':'狗'}。</p><div class="citygrid">${Object.keys(MOA_AREA).map(c=>`<button type="button" class="btn ghost" data-city="${c}">${c}</button>`).join('')}</div></div>`;
-      el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;st.dist='';$('#aCity').value=st.city;load()});return}
+      el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;st.dist=[];$('#aCity').value=st.city;load()});return}
     const my=navId,seq=++adoptSeq;const stale=()=>seq!==adoptSeq||my!==navId||!el.isConnected;   // 換了條件或換頁：舊的結果不要蓋上來
     let rows;const pr=fetchAdopt(st.city,st.kind);
     if(!adoptCache[MOA_AREA[st.city]+'_'+st.kind])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
     try{rows=await pr}catch(e){if(stale())return;el.innerHTML=`<div class="empty-card"><b>${esc(e.message)}</b><p><button type="button" class="btn" id="aRetry">再試一次</button></p><p class="small"><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent.aspx?PageType=Adopt">改到農業部全國認領養網站看 ↗</a></p></div>`;$('#aRetry').onclick=load;return}
     if(stale())return;
-    // 地區選單：依收容所所在的區分組，只有一區（例如臺北市）就不顯示
-    const dc={};rows.forEach(r=>{const d=adoptDist(r);if(d){(dc[d]=dc[d]||{n:0,sh:new Set()}).n++;{const n=shortShelter(r,st.city).replace(d,'');if(!/^(公立)?動物之家$/.test(n))dc[d].sh.add(n)}}});
-    const ds=Object.keys(dc).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
-    if(st.dist&&!dc[st.dist])st.dist='';
-    if(ds.length>1){dw.classList.remove('hidden');$('#aDist').innerHTML=`<option value="">${esc(st.city)}全部（${rows.length} 隻）</option>`+ds.map(d=>`<option value="${esc(d)}" ${d===st.dist?'selected':''}>${esc(d)}${dc[d].sh.size?'・'+esc([...dc[d].sh].join('、').slice(0,12)):''}（${dc[d].n} 隻）</option>`).join('')}else st.dist='';
-    let list=rows.filter(r=>(!st.dist||adoptDist(r)===st.dist)&&(!st.size||r.size===st.size)&&(!st.sex||r.sex===st.sex)&&(!st.age||r.age===st.age)&&(!st.photo||r.photo));
+    // 地區、犬種／貓種、毛色：依這個縣市實際有的資料列出（旁邊是幾隻），都可以多選
+    const inD=r=>!st.dist.length||st.dist.includes(adoptDist(r));
+    const cnt=(rs,f)=>{const m={};rs.forEach(r=>{const v=(f(r)||'').trim();if(v)m[v]=(m[v]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+    const dists=cnt(rows,adoptDist);st.dist=st.dist.filter(d=>dists.some(x=>x[0]===d));
+    const base=rows.filter(inD),vars=cnt(base,r=>r.variety||'混種'),cols=cnt(base,r=>r.colour);
+    st.variety=st.variety.filter(v=>vars.some(x=>x[0]===v));st.colour=st.colour.filter(v=>cols.some(x=>x[0]===v));
+    const grp=(k,t,arr,max)=>{if(!arr.length)return '';const showAll=st['_all_'+k];const sh=showAll?arr:arr.slice(0,max);const sel=arr.filter(x=>st[k].includes(x[0])&&!sh.includes(x));
+      return `<div class="fgrp"><b>${t}</b><div class="fchips">${chips(k,[...sh,...sel].map(([v,n])=>[v,v,n]))}${arr.length>max&&!showAll?`<button type="button" class="fchip more" data-all="${k}">更多 ${arr.length-max} 種…</button>`:''}</div></div>`};
+    $('#aDyn').innerHTML=(dists.length>1?grp('dist','地區',dists,8):'')+grp('variety',st.kind==='貓'?'貓種':'犬種',vars,8)+grp('colour','毛色',cols,8);
+    $('#aDyn').querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{st['_all_'+b.dataset.all]=true;load()});
+    sum();
+    let list=rows.filter(r=>inD(r)&&(!st.size.length||st.size.includes(r.size))&&(!st.sex.length||st.sex.includes(r.sex))&&(!st.age.length||st.age.includes(r.age))&&(!st.photo||r.photo)&&(!st.variety.length||st.variety.includes(r.variety||'混種'))&&(!st.colour.length||st.colour.includes(r.colour))&&(!st.ster.length||st.ster.includes(r.ster)));
     list.sort((a,b)=>st.sort==='old'?(a.created||'9').localeCompare(b.created||'9'):(b.created||'').localeCompare(a.created||''));
-    if(!list.length){el.innerHTML=`<div class="empty-card"><div class="big">${ic('search')}</div><b>${esc(st.city+(st.dist||''))}目前沒有符合條件的${st.kind==='貓'?'貓':'狗'}</b><p class="small">試試放寬條件，或換個縣市看看。</p></div>`;return}
+    if(!list.length){el.innerHTML=`<div class="empty-card"><div class="big">${ic('search')}</div><b>${esc(st.city)}目前沒有符合條件的${st.kind==='貓'?'貓':'狗'}</b><p class="small">試試少選幾個條件，或換個縣市看看。</p></div>`;return}
     const shown=list.slice(0,st.limit);
-    el.innerHTML=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist?st.dist+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
+    el.innerHTML=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist.length?st.dist.join('、')+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
       <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}${d&&d>=180?`<span class="band">等了 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}</div>
-      <div class="b"><div class="t">${esc(r.variety||'混種')} <span class="sexm">${r.sex==='M'?'公':r.sex==='F'?'母':''}</span></div><div class="small muted">${esc([ADOPT_SIZE[r.size],ADOPT_AGE[r.age],r.colour,r.ster==='T'?'已結紮':''].filter(Boolean).join('・'))}</div><div class="small">${ic('pin')} ${esc(shortShelter(r,st.city))}</div></div></a>`}).join('')}</div>
+      <div class="b"><div class="t">${esc(r.variety||'混種')} <span class="sexm">${r.sex==='M'?'公':r.sex==='F'?'母':''}</span></div><div class="small muted">${esc([ADOPT_SIZE[r.size],ADOPT_AGE[r.age],r.colour,r.ster==='T'?'已結紮':r.ster==='F'?'未結紮':''].filter(Boolean).join('・'))}</div><div class="small">${ic('pin')} ${esc(shortShelter(r,st.city))}</div></div></a>`}).join('')}</div>
       ${list.length>shown.length?`<div class="more-row"><button type="button" class="btn ghost big" id="aMore">顯示更多（還有 ${list.length-shown.length} 隻）</button></div>`:''}
       <p class="small muted" style="margin-top:12px">資料來源：農業部「動物認領養」開放資料。實際狀況以收容所為準，可能已被領養。</p>`;
     const m=$('#aMore');if(m)m.onclick=()=>{const k=st.limit;st.limit+=30;const y=scrollY;load().then(()=>{scrollTo(0,y);const c=document.querySelectorAll('.adopt-card')[k];if(c)c.focus({preventScroll:true})})}};
-  $('#aKind').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.kind=b.dataset.v;st.limit=30;$('#aKind').querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});load()});
-  $('#aDist').onchange=e=>{st.dist=e.target.value;st.limit=30;load()};
-  [['#aCity','city'],['#aSort','sort'],['#aSize','size'],['#aSex','sex'],['#aAge','age']].forEach(([sel,k])=>$(sel).onchange=e=>{st[k]=e.target.value;if(k==='city')st.dist='';st.limit=30;load()});
+  // 點標籤：加入或取消這個條件
+  app.querySelector('.adopt-f').addEventListener('click',e=>{const b=e.target.closest('.fchip[data-k]');if(!b)return;const k=b.dataset.k,v=b.dataset.v;const a=st[k];const i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);
+    b.classList.toggle('on',i<0);b.setAttribute('aria-pressed',i<0);if(k==='dist'){st.variety=[];st.colour=[]}st.limit=30;load()});
+  $('#aKind').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.kind=b.dataset.v;st.variety=[];st.colour=[];st.limit=30;$('#aKind').querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});load()});
+  $('#aCity').onchange=e=>{st.city=e.target.value;st.dist=[];st.variety=[];st.colour=[];st.limit=30;load()};
+  $('#aSort').onchange=e=>{st.sort=e.target.value;st.limit=30;load()};
   $('#aPhoto').onchange=e=>{st.photo=e.target.checked;st.limit=30;load()};
   load();
 }
