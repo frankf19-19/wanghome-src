@@ -1359,6 +1359,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
     <span class="navlinks lost-only" style="display:contents">
       <a href="#/injured" class="link hide-sm">受傷通報</a>
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
+      <a href="#/learn" class="link hide-sm">小學堂</a>
       <a href="#/thanks" class="link hide-sm app-hide">感謝牆</a>
       <a href="#/seen" class="btn sm green hide-sm">看到／撿到</a>
       <a href="#/new" class="btn sm hide-sm">＋ 登記走失</a>
@@ -1404,7 +1405,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.0';
+const BUILD = 'v4.7.1';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1767,7 +1768,7 @@ function route(){
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;curHash=newHash;const trav=trackDepth(wasPop);
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent=''}
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
-  app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
+  app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
   if(!window.L&&!leafletGaveUp&&/^#\/(new$|case\/|report\/|found\/new|injured$|found\/[0-9a-f-]{36}$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
   if(path==='#/'||path==='#'||path==='#/lost')return renderHome();
