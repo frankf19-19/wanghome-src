@@ -196,7 +196,10 @@ update storage.buckets set file_size_limit = 2097152 where id = 'photos';   -- �
 create or replace function public.photo_upload_ok() returns boolean
 language sql volatile security definer set search_path = public as $$
   -- 每個 IP 每小時 60 張（一件登記最多 4 張照片＋縮圖＝8 個檔），全站每小時 1500 張
-  select public.rate_ok('photo', 60, interval '1 hour', 1500, interval '1 hour');
+  -- 如果照片服務沒有把使用者 IP 傳進來，就只用全站上限（避免所有人共用 60 張）
+  select case when public.client_ip() = 'unknown'
+    then public.rate_ok('photo_noip', 1500, interval '1 hour', 1500, interval '1 hour')
+    else public.rate_ok('photo', 60, interval '1 hour', 1500, interval '1 hour') end;
 $$;
 revoke all on function public.photo_upload_ok() from public;
 grant execute on function public.photo_upload_ok() to anon, authenticated;
@@ -237,6 +240,9 @@ do $$ begin
   if not exists (select 1 from public.pets where not public.photo_urls_ok(photos)) then
     alter table public.pets validate constraint pets_photos_ok;
   else raise notice 'pets 有照片網址不符合，暫不啟用'; end if;
+  if not exists (select 1 from public.sightings where not public.photo_url_ok(photo_url)) then
+    alter table public.sightings validate constraint sightings_photo_ok;
+  else raise notice 'sightings 有照片網址不符合，暫不啟用'; end if;
 end $$;
 
 select 'WangMiao migration v1.19 installed' as result;
