@@ -1218,6 +1218,30 @@ body{touch-action:manipulation}
   main#app{padding-left:16px;padding-right:16px}
   .tabs button{white-space:nowrap;padding-left:8px;padding-right:8px}
 }
+
+/* ===== v4.2 App 導覽：固定 5 個分頁＋中間新增鈕、底部滑出選單 ===== */
+@media (max-width:760px){
+  .tabbar{grid-template-columns:repeat(5,1fr)!important}
+  .tabbar a.cta .i{width:54px!important;height:54px!important;border-radius:50%!important;margin-top:-26px!important;background:var(--red-fill)!important;box-shadow:0 8px 18px -6px rgba(184,53,99,.6),0 0 0 5px var(--sheet)!important}
+  .tabbar a.cta .i svg{width:26px!important;height:26px!important}
+  .tabbar a.cta{color:var(--ink-3)!important;font-weight:600!important}
+  .space{display:none!important}
+}
+.sheet-bg.lightbox{padding:0;align-items:flex-end;z-index:900}
+.sheet-bg{position:fixed;inset:0;z-index:200;background:rgba(40,20,32,0);display:flex;align-items:flex-end;justify-content:center;transition:background .2s}
+.sheet-bg.show{background:rgba(40,20,32,.42)}
+.sheet{width:100%;max-width:520px;background:var(--paper);border-radius:28px 28px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .26s cubic-bezier(.2,.8,.2,1);box-shadow:0 -10px 30px rgba(0,0,0,.15)}
+.sheet-bg.show .sheet{transform:none}
+@media (prefers-reduced-motion:reduce){.sheet,.sheet-bg{transition:none}}
+.grab{width:42px;height:5px;border-radius:9px;background:var(--line);margin:4px auto 10px}
+.sh-t{font-family:var(--head);font-weight:800;font-size:19px;margin:2px 4px 10px}
+.srow{display:flex;align-items:center;gap:14px;padding:12px;margin-bottom:8px;border-radius:20px;background:var(--sheet);color:var(--ink)!important;text-decoration:none!important;box-shadow:var(--lift)}
+.srow:active{transform:scale(.98)}
+.sri{flex:none;width:46px;height:46px;border-radius:15px;display:grid;place-items:center}
+.sri .ico{width:24px;height:24px;stroke-width:2.2}
+.sri.s1{background:#FFC6D3;color:#B8335F}.sri.s2{background:#BFEBD9;color:#18704F}.sri.s3{background:#D9D2FF;color:#5A46C4}.sri.s4{background:#FFE7A8;color:#9A6400}
+.srt{flex:1;display:flex;flex-direction:column}.srt b{font-size:16.5px}.srt small{font-size:13.5px;color:var(--ink-3)}
+.sh-x{margin-top:4px;min-height:50px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1281,7 +1305,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.1.0';
+const BUILD = 'v4.2.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1312,6 +1336,8 @@ if(IS_APP){
     A.addListener('pause',()=>{try{document.dispatchEvent(new Event('app-pause'))}catch(_){}});
     A.addListener('resume',()=>{try{lnSync()}catch(_){}});
   }}catch(_){}
+  // 輕輕震動：按底部選單、四宮格、大按鈕時（只有 App 裡）
+  try{const HP=capPlugin('Haptics');if(HP){let last=0;document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('.tabbar a,.tile4,.srow,.bigbtn,.btn,.mrow,.mb-back');if(!t)return;const n=Date.now();if(n-last<120)return;last=n;HP.impact({style:'LIGHT'}).catch(()=>{})},true)}}catch(_){}
   // 點通知：打開那隻毛孩的頁面
   try{const LN=capPlugin('LocalNotifications');if(LN){
     LN.addListener('localNotificationActionPerformed',e=>{const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
@@ -1538,15 +1564,29 @@ function spaceOf(path){
 }
 // 底部「我的」：沒登入時寫「註冊／登入」，讓新朋友知道可以加入
 function meLabel(){try{return session?.user?'我的':'註冊／登入'}catch(_){return '註冊／登入'}}
+// 底部選單：固定 5 個（像一般 App），中間「＋」打開新增選單
+function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/health','health',tbI('book')+'健康'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/?near=1','near',tbI('map')+'附近'],['#/me','me',tbI('me')+'我的']]}
+function openAddSheet(){
+  const el=document.createElement('div');el.className='lightbox sheet-bg';
+  const r=(h,i,c,t,d)=>`<a class="srow" href="${h}"><span class="sri ${c}">${i}</span><span class="srt"><b>${t}</b><small>${d}</small></span>${ic('chev','mrc')}</a>`;
+  el.innerHTML=`<div class="sheet" role="dialog" aria-label="新增"><div class="grab" aria-hidden="true"></div><p class="sh-t">要做什麼呢？</p>
+    ${r('#/new',ic('search'),'s1','我的毛孩走失了','登記協尋，自動做海報')}
+    ${r('#/seen',ic('eye'),'s2','我看到／撿到毛孩','拍照回報給飼主')}
+    ${r('#/health/add',ic('clipboard'),'s3','新增健康紀錄','看診、疫苗、驅蟲、體重')}
+    ${r('#/pet/new',ic('paw'),'s4','新增毛孩檔案','生日、晶片、照片')}
+    <button type="button" class="btn ghost block sh-x">取消</button></div>`;
+  el.onclick=e=>{const a=e.target.closest('a.srow');if(a){e.preventDefault();const h=a.getAttribute('href');closeOverlay(el);setTimeout(()=>{location.hash=h},80);return}
+    if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'));
+}
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.tb-add');if(a){e.preventDefault();openAddSheet()}});
 function renderChrome(path,h){
   const space=spaceOf(path);document.body.dataset.space=space;
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
-  const rk=path==='#/'||path==='#'?'home':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
+  const rk=path==='#/'||path==='#'?(qs(h).near?'near':'home'):(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
   const items=space==='health'
-   ?[['#/health','health',tbI('book')+'我的毛孩'],['#/health/add','add',plusI+'新增紀錄','cta2'],['#/health?due=1','due',tbI('bell')+'到期提醒'],['#/me','me',tbI('me')+meLabel()]]
-   :[['#/','home',tbI('home')+'首頁'],['#/new','new',plusI+'登記走失','cta'],['#/seen','found',pawI+'看到／撿到','cta2'],['#/me','me',tbI('me')+meLabel()]];
-  const due=path==='#/health'&&qs(h).due;
-  $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${(r===rk&&!due)||(due&&r==='due')?'on':''}">${inner}</a>`).join('');
+   ?TABS():TABS();
+  $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${r===rk?'on':''}"${r==='add'?' role="button" aria-label="新增"':''}>${inner}</a>`).join('');
 }
 
 // ---- 導覽：redirect 不留歷史、彈出視窗可用「上一頁」關閉、返回時恢復捲動位置 ----
@@ -1825,6 +1865,7 @@ ${bigStartHTML()}
     toast('定位中…');
     navigator.geolocation.getCurrentPosition(p=>{homeState.near={lat:p.coords.latitude,lng:p.coords.longitude};$('#btnNear').textContent='✕ 取消距離排序';$('#btnNear').classList.add('on');$('#nearInfo').textContent='依離你的距離排序（不會儲存你的位置）';loadList()},err=>toast(err&&err.code===1?(IS_APP?'你沒有允許定位。請到手機「設定」→ 汪喵回家，允許使用位置後再試一次':'你沒有允許定位。請到瀏覽器或手機設定，允許這個網站使用位置後再試一次'):'暫時抓不到你的位置（訊號不好或逾時），請稍後再試',6000),{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
   };
+  if(qs(location.hash).near)setTimeout(()=>{const b=$('#bigNear');if(b&&_n===navId)b.click()},50);
   $('#bigNear').onclick=()=>{homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   loadStats();loadRecent();loadReunited();loadList();loadMyPets(_n);
@@ -3323,7 +3364,7 @@ function updateAuthUI(){
   const u=me();
   a.innerHTML=ic('user')+(u?`<span class="hide-sm"> 我的</span>`:`<span class="hide-sm"> 登入／註冊</span>`);a.setAttribute('aria-label',u?'我的':'登入或註冊');
   a.title=u?(u.email||'我的'):'登入／註冊';
-  const t=document.querySelector('#tabbar a[data-r=me]');if(t)t.innerHTML=tbI('me')+meLabel();
+  const t=document.querySelector('#tabbar a[data-r=me]');if(t)t.innerHTML=tbI('me')+'我的';
 }
 function requireLogin(msg){
   if(me())return true;
