@@ -1246,6 +1246,8 @@ body{touch-action:manipulation}
 main#app:focus,#app h1[tabindex="-1"]:focus{outline:none}
 .skip{position:absolute;left:-999px;top:8px;z-index:999;background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px}.skip:focus{left:16px}
 #navMe.on,.hd-av.on{box-shadow:inset 0 0 0 2px var(--red)}
+body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #tabbar{display:none!important}body.bare{--tabbar-h:0px;padding-bottom:0}
+.chk.agree{margin:14px 0 6px;font-size:14.5px;line-height:1.5;align-items:flex-start}.chk.agree input{margin-top:3px;flex:none}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1441,9 +1443,10 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.0';
+const BUILD = 'v4.9.1';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
 if(IS_APP)document.documentElement.classList.add('is-app');
 /* ============================================================
    App（Capacitor）：在 App 裡改用原生的分享、拍照、定位、返回鍵、連結開啟。網頁版完全不受影響。
@@ -1465,7 +1468,7 @@ if(IS_APP){
     watchPosition:orig&&orig.watchPosition?orig.watchPosition.bind(orig):()=>0,clearWatch:orig&&orig.clearWatch?orig.clearWatch.bind(orig):()=>{}}})}catch(_){}
   // Android 返回鍵：先關視窗，再回上一頁；在首頁按返回就把 App 收到背景
   try{const A=capPlugin('App');if(A){
-    A.addListener('backButton',()=>{if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim())&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
+    A.addListener('backButton',()=>{if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue)&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
     // 從連結打開 App（分享頁 /s/、/f/、網站網址）：跳到對應頁面
     A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
       if(m)location.hash=(m[1]==='s'?'#/case/':'#/found/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
@@ -1481,7 +1484,7 @@ if(IS_APP){
   }}catch(_){}
   // 連結：站內的 #/ 連結留在 App 裡；網站網址轉成 App 內頁面；其他網站用 App 內瀏覽器開
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[href]');if(!a)return;const href=a.getAttribute('href')||'';
-    if(href.startsWith('#/')){if(a.target==='_blank'){e.preventDefault();const B=capPlugin('Browser');if(B)B.open({url:'https://wangmiaotw.com/'+href,presentationStyle:'popover'}).catch(()=>{location.hash=href});else location.hash=href}return}
+    if(href.startsWith('#/')){if(a.target==='_blank'){e.preventDefault();const B=capPlugin('Browser');if(B)B.open({url:'https://wangmiaotw.com/?bare=1'+href,presentationStyle:'popover'}).catch(()=>{location.hash=href});else location.hash=href}return}
     if(/^https?:/i.test(href)){let u;try{u=new URL(href)}catch(_){return}
       if(u.hostname==='wangmiaotw.com'&&u.hash.startsWith('#/')){e.preventDefault();location.hash=u.hash;return}
       // LINE、Facebook、Google 日曆：交給系統開（才會直接跳到 LINE／FB App）
@@ -1759,13 +1762,13 @@ function openOverlay(el){
   el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');if(!el.hasAttribute('tabindex'))el.tabIndex=-1;
   // 鍵盤使用者：記住是哪個按鈕打開的（關掉後回到那裡），Tab 只在視窗裡面轉
   const ae=document.activeElement;el._trigger=ae&&ae!==document.body?ae:null;
-  const focusables=()=>[...el.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null||x===document.activeElement);
+  const focusables=()=>[...el.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length>0||x===document.activeElement);
   el.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const f=focusables();if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&(i<=0)){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}});
-  document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{const f=focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el;try{f.focus({preventScroll:true})}catch(_){}},260);
+  document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{if(!el.isConnected||(el.contains(document.activeElement)&&document.activeElement!==el))return;const f=focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el;try{f.focus({preventScroll:true})}catch(_){}},260);
   try{history.pushState({overlay:1,d:navDepth,h:location.hash||'#/'},'',location.href)}catch(_){}
 }
 function closeOverlay(el){const t=el._trigger;if(overlayOpen===el){overlayOpen=null;el.remove();__selfPop=true;try{history.back()}catch(_){__selfPop=false}}else el.remove();if(t&&t.isConnected)try{t.focus({preventScroll:true})}catch(_){}}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()))return;closeOverlay(overlayOpen)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue))return;closeOverlay(overlayOpen)}});
 function closeOverlays(){document.querySelectorAll('.lightbox').forEach(x=>x.remove());overlayOpen=null}
 
 function showUndo(msg,onUndo){document.querySelectorAll('.undobar').forEach(x=>x.remove());const d=document.createElement('div');d.className='undobar';d.innerHTML=`<span>${esc(msg)}</span><button type="button">復原</button>`;
@@ -1812,6 +1815,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')__kbNav=
 document.addEventListener('pointerdown',()=>{__kbNav=false},true);
 window.addEventListener('hashchange',()=>{__pendFocus=__kbNav});
 new MutationObserver(()=>{if(!__pendFocus)return;const h=document.querySelector('#app h1');if(!h)return;__pendFocus=false;if(document.activeElement&&document.activeElement!==document.body&&app.contains(document.activeElement))return;h.tabIndex=-1;try{h.focus({preventScroll:true})}catch(_){}}).observe(document.getElementById('app'),{childList:true,subtree:true});
+// 發布前要勾「同意使用條款」（App Store 規定使用者要明確同意）；同意過一次就記住
+document.addEventListener('submit',e=>{const f=e.target;const cb=f&&f.querySelector&&f.querySelector('input[data-agree]');if(!cb||!cb.getClientRects().length)return;   // 分步驟表單還沒到最後一步：交給「下一步」處理
+  if(!cb.checked){e.preventDefault();e.stopImmediatePropagation();toast('請先勾選「我已閱讀並同意使用條款與隱私權政策」');cb.closest('label')?.scrollIntoView({block:'center'});try{cb.focus({preventScroll:true})}catch(_){}return}
+  try{localStorage.setItem('wh_agree','1')}catch(_){}},true);
+new MutationObserver(()=>{let ok=false;try{ok=localStorage.getItem('wh_agree')==='1'}catch(_){}if(ok)app.querySelectorAll('input[data-agree]:not([data-init])').forEach(x=>{x.dataset.init=1;x.checked=true})}).observe(document.getElementById('app'),{childList:true,subtree:true});
 function updScrolled(){const h=document.querySelector('#app h1');const b=h?h.getBoundingClientRect().bottom:0;document.body.classList.toggle('scrolled',!h||b<60)}
 window.addEventListener('scroll',updScrolled,{passive:true});
 try{new MutationObserver(()=>updScrolled()).observe(document.getElementById('app'),{childList:true})}catch(_){}
@@ -1822,7 +1830,7 @@ function route(){
     if(!__confirm(__dirtyMsg||'你填的資料還沒儲存，確定要離開這一頁嗎？')){
       // 按「上一頁」→ 把原頁加回去；點連結 → 退回原頁。兩種都不會弄丟上一頁的紀錄
       // 只有真的按「上一頁」（回到已存在的紀錄）才把原頁加回去；點連結、開分享連結產生的新紀錄就退回去
-      if(navByPop&&history.state&&typeof history.state.d==='number'){navByPop=false;try{history.pushState(null,'',location.pathname+location.search+curHash)}catch(_){}}
+      if(navByPop&&history.state&&typeof history.state.d==='number'){navByPop=false;try{history.pushState({d:navDepth,h:curHash},'',location.pathname+location.search+curHash)}catch(_){}}
       else{navByPop=false;__skipRoute=true;history.back()}
       return}
   }
@@ -2666,7 +2674,7 @@ function renderNew(){
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：可以用雞肉吸引牠"></textarea></label>
     </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>，並同意本站公開上述資料（Email 除外）供協尋使用。找到後請記得回來結案。</p>
+    <label class="chk agree"><input type="checkbox" name="agree" data-agree> 我已閱讀並同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>，並同意本站公開上述資料（Email 除外）供協尋使用</label><p class="muted small">找到後請記得回來結案。</p>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出登記</button></div>
   </form>`;
   let photoFiles=[],presetPhotos=[],species='';
@@ -2794,7 +2802,7 @@ async function renderReport(id){const _n=navId;
       <label class="f"><span><b class="lbl">聯絡方式</b><small class="hint">只有飼主看得到</small></span><input type="text" name="reporter_contact" placeholder="電話或 LINE"></label>
     </div>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>。</p>
+    <label class="chk agree"><input type="checkbox" name="agree" data-agree> 我已閱讀並同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a></label>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出回報</button></div>
   </form>
   <p class="muted small" style="text-align:center">回報會先通知飼主確認後才顯示在地圖上，避免誤導。</p>`;
@@ -3095,7 +3103,7 @@ function renderInjured(){
     <label class="chk"><input type="checkbox" name="phone_public"> 公開電話，讓飼主或救援的人聯絡我</label>
     <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000" placeholder="例：已打 1999，動保處說 30 分鐘內到"></textarea></label>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>。</p>
+    <label class="chk agree"><input type="checkbox" name="agree" data-agree> 我已閱讀並同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a></label>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出受傷通報</button></div>
   </form>`;
   $('#btnQuick').onclick=quickReport;
@@ -3186,7 +3194,7 @@ function renderFoundNew(){
     <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000"></textarea></label>
     </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
-    <p class="muted small">送出即表示同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>。</p>
+    <label class="chk agree"><input type="checkbox" name="agree" data-agree> 我已閱讀並同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a></label>
     <div class="submitbar"><button class="btn lg block green" type="submit" id="btnSubmit">送出拾獲通報</button></div>
   </form>`;
   let kind='found',species=null;
@@ -3357,7 +3365,7 @@ function userHidden(x){if(!x)return false;return lsList('wh_hidden').includes(x.
 function blockPoster(poster,after){if(!poster)return;if(!confirm('封鎖這位發布者？\n他發布的走失案件、通報和目擊，之後都不會再出現在你的畫面上。\n可以到「我的」頁恢復。'))return;lsAdd('wh_blocked',poster);toast('已封鎖，這位發布者的內容不會再出現',3500);if(after)after()}
 const REPORT_REASONS=[['fake','假案件／詐騙（例如要求先匯款）'],['spam','廣告或與協尋無關'],['inappropriate','不當照片或言論'],['privacy','洩漏他人個資'],['resolved','已經找到了但沒有結案'],['other','其他']];
 function openReport(type,id,poster,after){
-  const d=document.createElement('div');d.className='lightbox';d.style.alignItems='flex-start';d.style.overflow='auto';
+  const d=document.createElement('div');d.className='lightbox';d.style.alignItems='flex-start';d.style.overflow='auto';d.setAttribute('aria-label','檢舉這則內容');
   d.innerHTML=`<div class="card" style="max-width:460px;width:100%;margin-top:40px" onclick="event.stopPropagation()">
     <h2 style="margin-top:0">${ic('flag')} 檢舉這則內容</h2>
     <p class="muted small">站長會盡快處理。惡意檢舉不會讓內容自動下架。</p>
