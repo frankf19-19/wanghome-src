@@ -866,6 +866,16 @@ body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
   body[data-space="health"] .tabbar a.on:not(.cta):not(.cta2) .i{background:var(--green-soft)}
   .tabbar a.plainpaw .i{width:46px;height:28px}
 }
+
+/* v3.18.3 底部選單：4 個，兩個主要動作用紅、綠圓角底，不再浮起來 */
+@media (max-width:760px){
+  .tabbar{grid-template-columns:repeat(4,1fr)!important}
+  .tabbar a.cta .i,.tabbar a.cta2 .i{width:52px!important;height:30px!important;border-radius:99px!important;margin-top:0!important;box-shadow:none!important}
+  .tabbar a.cta2 .i{background:var(--green-fill)!important}
+  .tabbar a.cta .i svg,.tabbar a.cta2 .i svg{width:18px!important;height:18px!important}
+  .tabbar a.cta,.tabbar a.cta2{font-weight:700}
+  .tabbar a.cta.on,.tabbar a.cta2.on{color:var(--ink)}
+}
 /* 頁尾 */
 footer{border-top:0;background:var(--beige);border-radius:26px 26px 0 0;max-width:none;padding-left:max(20px,calc((100% - 1080px)/2));padding-right:max(20px,calc((100% - 1080px)/2))}
 form.steps>h3::before{background:var(--red-fill)!important;color:#fff!important}
@@ -1094,7 +1104,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.18.2';
+const BUILD = 'v3.18.3';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1352,10 +1362,10 @@ function meLabel(){try{return session?.user?'我的':'註冊／登入'}catch(_){
 function renderChrome(path,h){
   const space=spaceOf(path);document.body.dataset.space=space;
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
-  const rk=path==='#/'||path==='#'?(qs(h).tab==='map'?'map':'home'):path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
+  const rk=path==='#/'||path==='#'?'home':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
   const items=space==='health'
-   ?[['#/health','health',tbI('book')+'我的毛孩'],['#/health?cal=1','cal',tbI('cal')+'日曆同步'],['#/health/add','add',plusI+'新增紀錄','cta2'],['#/health?due=1','due',tbI('bell')+'到期提醒'],['#/me','me',tbI('me')+meLabel()]]
-   :[['#/','home',tbI('home')+'首頁'],['#/?tab=map','map',tbI('map')+'地圖'],['#/new','new',plusI+'登記走失','cta'],['#/seen','found',pawI+'看到／撿到','plainpaw'],['#/me','me',tbI('me')+meLabel()]];
+   ?[['#/health','health',tbI('book')+'我的毛孩'],['#/health/add','add',plusI+'新增紀錄','cta2'],['#/health?due=1','due',tbI('bell')+'到期提醒'],['#/me','me',tbI('me')+meLabel()]]
+   :[['#/','home',tbI('home')+'首頁'],['#/new','new',plusI+'登記走失','cta'],['#/seen','found',pawI+'看到／撿到','cta2'],['#/me','me',tbI('me')+meLabel()]];
   const due=path==='#/health'&&qs(h).due;
   $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${(r===rk&&!due)||(due&&r==='due')?'on':''}">${inner}</a>`).join('');
 }
