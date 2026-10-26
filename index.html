@@ -1228,6 +1228,20 @@ body{touch-action:manipulation}
   .tabbar a.cta{color:var(--ink-3)!important;font-weight:600!important}
   .space{display:none!important}
 }
+.adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:none}.adm-stats .stat{border:0;padding:6px 4px;white-space:normal;font-size:12.5px;line-height:1.3}
+@media(min-width:760px){.adm-stats{grid-template-columns:repeat(7,1fr)}}
+.adm-tabs{margin-top:20px}
+.adm-bar{margin:12px 0 4px;text-align:right}
+.adm-search{display:flex;gap:8px;margin:14px 0 8px}.adm-search input{flex:1}
+.adm-f{margin:0 0 12px}
+.adm-card{margin-bottom:10px}
+.adm-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.adm-row{display:flex;gap:12px;align-items:flex-start}.adm-main{flex:1;min-width:0;display:grid;gap:4px}
+.adm-ph{width:64px;height:64px;border-radius:14px;object-fit:cover;flex:none;background:var(--line)}
+.adm-ct{background:var(--beige,var(--line));border-radius:12px;padding:8px 10px;margin-top:4px;line-height:1.7;overflow-wrap:anywhere}
+.adm-acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.adm-edit{max-height:88vh;overflow:auto}
+.adm-edit .fl{display:grid;gap:4px;margin-top:10px;font-size:14px;font-weight:700;color:var(--ink-2)}
 .sheet-bg.lightbox{padding:0;align-items:flex-end;z-index:900}
 .sheet-bg{position:fixed;inset:0;z-index:200;background:rgba(40,20,32,0);display:flex;align-items:flex-end;justify-content:center;transition:background .2s}
 .sheet-bg.show{background:rgba(40,20,32,.42)}
@@ -1405,7 +1419,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.4';
+const BUILD = 'v4.7.5';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -3454,32 +3468,171 @@ async function renderAdmin(){const _n=navId;
   setTitle('管理後台');
   if(!requireLogin())return;
   const {data:isA}=await sb.rpc('is_admin');
-  if(!isA){(_n===navId?app:_void).innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const showAll=qs(location.hash).all==='1';
-  const [{data:st},{data:rs,error}]=await Promise.all([sb.rpc('admin_stats'),sb.rpc('admin_reports',{p_include_resolved:showAll})]);
-  if(error){(_n===navId?app:_void).innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+  if(_n!==navId)return;
+  if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
+  const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
+  const {data:st}=await sb.rpc('admin_stats');
+  if(_n!==navId)return;
+  app.innerHTML=`<h1>管理後台</h1>
+  <div class="stats adm-stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已找回'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??'–'}</b>${t}</div>`).join('')}</div>
+  <div class="tabs adm-tabs" role="tablist">${TABS.map(([v,t])=>`<button type="button" role="tab" data-tab="${v}" class="${v===tab?'on':''}" aria-selected="${v===tab}">${t}${v==='reports'&&st?.open_reports?`<span class="cnt">${st.open_reports}</span>`:''}</button>`).join('')}</div>
+  <div id="adm"></div>`;
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>location.replace('#/admin?tab='+b.dataset.tab));
+  const box=$('#adm');
+  if(tab==='reports')return admReports(box,q.all==='1');
+  if(tab==='members')return admMembers(box,q.q||'');
+  if(tab==='bans')return admBans(box);
+  return admList(box,tab,q.q||'',q.f||'all');
+}
+const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊'};
+const FSTATUS_T={open:'協尋中',reunited:'已找到飼主',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
+const admUrl=(t,id,caseId)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:`#/case/${caseId}`;
+function admMail(email,title){return email?`<a href="mailto:${esc(email)}?subject=${encodeURIComponent('【汪喵回家】關於'+(title?'「'+title+'」':'你在網站上的內容'))}">${esc(email)}</a>`:''}
+function admContact(r){const rows=[];
+  const nm=r.contact_name||r.reporter_name,ph=r.contact_phone||r.reporter_phone,ln=r.contact_line||r.reporter_line,em=r.contact_email||r.reporter_email,title=r.name||r.case_name||'';
+  if(nm)rows.push(`聯絡人：${esc(nm)}`);
+  if(ph)rows.push(`電話：<a href="tel:${esc(telClean(ph))}">${esc(ph)}</a>${r.phone_public===false?'（不公開）':''}`);
+  if(ln)rows.push(`LINE：${esc(ln)}`);
+  if(r.reporter_contact)rows.push(`聯絡方式：${esc(r.reporter_contact)}`);
+  if(em)rows.push(`Email：${admMail(em,title)}${r.email_verified===false?'（未確認）':''}`);
+  if(r.member_email&&r.member_email!==em)rows.push(`會員帳號：${admMail(r.member_email,title)}`);
+  return rows.length?`<div class="adm-ct small">${rows.join('<br>')}</div>`:'<div class="adm-ct small muted">沒有留聯絡方式</div>'}
+async function admReports(box,showAll){const _n=navId;
+  const {data:rs,error}=await sb.rpc('admin_reports',{p_include_resolved:showAll});
+  if(_n!==navId)return;
+  if(error){box.innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
   const groups={};(Array.isArray(rs)?rs:[]).forEach(r=>{(groups[r.target_id]=groups[r.target_id]||{...r,items:[]}).items.push(r)});
   const link=(t,id)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:null;
-  if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
-  (_n===navId?app:_void).innerHTML=`<h1>管理後台</h1>
-  <div class="stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已找回'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??0}</b>${t}</div>`).join('')}</div>
-  <h2>檢舉 <a class="small" style="margin-left:auto" href="#/admin${showAll?'':'?all=1'}">${showAll?'只看待處理':'顯示已處理'}</a></h2>
-  ${Object.values(groups).length?Object.values(groups).map(g=>`<div class="card" style="margin-bottom:10px">
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag ${g.target_type==='case'?'red':g.target_type==='found'?'green':'blue'}">${g.target_type==='case'?'走失案件':g.target_type==='found'?'拾獲通報':'目擊'}</span><b>${esc(g.target_title||'(已刪除)')}</b>${g.target_hidden?'<span class="tag gray">已隱藏</span>':''}<span class="tag amber">${g.items.length} 則檢舉</span>${g.resolved?'<span class="tag green">已處理</span>':''}</div>
+  box.innerHTML=`<p class="adm-bar"><a class="small" href="#/admin?tab=reports${showAll?'':'&all=1'}">${showAll?'只看待處理':'顯示已處理'}</a></p>
+  ${Object.values(groups).length?Object.values(groups).map(g=>`<div class="card adm-card">
+    <div class="adm-h"><span class="tag ${g.target_type==='case'?'red':g.target_type==='found'?'green':'blue'}">${ADM_T[g.target_type]||g.target_type}</span><b>${esc(g.target_title||'(已刪除)')}</b>${g.target_hidden?'<span class="tag">已隱藏</span>':''}${g.resolved?'<span class="tag green">已處理</span>':''}</div>
     <ul class="small" style="margin:8px 0 0 18px;padding:0">${g.items.map(r=>`<li>${fmtDT(r.created_at)}　${esc(REASON_TEXT[r.reason]||r.reason)}${r.note?'：'+esc(r.note):''}</li>`).join('')}</ul>
-    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-      ${link(g.target_type,g.target_id)?`<a class="btn sm ghost" target="_blank" href="${link(g.target_type,g.target_id)}">查看</a>`:''}
+    <div class="adm-acts">
+      ${link(g.target_type,g.target_id)?`<a class="btn sm ghost" href="${link(g.target_type,g.target_id)}">查看</a>`:''}
+      <a class="btn sm ghost" href="#/admin?tab=${g.target_type}&q=${g.target_id}">聯絡／編輯</a>
       <button class="btn sm" data-hide="${g.target_type}|${g.target_id}|${g.target_hidden?0:1}">${g.target_hidden?'恢復顯示':(g.target_type==='sighting'?'退回目擊':'隱藏')}</button>
       ${g.resolved?'':`<button class="btn sm green" data-res="${g.target_id}">標記已處理</button>`}
       ${g.resolved?'':`<button class="btn sm danger" data-ban="${g.target_type}|${g.target_id}">停權發布者</button>`}
     </div></div>`).join(''):'<p class="muted">目前沒有待處理的檢舉 🎉</p>'}`;
-  document.querySelectorAll('[data-hide]').forEach(b=>b.onclick=async()=>{const [t,id,h]=b.dataset.hide.split('|');const {error}=await sb.rpc('admin_set_hidden',{p_type:t,p_id:id,p_hidden:h==='1'});if(error)return toast(error.message);toast(h==='1'?'已隱藏':'已恢復');renderAdmin()});
-  app.querySelectorAll('[data-ban]').forEach(b=>b.onclick=async()=>{const [t,id]=b.dataset.ban.split('|');
+  admBind(box,()=>admReports(box,showAll));
+  box.querySelectorAll('[data-res]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('admin_resolve',{p_target:b.dataset.res});if(error)return toast(error.message);toast('已標記處理');admReports(box,showAll)});
+}
+// 共用按鈕：隱藏／恢復、停權、刪除、編輯
+function admBind(box,reload,rows){
+  box.querySelectorAll('[data-hide]').forEach(b=>b.onclick=async()=>{const [t,id,h]=b.dataset.hide.split('|');const {error}=await sb.rpc('admin_set_hidden',{p_type:t,p_id:id,p_hidden:h==='1'});if(error)return toast(error.message);toast(h==='1'?'已隱藏':'已恢復顯示');reload()});
+  box.querySelectorAll('[data-ban]').forEach(b=>b.onclick=async()=>{const [t,id]=b.dataset.ban.split('|');
     const why=prompt('停權原因（會記錄在後台，不會告訴對方）：','詐騙／濫用');if(why===null)return;
     const days=confirm('要永久停權嗎？\n按「確定」＝永久；按「取消」＝停權 30 天')?null:30;
     const {data,error}=await sb.rpc('admin_ban',{p_type:t,p_id:id,p_reason:why,p_days:days});if(error)return toast(error.message);
-    toast(data&&data.banned?`已停權${days?' 30 天':''}並隱藏內容`:(data&&data.note)||'已隱藏內容',4000);renderAdmin()});
-  document.querySelectorAll('[data-res]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('admin_resolve',{p_target:b.dataset.res});if(error)return toast(error.message);toast('已標記處理');renderAdmin()});
+    toast(data&&data.banned?`已停權${days?' 30 天':''}並隱藏內容`:(data&&data.note)||'已隱藏內容',4000);reload()});
+  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const [t,id]=b.dataset.del.split('|');
+    if(!confirm(`確定要永久刪除這則${ADM_T[t]}嗎？\n刪除後無法復原${t==='case'?'（目擊回報也會一起刪除）':''}。\n只是暫時不想公開的話，請改用「隱藏」。`))return;
+    const {error}=await sb.rpc('admin_delete',{p_type:t,p_id:id});if(error)return toast(error.message);toast('已刪除');reload()});
+  box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{const r=(rows||[]).find(x=>x.id===b.dataset.edit);if(r)admEdit(b.dataset.t,r,reload)});
+}
+async function admList(box,t,query,f){const _n=navId;let off=0,rows=[];
+  const FL={case:[['all','全部'],['searching','協尋中'],['found','已找到'],['closed','已結案'],['hidden','已隱藏'],['reported','被檢舉']],
+            found:[['all','全部'],['open','協尋中'],['reunited','已找到飼主'],['closed','已結案'],['hidden','已隱藏'],['reported','被檢舉']],
+            sighting:[['all','全部'],['pending','待確認'],['confirmed','已確認'],['hidden','已退回'],['reported','被檢舉']]}[t];
+  box.innerHTML=`<form class="adm-search" id="admQ" role="search"><input type="search" name="q" value="${esc(query)}" placeholder="搜尋名字、地點、電話、Email…" aria-label="搜尋"><button class="btn sm">搜尋</button></form>
+  <div class="fchips adm-f">${FL.map(([v,x])=>`<button type="button" class="fchip ${v===f?'on':''}" data-f="${v}" aria-pressed="${v===f}">${x}</button>`).join('')}</div>
+  <div id="admRows"><div class="empty">載入中…</div></div><div id="admMore"></div>`;
+  const go=(nq,nf)=>location.replace(`#/admin?tab=${t}${nq?'&q='+encodeURIComponent(nq):''}${nf&&nf!=='all'?'&f='+nf:''}`);
+  $('#admQ').onsubmit=e=>{e.preventDefault();go(e.target.q.value.trim(),f)};
+  box.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>go(query,b.dataset.f));
+  const load=async(reset)=>{if(reset){off=0;rows=[]}
+    const {data,error}=await sb.rpc('admin_list',{p_type:t,p_q:query,p_filter:f,p_offset:off});
+    if(_n!==navId)return;
+    if(error){$('#admRows').innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+    const got=Array.isArray(data)?data:[];rows=rows.concat(got);off+=got.length;
+    $('#admRows').innerHTML=rows.length?rows.map(r=>admRow(t,r)).join(''):'<p class="muted">沒有符合的內容</p>';
+    $('#admMore').innerHTML=got.length===30?'<button class="btn ghost" id="admMoreB" style="width:100%">載入更多</button>':'';
+    const mb=$('#admMoreB');if(mb)mb.onclick=()=>load(false);
+    admBind($('#admRows'),()=>load(true),rows)};
+  load(true);
+}
+function admRow(t,r){
+  const title=t==='case'?r.name:t==='found'?`${r.kind==='found'?'已收留':'看到'}${r.breed?'・'+r.breed:''}${r.colour?'・'+r.colour:''}`:`目擊「${r.case_name||''}」`;
+  const stt=t==='case'?STATUS[r.status]:t==='found'?FSTATUS_T[r.status]:SSTATUS_T[r.status];
+  const place=t==='case'?[r.lost_city,r.lost_district,r.lost_place]:t==='found'?[r.city,r.district,r.place_text]:[r.place_text];
+  const ph=r.photo||r.photo_url;const hidden=t==='sighting'?r.status==='rejected':r.hidden;
+  return `<div class="card adm-card">
+    <div class="adm-row">${ph?`<img class="adm-ph" src="${esc(thumbUrl(ph))}" alt="" loading="lazy">`:''}<div class="adm-main">
+      <div class="adm-h"><b>${esc(title||'(未命名)')}</b><span class="tag ${hidden?'':'green'}">${esc(stt||r.status)}</span>${r.hidden?'<span class="tag">已隱藏</span>':''}${r.open_reports>0?`<span class="tag red">檢舉 ${r.open_reports}</span>`:''}</div>
+      <div class="small muted">${fmtDT(r.created_at)} 登記${place.filter(Boolean).length?'　'+esc(place.filter(Boolean).join(' ')):''}${t==='case'?`　瀏覽 ${r.view_count||0}・目擊 ${r.sightings||0}`:''}</div>
+      ${t==='sighting'&&r.note?`<div class="small">${esc(r.note)}</div>`:''}
+      ${admContact(r)}
+    </div></div>
+    <div class="adm-acts">
+      <a class="btn sm ghost" href="${admUrl(t,r.id,r.case_id)}">查看</a>
+      <button class="btn sm ghost" data-edit="${r.id}" data-t="${t}">編輯</button>
+      <button class="btn sm" data-hide="${t}|${r.id}|${hidden?0:1}">${hidden?'恢復顯示':'隱藏'}</button>
+      <button class="btn sm danger" data-ban="${t}|${r.id}">停權發布者</button>
+      <button class="btn sm danger ghost" data-del="${t}|${r.id}">刪除</button>
+    </div></div>`}
+function admEdit(t,r,after){
+  const F={case:[['name','名字'],['breed','品種'],['colour','毛色'],['lost_place','走失地點'],['features','特徵','ta'],['notes','補充說明','ta'],['contact_name','聯絡人'],['contact_phone','電話'],['contact_line','LINE']],
+           found:[['place_text','地點'],['breed','品種'],['colour','毛色'],['current_place','目前在哪裡'],['features','特徵','ta'],['notes','補充說明','ta'],['reporter_name','通報人'],['reporter_phone','電話'],['reporter_line','LINE']],
+           sighting:[['place_text','地點'],['direction','往哪個方向'],['note','狀況','ta'],['reporter_name','回報人']]}[t];
+  const SO={case:STATUS,found:FSTATUS_T,sighting:SSTATUS_T}[t];
+  const el=document.createElement('div');el.className='lightbox sheet-bg';
+  el.innerHTML=`<form class="sheet adm-edit" aria-label="編輯"><div class="grab" aria-hidden="true"></div><p class="sh-t">編輯${ADM_T[t]}</p>
+    <label class="fl"><span>狀態</span><select name="status">${Object.entries(SO).map(([v,x])=>`<option value="${v}" ${v===r.status?'selected':''}>${x}</option>`).join('')}</select></label>
+    ${F.map(([k,lab,ta])=>`<label class="fl"><span>${lab}</span>${ta?`<textarea name="${k}" rows="3">${esc(r[k]||'')}</textarea>`:`<input type="text" name="${k}" value="${esc(r[k]||'')}">`}</label>`).join('')}
+    ${'phone_public' in r?`<label class="chk"><input type="checkbox" name="phone_public" ${r.phone_public!==false?'checked':''}> 公開電話</label>`:''}
+    <div class="fs-acts"><button type="button" class="btn ghost" data-x>取消</button><button class="btn">儲存</button></div></form>`;
+  const fm=el.querySelector('form');
+  el.onclick=e=>{if(e.target===el||e.target.closest('[data-x]'))closeOverlay(el)};
+  fm.onsubmit=async e=>{e.preventDefault();const p={};
+    if(fm.status.value!==r.status)p.status=fm.status.value;
+    F.forEach(([k])=>{const v=fm[k].value.trim();if(v!==(r[k]||''))p[k]=v});
+    if(fm.phone_public&&fm.phone_public.checked!==(r.phone_public!==false))p.phone_public=fm.phone_public.checked;
+    if(t==='case'&&'name' in p&&!p.name)return toast('名字不能空白');
+    if(!Object.keys(p).length){closeOverlay(el);return}
+    const {error}=await sb.rpc('admin_update',{p_type:t,p_id:r.id,p});if(error)return toast(error.message);
+    toast('已儲存');closeOverlay(el);after&&after()};
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
+async function admMembers(box,query){const _n=navId;let off=0,rows=[];
+  box.innerHTML=`<form class="adm-search" id="admQ" role="search"><input type="search" name="q" value="${esc(query)}" placeholder="搜尋 Email 或暱稱…" aria-label="搜尋"><button class="btn sm">搜尋</button></form>
+  <div id="admRows"><div class="empty">載入中…</div></div><div id="admMore"></div>`;
+  $('#admQ').onsubmit=e=>{e.preventDefault();const v=e.target.q.value.trim();location.replace('#/admin?tab=members'+(v?'&q='+encodeURIComponent(v):''))};
+  const load=async(reset)=>{if(reset){off=0;rows=[]}
+    const {data,error}=await sb.rpc('admin_members',{p_q:query,p_offset:off});
+    if(_n!==navId)return;
+    if(error){$('#admRows').innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+    const got=Array.isArray(data)?data:[];rows=rows.concat(got);off+=got.length;
+    $('#admRows').innerHTML=rows.length?rows.map(m=>`<div class="card adm-card">
+      <div class="adm-h"><b>${esc(m.display_name||m.email||'')}</b>${m.is_admin?'<span class="tag blue">管理員</span>':''}${m.banned?'<span class="tag red">停權中</span>':''}</div>
+      <div class="small">${admMail(m.email,'')}</div>
+      <div class="small muted">加入 ${fmtDT(m.created_at)}${m.last_sign_in_at?'　最後登入 '+fmtDT(m.last_sign_in_at):''}</div>
+      <div class="small muted">走失案件 ${m.cases}・拾獲 ${m.founds}・目擊 ${m.sightings}・寵物 ${m.pets}</div>
+      <div class="adm-acts">
+        ${m.email?`<a class="btn sm ghost" href="mailto:${esc(m.email)}?subject=${encodeURIComponent('【汪喵回家】')}">寄信</a>`:''}
+        ${m.cases?`<a class="btn sm ghost" href="#/admin?tab=case&q=${encodeURIComponent(m.email||m.id)}">看他的案件</a>`:''}
+        ${m.founds?`<a class="btn sm ghost" href="#/admin?tab=found&q=${encodeURIComponent(m.email||m.id)}">看他的通報</a>`:''}
+        ${m.is_admin||m.banned?'':`<button class="btn sm danger" data-mban="${m.id}">停權</button>`}
+      </div></div>`).join(''):'<p class="muted">沒有符合的會員</p>';
+    $('#admMore').innerHTML=got.length===50?'<button class="btn ghost" id="admMoreB" style="width:100%">載入更多</button>':'';
+    const mb=$('#admMoreB');if(mb)mb.onclick=()=>load(false);
+    box.querySelectorAll('[data-mban]').forEach(b=>b.onclick=async()=>{
+      const why=prompt('停權原因（會記錄在後台，不會告訴對方）：','詐騙／濫用');if(why===null)return;
+      const days=confirm('要永久停權嗎？\n按「確定」＝永久；按「取消」＝停權 30 天')?null:30;
+      const {error}=await sb.rpc('admin_ban_member',{p_user:b.dataset.mban,p_reason:why,p_days:days});if(error)return toast(error.message);
+      toast(`已停權${days?' 30 天':''}。他之前發的內容沒有隱藏，需要的話請到各分頁處理`,5000);load(true)})};
+  load(true);
+}
+async function admBans(box){const _n=navId;
+  const {data,error}=await sb.rpc('admin_bans');
+  if(_n!==navId)return;
+  if(error){box.innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+  const rows=Array.isArray(data)?data:[];
+  box.innerHTML=rows.length?rows.map(b=>`<div class="card adm-card">
+    <div class="adm-h"><b>${esc(b.email||(b.has_ip?'未登入的發布者（以網路位址停權）':'—'))}</b><span class="tag ${b.expires_at?'':'red'}">${b.expires_at?'到 '+fmtDT(b.expires_at):'永久'}</span></div>
+    <div class="small muted">${fmtDT(b.created_at)} 停權${b.reason?'：'+esc(b.reason):''}</div>
+    <div class="adm-acts"><button class="btn sm" data-unban="${b.id}">解除停權</button></div></div>`).join(''):'<p class="muted">目前沒有停權中的人</p>';
+  box.querySelectorAll('[data-unban]').forEach(b=>b.onclick=async()=>{if(!confirm('確定要解除停權嗎？'))return;
+    const {error}=await sb.rpc('admin_unban',{p_id:b.dataset.unban});if(error)return toast(error.message);toast('已解除停權');admBans(box)});
 }
 
 /* ============================================================
