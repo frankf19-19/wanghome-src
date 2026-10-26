@@ -1243,6 +1243,28 @@ body{touch-action:manipulation}
 .sri.s1{background:#FFC6D3;color:#B8335F}.sri.s2{background:#BFEBD9;color:#18704F}.sri.s3{background:#D9D2FF;color:#5A46C4}.sri.s4{background:#FFE7A8;color:#9A6400}
 .srt{flex:1;display:flex;flex-direction:column}.srt b{font-size:16.5px}.srt small{font-size:13.5px;color:var(--ink-3)}
 .sh-x{margin-top:4px;min-height:50px}
+
+/* ===== v4.3 專業 App：大標題收進上方列、我的頁分組、頭像 ===== */
+.hd-av{display:none}
+.profile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--sheet);border-radius:24px;padding:16px;box-shadow:var(--lift)}
+.pf-av{flex:none;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#FFC6D3,#D9D2FF);color:#4A3442;font:800 26px var(--head)}
+.pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:760px){
+  .hd-av{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--sheet);color:var(--ink-2);box-shadow:var(--lift);margin-left:auto}
+  #navMe{display:none!important}
+  body[data-route="me"] .hd-av,body[data-route="login"] .hd-av{visibility:hidden}
+  /* 內頁：上方列的標題先藏起來，往下捲過大標題才出現（像 iPhone） */
+  body.inner #mTitle{opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s}
+  body.inner.scrolled #mTitle{opacity:1;transform:none}
+  body.inner .mbar{box-shadow:none}
+  body.inner.scrolled .mbar{box-shadow:0 1px 0 var(--line)}
+  body.inner #app>h1:first-child,body.inner #app>.detail-head h1{margin-top:2px}
+  /* 我的：分組標題小小灰灰的，內容放進白色卡片 */
+  body[data-route="me"] #app h2{font-size:14px!important;color:var(--ink-3);font-family:var(--body)!important;font-weight:700!important;margin:26px 6px 8px!important}
+  body[data-route="me"] #app h2 .ico{display:none}
+  body[data-route="me"] #app .grid>p.muted{background:var(--sheet);border-radius:20px;padding:14px 16px;margin:0;box-shadow:var(--lift);font-size:14.5px}
+  body[data-route="me"] .crosslink{border-left:0!important;box-shadow:var(--lift)}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1270,6 +1292,7 @@ body{touch-action:manipulation}
       <a href="#/health?cal=1" class="link hide-sm">日曆同步</a>
       <a href="#/health/add" class="btn sm green hide-sm">＋ 新增紀錄</a>
     </span>
+    <a href="#/me" class="hd-av" aria-label="我的"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg></a>
     <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg><span class="hide-sm"> 登入</span></a>
   </div>
   <nav class="space" aria-label="切換功能">
@@ -1306,7 +1329,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.2.2';
+const BUILD = 'v4.3.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1582,6 +1605,7 @@ function openAddSheet(){
 }
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.tb-add');if(a){e.preventDefault();openAddSheet()}});
 function renderChrome(path,h){
+  document.body.dataset.route=(path.replace(/^#\/?/,'').split('/')[0]||'home');
   const space=spaceOf(path);document.body.dataset.space=space;
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
   const rk=path==='#/'||path==='#'?(qs(h).near?'near':'home'):(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':'';
@@ -1636,6 +1660,10 @@ function parentOf(h){const p=h.split('?')[0];let m;
   return '#/'}
 function goBack(){if(overlayOpen){closeOverlay(overlayOpen);return}if(navDepth>0)history.back();else{__replacing=true;goReplace(parentOf(location.hash||'#/'))}}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#mBack')){e.preventDefault();goBack()}});
+// 內頁大標題捲到上方列下面時，上方列才顯示頁名（像 iPhone 的大標題）
+function updScrolled(){const h=document.querySelector('#app h1');const b=h?h.getBoundingClientRect().bottom:0;document.body.classList.toggle('scrolled',!h||b<60)}
+window.addEventListener('scroll',updScrolled,{passive:true});
+try{new MutationObserver(()=>updScrolled()).observe(document.getElementById('app'),{childList:true})}catch(_){}
 function route(){
   if(!sb)return;
   if(__skipRoute){__skipRoute=false;navByPop=false;return}   // 取消離開後退回原頁，不重畫
@@ -3607,7 +3635,7 @@ async function renderMeBody(){const _n=navId;
   if(fl&&fl.length){const {data}=await sb.from('cases_public').select('*').in('id',fl.map(f=>f.case_id));followed=data||[]}
   const p=prof||{};
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
-  (_n===navId?app:_void).innerHTML=`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="margin:0">${esc(p.display_name||me().email)}</h1>${p.display_name?`<span class="muted small">${esc(me().email||'')}</span>`:''}${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}<button class="btn sm ghost" id="btnOut" style="margin-left:auto">登出</button></div>
+  (_n===navId?app:_void).innerHTML=`<div class="profile"><span class="pf-av" aria-hidden="true">${esc([...(p.display_name||me().email||'?')][0].toUpperCase())}</span><div class="pf-t"><h1>${esc(p.display_name||me().email)}</h1>${p.display_name?`<span class="muted small">${esc(me().email||'')}</span>`:''}</div>${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}<button class="btn sm ghost" id="btnOut">登出</button></div>
 
   <a class="crosslink" href="#/health" style="margin:18px 0 6px"><span class="cl-ic">${ic("steth")}</span><span><b>毛孩健康手冊${(pets||[]).length?`・${pets.length} 隻毛孩`:''}</b>${(dues||[]).length?`有 ${dues.length} 項一個月內到期`:'健康紀錄、到期提醒和日曆同步都在這裡'}</span><em>打開</em></a>
 
