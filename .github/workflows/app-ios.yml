@@ -1,0 +1,68 @@
+# 汪喵回家 iOS App：自動編譯
+# - 手動執行（Actions → App iOS → Run workflow），或推送 app-v* 標籤時執行
+# - 有設定 App Store Connect API 金鑰（Secrets）時：簽章、打包並上傳到 TestFlight
+# - 沒有設定時：只編譯模擬器版本，確認程式可以編譯
+# 注意：私人 repo 的 macOS 執行時間以 10 倍計算，請只在要送審／測試時執行
+name: App iOS
+on:
+  workflow_dispatch:
+  push:
+    tags: ['app-v*']
+concurrency: { group: app-ios, cancel-in-progress: true }
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      ASC_KEY: ${{ secrets.ASC_API_KEY_P8 }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/package-lock.json }
+      - name: 選擇 Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1); echo "使用 $X"; sudo xcode-select -s "$X/Contents/Developer"; xcodebuild -version
+      - name: 打包網站、同步到 App
+        working-directory: app
+        run: |
+          npm ci --no-audit --no-fund
+          bash prepare-web.sh
+          npx cap sync ios
+      - name: 版本號
+        working-directory: app/ios/App
+        run: |
+          V=$(node -p "require('../../package.json').version")
+          sed -i '' "s/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = $V;/; s/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJECT_VERSION = $((GITHUB_RUN_NUMBER + 100));/" App.xcodeproj/project.pbxproj
+      - name: 模擬器編譯（沒有 Apple 金鑰時）
+        if: ${{ env.ASC_KEY == '' }}
+        working-directory: app/ios/App
+        run: xcodebuild -project App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tail -30
+      - name: 簽章打包並上傳 TestFlight
+        if: ${{ env.ASC_KEY != '' }}
+        working-directory: app/ios/App
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          KP=~/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8
+          printf '%s' "$ASC_KEY" > "$KP"
+          AUTH="-allowProvisioningUpdates -authenticationKeyPath $KP -authenticationKeyID $ASC_KEY_ID -authenticationKeyIssuerID $ASC_ISSUER"
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGN_STYLE=Automatic $AUTH archive | tail -30
+          cat > "$RUNNER_TEMP/export.plist" <<PL
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PL
+          sed -i '' 's/^          //' "$RUNNER_TEMP/export.plist"
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
+            -exportPath "$RUNNER_TEMP/out" $AUTH | tail -30
+          rm -f "$KP"
+          echo "已上傳到 App Store Connect，約 10–30 分鐘後會出現在 TestFlight。"

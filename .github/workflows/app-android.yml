@@ -1,0 +1,58 @@
+# 汪喵回家 Android App：自動編譯
+# - 手動執行（Actions → App Android → Run workflow），或推送 app-v* 標籤時執行
+# - 有設定簽章密鑰（Secrets）時，產生可上傳 Google Play 的 .aab；沒有設定時只產生測試用 .apk
+name: App Android
+on:
+  workflow_dispatch:
+  push:
+    tags: ['app-v*']
+concurrency: { group: app-android, cancel-in-progress: true }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/package-lock.json }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21, cache: gradle }
+      - name: 打包網站、同步到 App
+        working-directory: app
+        run: |
+          npm ci --no-audit --no-fund
+          bash prepare-web.sh
+          npx cap sync android
+      - name: 版本號（每次編譯自動加 1）
+        working-directory: app/android
+        run: |
+          sed -i "s/versionCode [0-9]*/versionCode $((GITHUB_RUN_NUMBER + 100))/" app/build.gradle
+          V=$(node -p "require('../package.json').version"); sed -i "s/versionName \"[^\"]*\"/versionName \"$V\"/" app/build.gradle
+          grep -n "versionCode\|versionName" app/build.gradle
+      - name: 測試版 APK
+        working-directory: app/android
+        run: ./gradlew --no-daemon assembleDebug
+      - name: 正式版 AAB（需要簽章密鑰）
+        if: ${{ env.KS != '' }}
+        env:
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        working-directory: app/android
+        run: |
+          echo "$KS" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          ./gradlew --no-daemon bundleRelease \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.jks" \
+            -Pandroid.injected.signing.store.password="$KS_PASS" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASS"
+          rm -f "$RUNNER_TEMP/upload.jks"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ github.run_number }}
+          path: |
+            app/android/app/build/outputs/apk/debug/*.apk
+            app/android/app/build/outputs/bundle/release/*.aab
+          retention-days: 14

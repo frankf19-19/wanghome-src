@@ -1054,7 +1054,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.16.0';
+const BUILD = 'v3.17.0';
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
 /* ============================================================
@@ -1082,6 +1082,12 @@ if(IS_APP){
     A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
       if(m)location.hash=(m[1]==='s'?'#/case/':'#/found/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
     A.addListener('pause',()=>{try{document.dispatchEvent(new Event('app-pause'))}catch(_){}});
+    A.addListener('resume',()=>{try{lnSync()}catch(_){}});
+  }}catch(_){}
+  // 點通知：打開那隻毛孩的頁面
+  try{const LN=capPlugin('LocalNotifications');if(LN){
+    LN.addListener('localNotificationActionPerformed',e=>{const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
+    if(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'&&LN.createChannel)LN.createChannel({id:'care',name:'毛孩照護提醒',description:'回診、疫苗、驅蟲、用藥提醒',importance:4,visibility:1}).catch(()=>{});
   }}catch(_){}
   // 連結：站內的 #/ 連結留在 App 裡；網站網址轉成 App 內頁面；其他網站用 App 內瀏覽器開
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[href]');if(!a)return;const href=a.getAttribute('href')||'';
@@ -1600,9 +1606,9 @@ async function renderHealth(){const _n=navId;
   ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2>${ic("pill")} 今天的用藥與保養品</h2><div class="card med-card">${rows.join('')}</div>`:''})()}
   <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
   ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm" data-done="${r.id}">✓ 已完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">新增紀錄時填「下次到期日」（例如疫苗一年後），就會出現在這裡，到期前寄 Email 提醒你。</div>`}
-  <div id="calSec">${calSection(p)}</div>`;
-  bindCal(renderHealth);bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);rerender(renderHealth)})});
+  ${lnSection()}<div id="calSec">${calSection(p)}</div>`;
+  bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);rerender(renderHealth)})});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:RM()?'auto':'smooth'})},60);
@@ -3041,7 +3047,8 @@ async function initAuth(){
   sb.auth.onAuthStateChange((ev,s)=>{
     const was=!!session;session=s;updateAuthUI();
     if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)}}
-    if(ev==='SIGNED_OUT'){toast('已登出')}
+    if(ev==='SIGNED_OUT'){toast('已登出');if(IS_APP)lnClear()}
+    if(ev==='SIGNED_IN'&&IS_APP)setTimeout(()=>lnSync(),1500);
   });
   updateAuthUI();
 }
@@ -3119,6 +3126,70 @@ function bindCal(rerender){
   if($('#btnCalCopy'))$('#btnCalCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#calU').value);toast('已複製，貼到日曆 App 的「訂閱日曆」')}catch(_){$('#calU').select();toast('請長按複製')}};
   if($('#btnCalReset'))$('#btnCalReset').onclick=async()=>{if(!confirm('重設後舊的訂閱網址會失效，要重新訂閱一次。確定嗎？'))return;const {error}=await sb.rpc('rotate_calendar_token');if(error)return toast('重設失敗：'+error.message);toast('已重設，請重新訂閱');rerender()};
 }
+/* ============================================================
+   App 通知提醒（只在 App 裡）：回診／疫苗／驅蟲到期前一天早上 9 點、每天的用藥時間，手機直接跳通知。
+   提醒排在這支手機上（不經過網路、不寄信）；登出或關閉時全部取消。
+   ============================================================ */
+const LN_KEY='wh_lnotify',LN_IDS='wh_lnids';let lnLast=0,lnBusy=false;
+function lnOn(){try{return IS_APP&&localStorage.getItem(LN_KEY)==='1'}catch(_){return false}}
+function lnId(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return ((h>>>1)%2000000000)+1}
+function lnAt(d,hh,mm){const [y,m,dd]=d.split('-').map(Number);return new Date(y,m-1,dd,hh,mm,0,0)}
+function lnDiffDays(a,b){return Math.round((lnAt(b,12,0)-lnAt(a,12,0))/864e5)}
+async function lnClear(){const LN=capPlugin('LocalNotifications');if(!LN)return;
+  let ids=[];try{ids=JSON.parse(localStorage.getItem(LN_IDS)||'[]')}catch(_){}
+  try{const p=await LN.getPending();(p&&p.notifications||[]).forEach(n=>{if(n.extra&&n.extra.wh)ids.push(n.id)})}catch(_){}
+  ids=[...new Set(ids.map(Number).filter(Boolean))];
+  if(ids.length){try{await LN.cancel({notifications:ids.map(id=>({id}))})}catch(_){}}
+  try{localStorage.removeItem(LN_IDS)}catch(_){}
+}
+async function lnSync(force){
+  if(!lnOn()||!me()||lnBusy)return;if(!force&&Date.now()-lnLast<60000)return;
+  const LN=capPlugin('LocalNotifications');if(!LN)return;lnBusy=true;
+  try{
+    const perm=await LN.checkPermissions();if(perm.display!=='granted')return;
+    const today=todayStr();
+    const [{data:pets,error:e1},{data:recs,error:e2},{data:meds,error:e3}]=await Promise.all([
+      sb.from('pets').select('id,name'),
+      sb.from('pet_records').select('id,pet_id,kind,title,next_due').eq('done',false).gte('next_due',today).order('next_due').limit(40),
+      sb.from('pet_meds').select('id,pet_id,kind,name,freq,times,start_date,end_date,dose_amount,dose_unit').eq('active',true).limit(40)]);
+    if(e1||e2||e3||!pets)return;   // 沒網路：保留手機上原本的提醒
+    const nm={};pets.forEach(p=>nm[p.id]=p.name||'毛孩');const now=Date.now()+60000,list=[];
+    const ch=(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android')?{channelId:'care'}:{};
+    for(const r of recs||[]){
+      let at=lnAt(addDays(r.next_due,-1),9,0),when='明天';if(at<=now){at=lnAt(r.next_due,9,0);when='今天'}if(at<=now)continue;
+      list.push({id:lnId('r'+r.id),title:`🐾 ${nm[r.pet_id]||'毛孩'}${when}到期：${REC_KINDS[r.kind]?.[1]||'提醒'}`,body:r.title,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:r.pet_id},...ch});
+    }
+    for(const m of meds||[]){
+      if(m.end_date&&m.end_date<today)continue;if(m.start_date&&m.start_date>today)continue;
+      const times=(m.times||[]).filter(t=>/^\d{2}:\d{2}$/.test(t)).slice(0,4);if(!times.length)continue;
+      const dose=m.dose_amount?`（${String(+m.dose_amount)}${m.dose_unit||''}）`:'';
+      const title=`💊 ${nm[m.pet_id]||'毛孩'}該${m.kind==='supplement'?'吃保養品':'吃藥'}了`,body=m.name+dose;
+      for(const t of times){const [hh,mm]=t.split(':').map(Number);
+        if(/^daily/.test(m.freq))list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch});
+        else if(m.freq==='weekly'){const wd=lnAt(m.start_date||today,12,0).getDay()+1;list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{weekday:wd,hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}
+        else if(m.freq==='every_other'){let d=today;if(lnDiffDays(m.start_date||today,d)%2)d=addDays(d,1);
+          for(let k=0;k<6;k++,d=addDays(d,2)){if(m.end_date&&d>m.end_date)break;const at=lnAt(d,hh,mm);if(at<=now)continue;list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}}
+      }
+    }
+    const use=list.slice(0,60);   // iPhone 一個 App 最多排 64 則
+    await lnClear();
+    if(use.length)await LN.schedule({notifications:use});
+    try{localStorage.setItem(LN_IDS,JSON.stringify(use.map(n=>n.id)))}catch(_){}
+    lnLast=Date.now();
+  }catch(e){console.warn('提醒排程失敗',e)}finally{lnBusy=false}
+}
+async function lnToggle(btn){
+  const LN=capPlugin('LocalNotifications');if(!LN)return toast('這個版本不支援通知，請更新 App');
+  if(lnOn()){try{localStorage.setItem(LN_KEY,'0')}catch(_){}await lnClear();toast('已關閉手機通知提醒');if(btn)btn.outerHTML=lnBtnHTML();bindLnBtn();return}
+  let p;try{p=await LN.requestPermissions()}catch(_){p={display:'denied'}}
+  if(p.display!=='granted')return toast('通知沒有開啟。請到手機「設定」→「汪喵回家」→「通知」打開，再按一次。',6000);
+  try{localStorage.setItem(LN_KEY,'1')}catch(_){}
+  await lnSync(true);toast('已開啟：到期前一天早上 9 點、用藥時間會提醒你',4500);if(btn)btn.outerHTML=lnBtnHTML();bindLnBtn();
+}
+function lnBtnHTML(){return lnOn()?`<button type="button" class="btn sm ghost" id="btnLn">${ic('bell')} 關閉手機通知</button>`:`<button type="button" class="btn sm" id="btnLn">${ic('bell')} 開啟手機通知</button>`}
+function bindLnBtn(){const b=$('#btnLn');if(b)b.onclick=()=>lnToggle(b)}
+function lnSection(){if(!IS_APP)return '';
+  return `<h2>${ic("bell")} 手機通知提醒</h2><div class="card"><p style="margin:0 0 10px">回診、疫苗、驅蟲到期前一天早上 9 點，還有每天的用藥時間，手機會直接跳通知。</p>${lnBtnHTML()}<p class="muted small" style="margin:8px 0 0">提醒只存在這支手機上；換手機或重新安裝要再開一次。</p></div>`}
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
 
 async function getProfile(){
@@ -3474,7 +3545,7 @@ async function renderPetView(id){const _n=navId;
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error)return toast(error.message);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);rerender(()=>renderPetView(id))})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);rerender(()=>renderPetView(id))})});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
   {const mc=document.querySelector('#app .med-card'),g=document.querySelector('#app .gallery');if(mc&&g){const host=g.closest('.detail-head')||g;host.parentNode.insertBefore(mc,host);mc.style.marginBottom='14px'}}
   bindMedSlots(()=>rerender(()=>renderPetView(id)));
@@ -3538,7 +3609,7 @@ async function renderRecord(petId,recId){const _n=navId;
     if(f.elements.done)row.done=f.elements.done.checked;else if(recId==='new')row.done=false;
     const {data:saved,error}=recId==='new'?await sb.from('pet_records').insert(row).select('id').single():await sb.from('pet_records').update(row).eq('id',recId).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
-    didSave=true;
+    didSave=true;lnSync(true);
     // 從紀錄移除的照片，也從雲端刪掉
     const dropped=origFiles.concat(fresh).filter(x=>!files.includes(x));if(dropped.length)sb.storage.from('pet-private').remove(dropped).catch(()=>{});
     const dueChanged=row.next_due&&!row.done&&(recId==='new'||row.next_due!==r.next_due);
@@ -3549,7 +3620,7 @@ async function renderRecord(petId,recId){const _n=navId;
   {const mo=new MutationObserver(()=>{if(f.isConnected)return;mo.disconnect();
     Object.values(urls).forEach(u=>{if(String(u).startsWith('blob:'))URL.revokeObjectURL(u)});
     if(!didSave&&fresh.length)sb.storage.from('pet-private').remove(fresh).catch(()=>{})});mo.observe(app,{childList:true})}
-  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('確定刪除這筆紀錄？'))return;const {error}=await sb.from('pet_records').delete().eq('id',recId);if(error)return toast('刪除失敗：'+friendlyErr(error.message));const all=[...new Set([...files,...origFiles])];if(all.length)await sb.storage.from('pet-private').remove(all).catch(()=>{});goReplace('#/pet/'+petId)};
+  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('確定刪除這筆紀錄？'))return;const {error}=await sb.from('pet_records').delete().eq('id',recId);lnSync(true);if(error)return toast('刪除失敗：'+friendlyErr(error.message));const all=[...new Set([...files,...origFiles])];if(all.length)await sb.storage.from('pet-private').remove(all).catch(()=>{});goReplace('#/pet/'+petId)};
 }
 
 
@@ -3641,9 +3712,10 @@ async function renderMed(petId,medId){const _n=navId;
     if(!row.name)return toast('請填名稱');
     const {error}=medId==='new'?await sb.from('pet_meds').insert(row):await sb.from('pet_meds').update(row).eq('id',medId);
     if(error)return toast('儲存失敗：'+error.message);
+    lnSync(true);
     toast('已儲存');goReplace('#/pet/'+petId);
   });
-  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!confirm('確定刪除？給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。'))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);goReplace('#/pet/'+petId)};
+  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!confirm('確定刪除？給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。'))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);lnSync(true);goReplace('#/pet/'+petId)};
 }
 async function renderPetPrint(id){const _n=navId;
   if(!requireLogin())return;

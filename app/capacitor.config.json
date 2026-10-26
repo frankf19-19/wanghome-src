@@ -1,0 +1,30 @@
+{
+  "appId": "com.wangmiaotw.app",
+  "appName": "汪喵回家",
+  "webDir": "www",
+  "backgroundColor": "#EFF2EE",
+  "loggingBehavior": "none",
+  "appendUserAgent": "WangMiaoApp",
+  "ios": {
+    "contentInset": "never",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#CC3F1E",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP"
+    },
+    "StatusBar": { "overlaysWebView": true, "style": "DEFAULT" },
+    "LocalNotifications": { "iconColor": "#CC3F1E" }
+  }
+}
