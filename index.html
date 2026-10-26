@@ -1419,7 +1419,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.5';
+const BUILD = 'v4.7.6';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -2655,7 +2655,9 @@ function renderNew(){
           const {error:ce}=await sb.storage.from('photos').copy(k,nk);
           if(!ce){sb.storage.from('photos').copy(k.replace(/\.jpg$/,'_t.jpg'),nk.replace(/\.jpg$/,'_t.jpg')).catch(()=>{});photos.push(sb.storage.from('photos').getPublicUrl(nk).data.publicUrl);continue}
           // 複製失敗：下載後重新上傳一份到案件資料夾
-          try{const r=await fetch(u);if(r.ok){const nu=await tryUpload(new File([await r.blob()],'pet.jpg',{type:'image/jpeg'}),'cases');if(nu){photos.push(nu);continue}}}catch(_){}}
+          try{const r=await fetch(u);if(r.ok){const nu=await tryUpload(new File([await r.blob()],'pet.jpg',{type:'image/jpeg'}),'cases');if(nu){photos.push(nu);continue}}}catch(_){}
+          // 還是不行：略過這張（寵物照片網址含帳號資料夾，不放到公開案件）
+          if(/^pets\/[0-9a-f-]{36}\//.test(k)){toast('有一張寵物照片沒有帶入，可以再手動加一次',4000);continue}}
         photos.push(u)}
       const pg=$('#pg');pg.classList.remove('hidden');
       for(let i=0;i<photoFiles.length;i++){{const u=await tryUpload(photoFiles[i],'cases');if(u)photos.push(u)}pg.querySelector('i').style.width=((i+1)/photoFiles.length*100)+'%'}
@@ -3486,6 +3488,7 @@ async function renderAdmin(){const _n=navId;
   return admList(box,tab,q.q||'',q.f||'all');
 }
 const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊'};
+const ADM_MAX={name:30,lost_place:200,place_text:200,current_place:200,contact_phone:30,reporter_phone:30,contact_line:60,reporter_line:60,direction:20};
 const FSTATUS_T={open:'協尋中',reunited:'已找到飼主',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
 const admUrl=(t,id,caseId)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:`#/case/${caseId}`;
 function admMail(email,title){return email?`<a href="mailto:${esc(email)}?subject=${encodeURIComponent('【汪喵回家】關於'+(title?'「'+title+'」':'你在網站上的內容'))}">${esc(email)}</a>`:''}
@@ -3579,7 +3582,7 @@ function admEdit(t,r,after){
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<form class="sheet adm-edit" aria-label="編輯"><div class="grab" aria-hidden="true"></div><p class="sh-t">編輯${ADM_T[t]}</p>
     <label class="fl"><span>狀態</span><select name="status">${Object.entries(SO).map(([v,x])=>`<option value="${v}" ${v===r.status?'selected':''}>${x}</option>`).join('')}</select></label>
-    ${F.map(([k,lab,ta])=>`<label class="fl"><span>${lab}</span>${ta?`<textarea name="${k}" rows="3">${esc(r[k]||'')}</textarea>`:`<input type="text" name="${k}" value="${esc(r[k]||'')}">`}</label>`).join('')}
+    ${F.map(([k,lab,ta])=>`<label class="fl"><span>${lab}</span>${ta?`<textarea name="${k}" rows="3" maxlength="1000">${esc(r[k]||'')}</textarea>`:`<input type="text" name="${k}" maxlength="${ADM_MAX[k]||50}" value="${esc(r[k]||'')}">`}</label>`).join('')}
     ${'phone_public' in r?`<label class="chk"><input type="checkbox" name="phone_public" ${r.phone_public!==false?'checked':''}> 公開電話</label>`:''}
     <div class="fs-acts"><button type="button" class="btn ghost" data-x>取消</button><button class="btn">儲存</button></div></form>`;
   const fm=el.querySelector('form');

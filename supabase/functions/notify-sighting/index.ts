@@ -68,7 +68,9 @@ Deno.serve(async (req) => {
 
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), { auth: { persistSession: false } });
   // 每個網路位址每小時的呼叫上限（確認信 10 次、目擊通知 30 次）
-  const ip = (req.headers.get("cf-connecting-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown").trim();
+  // 只信任 Cloudflare 給的位址（x-forwarded-for 可以被偽造）；IPv6 以 /64 為一組
+  let ip = (req.headers.get("cf-connecting-ip") ?? "unknown").trim();
+  if (ip.includes(":")) ip = ip.split(":").slice(0, 4).join(":") + "::/64";
   const isVerify = body.action === "verify";
   {
     const { data: rok, error: re } = await sb.rpc("edge_rate_ok", {
@@ -156,7 +158,7 @@ Deno.serve(async (req) => {
       await sb.from("case_mail_log").insert({ case_id: caseId, to_email: toKey, kind: "verify" });
       return json({ sent: true });
     } catch (e) {
-      await sb.from("cases").update({ email_verify_sent_at: c.email_verify_sent_at }).eq("id", caseId);
+      await sb.from("cases").update({ email_verify_hash: c.email_verify_hash, email_verify_sent_at: c.email_verify_sent_at }).eq("id", caseId);
       await budgetBack("verify");
       console.error("verify send failed", String(e));
       return json({ sent: false, reason: "send_failed" }, 502);

@@ -4,6 +4,8 @@
 --   3. admin_delete：管理員永久刪除一則內容
 --   4. admin_members：會員清單（Email、加入時間、最後登入、發布數量、是否停權）
 --   5. 停權名單：admin_bans、admin_unban、admin_ban_member
+--   6. 站長修改內容時不觸發自動過濾
+--   7. 刪除帳號（保留內容）時，拾獲通報上的 Email 也清掉
 -- 只有 profiles.is_admin = true 的帳號能用。可重複執行。
 
 -- 1 ---------------------------------------------------------------------------
@@ -67,7 +69,7 @@ begin
       lost_place    = case when p ? 'lost_place'    then left(p->>'lost_place', 200)    else lost_place end,
       contact_name  = case when p ? 'contact_name'  then left(p->>'contact_name', 50)   else contact_name end,
       contact_phone = case when p ? 'contact_phone' then left(p->>'contact_phone', 30)  else contact_phone end,
-      contact_line  = case when p ? 'contact_line'  then left(p->>'contact_line', 50)   else contact_line end,
+      contact_line  = case when p ? 'contact_line'  then left(p->>'contact_line', 60)   else contact_line end,
       phone_public  = case when p ? 'phone_public'  then (p->>'phone_public')::boolean  else phone_public end,
       status        = coalesce(p->>'status', status),
       found_at      = case when p->>'status' = 'found' and found_at is null then now()
@@ -85,7 +87,7 @@ begin
       current_place  = case when p ? 'current_place'  then left(p->>'current_place', 200)  else current_place end,
       reporter_name  = case when p ? 'reporter_name'  then left(p->>'reporter_name', 50)   else reporter_name end,
       reporter_phone = case when p ? 'reporter_phone' then left(p->>'reporter_phone', 30)  else reporter_phone end,
-      reporter_line  = case when p ? 'reporter_line'  then left(p->>'reporter_line', 50)   else reporter_line end,
+      reporter_line  = case when p ? 'reporter_line'  then left(p->>'reporter_line', 60)   else reporter_line end,
       phone_public   = case when p ? 'phone_public'   then (p->>'phone_public')::boolean   else phone_public end,
       status         = coalesce(p->>'status', status),
       updated_at     = now()
@@ -95,8 +97,12 @@ begin
     update public.sightings set
       place_text    = case when p ? 'place_text'    then left(p->>'place_text', 200)    else place_text end,
       direction     = case when p ? 'direction'     then left(p->>'direction', 20)      else direction end,
-      note          = case when p ? 'note'          then left(p->>'note', 500)          else note end,
+      note          = case when p ? 'note'          then left(p->>'note', 1000)          else note end,
       reporter_name = case when p ? 'reporter_name' then left(p->>'reporter_name', 50)  else reporter_name end,
+      -- 狀態改成「退回」時記住原狀態；改成其他狀態時清掉隱藏紀錄（不然飼主之後無法再處理這則目擊）
+      status_before_hide = case when p->>'status' = 'rejected' and status <> 'rejected' then status
+                                when p ? 'status' and p->>'status' <> 'rejected' then null
+                                else status_before_hide end,
       status        = coalesce(p->>'status', status)
     where id = p_id;
   else raise exception '類型錯誤'; end if;
@@ -110,7 +116,11 @@ create or replace function public.admin_delete(p_type text, p_id uuid)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin() then raise exception '需要管理員權限'; end if;
-  if p_type = 'case' then delete from public.cases where id = p_id;
+  if p_type = 'case' then
+    -- 案件底下的目擊會一起刪除：它們的檢舉也一併結案
+    update public.reports set resolved = true, resolved_at = now()
+     where not resolved and target_id in (select id from public.sightings where case_id = p_id);
+    delete from public.cases where id = p_id;
   elsif p_type = 'found' then delete from public.found_reports where id = p_id;
   elsif p_type = 'sighting' then delete from public.sightings where id = p_id;
   else raise exception '類型錯誤'; end if;
@@ -176,6 +186,63 @@ begin
 end $$;
 revoke all on function public.admin_ban_member(uuid, text, int) from public, anon;
 grant execute on function public.admin_ban_member(uuid, text, int) to authenticated;
+
+-- 6 ---------------------------------------------------------------------------
+-- 自動過濾：站長自己修改的內容不檢查（例如加上「請勿先匯款」提醒）
+create or replace function public.ugc_filter() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare v_text text; v_type text;
+begin
+  if public.is_admin() then return new; end if;   -- 站長修改的內容不再自動過濾
+  if tg_table_name = 'cases' then
+    v_type := 'case';
+    v_text := concat_ws(' ', new.name, new.breed, new.colour, new.age_text, new.features, new.collar_desc, new.temperament, new.lost_district, new.lost_place, new.contact_name, new.contact_phone, new.contact_line, new.notes, new.found_note);
+  elsif tg_table_name = 'found_reports' then
+    v_type := 'found';
+    v_text := concat_ws(' ', new.place_text, new.breed, new.colour, new.features, new.collar_desc, new.current_place, new.reporter_name, new.reporter_phone, new.reporter_line, new.notes, new.injury);
+  else
+    v_type := 'sighting';
+    v_text := concat_ws(' ', new.place_text, new.direction, new.note, new.reporter_name, new.reporter_contact);
+  end if;
+  if not public.ugc_bad(v_text) then return new; end if;
+  if tg_op = 'UPDATE' and v_type <> 'sighting' then
+    -- 修改時只有「新出現」可疑字眼才處理，避免站長恢復顯示後又被藏起來
+    if v_type = 'case' and public.ugc_bad(concat_ws(' ', old.name, old.breed, old.colour, old.age_text, old.features, old.collar_desc, old.temperament, old.lost_district, old.lost_place, old.contact_name, old.contact_phone, old.contact_line, old.notes, old.found_note)) then return new; end if;
+    if v_type = 'found' and public.ugc_bad(concat_ws(' ', old.place_text, old.breed, old.colour, old.features, old.collar_desc, old.current_place, old.reporter_name, old.reporter_phone, old.reporter_line, old.notes, old.injury)) then return new; end if;
+  end if;
+  if v_type = 'sighting' then
+    if tg_op = 'UPDATE' then return new; end if;   -- 目擊只在新增時檢查（飼主改備註不影響）
+    new.status := 'rejected';                      -- 不顯示、也不寄給飼主
+    new.status_before_hide := 'pending';           -- 站長恢復時回到「待確認」
+  else
+    new.hidden := true;
+  end if;
+  insert into public.reports (target_type, target_id, reason, note) values (v_type, new.id, 'inappropriate', '系統自動過濾：內容含可疑字眼，已先隱藏，請站長確認');
+  return new;
+end $$;
+
+
+-- 7 ---------------------------------------------------------------------------
+-- 刪除帳號（保留內容）：拾獲通報上的 Email 也一起清掉
+create or replace function public.delete_my_account(p_delete_content boolean default false)
+returns void language plpgsql security definer set search_path = public, auth as $$
+declare v_uid uuid := auth.uid();
+begin
+  if v_uid is null then raise exception '請先登入'; end if;
+  if p_delete_content then
+    delete from public.cases where owner_id = v_uid;
+    delete from public.found_reports where owner_id = v_uid;
+    delete from public.sightings where reporter_id = v_uid;
+  else
+    perform set_config('wm.skip_guard', '1', true);
+    -- 保留給協尋（已公開的內容），只解除和帳號的連結；Email 一併清掉，之後不再寄任何信
+    update public.cases set owner_id = null, contact_email = null, email_verified = false, email_verify_hash = null
+     where owner_id = v_uid;
+    update public.found_reports set owner_id = null, reporter_email = null where owner_id = v_uid;
+    update public.sightings set reporter_id = null where reporter_id = v_uid;
+  end if;
+  delete from auth.users where id = v_uid;
+end $$;
 
 -- 站長帳號（只有這個帳號能進管理後台）
 update public.profiles set is_admin = true where id = (select id from auth.users where email = 'frankccc199@gmail.com');
