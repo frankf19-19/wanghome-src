@@ -7,7 +7,7 @@ bash build.sh
 rm -rf app/www && mkdir -p app/www
 cp -R dist/. app/www/
 rm -f app/www/sw.js app/www/_headers app/www/404.html app/www/robots.txt app/www/sitemap.xml app/www/mail-logo*.png app/www/og.png
-CSP="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://wangmiaotw.com https://nopyhfpaykkiieudvoko.supabase.co wss://nopyhfpaykkiieudvoko.supabase.co https://data.moa.gov.tw https://nominatim.openstreetmap.org; media-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'"
+CSP="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://wangmiaotw.com https://nopyhfpaykkiieudvoko.supabase.co wss://nopyhfpaykkiieudvoko.supabase.co https://data.moa.gov.tw https://nominatim.openstreetmap.org; media-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'"
 node -e '
 const fs=require("fs"),f="app/www/index.html";let s=fs.readFileSync(f,"utf8");
 const tag=`<meta http-equiv="Content-Security-Policy" content="${process.argv[1]}">`;

@@ -52,8 +52,6 @@ if(h.indexOf('#mig=')===0){
 <link rel="dns-prefetch" href="https://data.moa.gov.tw">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@800&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="vendor/leaflet-1.9.4.css" media="print" onload="this.media='all'">
-<script src="vendor/leaflet-1.9.4.js" async id="leafletJs" onerror="window.__lfail=1"></script>
 <script src="vendor/supabase-js-2.118.0.js" defer fetchpriority="high"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"汪喵回家","alternateName":"全台走失毛孩協尋平台","url":"https://wangmiaotw.com/","inLanguage":"zh-TW","description":"全台走失狗貓協尋：登記協尋、目擊與拾獲回報、受傷毛孩通報、自動比對收容所，以及毛孩健康手冊。"}</script>
 <style>
@@ -1230,6 +1228,7 @@ body{touch-action:manipulation}
 }
 .adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:none}.adm-stats .stat{border:0;padding:6px 4px;white-space:normal;font-size:12.5px;line-height:1.3}
 @media(min-width:760px){.adm-stats{grid-template-columns:repeat(7,1fr)}}
+@media(min-width:761px){main#app{min-height:70vh}}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1422,7 +1421,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.8';
+const BUILD = 'v4.7.9';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1583,9 +1582,11 @@ async function uploadPhoto_(file,folder){
   const [blob,thumb]=await Promise.all([compressImage(file,1080,.8),compressImage(file,480,.72).catch(()=>null)]);   // 1080 = 海報寬度；省雲端空間
   const uid=folder==='pets'?me()?.id:null;if(folder==='pets'&&!uid)throw new Error('請先登入');
   const base=`${folder}/${uid?uid+'/':''}${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
-  const {error}=await sb.storage.from('photos').upload(base+'.jpg',blob,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'});if(error)throw error;
+  // 網路卡住時 40 秒就放棄，不要讓「送出中…」一直轉
+  const tmo=(pr,ms)=>Promise.race([pr,new Promise((_,no)=>setTimeout(()=>no(new Error('照片上傳逾時，請確認網路後再送出一次（Failed to fetch）')),ms))]);
+  const {error}=await tmo(sb.storage.from('photos').upload(base+'.jpg',blob,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'}),40000);if(error)throw error;
   // 小縮圖（清單用，約 30KB）；失敗不影響主圖
-  if(thumb)await sb.storage.from('photos').upload(base+'_t.jpg',thumb,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'}).catch(()=>{});
+  if(thumb)await tmo(sb.storage.from('photos').upload(base+'_t.jpg',thumb,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'}),20000).catch(()=>{});
   const url=sb.storage.from('photos').getPublicUrl(base+'.jpg').data.publicUrl;upCache.set(file,{folder,url});return url;
 }
 // 清單用縮圖網址：本站上傳的照片才有 _t 縮圖；舊照片載入失敗時自動改用原圖
@@ -1620,6 +1621,7 @@ const TW_BOUNDS=[[21.7,117.8],[26.6,122.3]];
 const __pv=new Map();function pvUrl(f){let u=__pv.get(f);if(!u){u=URL.createObjectURL(f);__pv.set(f,u)}return u}
 // 地圖：換頁時把舊地圖拆掉（不然會一直留著監聽視窗大小）
 let __maps=[];
+function pruneMaps(){__maps=__maps.filter(m=>{const c=m.getContainer&&m.getContainer();if(c&&c.isConnected)return true;try{m.remove()}catch(_){}return false})}
 // 儲存按鈕：防止連按造成重複資料；照片還在上傳時先不要存（否則照片會漏掉）
 let __uploading=0;
 function once(fn){let busy=false;return async function(e){if(e&&e.preventDefault)e.preventDefault();if(busy)return;if(__uploading>0){toast('照片還在上傳，請等一下再按儲存',3500);return}
@@ -1629,7 +1631,11 @@ function once(fn){let busy=false;return async function(e){if(e&&e.preventDefault
 const NOMAP=new Proxy(function(){},{get:(t,k)=>k==='__stub'?true:k==='_mapPane'||k==='then'||typeof k==='symbol'?undefined:NOMAP,apply:()=>NOMAP});
 // 地圖程式改成不擋首頁：要用地圖的頁面先等它載好（最多 8 秒，超過就用沒有地圖的版本）
 let leafletGaveUp=false,_lw=null;
-function waitLeaflet(){if(window.__lfail&&!window.L)leafletGaveUp=true;if(window.L||leafletGaveUp)return Promise.resolve();return _lw||(_lw=new Promise(ok=>{const e=document.getElementById('leafletJs');const done=()=>{if(!window.L)leafletGaveUp=true;ok()};if(!e){done();return}e.addEventListener('load',done);e.addEventListener('error',done);setTimeout(done,8000)}))}
+function waitLeaflet(){if(window.__lfail&&!window.L)leafletGaveUp=true;if(window.L||leafletGaveUp)return Promise.resolve();return _lw||(_lw=new Promise(ok=>{
+  // 地圖程式只在需要地圖的頁面才下載（首頁不用多載 150KB）
+  if(!document.getElementById('leafletCss')){const c=document.createElement('link');c.id='leafletCss';c.rel='stylesheet';c.href='vendor/leaflet-1.9.4.css';document.head.insertBefore(c,document.head.querySelector('style'))}
+  let e=document.getElementById('leafletJs');if(!e){e=document.createElement('script');e.id='leafletJs';e.src='vendor/leaflet-1.9.4.js';e.async=true;e.onerror=()=>{window.__lfail=1};e.addEventListener('load',()=>{leafletGaveUp=false;_lw=null});document.head.appendChild(e)}
+  const done=()=>{if(!window.L)leafletGaveUp=true;ok()};if(!e){done();return}e.addEventListener('load',done);e.addEventListener('error',done);setTimeout(done,8000)}))}
 function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(m);__maps.push(m);return m}
 function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
@@ -2082,11 +2088,12 @@ async function renderHealth(){const _n=navId;
   setTitle('毛孩健康手冊');
   if(!me())return renderHealthLanding();
   (_n===navId?app:_void).innerHTML=`<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>`;
-  const [prof,{data:pets},{data:dues},{data:medsA}]=await Promise.all([
+  const [prof,{data:pets,error:pe},{data:dues},{data:medsA}]=await Promise.all([
     getProfile(), sb.from('pets').select('*').order('created_at'),
     sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),2)).order('next_due').limit(40),
     sb.from('pet_meds').select('*').eq('active',true).order('created_at')
   ]);
+  if(pe){if(_n===navId)app.innerHTML=netErrHTML();return}
   const hMeds=medsA||[];let hLogs=[];if(hMeds.length){const {data}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',hMeds.map(x=>x.id)).gte('given_at',todayStartISO());hLogs=data||[]}
   const p=prof||{};const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const ds=dues||[];const overdue=ds.filter(r=>r.next_due<todayStr()).length;const soon=ds.filter(r=>r.next_due>=todayStr()&&r.next_due<=addDays(todayStr(),14)).length;
@@ -2150,18 +2157,15 @@ async function loadFeatured(){
   el.classList.remove('hidden');$('#hero').classList.add('has-poster');if($('#heroDuo'))$('#heroDuo').remove();
 }
 async function loadStats(){
-  const [a,b,c,d]=await Promise.all([
+  // 只有看得到分頁數字（電腦版、協尋清單頁）時才查；手機首頁不用多花流量
+  const cl=$('#cLost'),cf=$('#cFound');if(!cl||!cl.offsetParent)return;
+  const [a,d]=await Promise.all([
     sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching'),
-    sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','found'),
-    sb.from('sightings_public').select('id',{count:'exact',head:true}),
     sb.from('found_public').select('id',{count:'exact',head:true}).eq('status','open')
   ]);
-  const el=$('#stats');if(!el)return;
-  if(a.error||b.error||c.error||d.error)return;   // 讀取失敗：保留「…」，不要顯示 0 讓人誤會沒有案件
-  if(!((a.count||0)+(b.count||0)+(c.count||0)+(d.count||0))){el.remove();if($('#cLost'))$('#cLost').textContent=0;if($('#cFound'))$('#cFound').textContent=0;return}
-  el.innerHTML=`<a class="stat" href="#/?tab=lost"><b>${(a.count??0).toLocaleString()}</b>協尋中</a><div class="stat good"><b>${(b.count??0).toLocaleString()}</b>已回家</div><div class="stat"><b>${(c.count??0).toLocaleString()}</b>則目擊</div><a class="stat" href="#/?tab=found"><b>${(d.count??0).toLocaleString()}</b>拾獲通報</a>`;
-  if($('#cLost'))$('#cLost').textContent=a.count??0;
-  if($('#cFound'))$('#cFound').textContent=d.count??0;
+  if(a.error||d.error)return;   // 讀取失敗：保留「…」，不要顯示 0 讓人誤會沒有案件
+  if(cl.isConnected)cl.textContent=a.count??0;
+  if(cf&&cf.isConnected)cf.textContent=d.count??0;
 }
 function daysAgo(ts){const d=Math.floor((Date.now()-new Date(ts))/86400000);return d<1?'今天':d<30?d+' 天前':d<365?Math.floor(d/30)+' 個月前':Math.floor(d/365)+' 年前'}
 async function loadReunited(){
@@ -2232,11 +2236,13 @@ async function loadMapAll(el){const my=listSeq;
   el.className='';
   el.innerHTML='<div id="mapAll" class="map-all"></div><p class="muted small">紅點＝走失案件（最後目擊位置），綠點＝拾獲／目擊流浪通報。點標記看詳情。</p>';
   const center=homeState.near?[homeState.near.lat,homeState.near.lng]:(homeState.city.length===1&&CITY_CENTER[homeState.city[0]])||[23.7,120.95];
+  pruneMaps();
   const map=makeMap('mapAll',center,homeState.near?13:homeState.city.length===1?11:7);
   let qc=sb.from('cases_public').select('id,species,name,lost_lat,lost_lng,lost_city,lost_district,photos,last_seen_at,poster').eq('status','searching').order('last_activity',{ascending:false}).limit(500);   // 案件很多時，先顯示最近有動靜的
   let qf=sb.from('found_public').select('id,species,kind,lat,lng,city,district,colour,size,photos,seen_at,poster').eq('status','open').order('seen_at',{ascending:false}).limit(500);
   qc=fIn(qc,'lost_city',homeState.city);qf=fIn(qf,'city',homeState.city);qc=fSp(qc);qf=fSp(qf);
-  const [{data:cs},{data:fs},{data:ls}]=await Promise.all([qc,qf,sb.from('sightings_public').select('case_id,lat,lng,seen_at').order('seen_at',{ascending:false}).limit(1000)]);if(my!==listSeq||!el.isConnected)return;
+  const [{data:cs,error:e1},{data:fs,error:e2},{data:ls}]=await Promise.all([qc,qf,sb.from('sightings_public').select('case_id,lat,lng,seen_at').order('seen_at',{ascending:false}).limit(1000)]);if(my!==listSeq||!el.isConnected)return;
+  if(e1&&e2){el.insertAdjacentHTML('afterbegin',netErrHTML());return}
   const last={};(ls||[]).forEach(s=>{if(!last[s.case_id]&&s.lat)last[s.case_id]=s});
   const pts=[];
   (cs||[]).filter(c=>!userHidden(c)).forEach(c=>{const p=last[c.id]||(c.lost_lat?{lat:c.lost_lat,lng:c.lost_lng}:null);if(!p)return;pts.push([p.lat,p.lng]);marker([p.lat,p.lng],c.species==='cat'?'貓':'狗','').addTo(map).bindPopup(`<a href="#/case/${c.id}"><b>${esc(c.name)}</b></a><br>${esc(c.lost_city)}${esc(c.lost_district||'')}<br>${last[c.id]?'最後目擊 '+fmtDT(last[c.id].seen_at):'走失地點'}`)});
@@ -2286,9 +2292,10 @@ if(!IS_APP&&'serviceWorker' in navigator){window.addEventListener('load',()=>nav
 async function checkUpdate(){
   if(IS_APP)return;   // App 版的網頁打包在 App 裡，改版要靠 App 更新
   try{
-    const t=await fetch(location.pathname+'?u='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'');
-    // 壓縮過的版本也抓得到（BUILD="v…" 或 BUILD = 'v…'）
-    const v=(t.match(/BUILD\s*=\s*["'](v[\d.]+)["']/)||[])[1];if(!v||v===BUILD)return;
+    // 只抓很小的 version.json（不用整頁重新下載），10 分鐘最多一次
+    const now=Date.now();if(now-(checkUpdate.last||0)<600000)return;checkUpdate.last=now;
+    const v=await fetch('version.json?u='+now,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>j&&/^v[\d.]+$/.test(j.v)?j.v:'').catch(()=>'');
+    if(!v||v===BUILD)return;
     const busy=__wiz||__dirty||document.body.classList.contains('formpage');
     if(!busy){let done='';try{done=sessionStorage.getItem('wh_upd')||''}catch(_){}if(done!==v){try{sessionStorage.setItem('wh_upd',v)}catch(_){}location.reload();return}}
     if(!$('#updBar')){const d=document.createElement('button');d.id='updBar';d.type='button';d.className='updbar';d.textContent='網站有新版本，點這裡更新';d.onclick=()=>location.reload();document.body.appendChild(d)}
@@ -3947,12 +3954,13 @@ async function renderMeBody(){const _n=navId;
   if(!me()){app.innerHTML=`<h1>我的</h1>${mineHTML()||'<p class="lede">這支手機還沒有登記過案件。</p>'}
     <div class="card" style="margin-top:14px"><b>加入會員（免費，可以不加入）</b><p class="small muted">加入後換手機也能管理案件，還能用毛孩健康手冊、收到附近走失通知。只要 Email，不用設密碼。</p><div class="bigacts"><a class="btn big" href="#/login?mode=signup" onclick="try{localStorage.setItem('wh_return','#/me')}catch(_){}">免費註冊</a><a class="btn big ghost" href="#/login?mode=login" onclick="try{localStorage.setItem('wh_return','#/me')}catch(_){}">我已經有帳號，登入</a></div></div>`;return}
   (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
-  const [prof,{data:cs},{data:fs},{data:pend},{data:fl},{data:pets},{data:dues}]=await Promise.all([
+  const [prof,{data:cs,error:ce1},{data:fs},{data:pend},{data:fl},{data:pets,error:pe1},{data:dues}]=await Promise.all([
     getProfile(), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
     sb.from('follows').select('case_id,created_at').order('created_at',{ascending:false}),
     sb.from('pets').select('*').order('created_at'),
     sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),1)).order('next_due').limit(20)
   ]);
+  if(ce1||pe1){if(_n===navId)app.innerHTML='<h1>我的</h1>'+netErrHTML();return}
   const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const pendMap={};(Array.isArray(pend)?pend:[]).forEach(p=>pendMap[p.case_id]=p.pending);
   let followed=[];
@@ -4039,7 +4047,7 @@ function petCardHTML(p){
 async function renderPet(id){const _n=navId;
   if(!requireLogin('建立寵物檔案需要登入'))return;
   let p={species:'dog',photos:[]};
-  if(id!=='new'){const {data}=await sb.from('pets').select('*').eq('id',id).maybeSingle();if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}p=data}
+  if(id!=='new'){const {data,error}=await sb.from('pets').select('*').eq('id',id).maybeSingle();if(error){(_n===navId?app:_void).innerHTML=netErrHTML();return}if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}p=data}
   if(_n!==navId)return;
   setTitle(id==='new'?'新增寵物檔案':'編輯 '+p.name);
   (_n===navId?app:_void).innerHTML=`<h1>${id==='new'?'新增寵物檔案':'✏️ '+esc(p.name)}</h1><p class="muted small">這份檔案只有你看得到。照片越多越好：正面、側面、特徵特寫。</p>
@@ -4159,7 +4167,8 @@ function weightChart(points){
 async function renderPetView(id){const _n=navId;
   if(!requireLogin())return;
   (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
-  const [{data:p},{data:recs},{data:medsAll}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).order('created_at')]);
+  const [{data:p,error:pe},{data:recs},{data:medsAll}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).order('created_at')]);
+  if(pe){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   if(_n!==navId)return;
   setTitle(p.name);

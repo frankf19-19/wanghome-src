@@ -24,4 +24,7 @@ else
   cp index.html dist/index.html
 fi
 check dist/index.html
+# 版本檔：網站用來檢查有沒有新版（很小，不用整頁重新下載）
+V=$(grep -oE "const BUILD = 'v[0-9.]+'" index.html | grep -oE "v[0-9.]+")
+[ -n "$V" ] && printf '{"v":"%s"}\n' "$V" > dist/version.json
 echo "built: $(find dist -type f | wc -l) files"
