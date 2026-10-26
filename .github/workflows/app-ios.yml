@@ -39,7 +39,7 @@ jobs:
         working-directory: app/ios/App
         run: |
           V=$(node -p "require('../../package.json').version")
-          sed -i '' "s/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = $V;/; s/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJECT_VERSION = $((GITHUB_RUN_NUMBER + 100));/" App.xcodeproj/project.pbxproj
+          sed -i '' "s/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = $V;/; s/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJECT_VERSION = $((GITHUB_RUN_NUMBER * 10 + GITHUB_RUN_ATTEMPT + 100));/" App.xcodeproj/project.pbxproj
       - name: 模擬器編譯（沒有 Apple 金鑰時）
         if: ${{ env.ASC_KEY == '' }}
         working-directory: app/ios/App

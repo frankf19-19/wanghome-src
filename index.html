@@ -52,8 +52,8 @@ if(h.indexOf('#mig=')===0){
 <link rel="dns-prefetch" href="https://data.moa.gov.tw">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@800&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" async id="leafletJs" onerror="window.__lfail=1"></script>
+<link rel="stylesheet" href="vendor/leaflet-1.9.4.css" media="print" onload="this.media='all'">
+<script src="vendor/leaflet-1.9.4.js" async id="leafletJs" onerror="window.__lfail=1"></script>
 <script src="vendor/supabase-js-2.118.0.js" defer fetchpriority="high"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"汪喵回家","alternateName":"全台走失毛孩協尋平台","url":"https://wangmiaotw.com/","inLanguage":"zh-TW","description":"全台走失狗貓協尋：登記協尋、目擊與拾獲回報、受傷毛孩通報、自動比對收容所，以及毛孩健康手冊。"}</script>
 <style>
@@ -1422,7 +1422,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.7';
+const BUILD = 'v4.7.8';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1442,7 +1442,7 @@ async function appShareFile(base64,filename,title,text){
 if(IS_APP){
   // 定位：改用原生定位（App 的權限視窗會顯示 App 名稱）
   try{const G=capPlugin('Geolocation'),orig=navigator.geolocation;if(G)Object.defineProperty(navigator,'geolocation',{configurable:true,value:{
-    getCurrentPosition(ok,err,opt){G.getCurrentPosition({enableHighAccuracy:!!(opt&&opt.enableHighAccuracy),timeout:(opt&&opt.timeout)||10000}).then(p=>ok({coords:p.coords,timestamp:p.timestamp}),e=>err&&err({code:1,message:String(e&&e.message||e)}))},
+    getCurrentPosition(ok,err,opt){G.getCurrentPosition({enableHighAccuracy:!!(opt&&opt.enableHighAccuracy),timeout:(opt&&opt.timeout)||10000}).then(p=>ok({coords:p.coords,timestamp:p.timestamp}),e=>{const m=String(e&&e.message||e);err&&err({code:/denied|permission|權限/i.test(m)?1:/time ?out|逾時/i.test(m)?3:2,message:m})})},
     watchPosition:orig&&orig.watchPosition?orig.watchPosition.bind(orig):()=>0,clearWatch:orig&&orig.clearWatch?orig.clearWatch.bind(orig):()=>{}}})}catch(_){}
   // Android 返回鍵：先關視窗，再回上一頁；在首頁按返回就把 App 收到背景
   try{const A=capPlugin('App');if(A){
@@ -1462,9 +1462,11 @@ if(IS_APP){
   }}catch(_){}
   // 連結：站內的 #/ 連結留在 App 裡；網站網址轉成 App 內頁面；其他網站用 App 內瀏覽器開
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[href]');if(!a)return;const href=a.getAttribute('href')||'';
-    if(href.startsWith('#/')){if(a.target==='_blank'){e.preventDefault();location.hash=href}return}
+    if(href.startsWith('#/')){if(a.target==='_blank'){e.preventDefault();const B=capPlugin('Browser');if(B)B.open({url:'https://wangmiaotw.com/'+href,presentationStyle:'popover'}).catch(()=>{location.hash=href});else location.hash=href}return}
     if(/^https?:/i.test(href)){let u;try{u=new URL(href)}catch(_){return}
       if(u.hostname==='wangmiaotw.com'&&u.hash.startsWith('#/')){e.preventDefault();location.hash=u.hash;return}
+      // LINE、Facebook、Google 日曆：交給系統開（才會直接跳到 LINE／FB App）
+      if(/(^|\.)(line\.me|facebook\.com|fb\.com|calendar\.google\.com)$/i.test(u.hostname)){e.preventDefault();location.href=href;return}
       const B=capPlugin('Browser');if(B){e.preventDefault();B.open({url:href,presentationStyle:'popover'}).catch(()=>{window.open(href,'_system')})}}},true);
   // 拍照：每個「選照片」旁邊多一顆「拍照」，用原生相機拍完交給原本的上傳流程
   const addCam=()=>{const C=capPlugin('Camera');if(!C)return;document.querySelectorAll('#app label.uploadbtn').forEach(l=>{if(l.dataset.cam)return;const inp=l.querySelector('input[type=file]');if(!inp)return;l.dataset.cam=1;
@@ -1593,7 +1595,7 @@ function thumbImg(u,alt='',attrs=''){if(!u)return '';const t=thumbUrl(u);return 
 /* 從照片讀拍攝時間與 GPS（手機相簿常會移除位置，讀不到就略過） */
 const _scripts={};
 function loadScript(src){return _scripts[src]||(_scripts[src]=new Promise((ok,no)=>{const el=document.createElement('script');el.src=src;el.async=true;el.onload=ok;el.onerror=()=>{delete _scripts[src];no(new Error('load '+src))};document.head.appendChild(el)}))}
-const LIB={qr:'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',exif:'https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js'};
+const LIB={qr:'vendor/qrcode-1.0.0.min.js',exif:'vendor/exifr-7.1.3-lite.js'};
 async function readPhotoMeta(file){
   if(!file)return {};
   try{await loadScript(LIB.exif)}catch(_){return {}}
@@ -4700,7 +4702,7 @@ function renderPrivacy(){
     <li>Resend：寄送通知信、登入信與確認信。</li>
     <li>OpenStreetMap／Nominatim：地圖與地址查詢（會傳送你選的座標）。</li>
     <li>農業部「動物認領養」開放資料：收容所比對，由你的手機直接查詢。</li>
-    <li>Google Fonts、unpkg、cdnjs、jsDelivr：網頁字型與程式庫，開啟網頁時你的瀏覽器會向它們下載（它們會看到你的 IP）。</li>
+    <li>Google Fonts：網頁字型，開啟網頁時你的瀏覽器會向它下載（它會看到你的 IP）。</li>
     <li>GitHub：每日收容所比對、通知信與提醒信的排程主機。</li>
     <li>Google 地圖、LINE、Facebook 分享：只在你點選開啟或分享時才會連過去，適用它們自己的隱私政策。</li>
   </ul>

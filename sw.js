@@ -1,8 +1,8 @@
-// 汪喵回家 service worker v3.16.0
+// 汪喵回家 service worker v3.17.0
 // 只快取網站外殼，讓離線時也能打開；資料（Supabase）一律走網路，不快取。
-const CACHE = 'wanghome-v3.16.0';
+const CACHE = 'wanghome-v3.17.0';
 // 不放 './index.html'：Cloudflare 會把 /index.html 轉址到 /，快取到轉址回應會讓離線開不起來
-const SHELL = ['./', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './duo.svg', './vendor/supabase-js-2.118.0.js'];
+const SHELL = ['./', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './duo.svg', './vendor/supabase-js-2.118.0.js', './vendor/leaflet-1.9.4.js', './vendor/leaflet-1.9.4.css'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -32,7 +32,7 @@ jobs:
       - name: 版本號（每次編譯自動加 1）
         working-directory: app/android
         run: |
-          sed -i "s/versionCode [0-9]*/versionCode $((GITHUB_RUN_NUMBER + 100))/" app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode $((GITHUB_RUN_NUMBER * 10 + GITHUB_RUN_ATTEMPT + 100))/" app/build.gradle
           V=$(node -p "require('../package.json').version"); sed -i "s/versionName \"[^\"]*\"/versionName \"$V\"/" app/build.gradle
           grep -n "versionCode\|versionName" app/build.gradle
       - name: 測試版 APK
