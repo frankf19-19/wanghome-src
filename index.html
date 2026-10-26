@@ -899,6 +899,23 @@ body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
 .bd-chip{display:inline-block;margin-top:6px;padding:2px 9px;border-radius:99px;background:var(--beige);color:var(--ink-2);font-size:13px;font-weight:700;font-style:normal}
 .bd-chip.soon{background:var(--mark);color:#3A2A1E}
 .mp .bd-chip{margin-top:3px;font-size:11.5px;padding:1px 7px}
+
+/* v3.20 手機內頁：上方固定的「返回」列（像 App 一樣），首頁類的頁面維持原本的標誌與分頁 */
+.mbar{display:none}
+@media (max-width:760px){
+  body.inner header{display:none}
+  body.inner .mbar{display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:55;min-height:52px;padding:4px 10px;padding-top:calc(4px + env(safe-area-inset-top));
+    background:var(--paper);background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
+  .mb-back{display:flex;align-items:center;gap:0;white-space:nowrap;min-height:44px;padding:0 12px 0 4px;border:0;border-radius:99px;background:var(--sheet);color:var(--ink);font:inherit;font-weight:800;font-size:16px;box-shadow:0 1px 4px rgba(120,80,40,.12);cursor:pointer;flex:none}
+  .mb-back:active{transform:scale(.96)}
+  body[data-space="health"] .mb-back svg{color:var(--green)}.mb-back svg{color:var(--red)}
+  #mTitle{flex:1;min-width:0;text-align:center;font-family:var(--head);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+  .mb-home{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+  .mb-home img{width:30px;height:30px;border-radius:9px}
+  body.inner #app{padding-top:10px}
+  body.inner .backlink{display:none}   /* 上方已經有「返回」 */
+}
+@media print{.mbar{display:none!important}}
 /* 頁尾 */
 footer{border-top:0;background:var(--beige);border-radius:26px 26px 0 0;max-width:none;padding-left:max(20px,calc((100% - 1080px)/2));padding-right:max(20px,calc((100% - 1080px)/2))}
 form.steps>h3::before{background:var(--red-fill)!important;color:#fff!important}
@@ -1100,6 +1117,7 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
   </nav>
 </header>
 
+<div class="mbar" id="mbar"><button type="button" class="mb-back" id="mBack" aria-label="回上一頁"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span></button><b id="mTitle"></b><a href="#/" class="mb-home" aria-label="回首頁"><img src="icon.svg" alt="" width="30" height="30"></a></div>
 <main id="app"><div class="empty">載入中…</div></main>
 
 <footer>
@@ -1127,7 +1145,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.19.0';
+const BUILD = 'v3.20.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1151,7 +1169,7 @@ if(IS_APP){
     watchPosition:orig&&orig.watchPosition?orig.watchPosition.bind(orig):()=>0,clearWatch:orig&&orig.clearWatch?orig.clearWatch.bind(orig):()=>{}}})}catch(_){}
   // Android 返回鍵：先關視窗，再回上一頁；在首頁按返回就把 App 收到背景
   try{const A=capPlugin('App');if(A){
-    A.addListener('backButton',()=>{if(overlayOpen){closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}history.back()});
+    A.addListener('backButton',()=>{if(overlayOpen){closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
     // 從連結打開 App（分享頁 /s/、/f/、網站網址）：跳到對應頁面
     A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
       if(m)location.hash=(m[1]==='s'?'#/case/':'#/found/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
@@ -1261,7 +1279,7 @@ function cityOptions(sel){return '<option value="">選擇縣市</option>'+Object
 function distOptions(city,sel){return '<option value="">選擇區</option>'+(TW[city]||[]).map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('')}
 function qs(h){const i=h.indexOf('?');if(i<0)return{};return Object.fromEntries(new URLSearchParams(h.slice(i+1)))}
 function RM(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(_){return false}}
-function setTitle(t){t=String(t||'').replace(/[\u202A-\u202E\u2066-\u2069]/g,'');document.title=(t?t+' — ':'')+CONFIG.SITE_NAME}
+function setTitle(t){t=String(t||'').replace(/[\u202A-\u202E\u2066-\u2069]/g,'');document.title=(t?t+' — ':'')+CONFIG.SITE_NAME;const m=document.getElementById('mTitle');if(m)m.textContent=t||CONFIG.SITE_NAME}
 // 很長的清單（例如 200 筆目擊）：先顯示 20 筆，其餘按按鈕再顯示
 function capList(box,n=20){if(!box)return;const items=[...box.children].filter(x=>x.classList.contains('tl'));if(items.length<=n)return;items.slice(n).forEach(x=>x.classList.add('hidden'));const b=document.createElement('button');b.type='button';b.className='btn ghost block';b.style.marginTop='8px';b.textContent=`顯示全部（還有 ${items.length-n} 筆）`;b.onclick=()=>{items.forEach(x=>x.classList.remove('hidden'));b.remove()};box.appendChild(b)}
 
@@ -1394,7 +1412,7 @@ function renderChrome(path,h){
 }
 
 // ---- 導覽：redirect 不留歷史、彈出視窗可用「上一頁」關閉、返回時恢復捲動位置 ----
-function goReplace(h){location.replace(location.pathname+location.search+h)}
+function goReplace(h){__replacing=true;location.replace(location.pathname+location.search+h)}
 try{history.scrollRestoration='manual'}catch(_){}
 const scrollMem={};let curHash=location.hash||'#/',navByPop=false,overlayOpen=null;
 window.addEventListener('popstate',e=>{
@@ -1421,6 +1439,24 @@ function netErrHTML(){return `<div class="empty-card"><div class="big">📶</div
 function rerender(fn){const y=scrollY;return Promise.resolve(fn()).then(()=>restoreScroll(y)).catch(()=>{})}
 function restoreScroll(y){let n=0;const t=()=>{if(document.documentElement.scrollHeight>=y+innerHeight*0.5||n>40){window.scrollTo(0,y);return}n++;setTimeout(t,50)};t()}
 window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
+// ===== 手機「返回」：記住在網站裡走了幾步；有上一頁就退回，直接打開內頁時回到合理的上一層 =====
+let navDepth=0,__replacing=false,__firstRoute=true;
+// 每一筆紀錄存 {d: 第幾步, h: 這頁的網址}；瀏覽器換 #網址 時可能把上一筆的資料帶過來，所以要比對網址
+function trackDepth(wasPop){const st=history.state,h=location.hash||'#/';
+  if(st&&typeof st.d==='number'&&st.h===h){const trav=!__firstRoute;navDepth=st.d;__firstRoute=false;__replacing=false;return trav}
+  if(__firstRoute)navDepth=0;else if(!__replacing)navDepth=navDepth+1;__firstRoute=false;   // 新的一頁（瀏覽器在換 #網址時也會發 popstate，所以不能靠它判斷是不是上一頁）
+  __replacing=false;try{history.replaceState(Object.assign({},st||{},{d:navDepth,h}),'')}catch(_){}return false}
+const TOP_PAGES=/^#\/?(\?.*)?$|^#\/(health|me|login|seen)(\?.*)?$/;
+function parentOf(h){const p=h.split('?')[0];let m;
+  if((m=p.match(/^#\/(report|manage|poster)\/([0-9a-f-]{36})/)))return '#/case/'+m[2];
+  if((m=p.match(/^#\/found-manage\/([0-9a-f-]{36})/)))return '#/found/'+m[1];
+  if(/^#\/found\/[0-9a-f-]{36}$/.test(p))return '#/?tab=found';
+  if((m=p.match(/^#\/pet\/([0-9a-f-]{36})\/.+/)))return '#/pet/'+m[1];
+  if(/^#\/(pet|health)\//.test(p))return '#/health';
+  if(/^#\/admin/.test(p))return '#/me';
+  return '#/'}
+function goBack(){if(overlayOpen){closeOverlay(overlayOpen);return}if(navDepth>0)history.back();else{__replacing=true;goReplace(parentOf(location.hash||'#/'))}}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#mBack')){e.preventDefault();goBack()}});
 function route(){
   if(!sb)return;
   if(__skipRoute){__skipRoute=false;navByPop=false;return}   // 取消離開後退回原頁，不重畫
@@ -1440,8 +1476,9 @@ function route(){
   renderChrome(path,h);
   document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
-  const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;curHash=newHash;
-  if(wasPop&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
+  const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;curHash=newHash;const trav=trackDepth(wasPop);
+  document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent=''}
+  if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
   let m;
   if(!window.L&&!leafletGaveUp&&/^#\/(new$|case\/|report\/|found\/new|injured$|found\/[0-9a-f-]{36}$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty">載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
