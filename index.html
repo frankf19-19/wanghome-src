@@ -1241,7 +1241,7 @@ body{touch-action:manipulation}
   .space{max-width:1080px}}
 .sheet-x{position:absolute;top:10px;right:12px;width:36px;height:36px;border-radius:50%;border:0;background:var(--line);color:var(--ink-2);font-size:18px;cursor:pointer;display:none}
 @media (min-width:761px){.sheet-x{display:block}}
-.lb-x{position:fixed;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#222;font-size:22px;cursor:pointer;z-index:1}
+.lb-x{position:fixed;top:calc(16px + env(safe-area-inset-top));right:16px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#222;font-size:22px;cursor:pointer;z-index:1}
 .lightbox{cursor:zoom-out}
 main#app:focus{outline:none}
 .skip{position:absolute;left:-999px;top:8px;z-index:999;background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px}.skip:focus{left:16px}
@@ -1441,7 +1441,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.8.8';
+const BUILD = 'v4.8.9';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1465,7 +1465,7 @@ if(IS_APP){
     watchPosition:orig&&orig.watchPosition?orig.watchPosition.bind(orig):()=>0,clearWatch:orig&&orig.clearWatch?orig.clearWatch.bind(orig):()=>{}}})}catch(_){}
   // Android 返回鍵：先關視窗，再回上一頁；在首頁按返回就把 App 收到背景
   try{const A=capPlugin('App');if(A){
-    A.addListener('backButton',()=>{if(overlayOpen){closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
+    A.addListener('backButton',()=>{if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim())&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
     // 從連結打開 App（分享頁 /s/、/f/、網站網址）：跳到對應頁面
     A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
       if(m)location.hash=(m[1]==='s'?'#/case/':'#/found/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
@@ -1502,7 +1502,7 @@ if(IS_APP){
     Storage.prototype.removeItem=function(k){orem.call(this,k);if(this===window.localStorage&&KEEP(k))P.remove({key:k}).catch(()=>{})};
     P.keys().then(({keys})=>(keys||[]).filter(KEEP).forEach(k=>{if(localStorage.getItem(k)==null)P.get({key:k}).then(({value})=>{if(value!=null)oset.call(localStorage,k,value)}).catch(()=>{})})).catch(()=>{})}}catch(_){}
   // 狀態列跟著深淺色
-  try{const SB=capPlugin('StatusBar');if(SB){const upd=()=>{const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);SB.setStyle({style:dark?'DARK':'LIGHT'}).catch(()=>{})};upd();matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',upd)}}catch(_){}
+  try{const SB=capPlugin('StatusBar');if(SB){const upd=window.__sbUpd=()=>{const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);SB.setStyle({style:dark?'DARK':'LIGHT'}).catch(()=>{})};upd();matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',upd)}}catch(_){}
 }
 
 /* ============================================================
@@ -1575,7 +1575,7 @@ function caseUrl(id){return CONFIG.SITE_URL+'#/case/'+id}
 function copyLegacy(t){try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);const ok=document.execCommand('copy');ta.remove();return ok}catch(_){return false}}
 function copy(t){const done=()=>toast('已複製');const fallback=()=>{if(copyLegacy(t))done();else prompt('請長按下面的文字複製：',t)};
   if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(done).catch(fallback);else fallback()}
-function share(title,url){if(navigator.share){navigator.share({title,url}).catch(e=>{if(e&&e.name!=='AbortError')copy(url)})}else copy(url)}
+function share(title,url){const SH=IS_APP&&capPlugin('Share');if(SH){SH.share({title,text:title,url,dialogTitle:title}).catch(e=>{if(!/cancel/i.test(String(e&&e.message||e)))copy(url)});return}if(navigator.share){navigator.share({title,url}).catch(e=>{if(e&&e.name!=='AbortError')copy(url)})}else copy(url)}
 function cityOptions(sel){return '<option value="">選擇縣市</option>'+Object.keys(TW).map(c=>`<option ${c===sel?'selected':''}>${c}</option>`).join('')}
 function distOptions(city,sel){return '<option value="">選擇區</option>'+(TW[city]||[]).map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('')}
 function qs(h){const i=h.indexOf('?');if(i<0)return{};return Object.fromEntries(new URLSearchParams(h.slice(i+1)))}
@@ -1675,7 +1675,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 const THEMES=[['auto','自動'],['light','淺色'],['dark','深色']];
 function cycleTheme(){let cur='auto';try{cur=localStorage.getItem('wh_theme')||'auto'}catch(_){}const nx=THEMES[(THEMES.findIndex(x=>x[0]===cur)+1)%3][0];try{localStorage.setItem('wh_theme',nx)}catch(_){}applyTheme(nx)}
-function applyTheme(t){if(t==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.themeLbl').forEach(x=>x.textContent=(THEMES.find(y=>y[0]===t)||THEMES[0])[1]);const b=$('#themeBtn');if(b)b.textContent='🌓 外觀：'+(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}
+function applyTheme(t){setTimeout(()=>{try{window.__sbUpd&&window.__sbUpd()}catch(_){}},0);if(t==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.themeLbl').forEach(x=>x.textContent=(THEMES.find(y=>y[0]===t)||THEMES[0])[1]);const b=$('#themeBtn');if(b)b.textContent='🌓 外觀：'+(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}
 (function(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}if(t!=='auto')document.documentElement.setAttribute('data-theme',t)})();
 async function init(){
   netState();
@@ -1809,8 +1809,9 @@ function route(){
   if(__dirty&&!__submitting&&curHash&&(location.hash||'#/')!==curHash){
     if(!__confirm(__dirtyMsg||'你填的資料還沒儲存，確定要離開這一頁嗎？')){
       // 按「上一頁」→ 把原頁加回去；點連結 → 退回原頁。兩種都不會弄丟上一頁的紀錄
-      if(navByPop){navByPop=false;try{history.pushState(null,'',location.pathname+location.search+curHash)}catch(_){}}
-      else{__skipRoute=true;history.back()}
+      // 只有真的按「上一頁」（回到已存在的紀錄）才把原頁加回去；點連結、開分享連結產生的新紀錄就退回去
+      if(navByPop&&history.state&&typeof history.state.d==='number'){navByPop=false;try{history.pushState(null,'',location.pathname+location.search+curHash)}catch(_){}}
+      else{navByPop=false;__skipRoute=true;history.back()}
       return}
   }
   __submitting=false;
