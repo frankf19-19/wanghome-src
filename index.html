@@ -1229,6 +1229,8 @@ body{touch-action:manipulation}
 .adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:none}.adm-stats .stat{border:0;padding:6px 4px;white-space:normal;font-size:12.5px;line-height:1.3}
 @media(min-width:760px){.adm-stats{grid-template-columns:repeat(7,1fr)}}
 @media(min-width:761px){main#app{min-height:70vh}}
+.anav-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.anav{display:flex;align-items:center;gap:8px}.anav .btn[disabled]{opacity:.4}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1422,7 +1424,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.8.4';
+const BUILD = 'v4.8.5';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -3367,6 +3369,7 @@ function adoptTel(r){return (String(r.tel||'').match(/[\d()+-]{7,}(#\d+)?/)||[''
 function adoptTitle(r){return [r.variety||'混種',r.sex==='M'?'公':r.sex==='F'?'母':'',ADOPT_SIZE[r.size]||'',ADOPT_AGE[r.age]||''].filter(Boolean).join('・')}
 function waitDays(r){return r.created?daysSince(r.created+'T00:00:00+08:00'):null}
 let adoptSeq=0;
+let adoptOrder=[];   // 清單目前的順序（單筆頁「下一隻」用）
 let adoptState={city:'',dist:[],kind:'狗',size:[],sex:[],age:[],variety:[],colour:[],ster:[],sort:'new',photo:true,limit:30};
 try{const v=JSON.parse(localStorage.getItem('wh_adopt')||'null');if(v&&typeof v==='object')Object.assign(adoptState,{city:MOA_AREA[v.city]?v.city:'',dist:Array.isArray(v.dist)?v.dist.filter(x=>typeof x==='string').slice(0,20):(typeof v.dist==='string'&&v.dist?[v.dist]:[]),kind:v.kind==='貓'?'貓':'狗'})}catch(_){}
 async function renderAdopt(){const _n=navId;
@@ -3421,6 +3424,7 @@ async function renderAdopt(){const _n=navId;
     let list=rows.filter(r=>inD(r)&&(!st.size.length||st.size.includes(r.size))&&(!st.sex.length||st.sex.includes(r.sex))&&(!st.age.length||st.age.includes(r.age))&&(!st.photo||r.photo)&&(!st.variety.length||st.variety.includes(r.variety||'混種'))&&(!st.colour.length||st.colour.includes(r.colour))&&(!st.ster.length||st.ster.includes(r.ster)));
     list.sort((a,b)=>st.sort==='old'?(a.created||'9').localeCompare(b.created||'9'):(b.created||'').localeCompare(a.created||''));
     if(!list.length){el.innerHTML=`<div class="empty-card"><div class="big">${ic('search')}</div><b>${esc(st.city)}目前沒有符合條件的${st.kind==='貓'?'貓':'狗'}</b><p class="small">試試少選幾個條件，或換個縣市看看。</p></div>`;return}
+    adoptOrder=list.map(r=>r.id);
     const shown=list.slice(0,st.limit);
     el.innerHTML=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist.length?st.dist.join('、')+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
       <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}${d&&d>=180?`<span class="band">等了 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}</div>
@@ -3446,7 +3450,9 @@ async function renderAdoptOne(id){const _n=navId;
   if(!r){app.innerHTML=`<div class="empty-card"><div class="big">🏡</div><b>這隻毛孩已經不在待領養名單</b><p class="small">${gone?'可能已經被領養了。':'可能已經被領養，或編號有誤。'}</p><a class="btn" href="#/adopt">看其他等待領養的毛孩</a></div>`;return}
   setTitle(`領養 ${adoptTitle(r)}`);
   const link=adoptLink(r),d=waitDays(r),map=r.addr?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.shelter+' '+r.addr)}`:'';
-  app.innerHTML=`<p class="small"><a class="backlink" href="#/adopt">‹ 回領養清單</a></p>
+  const oi=adoptOrder.indexOf(id),prevId=oi>0?adoptOrder[oi-1]:null,nextId=oi>=0&&oi<adoptOrder.length-1?adoptOrder[oi+1]:null;
+  const nav=oi<0?'':`<div class="anav"><button type="button" class="btn ghost sm" data-go="${esc(prevId||'')}" ${prevId?'':'disabled'} aria-label="上一隻">‹ 上一隻</button><span class="small muted">第 ${oi+1} / ${adoptOrder.length} 隻</span><button type="button" class="btn sm" data-go="${esc(nextId||'')}" ${nextId?'':'disabled'} aria-label="下一隻">下一隻 ›</button></div>`;
+  app.innerHTML=`<div class="anav-top"><a class="backlink small" href="#/adopt">‹ 回領養清單</a>${nav}</div>
   <div class="detail-head">
     <div class="gallery"><div class="main ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<button type="button" class="aph" id="aPh" aria-label="放大看照片"><img src="${esc(safeU(r.photo))}" referrerpolicy="no-referrer" alt="${esc(adoptTitle(r))}"></button>`:''}</div></div>
     <div>
@@ -3464,10 +3470,17 @@ async function renderAdoptOne(id){const _n=navId;
         <div class="bigacts" style="margin-top:10px">${adoptTel(r)?`<a class="btn big" href="tel:${esc(adoptTel(r))}">${ic('phone')} 打電話給收容所</a>`:''}${map?`<a class="btn big ghost" target="_blank" rel="noopener" href="${esc(map)}">${ic('map')} 導航到收容所</a>`:''}</div>
         <p class="small muted" style="margin:8px 0 0">打電話時說「我想領養，收容編號 ${esc(r.subid)}」。</p>
       </div>
+      ${nextId?`<button type="button" class="btn big ghost block" data-go="${esc(nextId)}" style="margin-top:10px">看下一隻 ›</button>`:''}
       <p class="small" style="margin-top:10px">${link?`<a target="_blank" rel="noopener" href="${esc(link)}">看農業部官方公告 ↗</a>　`:''}<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent.aspx?PageType=Adopt">全國認領養公告 ↗</a></p>
     </div>
   </div>`;
   const ph=$('#aPh');if(ph)ph.onclick=()=>lightbox(r.photo);
+  // 上一隻／下一隻：換掉這一頁（按返回會直接回清單），清單也會多顯示到這一隻
+  const go=nid=>{if(!nid)return;const k=adoptOrder.indexOf(nid);if(k>=adoptState.limit)adoptState.limit=Math.ceil((k+1)/30)*30;location.replace(location.pathname+location.search+'#/adopt/'+encodeURIComponent(nid))};
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  // 手機：照片往左滑看下一隻、往右滑看上一隻
+  const g=app.querySelector('.gallery');if(g&&oi>=0){let x0=null,y0=0;g.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+    g.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)go(dx<0?nextId:prevId)},{passive:true})}
 }
 // 農業部「全國動物收容管理系統」單筆公告網址（舊的 asms.coa.gov.tw 已停用）
 // AcNum＝收容編號、UT＝收容單位代碼（收容編號前 5 碼），兩個都要 Base64
