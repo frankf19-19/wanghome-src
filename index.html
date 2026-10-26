@@ -1234,6 +1234,18 @@ body{touch-action:manipulation}
 @media(min-width:761px){header{background:var(--paper)!important;backdrop-filter:none;-webkit-backdrop-filter:none}
   .nav a.link.on{color:var(--red);background:var(--red-soft,#FBE3DA);font-weight:700}
   .nav a.nav-home{display:inline-flex;align-items:center;gap:4px}}
+.nav .link,.nav .btn,.logo,#navMe{white-space:nowrap}
+@media (min-width:761px) and (max-width:1100px){.nav{gap:6px}.nav a.link{padding:6px 7px;font-size:13.5px}.nav a[href="#/thanks"],.nav a[href="#/injured"].link{display:none}.nav .btn.sm{padding:7px 10px;font-size:13.5px}#siteName{font-size:18px}}
+@media (min-width:761px){html{scroll-padding-top:150px}#listTitle,form.steps,.wstep{scroll-margin-top:150px}
+  .sheet-bg,.sheet-bg.lightbox{align-items:center}.sheet{border-radius:24px;max-height:85vh;overflow:auto;padding-bottom:18px;position:relative}.sheet .grab{display:none}
+  .space{max-width:1080px}}
+.sheet-x{position:absolute;top:10px;right:12px;width:36px;height:36px;border-radius:50%;border:0;background:var(--line);color:var(--ink-2);font-size:18px;cursor:pointer;display:none}
+@media (min-width:761px){.sheet-x{display:block}}
+.lb-x{position:fixed;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#222;font-size:22px;cursor:pointer;z-index:1}
+.lightbox{cursor:zoom-out}
+main#app:focus{outline:none}
+.skip{position:absolute;left:-999px;top:8px;z-index:999;background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px}.skip:focus{left:16px}
+#navMe.on,.hd-av.on{box-shadow:inset 0 0 0 2px var(--red)}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1372,13 +1384,14 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 <meta name="apple-mobile-web-app-title" content="汪喵回家">
 </head>
 <body>
-
+<a href="#app" class="skip" onclick="event.preventDefault();document.getElementById('app').focus()">跳到主要內容</a>
 <header>
   <div class="nav">
-    <a href="#/" class="logo"><span class="paw"><img src="icon.svg" alt="" width="38" height="38"></span><span id="siteName">汪喵回家</span></a>
+    <a href="#/" class="logo" title="回首頁"><span class="paw"><img src="icon.svg" alt="" width="38" height="38"></span><span id="siteName">汪喵回家</span></a>
     <div class="sp"></div>
     <a href="#/" class="link hide-sm nav-home" id="navHome"><svg class="ico" viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/></svg> 首頁</a>
     <span class="navlinks lost-only" style="display:contents">
+      <a href="#/lost" class="link hide-sm">協尋列表</a>
       <a href="#/injured" class="link hide-sm">受傷通報</a>
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
       <a href="#/adopt" class="link hide-sm">領養</a>
@@ -1395,13 +1408,13 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
     <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg><span class="hide-sm"> 登入</span></a>
   </div>
   <nav class="space" aria-label="切換功能">
-    <a href="#/" data-s="lost"><span class="sp-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></span><span class="sp-t"><b>找毛孩</b><small>走失協尋・目擊回報・拾獲通報</small></span></a>
+    <a href="#/lost" data-s="lost"><span class="sp-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></span><span class="sp-t"><b>找毛孩</b><small>走失協尋・目擊回報・拾獲通報</small></span></a>
     <a href="#/health" data-s="health"><span class="sp-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M12 7v4M10 9h4"/></svg></span><span class="sp-t"><b>毛孩健康手冊</b><small>健康紀錄・到期提醒・日曆同步</small></span></a>
   </nav>
 </header>
 
 <div class="mbar" id="mbar"><button type="button" class="mb-back" id="mBack" aria-label="回上一頁"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span></button><b id="mTitle"></b><a href="#/" class="mb-home" aria-label="回首頁"><img src="icon.svg" alt="" width="30" height="30"></a></div>
-<main id="app"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></main>
+<main id="app" tabindex="-1"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></main>
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
@@ -1428,7 +1441,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.8.7';
+const BUILD = 'v4.8.8';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1721,6 +1734,7 @@ function renderChrome(path,h){
   document.body.dataset.route=(path.replace(/^#\/?/,'').split('/')[0]||'home');
   const space=spaceOf(path);document.body.dataset.space=space;
   document.querySelectorAll('.nav a.link').forEach(a=>{const hr=a.getAttribute('href');const on=hr==='#/'?(path==='#/'||path==='#'):(path===hr||path.startsWith(hr+'/'));a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  {const meOn=path==='#/me'||path==='#/login';$('#navMe')?.classList.toggle('on',meOn);document.querySelector('.hd-av')?.classList.toggle('on',meOn)}
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
   const rk=(path==='#/lost'||((path==='#/'||path==='#')&&qs(h).tab))?'lost':path==='#/'||path==='#'?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured')?'lost':(path.startsWith('#/adopt')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path==='#/admin'?'me':'';
   const items=space==='health'
@@ -1741,7 +1755,7 @@ window.addEventListener('popstate',e=>{
   navByPop=true;
 });
 function openOverlay(el){
-  closeOverlays();el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');if(!el.hasAttribute('tabindex'))el.tabIndex=-1;document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{const f=el.querySelector('input,textarea,select,button')||el;try{f.focus({preventScroll:true})}catch(_){}},30);
+  closeOverlays();{const sh=el.querySelector('.sheet');if(sh&&!sh.querySelector('.sheet-x')){const x=document.createElement('button');x.type='button';x.className='sheet-x';x.setAttribute('aria-label','關閉');x.textContent='✕';x.onclick=e=>{e.stopPropagation();closeOverlay(el)};sh.prepend(x)}}el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');if(!el.hasAttribute('tabindex'))el.tabIndex=-1;document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{const f=el.querySelector('input,textarea,select,button')||el;try{f.focus({preventScroll:true})}catch(_){}},30);
   try{history.pushState({overlay:1,d:navDepth,h:location.hash||'#/'},'',location.href)}catch(_){}
 }
 function closeOverlay(el){if(overlayOpen===el){overlayOpen=null;el.remove();__selfPop=true;try{history.back()}catch(_){__selfPop=false}}else el.remove()}
@@ -1812,7 +1826,7 @@ function route(){
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;curHash=newHash;const trav=trackDepth(wasPop);
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent=''}
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
-  app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record)|poster\/)/.test(path));
+  app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
   let m;
   if(!window.L&&!leafletGaveUp&&/^#\/(new$|case\/|report\/|found\/new|injured$|found\/[0-9a-f-]{36}$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
   if(path==='#/'||path==='#'||path==='#/lost')return renderHome();
@@ -1896,7 +1910,7 @@ function wizard(form,checks={}){
   const show=(k,scroll=true)=>{i=Math.max(0,Math.min(N-1,k));steps.forEach((st,j)=>st.hidden=j!==i);
     prog.innerHTML=`<div class="wdots">${steps.map((_,j)=>`<i class="${j<i?'done':j===i?'on':''}"></i>`).join('')}</div><span>第 ${i+1} 步，共 ${N} 步</span>`;
     bBack.hidden=i===0;bNext.hidden=i===N-1;submit.hidden=i!==N-1;
-    if(scroll){const y=form.getBoundingClientRect().top+scrollY-70;window.scrollTo({top:Math.max(0,y),behavior:RM()?'auto':'smooth'})}
+    if(scroll){const y=form.getBoundingClientRect().top+scrollY-(innerWidth>760?(document.querySelector('header')?.offsetHeight||0)+16:70);window.scrollTo({top:Math.max(0,y),behavior:RM()?'auto':'smooth'})}
     setTimeout(()=>window.dispatchEvent(new Event('resize')),60)};   // 讓地圖重新算大小
   bNext.onclick=()=>{if(!stepOk(i))return;try{history.pushState({wiz:i+1},'',location.href)}catch(_){}show(i+1)};
   bBack.onclick=()=>{if(history.state&&history.state.wiz)history.back();else show(i-1)};
@@ -2574,7 +2588,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   d.innerHTML=`<div class="mph-card"><img src="${esc(b.dataset.photo)}" referrerpolicy="no-referrer" alt="收容所照片"><div class="mph-b"><b>${esc(b.dataset.name)}</b><span class="muted small">收容編號 ${esc(b.dataset.sub)}</span>
    <div class="mph-acts">${b.dataset.link?`<a class="btn" target="_blank" rel="noopener" href="${esc(b.dataset.link)}">看收容所公告 ↗</a>`:''}${b.dataset.tel?`<a class="btn ghost" href="tel:${esc(b.dataset.tel)}">${ic('phone')} 打電話</a>`:''}<button type="button" class="btn ghost mph-x">關閉</button></div></div></div>`;
   d.onclick=ev=>{if(ev.target===d||ev.target.closest('.mph-x'))closeOverlay(d)};openOverlay(d)});
-function lightbox(u){u=safeU(u);if(!u)return;const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<img src="${esc(u)}" referrerpolicy="no-referrer" alt="">`;d.onclick=()=>closeOverlay(d);openOverlay(d)}
+function lightbox(u){u=safeU(u);if(!u)return;const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<button type="button" class="lb-x" aria-label="關閉">✕</button><img src="${esc(u)}" referrerpolicy="no-referrer" alt="">`;d.onclick=()=>closeOverlay(d);openOverlay(d)}
 
 /* ============================================================
    登記走失
@@ -3015,7 +3029,7 @@ async function quickReport(){
         <label class="f"><span>電話通報稿</span><textarea id="qScript" readonly style="min-height:170px">${esc(script)}</textarea></label>
         <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報稿</button><a class="btn sm line" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(script)}">用 LINE 傳送</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} 在 Google 地圖打開</a><a class="btn sm ghost" href="#/found/${data.id}">查看通報頁</a></div>`;
       $('#qCopy').onclick=()=>copy($('#qScript').value);
-      window.scrollTo({top:box.getBoundingClientRect().top+scrollY-20,behavior:RM()?'auto':'smooth'});
+      window.scrollTo({top:box.getBoundingClientRect().top+scrollY-(innerWidth>760?(document.querySelector('header')?.offsetHeight||0)+16:20),behavior:RM()?'auto':'smooth'});
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='再送一次';
       // 網站沒送出也要能馬上打電話求救：顯示撥號按鈕與通報稿（沒有網址）
       if(!$('#qFail')){const sc=callScript({...q,address:g.address,where,place_text:$('#qPlace').value.trim(),url:''});
