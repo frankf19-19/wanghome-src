@@ -18,7 +18,7 @@
   GMAIL_APP_PASSWORD        （舊方式）Gmail 應用程式密碼（16 碼）
   MOA_API_URL               （選填）覆蓋農業部 API 網址
 """
-import os, sys, json, smtplib, datetime as dt, urllib.request, urllib.parse, urllib.error, re
+import os, sys, json, gzip, smtplib, datetime as dt, urllib.request, urllib.parse, urllib.error, re
 from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import formataddr
@@ -54,9 +54,12 @@ def sb(method, path, body=None, params=None, prefer=None):
         req.add_header("Authorization", f"Bearer {SERVICE_KEY}")
     req.add_header("Content-Type", "application/json")
     req.add_header("Prefer", prefer or "return=representation")
+    req.add_header("Accept-Encoding", "gzip")   # 壓縮傳輸：省 Supabase 每月流量
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
-            t = r.read().decode()
+            raw = r.read()
+            if (r.headers.get("Content-Encoding") or "").lower() == "gzip": raw = gzip.decompress(raw)
+            t = raw.decode()
             return json.loads(t) if t else None
     except urllib.error.HTTPError as e:
         raw = e.read().decode(errors="replace")
@@ -229,8 +232,26 @@ def run_found_matching():
     print(f"拾獲比對新增 {len(rows)} 筆")
 
 # ---------------------------------------------------------------- Email
-def send_mail(to, subject, body):
-    if not (MAIL_OK and to): return False
+# Resend 免費版一天 100 封，而且登入信也走同一個帳號：網站通知一天最多 60 封（保留 40 封給登入信）。
+# 會員通知（附近走失、追蹤、到期提醒）最多用到當天第 40 封，飼主的目擊通知永遠有保留額度。
+MAIL_CAP_HIGH, MAIL_CAP_LOW = 60, 40
+STOP_MAIL = False   # 這次執行中寄信出錯（例如額度用完）就不再嘗試
+def mail_budget(kind, cap):
+    try: return sb("POST", "rpc/mail_budget_take", body={"p_kind": kind, "p_cap": cap}) is True
+    except Exception as e:
+        print("查寄信額度失敗，這次先不寄：", type(e).__name__); return False
+
+def send_mail(to, subject, body, kind="notify", cap=MAIL_CAP_HIGH):
+    global STOP_MAIL
+    if not (MAIL_OK and to) or STOP_MAIL: return False
+    if not mail_budget(kind, cap):
+        print(f"今天的寄信額度已用完（{kind}），留到明天再寄"); return False
+    try:
+        return _send(to, subject, body)
+    except Exception:
+        STOP_MAIL = True; raise
+
+def _send(to, subject, body):
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = Header(subject, "utf-8"); msg["To"] = to
     if RESEND_KEY:   # 用自己的網域寄（Resend SMTP）
@@ -291,7 +312,8 @@ def mark_notified(table, ids):
 def run_notifications():
     if not MAIL_OK:
         print("未設定寄信，略過通知"); return
-    cases = {c["id"]: c for c in sb_all("cases", {"select": "id,name,contact_email,hidden,email_verified,status"}) if not c.get("hidden")}
+    # 只抓協尋中、沒隱藏的案件（省流量；其他案件的待通知紀錄會被標記掉，不再寄）
+    cases = {c["id"]: c for c in sb_all("cases", {"select": "id,name,contact_email,hidden,email_verified,status", "status": "eq.searching", "hidden": "eq.false"}, cap=10**6, strict=True)}
     old_cut = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=3)).isoformat()
     def skip_unverified(table, lst, key="created_at"):
         # 信箱還沒確認：先不寄、留著（確認後會一起寄）；超過 3 天的就標記掉，不再累積
@@ -380,11 +402,11 @@ def run_notifications():
 
 # ---------------------------------------------------------------- 會員通知
 SP_NAME = {"dog": "狗", "cat": "貓"}
-def run_member_notifications():
+def run_member_notifications(nearby=True):
     if not MAIL_OK:
         print("未設定寄信，略過會員通知"); return
-    # 附近新案件
-    rows = sb("POST", "rpc/nearby_targets", body={"p_hours": 26}) or []
+    # 附近新案件：一天只寄一次彙整（每天凌晨那次），省寄信額度
+    rows = (sb("POST", "rpc/nearby_targets", body={"p_hours": 26}) or []) if nearby else []
     by_user = {}
     for r in rows: by_user.setdefault((r["user_id"], r["email"]), []).append(r)
     for (uid, email), lst in by_user.items():
@@ -394,7 +416,7 @@ def run_member_notifications():
             lines.append(f"  {SITE_URL}#/case/{r['case_id']}")
         lines += ["", f"不想再收到？到「我的 → 通知設定」關閉：{SITE_URL}#/me", f"— {SITE_NAME}"]
         try:
-            send_mail(email, f"【{SITE_NAME}】你家附近有毛孩走失", "\n".join(lines))
+            if not send_mail(email, f"【{SITE_NAME}】你家附近有毛孩走失", "\n".join(lines), kind="nearby", cap=MAIL_CAP_LOW): break
             sb("POST", "notify_log", body=[{"user_id": uid, "kind": "nearby", "ref_id": r["case_id"]} for r in lst],
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"附近通知：{len(lst)} 筆 → 1 位會員")
@@ -411,7 +433,7 @@ def run_member_notifications():
             lines.append(f"  {SITE_URL}#/case/{r['case_id']}")
         lines += ["", f"管理追蹤與通知：{SITE_URL}#/me", f"— {SITE_NAME}"]
         try:
-            send_mail(email, f"【{SITE_NAME}】追蹤的案件有新目擊", "\n".join(lines))
+            if not send_mail(email, f"【{SITE_NAME}】追蹤的案件有新目擊", "\n".join(lines), kind="follow", cap=MAIL_CAP_LOW): break
             sb("POST", "notify_log", body=[{"user_id": uid, "kind": "follow", "ref_id": r["sighting_id"]} for r in lst],
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"追蹤通知：{len(lst)} 筆 → 1 位會員")
@@ -433,7 +455,7 @@ def run_due_reminders():
             lines.append(f"・{r['pet_name']}｜{r['title']}　{r['next_due']}（{when}）")
         lines += ["", f"完成後到「我的」頁標記已完成：{SITE_URL}#/me", f"— {SITE_NAME}"]
         try:
-            send_mail(email, f"【{SITE_NAME}】毛孩健康提醒：{lst[0]['pet_name']} {lst[0]['title']}", "\n".join(lines))
+            if not send_mail(email, f"【{SITE_NAME}】毛孩健康提醒：{lst[0]['pet_name']} {lst[0]['title']}", "\n".join(lines), kind="due", cap=MAIL_CAP_LOW): break
             sb("POST", "notify_log", body=[{"user_id": uid, "kind": f"due:{r['next_due']}", "ref_id": r["record_id"]} for r in lst],
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"到期提醒：{len(lst)} 筆 → 1 位會員")
@@ -452,7 +474,7 @@ def run_report_alerts():
         lines.append(f"・{names.get(r['target_type'], r['target_type'])}  原因：{r['reason']}  {r.get('note') or ''}")
     lines += ["", f"管理後台：{SITE_URL}#/admin", f"— {SITE_NAME}"]
     try:
-        send_mail(admin, f"【{SITE_NAME}】{len(rows)} 則新檢舉", "\n".join(lines))
+        if not send_mail(admin, f"【{SITE_NAME}】{len(rows)} 則新檢舉", "\n".join(lines), kind="admin"): return
         mark_notified("reports", [r["id"] for r in rows])
         print(f"已通知站長 {len(rows)} 則檢舉")
     except Exception as e:
@@ -511,7 +533,7 @@ def run_photo_cleanup(dry=False):
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    print("WangHome daily v1.8.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
+    print("WangHome daily v1.9.0 mode =", mode, dt.datetime.now(dt.timezone.utc).isoformat())
     if mode == "probe":
         try:
             data = fetch_moa()
@@ -527,10 +549,15 @@ if __name__ == "__main__":
     if mode in ("all", "match"): run_matching()
     if mode in ("all", "match", "notify"): run_found_matching()
     if mode in ("all", "notify"): run_notifications()
-    if mode in ("all", "notify"): run_member_notifications()
+    if mode in ("all", "notify"): run_member_notifications(nearby=(mode == "all"))
     if mode in ("all", "notify"): run_report_alerts()
     if mode in ("all",): run_due_reminders()
-    if mode in ("all", "cleanup", "cleanup-dry"):
+    if mode == "all":
+        try: print("定期清理：", sb("POST", "rpc/retention_cleanup", body={}))
+        except Exception as e: print("定期清理失敗（不影響其他功能）：", type(e).__name__)
+    # 照片清理要列出所有檔案（流量大）：每週日跑一次，或手動執行
+    weekly = mode == "all" and dt.datetime.now(TPE).weekday() == 6
+    if weekly or mode in ("cleanup", "cleanup-dry"):
         try: run_photo_cleanup(dry=(mode == "cleanup-dry"))
         except Exception as e: print("照片清理失敗（不影響其他功能）：", type(e).__name__)
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})

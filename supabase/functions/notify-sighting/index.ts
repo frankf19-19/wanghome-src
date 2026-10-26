@@ -1,4 +1,4 @@
-// 汪喵回家 — 飼主 Email 通知 v1.4（用 Resend 從 noreply@wangmiaotw.com 寄出）
+// 汪喵回家 — 飼主 Email 通知 v1.5（用 Resend 從 noreply@wangmiaotw.com 寄出）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-sighting
 //   1. {"case_id":"<uuid>"}                                   網友送出目擊後由網頁呼叫：寄目擊通知給飼主
 //   2. {"case_id":"<uuid>","action":"verify","token":"<管理代碼>"}  寄「確認信箱」信給飼主（登記後、改 Email 後、按重寄）
@@ -82,6 +82,10 @@ Deno.serve(async (req) => {
     const dom = d === "googlemail.com" ? "gmail.com" : d; let user = u.split("+")[0];
     if (dom === "gmail.com") user = user.replace(/\./g, ""); return `${user}@${dom}`; };
   const toKey = norm(to);
+  const budget = async (kind: string) => {
+    const { data, error } = await sb.rpc("mail_budget_take", { p_kind: kind, p_cap: 60 });
+    return !error && data === true;
+  };
 
   // ---------------------------------------------------------------- 確認信箱
   if (body.action === "verify") {
@@ -106,6 +110,8 @@ Deno.serve(async (req) => {
     if (await count((x) => x.eq("case_id", caseId).eq("kind", "verify").gte("sent_at", dayAgo)) >= 3) return json({ sent: false, reason: "throttled" });
     if (await count((x) => x.eq("to_email", toKey).gte("sent_at", dayAgo)) >= 3) return json({ sent: false, reason: "throttled" });
 
+    // 每日寄信預算（和排程共用）：網站通知一天最多 60 封，保留額度給登入信
+    if (!(await budget("verify"))) return json({ sent: false, reason: "throttled" });
     // 先「佔位」再寄：同時送來的請求只有一個會成功（10 分鐘內不重寄）
     const key = [...crypto.getRandomValues(new Uint8Array(24))].map((x) => x.toString(16).padStart(2, "0")).join("");
     const tenAgo = new Date(Date.now() - 10 * 60e3).toISOString();
@@ -158,6 +164,11 @@ Deno.serve(async (req) => {
     .select("id,seen_at,place_text,direction,note,lat,lng,reporter_name,reporter_contact,photo_url");
   if (se) return json({ error: "claim" }, 500);
   if (!ss || !ss.length) return json({ sent: false, reason: "nothing_new" });
+  // 每日寄信預算用完：把目擊放回「未通知」（排程之後會補寄），不佔用登入信的額度
+  if (!(await budget("notify"))) {
+    await sb.from("sightings").update({ notified: false }).in("id", ss.map((x) => x.id));
+    return json({ sent: false, reason: "throttled" });
+  }
 
   const lines = [`你的毛孩「${c.name}」剛剛有 ${ss.length} 筆新的目擊回報：`, ""];
   for (const s of ss) {
