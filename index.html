@@ -1290,12 +1290,13 @@ body{touch-action:manipulation}
 .sri.s5{background:#FFD9C7;color:#B5502A}
 
 /* 首頁快捷：領養、受傷、攻略 */
-.qrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.qrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:600px){.qrow{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (min-width:900px){.qrow{grid-column:1/-1}}
 .qk{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px;border-radius:20px;background:var(--sheet);box-shadow:var(--lift);text-decoration:none!important;color:var(--ink)!important;min-width:0}
 .qk:active{transform:scale(.97)}
 .qi{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;margin-bottom:6px}.qi .ico{width:21px;height:21px}
-.qi.q1{background:#BFEBD9;color:#18704F}.qi.q2{background:#FFD9C7;color:#B5502A}.qi.q3{background:#D9D2FF;color:#5A46C4}
+.qi.q4{background:#FFE7A8;font-size:20px}.qi.q1{background:#BFEBD9;color:#18704F}.qi.q2{background:#FFD9C7;color:#B5502A}.qi.q3{background:#D9D2FF;color:#5A46C4}
 .qk b{font-size:15px;line-height:1.3}.qk small{font-size:12px;color:var(--ink-3);line-height:1.35}
 .sri.s6{background:#BFEBD9;color:#18704F}
 /* 首頁手機版：底部的領養推薦已經在上面快捷，不重複 */
@@ -1324,6 +1325,21 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 .pill.fact{background:var(--red-soft);color:var(--red);border-color:transparent!important;font-weight:700}
 .fsheet{max-height:86vh;overflow-y:auto}
 .fs-acts{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:var(--paper);padding-top:8px}.fs-acts .btn{flex:1;min-height:50px}
+
+/* 毛孩小學堂 */
+.lgroup{background:var(--sheet);border-radius:22px;box-shadow:var(--lift);overflow:hidden;margin-top:12px}
+.lcard{display:flex;align-items:center;gap:14px;padding:12px 14px;color:var(--ink)!important;text-decoration:none!important;min-height:72px}
+.lcard+.lcard{box-shadow:0 -1px 0 var(--line)}
+.lcard:active{background:var(--beige)}
+.lc-ic{flex:none;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:24px}
+.lc-t{flex:1;min-width:0;display:flex;flex-direction:column}.lc-t b{font-size:16px;line-height:1.35}.lc-t small{font-size:13.5px;color:var(--ink-3);line-height:1.4}
+.lhero{height:150px;border-radius:28px;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:16px}
+.lh-ic{font-size:72px;line-height:1}
+.lh-tag{position:absolute;left:14px;top:14px;background:rgba(255,255,255,.75);color:#4A3442;font-weight:800;font-size:13px;padding:3px 10px;border-radius:99px}
+.lsec{background:var(--sheet);border-radius:22px;box-shadow:var(--lift);padding:4px 18px 10px;margin-top:14px}
+.lsec h2{font-size:18px!important;margin:14px 0 6px!important}
+.lsec ul{margin:0;padding-left:20px}.lsec li{margin:8px 0;line-height:1.7;font-size:15.5px}
+.lsec li::marker{color:var(--red)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1388,7 +1404,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.6.1';
+const BUILD = 'v4.7.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1660,6 +1676,7 @@ function openAddSheet(){
     ${r('#/pet/new',ic('paw'),'s4','新增毛孩檔案','生日、晶片、照片')}
     ${r('#/lost',ic('search'),'s5','看正在協尋的毛孩','幫忙找、分享出去')}
     ${r('#/adopt',ic('shelter'),'s6','我想領養毛孩','全台公立收容所，依縣市看照片')}
+    ${r('#/learn',ic('star'),'s3','毛孩小學堂','狗狗、貓咪的照顧小知識')}
     <button type="button" class="btn ghost block sh-x">取消</button></div>`;
   el.onclick=e=>{const a=e.target.closest('a.srow');if(a){e.preventDefault();const h=a.getAttribute('href');closeOverlay(el);setTimeout(()=>{location.hash=h},80);return}
     if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};
@@ -1719,6 +1736,7 @@ function parentOf(h){const p=h.split('?')[0];let m;
   if((m=p.match(/^#\/pet\/([0-9a-f-]{36})\/.+/)))return '#/pet/'+m[1];
   if(/^#\/(pet|health)\//.test(p))return '#/health';
   if(/^#\/admin/.test(p))return '#/me';
+  if(/^#\/learn\/./.test(p))return '#/learn';
   return '#/'}
 function goBack(){if(overlayOpen){closeOverlay(overlayOpen);return}if(navDepth>0)history.back();else{__replacing=true;goReplace(parentOf(location.hash||'#/'))}}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#mBack')){e.preventDefault();goBack()}});
@@ -1780,6 +1798,8 @@ function route(){
   if(path==='#/health/add')return renderHealthAdd();
   if(path==='#/thanks'){if(IS_APP){goReplace('#/');return}return renderThanks()}
   if(path==='#/resources')return renderResources();
+  if(path==='#/learn')return renderLearn();
+  if((m=path.match(/^#\/learn\/([a-z-]{2,30})$/)))return renderLearnOne(m[1]);
   if(path==='#/about')return renderAbout();
   if(path==='#/privacy')return renderPrivacy();
   if(path==='#/terms')return renderTerms();
@@ -1947,6 +1967,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <a href="#/adopt" class="qk"><span class="qi q1">${ic('shelter')}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
       <a href="#/injured" class="qk"><span class="qi q2">${ic('siren')}</span><b>受傷通報</b><small>一鍵撥打 1959</small></a>
       <a href="#/resources" class="qk"><span class="qi q3">${ic('clipboard')}</span><b>協尋攻略</b><small>黃金 48 小時</small></a>
+      <a href="#/learn" class="qk"><span class="qi q4" aria-hidden="true">🎓</span><b>毛孩小學堂</b><small>狗狗貓咪照顧知識</small></a>
     </div>
     <div id="myPets" class="mypets"></div>
     <p class="bs-rule"><span class="bs-paw">${pawSvg()}</span><span><b>看到走失的狗貓：</b>先別追，拍照回報就好。</span></p>
@@ -3730,7 +3751,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
 function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
-  <p class="mlh">協尋資源</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/injured','siren','受傷毛孩通報','c2')}${row('#/adopt','shelter','領養毛孩','c3')}${row('#/?tab=map','map','走失地圖','c4')}</div>
+  <p class="mlh">協尋資源</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}${row('#/injured','siren','受傷毛孩通報','c2')}${row('#/adopt','shelter','領養毛孩','c3')}${row('#/?tab=map','map','走失地圖','c4')}</div>
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info','關於本站','c4')}${IS_APP?'':row('#/thanks','heart','贊助感謝牆','c1')}${row('#/contact','mail','聯絡我們','c3')}${row('#/terms','doc','使用條款','c5')}${row('#/privacy','shield','隱私權政策','c5')}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
   <p class="mver">汪喵回家 ${BUILD}・全台走失狗貓協尋平台</p></div>`}
@@ -4330,6 +4351,81 @@ async function renderThanks(){const _n=navId;
 /* ============================================================
    協尋攻略 / 資源
    ============================================================ */
+/* ============================================================
+   毛孩小學堂：狗狗、貓咪的照顧小知識（一般常識，實際以獸醫師建議為準）
+   ============================================================ */
+const LEARN=[
+ {id:'dog-food',sp:'dog',c:'p',ic:'🍫',t:'狗狗不能吃的食物',s:'巧克力、葡萄、洋蔥…這些千萬別餵',b:[
+  ['最常見的危險食物',['<b>巧克力、咖啡、茶</b>：含可可鹼和咖啡因，會造成嘔吐、心跳過快、抽搐。黑巧克力最危險。','<b>葡萄、葡萄乾</b>：少量就可能造成腎衰竭，每隻狗的耐受度不同，一顆都不要給。','<b>洋蔥、大蒜、韭菜、蔥</b>：生的熟的都不行，會破壞紅血球造成貧血。滷肉、湯汁裡也常有。','<b>木糖醇</b>：無糖口香糖、部分花生醬裡有，會讓血糖急降、傷肝。','<b>酒精、夏威夷豆、酪梨</b>：也都可能中毒。','<b>煮過的骨頭</b>：容易碎裂成尖片，刺傷腸胃。']],
+  ['不小心吃到怎麼辦',['記下吃了什麼、大約多少、什麼時候吃的，把包裝帶著。','不要自己催吐，馬上打給動物醫院，依醫師指示處理。','夜間可以找 24 小時急診動物醫院。']]]},
+ {id:'cat-food',sp:'cat',c:'l',ic:'🌷',t:'貓咪不能碰的東西',s:'百合花、洋蔥、巧克力，還有牛奶',b:[
+  ['最危險的：百合花',['<b>百合科植物</b>（百合、萱草等）對貓是劇毒，花瓣、葉子、花粉、甚至花瓶的水都可能造成急性腎衰竭。有養貓就不要放百合在家裡。']],
+  ['其他要小心的',['<b>洋蔥、大蒜、蔥</b>：會造成貧血。','<b>巧克力、咖啡、酒精</b>：會中毒。','<b>葡萄、葡萄乾</b>：可能傷腎。','<b>牛奶</b>：大部分成貓有乳糖不耐，喝了容易拉肚子。','<b>狗飼料</b>：營養不夠貓用（例如牛磺酸），長期吃會生病。','<b>人吃的藥</b>：像普拿疼（乙醯胺酚）對貓非常危險，不要自己餵藥。']]]},
+ {id:'dog-vaccine',sp:'dog',c:'m',ic:'💉',t:'狗狗的疫苗與預防',s:'狂犬病每年一次，心絲蟲要每個月預防',b:[
+  ['疫苗',['<b>狂犬病疫苗</b>：台灣法規規定狗狗每年要打一次。','<b>多合一疫苗</b>：預防犬瘟熱、犬小病毒等嚴重傳染病。幼犬要打完一系列，之後依醫師建議補強。','還沒打完疫苗的幼犬，先不要去狗公園或接觸陌生的狗。']],
+  ['寄生蟲預防',['<b>心絲蟲</b>：由蚊子傳染，台灣一年四季都有蚊子，建議每個月預防。','<b>體內外驅蟲</b>：跳蚤、壁蝨、腸道寄生蟲，依產品說明定期使用。','可以在「毛孩健康手冊」設定到期提醒，時間到了手機會通知你。']]]},
+ {id:'cat-health',sp:'cat',c:'b',ic:'🩺',t:'貓咪的疫苗與健康',s:'核心疫苗、每年健檢、多喝水',b:[
+  ['疫苗',['<b>核心疫苗</b>：預防貓瘟（貓泛白血球減少症）、貓皰疹病毒、卡里西病毒，幼貓要打完一系列。','<b>狂犬病疫苗</b>：台灣規定貓咪每年要打。2025 年 7 月起，<b>完全養在室內、外出都裝在外出籠</b>的家貓可以免打；會到戶外活動的貓仍要每年施打。不確定的話可以問獸醫師或當地動物保護處。','核心疫苗就算完全不出門的貓也建議打，因為病毒可能被人帶回家。']],
+  ['日常照顧',['<b>多喝水</b>：貓咪天生不愛喝水，可以多放幾個水碗、用流動飲水機，或吃濕食，對泌尿道比較好。','<b>每年健康檢查</b>：貓很會忍痛，生病時常常看不出來。7 歲以後建議更常檢查。','<b>注意尿尿</b>：一直跑貓砂盆卻尿不出來，可能是泌尿道阻塞，公貓特別危險，要立刻就醫。']]]},
+ {id:'dog-heat',sp:'dog',c:'p',ic:'☀️',t:'夏天防中暑',s:'大口喘氣、牙齦很紅，要馬上處理',b:[
+  ['怎麼預防',['避開中午出門散步，選清晨或傍晚，先用手背摸地面，太燙就不要走。','絕對不要把狗留在車上，即使開了窗，車內溫度也會很快升高。','短鼻子的狗（法鬥、巴哥、西施）、胖狗、老狗特別容易中暑。']],
+  ['中暑的徵兆',['一直大口喘氣、流很多口水','牙齦或舌頭變得很紅或發紫','走路不穩、嘔吐、沒反應']],
+  ['發生時怎麼辦',['馬上移到陰涼通風的地方。','用常溫或微涼的水沾濕身體（特別是腳掌、腋下、肚子），可以搭配電扇。<b>不要用冰水或冰塊</b>，會讓血管收縮反而散不了熱。','一邊降溫一邊送醫，就算看起來好了也要給醫師檢查。']]]},
+ {id:'cat-safe',sp:'cat',c:'m',ic:'🪟',t:'防止貓咪走失與墜樓',s:'紗窗、門口、外出籠，三個地方最重要',b:[
+  ['家裡的防護',['<b>紗窗</b>：貓推得開一般紗窗，建議加裝防貓紗窗或窗戶限位器。高樓墜落在貓咪很常見。','<b>大門</b>：進出時先確認貓在哪裡，可以加一道防貓門或柵欄。','<b>陽台</b>：用網子圍起來，不要讓貓自己在陽台。']],
+  ['出門的時候',['帶貓出門一定要用<b>外出籠</b>，不要用抱的，貓受驚嚇時會掙脫。','看醫生前先確認外出籠的門和扣環是好的。']],
+  ['萬一走失',['大部分走失的室內貓會躲在附近，先仔細找家附近的機車底下、樓梯間、草叢。','晚上安靜的時候用平常的聲音叫牠。','到汪喵回家登記協尋，做海報貼在附近。']]]},
+ {id:'cat-litter',sp:'cat',c:'b',ic:'🧺',t:'貓砂盆小知識',s:'數量、位置、清潔，貓咪才會乖乖用',b:[
+  ['基本原則',['<b>數量</b>：建議「貓咪數量 + 1」個貓砂盆。','<b>位置</b>：放在安靜、不常有人經過的地方，和吃飯喝水的地方分開。','<b>大小</b>：至少是貓身長的 1.5 倍，貓才轉得過身。']],
+  ['清潔',['每天至少清 1～2 次，貓咪很愛乾淨，太髒會不想用。','定期整盆換砂、清洗。']],
+  ['突然亂尿尿？',['可能是生病（例如泌尿道問題），也可能是壓力或對貓砂盆不滿意。','先帶去給醫師檢查，排除身體的問題。']]]},
+ {id:'dog-walk',sp:'dog',c:'l',ic:'🦮',t:'安全散步與防走失',s:'名牌、牽繩、放鞭炮的日子要特別小心',b:[
+  ['出門前',['戴上<b>寫有電話的名牌</b>，就算有晶片，撿到的人不一定能馬上掃描。','檢查項圈或胸背帶有沒有鬆，容易掙脫的狗建議用胸背帶。','牽繩不要用太長的伸縮繩，在路邊容易衝出去。']],
+  ['特別容易走失的時候',['<b>過年、跨年放鞭炮煙火、打雷</b>：狗會受驚嚇暴衝，這幾天散步要更小心，在家也要關好門窗。','<b>搬家、出遊、寄宿</b>：到新環境狗狗容易想跑回家。']],
+  ['平常就要準備',['拍幾張清楚的全身照和特徵照，走失時馬上能用。','到汪喵回家的「毛孩健康手冊」建立檔案，走失時一鍵轉成協尋。']]]},
+ {id:'adopt-prep',sp:'all',c:'m',ic:'🏡',t:'新手領養準備清單',s:'領養前想清楚、帶回家前先準備好',b:[
+  ['領養前先想想',['毛孩可能陪伴你 10～20 年，未來搬家、工作、結婚生子都要把牠算進去。','每月飼料、預防針、看病大約要花多少，先估算一下。','家人都同意嗎？有人過敏嗎？房東允許養寵物嗎？']],
+  ['要準備的東西',['狗：牽繩、項圈或胸背帶、名牌、碗、睡墊、飼料。','貓：貓砂盆和貓砂、抓板、外出籠、碗、飼料，窗戶加裝防護。']],
+  ['帶回家之後',['先讓牠待在一個安靜的小空間，慢慢熟悉家裡。','一週內帶去動物醫院健康檢查，討論疫苗和驅蟲時間。','狗和貓依法都要做寵物登記（植入晶片），貓從 2026 年起沒登記也會被罰，走失時才找得回來。']]]},
+ {id:'chip',sp:'all',c:'p',ic:'🔖',t:'晶片與寵物登記',s:'走失時最快找回毛孩的方法',b:[
+  ['為什麼要植入晶片',['晶片是一顆米粒大小的芯片，打在肩胛中間，終身有效。','被送到動物醫院或收容所時，掃描晶片就能查到飼主。','<b>狗和貓都依法必須做寵物登記</b>，貓從 2026 年起沒植入晶片登記會被罰款。']],
+  ['登記完還要做的事',['<b>搬家、換電話要更新資料</b>，不然掃到晶片也聯絡不到你。','可以到農業部寵物登記管理資訊網查詢自己的登記資料。','把晶片號碼記在汪喵回家的毛孩檔案裡，走失時登記協尋更方便。']]]},
+ {id:'neuter',sp:'all',c:'l',ic:'💗',t:'結紮的好處',s:'減少走失、降低部分疾病風險',b:[
+  ['結紮可以',['降低發情時想往外跑的衝動，<b>減少走失</b>。','降低部分生殖系統疾病的風險，例如母犬母貓的子宮蓄膿。','減少流浪動物出生。']],
+  ['小提醒',['什麼時候結紮比較適合，每隻毛孩狀況不同，請和獸醫師討論。','很多縣市有結紮補助，可以問當地動物保護處或動物醫院。']]]},
+ {id:'vet-visit',sp:'all',c:'b',ic:'🏥',t:'帶毛孩看醫生要準備什麼',s:'把症狀記清楚，醫生更好判斷',b:[
+  ['先記下來',['什麼時候開始不舒服、症狀是什麼（拍影片很有幫助）。','最近吃了什麼、有沒有亂吃東西、精神食慾如何。','大小便的狀況，可以拍照或帶樣本。']],
+  ['要帶的東西',['過去的病歷、疫苗紀錄（可以直接打開汪喵回家的毛孩健康手冊給醫生看）。','正在吃的藥或保健品。','貓和小型犬用外出籠；大狗用牽繩。']],
+  ['這些情況要馬上就醫',['呼吸困難、抽搐、昏倒','誤食毒物或異物','一直嘔吐、拉肚子帶血','公貓一直蹲貓砂盆卻尿不出來']]]}
+];
+const LEARN_C={p:'#FFC6D3',m:'#BFEBD9',b:'#FFE7A8',l:'#D9D2FF'};
+let learnTab='all';
+function learnCard(a){return `<a class="lcard" href="#/learn/${a.id}"><span class="lc-ic" style="background:${LEARN_C[a.c]}">${a.ic}</span><span class="lc-t"><b>${esc(a.t)}</b><small>${esc(a.s)}</small></span>${ic('chev','mrc')}</a>`}
+function renderLearn(){
+  setTitle('毛孩小學堂');
+  const tabs=[['all','全部'],['dog','🐶 狗狗'],['cat','🐱 貓咪']];
+  const draw=()=>{const list=LEARN.filter(a=>learnTab==='all'||a.sp===learnTab||a.sp==='all');
+    $('#lList').innerHTML=list.map(learnCard).join('');
+    document.querySelectorAll('#lTabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===learnTab);b.setAttribute('aria-pressed',b.dataset.v===learnTab)})};
+  app.innerHTML=`<h1>毛孩小學堂</h1><p class="lede">狗狗、貓咪的照顧小知識，一篇幾分鐘就看完。</p>
+  <div class="tabs" id="lTabs" role="group" aria-label="分類">${tabs.map(([v,t])=>`<button type="button" data-v="${v}">${t}</button>`).join('')}</div>
+  <div class="lgroup" id="lList"></div>
+  <p class="muted small" style="margin-top:18px">這裡是一般照顧常識，每隻毛孩狀況不同，身體不舒服請以獸醫師的診斷和建議為準。</p>`;
+  document.querySelectorAll('#lTabs button').forEach(b=>b.onclick=()=>{learnTab=b.dataset.v;draw()});
+  draw();
+}
+function renderLearnOne(id){
+  const a=LEARN.find(x=>x.id===id);
+  if(!a){app.innerHTML=`<div class="empty-card"><b>找不到這篇文章</b><p><a class="btn" href="#/learn">回小學堂</a></p></div>`;return}
+  setTitle(a.t);
+  const rel=LEARN.filter(x=>x.id!==a.id&&(x.sp===a.sp||x.sp==='all'||a.sp==='all')).slice(0,3);
+  app.innerHTML=`<div class="lhero" style="background:${LEARN_C[a.c]}"><span class="lh-ic">${a.ic}</span><span class="lh-tag">${a.sp==='dog'?'狗狗':a.sp==='cat'?'貓咪':'狗狗・貓咪'}</span></div>
+  <h1>${esc(a.t)}</h1><p class="lede">${esc(a.s)}</p>
+  ${a.b.map(([h,items])=>`<section class="lsec"><h2>${esc(h)}</h2><ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul></section>`).join('')}
+  <div class="notice" style="margin-top:18px">這是一般照顧常識，每隻毛孩狀況不同，身體不舒服請以獸醫師的診斷和建議為準。</div>
+  ${rel.length?`<h2 style="margin-top:26px">${ic('clipboard')} 延伸閱讀</h2><div class="lgroup">${rel.map(learnCard).join('')}</div>`:''}
+  <p style="margin-top:18px"><a class="btn ghost" href="#/learn">看全部文章</a></p>`;
+}
 function renderResources(){
   setTitle('協尋攻略');
   const cityKeys=Object.keys(TW);
