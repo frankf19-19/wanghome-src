@@ -1405,7 +1405,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.2';
+const BUILD = 'v4.7.3';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -2638,7 +2638,9 @@ function renderNew(){
       const photos=[];for(const u of presetPhotos){const k=String(u).split('/object/public/photos/')[1];
         if(k&&k.startsWith('pets/')){const nk=`cases/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
           const {error:ce}=await sb.storage.from('photos').copy(k,nk);
-          if(!ce){sb.storage.from('photos').copy(k.replace(/\.jpg$/,'_t.jpg'),nk.replace(/\.jpg$/,'_t.jpg')).catch(()=>{});photos.push(sb.storage.from('photos').getPublicUrl(nk).data.publicUrl);continue}}
+          if(!ce){sb.storage.from('photos').copy(k.replace(/\.jpg$/,'_t.jpg'),nk.replace(/\.jpg$/,'_t.jpg')).catch(()=>{});photos.push(sb.storage.from('photos').getPublicUrl(nk).data.publicUrl);continue}
+          // 複製失敗：下載後重新上傳一份到案件資料夾
+          try{const r=await fetch(u);if(r.ok){const nu=await tryUpload(new File([await r.blob()],'pet.jpg',{type:'image/jpeg'}),'cases');if(nu){photos.push(nu);continue}}}catch(_){}}
         photos.push(u)}
       const pg=$('#pg');pg.classList.remove('hidden');
       for(let i=0;i<photoFiles.length;i++){{const u=await tryUpload(photoFiles[i],'cases');if(u)photos.push(u)}pg.querySelector('i').style.width=((i+1)/photoFiles.length*100)+'%'}
@@ -2742,16 +2744,16 @@ async function renderReport(id){const _n=navId;
   };
   $('#f').onsubmit=async e=>{
     e.preventDefault();const fd=new FormData(e.target);if(fd.get('website'))return;
-    const loc=picker.get();if(!loc){toast('請在地圖上點選看到的位置');return}
+    const loc=picker.get();if(!loc&&!String(fd.get('place_text')||'').trim()){toast('請在地圖上點選看到的位置，或寫下地點描述');return}
     const btn=$('#btnSubmit');btn.disabled=true;btn.textContent='送出中…';
     try{
       let photo_url=null;const f=fd.get('photo');if(f&&f.size)photo_url=await tryUpload(f,'sightings');
-      const {error}=await sb.from('sightings').insert({case_id:id,seen_at:new Date(fd.get('seen_at')).toISOString(),lat:loc.lat,lng:loc.lng,place_text:fd.get('place_text'),direction:fd.get('direction'),note:fd.get('note'),photo_url,reporter_name:fd.get('reporter_name'),reporter_contact:fd.get('reporter_contact')});
+      const {error}=await sb.from('sightings').insert({case_id:id,seen_at:new Date(fd.get('seen_at')).toISOString(),lat:loc?loc.lat:null,lng:loc?loc.lng:null,place_text:fd.get('place_text'),direction:fd.get('direction'),note:fd.get('note'),photo_url,reporter_name:fd.get('reporter_name'),reporter_contact:fd.get('reporter_contact')});
       if(error)throw error;
       // 立即寄 Email 給飼主（最多等 8 秒；失敗不影響回報）
       let mailed=false;try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),8000);const r=await fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-sighting',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY},body:JSON.stringify({case_id:id}),signal:ctl.signal});clearTimeout(tt);mailed=!!(await r.json()).sent}catch(_){}
       const place=fd.get('place_text')||'下面地圖連結標的位置';const dir=fd.get('direction');const note=fd.get('note');
-      const msg=`你好，我在汪喵回家看到你在找「${c.name}」。\n我在 ${fmtDT(new Date(fd.get('seen_at')).toISOString())} 於「${place}」看到疑似牠${dir&&dir!=='不確定'?'，往'+dir+'走':''}。${note?'\n狀況：'+note:''}\n地圖：https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+      const msg=`你好，我在汪喵回家看到你在找「${c.name}」。\n我在 ${fmtDT(new Date(fd.get('seen_at')).toISOString())} 於「${place}」看到疑似牠${dir&&dir!=='不確定'?'，往'+dir+'走':''}。${note?'\n狀況：'+note:''}\n${loc?`地圖：https://www.google.com/maps?q=${loc.lat},${loc.lng}`:''}`;
       const tel=String(c.contact_phone||'').replace(/[^\d+]/g,'');const lineRaw=String(c.contact_line||'').trim();const lineId=lineRaw.replace(/^@/,'');const lineUrl=lineRaw.startsWith('@')?`https://line.me/R/ti/p/@${encodeURIComponent(lineId)}`:`https://line.me/R/ti/p/~${encodeURIComponent(lineId)}`;
       (_n===navId?app:_void).innerHTML=`<div class="card done-card"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！回報已送出</h1>
       <p class="lede">${tel||lineId?`${mailed?'系統已經寄 Email 通知飼主了。':''}<b>最快的方法是直接告訴飼主：</b>`:mailed?'系統已經寄 Email 通知飼主了，飼主確認後會跟你聯絡。':'回報已經存好，飼主打開網站就會看到。'}</p>
@@ -2765,7 +2767,7 @@ async function renderReport(id){const _n=navId;
       const cp=$('#cpMsg');if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(msg);toast('已複製，可以貼到 LINE 或簡訊')}catch(_){const t=$('#msgTxt');t.select();document.execCommand('copy');toast('已複製')}};
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出回報'}
   };
-  wizard($('#f'),{'什麼時候、在哪裡看到？':()=>picker.get()?'':'請在地圖上點選看到的位置'});
+  wizard($('#f'),{'什麼時候、在哪裡看到？':()=>picker.get()||$('#f').elements.place_text.value.trim()?'':'請在地圖上點選看到的位置，或寫下地點描述'});
 }
 
 /* ============================================================
@@ -2809,7 +2811,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
   <h2>目擊回報 <span class="tag gray">${(ss||[]).length}</span></h2>
   <div class="timeline">${(ss||[]).length?ss.map((s,i)=>`<div class="tl"><div class="dot ${s.status==='pending'?'pending':s.status==='rejected'?'start':''}">${s.status==='pending'?'?':s.status==='rejected'?'×':'✓'}</div>
     <div class="when">${fmtDT(s.seen_at)} <span class="tag ${s.status==='pending'?'amber':s.status==='rejected'?'gray':'green'}">${s.status==='pending'?'待確認':s.status==='rejected'?'已退回':'已確認'}</span></div>
-    <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} <a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a></div>
+    <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
     ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
     ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>`:''}
@@ -2839,7 +2841,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     <p>會永久刪除這個案件、所有目擊回報和比對結果，網站上馬上就找不到；照片檔案會在幾天內自動清除。<b>找到了的話，建議改按「已找到」</b>，讓大家知道牠回家了。</p>
     <button type="button" class="btn big danger" id="btnDelCase">永久刪除這個案件</button>
   </details>`;
-  if($('#btnClaim'))$('#btnClaim').onclick=async()=>{const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error)return toast(error.message);toast('✅ 已綁定');renderManage(id,token)};
+  if($('#btnClaim'))$('#btnClaim').onclick=async()=>{const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error)return toast(error.message);toast('✅ 已綁定');if(__dirty){const x=$('#btnClaim');const box=x&&(x.closest('.notice,.card')||x);if(box)box.remove()}else renderManage(id,token)};   // 正在改資料時不要整頁重畫，免得改到一半的內容不見
   let status=c.status;
   if($('#btnHome'))$('#btnHome').onclick=async()=>{if(!confirm(`確定 ${c.name} 已經回家了嗎？按「確定」會把案件標記為「已找到」，大家就知道可以不用再找了。`))return;
     const b=$('#btnHome');b.disabled=true;const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p:{status:'found'}});b.disabled=false;
@@ -2866,7 +2868,8 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     const ops=row.querySelector('.ops');ops.innerHTML=sightOps(b.dataset.s,v);bindOps(ops);
     const n=app.querySelectorAll('.timeline .when .tag.amber').length,pn=$('#pendN');if(pn){if(n)pn.textContent=n;else $('#pendNotice').remove()}});
   bindOps(app);capList(app.querySelector('.timeline'));
-  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error)return toast(error.message);rerender(()=>renderManage(id,token))});
+  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{b.disabled=true;const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error){b.disabled=false;return toast(error.message)}
+    const w=b.closest('div[style*="opacity"]');if(w)w.style.opacity='.5';b.remove();toast('已隱藏這筆比對')});   // 只改這一筆，不整頁重畫（不會弄丟正在編輯的資料）
   let photos=(c.photos||[]).slice();const pv=$('#pv');
   const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
   $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,4-photos.length)){toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
@@ -3749,13 +3752,14 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
         let {data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'email'});
         if(error&&su)({data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'signup'}));
         if(error||!vd?.session){b.disabled=false;b.textContent='用驗證碼登入';return toast(/expired|invalid/i.test(error?.message||'')?'驗證碼不正確或已過期，請再寄一次':'登入失敗：'+(error?.message||'請再試一次'),4500)}
-        session=vd.session;updateAuthUI();toast('✅ 已登入'+(vd.session.user?.email?'：'+vd.session.user.email:''),3500);
+        session=vd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;   // 登入通知已經帶回原本的頁面
+        toast('✅ 已登入'+(vd.session.user?.email?'：'+vd.session.user.email:''),3500);
         let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)};
     };
     if($('#pwf'))$('#pwf').onsubmit=async ev=>{ev.preventDefault();const b=$('#btnPw');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
       const {data:pd,error}=await sb.auth.signInWithPassword({email:$('#pwe').value.trim(),password:$('#pwp').value});
       if(error||!pd?.session){b.disabled=false;b.textContent='用密碼登入';return toast('Email 或密碼不正確。一般會員請用上面的 Email 登入（不用密碼）',4500)}
-      session=pd.session;updateAuthUI();toast('✅ 已登入');let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)};
+      session=pd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 已登入');let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)};
     if(CONFIG.GOOGLE_LOGIN)$('#btnGoogle').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:CONFIG.SITE_URL}});
   };
   draw();
@@ -3831,14 +3835,15 @@ async function renderMeBody(){const _n=navId;
     if(!confirm('最後確認：真的要刪除嗎？'))return;
     const b=$('#btnDelAcct');b.disabled=true;b.textContent='刪除中…';
     try{
-      // 先清掉自己上傳的照片（失敗不影響刪帳號）
+      // 先記下要清的照片路徑，帳號刪除成功後才刪檔（不然刪帳號失敗時照片已經不見了）
+      let pub=[],priv=[];
       try{const [{data:ps},{data:rs}]=await Promise.all([sb.from('pets').select('photos'),sb.from('pet_records').select('files')]);
-        const pub=(ps||[]).flatMap(x=>x.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(Boolean);
-        const thumbs=pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'));
-        if(pub.length)await sb.storage.from('photos').remove([...pub,...thumbs]);
-        const priv=new Set((rs||[]).flatMap(x=>x.files||[]));(await listAllFiles('pet-private',me().id)).forEach(x=>priv.add(x));
-        if(priv.size)await removeAllFiles('pet-private',[...priv]);}catch(_){}
+        pub=(ps||[]).flatMap(x=>x.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(Boolean);
+        const pv=new Set((rs||[]).flatMap(x=>x.files||[]));(await listAllFiles('pet-private',me().id)).forEach(x=>pv.add(x));priv=[...pv]}catch(_){}
       const {error}=await sb.rpc('delete_my_account',{p_delete_content:!!$('#delContent')?.checked});if(error)throw error;
+      try{if(pub.length)await sb.storage.from('photos').remove([...pub,...pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]);if(priv.length)await removeAllFiles('pet-private',priv)}catch(_){}
+      // 這支手機上的管理網址、登記紀錄也一起清掉
+      try{Object.keys(localStorage).filter(k=>/^wh_(token|ftoken)_|^wh_mine$|^wh_lnids$/.test(k)).forEach(k=>localStorage.removeItem(k))}catch(_){}
       await sb.auth.signOut().catch(()=>{});toast('帳號已刪除，謝謝你曾經使用汪喵回家',4000);goReplace('#/');
     }catch(err){toast('刪除失敗：'+(err.message||err));b.disabled=false;b.textContent='永久刪除我的帳號'}
   };

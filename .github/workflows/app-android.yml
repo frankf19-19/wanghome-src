@@ -7,6 +7,10 @@ on:
   push:
     tags: ['app-v*']
 concurrency: { group: app-android, cancel-in-progress: true }
+# 管線指令（例如 xcodebuild … | tail）中間失敗也要讓整個步驟失敗
+defaults:
+  run:
+    shell: bash
 jobs:
   build:
     runs-on: ubuntu-latest
