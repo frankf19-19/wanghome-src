@@ -1243,7 +1243,7 @@ body{touch-action:manipulation}
 @media (min-width:761px){.sheet-x{display:block}}
 .lb-x{position:fixed;top:calc(16px + env(safe-area-inset-top));right:16px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#222;font-size:22px;cursor:pointer;z-index:1}
 .lightbox{cursor:zoom-out}
-main#app:focus{outline:none}
+main#app:focus,#app h1[tabindex="-1"]:focus{outline:none}
 .skip{position:absolute;left:-999px;top:8px;z-index:999;background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:10px}.skip:focus{left:16px}
 #navMe.on,.hd-av.on{box-shadow:inset 0 0 0 2px var(--red)}
 .adm-tabs{margin-top:20px}
@@ -1441,7 +1441,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.8.9';
+const BUILD = 'v4.9.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1755,10 +1755,16 @@ window.addEventListener('popstate',e=>{
   navByPop=true;
 });
 function openOverlay(el){
-  closeOverlays();{const sh=el.querySelector('.sheet');if(sh&&!sh.querySelector('.sheet-x')){const x=document.createElement('button');x.type='button';x.className='sheet-x';x.setAttribute('aria-label','關閉');x.textContent='✕';x.onclick=e=>{e.stopPropagation();closeOverlay(el)};sh.prepend(x)}}el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');if(!el.hasAttribute('tabindex'))el.tabIndex=-1;document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{const f=el.querySelector('input,textarea,select,button')||el;try{f.focus({preventScroll:true})}catch(_){}},30);
+  closeOverlays();{const sh=el.querySelector('.sheet');if(sh&&!sh.querySelector('.sheet-x')){const x=document.createElement('button');x.type='button';x.className='sheet-x';x.setAttribute('aria-label','關閉');x.textContent='✕';x.onclick=e=>{e.stopPropagation();closeOverlay(el)};sh.prepend(x)}}el.querySelectorAll('[role=dialog]').forEach(x=>{if(!el.getAttribute('aria-label')&&x.getAttribute('aria-label'))el.setAttribute('aria-label',x.getAttribute('aria-label'));x.removeAttribute('role')});
+  el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');if(!el.hasAttribute('tabindex'))el.tabIndex=-1;
+  // 鍵盤使用者：記住是哪個按鈕打開的（關掉後回到那裡），Tab 只在視窗裡面轉
+  const ae=document.activeElement;el._trigger=ae&&ae!==document.body?ae:null;
+  const focusables=()=>[...el.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null||x===document.activeElement);
+  el.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const f=focusables();if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&(i<=0)){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}});
+  document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{const f=focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el;try{f.focus({preventScroll:true})}catch(_){}},260);
   try{history.pushState({overlay:1,d:navDepth,h:location.hash||'#/'},'',location.href)}catch(_){}
 }
-function closeOverlay(el){if(overlayOpen===el){overlayOpen=null;el.remove();__selfPop=true;try{history.back()}catch(_){__selfPop=false}}else el.remove()}
+function closeOverlay(el){const t=el._trigger;if(overlayOpen===el){overlayOpen=null;el.remove();__selfPop=true;try{history.back()}catch(_){__selfPop=false}}else el.remove();if(t&&t.isConnected)try{t.focus({preventScroll:true})}catch(_){}}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()))return;closeOverlay(overlayOpen)}});
 function closeOverlays(){document.querySelectorAll('.lightbox').forEach(x=>x.remove());overlayOpen=null}
 
@@ -1800,6 +1806,12 @@ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#mB
 // 完成畫面：按了「LINE 保存」或「複製」就不用再提醒
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.done-card[data-keep] .bigacts .line,#cpManage,#cpToken,#cpFManage');if(b){const dc=b.closest('.done-card');if(dc)dc.dataset.kept='1';__dirty=false;__dirtyMsg=''}},true);
 // 內頁大標題捲到上方列下面時，上方列才顯示頁名（像 iPhone 的大標題）
+// 用鍵盤換頁時，把焦點移到新頁面的標題（螢幕閱讀器才會唸出新頁面）
+let __kbNav=false,__pendFocus=false;
+document.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')__kbNav=true},true);
+document.addEventListener('pointerdown',()=>{__kbNav=false},true);
+window.addEventListener('hashchange',()=>{__pendFocus=__kbNav});
+new MutationObserver(()=>{if(!__pendFocus)return;const h=document.querySelector('#app h1');if(!h)return;__pendFocus=false;if(document.activeElement&&document.activeElement!==document.body&&app.contains(document.activeElement))return;h.tabIndex=-1;try{h.focus({preventScroll:true})}catch(_){}}).observe(document.getElementById('app'),{childList:true,subtree:true});
 function updScrolled(){const h=document.querySelector('#app h1');const b=h?h.getBoundingClientRect().bottom:0;document.body.classList.toggle('scrolled',!h||b<60)}
 window.addEventListener('scroll',updScrolled,{passive:true});
 try{new MutationObserver(()=>updScrolled()).observe(document.getElementById('app'),{childList:true})}catch(_){}
@@ -2901,7 +2913,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     <p>會永久刪除這個案件、所有目擊回報和比對結果，網站上馬上就找不到；照片檔案會在幾天內自動清除。<b>找到了的話，建議改按「已找到」</b>，讓大家知道牠回家了。</p>
     <button type="button" class="btn big danger" id="btnDelCase">永久刪除這個案件</button>
   </details>`;
-  if($('#btnClaim'))$('#btnClaim').onclick=async()=>{const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error)return toast(error.message);toast('✅ 已綁定');if(__dirty){const x=$('#btnClaim');const box=x&&(x.closest('.notice,.card')||x);if(box)box.remove()}else renderManage(id,token)};   // 正在改資料時不要整頁重畫，免得改到一半的內容不見
+  if($('#btnClaim'))$('#btnClaim').onclick=async e=>{const cb=e.currentTarget;if(cb.disabled)return;cb.disabled=true;const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error){cb.disabled=false;return toast(error.message)}toast('✅ 已綁定');if(__dirty){const x=$('#btnClaim');const box=x&&(x.closest('.notice,.card')||x);if(box)box.remove()}else renderManage(id,token)};   // 正在改資料時不要整頁重畫，免得改到一半的內容不見
   let status=c.status;
   if($('#btnHome'))$('#btnHome').onclick=async()=>{if(!confirm(`確定 ${c.name} 已經回家了嗎？按「確定」會把案件標記為「已找到」，大家就知道可以不用再找了。`))return;
     const b=$('#btnHome');b.disabled=true;const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p:{status:'found'}});b.disabled=false;
@@ -3305,7 +3317,7 @@ async function renderFoundManage(id,token){const _n=navId;setTitle('管理我的
   </details>`;
   $('#btnDelFound').onclick=async()=>{if(!confirm('確定要永久刪除這則通報嗎？刪除後無法復原。'))return;const {error}=await sb.rpc('delete_found',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
     try{localStorage.removeItem('wh_ftoken_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這則通報',3000);goReplace('#/')};
-  if($('#btnClaimF'))$('#btnClaimF').onclick=async()=>{const {error}=await sb.rpc('claim_found',{p_id:id,p_token:token});if(error)return toast(error.message);toast('✅ 已綁定');renderFoundManage(id,token)};
+  if($('#btnClaimF'))$('#btnClaimF').onclick=async e=>{const cb=e.currentTarget;if(cb.disabled)return;cb.disabled=true;const {error}=await sb.rpc('claim_found',{p_id:id,p_token:token});if(error){cb.disabled=false;return toast(error.message)}toast('✅ 已綁定');renderFoundManage(id,token)};
   let st=f.status;
   // 點狀態就直接儲存（很多人點完就離開，不會再按下面的「儲存」）
   const fval=v=>({status:v,current_place:$('#cur').value,reporter_phone:$('#ph').value,phone_public:$('#pp').checked,notes:$('#nt').value});
@@ -3730,7 +3742,7 @@ async function handleVerify(){
     try{const {data:vd,error}=await sb.auth.verifyOtp({token_hash:th,type:ty});if(!error&&vd?.session){session=vd.session;ok=true}}catch(_){}
   }
   let back='#/login';
-  if(ok){back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}const em=session?.user?.email||'';setTimeout(()=>toast('✅ 已登入'+(em?'：'+em:''),4000),300);updateAuthUI()}
+  if(ok){back='#/me';back=takeReturn();const em=session?.user?.email||'';setTimeout(()=>toast('✅ 已登入'+(em?'：'+em:''),4000),300);updateAuthUI()}
   else if(skip)back='#/me';
   else setTimeout(()=>toast('這個登入連結已經失效或用過了，請再寄一次登入信',5000),300);
   history.replaceState(null,'',location.pathname+back);verifying=false;
@@ -3741,13 +3753,13 @@ async function initAuth(){
   // 魔法連結登入回來（PKCE ?code=）：清掉網址參數，回到原本的頁面
   if(location.search.includes('code=')||location.search.includes('error')){
     const err=new URLSearchParams(location.search).get('error_description');
-    let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}
+    let back='#/me';back=takeReturn();
     history.replaceState(null,'',location.pathname+back);
     if(err)setTimeout(()=>toast('登入失敗：'+err,4000),300);
   }
   sb.auth.onAuthStateChange((ev,s)=>{
     const was=!!session;session=s;updateAuthUI();
-    if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)}}
+    if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}}
     if(ev==='SIGNED_OUT'){toast('已登出');if(IS_APP)lnClear()}
     if(ev==='SIGNED_IN'&&IS_APP)setTimeout(()=>lnSync(),1500);
   });
@@ -3760,9 +3772,13 @@ function updateAuthUI(){
   a.title=u?(u.email||'我的'):'登入／註冊';
   const t=document.querySelector('#tabbar a[data-r=me]');if(t)t.innerHTML=tbI('me')+'我的';
 }
+// 登入後要回去的頁面：只記 15 分鐘，避免很久以前的導向（例如管理後台）在之後登入時突然跳出來
+function setReturn(h){try{localStorage.setItem('wh_return',JSON.stringify({h:h||'#/',t:Date.now()}))}catch(_){}}
+function peekReturn(){try{const v=localStorage.getItem('wh_return');if(!v)return '#/me';let o;try{o=JSON.parse(v)}catch(_){o={h:v,t:0}}if(!o||!o.h||Date.now()-(o.t||0)>15*60e3||!/^#\//.test(o.h))return '#/me';return o.h}catch(_){return '#/me'}}
+function takeReturn(){const h=peekReturn();try{localStorage.removeItem('wh_return')}catch(_){}return h}
 function requireLogin(msg){
   if(me())return true;
-  try{localStorage.setItem('wh_return',location.hash||'#/')}catch(_){}
+  setReturn(location.hash||'#/');
   toast(msg||'請先登入（還沒有帳號可以免費註冊）');goReplace('#/login');return false;
 }
 // ---- 日曆 ----
@@ -3912,7 +3928,7 @@ async function getProfile(){
 }
 
 function renderLogin(){
-  if(me()){let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back);return}
+  if(me()){let back='#/me';back=takeReturn();goReplace(back);return}
   // 預設：這支手機登入過 → 「登入」；沒登入過 → 「免費註冊」。網址 ?mode=signup / ?mode=login 可以指定
   let mode=qs(location.hash).mode;if(mode!=='signup'&&mode!=='login'){let was='';try{was=localStorage.getItem('wh_registered')||''}catch(_){}mode=was?'login':'signup'}
   let sending=false;
@@ -3933,7 +3949,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
     </details>`}
     ${CONFIG.GOOGLE_LOGIN?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google ${su?'註冊':'登入'}</button>`:''}
     <div class="notice" style="margin-top:16px"><b>收到信後，按信裡的大按鈕就好</b>寄件者是「汪喵回家」，標題是「${su?'【汪喵回家】歡迎加入！請確認你的信箱':'【汪喵回家】你的登入連結'}」。幾分鐘沒收到請看垃圾郵件匣。${IS_APP?'在 App 裡請輸入信裡的數字驗證碼。':'在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。'}</div>
-    <h3 style="margin-top:20px">${su?'加入會員可以':'會員可以'}</h3>
+    <h2 style="margin-top:20px;font-size:18px">${su?'加入會員可以':'會員可以'}</h2>
     <ul style="padding-left:20px;font-size:15px;margin:6px 0">
       <li><b>不怕管理網址弄丟</b>：你登記的案件綁在帳號上，換手機也能管理</li>
       <li><b>毛孩健康手冊</b>：記錄回診、疫苗、驅蟲、體重，到期自動提醒，可同步到手機日曆</li>
@@ -3946,7 +3962,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
     app.querySelectorAll('.logintabs button').forEach(b=>b.onclick=()=>{if(sending||b.dataset.m===mode)return;const v=$('#em').value,f=document.activeElement&&document.activeElement.id==='em';mode=b.dataset.m;draw();$('#em').value=v;if(f)$('#em').focus()});
     $('#lf').onsubmit=async e=>{
       e.preventDefault();if(sending)return;const email=$('#em').value.trim();const btn=$('#btnSend');const n=navId,sm=mode;sending=true;const label=btn.textContent;btn.disabled=true;btn.textContent='寄送中…';$('#lmsg').textContent='';
-      let ret='#/me';try{ret=localStorage.getItem('wh_return')||'#/me';localStorage.setItem('wh_return',ret)}catch(_){}
+      setReturn(peekReturn());
       const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:sm==='signup'}});
       sending=false;if(n!==navId||!btn.isConnected)return;   // 寄信途中已經換頁：不要蓋掉新頁面
       if(error){btn.disabled=false;btn.textContent=label;
@@ -3954,13 +3970,15 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
         if(sm==='login'&&/signup|not allowed|not found|otp_disabled/i.test((error.code||'')+' '+error.message)){
           $('#lmsg').innerHTML='這個 Email 還沒註冊過。<button type="button" class="btn sm" id="goSu" style="margin-left:6px">改成免費註冊</button>';
           $('#goSu').onclick=()=>{mode='signup';draw();$('#em').value=email;const f=$('#lf');f.requestSubmit?f.requestSubmit():$('#btnSend').click()};return}
-        return toast('寄送失敗：'+(/rate|limit/i.test(error.message)?'寄信次數已達上限，請稍後再試':error.message),5000)}
+        const ec=(error.code||'')+' '+error.message;return toast('寄送失敗：'+(/rate|limit|over_email|security purposes|after \d+ seconds/i.test(ec)?'寄得太頻繁了，請等一分鐘再試':/email_address_invalid|invalid/i.test(ec)?'Email 格式不對，請檢查一下（例如 name@gmail.com）':'請稍後再試一次'),5000)}
       try{localStorage.setItem('wh_registered','1')}catch(_){}
       const su=sm==='signup';
       app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div style="font-size:56px">📬</div><h1>請收信</h1><p>${su?'確認信':'登入信'}已寄到 <b>${esc(email)}</b></p>
         <form id="otpf" data-nodirty style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="10" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">用驗證碼登入</button></form>
         <p class="muted small">${IS_APP?'':`也可以直接按信裡的大按鈕，就會${su?'完成註冊並':''}登入。`}幾分鐘沒收到請看垃圾郵件匣。${su?'（如果這個 Email 之前註冊過，會收到「你的登入連結」，一樣輸入驗證碼就好）':''}</p><button type="button" class="btn ghost" id="btnReLogin">換一個 Email</button></div>`;
-      $('#btnReLogin').onclick=()=>draw();
+      $('#btnReLogin').onclick=()=>{draw();$('#em').value=email};
+      {const rb=document.createElement('button');rb.type='button';rb.className='btn ghost';rb.id='btnResend';rb.style.marginLeft='8px';$('#btnReLogin').after(rb);let left=60;const tick=()=>{if(!rb.isConnected)return;rb.disabled=left>0;rb.textContent=left>0?`重寄（${left} 秒）`:'重寄一封';if(left-->0)setTimeout(tick,1000)};tick();
+        rb.onclick=async()=>{rb.disabled=true;rb.textContent='寄送中…';const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:su}});if(error){toast('寄送失敗：請等一分鐘再試',4000);left=30}else{toast('已重寄，請看最新的那封信');left=60}tick()}}
       // 用驗證碼登入（App 裡點信件連結會開到瀏覽器，所以 App 一定要能輸入驗證碼）
       $('#otpf').onsubmit=async ev=>{ev.preventDefault();const code=$('#otp').value.replace(/\D/g,'');if(code.length<6)return toast('請輸入信裡的數字驗證碼');
         const b=$('#btnOtp');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
@@ -3969,12 +3987,12 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
         if(error||!vd?.session){b.disabled=false;b.textContent='用驗證碼登入';return toast(/expired|invalid/i.test(error?.message||'')?'驗證碼不正確或已過期，請再寄一次':'登入失敗：'+(error?.message||'請再試一次'),4500)}
         session=vd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;   // 登入通知已經帶回原本的頁面
         toast('✅ 已登入'+(vd.session.user?.email?'：'+vd.session.user.email:''),3500);
-        let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)};
+        let back='#/me';back=takeReturn();goReplace(back)};
     };
     if($('#pwf'))$('#pwf').onsubmit=async ev=>{ev.preventDefault();const b=$('#btnPw');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
       const {data:pd,error}=await sb.auth.signInWithPassword({email:$('#pwe').value.trim(),password:$('#pwp').value});
       if(error||!pd?.session){b.disabled=false;b.textContent='用密碼登入';return toast('Email 或密碼不正確。一般會員請用上面的 Email 登入（不用密碼）',4500)}
-      session=pd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 已登入');let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)};
+      session=pd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 已登入');let back='#/me';back=takeReturn();goReplace(back)};
     if(CONFIG.GOOGLE_LOGIN)$('#btnGoogle').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:CONFIG.SITE_URL}});
   };
   draw();
@@ -3993,7 +4011,7 @@ async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&loc
 async function renderMeBody(){const _n=navId;
   setTitle('我的');
   if(!me()){app.innerHTML=`<h1>我的</h1>${mineHTML()||'<p class="lede">這支手機還沒有登記過案件。</p>'}
-    <div class="card" style="margin-top:14px"><b>加入會員（免費，可以不加入）</b><p class="small muted">加入後換手機也能管理案件，還能用毛孩健康手冊、收到附近走失通知。只要 Email，不用設密碼。</p><div class="bigacts"><a class="btn big" href="#/login?mode=signup" onclick="try{localStorage.setItem('wh_return','#/me')}catch(_){}">免費註冊</a><a class="btn big ghost" href="#/login?mode=login" onclick="try{localStorage.setItem('wh_return','#/me')}catch(_){}">我已經有帳號，登入</a></div></div>`;return}
+    <div class="card" style="margin-top:14px"><b>加入會員（免費，可以不加入）</b><p class="small muted">加入後換手機也能管理案件，還能用毛孩健康手冊、收到附近走失通知。只要 Email，不用設密碼。</p><div class="bigacts"><a class="btn big" href="#/login?mode=signup" onclick="setReturn('#/me')">免費註冊</a><a class="btn big ghost" href="#/login?mode=login" onclick="setReturn('#/me')">我已經有帳號，登入</a></div></div>`;return}
   (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
   const [prof,{data:cs,error:ce1},{data:fs},{data:pend},{data:fl},{data:pets,error:pe1},{data:dues}]=await Promise.all([
     getProfile(), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
@@ -4028,7 +4046,7 @@ async function renderMeBody(){const _n=navId;
     <label class="chk"><input type="checkbox" id="nOn" ${p.notify_enabled?'checked':''}> 我家附近有毛孩走失時，寄 Email 通知我</label>
     <div id="nearBox" class="${p.notify_enabled?'':'hidden'}">
       <div class="row2">
-        <label class="f"><span>範圍</span><select id="nR">${[1,2,3,5,10,20].map(r=>`<option value="${r}" ${p.home_radius_km==r?'selected':''}>${r} 公里內</option>`).join('')}</select></label>
+        <label class="f"><span>範圍</span><select id="nR">${[...new Set([1,2,3,5,10,20,30,+p.home_radius_km||3])].sort((a,b)=>a-b).map(r=>`<option value="${r}" ${p.home_radius_km==r?'selected':''}>${r} 公里內</option>`).join('')}</select></label>
         <label class="f"><span>種類</span><select id="nSp"><option value="all" ${p.notify_species==='all'?'selected':''}>狗＋貓</option><option value="dog" ${p.notify_species==='dog'?'selected':''}>只要狗</option><option value="cat" ${p.notify_species==='cat'?'selected':''}>只要貓</option></select></label>
       </div>
       <label class="f"><span><b class="lbl">中心點</b><small class="hint long">點地圖，不必精確，只用來算距離，不會公開</small></span></label>
@@ -4045,7 +4063,8 @@ async function renderMeBody(){const _n=navId;
     <button type="button" class="btn big danger" id="btnDelAcct">永久刪除我的帳號</button>
   </details>`;
   {const ub=$('#btnUnblockAll');if(ub)ub.onclick=()=>{try{localStorage.removeItem('wh_hidden');localStorage.removeItem('wh_blocked')}catch(_){}toast('已全部恢復顯示');renderMe()}}
-  $('#btnOut').onclick=async()=>{await sb.auth.signOut();goReplace('#/')};
+  $('#btnOut').onclick=async()=>{const clearMine=confirm('要一併清除這支手機上記住的案件管理連結嗎？\n（共用手機建議清除；自己的手機可以按「取消」保留）');
+    await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|lnids$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}try{lnClear&&lnClear()}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
     if(!confirm('確定要永久刪除你的帳號和所有毛孩資料嗎？刪除後無法復原。'))return;
     if(!confirm('最後確認：真的要刪除嗎？'))return;
@@ -4059,7 +4078,7 @@ async function renderMeBody(){const _n=navId;
       const {error}=await sb.rpc('delete_my_account',{p_delete_content:!!$('#delContent')?.checked});if(error)throw error;
       try{if(pub.length)await sb.storage.from('photos').remove([...pub,...pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]);if(priv.length)await removeAllFiles('pet-private',priv)}catch(_){}
       // 這支手機上的管理網址、登記紀錄也一起清掉
-      try{Object.keys(localStorage).filter(k=>/^wh_(token|ftoken)_|^wh_mine$|^wh_lnids$/.test(k)).forEach(k=>localStorage.removeItem(k))}catch(_){}
+      try{Object.keys(localStorage).filter(k=>/^wh_/.test(k)&&k!=='wh_theme').forEach(k=>localStorage.removeItem(k))}catch(_){}
       await sb.auth.signOut().catch(()=>{});toast('帳號已刪除，謝謝你曾經使用汪喵回家',4000);goReplace('#/');
     }catch(err){toast('刪除失敗：'+(err.message||err));b.disabled=false;b.textContent='永久刪除我的帳號'}
   };
