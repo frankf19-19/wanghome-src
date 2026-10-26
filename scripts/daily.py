@@ -119,8 +119,10 @@ SIZE_MAP = {"small":"SMALL","medium":"MEDIUM","large":"BIG"}
 SEX_MAP  = {"male":"M","female":"F"}
 
 def score(case, a):
-    """粗略相似度 0~100，只比對狗。"""
-    if (a.get("animal_kind") or "") != "狗": return -1
+    """粗略相似度 0~100；狗比狗、貓比貓，只看還在收容所的。"""
+    want = "貓" if case.get("species") == "cat" else "狗"
+    if (a.get("animal_kind") or "") != want: return -1
+    if (a.get("animal_status") or "OPEN") != "OPEN": return -1
     s = 0
     # 縣市：拾獲地或收容所地址
     c = norm_city(case["lost_city"])
@@ -131,7 +133,12 @@ def score(case, a):
     # 拾獲時間必須在走失之後（用 animal_createtime / opendate）
     lost_dt = case["lost_at"][:10]
     found_dt = (a.get("animal_createtime") or a.get("animal_opendate") or "")[:10].replace("/", "-")
-    if found_dt and found_dt < lost_dt: return -1
+    # 走失當天前後一天的誤差也算（資料日期常以進收容所當天為準）
+    try:
+        lost_m1 = (dt.date.fromisoformat(lost_dt) - dt.timedelta(days=1)).isoformat()
+    except Exception:
+        lost_m1 = lost_dt
+    if found_dt and found_dt < lost_m1: return -1
     s += 10
     # 毛色
     ct = colour_tokens(case.get("colour")); at = colour_tokens(a.get("animal_colour"))
@@ -154,7 +161,7 @@ def run_matching():
     # 收容所比對已改在瀏覽器端進行；只有設定了 MOA_API_URL（例如台灣的代理）才在這裡跑。
     if not os.environ.get("MOA_API_URL"):
         print("收容所比對：由網站前端執行（未設定 MOA_API_URL，略過）"); return
-    cases = sb_all("cases", {"select": "id,name,lost_city,lost_district,lost_at,colour,size,sex,contact_email", "status": "eq.searching", "hidden": "eq.false"})
+    cases = sb_all("cases", {"select": "id,name,species,lost_city,lost_district,lost_at,colour,size,sex,contact_email", "status": "eq.searching", "hidden": "eq.false"})
     if not cases: print("沒有協尋中案件"); return
     try:
         animals = fetch_moa()
@@ -176,7 +183,7 @@ def run_matching():
                 "shelter_name": a.get("shelter_name"), "shelter_tel": a.get("shelter_tel"),
                 "shelter_address": a.get("shelter_address"), "found_place": a.get("animal_foundplace"),
                 "colour": a.get("animal_colour"), "bodytype": {"SMALL":"小型","MEDIUM":"中型","BIG":"大型"}.get(a.get("animal_bodytype"), a.get("animal_bodytype")),
-                "sex": {"M":"公","F":"母"}.get(a.get("animal_sex"), "不明"), "age": {"CHILD":"幼犬","ADULT":"成犬"}.get(a.get("animal_age"), a.get("animal_age")),
+                "sex": {"M":"公","F":"母"}.get(a.get("animal_sex"), "不明"), "age": ({"CHILD":"幼貓","ADULT":"成貓"} if c.get("species") == "cat" else {"CHILD":"幼犬","ADULT":"成犬"}).get(a.get("animal_age"), a.get("animal_age")),
                 "variety": a.get("animal_Variety") or a.get("animal_variety"),
                 "photo_url": photo if photo.startswith("http") else None,
                 "open_date": (a.get("animal_opendate") or None), "score": sc,

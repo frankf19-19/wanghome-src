@@ -1231,6 +1231,9 @@ body{touch-action:manipulation}
 @media(min-width:761px){main#app{min-height:70vh}}
 .anav-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 10px}
 .anav{display:flex;align-items:center;gap:8px}.anav .btn[disabled]{opacity:.4}
+@media(min-width:761px){header{background:var(--paper)!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .nav a.link.on{color:var(--red);background:var(--red-soft,#FBE3DA);font-weight:700}
+  .nav a.nav-home{display:inline-flex;align-items:center;gap:4px}}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1374,6 +1377,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
   <div class="nav">
     <a href="#/" class="logo"><span class="paw"><img src="icon.svg" alt="" width="38" height="38"></span><span id="siteName">汪喵回家</span></a>
     <div class="sp"></div>
+    <a href="#/" class="link hide-sm nav-home" id="navHome"><svg class="ico" viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/></svg> 首頁</a>
     <span class="navlinks lost-only" style="display:contents">
       <a href="#/injured" class="link hide-sm">受傷通報</a>
       <a href="#/resources" class="link hide-sm">協尋攻略</a>
@@ -1424,7 +1428,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.8.5';
+const BUILD = 'v4.8.7';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1716,6 +1720,7 @@ document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest
 function renderChrome(path,h){
   document.body.dataset.route=(path.replace(/^#\/?/,'').split('/')[0]||'home');
   const space=spaceOf(path);document.body.dataset.space=space;
+  document.querySelectorAll('.nav a.link').forEach(a=>{const hr=a.getAttribute('href');const on=hr==='#/'?(path==='#/'||path==='#'):(path===hr||path.startsWith(hr+'/'));a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
   const rk=(path==='#/lost'||((path==='#/'||path==='#')&&qs(h).tab))?'lost':path==='#/'||path==='#'?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured')?'lost':(path.startsWith('#/adopt')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path==='#/admin'?'me':'';
   const items=space==='health'
@@ -2110,7 +2115,7 @@ async function renderHealth(){const _n=navId;
   ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">新增紀錄時填「下次到期日」（例如疫苗一年後），就會出現在這裡，到期前寄 Email 提醒你。</div>`}
   ${lnSection()}<div id="calSec">${calSection(p)}</div>`;
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);rerender(renderHealth)})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:RM()?'auto':'smooth'})},60);
@@ -2420,7 +2425,7 @@ async function renderCase(id){const _n=navId;
         </dl>
       </div>
       ${active?`<div class="banner" style="margin-top:10px">看到請勿呼喊、追趕或包圍<small>請拍照，記下時間、位置及方向，立即回報</small></div>`:''}
-      ${!active?'':c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">${ic('phone')} ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
+      ${!active?'':c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">${ic('phone')} ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
       <div class="actionbar">
         ${active?`<a class="btn" href="#/report/${id}">${ic("eye")} 回報目擊</a>`:''}
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
@@ -2809,10 +2814,13 @@ async function renderReport(id){const _n=navId;
    飼主管理
    ============================================================ */
 async function renderManage(id,token){const _n=navId;setTitle('管理我的案件');
-  if(!token){try{token=localStorage.getItem('wh_token_'+id)}catch(_){}}
+  let saved=null;try{saved=localStorage.getItem('wh_token_'+id)}catch(_){}
+  if(!token)token=saved;
   if(!token&&!me()){(_n===navId?app:_void).innerHTML=entryHTML('case',id);bindEntry('case',id);return}
   token=token||null;
-  (_n===navId?app:_void).innerHTML='<div class="empty">驗證中…</div>';
+  (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>驗證中…</div>';
+  // 網址裡的代碼不對、但這支手機存過正確的：改用存過的
+  if(token&&saved&&token!==saved){const {data:ok}=await sb.rpc('can_manage_case',{p_id:id,p_token:token});if(!ok)token=saved}
   try{const {data:pc}=await sb.from('cases_public').select('id,species,status,lost_city,lost_district,lost_at,colour,size,sex').eq('id',id).single();if(pc&&pc.status==='searching')await Promise.race([liveShelterMatch(pc,token),new Promise(r=>setTimeout(r,6000))])}catch(_){}
   const [{data:c,error},{data:ss},{data:matches}]=await Promise.all([
     sb.rpc('owner_case',{p_id:id,p_token:token}),
@@ -2823,6 +2831,8 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
   if(error||!c){(_n===navId?app:_void).innerHTML=`<div class="notice red" style="margin-bottom:12px"><b>${token?'這個管理網址不正確':'這不是你登記的案件'}</b>請確認是不是貼了完整的網址，或換成 LINE 裡那則訊息的網址。</div>`+entryHTML('case',id);bindEntry('case',id);return}
   if(token)try{localStorage.setItem('wh_token_'+id,token)}catch(_){}
   if(_n!==navId)return;
+  // 管理代碼從網址列拿掉（避免截圖、複製網址時外流）；這支手機已經記住了
+  if(/[?&]t=/.test(location.hash))try{const h='#/manage/'+id;history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h);if(typeof curHash!=='undefined')curHash=h}catch(_){}
   setTitle(`管理 ${c.name||''}`);
   const pending=(Array.isArray(ss)?ss:[]).filter(s=>s.status==='pending');
   (_n===navId?app:_void).innerHTML=`<h1>管理：${esc(c.name)}</h1>${c.hidden?'<div class="notice red"><b>這個案件目前沒有公開</b>可能是系統偵測到可疑字眼（例如匯款、訂金），或被檢舉後由站方隱藏。站方確認後會恢復；如有疑問請寫信到 service@wangmiaotw.com。</div>':''}
@@ -2892,6 +2902,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p:{status:v}});btns.forEach(x=>x.disabled=false);
     if(error)return toast('儲存失敗：'+friendlyErr(error.message));
     status=v;markSeg(v);if($('#btnHome')&&v!=='searching')$('#btnHome').remove();
+    if(v==='searching'){if($('#foundNote'))$('#foundNote').value='';if($('#foundMethod'))$('#foundMethod').selectedIndex=0}   // 改回協尋中：資料庫也清掉了，畫面一起清
     toast(v==='found'?'🎉 恭喜！已標記為找到。下面可以補寫是怎麼找到的（可以不寫）':'已儲存：'+STATUS[v]);
     if(v==='found')$('#foundBox').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})});
   $('#btnStatus').onclick=async()=>{const p={status:'found',found_method:$('#foundMethod').value,found_note:$('#foundNote').value};const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('已儲存，謝謝你的分享');setTimeout(()=>goReplace('#/case/'+id),1200)};
@@ -3838,7 +3849,9 @@ async function lnSync(force){
     }
     for(const m of meds||[]){
       if(m.end_date&&m.end_date<today)continue;if(m.start_date&&m.start_date>today)continue;
-      const times=(m.times||[]).filter(t=>/^\d{2}:\d{2}$/.test(t)).slice(0,4);if(!times.length)continue;
+      const SLOT={'早上':'08:00','中午':'12:00','晚上':'19:00','睡前':'22:00'};
+      let times=[...new Set((m.times||[]).map(t=>SLOT[t]||t).filter(t=>/^\d{2}:\d{2}$/.test(t)))].slice(0,4);
+      if(!times.length){if(m.freq==='asneeded'||m.freq==='other')continue;times=m.freq==='daily2'?['08:00','19:00']:m.freq==='daily3'?['08:00','12:00','19:00']:['08:00']}
       const dose=m.dose_amount?`（${String(+m.dose_amount)}${m.dose_unit||''}）`:'';
       const title=`💊 ${nm[m.pet_id]||'毛孩'}該${m.kind==='supplement'?'吃保養品':'吃藥'}了`,body=m.name+dose;
       for(const t of times){const [hh,mm]=t.split(':').map(Number);
@@ -4099,12 +4112,12 @@ async function renderPet(id){const _n=navId;
     const row={species,name:fd.get('name').trim(),sex:fd.get('sex')||null,size:fd.get('size')||null,birthday:fd.get('birthday')||null,breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_no:fd.get('chip_no'),neutered:fd.get('neutered')===''?null:fd.get('neutered')==='true',notes:fd.get('notes'),photos,updated_at:new Date().toISOString()};
     const {data:saved,error}=id==='new'?await sb.from('pets').insert(row).select('id').single():await sb.from('pets').update(row).eq('id',id).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
-    toast('已儲存');goReplace('#/pet/'+(saved?.id||id));
+    if(id!=='new')lnSync(true);toast('已儲存');goReplace('#/pet/'+(saved?.id||id));
   });
   if(id!=='new')$('#btnDel').onclick=async()=>{if(!confirm(`確定刪除 ${p.name} 的寵物檔案？健康紀錄、用藥和照片會一起刪除，無法復原。`))return;
     const priv=await listAllFiles('pet-private',`${me().id}/${id}`).catch(()=>[]);
     const pub=(p.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(x=>x.startsWith('pets/'));
-    const {error}=await sb.from('pets').delete().eq('id',id);if(error)return toast(error.message);
+    const {error}=await sb.from('pets').delete().eq('id',id);if(error)return toast(error.message);lnSync(true);
     removeAllFiles('pet-private',priv);if(pub.length)removeAllFiles('photos',[...pub,...pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]);
     goReplace('#/health')};
 }
@@ -4149,7 +4162,7 @@ function bdayInfo(bd){if(!bd||!/^\d{4}-\d{2}-\d{2}$/.test(bd))return null;const 
   let n=new Date(t.getFullYear(),m-1,d);if(n<t)n=new Date(t.getFullYear()+1,m-1,d);const age=n.getFullYear()-y;if(age<1)return null;return {days:Math.round((n-t)/864e5),age,md:`${m}/${d}`}}
 function bdayText(bd){const b=bdayInfo(bd);if(!b)return '';return b.days===0?`🎂 今天 ${b.age} 歲生日！`:b.days<=30?`🎂 再 ${b.days} 天滿 ${b.age} 歲`:`🎂 生日 ${b.md}`}
 function bdayChip(bd){const t=bdayText(bd);if(!t)return '';const b=bdayInfo(bd);return `<span class="bd-chip ${b.days<=30?'soon':''}">${t}</span>`}
-function petAge(bd){if(!bd)return '';const b=new Date(bd),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
+function petAge(bd){if(!bd)return '';const b=new Date(bd),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';if(m<1){const dd=Math.max(0,Math.round((n-b)/864e5));return dd<1?'剛出生':`${dd} 天`}return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
 function dueText(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return days<0?`已過期 ${-days} 天`:days===0?'今天到期':`${days} 天後`}
 function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new Date(r.next_due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return `<span class="tag ${days<0?'red':days<=14?'amber':'gray'}">下次 ${r.next_due.slice(5).replace('-','/')}・${dueText(r.next_due)}</span>`}
 // 列出某個資料夾底下全部檔案（含子資料夾），刪除帳號／寵物時用
@@ -4249,7 +4262,7 @@ async function renderPetView(id){const _n=navId;
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);rerender(()=>renderPetView(id))})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
   {const mc=document.querySelector('#app .med-card'),g=document.querySelector('#app .gallery');if(mc&&g){const host=g.closest('.detail-head')||g;host.parentNode.insertBefore(mc,host);mc.style.marginBottom='14px'}}
   bindMedSlots(()=>rerender(()=>renderPetView(id)));
@@ -4295,7 +4308,7 @@ async function renderRecord(petId,recId){const _n=navId;
   // 下次到期日：記住「幾個月後」，日期改了就跟著重算；手動改過就不再自動動它
   let dueM=0,dueAuto=false;
   const setDue=m=>{dueM=m;dueAuto=!!m;f.elements.next_due.value=m?addMonths(f.elements.date.value||todayStr(),m):''};
-  f.elements.next_due.addEventListener('input',()=>{dueAuto=false;dueM=0});
+  f.elements.next_due.addEventListener('input',()=>{dueAuto=false;dueM=0;const dn=f.elements.done;if(dn&&dn.checked&&f.elements.next_due.value&&f.elements.next_due.value!==(r.next_due||''))dn.checked=false});   // 改了到期日＝要重新提醒
   f.elements.date.addEventListener('change',()=>{if(dueAuto&&dueM)f.elements.next_due.value=addMonths(f.elements.date.value||todayStr(),dueM)});
   const drawPresets=()=>{const list=(REC_PRESETS[kind]||{})[p.species==='cat'?'cat':'dog']||[];$('#presets').innerHTML=list.map(([t,m])=>`<button type="button" data-t="${esc(t)}" data-pm="${m}">${esc(t)}</button>`).join('');
     $('#presets').querySelectorAll('button').forEach(b=>b.onclick=()=>{f.elements.title.value=b.dataset.t;const m=+b.dataset.pm;if(m&&(!f.elements.next_due.value||dueAuto))setDue(m)});
@@ -4492,8 +4505,8 @@ async function renderPoster(id){const _n=navId;
   const LOOK=[c.colour,SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,SEX[c.sex],c.age_text].filter(Boolean).join('・')||sp(c.species).name;
   const DETAIL=[c.breed,c.has_chip?'有晶片'+(c.chip_last4?' 末四碼 '+c.chip_last4:''):null,c.neutered===true?'已結紮':null].filter(Boolean).join('｜');
   const LATEST=ss&&ss[0]?`最新目擊｜${fmtDT(ss[0].seen_at)}  ${ss[0].place_text||''}${ss[0].direction?'  往'+ss[0].direction:''}`:`走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`;
-  const WARN='看到請勿呼喊、追趕或包圍';
-  const HOWTO=qrc?'請拍照，記下時間、位置及方向，掃 QR 回報目擊':'請拍照，記下時間、位置及方向，上網站回報目擊';
+  const WARN=c.status==='searching'?'看到請勿呼喊、追趕或包圍':c.status==='found'?'已經回家了，謝謝大家幫忙分享！':'協尋已結束，謝謝大家';
+  const HOWTO=c.status!=='searching'?'掃 QR 看案件頁':qrc?'請拍照，記下時間、位置及方向，掃 QR 回報目擊':'請拍照，記下時間、位置及方向，上網站回報目擊';
   const FOOT=`${CONFIG.SITE_NAME}・${CONFIG.SITE_URL.replace(/^https?:\/\//,'').replace(/\/$/,'')}`;
   const REWARD=c.reward>0?`尋獲獎金 NT$${c.reward.toLocaleString()}`:'';
   const ph=c.photos?.[0];
@@ -4524,7 +4537,7 @@ async function renderPoster(id){const _n=navId;
     ctx.fillStyle=red;ctx.fillText(fit(STATUS,W-M*2,900,52,34),M,830);
     ctx.fillStyle=ink;ctx.font=font(700,36);let y=wrap(LOOK+(DETAIL?'｜'+DETAIL:''),M,886,W-M*2,46,2);
     if(c.features){ctx.fillStyle='#444';ctx.font=font(400,30);y=wrap(c.features,M,y+2,W-M*2-(REWARD?0:0),40,2)}
-    if(REWARD){ctx.font=font(900,34);const rw=Math.min(W-M*2,ctx.measureText(REWARD).width+48);pill(W-M-rw,768,rw,60,30,'#1F5FBF');ctx.fillStyle='#fff';ctx.fillText(fit(REWARD,rw-40,900,34,24),W-M-rw+24,810)}
+    if(REWARD){ctx.font=font(900,34);const rw=Math.min(560,ctx.measureText(REWARD).width+48);pill(W-M-rw,M+12,rw,60,30,'#1F5FBF');ctx.fillStyle='#fff';ctx.fillText(fit(REWARD,rw-40,900,34,24),W-M-rw+24,M+54)}
     const yb=Math.max(y+8,1010);pill(M,yb,W-M*2,72,14,ink);ctx.fillStyle='#fff';ctx.fillText(fit(WARN,W-M*2-40,900,44,30),M+20,yb+52);
     contactRow(yb+90,190,red,'#333');
     ctx.fillStyle='#8A8A8A';ctx.fillText(fit(FOOT,600,400,24,18),M,H-24)};
@@ -4584,7 +4597,7 @@ async function renderPoster(id){const _n=navId;
     if(qrc)drawQR(QX,QY,qs);
     center(FOOT,H-26,W-M*2,400,24,18,'#FFD0D0')};
 
-  const drawClassic=async()=>{
+  const drawClassic=async()=>{W=1080;H=1350;cv.width=W;cv.height=H;
   ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.textBaseline='alphabetic';
   // 標題：尋狗啟事＋名字（名字太長就縮字）
   ctx.fillStyle=ink;ctx.font=font(900,96);ctx.fillText(PT,M,120);
@@ -4614,10 +4627,10 @@ async function renderPoster(id){const _n=navId;
   if(ss&&ss[0]){ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(M,900,W-M*2,70,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit(`最新目擊｜${fmtDT(ss[0].seen_at)}  ${ss[0].place_text||''}${ss[0].direction?'  往'+ss[0].direction:''}`,W-M*2-40,900,34,24),M+20,948)}
   else{ctx.fillStyle='#333';ctx.fillText(fit(`走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`,W-M*2,700,34,24),M,948)}
   // 警語
-  ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(M,y2,W-M*2,90,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit('看到請勿呼喊、追趕或包圍',W-M*2-40,900,48,32),M+20,y2+62);
+  ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(M,y2,W-M*2,90,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit(WARN,W-M*2-40,900,48,32),M+20,y2+62);
   // 電話（寬度只到 QR Code 左邊）＋ QR
   const QX=W-M-240,QY=y2+105,leftW=QX-M-20;
-  ctx.fillStyle=ink;ctx.fillText(fit(qrc?'請拍照，記下時間、位置及方向，掃 QR 回報目擊':'請拍照，記下時間、位置及方向，上網站回報目擊',leftW,400,30,22),M,y2+140);
+  ctx.fillStyle=ink;ctx.fillText(fit(HOWTO,leftW,400,30,22),M,y2+140);
   if(c.contact_phone){icon(PHONE,M,y2+180,72,red);ctx.fillStyle=red;ctx.fillText(fit(c.contact_phone,leftW-90,900,92,44),M+90,y2+245)}
   else{ctx.fillStyle=red;ctx.fillText(fit(qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,56,34),M,y2+230)}
   if(qrc){ctx.fillStyle='#fff';ctx.fillRect(QX,QY,240,240);ctx.drawImage(qrc,QX+8,QY+8,224,224)}
