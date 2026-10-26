@@ -830,15 +830,17 @@ select:focus,input:focus,textarea:focus{border-color:var(--red)}
 }
 
 /* ===== v3.18 手機介面：更簡單、更可愛 ===== */
-.bs-hello{display:flex;align-items:center;gap:12px}
-.bs-duo{flex:none;width:66px;height:auto}
+.bs-hello{display:grid;grid-template-columns:66px minmax(0,1fr);align-items:center;column-gap:12px}
+.bs-duo{display:block;width:66px;height:45px}
+.bs-hi{display:flex;flex-wrap:wrap;column-gap:.3em;min-width:0}
+.nw{white-space:nowrap}
 .m-br{display:none}
 .bs-rule{display:flex;align-items:flex-start;gap:10px;background:var(--sheet);border:1.5px dashed var(--line);border-radius:18px;padding:12px 14px;margin-top:6px}
 .bs-paw{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--mark);color:#3A2A1E}
 .bs-paw svg{width:18px;height:18px}
 /* 大按鈕：淡淡的腳印花紋 */
 .bigbtn.b-red,.bigbtn.b-green{position:relative;overflow:hidden}
-.bigbtn.b-red::after,.bigbtn.b-green::after{content:"";position:absolute;right:-8px;bottom:-14px;width:96px;height:96px;opacity:.13;pointer-events:none;transform:rotate(-18deg);
+.bigbtn.b-red::after,.bigbtn.b-green::after{content:"";position:absolute;right:30px;bottom:-22px;width:84px;height:84px;opacity:.13;pointer-events:none;transform:rotate(-18deg);
   background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cellipse cx='12' cy='16' rx='4.6' ry='3.8'/%3E%3Ccircle cx='6.2' cy='10.6' r='2'/%3E%3Ccircle cx='9.6' cy='6.6' r='2.1'/%3E%3Ccircle cx='14.4' cy='6.6' r='2.1'/%3E%3Ccircle cx='17.8' cy='10.6' r='2'/%3E%3C/svg%3E")}
 .bigbtn .bb-ic{border-radius:50%!important}
 .bigbtn > *{position:relative;z-index:1}
@@ -846,6 +848,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--red)}
 h2 > .ico:first-child{box-sizing:content-box;width:18px;height:18px;padding:7px;border-radius:50%;background:var(--red-soft,#FBE3DA)}
 body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
 /* 已完成：輕一點的按鈕 */
+.pwmore{margin-top:12px;text-align:center}.pwmore summary{display:inline-block;cursor:pointer;font-size:14px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px}.pwmore[open]{text-align:left}.pwmore[open] summary{display:block;text-align:center;margin-bottom:6px}
 .sharetext summary{cursor:pointer;font-weight:700;color:var(--ink-2);font-size:14px}
 .tl-rep{font-size:13px!important;color:var(--ink-3)!important;opacity:.85}
 .btn.done-chip{background:var(--green-soft)!important;color:var(--green)!important;border:1.5px solid transparent!important;box-shadow:none!important}
@@ -1091,7 +1094,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.18.0';
+const BUILD = 'v3.18.2';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1549,11 +1552,10 @@ function bindEntry(kind,id){const go=()=>{const t=extractToken($('#tk').value);i
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
 function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     ${mineHTML()}
-    <p class="bs-hello"><img src="duo.svg" alt="" width="66" height="45" class="bs-duo"><span>需要幫忙嗎？<br class="m-br">點一個就好</span></p>
+    <p class="bs-hello"><img src="duo.svg" alt="" width="66" height="45" class="bs-duo"><span class="bs-hi"><span class="nw">需要幫忙嗎？</span><span class="nw">點一個就好</span></span></p>
     <a href="#/new" class="bigbtn b-red"><span class="bb-ic">${ic("search")}</span><span class="bb-t"><b>我的毛孩走失了</b><small>登記協尋、做尋狗尋貓海報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a href="#/seen" class="bigbtn b-green"><span class="bb-ic">${pawSvg()}</span><span class="bb-t"><b>我看到／撿到毛孩</b><small>受傷的毛孩也從這裡通報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <button type="button" class="bigbtn b-white" id="bigNear"><span class="bb-ic">${ic("pin")}</span><span class="bb-t"><b>看我附近走失的毛孩</b><small>依離你的距離排好</small></span><span class="bb-go" aria-hidden="true">›</span></button>
-    <a class="bs-health" href="#/health">${ic("steth")}<span>毛孩健康手冊：回診、疫苗到期提醒</span><span aria-hidden="true">›</span></a>
     <p class="bs-rule"><span class="bs-paw">${pawSvg()}</span><span><b>看到走失的狗貓：</b>先別追，拍照回報就好。</span></p>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   </section>
@@ -3259,9 +3261,9 @@ function renderLogin(){
       <button class="btn lg block" style="margin-top:12px" id="btnSend">${su?'免費註冊（寄確認信）':'寄登入信給我'}</button>
     </form>
     <p class="small muted" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
-    <details class="more" style="margin-top:10px"><summary class="small">有密碼的帳號（例如 App 審核測試帳號）</summary>
+${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       <form id="pwf" data-nodirty><label class="f"><span>Email</span><input type="email" id="pwe" autocomplete="username" required></label><label class="f"><span>密碼</span><input type="password" id="pwp" autocomplete="current-password" required></label><button class="btn block ghost" id="btnPw" style="margin-top:8px">用密碼登入</button></form>
-    </details>
+    </details>`}
     ${CONFIG.GOOGLE_LOGIN?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google ${su?'註冊':'登入'}</button>`:''}
     <div class="notice" style="margin-top:16px"><b>收到信後，按信裡的大按鈕就好</b>寄件者是「汪喵回家」，標題是「${su?'【汪喵回家】歡迎加入！請確認你的信箱':'【汪喵回家】你的登入連結'}」。幾分鐘沒收到請看垃圾郵件匣。${IS_APP?'在 App 裡請輸入信裡的數字驗證碼。':'在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。'}</div>
     <h3 style="margin-top:20px">${su?'加入會員可以':'會員可以'}</h3>
@@ -3301,7 +3303,7 @@ function renderLogin(){
         session=vd.session;updateAuthUI();toast('✅ 已登入'+(vd.session.user?.email?'：'+vd.session.user.email:''),3500);
         let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)};
     };
-    $('#pwf').onsubmit=async ev=>{ev.preventDefault();const b=$('#btnPw');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
+    if($('#pwf'))$('#pwf').onsubmit=async ev=>{ev.preventDefault();const b=$('#btnPw');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
       const {data:pd,error}=await sb.auth.signInWithPassword({email:$('#pwe').value.trim(),password:$('#pwp').value});
       if(error||!pd?.session){b.disabled=false;b.textContent='用密碼登入';return toast('Email 或密碼不正確。一般會員請用上面的 Email 登入（不用密碼）',4500)}
       session=pd.session;updateAuthUI();toast('✅ 已登入');let back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}goReplace(back)};
