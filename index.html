@@ -848,6 +848,8 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .slot{min-height:40px;padding:0 14px;border-radius:12px;border:1.5px dashed var(--line);background:var(--paper);color:var(--ink-2);font:inherit;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .slot.done{border-style:solid;border-color:var(--green-fill);background:var(--green-fill);color:#fff}
 .slot .ico{width:15px;height:15px}
+.slot{white-space:nowrap;flex-shrink:0}
+.leaflet-control-attribution a{color:inherit!important;text-decoration:underline!important}
 .med-off{margin-top:10px;font-size:14px}.med-off summary{cursor:pointer;color:var(--ink-3);font-weight:700}
 .med-off a{display:block;padding:6px 2px;color:var(--ink-2)}
 .logo .paw{width:38px!important;height:38px!important;background:none!important;box-shadow:0 3px 8px -2px rgba(226,69,42,.45)!important;border-radius:11px!important;overflow:hidden;transform:none!important}.logo .paw img{width:38px;height:38px;display:block}
@@ -1054,7 +1056,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.17.0';
+const BUILD = 'v3.17.1';
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
 /* ============================================================
@@ -3130,7 +3132,7 @@ function bindCal(rerender){
    App 通知提醒（只在 App 裡）：回診／疫苗／驅蟲到期前一天早上 9 點、每天的用藥時間，手機直接跳通知。
    提醒排在這支手機上（不經過網路、不寄信）；登出或關閉時全部取消。
    ============================================================ */
-const LN_KEY='wh_lnotify',LN_IDS='wh_lnids';let lnLast=0,lnBusy=false;
+const LN_KEY='wh_lnotify',LN_IDS='wh_lnids';let lnLast=0,lnBusy=false,lnAgain=false;
 function lnOn(){try{return IS_APP&&localStorage.getItem(LN_KEY)==='1'}catch(_){return false}}
 function lnId(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return ((h>>>1)%2000000000)+1}
 function lnAt(d,hh,mm){const [y,m,dd]=d.split('-').map(Number);return new Date(y,m-1,dd,hh,mm,0,0)}
@@ -3143,7 +3145,7 @@ async function lnClear(){const LN=capPlugin('LocalNotifications');if(!LN)return;
   try{localStorage.removeItem(LN_IDS)}catch(_){}
 }
 async function lnSync(force){
-  if(!lnOn()||!me()||lnBusy)return;if(!force&&Date.now()-lnLast<60000)return;
+  if(!lnOn()||!me())return;if(lnBusy){if(force)lnAgain=true;return}if(!force&&Date.now()-lnLast<60000)return;
   const LN=capPlugin('LocalNotifications');if(!LN)return;lnBusy=true;
   try{
     const perm=await LN.checkPermissions();if(perm.display!=='granted')return;
@@ -3154,7 +3156,8 @@ async function lnSync(force){
       sb.from('pet_meds').select('id,pet_id,kind,name,freq,times,start_date,end_date,dose_amount,dose_unit').eq('active',true).limit(40)]);
     if(e1||e2||e3||!pets)return;   // 沒網路：保留手機上原本的提醒
     const nm={};pets.forEach(p=>nm[p.id]=p.name||'毛孩');const now=Date.now()+60000,list=[];
-    const ch=(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android')?{channelId:'care'}:{};
+    // Android 不要求精準鬧鐘（不然每次都會跳到系統的「鬧鐘與提醒」設定頁）
+    const ch=(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android')?{channelId:'care',isExactNotification:false}:{};
     for(const r of recs||[]){
       let at=lnAt(addDays(r.next_due,-1),9,0),when='明天';if(at<=now){at=lnAt(r.next_due,9,0);when='今天'}if(at<=now)continue;
       list.push({id:lnId('r'+r.id),title:`🐾 ${nm[r.pet_id]||'毛孩'}${when}到期：${REC_KINDS[r.kind]?.[1]||'提醒'}`,body:r.title,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:r.pet_id},...ch});
@@ -3165,7 +3168,9 @@ async function lnSync(force){
       const dose=m.dose_amount?`（${String(+m.dose_amount)}${m.dose_unit||''}）`:'';
       const title=`💊 ${nm[m.pet_id]||'毛孩'}該${m.kind==='supplement'?'吃保養品':'吃藥'}了`,body=m.name+dose;
       for(const t of times){const [hh,mm]=t.split(':').map(Number);
-        if(/^daily/.test(m.freq))list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch});
+        // 有停藥日、而且一週內就停：逐天排，停藥後不會再響；其他每天固定時間重複
+        if(/^daily/.test(m.freq)&&m.end_date&&m.end_date<=addDays(today,7)){for(let d=today;d<=m.end_date;d=addDays(d,1)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}}
+        else if(/^daily/.test(m.freq))list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch});
         else if(m.freq==='weekly'){const wd=lnAt(m.start_date||today,12,0).getDay()+1;list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{weekday:wd,hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}
         else if(m.freq==='every_other'){let d=today;if(lnDiffDays(m.start_date||today,d)%2)d=addDays(d,1);
           for(let k=0;k<6;k++,d=addDays(d,2)){if(m.end_date&&d>m.end_date)break;const at=lnAt(d,hh,mm);if(at<=now)continue;list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}}
@@ -3176,7 +3181,7 @@ async function lnSync(force){
     if(use.length)await LN.schedule({notifications:use});
     try{localStorage.setItem(LN_IDS,JSON.stringify(use.map(n=>n.id)))}catch(_){}
     lnLast=Date.now();
-  }catch(e){console.warn('提醒排程失敗',e)}finally{lnBusy=false}
+  }catch(e){console.warn('提醒排程失敗',e)}finally{lnBusy=false;if(lnAgain){lnAgain=false;setTimeout(()=>lnSync(true),300)}}
 }
 async function lnToggle(btn){
   const LN=capPlugin('LocalNotifications');if(!LN)return toast('這個版本不支援通知，請更新 App');
