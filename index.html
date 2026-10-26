@@ -3915,7 +3915,7 @@ function renderAbout(){
   ${CONFIG.CONTACT_EMAIL?`<p>聯絡站長：<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a></p>`:''}
   <p class="muted small">BUILD ${BUILD}</p></div>`;
 }
-const LEGAL_DATE='2026 年 10 月 25 日';
+const LEGAL_DATE='2026 年 10 月 26 日';
 function contactLine(){return CONFIG.CONTACT_EMAIL?`<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a>`:'網站客服信箱（設定中，暫時請用各頁面的「檢舉」按鈕聯絡站長）'}
 function renderPrivacy(){
   setTitle('隱私權政策');
@@ -3928,6 +3928,7 @@ function renderPrivacy(){
     <li><b>會員（可不註冊）：</b>Email、顯示名稱、通知設定與「家附近」中心點、毛孩檔案、健康紀錄、用藥紀錄、收據與病歷照片、追蹤的案件。</li>
     <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址，只存在你的手機裡，不會上傳。</li>
     <li><b>定位與相機：</b>只有在你按下「用我目前位置」或選擇照片時才會使用，並會先徵求你的同意。照片的拍攝時間與地點只用來幫你自動填表。</li>
+    <li><b>手機通知（App）：</b>你在 App 開啟通知後，回診、疫苗、用藥提醒會排在你的手機上，由手機自己跳出，不經過我們的伺服器；關閉或登出就會全部取消。</li>
     <li><b>技術紀錄：</b>為了防止濫用，本站會記錄送出登記、通報、檢舉時的 IP 位址：次數限制用的紀錄約 2 天後刪除；檢舉的 IP 與檢舉一起保存，用來避免重複檢舉。主機服務商也會保存一般連線紀錄。</li>
   </ul>
   <h2>二、哪些會公開、哪些不會</h2>
