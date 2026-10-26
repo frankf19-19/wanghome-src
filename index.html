@@ -876,6 +876,29 @@ body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
   .tabbar a.cta,.tabbar a.cta2{font-weight:700}
   .tabbar a.cta.on,.tabbar a.cta2.on{color:var(--ink)}
 }
+
+/* v3.19 我的毛孩 */
+.mypets:empty{display:none}
+.bigstart{grid-template-columns:minmax(0,1fr)}.mypets{min-width:0}
+.mp-cta .bb-t{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mp-cta{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:20px;background:var(--green-soft);color:var(--ink);text-decoration:none;font-weight:700}
+.mp-cta .bb-t b{font-family:var(--head);font-size:18px}.mp-cta .bb-t small{font-weight:500;font-size:14px;color:var(--ink-2)}
+.mp-cta>span:last-child{font-size:26px;color:var(--ink-3);font-weight:300}
+.mp-cta-ic{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--green-fill);color:#fff}.mp-cta-ic svg{width:22px;height:22px}
+.mp-h{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 8px}
+.mp-h b{display:flex;align-items:center;gap:6px;font-family:var(--head);font-size:18px}.mp-h b svg{color:var(--green)}
+.mp-h a{font-size:14px;font-weight:700;color:var(--green)}
+.mp-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.mp-row::-webkit-scrollbar{display:none}
+.mp{flex:none;width:84px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;text-decoration:none;color:var(--ink)}
+.mp-ph{position:relative;width:72px;height:72px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--beige);border:3px solid var(--sheet);box-shadow:0 0 0 2px var(--green-fill);color:var(--ink-3)}
+.mp-ph img{width:100%;height:100%;object-fit:cover}.mp-ph .ico{width:30px;height:30px}
+.mp.add .mp-ph{box-shadow:0 0 0 2px var(--line);border-style:dashed;color:var(--green)}
+.mp b{font-size:15px;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
+.mp small{font-size:12.5px;color:var(--ink-2);line-height:1.3}
+.mp-cake{position:absolute;right:-2px;bottom:-2px;font-style:normal;font-size:20px}
+.bd-chip{display:inline-block;margin-top:6px;padding:2px 9px;border-radius:99px;background:var(--beige);color:var(--ink-2);font-size:13px;font-weight:700;font-style:normal}
+.bd-chip.soon{background:var(--mark);color:#3A2A1E}
+.mp .bd-chip{margin-top:3px;font-size:11.5px;padding:1px 7px}
 /* 頁尾 */
 footer{border-top:0;background:var(--beige);border-radius:26px 26px 0 0;max-width:none;padding-left:max(20px,calc((100% - 1080px)/2));padding-right:max(20px,calc((100% - 1080px)/2))}
 form.steps>h3::before{background:var(--red-fill)!important;color:#fff!important}
@@ -973,7 +996,7 @@ details.more>:last-child{margin-bottom:14px}
 .bs-health svg{width:22px;height:22px;color:var(--green-fill);flex:none}.bs-health span:nth-child(2){flex:1}
 .bs-rule{margin:4px 2px 0;font-size:15px;color:var(--ink-2)}
 .choose{display:grid;gap:12px;margin-top:14px}
-@media (min-width:900px){.bigstart{grid-template-columns:repeat(3,1fr)}.bs-hello,.bs-health,.bs-rule{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
+@media (min-width:900px){.bigstart{grid-template-columns:repeat(3,minmax(0,1fr))!important}.bs-hello,.bs-health,.bs-rule,.mypets{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
 /* v3.11.0 分步驟表單 */
 .wprog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;font-weight:700;color:var(--ink-2);font-size:15px}
 .wdots{display:flex;gap:6px}.wdots i{width:28px;height:8px;border-radius:8px;background:var(--sheet);background:color-mix(in srgb,var(--ink-3) 35%,var(--sheet))}
@@ -1104,7 +1127,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.18.3';
+const BUILD = 'v3.19.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1560,12 +1583,23 @@ function entryHTML(kind,id){const what=kind==='case'?'走失案件':'通報';
   <a class="btn ghost" href="#/${kind==='case'?'case':'found'}/${id}">回上一頁</a></div>`}
 function bindEntry(kind,id){const go=()=>{const t=extractToken($('#tk').value);if(!t)return toast('請先貼上管理網址');location.hash=`#/${kind==='case'?'manage':'found-manage'}/${id}?t=${encodeURIComponent(t)}`};
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
+// 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
+async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
+  const cta=`<a class="mp-cta" href="#/health"><span class="mp-cta-ic">${pawSvg()}</span><span class="bb-t"><b>我的毛孩</b><small>記下生日、年齡，疫苗回診到期提醒</small></span><span aria-hidden="true">›</span></a>`;
+  if(!me()){el.innerHTML=cta;return}
+  const {data,error}=await sb.from('pets').select('id,name,species,photos,birthday').order('created_at').limit(12);
+  if(_n!==navId||!el.isConnected)return;
+  if(error||!data||!data.length){el.innerHTML=error?'':cta;return}
+  el.innerHTML=`<div class="mp-h"><b>${pawSvg()} 我的毛孩</b><a href="#/health">健康手冊 ›</a></div><div class="mp-row">${data.map(p=>{const ph=p.photos?.[0];const b=bdayInfo(p.birthday);
+    return `<a class="mp" href="#/pet/${p.id}"><span class="mp-ph ${p.species==='cat'?'cat':''}">${ph?thumbImg(ph,p.name):spIc(p.species)}${b&&b.days===0?'<i class="mp-cake" aria-hidden="true">🎂</i>':''}</span><b>${esc(p.name)}</b><small>${esc(petAge(p.birthday)||(p.species==='cat'?'貓咪':'狗狗'))}</small>${b&&b.days<=30?`<em class="bd-chip soon">${b.days===0?'今天生日':`${b.days} 天後生日`}</em>`:''}</a>`}).join('')}<a class="mp add" href="#/pet/new"><span class="mp-ph">${ic('plus')}</span><b>新增</b><small>&nbsp;</small></a></div>`;
+}
 function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     ${mineHTML()}
     <p class="bs-hello"><img src="duo.svg" alt="" width="66" height="45" class="bs-duo"><span class="bs-hi"><span class="nw">需要幫忙嗎？</span><span class="nw">點一個就好</span></span></p>
     <a href="#/new" class="bigbtn b-red"><span class="bb-ic">${ic("search")}</span><span class="bb-t"><b>我的毛孩走失了</b><small>登記協尋、做尋狗尋貓海報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a href="#/seen" class="bigbtn b-green"><span class="bb-ic">${pawSvg()}</span><span class="bb-t"><b>我看到／撿到毛孩</b><small>受傷的毛孩也從這裡通報</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <button type="button" class="bigbtn b-white" id="bigNear"><span class="bb-ic">${ic("pin")}</span><span class="bb-t"><b>看我附近走失的毛孩</b><small>依離你的距離排好</small></span><span class="bb-go" aria-hidden="true">›</span></button>
+    <div id="myPets" class="mypets"></div>
     <p class="bs-rule"><span class="bs-paw">${pawSvg()}</span><span><b>看到走失的狗貓：</b>先別追，拍照回報就好。</span></p>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   </section>
@@ -1611,7 +1645,7 @@ ${bigStartHTML()}
   };
   $('#bigNear').onclick=()=>{homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
-  loadStats();loadRecent();loadReunited();loadList();
+  loadStats();loadRecent();loadReunited();loadList();loadMyPets(_n);
 }
 function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" aria-labelledby="promoT">
   <div class="promo-txt">
@@ -3411,7 +3445,7 @@ function petCardHTML(p){
   return `<div class="ccard">
     <a href="#/pet/${p.id}" class="ph ${ph?'':'noimg'} ${p.species==='cat'?'cat':''}">${ph?thumbImg(ph,p.name):''}</a>
     <div class="b"><a href="#/pet/${p.id}" class="t" style="color:inherit">${spIc(p.species)} ${esc(p.name)}</a>
-      <div class="m">${esc([p.breed,SEX[p.sex],petAge(p.birthday)].filter(Boolean).join('、'))||'&nbsp;'}</div>
+      <div class="m">${esc([p.breed,SEX[p.sex],petAge(p.birthday)].filter(Boolean).join('、'))||'&nbsp;'}</div>${bdayChip(p.birthday)}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><a class="btn sm ghost" href="#/pet/${p.id}">${ic("clipboard")} 健康紀錄</a><button class="btn sm" data-lost="${p.id}">${ic("siren")} 走失了</button></div>
     </div></div>`;
 }
@@ -3502,6 +3536,11 @@ function addMonths(dateStr,m){const [y,mo,da]=dateStr.split('-').map(Number);con
 function addDays(dateStr,n){const [y,mo,da]=dateStr.split('-').map(Number);return new Date(Date.UTC(y,mo-1,da+n)).toISOString().slice(0,10)}
 function todayStr(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
 function agoText(d){const m=Math.round((Date.now()-new Date(d+'T00:00:00'))/2629800000);return m<1?'本月':m<12?`${m} 個月前`:`${Math.floor(m/12)} 年${m%12?m%12+'個月':''}前`}
+// 生日：下次生日還有幾天、會滿幾歲
+function bdayInfo(bd){if(!bd||!/^\d{4}-\d{2}-\d{2}$/.test(bd))return null;const [y,m,d]=bd.split('-').map(Number);const t=new Date();t.setHours(0,0,0,0);
+  let n=new Date(t.getFullYear(),m-1,d);if(n<t)n=new Date(t.getFullYear()+1,m-1,d);const age=n.getFullYear()-y;if(age<1)return null;return {days:Math.round((n-t)/864e5),age,md:`${m}/${d}`}}
+function bdayText(bd){const b=bdayInfo(bd);if(!b)return '';return b.days===0?`🎂 今天 ${b.age} 歲生日！`:b.days<=30?`🎂 再 ${b.days} 天滿 ${b.age} 歲`:`🎂 生日 ${b.md}`}
+function bdayChip(bd){const t=bdayText(bd);if(!t)return '';const b=bdayInfo(bd);return `<span class="bd-chip ${b.days<=30?'soon':''}">${t}</span>`}
 function petAge(bd){if(!bd)return '';const b=new Date(bd),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
 function dueText(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return days<0?`已過期 ${-days} 天`:days===0?'今天到期':`${days} 天後`}
 function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new Date(r.next_due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return `<span class="tag ${days<0?'red':days<=14?'amber':'gray'}">下次 ${r.next_due.slice(5).replace('-','/')}・${dueText(r.next_due)}</span>`}
@@ -3557,7 +3596,7 @@ async function renderPetView(id){const _n=navId;
     <div class="gallery"><div class="main ${ph?'':'noimg'} ${p.species==='cat'?'cat':''}" ${ph?`style="background-image:url('${esc(safeU(ph))}')"`:''}></div></div>
     <div>
       <h1>${spIc(p.species)} ${esc(p.name)}</h1>
-      <p class="muted">${esc([p.breed,SEX[p.sex],SIZE[p.size]&&SIZE[p.size]+sp(p.species).unit,p.colour,petAge(p.birthday)].filter(Boolean).join('、'))}</p>
+      <p class="muted">${esc([p.breed,SEX[p.sex],SIZE[p.size]&&SIZE[p.size]+sp(p.species).unit,p.colour,petAge(p.birthday)].filter(Boolean).join('、'))}</p>${p.birthday?`<p style="margin:4px 0 0">${bdayChip(p.birthday)}</p>`:''}
       <div class="stats" style="margin-top:12px">
         <div class="stat"><b>${weights.length?weights[weights.length-1].w:'—'}</b>最新體重 kg</div>
         <div class="stat"><b>${lastVac?agoText(lastVac.date):'—'}</b>上次疫苗</div>
