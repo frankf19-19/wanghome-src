@@ -15,6 +15,7 @@ cp sw.js manifest.webmanifest _headers dist/
 [ -f sitemap.xml ] && cp sitemap.xml dist/
 [ -f 404.html ] && cp 404.html dist/
 cp ./*.png ./*.svg dist/
+mkdir -p dist/vendor && cp vendor/*.js dist/vendor/
 for d in s f; do mkdir -p "dist/$d"; cp -r "$d"/. "dist/$d"/ 2>/dev/null || true; done
 if npx --yes html-minifier-terser@7.2.0 --config-file minify.config.json -o dist/index.html index.html 2>/tmp/minify.log \
    && [ -s dist/index.html ] && grep -Eq 'BUILD="v[0-9.]+"' dist/index.html && grep -q '</html>' dist/index.html; then
