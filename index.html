@@ -1274,6 +1274,7 @@ body{touch-action:manipulation}
 #app.listonly .homelist>h2:first-child{margin-top:4px;font-size:26px}
 #app.listonly .homelist>h2:first-child .ico{display:none}
 .lostprev:empty{display:none}
+@media (min-width:761px){.lostprev{display:none!important}}   /* 電腦版下面就有完整名單 */
 .lostprev{min-width:0}
 .lp-n{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 7px;border-radius:99px;background:var(--red-fill);color:#fff;font:700 13px var(--body);margin-left:4px}
 .lostprev .mp-h b .ico{color:var(--red)}
@@ -1363,7 +1364,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.4.0';
+const BUILD = 'v4.4.1';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
