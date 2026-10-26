@@ -41,7 +41,8 @@
       "icons": [
         {
           "src": "icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -52,7 +53,8 @@
       "icons": [
         {
           "src": "icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -63,7 +65,8 @@
       "icons": [
         {
           "src": "icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
@@ -73,7 +76,8 @@
       "icons": [
         {
           "src": "icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ],
       "short_name": "健康手冊"
@@ -83,5 +87,28 @@
   "categories": [
     "lifestyle",
     "utilities"
+  ],
+  "screenshots": [
+    {
+      "src": "shot-home.jpg",
+      "sizes": "540x1080",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "首頁：一鍵登記走失、回報看到"
+    },
+    {
+      "src": "shot-case.jpg",
+      "sizes": "540x1080",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "協尋案件頁：照片、特徵、聯絡方式"
+    },
+    {
+      "src": "shot-health.jpg",
+      "sizes": "540x1080",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "毛孩健康手冊：疫苗、回診提醒"
+    }
   ]
 }

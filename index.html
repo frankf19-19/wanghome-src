@@ -1422,7 +1422,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.9';
+const BUILD = 'v4.8.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -3157,7 +3157,7 @@ function renderFoundNew(){
    const setLabel=()=>{const seen=kind==='seen';$('#btnSubmit').textContent=seen?'送出目擊通報':'送出拾獲通報';
      $('#fnTitle').textContent=seen?'回報看到的毛孩':'我撿到毛孩';setTitle(seen?'回報看到的毛孩':'我撿到毛孩');
      $('#fnTips').innerHTML=seen?'<b>看到疑似走失的毛孩，這樣做最有幫助</b>① 不要追趕、不要大聲叫，牠會跑更遠 ② 拍照，記下時間、地點和牠往哪個方向走 ③ 在這裡回報，系統會通知附近正在找的飼主'
-       :'<b>撿到毛孩先做這三件事</b>① 帶到附近動物醫院免費掃晶片，有晶片就能直接聯絡飼主 ② 不要急著送養或轉手，飼主可能正在找 ③ 在這裡登記，讓飼主找得到你'};
+       :'<b>撿到毛孩先做這三件事</b>① 帶到附近動物醫院免費掃晶片，有晶片就能直接聯絡飼主 ② 通報動保處或警察機關，不要自己送養或轉手（飼主可能正在找，未通報就留養可能觸法） ③ 在這裡登記，讓飼主找得到你'};
    setLabel();
    $('#segKind').querySelectorAll('button').forEach(b=>b.addEventListener('click',setLabel));
    if(k==='seen')$('#segKind [data-v=seen]').click();
@@ -4120,7 +4120,7 @@ const REC_IC={
 function recIc(k){return `<svg class="ico rk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${REC_IC[k]||REC_IC.other}</svg>`}
 const REC_KINDS={vet:['🩺','看診'],vaccine:['💉','疫苗'],deworm:['🛡️','驅蟲／除蚤'],med:['💊','用藥'],surgery:['🏥','手術'],weight:['⚖️','體重'],grooming:['🛁','美容洗澡'],other:['📝','其他']};
 const REC_PRESETS={
-  vaccine:{dog:[['狂犬病疫苗',12],['八合一／十合一疫苗',12],['鉤端螺旋體疫苗',12],['犬舍咳疫苗',12]],cat:[['狂犬病疫苗',12],['三合一疫苗',12],['五合一疫苗',12],['貓白血病疫苗',12]]},
+  vaccine:{dog:[['狂犬病疫苗',12],['八合一／十合一疫苗',12],['鉤端螺旋體疫苗',12],['犬舍咳疫苗',12]],cat:[['五合一疫苗（含三合一）',12],['三合一疫苗',12],['狂犬病疫苗（會出門的貓）',12],['貓白血病疫苗',12]]},
   deworm:{dog:[['心絲蟲預防',1],['體內驅蟲',3],['體外除蚤蜱',1],['體內外驅蟲',1]],cat:[['體內外驅蟲',1],['體內驅蟲',3],['體外除蚤',1],['心絲蟲預防',1]]},
   vet:{dog:[['年度健康檢查',12],['皮膚問題',0],['腸胃不適',0],['牙齒檢查',0]],cat:[['年度健康檢查',12],['泌尿道問題',0],['腸胃不適',0],['牙齒檢查',0]]},
   grooming:{dog:[['洗澡',1],['美容剪毛',2],['剪指甲',1]],cat:[['洗澡',3],['剪指甲',1]]},
@@ -4658,7 +4658,7 @@ function renderResources(){
 
   <h2>撿到毛孩怎麼做</h2>
   <div class="card">
-    <ul style="padding-left:20px;font-size:15px;margin:6px 0"><li><b>先掃晶片</b>：任何動物醫院都可以掃，通常免費。有晶片就能查到飼主。</li><li><b>在本站登記拾獲通報</b>：系統會自動比對附近的走失案件，飼主登記時也會看到你。</li><li><b>拍清楚照片</b>：正面、側面、特徵（斑點、耳朵、尾巴）。</li><li><b>不要急著送養</b>：飼主可能正在找，至少等 2 週並通報動保處。</li><li>無法收留：通報當地動保處或 1999，不要再放回街上。</li></ul>
+    <ul style="padding-left:20px;font-size:15px;margin:6px 0"><li><b>先掃晶片</b>：任何動物醫院都可以掃，通常免費。有晶片就能查到飼主。</li><li><b>在本站登記拾獲通報</b>：系統會自動比對附近的走失案件，飼主登記時也會看到你。</li><li><b>拍清楚照片</b>：正面、側面、特徵（斑點、耳朵、尾巴）。</li><li><b>通報動保處或警察機關</b>：依民法，撿到的動物要通知飼主或報警／通報主管機關，招領 6 個月沒人認領才歸你。沒有通報就自己留養或送養，可能觸犯刑法侵占遺失物。</li><li>無法收留：通報當地動保處或 1999，不要再放回街上。</li></ul>
     <a class="btn green sm" href="#/found/new">🙋 登記拾獲通報</a>
   </div>
 
@@ -4696,7 +4696,7 @@ function renderPrivacy(){
     <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址，只存在你的手機裡，不會上傳。</li>
     <li><b>定位與相機：</b>只有在你按下「用我目前位置」或選擇照片時才會使用，並會先徵求你的同意。照片的拍攝時間與地點只用來幫你自動填表。</li>
     <li><b>手機通知（App）：</b>你在 App 開啟通知後，回診、疫苗、用藥提醒會排在你的手機上，由手機自己跳出，不經過我們的伺服器；關閉或登出就會全部取消。</li>
-    <li><b>技術紀錄：</b>為了防止濫用，本站會記錄送出登記、通報、檢舉時的 IP 位址：次數限制用的紀錄約 2 天後刪除；檢舉的 IP 與檢舉一起保存，用來避免重複檢舉。主機服務商也會保存一般連線紀錄。</li>
+    <li><b>技術紀錄：</b>為了防止濫用，本站會記錄送出登記、通報、目擊、檢舉時的 IP 位址：登記、通報、目擊的 IP 跟著內容最多保存 30 天（用來停權濫用的人），之後自動刪除；次數限制用的紀錄約 2 天後刪除；檢舉的 IP 與檢舉一起保存，用來避免重複檢舉。主機服務商也會保存一般連線紀錄。</li>
   </ul>
   <h2>二、哪些會公開、哪些不會</h2>
   <ul>
@@ -4708,7 +4708,7 @@ function renderPrivacy(){
   <h2>四、合作的服務商</h2>
   <ul>
     <li>Supabase：資料庫、會員登入與寄信程式主機。</li>
-    <li>Cloudflare：網站主機與網域、客服信箱轉寄。</li>
+    <li>Cloudflare：網站主機與網域、客服信箱轉寄；Cloudflare Web Analytics 統計匿名的瀏覽次數（不使用 Cookie、不追蹤個人）。</li>
     <li>Resend：寄送通知信、登入信與確認信。</li>
     <li>OpenStreetMap／Nominatim：地圖與地址查詢（會傳送你選的座標）。</li>
     <li>農業部「動物認領養」開放資料：收容所比對，由你的手機直接查詢。</li>
@@ -4787,7 +4787,7 @@ function renderDeleteAccount(){
   </ul>
   <h2>可能保留的資料</h2>
   <ul>
-    <li>為了防止濫用而記錄的網路位址：最多保存 30 天後自動刪除。</li>
+    <li>為了防止濫用而記錄的網路位址：登記、通報、目擊的最多保存 30 天，次數限制紀錄約 2 天，之後自動刪除；檢舉紀錄的網路位址跟著檢舉保存。</li>
     <li>寄信與通知紀錄：最多保存 60 天後自動刪除。</li>
     <li>檢舉紀錄與停權名單：為了防止詐騙與濫用而保留。</li>
     <li>已刪除的照片檔案：會在幾天內自動清除。</li>
