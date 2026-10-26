@@ -10,7 +10,7 @@ const KIND: Record<string, string> = {
 };
 
 function esc(s: string) {
-  return String(s ?? "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  return String(s ?? "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n|\r/g, "\\n");
 }
 // RFC 5545：每行最多 75 bytes，超過要折行（續行以空白開頭）
 function fold(line: string) {
