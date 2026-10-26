@@ -1115,7 +1115,8 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
 .bs-hello{display:block!important;font-family:var(--head);font-size:24px!important;line-height:1.35!important;margin:4px 2px 4px!important}
 .bs-hello em{font-style:normal;color:var(--red)}
 /* 貓耳朵四宮格 */
-.tiles4{display:grid;grid-template-columns:1fr 1fr;gap:16px 14px;padding-top:12px}
+.tiles4{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:16px 14px;padding-top:12px}
+.tile4{width:100%;height:100%;box-sizing:border-box;margin:0}button.tile4{-webkit-appearance:none;appearance:none;line-height:inherit}
 @media (min-width:900px){.tiles4{grid-template-columns:repeat(4,1fr);grid-column:1/-1}}
 .tile4{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:118px;padding:18px 10px 14px;border:0;border-radius:30px;
   text-align:center;text-decoration:none!important;color:#4A3442!important;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
@@ -1305,7 +1306,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.2.0';
+const BUILD = 'v4.2.1';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
