@@ -59,7 +59,12 @@ def sb(method, path, body=None, params=None, prefer=None):
             t = r.read().decode()
             return json.loads(t) if t else None
     except urllib.error.HTTPError as e:
-        body = e.read().decode(errors="replace")[:300]
+        raw = e.read().decode(errors="replace")
+        # 公開 repo 的執行紀錄任何人看得到：只印錯誤代碼和簡短訊息，不印 details（可能含整列資料）
+        try:
+            j = json.loads(raw); body = f"code={j.get('code')} message={str(j.get('message',''))[:120]}"
+        except Exception:
+            body = "(非 JSON 回應)"
         kind = "sb_secret" if SERVICE_KEY.startswith("sb_secret_") else "sb_publishable(錯誤：這是公開金鑰)" if SERVICE_KEY.startswith("sb_publishable_") else "JWT" if SERVICE_KEY.startswith("eyJ") else "未知格式"
         print(f"Supabase 回應 {e.code}：{body}")
         print(f"金鑰檢查：類型={kind}，長度={len(SERVICE_KEY)}，含遮罩符號={'•' in SERVICE_KEY or '*' in SERVICE_KEY}")
@@ -151,7 +156,7 @@ def run_matching():
     try:
         animals = fetch_moa()
     except Exception as e:
-        print("抓取農業部資料失敗：", e); return
+        print("抓取農業部資料失敗：", type(e).__name__); return
     existing = sb_all("shelter_matches", {"select": "id,case_id,animal_id"})
     seen = {(m["case_id"], str(m["animal_id"])) for m in existing}
     rows = []
@@ -236,7 +241,7 @@ def send_mail(to, subject, body):
             return True
         except Exception as e:
             if not (GMAIL_USER and GMAIL_PASS): raise
-            print("Resend 寄信失敗，改用 Gmail：", e)
+            print("Resend 寄信失敗，改用 Gmail：", type(e).__name__)
             del msg["From"]; del msg["Reply-To"]
     if True:
         msg["From"] = formataddr((SITE_NAME, GMAIL_USER))
@@ -259,7 +264,7 @@ def case_mail_ok(to):
     try:
         return cnt({"to_email": f"eq.{to.lower()}", "sent_at": f"gte.{hour}"}) < 6 and cnt({"sent_at": f"gte.{hour}"}) < 150
     except Exception as e:
-        print("查寄信上限失敗，這次先不寄：", e); return False
+        print("查寄信上限失敗，這次先不寄：", type(e).__name__); return False
 
 def send_case_mail(c, subject, body):
     """寄給案件飼主：只寄已確認的信箱、遵守上限、寄完記錄。回傳 True 才算寄出。"""
@@ -268,7 +273,7 @@ def send_case_mail(c, subject, body):
     if not case_mail_ok(to): print("達寄信上限，下次再寄：", c.get("name")); return False
     if not send_mail(to, subject, body): return False
     try: sb("POST", "case_mail_log", body={"case_id": c["id"], "to_email": to}, prefer="return=minimal")
-    except Exception as e: print("寫入寄信紀錄失敗：", e)
+    except Exception as e: print("寫入寄信紀錄失敗：", type(e).__name__)
     return True
 
 def fmt(ts):
@@ -314,7 +319,7 @@ def run_notifications():
             if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines)): continue
             print(f"已通知目擊：{c['name']} x{len(lst)}")
         except Exception as e:
-            print("寄信失敗：", e); continue
+            print("寄信失敗：", type(e).__name__); continue
         sb("PATCH", "sightings", body={"notified": True}, params={"id": "in.(" + ",".join(s["id"] for s in lst) + ")"}, prefer="return=minimal")
     # 收容所比對
     pend = sb_all("shelter_matches", {"select": "*", "notified": "eq.false", "dismissed": "eq.false", "order": "score.desc"})
@@ -340,7 +345,7 @@ def run_notifications():
             if not send_case_mail(c, f"【{SITE_NAME}】收容所有疑似 {c['name']} 的毛孩", "\n".join(lines)): continue
             print(f"已通知比對：{c['name']} x{len(lst)}")
         except Exception as e:
-            print("寄信失敗：", e); continue
+            print("寄信失敗：", type(e).__name__); continue
         sb("PATCH", "shelter_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
     # 拾獲通報比對
     pend = sb_all("found_matches", {"select": "id,case_id,found_id,score,created_at", "notified": "eq.false", "order": "score.desc"})
@@ -370,7 +375,7 @@ def run_notifications():
             if not send_case_mail(c, f"【{SITE_NAME}】有人可能撿到／看到 {c['name']}", "\n".join(lines)): continue
             print(f"已通知拾獲比對：{c['name']} x{len(lst)}")
         except Exception as e:
-            print("寄信失敗：", e); continue
+            print("寄信失敗：", type(e).__name__); continue
         sb("PATCH", "found_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
 
 # ---------------------------------------------------------------- 會員通知
@@ -394,7 +399,7 @@ def run_member_notifications():
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"附近通知：{len(lst)} 筆 → 1 位會員")
         except Exception as e:
-            print("附近通知寄送失敗：", e)
+            print("附近通知寄送失敗：", type(e).__name__)
     # 追蹤案件新目擊
     rows = sb("POST", "rpc/follow_targets", body={"p_hours": 26}) or []
     by_user = {}
@@ -411,7 +416,7 @@ def run_member_notifications():
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"追蹤通知：{len(lst)} 筆 → 1 位會員")
         except Exception as e:
-            print("追蹤通知寄送失敗：", e)
+            print("追蹤通知寄送失敗：", type(e).__name__)
 
 # ---------------------------------------------------------------- 健康紀錄到期提醒
 def run_due_reminders():
@@ -433,7 +438,7 @@ def run_due_reminders():
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"到期提醒：{len(lst)} 筆 → 1 位會員")
         except Exception as e:
-            print("到期提醒寄送失敗：", e)
+            print("到期提醒寄送失敗：", type(e).__name__)
 
 # ---------------------------------------------------------------- 檢舉通知站長
 def run_report_alerts():
@@ -451,7 +456,7 @@ def run_report_alerts():
         mark_notified("reports", [r["id"] for r in rows])
         print(f"已通知站長 {len(rows)} 則檢舉")
     except Exception as e:
-        print("檢舉通知失敗：", e)
+        print("檢舉通知失敗：", type(e).__name__)
 
 # ---------------------------------------------------------------- main
 # ---------------------------------------------------------------- 清掉沒人用的公開照片
@@ -511,7 +516,7 @@ if __name__ == "__main__":
         try:
             data = fetch_moa()
         except Exception as e:
-            print("連不上農業部開放資料（多半是擋海外 IP）：", e); sys.exit(0)
+            print("連不上農業部開放資料（多半是擋海外 IP）：", type(e).__name__); sys.exit(0)
         dogs = [x for x in data if (x.get("animal_kind") or "") == "狗"]
         print(f"其中狗：{len(dogs)} 筆")
         if data: print("欄位：", ", ".join(sorted(data[0].keys())))
@@ -527,6 +532,6 @@ if __name__ == "__main__":
     if mode in ("all",): run_due_reminders()
     if mode in ("all", "cleanup", "cleanup-dry"):
         try: run_photo_cleanup(dry=(mode == "cleanup-dry"))
-        except Exception as e: print("照片清理失敗（不影響其他功能）：", e)
+        except Exception as e: print("照片清理失敗（不影響其他功能）：", type(e).__name__)
     n = sb("GET", "cases", params={"select": "id", "limit": "1"})
     print("保活 OK", "有資料" if n else "空")

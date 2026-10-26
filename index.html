@@ -8,7 +8,7 @@
    安全：只接受從舊網址轉過來的（referrer 檢查）、只收指定的鍵、內容逐筆檢查；舊網址只帶一次。 */
 (function(){var H='wangmiaotw.com',OLD='frankf19-19.github.io',MOVE=true,SBK='sb-nopyhfpaykkiieudvoko-auth-token',
 UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-KEEP=function(k){return k==='wh_mine'||k==='wh_theme'||k===SBK||/^wh_(token|ftoken)_[0-9a-f-]{36}$/.test(k)||/^wh_draft[a-z_]{0,20}$/.test(k)};
+KEEP=function(k){return k==='wh_mine'||k==='wh_theme'||/^wh_(token|ftoken)_[0-9a-f-]{36}$/.test(k)||/^wh_draft[a-z_]{0,20}$/.test(k)};
 try{var h=location.hash;
 if(h.indexOf('#mig=')===0){
   var p=h.slice(5),i=p.indexOf('&h='),d=i<0?p:p.slice(0,i),back=i<0?'':decodeURIComponent(p.slice(i+3));
@@ -45,7 +45,7 @@ if(h.indexOf('#mig=')===0){
 <meta property="og:image:alt" content="汪喵回家：看到走失的狗貓，別追。拍照、記下時間地點，回報給飼主。">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://wangmiaotw.com/">
-<!-- BUILD v3.13.0 -->
+<!-- BUILD v3.14.0 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://nopyhfpaykkiieudvoko.supabase.co" crossorigin>
@@ -347,7 +347,8 @@ label.f>span .req{color:var(--red);font-style:normal}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media(max-width:520px){.row3{grid-template-columns:1fr 1fr}}
 .chk{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:15px;cursor:pointer}
-.chk input{width:20px;height:20px;accent-color:var(--red)}
+.chk input{width:24px;height:24px;flex:none;accent-color:var(--red)}
+#app input[type=checkbox]{min-width:22px;min-height:22px;accent-color:var(--red)}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
 .seg button{border:1.5px solid var(--line);background:var(--sheet);border-radius:var(--r-pill);padding:8px 15px;font-size:14.5px;cursor:pointer;color:var(--ink-2);font-weight:600}
 .seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -979,6 +980,13 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
 /* 條款頁 */
 .legal h2{font-size:18px;margin:20px 0 8px}.legal ul{padding-left:20px;line-height:1.75}.legal li{margin-bottom:6px}.legal p{line-height:1.75}
 .is-app .app-hide{display:none!important}
+
+/* v3.14 給長輩：手機上的小字至少 14px，小按鈕加大 */
+@media (max-width:640px){
+  .stat{font-size:14px!important}.ccard .loc,.ccard .b .m{font-size:14.5px!important}.sponsor .d,.pd-cap,.pd-top small,.pd-due small,.exif-hint,.med-b small{font-size:14px}
+  .tl .dot{font-size:14px}.tl .when,.tl .small{font-size:14.5px}.dist,.score{font-size:14px}
+  details.more>summary,details.danger-zone>summary{min-height:44px;display:flex;align-items:center}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1019,7 +1027,7 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/health">毛孩健康手冊</a><a href="#/me">我的帳號</a><a href="#/seen">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>© 2026 汪喵回家 版權所有</span><span>BUILD v3.13.0</span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>© 2026 汪喵回家 版權所有</span><span>BUILD v3.14.0</span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -1040,7 +1048,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v3.13.0';
+const BUILD = 'v3.14.0';
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
 
@@ -1099,8 +1107,8 @@ const app = $('#app');let navId=0;const _void=document.createElement('div');
 let sb = null;
 function safeU(u){u=String(u??'');return /^https:\/\/[^\s'"()\\<>]+$/.test(u)?u:''}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function friendlyErr(m){m=String(m??'');if(/violates check constraint/i.test(m))return m.replace(/new row[\s\S]*|[^：:]*violates check constraint[\s\S]*/i,'')+'有欄位內容太長或格式不對，請檢查後再送出';if(/value too long/i.test(m))return '有欄位內容太長，請縮短後再送出';if(/violates (not-null|foreign key)/i.test(m))return '資料不完整，請重新整理後再試';if(/duplicate key/i.test(m))return '這筆資料已經存在';if(/Failed to fetch|NetworkError|Load failed/i.test(m))return m.replace(/(Failed to fetch|NetworkError[^ ]*|Load failed).*/,'')+'網路連線不穩，請確認網路後再試一次';if(/JWT|jwt expired|invalid claim/i.test(m))return '登入已過期，請重新登入';if(/row-level security/i.test(m))return '沒有權限進行這個操作（可能需要重新登入）';return m}
-function toast(m,ms=2600){m=friendlyErr(m);const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
+function friendlyErr(m){m=String(m??'');if(/cases_email_ok/.test(m))return 'Email 格式不對，請檢查一下（例如 name@gmail.com）';if(/row-level security/i.test(m)&&/storage|object/i.test(m))return '照片上傳太頻繁，請過一會兒再試';if(/violates check constraint/i.test(m))return m.replace(/new row[\s\S]*|[^：:]*violates check constraint[\s\S]*/i,'')+'有欄位內容太長或格式不對，請檢查後再送出';if(/value too long/i.test(m))return '有欄位內容太長，請縮短後再送出';if(/violates (not-null|foreign key)/i.test(m))return '資料不完整，請重新整理後再試';if(/duplicate key/i.test(m))return '這筆資料已經存在';if(/Failed to fetch|NetworkError|Load failed/i.test(m))return m.replace(/(Failed to fetch|NetworkError[^ ]*|Load failed).*/,'')+'網路連線不穩，請確認網路後再試一次';if(/JWT|jwt expired|invalid claim/i.test(m))return '登入已過期，請重新登入';if(/row-level security/i.test(m))return '沒有權限進行這個操作（可能需要重新登入）';return m}
+function toast(m,ms=2600){m=friendlyErr(m);if(/已儲存/.test(m)&&!/失敗/.test(m))__dirty=false;const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
 // 日期一律用台灣時間（UTC+8）顯示；不是今年的加上年份
 function tw(s){const d=new Date(new Date(s).getTime()+8*3600e3);return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate(),h:d.getUTCHours(),mi:d.getUTCMinutes()}}
 function fmtDT(s){if(!s)return '';const t=tw(s),now=tw(Date.now());return `${t.y!==now.y?t.y+'/':''}${t.m}/${t.d} ${String(t.h).padStart(2,'0')}:${String(t.mi).padStart(2,'0')}`}
@@ -1177,8 +1185,8 @@ let __maps=[];
 // 儲存按鈕：防止連按造成重複資料；照片還在上傳時先不要存（否則照片會漏掉）
 let __uploading=0;
 function once(fn){let busy=false;return async function(e){if(e&&e.preventDefault)e.preventDefault();if(busy)return;if(__uploading>0){toast('照片還在上傳，請等一下再按儲存',3500);return}
-  busy=true;const form=this&&this.tagName==='FORM'?this:null;const b=(e&&e.submitter)||(form?form.querySelector('button[type=submit],button:not([type])'):(this&&this.tagName==='BUTTON'?this:null));const t=b&&b.innerHTML;if(b){b.disabled=true;b.textContent='儲存中…'}
-  try{return await fn.call(this,e)}finally{busy=false;if(b&&b.isConnected){b.disabled=false;b.innerHTML=t}}}}
+  busy=true;const h0=location.hash;const form=this&&this.tagName==='FORM'?this:null;const b=(e&&e.submitter)||(form?form.querySelector('button[type=submit],button:not([type])'):(this&&this.tagName==='BUTTON'?this:null));const t=b&&b.innerHTML;if(b){b.disabled=true;b.textContent='儲存中…'}
+  try{return await fn.call(this,e)}finally{if(location.hash===h0)__submitting=false;busy=false;if(b&&b.isConnected){b.disabled=false;b.innerHTML=t}}}}
 // 地圖程式載入失敗（網路擋掉、太慢）時用的替身：頁面其他功能照常，定位仍可用
 const NOMAP=new Proxy(function(){},{get:(t,k)=>k==='__stub'?true:k==='_mapPane'||k==='then'||typeof k==='symbol'?undefined:NOMAP,apply:()=>NOMAP});
 // 地圖程式改成不擋首頁：要用地圖的頁面先等它載好（最多 8 秒，超過就用沒有地圖的版本）
@@ -1262,7 +1270,7 @@ function openOverlay(el){
   try{history.pushState({overlay:1},'',location.href)}catch(_){}
 }
 function closeOverlay(el){if(overlayOpen===el){overlayOpen=null;el.remove();try{history.back()}catch(_){}}else el.remove()}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlayOpen)closeOverlay(overlayOpen)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()))return;closeOverlay(overlayOpen)}});
 function closeOverlays(){document.querySelectorAll('.lightbox').forEach(x=>x.remove());overlayOpen=null}
 
 function showUndo(msg,onUndo){document.querySelectorAll('.undobar').forEach(x=>x.remove());const d=document.createElement('div');d.className='undobar';d.innerHTML=`<span>${esc(msg)}</span><button type="button">復原</button>`;
@@ -1270,14 +1278,21 @@ function showUndo(msg,onUndo){document.querySelectorAll('.undobar').forEach(x=>x
 function sightOps(id,st){id=esc(id);return (st!=='confirmed'?`<button class="btn sm green" data-s="${id}" data-v="confirmed">✓ 確認是牠</button>`:'')+(st!=='rejected'?`<button class="btn sm ghost" data-s="${id}" data-v="rejected">× 退回</button>`:'')+(st!=='pending'?`<button class="btn sm ghost" data-s="${id}" data-v="pending">改回待確認</button>`:'')}
 // 連線失敗 ≠ 找不到：只有資料庫回答「沒有這筆」(PGRST116) 才說找不到，其他錯誤請使用者再試一次
 function isNetErr(e){return !!e&&e.code!=='PGRST116'}
+// 連不上（不是資料庫回的錯誤）：沒有錯誤代碼，或訊息是 fetch 失敗
+function isFetchErr(e){return !!e&&(!e.code||/fetch|network|load failed/i.test(e.message||''))}
 function netErrHTML(){return `<div class="empty-card"><div class="big">📶</div><b>網路好像不太穩，資料沒有載入</b><p class="small">請確認網路後再試一次。</p><button type="button" class="btn" onclick="route()">再試一次</button></div>`}
 function rerender(fn){const y=scrollY;return Promise.resolve(fn()).then(()=>restoreScroll(y)).catch(()=>{})}
 function restoreScroll(y){let n=0;const t=()=>{if(document.documentElement.scrollHeight>=y+innerHeight*0.5||n>40){window.scrollTo(0,y);return}n++;setTimeout(t,50)};t()}
 window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
 function route(){
   if(!sb)return;
+  if(__skipRoute){__skipRoute=false;navByPop=false;return}   // 取消離開後退回原頁，不重畫
   if(__dirty&&!__submitting&&curHash&&(location.hash||'#/')!==curHash){
-    if(!__confirm('你填的資料還沒儲存，確定要離開這一頁嗎？')){try{history.replaceState(history.state,'',location.pathname+location.search+curHash)}catch(_){}return}
+    if(!__confirm('你填的資料還沒儲存，確定要離開這一頁嗎？')){
+      // 按「上一頁」→ 把原頁加回去；點連結 → 退回原頁。兩種都不會弄丟上一頁的紀錄
+      if(navByPop){navByPop=false;try{history.pushState(null,'',location.pathname+location.search+curHash)}catch(_){}}
+      else{__skipRoute=true;history.back()}
+      return}
   }
   __submitting=false;
   navId++;__wiz=null;__dirty=false;document.querySelectorAll('.undobar').forEach(x=>x.remove());
@@ -1335,11 +1350,15 @@ function route(){
    - 手機返回鍵＝回上一步
    ============================================================ */
 let __wiz=null,__dirty=false;
+// 表單裡點選項按鈕（狗／貓、疫苗快速選項…）也算有填資料；換步驟的按鈕不算
+document.addEventListener('click',e=>{if(!e.isTrusted)return;const b=e.target.closest&&e.target.closest('#app form button[type=button]');if(b&&!b.closest('.wnav,.submitbar')&&!/wnext|wprev|wback/.test(b.className)){const f=b.closest('form');if(f&&!f.hasAttribute('data-nodirty'))__dirty=true}},true);
 document.addEventListener('input',e=>{if(e.target.type==='datetime-local'||e.target.type==='date')e.target.dataset.touched='1';const f=e.target.closest&&e.target.closest('#app form');if(f&&!f.hasAttribute('data-nodirty'))__dirty=true},true);
 // 填到一半要離開：先問一下（送出中、送出後跳頁不問）
-let __submitting=false;document.addEventListener('submit',()=>{__submitting=true},true);
+let __submitting=false,__skipRoute=false;
 // 按了「確定刪除／標記找到」之類的確認，接下來跳頁就不用再問「還沒儲存」
-const __confirm=window.confirm.bind(window);window.confirm=m=>{const ok=__confirm(m);if(ok)__submitting=true;return ok};
+const __confirm=window.confirm.bind(window);window.confirm=m=>{const ok=__confirm(m);if(ok&&/刪除/.test(m))__submitting=true;return ok};
+// 存好了（出現「已儲存」或完成畫面）就不用再提醒
+new MutationObserver(()=>{if(__dirty&&app.querySelector('.done-card'))__dirty=false}).observe(document.getElementById('app')||document.body,{childList:true});
 window.addEventListener('beforeunload',e=>{if(__dirty&&!__submitting){e.preventDefault();e.returnValue=''}});
 function wizard(form,checks={}){
   if(!form||form.dataset.wiz)return;form.dataset.wiz=1;form.noValidate=true;
@@ -1907,7 +1926,9 @@ async function renderCase(id){const _n=navId;
 
   // 收容所即時比對（瀏覽器端抓農業部資料）
   const slowNet=(()=>{const n=navigator.connection;return !!n&&(n.saveData||/(^|-)2g|3g/.test(n.effectiveType||''))})();
-  if(c.status==='searching'&&slowNet){const st=$('#shelterStatus');if(st)st.innerHTML='你的網路較慢或開了省流量，沒有自動比對收容所（約要下載 1MB）。<button type="button" class="btn sm ghost" id="btnShelterNow">現在比對</button>';const b=$('#btnShelterNow');if(b)b.onclick=()=>{b.disabled=true;b.textContent='比對中…';liveShelterMatch({...c},null).then(()=>rerender(()=>renderCase(id))).catch(()=>{b.textContent='讀取不到，稍後再試'})}}
+  if(c.status==='searching'&&slowNet){const st=$('#shelterStatus');if(st)st.innerHTML='你的網路較慢或開了省流量，沒有自動比對收容所（約要下載 1MB）。<button type="button" class="btn sm ghost" id="btnShelterNow">現在比對</button>';const b=$('#btnShelterNow');if(b)b.onclick=()=>{b.disabled=true;b.textContent='比對中…';let tk=null;try{tk=localStorage.getItem('wh_token_'+id)}catch(_){}
+    liveShelterMatch({...c},tk).then(async()=>{if(_n!==navId)return;const {data:m2}=await sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false);const box=$('#shelterBox');if(!box)return;
+      box.innerHTML=shelterBoxHTML(m2,false)||`<h2>${ic('shelter')} 收容所比對</h2><p class="muted small">比對完成：目前 ${esc(c.lost_city)} 收容所沒有走失日之後收容、特徵相符的動物。</p>`}).catch(()=>{b.disabled=false;b.textContent='讀取不到，再試一次'})}}
   else if(c.status==='searching'){
     liveShelterMatch({...c},(()=>{try{return localStorage.getItem('wh_token_'+id)}catch(_){return null}})()).then(async()=>{
       if(location.hash.split('?')[0]!=='#/case/'+id)return;
@@ -1978,7 +1999,7 @@ function lightbox(u){u=safeU(u);if(!u)return;const d=document.createElement('div
 function renderNew(){
   setTitle('登記走失');
   app.innerHTML=`<h1>登記走失毛孩</h1><p class="lede">免費、不用註冊。照著步驟填，大約 2 分鐘。</p>
-  ${me()?'<div class="notice green"><b>✓ 你已登入</b>這個案件會自動綁定到你的帳號，換手機也能管理。</div>':'<p class="small" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">不登入也可以登記。想換手機也能管理？<a class="btn sm ghost" href="#/login" onclick="try{localStorage.setItem(\'wh_return\',\'#/new\')}catch(_){}">登入／免費註冊</a></p>'}
+  ${me()?`<div class="notice green"><b>✓ 你已登入：${esc(me().email||'')}</b>這個案件會自動綁定到這個帳號，換手機也能管理。不是你的帳號？請先到「我的」登出。</div>`:'<p class="small" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">不登入也可以登記。想換手機也能管理？<a class="btn sm ghost" href="#/login" onclick="try{localStorage.setItem(\'wh_return\',\'#/new\')}catch(_){}">登入／免費註冊</a></p>'}
   <form onsubmit="return false" class="card steps" id="f" autocomplete="on">
     <h3>牠叫什麼名字？長什麼樣子？</h3>
     <div class="seg" id="segSp" role="group" aria-label="狗還是貓"><button type="button" data-v="dog">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
@@ -2116,7 +2137,7 @@ function renderCreated(id,token,email){
     <div class="bigacts"><a class="btn big" href="#/poster/${id}">${ic("image")} 做協尋海報</a>
     <a class="btn big ghost" href="https://line.me/R/share?text=${encodeURIComponent('請幫忙協尋，看到請回報：\n'+cUrl)}" target="_blank" rel="noopener">用 LINE 分享案件</a></div>
   </section>
-  <p class="small muted" style="margin-top:6px">還可以：<a href="#/resources">看協尋攻略</a>、<a href="#/case/${id}">打開案件頁</a></p></div>`;
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px"><a class="btn sm ghost" href="#/case/${id}">打開案件頁</a><a class="btn sm ghost" href="#/resources">看協尋攻略</a></div></div>`;
   $('#cpManage').onclick=()=>copy(manage);$('#cpToken').onclick=()=>copy(token);
   if(email){const go=async()=>{const why=await sendVerifyMail(id,token);const m=$('#vmsg');if(!m)return;m.textContent=VERIFY_MSG[why]||VERIFY_MSG.failed;
       if(why==='already_verified'){const h=$('#vstep h2');if(h)h.innerHTML='<span class="cnum">2</span>Email 已確認'}
@@ -2216,6 +2237,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     sb.rpc('owner_sightings',{p_id:id,p_token:token}),
     sb.from('shelter_matches').select('*').eq('case_id',id).order('matched_at',{ascending:false})
   ]);
+  if(isFetchErr(error)){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(error||!c){(_n===navId?app:_void).innerHTML=`<div class="notice red" style="margin-bottom:12px"><b>${token?'這個管理網址不正確':'這不是你登記的案件'}</b>請確認是不是貼了完整的網址，或換成 LINE 裡那則訊息的網址。</div>`+entryHTML('case',id);bindEntry('case',id);return}
   if(token)try{localStorage.setItem('wh_token_'+id,token)}catch(_){}
   if(_n!==navId)return;
@@ -2224,7 +2246,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
   (_n===navId?app:_void).innerHTML=`<h1>管理：${esc(c.name)}</h1>
   <p class="muted small" style="margin-bottom:6px">管理連結請勿公開。</p><div class="row-btns" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><a class="btn sm" href="#/poster/${id}">${ic("image")} 產生海報</a><a class="btn sm ghost" href="#/case/${id}">查看公開頁</a></div>
   ${c.is_mine?'<p class="small"><span class="tag green">✓ 已綁定你的帳號</span></p>':c.owner_id?'':me()&&token?'<div class="notice green"><b>把這個案件綁定到你的帳號？</b>綁定後換手機也能管理，不怕管理網址弄丟。<div style="margin-top:8px"><button class="btn sm green" id="btnClaim">綁定到我的帳號</button></div></div>':!me()?'<p class="small muted"><a href="#/login">登入</a>後可把案件綁定帳號，不怕管理網址弄丟。</p>':''}
-  ${pending.length?`<div class="notice"><b>有 ${pending.length} 筆目擊待你確認</b>確認後才會顯示在公開地圖上；明顯不是牠的請按「退回」。</div>`:''}
+  ${pending.length?`<div class="notice" id="pendNotice"><b>有 <span id="pendN">${pending.length}</span> 筆目擊待你確認</b>確認後才會顯示在公開地圖上；明顯不是牠的請按「退回」。</div>`:''}
 
   ${c.contact_email&&c.email_verified===false?`<div class="notice" id="vnotice"><b>Email 還沒確認</b>有人回報看到牠時，我們還不能寄信給你。請到 <b>${esc(c.contact_email)}</b> 的信箱按「確認信箱」（也找找垃圾郵件匣）。<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><button type="button" class="btn sm" id="btnRev">重寄確認信</button><span class="small" id="vmsg" aria-live="polite"></span></div></div>`:''}
   ${c.status==='searching'?`<button type="button" class="btn big green home-btn" id="btnHome">🎉 牠回家了！</button>`:''}
@@ -2260,7 +2282,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     <label class="f"><span>走失地點描述</span><input name="lost_place" value="${esc(c.lost_place||'')}"></label>
     <div class="row2"><label class="f"><span>稱呼</span><input name="contact_name" value="${esc(c.contact_name||'')}"></label><label class="f"><span>電話</span><input name="contact_phone" value="${esc(c.contact_phone||'')}"></label></div>
     <label class="chk"><input type="checkbox" name="phone_public" ${c.phone_public?'checked':''}> 讓看到牠的人可以直接打電話給我（電話會顯示在案件頁）</label>
-    <div class="row2"><label class="f"><span><b class="lbl">Email</b><small class="hint">私密</small></span><input name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span>LINE ID</span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
+    <div class="row2"><label class="f"><span><b class="lbl">Email</b><small class="hint">私密</small></span><input type="email" name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開</small></span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
     <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" step="100" inputmode="numeric"></label>
     <label class="f"><span>補充</span><textarea name="notes">${esc(c.notes||'')}</textarea></label>
     <h3>照片</h3>
@@ -2296,7 +2318,8 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     toast(v==='confirmed'?'✅ 已確認，會顯示在公開頁':v==='rejected'?'已退回，不會公開':'已改回待確認');const row=b.closest('.tl');if(!row)return;
     const dot=row.querySelector('.dot'),tag=row.querySelector('.when .tag');dot.className='dot '+(v==='pending'?'pending':v==='rejected'?'start':'');dot.textContent=v==='pending'?'?':v==='rejected'?'×':'✓';
     if(tag){tag.className='tag '+(v==='pending'?'amber':v==='rejected'?'gray':'green');tag.textContent=v==='pending'?'待確認':v==='rejected'?'已退回':'已確認'}
-    const ops=row.querySelector('.ops');ops.innerHTML=sightOps(b.dataset.s,v);bindOps(ops)});
+    const ops=row.querySelector('.ops');ops.innerHTML=sightOps(b.dataset.s,v);bindOps(ops);
+    const n=app.querySelectorAll('.timeline .when .tag.amber').length,pn=$('#pendN');if(pn){if(n)pn.textContent=n;else $('#pendNotice').remove()}});
   bindOps(app);
   app.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error)return toast(error.message);rerender(()=>renderManage(id,token))});
   let photos=(c.photos||[]).slice();const pv=$('#pv');
@@ -2530,6 +2553,7 @@ function renderFoundNew(){
     <div class="progress hidden" id="pg"><i></i></div>
 
     <h3>怎麼聯絡你？</h3>
+      <p class="small" style="margin:-4px 0 8px"><b style="color:var(--red)">必填：</b>電話、LINE、Email 至少填一種，飼主才找得到你。</p>
     <div class="row2">
       <label class="f"><span>稱呼</span><input type="text" name="reporter_name" maxlength="50"></label>
       <label class="f"><span>電話</span><input type="tel" name="reporter_phone" maxlength="30"></label>
@@ -2648,6 +2672,7 @@ async function renderFoundManage(id,token){const _n=navId;setTitle('管理我的
   if(!token&&!me()){(_n===navId?app:_void).innerHTML=entryHTML('found',id);bindEntry('found',id);return}
   token=token||null;
   const {data:f,error}=await sb.rpc('owner_found',{p_id:id,p_token:token});
+  if(isFetchErr(error)){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(error||!f){(_n===navId?app:_void).innerHTML=`<div class="notice red" style="margin-bottom:12px"><b>${token?'這個管理網址不正確':'這不是你的通報'}</b>請貼上通報後收到的管理網址。</div>`+entryHTML('found',id);bindEntry('found',id);return}
   if(token)try{localStorage.setItem('wh_ftoken_'+id,token)}catch(_){}
   if(_n!==navId)return;
@@ -2907,11 +2932,15 @@ async function handleVerify(){
   history.replaceState(null,'',location.pathname+'#/');   // 先把一次性代碼從網址拿掉
   app.innerHTML='<div class="empty">登入中，請稍候…</div>';
   let ok=false;
-  if(/^[A-Za-z0-9_-]{10,200}$/.test(th)){
+  // 已經登入別的帳號：先問一下（避免點了別人傳來的登入連結，變成用別人的帳號登記）
+  const cur=session?.user?.email;let skip=false;
+  if(cur&&!__confirm(`你目前已經用 ${cur} 登入。\n要改用這封登入信的帳號登入嗎？\n（如果這封信不是你自己申請的，請按「取消」）`))skip=true;
+  if(!skip&&/^[A-Za-z0-9_-]{10,200}$/.test(th)){
     try{const {data:vd,error}=await sb.auth.verifyOtp({token_hash:th,type:ty});if(!error&&vd?.session){session=vd.session;ok=true}}catch(_){}
   }
   let back='#/login';
-  if(ok){back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}setTimeout(()=>toast('✅ 已登入'),300);updateAuthUI()}
+  if(ok){back='#/me';try{back=localStorage.getItem('wh_return')||'#/me';localStorage.removeItem('wh_return')}catch(_){}const em=session?.user?.email||'';setTimeout(()=>toast('✅ 已登入'+(em?'：'+em:''),4000),300);updateAuthUI()}
+  else if(skip)back='#/me';
   else setTimeout(()=>toast('這個登入連結已經失效或用過了，請再寄一次登入信',5000),300);
   history.replaceState(null,'',location.pathname+back);verifying=false;
 }
@@ -3558,7 +3587,7 @@ async function renderPoster(id){const _n=navId;
   // 等字型（字型樣式表是非同步載入，先確保套用，再要求下載海報用到的字重）
   // 海報畫在圖片上，要用粗體字型：只有這一頁才下載 Noto Sans TC
   let pf=document.getElementById('posterFont');if(!pf){const l=document.createElement('link');pf=l;l.id='posterFont';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap';document.head.appendChild(l)}
-  try{document.querySelectorAll('link[rel=stylesheet][media=print]').forEach(l=>l.media='all');if(!pf.sheet)await Promise.race([new Promise(r=>{pf.addEventListener('load',r);pf.addEventListener('error',r)}),new Promise(r=>setTimeout(r,3000))]);await Promise.race([Promise.all(['900 96px "Noto Sans TC"','700 34px "Noto Sans TC"','400 30px "Noto Sans TC"'].map(f=>document.fonts.load(f,'尋狗貓啟事0123456789走失目擊'))),new Promise(r=>setTimeout(r,4000))])}catch(_){}
+  try{document.querySelectorAll('link[rel=stylesheet][media=print]').forEach(l=>l.media='all');if(!pf.sheet)await Promise.race([new Promise(r=>{pf.addEventListener('load',r);pf.addEventListener('error',()=>{pf.remove();r()})}),new Promise(r=>setTimeout(r,3000))]);await Promise.race([Promise.all(['900 96px "Noto Sans TC"','700 34px "Noto Sans TC"','400 30px "Noto Sans TC"'].map(f=>document.fonts.load(f,'尋狗貓啟事0123456789走失目擊聯絡電話獎金'+[c.name,c.breed,c.colour,c.features,c.collar_desc,c.lost_city,c.lost_district,c.lost_place,c.contact_name].join('').slice(0,400)))),new Promise(r=>setTimeout(r,4000))])}catch(_){}
   if(_n!==navId||!$('#pc'))return;
   const qrc=$('#qr').querySelector('canvas');
   const cv=$('#pc'),ctx=cv.getContext('2d');

@@ -1,9 +1,9 @@
-// 汪喵回家 — 飼主 Email 通知 v1.3（用 Resend 從 noreply@wangmiaotw.com 寄出）
+// 汪喵回家 — 飼主 Email 通知 v1.4（用 Resend 從 noreply@wangmiaotw.com 寄出）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-sighting
 //   1. {"case_id":"<uuid>"}                                   網友送出目擊後由網頁呼叫：寄目擊通知給飼主
 //   2. {"case_id":"<uuid>","action":"verify","token":"<管理代碼>"}  寄「確認信箱」信給飼主（登記後、改 Email 後、按重寄）
 // 安全：飼主的 Email 必須先點確認信才會收到通知（避免有人拿別人的信箱登記來灌信）。
-//       確認信內容固定、不含任何網友填的文字；同一案件 10 分鐘最多 1 封、同一信箱一天最多 5 封、全站每小時最多 150 封。
+//       確認信內容固定、不含任何網友填的文字；同一案件 10 分鐘最多 1 封、一天最多 3 封；同一信箱一天最多 3 封；確認信全站每小時 30 封，目擊通知另計 150 封。
 // 需關閉 JWT 驗證（訪客也能回報）。
 // Secrets（Supabase → Edge Functions → Secrets）：RESEND_API_KEY（建議）；或舊方式 GMAIL_USER、GMAIL_APP_PASSWORD
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -77,11 +77,16 @@ Deno.serve(async (req) => {
     const { count } = await q(sb.from("case_mail_log").select("case_id", { count: "exact", head: true }));
     return count ?? 0;
   };
-  // 全站每小時最多 150 封
-  if (await count((x) => x.gte("sent_at", hourAgo)) >= 150) return json({ sent: false, reason: "throttled" });
+  // 同一個人的信箱（Gmail 的 . 和 +標籤 視為同一個）
+  const norm = (e: string) => { const [u, d] = e.split("@"); if (!d) return e;
+    const dom = d === "googlemail.com" ? "gmail.com" : d; let user = u.split("+")[0];
+    if (dom === "gmail.com") user = user.replace(/\./g, ""); return `${user}@${dom}`; };
+  const toKey = norm(to);
 
   // ---------------------------------------------------------------- 確認信箱
   if (body.action === "verify") {
+    // 確認信另外計上限（全站每小時 30 封），不會佔掉目擊通知的額度
+    if (await count((x) => x.eq("kind", "verify").gte("sent_at", hourAgo)) >= 30) return json({ sent: false, reason: "throttled" });
     const token = String(body.token ?? "");
     let { data: ok } = await sb.rpc("can_manage_case", { p_id: caseId, p_token: token });
     if (!ok) {   // 已登入的飼主（沒有管理代碼）：用登入身分確認
@@ -96,18 +101,22 @@ Deno.serve(async (req) => {
     }
     if (!ok) return json({ sent: false, reason: "bad_token" }, 403);
     if (c.email_verified) return json({ sent: false, reason: "already_verified" });
-    if (c.email_verify_sent_at && Date.now() - new Date(c.email_verify_sent_at).getTime() < 10 * 60e3)
-      return json({ sent: false, reason: "too_soon" });
     const dayAgo = new Date(Date.now() - 24 * 3600e3).toISOString();
-    if (await count((x) => x.eq("to_email", to).gte("sent_at", dayAgo)) >= 5) return json({ sent: false, reason: "throttled" });
+    // 同一案件每天最多 3 封確認信；同一信箱每天最多 3 封
+    if (await count((x) => x.eq("case_id", caseId).eq("kind", "verify").gte("sent_at", dayAgo)) >= 3) return json({ sent: false, reason: "throttled" });
+    if (await count((x) => x.eq("to_email", toKey).gte("sent_at", dayAgo)) >= 3) return json({ sent: false, reason: "throttled" });
 
+    // 先「佔位」再寄：同時送來的請求只有一個會成功（10 分鐘內不重寄）
     const key = [...crypto.getRandomValues(new Uint8Array(24))].map((x) => x.toString(16).padStart(2, "0")).join("");
-    const { error: ue } = await sb.from("cases")
-      .update({ email_verify_hash: await sha256hex(key), email_verify_sent_at: new Date().toISOString() }).eq("id", caseId);
+    const tenAgo = new Date(Date.now() - 10 * 60e3).toISOString();
+    const { data: claimed, error: ue } = await sb.from("cases")
+      .update({ email_verify_hash: await sha256hex(key), email_verify_sent_at: new Date().toISOString() })
+      .eq("id", caseId).or(`email_verify_sent_at.is.null,email_verify_sent_at.lt.${tenAgo}`).select("id");
     if (ue) return json({ error: "save" }, 500);
+    if (!claimed || !claimed.length) return json({ sent: false, reason: "too_soon" });
     const link = `${SITE}#/verify-email?c=${caseId}&k=${key}`;
-    const name = String(c.name ?? "").slice(0, 30);
-    const text = [`你好，你在${SITE_NAME}登記了走失協尋「${name}」，並留下這個 Email。`, "",
+    // 信裡不放使用者填的文字（案件名稱），避免被拿來夾帶廣告或詐騙訊息
+    const text = [`你好，你在${SITE_NAME}登記了走失協尋，並留下這個 Email。`, "",
       "請點下面的連結確認這是你的信箱。確認之後，有人回報看到牠，我們會馬上寄信通知你：", link, "",
       "連結 7 天內有效。", "不是你登記的？直接刪除這封信就好，我們不會再寄信給你。", "", `— ${SITE_NAME}　${SITE}`].join("\n");
     const html = `<!DOCTYPE html><html lang="zh-Hant"><body style="margin:0;background:#EFF2EE;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;color:#141E22">
@@ -116,15 +125,15 @@ Deno.serve(async (req) => {
 <tr><td style="background:#CC3F1E;padding:18px 24px;color:#fff;font-size:22px;font-weight:900">🐾 ${SITE_NAME}</td></tr>
 <tr><td style="padding:26px 24px 8px">
 <p style="margin:0 0 12px;font-size:22px;font-weight:900">請確認你的信箱</p>
-<p style="margin:0 0 22px;font-size:17px;line-height:1.7;color:#36454B">你在${SITE_NAME}登記了走失協尋「${escH(name)}」。點下面的按鈕確認這是你的信箱，之後有人回報看到牠，我們會馬上寄信通知你。</p>
+<p style="margin:0 0 22px;font-size:17px;line-height:1.7;color:#36454B">你在${SITE_NAME}登記了走失協尋。點下面的按鈕確認這是你的信箱，之後有人回報看到牠，我們會馬上寄信通知你。</p>
 <a href="${link}" style="display:block;background:#CC3F1E;color:#fff;text-decoration:none;font-size:20px;font-weight:900;padding:16px 20px;border-radius:12px;text-align:center">✅ 確認信箱</a>
 <p style="margin:18px 0 0;font-size:15px;line-height:1.7;color:#36454B">連結 7 天內有效。</p></td></tr>
 <tr><td style="padding:18px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
 不是你登記的？直接刪除這封信就好，我們不會再寄信給你。<br>${SITE_NAME}｜全台走失毛孩協尋平台　<a href="${SITE}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
 </table></td></tr></table></body></html>`;
     try {
-      await sendMail(to, `【${SITE_NAME}】請確認你的信箱，才收得到「${name}」的目擊通知`, text, html);
-      await sb.from("case_mail_log").insert({ case_id: caseId, to_email: to });
+      await sendMail(to, `【${SITE_NAME}】請確認你的信箱，才收得到目擊通知`, text, html);
+      await sb.from("case_mail_log").insert({ case_id: caseId, to_email: toKey, kind: "verify" });
       return json({ sent: true });
     } catch (e) {
       await sb.from("cases").update({ email_verify_sent_at: null }).eq("id", caseId);
@@ -135,6 +144,8 @@ Deno.serve(async (req) => {
 
   // ---------------------------------------------------------------- 目擊通知
   if (!c.email_verified) return json({ sent: false, reason: "unverified" });
+  // 目擊通知全站每小時最多 150 封（和確認信分開計算）
+  if (await count((x) => x.eq("kind", "notify").gte("sent_at", hourAgo)) >= 150) return json({ sent: false, reason: "throttled" });
   // 同一案件、同一信箱一小時最多 6 封；超過就先不寄，目擊留著下次一起寄
   if (await count((x) => x.eq("case_id", caseId).gte("sent_at", hourAgo)) >= 6) return json({ sent: false, reason: "throttled" });
   if (await count((x) => x.eq("to_email", to).gte("sent_at", hourAgo)) >= 6) return json({ sent: false, reason: "throttled" });

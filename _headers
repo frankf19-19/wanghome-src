@@ -13,10 +13,6 @@
   Cache-Control: no-cache
 /manifest.webmanifest
   Cache-Control: no-cache
-/s/*
-  Cache-Control: public, max-age=300
-/f/*
-  Cache-Control: public, max-age=300
 /*.png
   Cache-Control: public, max-age=86400
 /*.svg
