@@ -1405,7 +1405,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.7.3';
+const BUILD = 'v4.7.4';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IS_APP)document.documentElement.classList.add('is-app');
@@ -1562,7 +1562,8 @@ async function uploadPhoto(file,folder){__uploading++;try{return await uploadPho
 async function uploadPhoto_(file,folder){
   const k=upCache.get(file);if(k&&k.folder===folder)return k.url;
   const [blob,thumb]=await Promise.all([compressImage(file,1080,.8),compressImage(file,480,.72).catch(()=>null)]);   // 1080 = 海報寬度；省雲端空間
-  const base=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+  const uid=folder==='pets'?me()?.id:null;if(folder==='pets'&&!uid)throw new Error('請先登入');
+  const base=`${folder}/${uid?uid+'/':''}${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
   const {error}=await sb.storage.from('photos').upload(base+'.jpg',blob,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'});if(error)throw error;
   // 小縮圖（清單用，約 30KB）；失敗不影響主圖
   if(thumb)await sb.storage.from('photos').upload(base+'_t.jpg',thumb,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'}).catch(()=>{});
