@@ -1422,7 +1422,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 <main id="app" tabindex="-1"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></main>
 
 <footer>
-  <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
+  <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/health" class="tb-dup">毛孩健康手冊</a><a href="#/me" class="tb-dup">我的帳號</a><a href="#/seen" class="tb-dup">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
   <p class="health-note small">毛孩健康手冊的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷。用藥與治療請依獸醫師指示。</p>
   <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>© 2026 汪喵回家 版權所有</span><span id="buildV"></span></div>
@@ -1446,7 +1446,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.5';
+const BUILD = 'v4.9.6';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
