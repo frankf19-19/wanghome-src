@@ -1504,7 +1504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.1.4';
+const BUILD = 'v5.1.5';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -3566,20 +3566,46 @@ async function renderFoundManage(id,token){const _n=navId;setTitle('管理我的
   // 管理代碼存好後從網址拿掉，避免截圖或複製網址時外流
   if(/[?&]t=/.test(location.hash))try{const h='#/found-manage/'+id;history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h);if(typeof curHash!=='undefined')curHash=h}catch(_){}
   setTitle('管理拾獲通報');
-  (_n===navId?app:_void).innerHTML=`<h1>管理拾獲通報</h1><p><a class="btn sm ghost" href="#/found/${id}">查看公開頁</a></p>
-  ${f.is_mine?'<p class="small"><span class="tag green">✓ 已綁定你的帳號</span></p>':(!f.owner_id&&me()&&token)?'<div class="notice green"><b>綁定到你的帳號？</b><div style="margin-top:8px"><button class="btn sm green" id="btnClaimF">綁定</button></div></div>':''}
-  <div class="card">
-    <div class="seg" id="seg"><button type="button" data-v="open" class="${f.status==='open'?'on':''}">${f.kind==='injured'?'等待救援／照顧中':'還在等飼主'}</button><button type="button" data-v="reunited" class="${f.status==='reunited'?'on':''}">已回到主人身邊 🎉</button><button type="button" data-v="closed" class="${f.status==='closed'?'on':''}">${f.kind==='injured'?'已被救援帶走／結案':'結案（其他）'}</button></div>
+  const P=qs(location.hash).p||'';const go=k=>`#/found-manage/${id}${k?'?p='+k:''}`;
+  const what=(f.kind==='injured'?'受傷的':f.kind==='seen'?'看到的':'撿到的')+sp(f.species).name;
+  const FST={open:`<span class="tag amber">${f.kind==='injured'?'等待救援／照顧中':'等飼主中'}</span>`,reunited:'<span class="tag green">已回到主人身邊</span>',closed:'<span class="tag gray">已結案</span>'};
+  const tile=(href,icon,title,sub,cls='',idAttr='')=>`<a class="mg-tile ${cls}" href="${href}"${idAttr}><span class="mg-ic" aria-hidden="true">${icon}</span><span class="mg-tt"><b>${title}</b><small>${sub}</small></span><span class="mg-go" aria-hidden="true">›</span></a>`;
+  (_n===navId?app:_void).innerHTML=`
+  <div ${P?'hidden':''}>
+    <div class="mg-head"><h1>${esc(what)} <span id="fstTag">${FST[f.status]||''}</span></h1><p class="muted">${f.status==='open'?'要做什麼？點下面一項就好。':'謝謝你的幫忙 🐾'}</p></div>
+    <div class="mg-tiles">
+      ${tile(`#/found/${id}`,'🔍','看可能的飼主','系統比對附近的走失案件，很像就直接聯絡')}
+      ${f.status==='open'?tile('javascript:void 0','🏠','牠回到主人身邊了','找到飼主就按這裡','green',' id="btnReunite"'):''}
+      ${tile(go('edit'),'✏️','修改資料','牠現在在哪裡、我的電話')}
+    </div>
+    <p class="mg-foot small"><a href="${go('more')}">結案・綁定帳號・刪除通報</a></p>
+  </div>
+  <div ${P?'':'hidden'}>
+    <a class="mg-back" href="${go('')}">‹ 回到管理</a>
+    <section ${P==='edit'?'':'hidden'}>
+      <h1>修改資料</h1>
+      <div class="card">
     <label class="f"><span>牠目前在哪裡</span><input id="cur" value="${esc(f.current_place||'')}" maxlength="200"></label>
     <label class="f"><span>電話</span><input id="ph" value="${esc(f.reporter_phone||'')}" maxlength="30"></label>
     <label class="chk"><input type="checkbox" id="pp" ${f.phone_public?'checked':''}> 讓飼主可以直接打電話給我（電話會公開顯示）</label>
     <label class="f"><span>補充</span><textarea id="nt" maxlength="1000">${esc(f.notes||'')}</textarea></label>
-    <button class="btn" style="margin-top:12px" id="save">儲存</button>
+            <button class="btn big block" style="margin-top:12px" id="save">儲存</button>
+      </div>
+    </section>
+    <section ${P==='more'?'':'hidden'}>
+      <h1>其他設定</h1>
+      <h2>狀態</h2><p class="small muted">點一下就會儲存。</p>
+    <div class="seg" id="seg"><button type="button" data-v="open" class="${f.status==='open'?'on':''}">${f.kind==='injured'?'等待救援／照顧中':'還在等飼主'}</button><button type="button" data-v="reunited" class="${f.status==='reunited'?'on':''}">已回到主人身邊 🎉</button><button type="button" data-v="closed" class="${f.status==='closed'?'on':''}">${f.kind==='injured'?'已被救援帶走／結案':'結案（其他）'}</button></div>
+      ${f.is_mine?'<p class="small"><span class="tag green">✓ 已綁定你的帳號</span></p>':(!f.owner_id&&me()&&token)?'<div class="notice green"><b>綁定到你的帳號？</b><div style="margin-top:8px"><button class="btn sm green" id="btnClaimF">綁定</button></div></div>':''}
+      <h2 style="color:var(--red-ink)">刪除這則通報</h2>
+      <p class="small">會永久刪除這則通報，網站上馬上就找不到。</p>
+      <button type="button" class="btn big danger" id="btnDelFound">永久刪除這則通報</button>
+    </section>
   </div>
-  <details class="more danger-zone" style="margin-top:28px"><summary>刪除這則通報</summary>
-    <p>會永久刪除這則通報，網站上馬上就找不到；照片檔案會在幾天內自動清除。</p>
-    <button type="button" class="btn big danger" id="btnDelFound">永久刪除這則通報</button>
-  </details>`;
+  <p class="small muted mg-foot">管理連結請勿轉傳。</p>`;
+  if($('#btnReunite'))$('#btnReunite').onclick=async e=>{e.preventDefault();if(!confirm('確定牠已經回到主人身邊了嗎？這則通報會標示為「已回家」。'))return;
+    const {error}=await sb.rpc('update_found',{p_id:id,p_token:token,p:{status:'reunited',current_place:f.current_place,reporter_phone:f.reporter_phone,phone_public:f.phone_public,notes:f.notes}});
+    if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('🎉 太好了，謝謝你！',3500);route()};
   $('#btnDelFound').onclick=async()=>{if(!confirm('確定要永久刪除這則通報嗎？刪除後無法復原。'))return;const {error}=await sb.rpc('delete_found',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
     try{localStorage.removeItem('wh_ftoken_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這則通報',3000);goReplace('#/')};
   if($('#btnClaimF'))$('#btnClaimF').onclick=async e=>{const cb=e.currentTarget;if(cb.disabled)return;cb.disabled=true;const {error}=await sb.rpc('claim_found',{p_id:id,p_token:token});if(error){cb.disabled=false;return toast(error.message)}toast('✅ 已綁定');renderFoundManage(id,token)};
@@ -3590,7 +3616,7 @@ async function renderFoundManage(id,token){const _n=navId;setTitle('管理我的
     if(v!=='open'&&!confirm(v==='reunited'?'確定牠已經回到主人身邊了嗎？這則通報會標示為「已回家」。':'確定要結案嗎？這則通報會標示為已結案。'))return;
     const btns=$('#seg').querySelectorAll('button');btns.forEach(x=>x.disabled=true);
     const {error}=await sb.rpc('update_found',{p_id:id,p_token:token,p:fval(v)});btns.forEach(x=>x.disabled=false);
-    if(error)return toast('儲存失敗：'+friendlyErr(error.message));st=v;btns.forEach(x=>x.classList.toggle('on',x===b));toast(v==='reunited'?'🎉 太好了，謝謝你！已儲存':'已儲存')});
+    if(error)return toast('儲存失敗：'+friendlyErr(error.message));st=v;btns.forEach(x=>x.classList.toggle('on',x===b));{const t=$('#fstTag');if(t)t.innerHTML=FST[v]||''}toast(v==='reunited'?'🎉 太好了，謝謝你！已儲存':'已儲存')});
   $('#save').onclick=once(async()=>{const {error}=await sb.rpc('update_found',{p_id:id,p_token:token,p:fval(st)});if(error)return toast('儲存失敗：'+error.message);toast(st==='reunited'?'🎉 太好了，謝謝你！':'已儲存')});
 }
 
