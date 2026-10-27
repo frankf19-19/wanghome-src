@@ -1249,6 +1249,8 @@ main#app:focus,#app h1[tabindex="-1"]:focus{outline:none}
 #navMe.on,.hd-av.on{box-shadow:inset 0 0 0 2px var(--red)}
 body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #tabbar{display:none!important}body.bare{--tabbar-h:0px;padding-bottom:0}
 .chk.agree{margin:14px 0 6px;font-size:14.5px;line-height:1.5;align-items:flex-start}.chk.agree input{margin-top:3px;flex:none}
+.af-note{margin:6px 0 4px;padding:8px 12px;border-radius:12px;background:var(--green-soft);color:var(--green)}
+@keyframes afFlash{0%{box-shadow:0 0 0 3px var(--green)}100%{box-shadow:0 0 0 0 transparent}}.autofill{animation:afFlash 1.6s ease-out}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1444,7 +1446,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.3';
+const BUILD = 'v4.9.4';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1663,7 +1665,24 @@ function waitLeaflet(){if(window.__lfail&&!window.L)leafletGaveUp=true;if(window
 function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(m);__maps.push(m);return m}
 function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
-function pickerMap(el,center){const m=makeMap(el,center,13);let mk=null,val=null,user=false;const set=(lat,lng,fly)=>{if(m.__stub){val={lat,lng};toast('✅ 已記下你的位置');return}if(!m._mapPane)return;val={lat,lng};if(!mk){mk=marker([lat,lng],'📍','me').addTo(m)}else mk.setLatLng([lat,lng]);if(fly)m.setView([lat,lng],16)};m.on('click',e=>{__dirty=true;user=true;set(e.latlng.lat,e.latlng.lng)});return{map:m,get:()=>val,get touched(){return user},set,locate(){if(!navigator.geolocation){toast('此裝置不支援定位');return}toast('定位中…');navigator.geolocation.getCurrentPosition(p=>{__dirty=true;user=true;set(p.coords.latitude,p.coords.longitude,true)},()=>toast('無法取得定位，請直接點地圖'),{enableHighAccuracy:true,timeout:8000})}}}
+// 定位或點地圖後：自動帶入縣市、區、地點描述（只填空的或跟位置不一樣的），並請使用者確認
+// 瀏覽器內建的欄位提示改成中文（iPhone 語言是英文時會跳出「Select an item in the list」）
+document.addEventListener('invalid',e=>{const x=e.target;if(!x||!x.validity)return;const v=x.validity;
+  x.setCustomValidity(v.valueMissing?(x.tagName==='SELECT'?'請選一個項目':x.type==='checkbox'?'請勾選這一項':'請填寫這個欄位'):v.typeMismatch?(x.type==='email'?'Email 格式不對，例如 name@gmail.com':'格式不對'):v.tooLong?'字數太多了':v.patternMismatch?'格式不對':v.rangeUnderflow||v.rangeOverflow?'數值超出範圍':'')},true);
+['input','change'].forEach(t=>document.addEventListener(t,e=>{const x=e.target;if(x&&x.setCustomValidity)x.setCustomValidity('')},true));
+let __afT=null;
+function autoFillPlace(mapEl,lat,lng,now){clearTimeout(__afT);__afT=setTimeout(async()=>{
+  const box=typeof mapEl==='string'?document.getElementById(mapEl):mapEl;const f=box&&box.closest('form');if(!f)return;
+  const cs=f.querySelector('#city'),ds=f.querySelector('#dist');if(!cs)return;
+  const g=await reverseGeo(lat,lng);if(!box.isConnected||!g.city||!TW[g.city])return;
+  if(cs.value!==g.city){cs.value=g.city;if(ds)ds.innerHTML=distOptions(g.city,g.district)}else if(ds&&g.district)ds.value=g.district;
+  const pt=f.querySelector('[name=lost_place],[name=place_text]');let road='';
+  if(g.geoOk){road=g.address.replace(g.city,'').replace(g.district,'').trim();if(pt&&!pt.value.trim()&&road)pt.value=road}
+  [cs,ds,pt].forEach(x=>{if(x){x.classList.remove('autofill');void x.offsetWidth;x.classList.add('autofill')}});
+  let n=f.querySelector('.af-note');if(!n){n=document.createElement('p');n.className='af-note small';n.setAttribute('aria-live','polite');(cs.closest('.row2')||cs.closest('label')).after(n)}
+  n.innerHTML=`📍 已依位置帶入：<b>${esc(g.city+(g.district||''))}</b>${road&&pt&&pt.value===road?'　'+esc(road):''}，請確認是否正確；不對的話直接改選就好。`;
+  __dirty=true},now?0:700)}
+function pickerMap(el,center){const m=makeMap(el,center,13);let mk=null,val=null,user=false;const set=(lat,lng,fly)=>{if(m.__stub){val={lat,lng};toast('✅ 已記下你的位置');return}if(!m._mapPane)return;val={lat,lng};if(!mk){mk=marker([lat,lng],'📍','me').addTo(m)}else mk.setLatLng([lat,lng]);if(fly)m.setView([lat,lng],16)};m.on('click',e=>{__dirty=true;user=true;set(e.latlng.lat,e.latlng.lng);autoFillPlace(el,e.latlng.lat,e.latlng.lng)});return{map:m,get:()=>val,get touched(){return user},set,locate(){if(!navigator.geolocation){toast('此裝置不支援定位');return}toast('定位中…');navigator.geolocation.getCurrentPosition(p=>{__dirty=true;user=true;set(p.coords.latitude,p.coords.longitude,true);autoFillPlace(el,p.coords.latitude,p.coords.longitude,true)},()=>toast('無法取得定位，請直接點地圖'),{enableHighAccuracy:true,timeout:8000})}}}
 
 /* ============================================================
    路由
