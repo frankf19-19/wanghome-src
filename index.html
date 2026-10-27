@@ -1252,6 +1252,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .af-note{margin:6px 0 4px;padding:8px 12px;border-radius:12px;background:var(--green-soft);color:var(--green)}
 @keyframes afFlash{0%{box-shadow:0 0 0 3px var(--green)}100%{box-shadow:0 0 0 0 transparent}}.autofill{animation:afFlash 1.6s ease-out}
 .reward-note{text-align:center;margin:8px 4px 0;line-height:1.6}
+.qpick{margin:6px 0 4px;gap:6px}.qpick .fchip{padding:6px 11px;font-size:13.5px;min-height:34px}.qpick .more{border-style:dashed}.qp-t{display:block;margin:8px 0 0;color:var(--ink-2)}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1447,7 +1448,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.8';
+const BUILD = 'v4.9.9';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1841,6 +1842,24 @@ document.addEventListener('submit',e=>{const f=e.target;const cb=f&&f.querySelec
   if(!cb.checked){e.preventDefault();e.stopImmediatePropagation();toast('請先勾選「我已閱讀並同意使用條款與隱私權政策」');cb.closest('label')?.scrollIntoView({block:'center'});try{cb.focus({preventScroll:true})}catch(_){}return}
   try{localStorage.setItem('wh_agree','1')}catch(_){}},true);
 new MutationObserver(()=>{let ok=false;try{ok=localStorage.getItem('wh_agree')==='1'}catch(_){}if(ok)app.querySelectorAll('input[data-agree]:not([data-init])').forEach(x=>{x.dataset.init=1;x.checked=true})}).observe(document.getElementById('app'),{childList:true,subtree:true});
+// 品種、毛色：常見的點一下就填好，其他的自己打字
+const QPICK={breed:{dog:['米克斯','台灣犬','柴犬','貴賓','博美','吉娃娃','臘腸','法鬥','柯基','雪納瑞','馬爾濟斯','西施','約克夏','比熊','黃金獵犬','拉布拉多','哈士奇','邊境牧羊犬','米格魯'],cat:['米克斯','英國短毛','美國短毛','波斯','布偶','曼赤肯','蘇格蘭摺耳','暹羅','俄羅斯藍','緬因','異國短毛','孟加拉']},
+  colour:{dog:['黑','白','黃','咖啡','奶油','灰','虎斑','黑白','黑黃','花色'],cat:['橘','白','黑','灰','三花','玳瑁','虎斑','黑白（賓士）','橘白','灰白','暹羅色']}};
+function qpSpecies(f){const on=f.querySelector('#segSp .on');return on?on.dataset.v:(f.dataset.sp||'dog')}
+function qpDraw(inp){const f=inp.form;if(!f)return;const k=inp.name,sp=qpSpecies(f)==='cat'?'cat':'dog',box=inp._qp;if(!box)return;
+  const cur=inp.value.split(/[、,，\s]+/).filter(Boolean);
+  box.innerHTML=QPICK[k][sp].map(v=>`<button type="button" class="fchip qp ${k==='breed'?(inp.value.trim()===v?'on':''):(cur.includes(v)?'on':'')}" data-v="${v}">${v}</button>`).join('')+`<button type="button" class="fchip qp more" data-own>其他（自己輸入）</button>`}
+function qpEnhance(root){root.querySelectorAll('form input[name=breed],form input[name=colour]').forEach(inp=>{if(inp._qp)return;const lab=inp.closest('label')||inp;
+  const box=document.createElement('div');box.className='fchips qpick';box.setAttribute('aria-label',inp.name==='breed'?'常見品種':'常見毛色');inp._qp=box;
+  // 兩欄並排時，選項放到整排下面
+  const row=lab.closest('.row2');(row&&row.contains(lab)?(row._qpHost||(row._qpHost=(()=>{const h=document.createElement('div');row.after(h);return h})())):lab).appendChild(box);
+  if(row){const t=document.createElement('b');t.className='qp-t small';t.textContent=inp.name==='breed'?'品種':'毛色';box.before(t)}
+  box.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-own')){inp.focus();inp.select&&inp.select();return}
+    const v=b.dataset.v;if(inp.name==='breed')inp.value=inp.value.trim()===v?'':v;else{let a=inp.value.split(/[、,，\s]+/).filter(Boolean);a=a.includes(v)?a.filter(x=>x!==v):[...a,v];inp.value=a.join('、')}
+    inp.dispatchEvent(new Event('input',{bubbles:true}));qpDraw(inp)};
+  inp.addEventListener('input',()=>qpDraw(inp));qpDraw(inp);
+  const seg=inp.form&&inp.form.querySelector('#segSp');if(seg&&!seg._qp){seg._qp=1;seg.addEventListener('click',()=>setTimeout(()=>inp.form.querySelectorAll('input[name=breed],input[name=colour]').forEach(qpDraw),0))}})}
+new MutationObserver(()=>qpEnhance(document.getElementById('app'))).observe(document.getElementById('app'),{childList:true,subtree:true});
 function updScrolled(){const h=document.querySelector('#app h1');const b=h?h.getBoundingClientRect().bottom:0;document.body.classList.toggle('scrolled',!h||b<60)}
 window.addEventListener('scroll',updScrolled,{passive:true});
 try{new MutationObserver(()=>updScrolled()).observe(document.getElementById('app'),{childList:true})}catch(_){}
@@ -2926,7 +2945,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
   ${(matches||[]).length?matches.map(m=>`<div style="opacity:${m.dismissed?.5:1}">${matchHTML(m)}${m.dismissed?'':`<div style="text-align:right;margin:-4px 0 10px"><button class="btn sm ghost" data-m="${m.id}">不是牠，隱藏</button></div>`}</div>`).join(''):'<p class="muted">目前沒有疑似資料：走失日之後，該縣市收容所沒有收容特徵相符的動物。</p>'}
 
   <h2>編輯資料</h2>
-  <form onsubmit="return false" class="card" id="fe">
+  <form onsubmit="return false" class="card" id="fe" data-sp="${esc(c.species||'dog')}">
     <div class="row2"><label class="f"><span>名字</span><input name="name" required maxlength="30" value="${esc(c.name)}"></label><label class="f"><span>毛色</span><input name="colour" value="${esc(c.colour||'')}"></label></div>
     <label class="f"><span>辨識特徵</span><textarea name="features">${esc(c.features||'')}</textarea></label>
     <div class="row2"><label class="f"><span>走失時配戴</span><input name="collar_desc" value="${esc(c.collar_desc||'')}"></label><label class="f"><span>個性</span><input name="temperament" value="${esc(c.temperament||'')}"></label></div>
