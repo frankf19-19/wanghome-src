@@ -62,7 +62,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>拍下走失或拾獲毛孩的照片，放進協尋案件或通報。</string>
+	<string>拍下毛孩、藥袋或病歷的照片，放進協尋案件、通報或健康手冊。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>從相簿選擇毛孩照片，放進協尋案件、通報或健康紀錄。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
