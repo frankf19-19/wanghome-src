@@ -1313,6 +1313,20 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 /* iPad 直向：導覽列只留主要的，logo 不換行 */
 .logo,#siteName,.nav .btn.sm{white-space:nowrap}
 @media (min-width:761px) and (max-width:1000px){.nav a[href="#/learn"].link,.nav a[href="#/resources"].link{display:none}.nav a.link{min-height:40px;display:inline-flex;align-items:center}}
+.mg-head{margin:4px 0 12px}.mg-head small{display:block;font-weight:700;letter-spacing:.02em}.mg-head h1{margin:2px 0 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.mg-head h1 .tag{font-size:14px}
+.mg-pend{background:var(--mark-soft,#FFF5CC);border-radius:18px;padding:14px 16px 6px;margin:0 0 14px}.mg-pend h2{margin:0 0 6px;font-size:19px}
+.home-btn{width:100%;margin:4px 0 10px}
+.mg-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}.mg-acts .btn{justify-content:center}
+.mg-list{display:flex;flex-direction:column;gap:10px}
+.mg-sec{background:var(--sheet);border-radius:16px;box-shadow:0 1px 0 var(--line),0 0 0 1px var(--line)}
+.mg-sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:15px 16px;font-weight:800;font-size:16.5px;min-height:52px}
+.mg-sec>summary::-webkit-details-marker{display:none}
+.mg-sec>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);opacity:.5;transition:transform .15s}
+.mg-sec[open]>summary::after{transform:rotate(225deg)}
+.mg-sec>summary .muted,.mg-sec>summary .tag{font-weight:600}
+.mg-body{padding:0 16px 16px}.mg-body>.card{box-shadow:none;padding:0;background:none}
+.mg-sec.danger-zone>summary{color:var(--red-ink)}
+.mg-foot{margin:16px 2px 0;text-align:center}
 .pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:760px){
   .hd-av{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--sheet);color:var(--ink-2);box-shadow:var(--lift);margin-left:auto}
@@ -1474,7 +1488,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.1.1';
+const BUILD = 'v5.1.2';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2992,38 +3006,40 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   if(/[?&][tm]=/.test(location.hash))try{const h='#/manage/'+id;history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h);if(typeof curHash!=='undefined')curHash=h}catch(_){}
   setTitle(`管理 ${c.name||''}`);
   const pending=(Array.isArray(ss)?ss:[]).filter(s=>s.status==='pending');
-  (_n===navId?app:_void).innerHTML=`<h1>管理：${esc(c.name)}</h1>${mailOnly?`<div class="notice"><b>你是從通知信點進來的</b>信裡的按鈕 30 天內都能直接進來管理。想長期管理：${me()?'按下面的「綁定到我的帳號」':'登入會員後按「綁定到我的帳號」'}，或用登記時收到的管理網址。</div>`:''}${c.hidden?'<div class="notice red"><b>這個案件目前沒有公開</b>可能是系統偵測到可疑字眼（例如匯款、訂金），或被檢舉後由站方隱藏。站方確認後會恢復；如有疑問請寫信到 service@wangmiaotw.com。</div>':''}
-  <p class="muted small" style="margin-bottom:6px">管理連結請勿公開。</p><div class="row-btns" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><a class="btn sm" href="#/poster/${id}">${ic("image")} 產生海報</a><a class="btn sm ghost" href="#/case/${id}">查看公開頁</a></div>
-  ${c.is_mine?'<p class="small"><span class="tag green">✓ 已綁定你的帳號</span></p>':c.owner_id?'':me()&&token?'<div class="notice green"><b>把這個案件綁定到你的帳號？</b>綁定後換手機也能管理，不怕管理網址弄丟。<div style="margin-top:8px"><button class="btn sm green" id="btnClaim">綁定到我的帳號</button></div></div>':!me()?'<p class="small muted"><a href="#/login">登入</a>後可把案件綁定帳號，不怕管理網址弄丟。</p>':''}
-  ${pending.length?`<div class="notice" id="pendNotice"><b>有 <span id="pendN">${pending.length}</span> 筆目擊待你確認</b>確認後才會顯示在公開地圖上；明顯不是牠的請按「退回」。</div>`:''}
-
-  ${c.contact_email&&c.email_verified===false?`<div class="notice" id="vnotice"><b>Email 還沒確認</b>有人回報看到牠時，我們還不能寄信給你。請到 <b>${esc(c.contact_email)}</b> 的信箱按「確認信箱」（也找找垃圾郵件匣）。<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><button type="button" class="btn sm" id="btnRev">重寄確認信</button><span class="small" id="vmsg" aria-live="polite"></span></div></div>`:''}
-  ${c.status==='searching'?`<button type="button" class="btn big green home-btn" id="btnHome">🎉 牠回家了！</button>`:''}
-  <h2>狀態</h2>
-  <div class="card">
-    <div class="seg" id="segStatus">${Object.entries(STATUS).map(([k,v])=>`<button type="button" data-v="${k}" class="${c.status===k?'on':''}">${v}</button>`).join('')}</div>
-    <ul class="small muted statushelp"><li>點一下就會儲存</li><li><b>協尋中</b>：還在找</li><li><b>已找到</b>：牠回家了</li><li><b>已結案</b>：不再協尋（例如確定找不回來）</li></ul>
-    <div id="foundBox" class="${c.status==='found'?'':'hidden'}" style="margin-top:12px">
-      <label class="f"><span><b class="lbl">怎麼找到的？</b><small class="hint">會公開，幫助其他飼主</small></span><select id="foundMethod"><option value="">選擇</option>${FOUND_METHODS.map(m=>`<option ${c.found_method===m?'selected':''}>${m}</option>`).join('')}</select></label>
-      <label class="f"><span><b class="lbl">找到的經過</b><small class="hint">會公開</small></span><textarea id="foundNote" maxlength="1000">${esc(c.found_note||'')}</textarea></label>
-    </div>
-    <button class="btn big ${c.status==='found'?'':'hidden'}" style="margin-top:12px" id="btnStatus">儲存找到的經過</button>
-  </div>
-
-  <h2>目擊回報 <span class="tag gray">${(ss||[]).length}</span></h2>
-  <div class="timeline">${(ss||[]).length?ss.map((s,i)=>`<div class="tl"><div class="dot ${s.status==='pending'?'pending':s.status==='rejected'?'start':''}">${s.status==='pending'?'?':s.status==='rejected'?'×':'✓'}</div>
+  const pendS=(ss||[]).filter(s=>s.status==='pending'),doneS=(ss||[]).filter(s=>s.status!=='pending');
+  const sItem=(s,i)=>`<div class="tl"><div class="dot ${s.status==='pending'?'pending':s.status==='rejected'?'start':''}">${s.status==='pending'?'?':s.status==='rejected'?'×':'✓'}</div>
     <div class="when">${fmtDT(s.seen_at)} <span class="tag ${s.status==='pending'?'amber':s.status==='rejected'?'gray':'green'}">${s.status==='pending'?'待確認':s.status==='rejected'?'已退回':'已確認'}</span></div>
     <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
     ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
     ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>`:''}
-    <div class="ops">${sightOps(s.id,s.status)}</div></div>`).join(''):'<p class="muted">還沒有目擊回報。</p>'}</div>
+    <div class="ops">${sightOps(s.id,s.status)}</div></div>`;
+  const STATUS_TAG={searching:'<span class="tag red">協尋中</span>',found:'<span class="tag green">已找到</span>',closed:'<span class="tag gray">已結案</span>'};
+  (_n===navId?app:_void).innerHTML=`<div class="mg-head"><small class="muted">管理案件</small><h1>${esc(c.name)} ${STATUS_TAG[c.status]||''}</h1></div>
+  ${c.hidden?'<div class="notice red"><b>這個案件目前沒有公開</b>可能含可疑字眼，或被檢舉後由站方隱藏。站方確認後會恢復；有疑問請寫信到 service@wangmiaotw.com。</div>':''}
+  ${pendS.length?`<section class="mg-pend" id="pendNotice"><h2>有 <span id="pendN">${pendS.length}</span> 筆目擊等你確認</h2><p class="small muted" style="margin:-4px 0 8px">是牠就按「確認」，會顯示在公開地圖上；不是就按「退回」。</p><div class="timeline">${pendS.map(sItem).join('')}</div></section>`:''}
+  ${c.contact_email&&c.email_verified===false?`<div class="notice" id="vnotice"><b>Email 還沒確認</b>有人回報看到牠時，我們還不能寄信給你。請到 <b>${esc(c.contact_email)}</b> 的信箱按「確認信箱」（也找找垃圾郵件匣）。<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><button type="button" class="btn sm" id="btnRev">重寄確認信</button><span class="small" id="vmsg" aria-live="polite"></span></div></div>`:''}
+  ${c.status==='searching'?`<button type="button" class="btn big green home-btn" id="btnHome">🎉 牠回家了！</button>`:''}
+  <div class="mg-acts"><a class="btn ghost" href="#/poster/${id}">${ic("image")} 海報</a><a class="btn ghost" href="#/case/${id}">${ic("eye")} 公開頁</a></div>
 
-  <h2>收容所比對 <span class="tag gray">${(matches||[]).length}</span></h2>
-  <p class="muted small">每次打開案件頁或這個管理頁都會用最新的農業部收容所資料重新比對。相似分數只是粗略篩選，請親自看照片、打電話核對晶片。</p>
+  <div class="mg-list">
+  <details class="mg-sec"${c.status!=='searching'?' open':''}><summary>案件狀態<span class="muted small">${STATUS[c.status]||''}</span></summary><div class="mg-body">
+    <div class="seg" id="segStatus">${Object.entries(STATUS).map(([k,v])=>`<button type="button" data-v="${k}" class="${c.status===k?'on':''}">${v}</button>`).join('')}</div>
+    <div id="foundBox" class="${c.status==='found'?'':'hidden'}" style="margin-top:12px">
+      <label class="f"><span><b class="lbl">怎麼找到的？</b><small class="hint">會公開，幫助其他飼主</small></span><select id="foundMethod"><option value="">選擇</option>${FOUND_METHODS.map(m=>`<option ${c.found_method===m?'selected':''}>${m}</option>`).join('')}</select></label>
+      <label class="f"><span><b class="lbl">找到的經過</b><small class="hint">會公開</small></span><textarea id="foundNote" maxlength="1000">${esc(c.found_note||'')}</textarea></label>
+    </div>
+    <button class="btn big ${c.status==='found'?'':'hidden'}" style="margin-top:12px" id="btnStatus">儲存找到的經過</button>
+    <ul class="small muted statushelp"><li>點一下就會儲存。<b>已結案</b>＝不再協尋（例如確定找不回來）。</li></ul>
+  </div></details>
+  <details class="mg-sec"><summary>${pendS.length?'已處理的目擊':'目擊回報'}<span class="tag gray">${doneS.length}</span></summary><div class="mg-body">
+    <div class="timeline">${doneS.length?doneS.map(sItem).join(''):`<p class="muted">${pendS.length?'其他的都在上面等你確認。':'還沒有目擊回報。'}</p>`}</div>
+  </div></details>
+  <details class="mg-sec"><summary>收容所比對<span class="tag gray">${(matches||[]).filter(m=>!m.dismissed).length}</span></summary><div class="mg-body">
+    <p class="muted small">用農業部收容所資料自動比對，只是粗略篩選，請親自看照片、打電話核對晶片。</p>
   ${(matches||[]).length?matches.map(m=>`<div style="opacity:${m.dismissed?.5:1}">${matchHTML(m)}${m.dismissed?'':`<div style="text-align:right;margin:-4px 0 10px"><button class="btn sm ghost" data-m="${m.id}">不是牠，隱藏</button></div>`}</div>`).join(''):'<p class="muted">目前沒有疑似資料：走失日之後，該縣市收容所沒有收容特徵相符的動物。</p>'}
-
-  <h2>編輯資料</h2>
+  </div></details>
+  <details class="mg-sec"><summary>修改資料與照片</summary><div class="mg-body">
   <form onsubmit="return false" class="card" id="fe" data-sp="${esc(c.species||'dog')}">
     <div class="row2"><label class="f"><span>名字</span><input name="name" required maxlength="30" value="${esc(c.name)}"></label><label class="f"><span>毛色</span><input name="colour" value="${esc(c.colour||'')}"></label></div>
     <label class="f"><span>辨識特徵</span><textarea name="features">${esc(c.features||'')}</textarea></label>
@@ -3039,19 +3055,26 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
     <button class="btn big block" type="submit" style="margin-top:14px">儲存資料</button>
   </form>
-  <details class="more danger-zone" style="margin-top:28px"><summary>刪除這個案件</summary>
-    <p>會永久刪除這個案件、所有目擊回報和比對結果，網站上馬上就找不到；照片檔案會在幾天內自動清除。<b>找到了的話，建議改按「已找到」</b>，讓大家知道牠回家了。</p>
+  </div></details>
+  ${c.is_mine||c.owner_id?'':`<details class="mg-sec"><summary>綁定到我的帳號<span class="muted small">換手機也能管理</span></summary><div class="mg-body">
+  ${c.is_mine?'<p class="small"><span class="tag green">✓ 已綁定你的帳號</span></p>':c.owner_id?'':me()&&token?'<div class="notice green"><b>把這個案件綁定到你的帳號？</b>綁定後換手機也能管理，不怕管理網址弄丟。<div style="margin-top:8px"><button class="btn sm green" id="btnClaim">綁定到我的帳號</button></div></div>':!me()?'<p class="small muted"><a href="#/login">登入</a>後可把案件綁定帳號，不怕管理網址弄丟。</p>':''}
+
+  </div></details>`}
+  <details class="mg-sec danger-zone"><summary>刪除這個案件</summary><div class="mg-body">
+    <p>會永久刪除這個案件、所有目擊回報和比對結果，網站上馬上就找不到。<b>找到了的話，請改按「牠回家了」</b>，讓大家知道。</p>
     <button type="button" class="btn big danger" id="btnDelCase">永久刪除這個案件</button>
-  </details>`;
+  </div></details>
+  </div>
+  ${mailOnly?`<p class="small muted mg-foot">你是從通知信進來的，信裡的按鈕 30 天內有效。管理連結請勿轉傳。</p>`:'<p class="small muted mg-foot">管理連結請勿轉傳。</p>'}`;
   if($('#btnClaim'))$('#btnClaim').onclick=async e=>{const cb=e.currentTarget;if(cb.disabled)return;cb.disabled=true;const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error){cb.disabled=false;return toast(error.message)}toast('✅ 已綁定');if(__dirty){const x=$('#btnClaim');const box=x&&(x.closest('.notice,.card')||x);if(box)box.remove()}else renderManage(id,token)};   // 正在改資料時不要整頁重畫，免得改到一半的內容不見
   let status=c.status;
   if($('#btnHome'))$('#btnHome').onclick=async()=>{if(!confirm(`確定 ${c.name} 已經回家了嗎？按「確定」會把案件標記為「已找到」，大家就知道可以不用再找了。`))return;
     const b=$('#btnHome');b.disabled=true;const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p:{status:'found'}});b.disabled=false;
     if(error)return toast('儲存失敗：'+error.message);toast('🎉 恭喜！已標記為找到。下面可以補寫是怎麼找到的（可以不寫）');
     status='found';markSeg('found');b.remove();
-    $('#foundBox').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})};
+    ($('#foundBox').closest('details')||{}).open=true;$('#foundBox').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})};
   // 狀態：點一下就儲存（老人家常常點了「已找到」就離開，不會再按儲存）
-  const markSeg=v=>{$('#segStatus').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));$('#foundBox').classList.toggle('hidden',v!=='found');$('#btnStatus').classList.toggle('hidden',v!=='found')};
+  const markSeg=v=>{{const ht=document.querySelector('.mg-head h1 .tag');if(ht)ht.outerHTML=STATUS_TAG[v]||'';const sm=document.querySelector('#segStatus')?.closest('details')?.querySelector('summary .muted');if(sm)sm.textContent=STATUS[v]||''}$('#segStatus').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));$('#foundBox').classList.toggle('hidden',v!=='found');$('#btnStatus').classList.toggle('hidden',v!=='found')};
   $('#segStatus').querySelectorAll('button').forEach(b=>b.onclick=async()=>{const v=b.dataset.v;if(v===status)return;
     const ask={searching:`把 ${c.name} 改回「協尋中」？案件會重新出現在大家的協尋名單。`,found:`確定 ${c.name} 已經找到了嗎？大家就知道可以不用再找了。`,closed:`把案件改成「已結案」？案件會從協尋名單移除。`}[v];
     if(!confirm(ask))return;
@@ -3061,7 +3084,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     status=v;markSeg(v);if($('#btnHome')&&v!=='searching')$('#btnHome').remove();
     if(v==='searching'){if($('#foundNote'))$('#foundNote').value='';if($('#foundMethod'))$('#foundMethod').selectedIndex=0}   // 改回協尋中：資料庫也清掉了，畫面一起清
     toast(v==='found'?'🎉 恭喜！已標記為找到。下面可以補寫是怎麼找到的（可以不寫）':'已儲存：'+STATUS[v]);
-    if(v==='found')$('#foundBox').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})});
+    if(v==='found')($('#foundBox').closest('details')||{}).open=true;$('#foundBox').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})});
   $('#btnStatus').onclick=async e=>{const bt=e.currentTarget;if(bt.disabled)return;bt.disabled=true;const p={status:'found',found_method:$('#foundMethod').value,found_note:$('#foundNote').value};const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});bt.disabled=false;if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('已儲存，謝謝你的分享');setTimeout(()=>goReplace('#/case/'+id),1200)};
   // 確認／退回目擊：只更新那一筆，不重畫整頁（避免清掉正在編輯的資料）
   const bindOps=root=>root.querySelectorAll('.ops [data-s]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const v=b.dataset.v;const {error}=await sb.rpc('set_sighting_status',{p_case:id,p_sighting:b.dataset.s,p_token:token,p_status:v});if(error){b.disabled=false;return toast(friendlyErr(error.message))}
@@ -3069,7 +3092,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     const dot=row.querySelector('.dot'),tag=row.querySelector('.when .tag');dot.className='dot '+(v==='pending'?'pending':v==='rejected'?'start':'');dot.textContent=v==='pending'?'?':v==='rejected'?'×':'✓';
     if(tag){tag.className='tag '+(v==='pending'?'amber':v==='rejected'?'gray':'green');tag.textContent=v==='pending'?'待確認':v==='rejected'?'已退回':'已確認'}
     const ops=row.querySelector('.ops');ops.innerHTML=sightOps(b.dataset.s,v);bindOps(ops);
-    const n=app.querySelectorAll('.timeline .when .tag.amber').length,pn=$('#pendN');if(pn){if(n)pn.textContent=n;else $('#pendNotice').remove()}});
+    const n=app.querySelectorAll('.timeline .when .tag.amber').length,pn=$('#pendN');if(pn){if(n)pn.textContent=n;else{const h=$('#pendNotice h2');if(h)h.textContent='✓ 都處理好了，謝謝你';const t=$('#pendNotice p');if(t)t.remove()}}});
   bindOps(app);capList(app.querySelector('.timeline'));
   app.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{b.disabled=true;const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error){b.disabled=false;return toast(error.message)}
     const w=b.closest('div[style*="opacity"]');if(w)w.style.opacity='.5';b.remove();toast('已隱藏這筆比對')});   // 只改這一筆，不整頁重畫（不會弄丟正在編輯的資料）
