@@ -1324,6 +1324,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .ownerfoot{margin:26px 0 0;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
 .injstrip{display:flex;align-items:center;gap:10px;margin:12px 0 4px;padding:12px 16px;border-radius:16px;background:var(--red-soft);color:var(--red-ink);text-decoration:none;font-size:15px;min-height:52px}
 .injstrip:hover{text-decoration:none}.injstrip span:first-of-type{flex:1}.injstrip b{margin-right:6px}.injstrip>span:last-child{font-size:22px}
+.cstep.locked{opacity:.4;pointer-events:none;filter:grayscale(.4)}.cstep.locked::after{content:"先完成第 1 步，這裡才會打開";display:block;font-size:13px;font-weight:700;margin-top:6px}
 .mg-tiles{display:flex;flex-direction:column;gap:12px;margin:14px 0 6px}
 .mg-tile{display:flex;align-items:center;gap:14px;padding:18px 16px;background:var(--sheet);border-radius:18px;color:var(--ink);text-decoration:none;box-shadow:0 0 0 1px var(--line),0 2px 0 var(--line);min-height:76px}
 .mg-tile:hover{text-decoration:none}.mg-tile .mg-ic{font-size:30px;line-height:1;flex:none;width:40px;text-align:center}
@@ -1506,7 +1507,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.1.6';
+const BUILD = 'v5.1.7';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2202,11 +2203,11 @@ ${bigStartHTML()}
   <div class="homelist">
   <h2 id="listTitle">${ic("search")} ${isListOnly()?'正在協尋的毛孩':'大家正在找的毛孩'}</h2>
   <div class="tabs" id="tabs">
-    <button data-t="lost">走失協尋<span class="cnt" id="cLost">…</span></button>
-    <button data-t="found">拾獲／目擊<span class="cnt" id="cFound">…</span></button>
+    <button data-t="lost">走失的<span class="cnt" id="cLost">…</span></button>
+    <button data-t="found">被撿到／看到的<span class="cnt" id="cFound">…</span></button>
     <button data-t="map">${ic("map")} 地圖</button>
   </div>
-  <div class="searchbar" id="lostFilters">${ic("search")}<input type="search" id="fQ" aria-label="搜尋走失毛孩" enterkeyhint="search" placeholder="搜尋名字、品種、地點、晶片末4碼" value="${esc(homeState.chip||homeState.q)}"></div>
+  <div class="searchbar" id="lostFilters">${ic("search")}<input type="search" id="fQ" aria-label="搜尋走失毛孩" enterkeyhint="search" placeholder="搜名字、品種、地區" value="${esc(homeState.chip||homeState.q)}"></div>
   <div class="pillbar">
     <button type="button" class="pill fbtn" id="btnFilter">⚙️ 篩選<span class="fcnt" id="fCnt"></span></button>
     <button type="button" class="pill${homeState.near?' on':''}" id="btnNear">${homeState.near?'✕ 取消距離排序':ic('pin')+' 我附近'}</button>
@@ -2898,19 +2899,20 @@ function renderCreated(id,token,email){
     <p>之後要確認目擊、修改資料、標記「找到了」，都要從這個網址進去。${me()?'你已登入，在「我的」也找得到，這個網址當備用。':'<b>這個網址只會出現這一次，請一定要存。</b>'}</p>
     <div class="bigacts"><a class="btn big line" href="https://line.me/R/share?text=${encodeURIComponent(saveMsg)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a>
     <button type="button" class="btn big ghost" id="cpManage">複製管理網址</button></div>
-    <details class="more"><summary>看網址、只複製管理密碼</summary><div class="tokenbox" id="mlink">${esc(manage)}</div><button type="button" class="btn sm ghost" id="cpToken" style="margin-top:8px">只複製管理密碼</button>
-    <p class="muted small">這台手機的瀏覽器也會暫時記住，但換手機就沒有了。${me()?'':'<a href="#/login">登入或免費註冊</a>後可以把案件綁定帳號，換手機也能管理。'}</p></details>
+    <details class="more"><summary>我要自己抄下來</summary><div class="tokenbox" id="mlink">${esc(manage)}</div></details>
   </section>
-  ${email?`<section class="cstep" id="vstep"><h2><span class="cnum">2</span>到信箱按「確認信箱」</h2>
+  ${email?`<section class="cstep${me()?'':' locked'}" id="vstep"><h2><span class="cnum">2</span>到信箱按「確認信箱」</h2>
     <p>我們寄了一封確認信到 <b>${esc(email)}</b>。<b>按了確認，有人回報看到牠，才會寄信通知你。</b></p>
     <p class="small muted" id="vmsg" aria-live="polite">寄送中…</p><button type="button" class="btn ghost hidden" id="btnRev">重寄確認信</button></section>`:''}
-  <section class="cstep"><h2><span class="cnum">${email?3:2}</span>做海報、分享出去</h2>
+  <section class="cstep${me()?'':' locked'}"><h2><span class="cnum">${email?3:2}</span>做海報、分享出去</h2>
     <p>貼到附近的 FB 社團、LINE 群組，看到的人越多越好找。</p>
     <div class="bigacts"><a class="btn big" href="#/poster/${id}">${ic("image")} 做協尋海報</a>
     <a class="btn big ghost" href="https://line.me/R/share?text=${encodeURIComponent('請幫忙協尋，看到請回報：\n'+cUrl)}" target="_blank" rel="noopener">用 LINE 分享案件</a></div>
   </section>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px"><a class="btn sm ghost" href="#/case/${id}">打開案件頁</a><a class="btn sm ghost" href="#/resources">看協尋攻略</a></div></div>`;
-  $('#cpManage').onclick=()=>copy(manage);$('#cpToken').onclick=()=>copy(token);
+  </div>`;
+  // 先存好管理網址，下面的步驟才打開（照順序做，不會漏掉最重要的一步）
+  const unlock=()=>app.querySelectorAll('.cstep.locked').forEach(x=>x.classList.remove('locked'));
+  $('#cpManage').onclick=()=>{copy(manage);unlock()};app.querySelector('.cstep .btn.line').addEventListener('click',unlock);app.querySelector('.cstep details.more').addEventListener('toggle',unlock);
   if(email){const go=async()=>{const why=await sendVerifyMail(id,token);const m=$('#vmsg');if(!m)return;m.textContent=VERIFY_MSG[why]||VERIFY_MSG.failed;
       if(why==='already_verified'){const h=$('#vstep h2');if(h)h.innerHTML='<span class="cnum">2</span>Email 已確認'}
       $('#btnRev').classList.toggle('hidden',why==='already_verified')};
@@ -3400,8 +3402,7 @@ function renderInjured(){
 function renderFoundNew(){
   setTitle('我看到／撿到毛孩');
   app.innerHTML=`<h1 id="fnTitle">我撿到毛孩</h1>
-  <p class="muted">送出後系統會立刻比對附近的走失案件，有相符的會通知飼主。免註冊。</p>
-  <div class="notice" id="fnTips"></div>
+  <p class="tipbox" id="fnTips" style="margin:6px 0 0"></p>
   <form onsubmit="return false" class="card steps" id="f" style="margin-top:12px">
     <h3>是狗還是貓？</h3>
     <div class="seg" id="segSp"><button type="button" data-v="dog">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
@@ -3459,8 +3460,7 @@ function renderFoundNew(){
    const setLabel=()=>{const seen=kind==='seen';$('#btnSubmit').textContent=seen?'送出目擊通報':'送出拾獲通報';
      $('#fnTitle').textContent=seen?'回報看到的毛孩':'我撿到毛孩';setTitle(seen?'回報看到的毛孩':'我撿到毛孩');
      const L=a=>'<ol class="tips3">'+a.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
-     $('#fnTips').innerHTML=seen?'<b>看到疑似走失的毛孩，這樣做最有幫助</b>'+L(['不要追趕、不要大聲叫，牠會跑更遠','拍照，記下時間、地點和牠往哪個方向走','在這裡回報，系統會通知附近正在找的飼主'])
-       :'<b>撿到毛孩先做這三件事</b>'+L(['帶到附近動物醫院<b>免費掃晶片</b>，有晶片就能直接聯絡飼主','通報動保處或警察機關，不要自己送養或轉手（飼主可能正在找，未通報就留養可能觸法）','在這裡登記，讓飼主找得到你'])};
+     $('#fnTips').innerHTML=seen?'💡 不要追，拍照、記下地點和牠往哪走，在這裡回報就好。':'💡 先帶去任何動物醫院<b>免費掃晶片</b>，有晶片就能馬上找到飼主。'};
    setLabel();
    $('#segKind').querySelectorAll('button').forEach(b=>b.addEventListener('click',setLabel));
    if(k==='seen')$('#segKind [data-v=seen]').click();
@@ -4239,7 +4239,7 @@ function renderLogin(){
     <div class="seg logintabs" role="tablist" aria-label="註冊或登入"><button type="button" role="tab" data-m="signup" aria-selected="${su}" class="${su?'on':''}">免費註冊</button><button type="button" role="tab" data-m="login" aria-selected="${!su}" class="${su?'':'on'}">登入</button></div>
     <img class="login-duo" src="duo.svg" alt="" width="150" height="102">
     <h1>${su?'免費加入會員':'登入'}</h1>
-    <p class="muted">${su?'只要 Email，<b>不用設密碼</b>。我們會寄一封「歡迎加入」信，按信裡的按鈕就完成註冊並登入。':'輸入註冊時用的 Email，我們會寄一封登入信給你，<b>不用密碼</b>，按信裡的按鈕就登入。'}</p>
+    <p class="muted">只要 Email，不用密碼。我們寄一封信給你，按信裡的按鈕就${su?'完成註冊':'登入'}了。</p>
     <form onsubmit="return false" id="lf" data-nodirty>
       <label class="f"><span>Email</span><input type="email" id="em" required autocomplete="email" inputmode="email" placeholder="you@example.com"></label>
       <button class="btn lg block" style="margin-top:12px" id="btnSend">${su?'免費註冊（寄確認信）':'寄登入信給我'}</button>
@@ -4249,16 +4249,12 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       <form id="pwf" data-nodirty><label class="f"><span>Email</span><input type="email" id="pwe" autocomplete="username" required></label><label class="f"><span>密碼</span><input type="password" id="pwp" autocomplete="current-password" required></label><button class="btn block ghost" id="btnPw" style="margin-top:8px">用密碼登入</button></form>
     </details>`}
     ${CONFIG.GOOGLE_LOGIN&&!IS_APP?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google ${su?'註冊':'登入'}</button>`:''}
-    <div class="notice" style="margin-top:16px"><b>收到信後，按信裡的大按鈕就好</b>寄件者是「汪喵回家」，標題是「${su?'【汪喵回家】歡迎加入！請確認你的信箱':'【汪喵回家】你的登入連結'}」。幾分鐘沒收到請看垃圾郵件匣。${IS_APP?'在 App 裡請輸入信裡的數字驗證碼。':'在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。'}</div>
-    <h2 style="margin-top:20px;font-size:18px">${su?'加入會員可以':'會員可以'}</h2>
-    <ul style="padding-left:20px;font-size:15px;margin:6px 0">
-      <li><b>不怕管理網址弄丟</b>：你登記的案件綁在帳號上，換手機也能管理</li>
-      <li><b>毛孩健康手冊</b>：記錄回診、疫苗、驅蟲、體重，到期自動提醒，可同步到手機日曆</li>
-      <li><b>寵物檔案</b>：平時先建好照片和特徵，走失時一鍵變成協尋案件</li>
-      <li><b>附近走失通知</b>：家附近有毛孩走失時通知你，一起幫忙找</li>
-      <li><b>追蹤案件</b>：關心的案件有新目擊時通知你</li>
+    <p class="tipbox" style="margin-top:14px">📩 去信箱按信裡的按鈕就好（找不到請看垃圾郵件）。</p>
+    <details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">${IS_APP?'在 App 裡請輸入信裡的數字驗證碼。':'在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。'}</p></details>
+    <ul class="small muted" style="padding-left:20px;margin:16px 0 0;line-height:1.8">
+      <li>案件存在帳號裡，換手機也能管理</li>
+      <li>毛孩健康手冊：疫苗、回診到期提醒</li>
     </ul>
-    <p class="muted small">完全免費。不加入會員也可以使用所有協尋功能。</p>
   </div>`;
     app.querySelectorAll('.logintabs button').forEach(b=>b.onclick=()=>{if(sending||b.dataset.m===mode)return;const v=$('#em').value,f=document.activeElement&&document.activeElement.id==='em';mode=b.dataset.m;draw();$('#em').value=v;if(f)$('#em').focus()});
     $('#lf').onsubmit=async e=>{
