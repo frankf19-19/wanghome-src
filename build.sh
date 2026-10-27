@@ -28,5 +28,6 @@ check dist/index.html
 V=$(grep -oE "const BUILD = 'v[0-9.]+'" index.html | grep -oE "v[0-9.]+")
 [ -n "$V" ] && printf '{"v":"%s"}\n' "$V" > dist/version.json
 # 每次發版換 service worker 的快取名稱，舊快取（圖示、manifest）才會更新
-[ -n "$V" ] && sed -i "s/const CACHE = 'wanghome-[^']*'/const CACHE = 'wanghome-$V'/" dist/sw.js
+# （不用 sed -i：Mac 和 Linux 的寫法不同，App 在 Mac 上打包）
+if [ -n "$V" ]; then sed "s/const CACHE = 'wanghome-[^']*'/const CACHE = 'wanghome-$V'/" dist/sw.js > dist/sw.js.tmp && mv dist/sw.js.tmp dist/sw.js; fi
 echo "built: $(find dist -type f | wc -l) files"
