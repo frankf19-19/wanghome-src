@@ -1431,7 +1431,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/health" class="tb-dup">毛孩健康手冊</a><a href="#/me" class="tb-dup">我的帳號</a><a href="#/seen" class="tb-dup">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/learn">毛孩小學堂</a><a href="#/health" class="tb-dup">毛孩健康手冊</a><a href="#/me" class="tb-dup">我的帳號</a><a href="#/seen" class="tb-dup">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
   <p class="health-note small">毛孩健康手冊的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷。用藥與治療請依獸醫師指示。</p>
   <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>© 2026 汪喵回家 版權所有</span><span id="buildV"></span></div>
 </footer>
@@ -1450,11 +1450,12 @@ const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_WCeVQIAPH0UEEzhTwovqkg_lJ8Qjydb',  // publishable key（可公開）
   ECPAY_URL: '',             // 綠界實況主收款網址，例：https://p.ecpay.com.tw/XXXXXXX
   CONTACT_EMAIL: 'service@wangmiaotw.com',
+  OPERATOR: '汪喵回家站長（個人經營）',   // 隱私權政策上的「蒐集者」名稱
   GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.0.4';
+const BUILD = 'v5.0.5';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1514,7 +1515,9 @@ if(IS_APP){
   try{const P=capPlugin('Preferences');if(P){const KEEP=k=>/^(wh_|sb-)/.test(k),oset=Storage.prototype.setItem,orem=Storage.prototype.removeItem;
     Storage.prototype.setItem=function(k,v){oset.call(this,k,v);if(this===window.localStorage&&KEEP(k))P.set({key:k,value:String(v)}).catch(()=>{})};
     Storage.prototype.removeItem=function(k){orem.call(this,k);if(this===window.localStorage&&KEEP(k))P.remove({key:k}).catch(()=>{})};
-    P.keys().then(({keys})=>(keys||[]).filter(KEEP).forEach(k=>{if(localStorage.getItem(k)==null)P.get({key:k}).then(({value})=>{if(value!=null)oset.call(localStorage,k,value)}).catch(()=>{})})).catch(()=>{})}}catch(_){}
+    P.keys().then(({keys})=>Promise.all((keys||[]).filter(KEEP).map(k=>localStorage.getItem(k)!=null?0:P.get({key:k}).then(({value})=>{if(value!=null){oset.call(localStorage,k,value);return /^sb-/.test(k)?1:0}return 0}).catch(()=>0))))
+      // 登入狀態是剛剛才從備份還原的：重新整理一次，讓登入生效（只做一次）
+      .then(r=>{if(r.some(Boolean)){let done=false;try{done=sessionStorage.getItem('wh_restored')==='1';sessionStorage.setItem('wh_restored','1')}catch(_){}if(!done)setTimeout(()=>{if(!session)location.reload()},300)}}).catch(()=>{})}}catch(_){}
   // 狀態列跟著深淺色
   try{const SB=capPlugin('StatusBar');if(SB){const upd=window.__sbUpd=()=>{const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);SB.setStyle({style:dark?'DARK':'LIGHT'}).catch(()=>{})};upd();matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',upd)}}catch(_){}
 }
@@ -1676,7 +1679,7 @@ function waitLeaflet(){if(window.__lfail&&!window.L)leafletGaveUp=true;if(window
   if(!document.getElementById('leafletCss')){const c=document.createElement('link');c.id='leafletCss';c.rel='stylesheet';c.href='vendor/leaflet-1.9.4.css';document.head.insertBefore(c,document.head.querySelector('style'))}
   let e=document.getElementById('leafletJs');if(!e){e=document.createElement('script');e.id='leafletJs';e.src='vendor/leaflet-1.9.4.js';e.async=true;e.onerror=()=>{window.__lfail=1};e.addEventListener('load',()=>{leafletGaveUp=false;_lw=null});document.head.appendChild(e)}
   const done=()=>{if(!window.L)leafletGaveUp=true;ok()};if(!e){done();return}e.addEventListener('load',done);e.addEventListener('error',done);setTimeout(done,8000)}))}
-function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(m);__maps.push(m);return m}
+function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);(IS_APP?L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);return m}
 function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
 // 定位或點地圖後：自動帶入縣市、區、地點描述（只填空的或跟位置不一樣的），並請使用者確認
@@ -3099,7 +3102,7 @@ function emergencyHTML(){
       <li><b>送到動物醫院</b><span>能安全移動的話，先打電話確認醫院有沒有開、能不能收，再就近送醫，並請醫院掃晶片。</span>
         <div class="er-call"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/24%E5%B0%8F%E6%99%82%E5%8B%95%E7%89%A9%E9%86%AB%E9%99%A2">${ic("map")} 找附近 24 小時動物醫院</a></div></li>
     </ol>
-    <p class="small er-foot">各縣市動保單位直撥電話：<a href="#/resources">資源頁選縣市查詢</a>；用上面的「一鍵通報」會自動顯示你所在縣市的電話。本站不是救援單位，無法派人到現場。</p>
+    <p class="small er-foot">各縣市動保單位直撥電話：<a href="#/resources">協尋攻略頁選縣市查詢</a>；用上面的「一鍵通報」會自動顯示你所在縣市的電話。本站不是救援單位，無法派人到現場。</p>
   </div>`;
 }
 
@@ -3110,7 +3113,10 @@ async function reverseGeo(lat,lng){
   let city=inTW?nearestCity(lat,lng):'',district='',address='',geoOk=false;
   try{
     const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),6000);   // 查地址最多等 6 秒，不能卡住救援流程
-    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&accept-language=zh-TW`,{headers:{'Accept':'application/json'},signal:ctl.signal});clearTimeout(tt);
+    // App 裡沒有網址來源，地址查詢服務可能會擋：改走本站的轉接（失敗再直接查）
+    const direct=()=>fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&accept-language=zh-TW`,{headers:{'Accept':'application/json'},signal:ctl.signal});
+    let r=null;if(IS_APP){try{r=await fetch(`${CONFIG.SITE_URL}api/rgeo?lat=${(+lat).toFixed(5)}&lon=${(+lng).toFixed(5)}`,{signal:ctl.signal});if(!r.ok)r=null}catch(_){r=null}}
+    if(!r)r=await direct();clearTimeout(tt);
     if(r.ok){const j=await r.json();const a=j.address||{};
       const norm=x=>String(x||'').replace(/^台/,'臺');
       const c=[a.county,a.city,a.state,a.province].map(norm).find(x=>TW[x]);
@@ -3521,7 +3527,7 @@ function openReport(type,id,poster,after){
    領養：農業部「動物認領養」開放資料（全台公立收容所），依縣市載入
    ============================================================ */
 const ADOPT_SIZE={SMALL:'小型',MEDIUM:'中型',BIG:'大型'},ADOPT_AGE={CHILD:'幼年',ADULT:'成年'};
-const adoptCache={};
+const adoptCache={};const adoptKey=(area,kind)=>area+'_'+kind+'_'+todayStr();   // 每天換新，網頁開著好幾天也不會一直看到舊名單
 function adoptRow(a){return {id:String(a.animal_id),subid:String(a.animal_subid||''),pk:a.animal_shelter_pkid,kind:a.animal_kind,variety:(a.animal_Variety||'').trim(),sex:a.animal_sex,size:a.animal_bodytype,colour:(a.animal_colour||'').trim(),age:a.animal_age,ster:a.animal_sterilization,bac:a.animal_bacterin,found:(a.animal_foundplace||'').trim(),remark:(a.animal_remark||'').trim(),photo:/^https:\/\//.test(a.album_file||'')?a.album_file:'',created:(a.animal_createtime||'').replace(/\//g,'-'),open:a.animal_opendate,shelter:a.shelter_name||a.animal_place||'',tel:(a.shelter_tel||'').trim(),addr:(a.shelter_address||'').trim(),status:a.animal_status}}
 const adoptPending={};
 const ADOPT_ERR='讀不到收容所資料。可能是網路不穩，或你目前不在台灣（農業部的資料只開放台灣的網路）。';
@@ -3530,7 +3536,7 @@ async function moaJson(qs){const ac=new AbortController(),t=setTimeout(()=>ac.ab
   catch(_){throw new Error(ADOPT_ERR)}finally{clearTimeout(t)}}
 function fetchAdopt(city,kind){
   const area=MOA_AREA[city];if(!area)return Promise.resolve([]);
-  const ck=area+'_'+kind;if(adoptCache[ck])return Promise.resolve(adoptCache[ck]);
+  const ck=adoptKey(area,kind);if(adoptCache[ck])return Promise.resolve(adoptCache[ck]);
   // 同一份資料正在下載時共用同一個請求（約 1MB），不重複下載
   return adoptPending[ck]||(adoptPending[ck]=moaJson(`&animal_kind=${encodeURIComponent(kind)}&animal_area_pkid=${area}`)
     .then(j=>adoptCache[ck]=j.filter(a=>a.animal_status==='OPEN').map(adoptRow)).finally(()=>{delete adoptPending[ck]}));
@@ -3583,7 +3589,7 @@ async function renderAdopt(){const _n=navId;
       el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;st.dist=[];$('#aCity').value=st.city;load()});return}
     const my=navId,seq=++adoptSeq;const stale=()=>seq!==adoptSeq||my!==navId||!el.isConnected;   // 換了條件或換頁：舊的結果不要蓋上來
     let rows;const pr=fetchAdopt(st.city,st.kind);
-    if(!adoptCache[MOA_AREA[st.city]+'_'+st.kind])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
+    if(!adoptCache[adoptKey(MOA_AREA[st.city],st.kind)])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
     try{rows=await pr}catch(e){if(stale())return;el.innerHTML=`<div class="empty-card"><b>${esc(e.message)}</b><p><button type="button" class="btn" id="aRetry">再試一次</button></p><p class="small"><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent.aspx?PageType=Adopt">改到農業部全國認領養網站看 ↗</a></p></div>`;$('#aRetry').onclick=load;return}
     if(stale())return;
     // 地區、犬種／貓種、毛色：依這個縣市實際有的資料列出（旁邊是幾隻），都可以多選
@@ -4087,7 +4093,7 @@ function renderLogin(){
 ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       <form id="pwf" data-nodirty><label class="f"><span>Email</span><input type="email" id="pwe" autocomplete="username" required></label><label class="f"><span>密碼</span><input type="password" id="pwp" autocomplete="current-password" required></label><button class="btn block ghost" id="btnPw" style="margin-top:8px">用密碼登入</button></form>
     </details>`}
-    ${CONFIG.GOOGLE_LOGIN?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google ${su?'註冊':'登入'}</button>`:''}
+    ${CONFIG.GOOGLE_LOGIN&&!IS_APP?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google ${su?'註冊':'登入'}</button>`:''}
     <div class="notice" style="margin-top:16px"><b>收到信後，按信裡的大按鈕就好</b>寄件者是「汪喵回家」，標題是「${su?'【汪喵回家】歡迎加入！請確認你的信箱':'【汪喵回家】你的登入連結'}」。幾分鐘沒收到請看垃圾郵件匣。${IS_APP?'在 App 裡請輸入信裡的數字驗證碼。':'在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。'}</div>
     <h2 style="margin-top:20px;font-size:18px">${su?'加入會員可以':'會員可以'}</h2>
     <ul style="padding-left:20px;font-size:15px;margin:6px 0">
@@ -4133,7 +4139,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       const {data:pd,error}=await sb.auth.signInWithPassword({email:$('#pwe').value.trim(),password:$('#pwp').value});
       if(error||!pd?.session){b.disabled=false;b.textContent='用密碼登入';return toast('Email 或密碼不正確。一般會員請用上面的 Email 登入（不用密碼）',4500)}
       session=pd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 已登入');let back='#/me';back=takeReturn();goReplace(back)};
-    if(CONFIG.GOOGLE_LOGIN)$('#btnGoogle').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:CONFIG.SITE_URL}});
+    if(CONFIG.GOOGLE_LOGIN&&!IS_APP)$('#btnGoogle').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:CONFIG.SITE_URL}});
   };
   draw();
 }
@@ -4848,7 +4854,8 @@ async function renderPoster(id){const _n=navId;
    ============================================================ */
 async function renderThanks(){const _n=navId;
   setTitle('贊助感謝牆');
-  const {data}=await sb.from('sponsors_public').select('*').limit(300);
+  const {data,error}=await sb.from('sponsors_public').select('*').limit(300);
+  if(error&&isFetchErr(error)){if(_n===navId)app.innerHTML='<h1>贊助感謝牆</h1>'+netErrHTML();return}
   const byMonth={};(data||[]).forEach(s=>{s.nickname=s.nickname||'匿名';{let v=String(s.sponsored_on||s.created_at||todayStr());if(v.includes('T')){const d=new Date(v);v=new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}s.sponsored_on=v}const k=s.sponsored_on.slice(0,7).replace('-','/');(byMonth[k]=byMonth[k]||[]).push(s)});
   (_n===navId?app:_void).innerHTML=`<h1>贊助感謝牆</h1>
   <div class="card">
@@ -4857,7 +4864,7 @@ async function renderThanks(){const _n=navId;
     <p class="muted small">本頁為自願性贊助，非商品交易、非公益勸募，不開立捐款收據。尋獲獎金由飼主與尋獲者自行處理，本站不經手任何款項。</p>
   </div>
   <h2>感謝名單</h2>
-  ${Object.keys(byMonth).length?Object.entries(byMonth).map(([m,list])=>`<h3>${m}</h3><div class="card" style="padding:4px 18px">${list.map(s=>`<div class="sponsor"><div class="av">${esc(s.nickname.slice(0,1))}</div><div class="b"><b>${esc(s.nickname)}</b>${s.amount?` <span class="tag blue">NT$${s.amount.toLocaleString()}</span>`:''}<div class="msg">${esc(s.message||'')}</div></div><div class="d">${esc(s.sponsored_on.slice(5).replace('-','/'))}</div></div>`).join('')}</div>`).join(''):'<p class="muted">還沒有贊助紀錄。</p>'}`;
+  ${Object.keys(byMonth).length?Object.entries(byMonth).map(([m,list])=>`<h3>${m}</h3><div class="card" style="padding:4px 18px">${list.map(s=>`<div class="sponsor"><div class="av">${esc([...s.nickname][0]||'?')}</div><div class="b"><b>${esc(s.nickname)}</b>${s.amount?` <span class="tag blue">NT$${s.amount.toLocaleString()}</span>`:''}<div class="msg">${esc(s.message||'')}</div></div><div class="d">${esc(s.sponsored_on.slice(5).replace('-','/'))}</div></div>`).join('')}</div>`).join(''):'<p class="muted">還沒有贊助紀錄。</p>'}`;
 }
 
 /* ============================================================
@@ -4877,7 +4884,7 @@ const LEARN=[
   ['疫苗',['<b>狂犬病疫苗</b>：台灣法規規定狗狗每年要打一次。','<b>多合一疫苗</b>：預防犬瘟熱、犬小病毒等嚴重傳染病。幼犬要打完一系列，之後依醫師建議補強。','還沒打完疫苗的幼犬，先不要去狗公園或接觸陌生的狗。']],
   ['寄生蟲預防',['<b>心絲蟲</b>：由蚊子傳染，台灣一年四季都有蚊子，建議每個月預防。','<b>體內外驅蟲</b>：跳蚤、壁蝨、腸道寄生蟲，依產品說明定期使用。','可以在「毛孩健康手冊」設定到期提醒，時間到了手機會通知你。']]]},
  {id:'cat-health',sp:'cat',c:'b',ic:'🩺',t:'貓咪的疫苗與健康',s:'核心疫苗、每年健檢、多喝水',b:[
-  ['疫苗',['<b>核心疫苗</b>：預防貓瘟（貓泛白血球減少症）、貓皰疹病毒、卡里西病毒，幼貓要打完一系列。','<b>狂犬病疫苗</b>：台灣規定貓咪每年要打。2025 年 7 月起，<b>完全養在室內、外出都裝在外出籠</b>的家貓可以免打；會到戶外活動的貓仍要每年施打。不確定的話可以問獸醫師或當地動物保護處。','核心疫苗就算完全不出門的貓也建議打，因為病毒可能被人帶回家。']],
+  ['疫苗',['<b>核心疫苗</b>：預防貓瘟（貓泛白血球減少症）、貓疱疹病毒、卡里西病毒，幼貓要打完一系列。','<b>狂犬病疫苗</b>：台灣規定貓咪每年要打。2025 年 7 月起，<b>完全養在室內、外出都裝在外出籠</b>的家貓可以免打；會到戶外活動的貓仍要每年施打。不確定的話可以問獸醫師或當地動物保護處。','核心疫苗就算完全不出門的貓也建議打，因為病毒可能被人帶回家。']],
   ['日常照顧',['<b>多喝水</b>：貓咪天生不愛喝水，可以多放幾個水碗、用流動飲水機，或吃濕食，對泌尿道比較好。','<b>每年健康檢查</b>：貓很會忍痛，生病時常常看不出來。7 歲以後建議更常檢查。','<b>注意尿尿</b>：一直跑貓砂盆卻尿不出來，可能是泌尿道阻塞，公貓特別危險，要立刻就醫。']]]},
  {id:'dog-heat',sp:'dog',c:'p',ic:'☀️',t:'夏天防中暑',s:'大口喘氣、牙齦很紅，要馬上處理',b:[
   ['怎麼預防',['避開中午出門散步，選清晨或傍晚，先用手背摸地面，太燙就不要走。','絕對不要把狗留在車上，即使開了窗，車內溫度也會很快升高。','短鼻子的狗（法鬥、巴哥、西施）、胖狗、老狗特別容易中暑。']],
@@ -4928,7 +4935,7 @@ function renderLearn(){
 }
 function renderLearnOne(id){
   const a=LEARN.find(x=>x.id===id);
-  if(!a){app.innerHTML=`<div class="empty-card"><b>找不到這篇文章</b><p><a class="btn" href="#/learn">回小學堂</a></p></div>`;return}
+  if(!a){setTitle('找不到這篇文章');app.innerHTML=`<div class="empty-card"><b>找不到這篇文章</b><p><a class="btn" href="#/learn">回小學堂</a></p></div>`;return}
   setTitle(a.t);
   const rel=LEARN.filter(x=>x.id!==a.id&&(x.sp===a.sp||x.sp==='all'||a.sp==='all')).slice(0,3);
   app.innerHTML=`<div class="lhero" style="background:${LEARN_C[a.c]}"><span class="lh-ic">${a.ic}</span><span class="lh-tag">${a.sp==='dog'?'狗狗':a.sp==='cat'?'貓咪':'狗狗・貓咪'}</span></div>
@@ -4941,13 +4948,13 @@ function renderLearnOne(id){
 function renderResources(){
   setTitle('協尋攻略');
   const cityKeys=Object.keys(TW);
-  app.innerHTML=`<h1>協尋攻略</h1><p class="muted">依成功率排序。前 48 小時最關鍵，請一項一項做。</p>
+  app.innerHTML=`<h1>協尋攻略</h1><p class="muted">依建議的順序。前 48 小時最關鍵，請一項一項做。</p>
   <h2>第一步：黃金 48 小時</h2>
   <div class="card"><ul class="checklist">
     <li><span class="n">1</span><div><b>回到走失點附近，安靜地找</b><div class="d">高齡、膽小的狗通常躲在走失點 1 公里內的草叢、車底、工地。清晨 5–7 點與傍晚最容易出來。帶牠的毯子或你穿過的衣服放在走失點留氣味。</div></div></li>
     <li><span class="n">2</span><div><b>在本站登記，產生海報</b><div class="d">協尋海報上有 QR Code，路人掃了就能回報目擊，比抄電話快。</div></div></li>
     <li><span class="n">3</span><div><b>通報動保處與收容所，留晶片號碼</b><div class="d">被路人送到收容所的狗貓，飼主常常不知道。本站會自動比對收容所資料，但親自打電話更快。</div></div></li>
-    <li><span class="n">4</span><div><b>到農業部寵物登記網做「遺失申報」</b><div class="d">任何動物醫院、收容所掃到晶片都會看到走失註記。<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報 ↗</a></div></div></li>
+    <li><span class="n">4</span><div><b>到農業部寵物登記網做「遺失申報」</b><div class="d">動物醫院、收容所掃到晶片查詢時，會看到你的遺失申報。<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報 ↗</a></div></div></li>
     <li><span class="n">5</span><div><b>FB 協尋社團 + LINE 社區群</b><div class="d">用本站案件頁的「複製協尋貼文」直接貼。找走失地點那個區的社團，不要只貼全台大社團。</div></div></li>
     <li><span class="n">6</span><div><b>實體海報：半徑 2 公里</b><div class="d">便利商店、動物醫院、公園、里長辦公室、宮廟、公車站。海報用本站產生的版本，字要大，電話要大。</div></div></li>
     <li><span class="n">7</span><div><b>問「天天在巷弄跑的人」</b><div class="d">外送員、郵差、垃圾車清潔隊、早餐店、保全。他們看到走失狗貓的機率比任何人高。</div></div></li>
@@ -4983,40 +4990,41 @@ function renderResources(){
     <div class="res"><b>農業部 寵物登記管理資訊網</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報</a>（有晶片一定要做）</li><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/">晶片查詢 / 遺失啟事</a></li></ul></div>
     <div class="res"><b>全國動物收容管理系統</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">查看各收容所收容公告</a></li><li>本站每日自動比對來源</li></ul></div>
     <div class="res"><b>各縣市動保處</b><ul><li>受傷動物先撥 1959 動保專線，或選縣市看直撥電話</li><li>也可以打 1999 轉動保處，或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" aria-label="選擇縣市" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
-    <div class="res"><b>民間協尋平台（多貼一處多一分機會）</b><ul><li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li><li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li><li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li><li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li><li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各縣市 FB 協尋社團清單</a></li></ul></div>
+    <div class="res"><b>民間協尋平台（多貼一處多一分機會）</b><ul><li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li><li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li><li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li><li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li><li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各地區 FB 協尋社團清單</a></li></ul></div>
   </div>
   <h2>找回統計</h2><div class="card" id="foundStats"><p class="muted">載入中…</p></div>`;
   $('#selCity').onchange=()=>{const c=$('#selCity').value;$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?(AGENCY[c]?`<p class="small" style="margin:0 0 8px"><b>${esc(AGENCY[c].n)}</b>：${AGENCY[c].t.map(e=>`<a href="${agTel(e)}">${esc(agNum(e))}</a>${e.h?'（'+agHours(e.h)+'）':''}`).join('、')}</p>`:'')+`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
-  sb.from('found_stats').select('*').then(({data})=>{const el=$('#foundStats');if(!el)return;if(!data||!data.length){el.innerHTML='<p class="muted">等第一批案件結案後，這裡會顯示「哪種方法最常找回」。</p>';return}const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:#eee;border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red-fill);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
+  sb.from('found_stats').select('*').then(({data,error})=>{const el=$('#foundStats');if(!el)return;if(error){el.innerHTML='<p class="muted">網路不穩，統計暫時載入不到。</p>';return}data=(data||[]).filter(d=>d.n>0);if(!data.length){el.innerHTML='<p class="muted">等第一批案件結案後，這裡會顯示「哪種方法最常找回」。</p>';return}const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:#eee;border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red-fill);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
 }
 function renderAbout(){
   setTitle('關於');
   app.innerHTML=`<h1>關於 ${esc(CONFIG.SITE_NAME)}</h1><div class="card">
   <p>這是一個免費、無廣告的走失毛孩協尋平台。我們相信找回毛孩最有效的方式是：<b>讓目擊資訊快速集中到一張地圖上</b>，並且<b>主動比對收容所</b>。</p>
-  <h3>本站做什麼</h3><ul style="padding-left:20px"><li>飼主免註冊登記案件，產生含 QR Code 的海報</li><li>網友回報目擊：時間、位置、方向、照片，飼主確認後上地圖</li><li>自動比對農業部全台收容所資料（每次有人打開案件頁就用最新資料重比），疑似會顯示在案件頁</li><li>統計找回方式，讓後來的人知道什麼最有效</li></ul>
+  <h3>本站做什麼</h3><ul style="padding-left:20px"><li>飼主免註冊登記案件，產生含 QR Code 的海報</li><li>網友回報目擊：時間、位置、方向、照片，飼主確認後上地圖</li><li>自動比對農業部全台收容所資料（每次有人打開案件頁就用最新資料重比），疑似會顯示在案件頁</li><li>撿到或看到疑似走失的毛孩，登記拾獲／目擊通報，系統自動比對附近走失案件</li><li>受傷毛孩一鍵通報：定位後直撥當地動保單位，並產生照著唸的通報稿</li><li>毛孩健康手冊：看診、疫苗、驅蟲紀錄與到期提醒，可同步到手機日曆</li><li>領養：整理農業部全台收容所的待領養毛孩</li><li>毛孩小學堂：照顧、走失預防與協尋知識</li><li>統計找回方式，讓後來的人知道什麼最有效</li></ul>
   <h3>本站不做什麼</h3><ul style="padding-left:20px"><li>不經手任何款項：尋獲獎金由飼主與尋獲者自行處理</li><li>不公開回報者聯絡方式：只有飼主看得到</li><li>不保證比對正確：收容所比對只是粗略篩選，請親自確認</li></ul>
   ${CONFIG.CONTACT_EMAIL?`<p>聯絡站長：<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a></p>`:''}
   <p class="muted small">BUILD ${BUILD}</p></div>`;
 }
-const LEGAL_DATE='2026 年 10 月 26 日';
+const LEGAL_DATE='2026 年 10 月 27 日';
 function contactLine(){return CONFIG.CONTACT_EMAIL?`<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a>`:'網站客服信箱（設定中，暫時請用各頁面的「檢舉」按鈕聯絡站長）'}
 function renderPrivacy(){
   setTitle('隱私權政策');
   app.innerHTML=`<h1>隱私權政策</h1><p class="muted small">最後更新：${LEGAL_DATE}</p><div class="card legal">
   <p>「${esc(CONFIG.SITE_NAME)}」（以下稱本站，含網站與 App）重視你的隱私。本政策說明我們收集哪些資料、做什麼用、和誰分享、保存多久，以及你可以怎麼查詢、更正或刪除。</p>
+  <p><b>資料蒐集者：</b>${esc(CONFIG.OPERATOR)}；聯絡方式：${contactLine()}。</p>
   <h2>一、我們收集的資料</h2>
   <ul>
     <li><b>登記走失：</b>毛孩名字、種類、外觀特徵、照片、走失時間與地點；飼主稱呼、電話、Email（可不填）、LINE ID（可不填）。</li>
     <li><b>目擊／拾獲／受傷通報：</b>時間、地點（你點選或同意定位的位置）、照片、狀況說明、通報者稱呼與聯絡方式（可不填）。</li>
     <li><b>會員（可不註冊）：</b>Email、顯示名稱、通知設定與「家附近」中心點、毛孩檔案、健康紀錄、用藥紀錄、收據與病歷照片、追蹤的案件。</li>
-    <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址，只存在你的手機裡，不會上傳。</li>
+    <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址、還沒送出的草稿、領養篩選條件、你檢舉或封鎖而不想再看到的內容、外觀設定，只存在你的手機裡，不會上傳。</li>
     <li><b>定位與相機：</b>只有在你按下「用我目前位置」或選擇照片時才會使用，並會先徵求你的同意。照片的拍攝時間與地點只用來幫你自動填表。</li>
     <li><b>手機通知（App）：</b>你在 App 開啟通知後，回診、疫苗、用藥提醒會排在你的手機上，由手機自己跳出，不經過我們的伺服器；關閉或登出就會全部取消。</li>
     <li><b>技術紀錄：</b>為了防止濫用，本站會記錄送出登記、通報、目擊、檢舉時的 IP 位址：登記、通報、目擊的 IP 跟著內容最多保存 30 天（用來停權濫用的人），之後自動刪除；次數限制用的紀錄約 2 天後刪除；檢舉的 IP 與檢舉一起保存，用來避免重複檢舉。主機服務商也會保存一般連線紀錄。</li>
   </ul>
   <h2>二、哪些會公開、哪些不會</h2>
   <ul>
-    <li><b>會公開：</b>走失案件與通報的內容與照片、飼主稱呼；飼主選擇公開時的電話與 LINE ID。這些是協尋需要，可能被分享到 LINE、Facebook 等社群。</li>
+    <li><b>會公開：</b>走失案件與通報的內容與照片、飼主稱呼；飼主勾選公開時的電話；有填寫的 LINE ID。這些是協尋需要，可能被分享到 LINE、Facebook 等社群。</li>
     <li><b>不會公開：</b>飼主的 Email、選擇不公開的電話、目擊回報者的聯絡方式（只有該案件飼主看得到）、會員的毛孩檔案與健康紀錄（只有你自己看得到）、家附近中心點。</li>
   </ul>
   <h2>三、使用目的</h2>
@@ -5026,12 +5034,13 @@ function renderPrivacy(){
     <li>Supabase：資料庫、會員登入與寄信程式主機。</li>
     <li>Cloudflare：網站主機與網域、客服信箱轉寄；Cloudflare Web Analytics 統計匿名的瀏覽次數（不使用 Cookie、不追蹤個人）。</li>
     <li>Resend：寄送通知信、登入信與確認信。</li>
-    <li>OpenStreetMap／Nominatim：地圖與地址查詢（會傳送你選的座標）。</li>
+    <li>OpenStreetMap／Nominatim：地圖與地址查詢（會傳送你選的座標；App 內的地址查詢經由本站 Cloudflare 主機轉送）。App 內的地圖圖片由 CARTO 提供。</li>
     <li>農業部「動物認領養」開放資料：收容所比對，由你的手機直接查詢。</li>
     <li>Google Fonts：網頁字型，開啟網頁時你的瀏覽器會向它下載（它會看到你的 IP）。</li>
     <li>GitHub：每日收容所比對、通知信與提醒信的排程主機。</li>
     <li>Google 地圖、LINE、Facebook 分享：只在你點選開啟或分享時才會連過去，適用它們自己的隱私政策。</li>
   </ul>
+  <p class="small">以上服務商的主機可能位於台灣以外的地區（例如美國、新加坡），你的資料會儲存或經過這些地區的主機。</p>
   <h2>五、保存期間</h2>
   <ul>
     <li>走失案件：保存到你刪除、或站方因違規下架為止；結案後仍保留，作為找回方式的統計。</li>
@@ -5060,7 +5069,7 @@ function renderTerms(){
   <h2>一、服務內容</h2>
   <p>本站是免費的走失毛孩協尋平台，提供登記走失、目擊與拾獲通報、受傷毛孩通報、收容所比對、毛孩健康手冊等功能。本站<b>不保證一定找回</b>，也<b>無法派人救援</b>；遇到受傷動物請撥全國動保專線 1959（或 1999），有交通危險請撥 110。</p>
   <h2>二、你發布的內容</h2>
-  <p>你保證提供的資料真實，且你有權使用上傳的照片。你同意本站為協尋目的，公開展示你發布的案件與通報、製作海報與分享頁。</p>
+  <p>你保證提供的資料真實，且你有權使用上傳的照片。你同意本站為協尋目的，公開展示你發布的案件與通報、製作海報與分享頁。內容刪除後，網站上會立即移除；但已經被別人分享、轉貼或印出的海報，本站無法收回。</p>
   <h2>三、禁止的行為</h2>
   <p><b>本站對不當內容與濫用行為採零容忍：</b>違規內容會被移除，違規者會被停權，無法再發布任何內容。</p>
   <ul>
@@ -5073,11 +5082,15 @@ function renderTerms(){
   <p>每個案件、通報、目擊回報都有「檢舉」按鈕，檢舉後該內容會立刻從你的畫面隱藏；你也可以按「封鎖發布者」，不再看到這位發布者的任何內容（可在「我的」頁恢復）。</p>
   <p>站方收到檢舉後原則上 24 小時內處理，會隱藏或刪除違規內容，並停權違規者（停權後該帳號與網路無法再發布）。含詐騙、賭博、色情等可疑字眼的內容會被系統自動先隱藏，由站方確認。飼主也可以在管理頁直接退回不正確的目擊回報。</p>
   <h2>五、防詐提醒</h2>
-  <p>本站不經手任何金錢。尋獲獎金由飼主與尋獲者自行處理；任何要求你「先匯款」的人都可能是詐騙，請先和飼主本人確認，或撥 165 反詐騙專線。</p>
+  <p>本站不經手任何金錢。尋獲獎金或酬謝是飼主與尋獲者之間的約定，本站不擔保、也不介入相關糾紛；任何要求你「先匯款」的人都可能是詐騙，請先和飼主本人確認，或撥 165 反詐騙專線。</p>
+  <ul><li><b>交還毛孩前請核對身分：</b>請對方說出晶片號碼，或出示舊照片、就醫紀錄，避免被冒領。</li><li><b>見面請約在公開場所</b>（例如派出所、動物醫院），盡量有人陪同。</li></ul>
   <h2>六、免責</h2>
   <p>網友發布的內容由發布者自行負責。本站會盡力維持服務正常，但不保證不中斷或資料完全正確；收容所比對與相似度只是參考，請親自確認。</p>
-  <h2>七、條款修改與適用法律</h2>
-  <p>條款修改會更新在本頁。本條款以中華民國法律為準據法。</p>
+  <ul><li><b>毛孩健康手冊</b>的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷；用藥與治療請依獸醫師指示。</li><li><b>領養資料</b>來自農業部開放資料，本站不是收容或送養單位；領養請直接聯絡收容所，以收容所公告為準。</li></ul>
+  <h2>七、停止使用</h2>
+  <p>你可以隨時停止使用，並在「我的」頁刪除帳號。站方得因維護、違規處理或營運考量，暫停或終止部分或全部服務，並會盡量事先在網站上公告。</p>
+  <h2>八、條款修改與適用法律</h2>
+  <p>條款修改會更新在本頁。本條款以中華民國法律為準據法；如有爭議，以臺灣臺北地方法院為第一審管轄法院。</p>
   <h2>八、聯絡我們</h2>
   <p>${contactLine()}</p>
   </div>`;

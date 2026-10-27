@@ -24,7 +24,13 @@
       "showSpinner": false,
       "androidScaleType": "CENTER_CROP"
     },
-    "StatusBar": { "overlaysWebView": true, "style": "DEFAULT" },
-    "LocalNotifications": { "iconColor": "#CC3F1E" }
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "DEFAULT"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_paw",
+      "iconColor": "#CC3F1E"
+    }
   }
 }
