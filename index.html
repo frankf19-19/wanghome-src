@@ -1510,7 +1510,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.3.1';
+const BUILD = 'v5.3.2';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -4250,7 +4250,7 @@ function renderLogin(){
     <div class="seg logintabs" role="tablist" aria-label="註冊或登入"><button type="button" role="tab" data-m="signup" aria-selected="${su}" class="${su?'on':''}">免費註冊</button><button type="button" role="tab" data-m="login" aria-selected="${!su}" class="${su?'':'on'}">登入</button></div>
     <img class="login-duo" src="duo.svg" alt="" width="150" height="102">
     <h1>${su?'免費加入會員':'登入'}</h1>
-    <p class="muted">只要 Email，不用密碼。我們寄一封信給你，按信裡的按鈕就${su?'完成註冊':'登入'}了。</p>
+    <p class="muted" style="text-wrap:pretty">只要 Email，不用密碼。${IS_APP?`我們寄一封信給你，把信裡的 8 位數驗證碼輸入 App，就${su?'完成註冊':'登入'}了。`:`我們寄一封信給你，點信裡的按鈕就${su?'完成註冊':'登入'}了。`}</p>
     <form onsubmit="return false" id="lf" data-nodirty>
       <label class="f"><span>Email</span><input type="email" id="em" required autocomplete="email" inputmode="email" placeholder="you@example.com"></label>
       <button class="btn lg block" style="margin-top:12px" id="btnSend">${su?'寄確認信給我':'寄登入信給我'}</button>
@@ -4260,8 +4260,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       <form id="pwf" data-nodirty><label class="f"><span>Email</span><input type="email" id="pwe" autocomplete="username" required></label><label class="f"><span>密碼</span><input type="password" id="pwp" autocomplete="current-password" required></label><button class="btn block ghost" id="btnPw" style="margin-top:8px">用密碼登入</button></form>
     </details>`}
     ${CONFIG.GOOGLE_LOGIN&&!IS_APP?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google ${su?'註冊':'登入'}</button>`:''}
-    <p class="tipbox" style="margin-top:14px">📩 去信箱按信裡的按鈕就好（找不到請看垃圾郵件）。</p>
-    <details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">${IS_APP?'在 App 裡請輸入信裡的數字驗證碼。':'在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。'}</p></details>
+    ${IS_APP?'':`<details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。</p></details>`}
     <ul class="small muted" style="padding-left:20px;margin:16px 0 0;line-height:1.8">
       <li>案件存在帳號裡，換手機也能管理</li>
       <li>毛孩健康手冊：疫苗、回診到期提醒</li>
@@ -4282,7 +4281,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       try{localStorage.setItem('wh_registered','1')}catch(_){}
       const su=sm==='signup';
       app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div style="font-size:56px">📬</div><h1>請收信</h1><p>${su?'確認信':'登入信'}已寄到 <b>${esc(email)}</b></p>
-        <form id="otpf" data-nodirty novalidate style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" type="text" maxlength="40" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">用驗證碼登入</button></form>
+        <form id="otpf" data-nodirty novalidate style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" type="text" maxlength="8" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">用驗證碼登入</button></form>
         <p class="muted small">${IS_APP?'':`也可以直接按信裡的大按鈕，就會${su?'完成註冊並':''}登入。`}幾分鐘沒收到請看垃圾郵件匣。${su?'（如果這個 Email 之前註冊過，會收到「你的登入連結」，一樣輸入驗證碼就好）':''}</p><button type="button" class="btn ghost" id="btnReLogin">換一個 Email</button></div>`;
       $('#btnReLogin').onclick=()=>{draw();$('#em').value=email};
       {const rb=document.createElement('button');rb.type='button';rb.className='btn ghost';rb.id='btnResend';rb.style.marginLeft='8px';$('#btnReLogin').after(rb);let left=60;const tick=()=>{if(!rb.isConnected)return;rb.disabled=left>0;rb.textContent=left>0?`重寄（${left} 秒）`:'重寄一封';if(left-->0)setTimeout(tick,1000)};tick();
@@ -4292,7 +4291,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       const otpIn=$('#otp');
       otpIn.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text');if(t==null)return;e.preventDefault();otpIn.value=otpDigits(t);if(otpIn.value.length===OTP_LEN)setTimeout(()=>$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click(),150)});
       // 打字或 iPhone 自動填入：等它填完再整理，湊滿 8 位就自動登入（不在輸入過程中改值，避免跟自動填入打架）
-      let otpT=0;otpIn.addEventListener('input',e=>{if(e.isComposing)return;clearTimeout(otpT);otpT=setTimeout(()=>{const v=otpDigits(otpIn.value);if(v!==otpIn.value)otpIn.value=v;if(v.length===OTP_LEN&&!$('#btnOtp').disabled)$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click()},250)});
+      let otpT=0;otpIn.addEventListener('input',e=>{if(e.isComposing)return;const v=otpDigits(otpIn.value);if(v!==otpIn.value)otpIn.value=v;clearTimeout(otpT);if(v.length===OTP_LEN)otpT=setTimeout(()=>{if(!$('#btnOtp').disabled&&otpDigits(otpIn.value).length===OTP_LEN)$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click()},300)});
       $('#otpf').onsubmit=async ev=>{ev.preventDefault();const code=otpDigits($('#otp').value);$('#otp').value=code;if(code.length<6)return toast('請輸入信裡的數字驗證碼（6 位數以上）');
         const b=$('#btnOtp');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
         let {data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'email'});
