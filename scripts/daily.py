@@ -18,7 +18,7 @@
   GMAIL_APP_PASSWORD        （舊方式）Gmail 應用程式密碼（16 碼）
   MOA_API_URL               （選填）覆蓋農業部 API 網址
 """
-import os, sys, json, gzip, smtplib, datetime as dt, urllib.request, urllib.parse, urllib.error, re
+import os, sys, json, gzip, smtplib, time, datetime as dt, urllib.request, urllib.parse, urllib.error, re
 from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import formataddr
@@ -70,7 +70,7 @@ def sb(method, path, body=None, params=None, prefer=None):
             body = "(非 JSON 回應)"
         kind = "sb_secret" if SERVICE_KEY.startswith("sb_secret_") else "sb_publishable(錯誤：這是公開金鑰)" if SERVICE_KEY.startswith("sb_publishable_") else "JWT" if SERVICE_KEY.startswith("eyJ") else "未知格式"
         print(f"Supabase 回應 {e.code}：{body}")
-        print(f"金鑰檢查：類型={kind}，長度={len(SERVICE_KEY)}，含遮罩符號={'•' in SERVICE_KEY or '*' in SERVICE_KEY}")
+        print(f"金鑰檢查：類型={kind}，含遮罩符號={'•' in SERVICE_KEY or '*' in SERVICE_KEY}")
         raise
 
 def sb_all(path, params, page=1000, cap=50000, strict=False):
@@ -99,10 +99,9 @@ def fetch_moa():
     print(f"農業部資料筆數：{len(data)}")
     return data
 
-CITY_ALIASES = {"台北市":"臺北市","台中市":"臺中市","台南市":"臺南市","台東縣":"臺東縣"}
 def norm_city(s):
-    s = (s or "").strip()
-    return CITY_ALIASES.get(s, s)
+    # 「台」「臺」一律當成同一個字（地址裡常混用，例如「台北市內湖區…」）
+    return (s or "").strip().replace("台", "臺")
 
 COLOUR_GROUPS = {
     "黑": ["黑"], "白": ["白"], "黃": ["黃","米","淺棕","卡其","金"], "棕": ["棕","咖啡","褐","茶"],
@@ -243,8 +242,9 @@ def run_found_matching():
 # 會員通知（附近走失、追蹤、到期提醒）最多用到當天第 40 封，飼主的目擊通知永遠有保留額度。
 MAIL_CAP_HIGH, MAIL_CAP_LOW = 60, 40
 STOP_MAIL = False   # 這次執行中寄信出錯（例如額度用完）就不再嘗試
+KIND_CAP = {"notify": 45, "shelter": 45, "found": 45, "nearby": 40, "follow": 40, "due": 40, "admin": 5}
 def mail_budget(kind, cap):
-    try: return sb("POST", "rpc/mail_budget_take", body={"p_kind": kind, "p_cap": cap}) is True
+    try: return sb("POST", "rpc/mail_budget_take", body={"p_kind": kind, "p_cap": cap, "p_kind_cap": min(cap, KIND_CAP.get(kind, 40))}) is True
     except Exception as e:
         print("查寄信額度失敗，這次先不寄：", type(e).__name__); return False
 
@@ -255,8 +255,13 @@ def send_mail(to, subject, body, kind="notify", cap=MAIL_CAP_HIGH):
         print(f"今天的寄信額度已用完（{kind}），留到明天再寄"); return False
     try:
         return _send(to, subject, body)
-    except Exception:
-        STOP_MAIL = True; raise
+    except Exception as e:
+        # 沒寄出去：額度還回去
+        try: sb("POST", "rpc/mail_budget_return", body={"p_kind": kind})
+        except Exception: pass
+        # 只是這個收件地址有問題：跳過這封，其他人照寄；登入失敗、連線問題才停止這一輪
+        if not isinstance(e, (smtplib.SMTPRecipientsRefused, smtplib.SMTPDataError)): STOP_MAIL = True
+        raise
 
 def _send(to, subject, body):
     msg = MIMEText(body, "plain", "utf-8")
@@ -311,10 +316,17 @@ def fmt(ts):
     except Exception: return ts or ""
 
 def mark_notified(table, ids):
-    """把已處理（或不可能寄出、例如案件已隱藏或沒 Email）的紀錄標記為已通知，避免卡住後面的通知。"""
+    """把已處理（或不可能寄出、例如案件已隱藏或沒 Email）的紀錄標記為已通知，避免卡住後面的通知。
+    失敗會重試一次；還是失敗就印出來、繼續處理下一個（不要讓整輪中斷）。"""
     ids = list(ids)
     for i in range(0, len(ids), 150):
-        sb("PATCH", table, body={"notified": True}, params={"id": "in.(" + ",".join(ids[i:i+150]) + ")"}, prefer="return=minimal")
+        part = ids[i:i+150]
+        for attempt in (1, 2):
+            try:
+                sb("PATCH", table, body={"notified": True}, params={"id": "in.(" + ",".join(part) + ")"}, prefer="return=minimal"); break
+            except Exception as e:
+                if attempt == 2: print(f"標記已通知失敗（{table}，{len(part)} 筆），下一輪可能重寄：", type(e).__name__)
+                else: time.sleep(3)
 
 def run_notifications():
     if not MAIL_OK:
@@ -349,7 +361,7 @@ def run_notifications():
             print(f"已通知目擊：{c['name']} x{len(lst)}")
         except Exception as e:
             print("寄信失敗：", type(e).__name__); continue
-        sb("PATCH", "sightings", body={"notified": True}, params={"id": "in.(" + ",".join(s["id"] for s in lst) + ")"}, prefer="return=minimal")
+        mark_notified("sightings", [s["id"] for s in lst])
     # 收容所比對
     pend = sb_all("shelter_matches", {"select": "*", "notified": "eq.false", "dismissed": "eq.false", "order": "score.desc"})
     by_case = {}
@@ -379,7 +391,7 @@ def run_notifications():
             print(f"已通知比對：{c['name']} x{len(lst)}")
         except Exception as e:
             print("寄信失敗：", type(e).__name__); continue
-        sb("PATCH", "shelter_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
+        mark_notified("shelter_matches", [m["id"] for m in lst])
     # 拾獲通報比對
     pend = sb_all("found_matches", {"select": "id,case_id,found_id,score,created_at", "notified": "eq.false", "order": "score.desc"})
     by_case = {}
@@ -409,7 +421,7 @@ def run_notifications():
             print(f"已通知拾獲比對：{c['name']} x{len(lst)}")
         except Exception as e:
             print("寄信失敗：", type(e).__name__); continue
-        sb("PATCH", "found_matches", body={"notified": True}, params={"id": "in.(" + ",".join(m["id"] for m in lst) + ")"}, prefer="return=minimal")
+        mark_notified("found_matches", [m["id"] for m in lst])
 
 # ---------------------------------------------------------------- 會員通知
 SP_NAME = {"dog": "狗", "cat": "貓"}
@@ -428,7 +440,7 @@ def run_member_notifications(nearby=True):
         lines += ["", f"不想再收到？到「我的 → 通知設定」關閉：{SITE_URL}#/me", f"— {SITE_NAME}"]
         try:
             if not send_mail(email, f"【{SITE_NAME}】你家附近有毛孩走失", "\n".join(lines), kind="nearby", cap=MAIL_CAP_LOW): break
-            sb("POST", "notify_log", body=[{"user_id": uid, "kind": "nearby", "ref_id": r["case_id"]} for r in lst],
+            sb("POST", "notify_log", body=[{"user_id": uid, "kind": "nearby", "ref_id": r["case_id"]} for r in lst[:10]],
                prefer="return=minimal,resolution=ignore-duplicates")
             print(f"附近通知：{len(lst)} 筆 → 1 位會員")
         except Exception as e:
@@ -560,21 +572,31 @@ if __name__ == "__main__":
             d = dogs[0]
             print("範例：", {k: d.get(k) for k in ("shelter_name", "animal_colour", "animal_bodytype", "animal_sex", "animal_foundplace", "animal_createtime", "album_file")})
         sys.exit(0)
-    if mode in ("all", "match"): run_matching()
-    if mode in ("all", "match", "notify"): run_found_matching()
-    if mode in ("all", "notify"): run_notifications()
-    if mode in ("all", "notify"): run_member_notifications(nearby=(mode == "all"))
-    if mode in ("all", "notify"): run_report_alerts()
-    if mode in ("all",): run_due_reminders()
-    if mode == "all":
+    # 每個步驟各自執行：一個出錯不影響後面的；最後有錯就讓排程顯示失敗（紅燈）
+    failed = []
+    def step(name, fn, *a, **k):
+        try: fn(*a, **k)
+        except Exception as e:
+            failed.append(name); print(f"【{name}】失敗：", type(e).__name__, str(e)[:120])
+    try:
+        if mode in ("all", "match"): step("收容所比對", run_matching)
+        if mode in ("all", "match", "notify"): step("拾獲比對", run_found_matching)
+        if mode in ("all", "notify"): step("飼主通知", run_notifications)
+        if mode in ("all", "notify"): step("會員通知", run_member_notifications, nearby=(mode == "all"))
+        if mode in ("all", "notify"): step("檢舉通知", run_report_alerts)
+        if mode in ("all",): step("到期提醒", run_due_reminders)
+        if mode == "all":
+            step("定期清理", lambda: print("定期清理：", sb("POST", "rpc/retention_cleanup", body={})))
+            step("清除舊網路位址", lambda: print("清除 30 天前的網路位址：", sb("POST", "rpc/clear_old_ips", body={})))
+        # 照片清理：每天凌晨那次一起跑（12 小時以上沒人用的才刪），或手動執行
+        if mode in ("all", "cleanup", "cleanup-dry"):
+            step("照片清理", run_photo_cleanup, dry=(mode == "cleanup-dry"))
+    finally:
+        # 保活：免費專案 7 天沒有活動會被暫停，所以一定要跑
         try:
-            print("定期清理：", sb("POST", "rpc/retention_cleanup", body={}))
-            print("清除 30 天前的網路位址：", sb("POST", "rpc/clear_old_ips", body={}))
-        except Exception as e: print("定期清理失敗（不影響其他功能）：", type(e).__name__)
-    # 照片清理要列出所有檔案（流量大）：每週日跑一次，或手動執行
-    weekly = mode == "all" and dt.datetime.now(TPE).weekday() == 6
-    if weekly or mode in ("cleanup", "cleanup-dry"):
-        try: run_photo_cleanup(dry=(mode == "cleanup-dry"))
-        except Exception as e: print("照片清理失敗（不影響其他功能）：", type(e).__name__)
-    n = sb("GET", "cases", params={"select": "id", "limit": "1"})
-    print("保活 OK", "有資料" if n else "空")
+            n = sb("GET", "cases", params={"select": "id", "limit": "1"})
+            print("保活 OK", "有資料" if n else "空")
+        except Exception as e:
+            failed.append("保活"); print("保活失敗：", type(e).__name__)
+    if failed:
+        print("這次有步驟失敗：", "、".join(failed)); sys.exit(1)
