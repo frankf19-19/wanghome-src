@@ -1,4 +1,4 @@
-// 汪喵回家 — 飼主 Email 通知 v1.7（用 Resend 從 noreply@wangmiaotw.com 寄出）
+// 汪喵回家 — 飼主 Email 通知 v1.8（用 Resend 從 noreply@wangmiaotw.com 寄出）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-sighting
 //   1. {"case_id":"<uuid>"}                                   網友送出目擊後由網頁呼叫：寄目擊通知給飼主
 //   2. {"case_id":"<uuid>","action":"verify","token":"<管理代碼>"}  寄「確認信箱」信給飼主（登記後、改 Email 後、按重寄）
@@ -6,6 +6,7 @@
 //       確認信內容固定、不含任何網友填的文字；同一案件 10 分鐘最多 1 封、一天最多 3 封；同一信箱一天最多 3 封；確認信全站每小時 30 封，目擊通知另計 150 封。
 //       v1.6：每個網路位址每小時有上限；每日寄信額度分類（確認信 ≤15、目擊 ≤45）；只有「協尋中」的案件才寄目擊通知；同一案件一天最多 20 封。
 //       v1.7：每個網路位址另有每天上限（目擊通知 15、確認信 6）；IPv6 位址分組修正。
+//       v1.8：目擊通知改成有版面的信：照片直接顯示、地圖與管理頁用大按鈕。
 // 需關閉 JWT 驗證（訪客也能回報）。
 // Secrets（Supabase → Edge Functions → Secrets）：RESEND_API_KEY（建議）；或舊方式 GMAIL_USER、GMAIL_APP_PASSWORD
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -210,7 +211,7 @@ Deno.serve(async (req) => {
   for (const s of ss) {
     lines.push(`・${fmt(s.seen_at)}  ${s.place_text || "（見地圖）"}  ${s.direction ? "往" + s.direction : ""}`);
     if (s.note) lines.push(`  狀況：${s.note}`);
-    if (s.lat) lines.push(`  地圖：https://www.google.com/maps?q=${s.lat},${s.lng}`);
+    if (s.lat) lines.push(`  地圖：https://www.google.com/maps?q=${(+s.lat).toFixed(5)},${(+s.lng).toFixed(5)}`);
     if (s.photo_url) lines.push(`  照片：${s.photo_url}`);
     lines.push(`  回報者：${s.reporter_name || "匿名"}${s.reporter_contact ? "，聯絡方式：" + s.reporter_contact : ""}`);
     lines.push("");
@@ -219,8 +220,39 @@ Deno.serve(async (req) => {
     "確認後才會顯示在公開地圖上，請到管理頁處理（需要你的管理網址）：",
     `${SITE}#/manage/${caseId}`, "", "看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。", "", `— ${SITE_NAME}`);
 
+  // 信件版面（HTML）：照片直接顯示在信裡、地圖和管理頁用大按鈕；網友填的文字一律跳脫
+  const okPhoto = (u: string) => typeof u === "string" && u.startsWith(Deno.env.get("SUPABASE_URL") + "/storage/v1/object/public/photos/");
+  const btn = (href: string, label: string, bg: string, fg = "#fff", border = bg) =>
+    `<a href="${escH(href)}" style="display:block;background:${bg};color:${fg};border:2px solid ${border};text-decoration:none;font-size:17px;font-weight:800;padding:13px 16px;border-radius:12px;text-align:center;margin:8px 0 0">${label}</a>`;
+  const items = ss.map((s) => {
+    const map = s.lat ? `https://www.google.com/maps?q=${(+s.lat).toFixed(5)},${(+s.lng).toFixed(5)}` : "";
+    const rows: [string, string][] = [["時間", fmt(s.seen_at)], ["地點", s.place_text || (s.lat ? "（看地圖）" : "未標示")]];
+    if (s.direction) rows.push(["方向", "往" + s.direction]);
+    if (s.note) rows.push(["狀況", s.note]);
+    rows.push(["回報者", (s.reporter_name || "匿名") + (s.reporter_contact ? "（" + s.reporter_contact + "）" : "")]);
+    return `<tr><td style="padding:16px 24px 6px">
+${okPhoto(s.photo_url) ? `<a href="${escH(s.photo_url)}"><img src="${escH(s.photo_url)}" alt="目擊照片" width="432" style="display:block;width:100%;max-width:432px;height:auto;border-radius:12px;margin:0 0 12px;background:#EEE"></a>` : ""}
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:16px;line-height:1.6;color:#36454B">
+${rows.map(([k, v]) => `<tr><td style="width:64px;vertical-align:top;color:#5A6A70;font-weight:700;padding:2px 0">${k}</td><td style="padding:2px 0">${escH(v)}</td></tr>`).join("")}
+</table>
+${map ? btn(map, "📍 在 Google 地圖看位置", "#ffffff", "#CC3F1E", "#CC3F1E") : ""}
+</td></tr>`;
+  }).join(`<tr><td style="padding:6px 24px"><div style="border-top:1px solid #E3E7E2"></div></td></tr>`);
+  const html = `<!DOCTYPE html><html lang="zh-Hant"><body style="margin:0;background:#EFF2EE;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;color:#141E22">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:16px;overflow:hidden">
+<tr><td style="background:#CC3F1E;padding:18px 24px;color:#fff;font-size:22px;font-weight:900">🐾 ${SITE_NAME}</td></tr>
+<tr><td style="padding:22px 24px 4px"><p style="margin:0;font-size:22px;font-weight:900">有人看到${escH(c.name)}了！</p>
+<p style="margin:6px 0 0;font-size:16px;color:#36454B">剛剛有 ${ss.length} 筆新的目擊回報：</p></td></tr>
+${items}
+<tr><td style="padding:14px 24px 6px">${btn(`${SITE}#/manage/${caseId}`, "到管理頁確認這筆目擊", "#CC3F1E")}
+<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上（需要你的管理網址，或用登記時的帳號登入）。</p></td></tr>
+<tr><td style="padding:12px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
+以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。<br>看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。<br>${SITE_NAME}｜全台走失毛孩協尋平台　<a href="${SITE}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
+</table></td></tr></table></body></html>`;
+
   try {
-    await sendMail(to, `【${SITE_NAME}】有人看到${c.name}了！`, lines.join("\n"));
+    await sendMail(to, `【${SITE_NAME}】有人看到${c.name}了！`, lines.join("\n"), html);
     await sb.from("case_mail_log").insert({ case_id: caseId, to_email: toKey });
     return json({ sent: true, count: ss.length });
   } catch (e) {

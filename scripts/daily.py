@@ -20,6 +20,8 @@
 """
 import os, sys, json, gzip, smtplib, time, datetime as dt, urllib.request, urllib.parse, urllib.error, re
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import html as _html
 from email.header import Header
 from email.utils import formataddr
 from zoneinfo import ZoneInfo
@@ -248,13 +250,13 @@ def mail_budget(kind, cap):
     except Exception as e:
         print("查寄信額度失敗，這次先不寄：", type(e).__name__); return False
 
-def send_mail(to, subject, body, kind="notify", cap=MAIL_CAP_HIGH):
+def send_mail(to, subject, body, kind="notify", cap=MAIL_CAP_HIGH, html=None):
     global STOP_MAIL
     if not (MAIL_OK and to) or STOP_MAIL: return False
     if not mail_budget(kind, cap):
         print(f"今天的寄信額度已用完（{kind}），留到明天再寄"); return False
     try:
-        return _send(to, subject, body)
+        return _send(to, subject, body, html)
     except Exception as e:
         # 沒寄出去：額度還回去
         try: sb("POST", "rpc/mail_budget_return", body={"p_kind": kind})
@@ -263,8 +265,11 @@ def send_mail(to, subject, body, kind="notify", cap=MAIL_CAP_HIGH):
         if not isinstance(e, (smtplib.SMTPRecipientsRefused, smtplib.SMTPDataError)): STOP_MAIL = True
         raise
 
-def _send(to, subject, body):
-    msg = MIMEText(body, "plain", "utf-8")
+def _send(to, subject, body, html=None):
+    if html:   # 純文字＋有版面的 HTML 兩種都附上，信箱 App 會挑能顯示的
+        msg = MIMEMultipart("alternative"); msg.attach(MIMEText(body, "plain", "utf-8")); msg.attach(MIMEText(html, "html", "utf-8"))
+    else:
+        msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = Header(subject, "utf-8"); msg["To"] = to
     if RESEND_KEY:   # 用自己的網域寄（Resend SMTP）
         try:
@@ -299,12 +304,12 @@ def case_mail_ok(to):
     except Exception as e:
         print("查寄信上限失敗，這次先不寄：", type(e).__name__); return False
 
-def send_case_mail(c, subject, body):
+def send_case_mail(c, subject, body, html=None):
     """寄給案件飼主：只寄已確認的信箱、遵守上限、寄完記錄。回傳 True 才算寄出。"""
     to = (c.get("contact_email") or "").strip().lower()
     if not to or not c.get("email_verified"): return False
     if not case_mail_ok(to): print("達寄信上限，下次再寄：", c.get("name")); return False
-    if not send_mail(to, subject, body): return False
+    if not send_mail(to, subject, body, html=html): return False
     try: sb("POST", "case_mail_log", body={"case_id": c["id"], "to_email": to}, prefer="return=minimal")
     except Exception as e: print("寫入寄信紀錄失敗：", type(e).__name__)
     return True
@@ -327,6 +332,39 @@ def mark_notified(table, ids):
             except Exception as e:
                 if attempt == 2: print(f"標記已通知失敗（{table}，{len(part)} 筆），下一輪可能重寄：", type(e).__name__)
                 else: time.sleep(3)
+
+def sighting_html(c, cid, lst):
+    """目擊通知的信件版面：照片直接顯示、地圖與管理頁用大按鈕；網友填的文字一律跳脫。"""
+    E = lambda x: _html.escape(str(x or ""), quote=True)
+    pub = f"{SUPABASE_URL}/storage/v1/object/public/photos/"
+    def btn(href, label, bg, fg="#fff", border=None):
+        return (f'<a href="{E(href)}" style="display:block;background:{bg};color:{fg};border:2px solid {border or bg};text-decoration:none;'
+                f'font-size:17px;font-weight:800;padding:13px 16px;border-radius:12px;text-align:center;margin:8px 0 0">{label}</a>')
+    items = []
+    for s in lst:
+        rows = [("時間", fmt(s.get("seen_at"))), ("地點", s.get("place_text") or ("（看地圖）" if s.get("lat") else "未標示"))]
+        if s.get("direction"): rows.append(("方向", "往" + s["direction"]))
+        if s.get("note"): rows.append(("狀況", s["note"]))
+        rows.append(("回報者", (s.get("reporter_name") or "匿名") + (f"（{s['reporter_contact']}）" if s.get("reporter_contact") else "")))
+        ph = s.get("photo_url") or ""
+        img = (f'<a href="{E(ph)}"><img src="{E(ph)}" alt="目擊照片" width="432" style="display:block;width:100%;max-width:432px;height:auto;border-radius:12px;margin:0 0 12px;background:#EEE"></a>'
+               if isinstance(ph, str) and ph.startswith(pub) else "")
+        tbl = "".join(f'<tr><td style="width:64px;vertical-align:top;color:#5A6A70;font-weight:700;padding:2px 0">{k}</td><td style="padding:2px 0">{E(v)}</td></tr>' for k, v in rows)
+        mp = btn(f"https://www.google.com/maps?q={float(s['lat']):.5f},{float(s['lng']):.5f}", "📍 在 Google 地圖看位置", "#ffffff", "#CC3F1E", "#CC3F1E") if s.get("lat") else ""
+        items.append(f'<tr><td style="padding:16px 24px 6px">{img}<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:16px;line-height:1.6;color:#36454B">{tbl}</table>{mp}</td></tr>')
+    sep = '<tr><td style="padding:6px 24px"><div style="border-top:1px solid #E3E7E2"></div></td></tr>'
+    return f"""<!DOCTYPE html><html lang="zh-Hant"><body style="margin:0;background:#EFF2EE;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;color:#141E22">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:16px;overflow:hidden">
+<tr><td style="background:#CC3F1E;padding:18px 24px;color:#fff;font-size:22px;font-weight:900">🐾 {SITE_NAME}</td></tr>
+<tr><td style="padding:22px 24px 4px"><p style="margin:0;font-size:22px;font-weight:900">有人看到{E(c.get('name'))}了！</p>
+<p style="margin:6px 0 0;font-size:16px;color:#36454B">有 {len(lst)} 筆新的目擊回報：</p></td></tr>
+{sep.join(items)}
+<tr><td style="padding:14px 24px 6px">{btn(f"{SITE_URL}#/manage/{cid}", "到管理頁確認這筆目擊", "#CC3F1E")}
+<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上（需要你的管理網址，或用登記時的帳號登入）。</p></td></tr>
+<tr><td style="padding:12px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
+以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。<br>看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。<br>{SITE_NAME}｜全台走失毛孩協尋平台　<a href="{SITE_URL}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
+</table></td></tr></table></body></html>"""
 
 def run_notifications():
     if not MAIL_OK:
@@ -357,7 +395,7 @@ def run_notifications():
             lines.append("")
         lines += ["請到管理頁確認後才會顯示在公開地圖：", f"{SITE_URL}#/manage/{cid}", "（需要你的管理網址）", "", f"— {SITE_NAME}"]
         try:
-            if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines)): continue
+            if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines), html=sighting_html(c, cid, lst)): continue
             print(f"已通知目擊：{c['name']} x{len(lst)}")
         except Exception as e:
             print("寄信失敗：", type(e).__name__); continue
