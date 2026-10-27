@@ -1446,7 +1446,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.6';
+const BUILD = 'v4.9.7';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2492,6 +2492,7 @@ async function renderCase(id){const _n=navId;
   </div>
 
   <h2>${ic("map")} 目擊位置與時間軸</h2>
+  ${c.pending_count>0?`<p class="notice pend-n">🕒 另有 <b>${c.pending_count}</b> 則新的目擊回報，等飼主確認後會顯示在地圖上。</p>`:''}
   <div class="trail"><div class="trail-map"><div id="map"></div></div><div class="timeline" id="tl"></div></div>
 
   <div id="shelterBox">${shelterBoxHTML(matches,c.status==='searching')}</div>
@@ -2546,7 +2547,7 @@ async function renderCase(id){const _n=navId;
   pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
   if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]});
   const tl=$('#tl');
-  if(!pts.length){tl.innerHTML='<p class="muted">還沒有目擊回報。</p>'}
+  if(!pts.length){tl.innerHTML=c.pending_count>0?'<p class="muted">目前還沒有飼主確認過的目擊。</p>':'<p class="muted">還沒有目擊回報。</p>'}
   else tl.innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div>
     <div class="when">${esc(p.title)} · ${fmtDT(p.t)}</div>
     <div class="where">${ic("pin")} ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
@@ -2851,6 +2852,7 @@ async function renderReport(id){const _n=navId;
       const msg=`你好，我在汪喵回家看到你在找「${c.name}」。\n我在 ${fmtDT(new Date(fd.get('seen_at')).toISOString())} 於「${place}」看到疑似牠${dir&&dir!=='不確定'?'，往'+dir+'走':''}。${note?'\n狀況：'+note:''}\n${loc?`地圖：https://www.google.com/maps?q=${loc.lat},${loc.lng}`:''}`;
       const tel=String(c.contact_phone||'').replace(/[^\d+]/g,'');const lineRaw=String(c.contact_line||'').trim();const lineId=lineRaw.replace(/^@/,'');const lineUrl=lineRaw.startsWith('@')?`https://line.me/R/ti/p/@${encodeURIComponent(lineId)}`:`https://line.me/R/ti/p/~${encodeURIComponent(lineId)}`;
       (_n===navId?app:_void).innerHTML=`<div class="card done-card"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！回報已送出</h1>
+      <p class="small muted" style="margin:-6px 0 10px">為了避免假消息，目擊回報要等飼主確認後，才會顯示在公開的地圖上。</p>
       <p class="lede">${tel||lineId?`${mailed?'系統已經寄 Email 通知飼主了。':''}<b>最快的方法是直接告訴飼主：</b>`:mailed?'系統已經寄 Email 通知飼主了，飼主確認後會跟你聯絡。':'回報已經存好，飼主打開網站就會看到。'}</p>
       <div class="bigacts">${tel?`<a class="btn big call" href="tel:${esc(tel)}">${ic('phone')} 打電話給${esc(c.contact_name||'飼主')}</a>`:''}
       ${lineId?`<a class="btn big line" href="${lineUrl}" target="_blank" rel="noopener">加飼主 LINE（${esc(lineId)}）</a>`:''}
