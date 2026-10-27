@@ -52,8 +52,10 @@ jobs:
           KP=~/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8
           printf '%s' "$ASC_KEY" > "$KP"
           AUTH="-allowProvisioningUpdates -authenticationKeyPath $KP -authenticationKeyID $ASC_KEY_ID -authenticationKeyIssuerID $ASC_ISSUER"
-          xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
-            -archivePath "$RUNNER_TEMP/App.xcarchive" DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGN_STYLE=Automatic $AUTH archive | tail -30
+          # 失敗時把錯誤訊息寫成 GitHub 的「註解」，方便從外面看到原因
+          run_log(){ local L="$RUNNER_TEMP/$1.log"; shift; if ! "$@" > "$L" 2>&1; then tail -40 "$L"; grep -E "error|Error|ERROR|fail|No profiles|No Accounts|certificate|provision" "$L" | grep -v "^\s*$" | tail -12 | while IFS= read -r line; do echo "::error::${line:0:400}"; done; rm -f "$KP"; exit 1; fi; tail -15 "$L"; }
+          run_log archive xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGN_STYLE=Automatic $AUTH archive
           cat > "$RUNNER_TEMP/export.plist" <<PL
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -66,7 +68,7 @@ jobs:
           </dict></plist>
           PL
           sed -i '' 's/^          //' "$RUNNER_TEMP/export.plist"
-          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
-            -exportPath "$RUNNER_TEMP/out" $AUTH | tail -30
+          run_log export xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
+            -exportPath "$RUNNER_TEMP/out" $AUTH
           rm -f "$KP"
           echo "已上傳到 App Store Connect，約 10–30 分鐘後會出現在 TestFlight。"
