@@ -1251,6 +1251,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .chk.agree{margin:14px 0 6px;font-size:14.5px;line-height:1.5;align-items:flex-start}.chk.agree input{margin-top:3px;flex:none}
 .af-note{margin:6px 0 4px;padding:8px 12px;border-radius:12px;background:var(--green-soft);color:var(--green)}
 @keyframes afFlash{0%{box-shadow:0 0 0 3px var(--green)}100%{box-shadow:0 0 0 0 transparent}}.autofill{animation:afFlash 1.6s ease-out}
+.reward-note{text-align:center;margin:8px 4px 0;line-height:1.6}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1446,7 +1447,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.7';
+const BUILD = 'v4.9.8';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2481,6 +2482,7 @@ async function renderCase(id){const _n=navId;
       </div>
       ${active?`<div class="banner" style="margin-top:10px">看到請勿呼喊、追趕或包圍<small>請拍照，記下時間、位置及方向，立即回報</small></div>`:''}
       ${!active?'':c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">${ic('phone')} ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
+      ${active&&c.reward>0?`<p class="small muted reward-note">💰 尋獲獎金由飼主自行支付，請直接和飼主聯絡；本站不經手任何款項。任何要你「先匯款、付訂金」的都可能是詐騙，可撥 165 確認。</p>`:''}
       <div class="actionbar">
         ${active?`<a class="btn" href="#/report/${id}">${ic("eye")} 回報目擊</a>`:''}
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
