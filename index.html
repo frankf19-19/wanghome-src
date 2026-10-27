@@ -1455,7 +1455,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.0.6';
+const BUILD = 'v5.0.7';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1593,6 +1593,8 @@ function twParse(v){const d=new Date(String(v)+(String(v).length===16?':00':'')+
 function nowLocalInput(d=new Date()){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
 // 比對分數換成一般人看得懂的說法
 function simLabel(n){n=+n||0;return n>=80?'很像':n>=60?'有點像':'可能相關'}
+// 電話格式：至少 8 碼（可含空白、-、括號、#分機、全形數字）。用 String.raw 才不會在網頁樣板裡吃掉反斜線
+const PHONE_PAT=String.raw`[0-9０-９+＋\-－\s\(\)#＃]{8,30}`;
 function caseUrl(id){return CONFIG.SITE_URL+'#/case/'+id}
 // 複製：新式 API → 舊式 execCommand → 最後才跳出視窗讓使用者自己複製（LINE／FB 內建瀏覽器常常沒有 clipboard）
 function copyLegacy(t){try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);const ok=document.execCommand('copy');ta.remove();return ok}catch(_){return false}}
@@ -1684,9 +1686,17 @@ function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;retu
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
 // 定位或點地圖後：自動帶入縣市、區、地點描述（只填空的或跟位置不一樣的），並請使用者確認
 // 瀏覽器內建的欄位提示改成中文（iPhone 語言是英文時會跳出「Select an item in the list」）
-document.addEventListener('invalid',e=>{const x=e.target;if(!x||!x.validity)return;const v=x.validity;
-  x.setCustomValidity(v.valueMissing?(x.tagName==='SELECT'?'請選一個項目':x.type==='checkbox'?'請勾選這一項':'請填寫這個欄位'):v.typeMismatch?(x.type==='email'?'Email 格式不對，例如 name@gmail.com':'格式不對'):v.tooLong?'字數太多了':v.patternMismatch?(x.type==='tel'?'請填電話號碼（至少 8 碼數字，例如 0912-345-678）':'格式不對'):v.rangeUnderflow||v.rangeOverflow?'數值超出範圍':'')},true);
-['input','change'].forEach(t=>document.addEventListener(t,e=>{const x=e.target;if(x&&x.setCustomValidity)x.setCustomValidity('')},true));
+document.addEventListener('invalid',e=>{const x=e.target;if(!x||!x.validity)return;const v=x.validity;if(v.customError)return;   // 自己設的中文訊息（例如只填空白）保留
+  x.setCustomValidity(v.valueMissing?(x.tagName==='SELECT'?'請選一個項目':x.type==='checkbox'?'請勾選這一項':'請填寫這個欄位'):v.typeMismatch?(x.type==='email'?'Email 格式不對，例如 name@gmail.com':'格式不對'):v.tooLong?'字數太多了':v.patternMismatch?(x.type==='tel'?'請填電話號碼（至少 8 碼數字，例如 0912-345-678）':'格式不對'):v.rangeUnderflow?(/date/.test(x.type)?'日期太早了，請再確認一下':'數字太小了'):v.rangeOverflow?(/date/.test(x.type)?'日期太晚了，請再確認一下':'數字太大了'):v.stepMismatch?(x.step&&+x.step>=1?'請填整數':'小數位數太多了'):v.badInput?(/date/.test(x.type)?'日期格式不對':'請填數字'):'')},true);
+// 必填欄位只打空白，也算沒填
+const blankReq=x=>x&&x.required&&(x.tagName==='TEXTAREA'||/^(text|tel|email|search|)$/.test(x.getAttribute('type')||''))&&x.value!==''&&!x.value.trim();
+['input','change'].forEach(t=>document.addEventListener(t,e=>{const x=e.target;if(x&&x.setCustomValidity)x.setCustomValidity(blankReq(x)?'請填寫這個欄位（不能只有空白）':'')},true));
+// 送出前整理：去掉前後空白、晶片號碼全形轉半形；日期不能離譜（例如 0001 年）
+document.addEventListener('submit',e=>{const f=e.target;if(!f||!f.querySelectorAll)return;
+  for(const x of f.querySelectorAll('input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=search],textarea')){if(x.readOnly||x.disabled)continue;let v=x.value.trim();if(/chip/.test(x.name||''))v=v.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));if(v!==x.value)x.value=v}
+  for(const x of f.querySelectorAll('input[type=text][required],input:not([type])[required],input[type=tel][required],textarea[required]')){if(!x.value.trim()&&x.getClientRects().length){e.preventDefault();e.stopImmediatePropagation();x.setCustomValidity('請填寫這個欄位（不能只有空白）');x.reportValidity();return}}
+  for(const x of f.querySelectorAll('input[type=date],input[type=datetime-local]')){const y=+String(x.value).slice(0,4);if(x.value&&(y<1990||y>2100)){e.preventDefault();e.stopImmediatePropagation();x.setCustomValidity('日期不太對（年份 '+y+'），請再確認一下');toast('日期不太對（年份 '+y+'），請再確認一下');if(x.offsetParent)x.reportValidity();return}}
+},true);
 // 時間不能填未來（多留 15 分鐘誤差）
 document.addEventListener('submit',e=>{const f=e.target;if(!f||!f.querySelectorAll)return;for(const x of f.querySelectorAll('input[type=datetime-local]')){if(!x.value)continue;if(twParse(x.value).getTime()>Date.now()+15*60e3){e.preventDefault();e.stopImmediatePropagation();x.setCustomValidity('時間不能是未來，請再確認一下');toast('時間不能是未來，請再確認一下');if(x.offsetParent)x.reportValidity();return}}},true);
 let __afT=null,__afSeq=0;
@@ -2736,13 +2746,13 @@ function renderNew(){
     <h3>怎麼聯絡你？</h3>
     <div class="row2">
       <label class="f"><span>稱呼</span><input type="text" name="contact_name" placeholder="例：陳小姐"></label>
-      <label class="f"><span>電話 <i class="req">*</i></span><input type="tel" name="contact_phone" required pattern="[0-9０-９+＋\-－\s\(\)#＃]{8,30}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
+      <label class="f"><span>電話 <i class="req">*</i></span><input type="tel" name="contact_phone" required pattern="${PHONE_PAT}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
     </div>
     <label class="chk"><input type="checkbox" name="phone_public" checked> 讓看到牠的人可以直接打電話給我（電話會顯示在案件頁）</label>
     <label class="f"><span><b class="lbl">Email</b><small class="hint long">可以不填。有填的話，我們會先寄一封確認信，按確認後有人回報就會立刻寄信通知你（不會公開）</small></span><input type="email" name="contact_email" inputmode="email" autocomplete="email" placeholder="沒有可以空白"></label>
     <details class="more"><summary>LINE、獎金（可以不填）</summary>
     <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line"></label>
-    <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" step="100" inputmode="numeric" placeholder="0"></label>
+    <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" max="10000000" step="1" inputmode="numeric" placeholder="0"></label>
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：可以用雞肉吸引牠"></textarea></label>
     </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
@@ -2984,10 +2994,10 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     <label class="f"><span>辨識特徵</span><textarea name="features">${esc(c.features||'')}</textarea></label>
     <div class="row2"><label class="f"><span>走失時配戴</span><input name="collar_desc" value="${esc(c.collar_desc||'')}"></label><label class="f"><span>個性</span><input name="temperament" value="${esc(c.temperament||'')}"></label></div>
     <label class="f"><span>走失地點描述</span><input name="lost_place" value="${esc(c.lost_place||'')}"></label>
-    <div class="row2"><label class="f"><span>稱呼</span><input name="contact_name" value="${esc(c.contact_name||'')}"></label><label class="f"><span>電話</span><input name="contact_phone" value="${esc(c.contact_phone||'')}"></label></div>
+    <div class="row2"><label class="f"><span>稱呼</span><input name="contact_name" value="${esc(c.contact_name||'')}"></label><label class="f"><span>電話</span><input type="tel" inputmode="tel" pattern="${PHONE_PAT}" name="contact_phone" value="${esc(c.contact_phone||'')}"></label></div>
     <label class="chk"><input type="checkbox" name="phone_public" ${c.phone_public?'checked':''}> 讓看到牠的人可以直接打電話給我（電話會顯示在案件頁）</label>
     <div class="row2"><label class="f"><span><b class="lbl">Email</b><small class="hint">私密</small></span><input type="email" name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開</small></span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
-    <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" step="100" inputmode="numeric"></label>
+    <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" max="10000000" step="1" inputmode="numeric"></label>
     <label class="f"><span>補充</span><textarea name="notes">${esc(c.notes||'')}</textarea></label>
     <h3>照片</h3>
     <div class="photos-preview" id="pv"></div>
@@ -3231,7 +3241,7 @@ function renderInjured(){
     <h3>怎麼聯絡你？（可以不填）</h3>
     <div class="row2">
       <label class="f"><span>稱呼</span><input type="text" name="reporter_name" maxlength="50"></label>
-      <label class="f"><span>電話</span><input type="tel" name="reporter_phone" maxlength="30" pattern="[0-9０-９+＋\-－\s\(\)#＃]{8,30}" inputmode="tel"></label>
+      <label class="f"><span>電話</span><input type="tel" name="reporter_phone" maxlength="30" pattern="${PHONE_PAT}" inputmode="tel"></label>
     </div>
     <label class="chk"><input type="checkbox" name="phone_public"> 公開電話，讓飼主或救援的人聯絡我</label>
     <label class="f"><span>其他補充</span><textarea name="notes" maxlength="1000" placeholder="例：已打 1999，動保處說 30 分鐘內到"></textarea></label>
@@ -3318,7 +3328,7 @@ function renderFoundNew(){
       <p class="small" style="margin:-4px 0 8px"><b style="color:var(--red)">必填：</b>公開的電話或 LINE 至少一種，飼主才聯絡得到你。</p>
     <div class="row2">
       <label class="f"><span>稱呼</span><input type="text" name="reporter_name" maxlength="50"></label>
-      <label class="f"><span>電話</span><input type="tel" name="reporter_phone" maxlength="30" pattern="[0-9０-９+＋\-－\s\(\)#＃]{8,30}" inputmode="tel"></label>
+      <label class="f"><span>電話</span><input type="tel" name="reporter_phone" maxlength="30" pattern="${PHONE_PAT}" inputmode="tel"></label>
     </div>
     <label class="chk"><input type="checkbox" name="phone_public" checked> 公開電話，讓飼主直接聯絡我</label>
     <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開</small></span><input type="text" name="reporter_line" maxlength="50"></label>
@@ -3378,7 +3388,7 @@ function renderFoundNew(){
       $('#cpFManage').onclick=()=>copy(manage);
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent=kind==='seen'?'送出目擊通報':'送出拾獲通報'}
   };
-  wizard($('#f'),{'是狗還是貓？':()=>species?'':'請先選「狗」或「貓」'});
+  wizard($('#f'),{'是狗還是貓？':()=>species?'':'請先選「狗」或「貓」','什麼時候、在哪裡遇到？':()=>picker.get()||$('#f').elements.place_text.value.trim()?'':'請在地圖上點位置，或寫下地點描述，飼主才知道去哪裡找'});
 }
 async function renderFound(id){const _n=navId;
   (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
@@ -3801,14 +3811,14 @@ function admEdit(t,r,after){
     <div class="fs-acts"><button type="button" class="btn ghost" data-x>取消</button><button class="btn">儲存</button></div></form>`;
   const fm=el.querySelector('form');
   el.onclick=e=>{if(e.target===el||e.target.closest('[data-x]'))closeOverlay(el)};
-  fm.onsubmit=async e=>{e.preventDefault();const p={};
+  fm.onsubmit=once(async e=>{e.preventDefault();const p={};
     if(fm.status.value!==r.status)p.status=fm.status.value;
     F.forEach(([k])=>{const v=fm[k].value.trim();if(v!==(r[k]||''))p[k]=v});
     if(fm.phone_public&&fm.phone_public.checked!==(r.phone_public!==false))p.phone_public=fm.phone_public.checked;
     if(t==='case'&&'name' in p&&!p.name)return toast('名字不能空白');
     if(!Object.keys(p).length){closeOverlay(el);return}
     const {error}=await sb.rpc('admin_update',{p_type:t,p_id:r.id,p});if(error)return toast(error.message);
-    toast('已儲存');closeOverlay(el);after&&after()};
+    toast('已儲存');closeOverlay(el);after&&after()});
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
 async function admMembers(box,query){const _n=navId;let off=0,rows=[];
   box.innerHTML=`<form class="adm-search" id="admQ" role="search"><input type="search" name="q" value="${esc(query)}" placeholder="搜尋 Email 或暱稱…" aria-label="搜尋"><button class="btn sm">搜尋</button></form>
@@ -4265,7 +4275,7 @@ async function renderPet(id){const _n=navId;
     <div class="row3">
       <label class="f"><span>性別</span><select name="sex"><option value="">不確定</option><option value="male" ${p.sex==='male'?'selected':''}>公</option><option value="female" ${p.sex==='female'?'selected':''}>母</option></select></label>
       <label class="f"><span>體型</span><select name="size"><option value="">—</option><option value="small" ${p.size==='small'?'selected':''}>小型</option><option value="medium" ${p.size==='medium'?'selected':''}>中型</option><option value="large" ${p.size==='large'?'selected':''}>大型</option></select></label>
-      <label class="f"><span>生日</span><input type="date" name="birthday" value="${esc(p.birthday||'')}"></label>
+      <label class="f"><span>生日</span><input type="date" name="birthday" max="${todayStr()}" value="${esc(p.birthday||'')}"></label>
     </div>
     <div class="row2">
       <label class="f"><span>品種</span><input name="breed" maxlength="50" value="${esc(p.breed||'')}"></label>
@@ -4583,7 +4593,7 @@ async function renderMed(petId,medId){const _n=navId;
     <label class="f"><span>名稱 <i class="req">*</i></span><input type="text" name="name" required maxlength="60" value="${esc(m.name||'')}" placeholder="例：關節保健、消炎藥"></label>
     <div class="seg" id="mPresets" style="margin-top:8px"></div>
     <div class="row2">
-      <label class="f"><span>每次劑量</span><input type="number" name="dose_amount" step="0.01" min="0.01" inputmode="decimal" value="${m.dose_amount??''}" placeholder="例：0.5"></label>
+      <label class="f"><span>每次劑量</span><input type="number" name="dose_amount" step="0.01" min="0.01" max="9999" inputmode="decimal" value="${m.dose_amount??''}" placeholder="例：0.5"></label>
       <label class="f"><span>單位</span><select name="dose_unit">${MED_UNITS.map(u=>`<option ${u===(m.dose_unit||'顆')?'selected':''}>${u}</option>`).join('')}</select></label>
     </div>
     <p class="muted small" style="margin:4px 0 0">半顆請填 0.5；藥水填 ml。請照藥袋或獸醫的指示，網站不會建議劑量。</p>
