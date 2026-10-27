@@ -1317,6 +1317,11 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-pend{background:var(--mark-soft,#FFF5CC);border-radius:18px;padding:14px 16px 6px;margin:0 0 14px}.mg-pend h2{margin:0 0 6px;font-size:19px}
 .home-btn{width:100%;margin:4px 0 10px}
 .mg-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}.mg-acts .btn{justify-content:center}
+.cact{display:flex;flex-direction:column;gap:10px;margin:14px 0 0}.cact .btn{width:100%;justify-content:center}
+.cact .btn.call{flex-wrap:wrap;gap:4px 8px}.cact-num{white-space:nowrap;font-family:var(--display);letter-spacing:.02em}
+.tipbox{background:var(--mark-soft,#FFF5CC);color:var(--ink);border-radius:14px;padding:10px 14px;margin:12px 0 0;font-size:15px;line-height:1.55}
+.cact-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}.cact-sub .btn{justify-content:center;padding-left:6px;padding-right:6px}
+.ownerfoot{margin:26px 0 0;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
 .mg-tiles{display:flex;flex-direction:column;gap:12px;margin:14px 0 6px}
 .mg-tile{display:flex;align-items:center;gap:14px;padding:18px 16px;background:var(--sheet);border-radius:18px;color:var(--ink);text-decoration:none;box-shadow:0 0 0 1px var(--line),0 2px 0 var(--line);min-height:76px}
 .mg-tile:hover{text-decoration:none}.mg-tile .mg-ic{font-size:30px;line-height:1;flex:none;width:40px;text-align:center}
@@ -1338,7 +1343,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-body{padding:0 16px 16px}.mg-body>.card{box-shadow:none;padding:0;background:none}
 .mg-sec.danger-zone>summary{color:var(--red-ink)}
 .mg-foot{margin:16px 2px 0;text-align:center}
-.pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis}
+.pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-acts{display:flex;gap:8px;flex-basis:100%;justify-content:flex-end}@media(min-width:600px){.pf-acts{flex-basis:auto}}
 @media (max-width:760px){
   .hd-av{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--sheet);color:var(--ink-2);box-shadow:var(--lift);margin-left:auto}
   #navMe{display:none!important}
@@ -1499,7 +1504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.1.3';
+const BUILD = 'v5.1.4';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2592,16 +2597,18 @@ async function renderCase(id){const _n=navId;
           ${c.notes?`<dt>補充</dt><dd>${esc(c.notes)}</dd>`:''}
         </dl>
       </div>
-      ${active?`<div class="banner" style="margin-top:10px">看到請勿呼喊、追趕或包圍<small>請拍照，記下時間、位置及方向，立即回報</small></div>`:''}
-      ${!active?'':c.contact_phone?`<div class="phone"><a href="tel:${esc(c.contact_phone)}">${ic('phone')} ${esc(c.contact_phone)}</a></div><p class="muted small" style="text-align:center">${esc(c.contact_name||'飼主')}${c.contact_line?' · LINE：'+esc(c.contact_line):''}　疑似也請聯絡確認</p>`:`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}飼主未公開電話，請用下方「回報目擊」留言，飼主會收到通知。</p>`}
-      ${active&&c.reward>0?`<p class="small muted reward-note">💰 尋獲獎金由飼主自行支付，請直接和飼主聯絡；本站不經手任何款項。任何要你「先匯款、付訂金」的都可能是詐騙，可撥 165 確認。</p>`:''}
-      <div class="actionbar">
-        ${active?`<a class="btn" href="#/report/${id}">${ic("eye")} 回報目擊</a>`:''}
+      ${active?`<div class="cact">
+        <a class="btn big cact-main" href="#/report/${id}">${ic("eye")} 我看到牠了，回報</a>
+        ${c.contact_phone?`<a class="btn big call" href="tel:${esc(String(c.contact_phone).replace(/[^\d+#]/g,''))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(c.contact_phone)}</span></a>`:''}
+      </div>
+      ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}飼主沒有公開電話，按上面的「我看到牠了」留言，飼主會收到通知。</p>`}
+      <p class="tipbox">🐾 看到牠：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。</p>`:''}
+      ${active&&c.reward>0?`<p class="small muted reward-note">💰 獎金由飼主自行支付，本站不經手；要你先匯款的都可能是詐騙。</p>`:''}
+      <div class="cact-sub">
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
         ${active?`<button class="btn ghost" id="btnFollow" data-on="0">${ic("star")} 追蹤</button>
-        <a class="btn ghost" href="#/poster/${id}">${ic("image")} 產生海報</a>`:''}
+        <a class="btn ghost" href="#/poster/${id}">${ic("image")} 海報</a>`:''}
       </div>
-      <p class="small ownerline"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">封鎖發布者</button></p>
     </div>
   </div>
 
@@ -2625,6 +2632,7 @@ async function renderCase(id){const _n=navId;
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製協尋貼文</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a><a class="btn sm ghost" href="#/resources">協尋攻略</a></div>
   </div>
   </div>
+      <p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">封鎖發布者</button></p>
   ${active?`<div class="sticky-cta"><a class="btn block" href="#/report/${id}">${ic("eye")} 我看到牠了，回報目擊</a></div>`:''}`;
 
   document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${safeU(photos[+t.dataset.i])}')`});
@@ -4287,7 +4295,7 @@ async function renderMeBody(){const _n=navId;
   if(fl&&fl.length){const {data}=await sb.from('cases_public').select('*').in('id',fl.map(f=>f.case_id));followed=data||[]}
   const p=prof||{};
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
-  (_n===navId?app:_void).innerHTML=`<div class="profile"><span class="pf-av" aria-hidden="true">${esc([...(p.display_name||me().email||'?')][0].toUpperCase())}</span><div class="pf-t"><h1>${esc(p.display_name||me().email)}</h1>${p.display_name?`<span class="muted small">${esc(me().email||'')}</span>`:''}</div>${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}<button class="btn sm ghost" id="btnOut">登出</button></div>
+  (_n===navId?app:_void).innerHTML=`<div class="profile"><span class="pf-av" aria-hidden="true">${esc([...(p.display_name||me().email||'?')][0].toUpperCase())}</span><div class="pf-t"><h1>${esc(p.display_name||me().email)}</h1>${p.display_name?`<span class="muted small">${esc(me().email||'')}</span>`:''}</div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}<button class="btn sm ghost" id="btnOut">登出</button></div></div>
 
   <a class="crosslink" href="#/health" style="margin:18px 0 6px"><span class="cl-ic">${ic("steth")}</span><span><b>毛孩健康手冊${(pets||[]).length?`・${pets.length} 隻毛孩`:''}</b>${(dues||[]).length?`有 ${dues.length} 項一個月內到期`:'健康紀錄、到期提醒和日曆同步都在這裡'}</span><em>打開</em></a>
 
