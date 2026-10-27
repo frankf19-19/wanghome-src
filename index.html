@@ -1322,6 +1322,8 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .tipbox{background:var(--mark-soft,#FFF5CC);color:var(--ink);border-radius:14px;padding:10px 14px;margin:12px 0 0;font-size:15px;line-height:1.55}
 .cact-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}.cact-sub .btn{justify-content:center;padding-left:6px;padding-right:6px}
 .ownerfoot{margin:26px 0 0;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.injstrip{display:flex;align-items:center;gap:10px;margin:12px 0 4px;padding:12px 16px;border-radius:16px;background:var(--red-soft);color:var(--red-ink);text-decoration:none;font-size:15px;min-height:52px}
+.injstrip:hover{text-decoration:none}.injstrip span:first-of-type{flex:1}.injstrip b{margin-right:6px}.injstrip>span:last-child{font-size:22px}
 .mg-tiles{display:flex;flex-direction:column;gap:12px;margin:14px 0 6px}
 .mg-tile{display:flex;align-items:center;gap:14px;padding:18px 16px;background:var(--sheet);border-radius:18px;color:var(--ink);text-decoration:none;box-shadow:0 0 0 1px var(--line),0 2px 0 var(--line);min-height:76px}
 .mg-tile:hover{text-decoration:none}.mg-tile .mg-ic{font-size:30px;line-height:1;flex:none;width:40px;text-align:center}
@@ -1504,7 +1506,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.1.5';
+const BUILD = 'v5.1.6';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2077,14 +2079,13 @@ document.addEventListener('submit',e=>{if(__wiz&&e.target===__wiz.form)__wiz.onS
 
 function renderSeen(){
   setTitle('看到或撿到毛孩');
-  app.innerHTML=`<h1>你遇到的是哪一種？</h1><p class="lede">點最符合的一個，下一步會一步一步帶你填。</p>
+  app.innerHTML=`<h1>你遇到的是哪一種？</h1><p class="tipbox" style="margin:6px 0 12px">⚠️ <b>先別追</b>，追趕只會讓牠跑更遠。拍照、記下時間地點就好。</p>
   <div class="choose">
+    <a class="bigbtn b-red" href="#/injured"><span class="bb-ic">${ic("aid")}</span><span class="bb-t"><b>牠受傷了</b><small>一鍵通報位置、撥打 1959 救援</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a class="bigbtn b-green" href="#/found/new?k=found"><span class="bb-ic">${pawSvg()}</span><span class="bb-t"><b>牠在我這裡</b><small>我已經帶走、收留或送醫了</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a class="bigbtn b-white" href="#/found/new?k=seen"><span class="bb-ic">${ic("eye")}</span><span class="bb-t"><b>我看到，但沒有帶走</b><small>在路上、公園看到流浪或走失的</small></span><span class="bb-go" aria-hidden="true">›</span></a>
-    <a class="bigbtn b-yellow" href="#/injured"><span class="bb-ic">${ic("aid")}</span><span class="bb-t"><b>牠受傷了</b><small>一鍵通報位置、撥打 1959 救援</small></span><span class="bb-go" aria-hidden="true">›</span></a>
-    <a class="bigbtn b-white" href="#/?tab=lost"><span class="bb-ic">${ic("search")}</span><span class="bb-t"><b>是網站上在找的那隻</b><small>到協尋名單找牠，直接回報給飼主</small></span><span class="bb-go" aria-hidden="true">›</span></a>
   </div>
-  <div class="notice" style="margin-top:16px"><b>先別追</b>追趕只會讓牠跑更遠。<br>拍照、記下時間地點就好。</div>`;
+  <p class="small muted" style="margin-top:14px">覺得是協尋名單上的某隻？<a href="#/lost">到協尋名單找牠</a>，直接回報給飼主。</p>`;
 }
 function renderSetup(){
   setTitle('初始設定');
@@ -2176,6 +2177,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <button type="button" class="tile4 tb" id="bigNear"><span class="te">${ic("pin")}</span><b>附近走失</b><small>離我最近的毛孩</small></button>
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
+    <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div id="lostPrev" class="lostprev"></div>
     <div class="qrow" aria-label="更多服務">
       <a href="#/adopt" class="qk"><span class="qi q1">${ic('shelter')}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
@@ -2764,7 +2766,7 @@ function lightbox(u){u=safeU(u);if(!u)return;const d=document.createElement('div
 function renderNew(){
   setTitle('登記走失');
   app.innerHTML=`<h1>登記走失毛孩</h1><p class="lede">免費、不用註冊。照著步驟填，大約 2 分鐘。</p>
-  ${me()?`<div class="notice green"><b>✓ 你已登入：${esc(me().email||'')}</b>這個案件會自動綁定到這個帳號，換手機也能管理。不是你的帳號？請先到「我的」登出。</div>`:'<p class="small" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">不登入也能登記。登入後，換手機也能繼續管理案件。<a class="btn sm ghost" href="#/login" onclick="setReturn(\'#/new\')">登入／免費註冊</a></p>'}
+  ${me()?`<p class="small muted">✓ 已登入（${esc(me().email||'')}），案件會存到你的帳號。</p>`:''}
   <form onsubmit="return false" class="card steps" id="f" autocomplete="on">
     <h3>牠叫什麼名字？長什麼樣子？</h3>
     <div class="seg" id="segSp" role="group" aria-label="狗還是貓"><button type="button" data-v="dog">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
@@ -3212,16 +3214,14 @@ function agencyCallHTML(city){
 }
 function emergencyHTML(){
   return `<div class="er">
-    <div class="er-head">${ic("aid")} 先做這幾件事</div>
+    <div class="er-head">${ic("aid")} 等救援時這樣做</div>
     <ol class="er-steps">
-      <li><b>先顧好自己的安全</b><span>不要站到車道上；在馬路邊請開警示燈、拿手電筒。動物躺在車道上、可能造成車禍時，請撥 110 請警察協助。</span></li>
-      <li><b>打電話請求救援</b><span>撥全國動保專線 1959，電話會自動轉到你所在縣市的動物保護單位；說清楚地點、傷勢，以及牠還在不在原地。部分縣市夜間或假日可能接不通，請改撥 1999 市民專線，或查下方各縣市動保處電話。</span>
-        <div class="er-call"><a class="btn" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a><a class="btn ghost" href="tel:1999">${ic("phone")} 1999 市民專線</a><a class="btn ghost" href="tel:110">${ic("phone")} 110</a></div></li>
-      <li><b>小心靠近</b><span>受傷的動物會因為疼痛和害怕咬人。不確定就保持距離、等救援；要移動時先用毛巾或外套包住身體，平穩地抱起。</span></li>
-      <li><b>送到動物醫院</b><span>能安全移動的話，先打電話確認醫院有沒有開、能不能收，再就近送醫，並請醫院掃晶片。</span>
+      <li><b>先顧好自己</b><span>不要站到車道上；動物躺在車道上請打 110。</span></li>
+      <li><b>打電話</b><span>說清楚地點、傷勢、牠還在不在原地。</span></li>
+      <li><b>不要徒手抱</b><span>牠會因為痛和怕咬人；要移動先用外套包住。</span></li>
+      <li><b>送醫前先打電話</b><span>確認醫院有開、能收，並請醫院掃晶片。</span>
         <div class="er-call"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/24%E5%B0%8F%E6%99%82%E5%8B%95%E7%89%A9%E9%86%AB%E9%99%A2">${ic("map")} 找附近 24 小時動物醫院</a></div></li>
     </ol>
-    <p class="small er-foot">各縣市動保單位直撥電話：<a href="#/resources">協尋攻略頁選縣市查詢</a>；用上面的「一鍵通報」會自動顯示你所在縣市的電話。本站不是救援單位，無法派人到現場。</p>
   </div>`;
 }
 
@@ -3252,7 +3252,7 @@ function callScript(q){
 }
 async function quickReport(){
   const box=$('#quick');
-  if(!navigator.geolocation){toast('這支手機不支援定位，請用下方完整通報');document.getElementById('fullForm')?.scrollIntoView({behavior:RM()?'auto':'smooth'});return}
+  if(!navigator.geolocation){toast('這支手機不支援定位，請用下方完整通報');(document.getElementById('fullDet')||{}).open=true;document.getElementById('fullForm')?.scrollIntoView({behavior:RM()?'auto':'smooth'});return}
   box.innerHTML=`<div class="q-wait">${ic("pin")} 正在定位…（請允許${IS_APP?'汪喵回家':'瀏覽器'}使用位置）</div>`;
   let pos;try{pos=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:true,timeout:15000,maximumAge:30000}))}
   catch(_){box.innerHTML=`<div class="notice red"><b>定位失敗</b>請確認已允許${IS_APP?'汪喵回家（手機「設定」裡）':'瀏覽器'}使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;$('#btnQuick').onclick=quickReport;return}
@@ -3316,13 +3316,14 @@ async function quickReport(){
 function renderInjured(){
   setTitle('受傷毛孩通報');
   app.innerHTML=`<h1>看到受傷的毛孩</h1>
-  <p class="muted">救援要打電話請當地動保單位派人，本站無法派人到現場。這裡幫你一鍵定位、留下通報讓飼主和附近的人看到，並產生打電話時可以照著唸的通報稿。</p>
+  <p class="muted">本站不能派人到現場，請先打電話請動保單位救援。</p>
   <div class="quick" id="quick">
-    <button type="button" class="btn lg block" id="btnQuick">${ic("pin")} 一鍵通報我現在的位置</button>
-    <p class="small muted" style="margin:8px 2px 0">會用手機定位抓地址，不需要註冊。也可以往下看緊急處理步驟，或填完整通報。</p>
+    <a class="btn lg block q-call" href="tel:1959">${ic("phone")} 打 1959 動保專線</a>
+    <button type="button" class="btn lg block ghost" id="btnQuick" style="margin-top:10px">${ic("pin")} 用定位找當地動保電話</button>
+    <p class="small muted" style="margin:8px 2px 0">定位後會顯示你所在縣市的動保直撥電話，和講電話時可以照著唸的通報稿。接不通打 <a href="tel:1999"><b>1999</b></a>；動物在車道上、危及交通打 <a href="tel:110"><b>110</b></a>。</p>
   </div>
   ${emergencyHTML()}
-  <h2 id="fullForm">${ic("clipboard")} 完整通報（定位不到時用）</h2>
+  <details class="mg-sec" id="fullDet" style="margin-top:16px"><summary id="fullForm">${ic("clipboard")} 定位失敗？手動填寫通報</summary><div class="mg-body">
   <form onsubmit="return false" class="card steps" id="f" style="margin-top:8px">
     <h3>牠怎麼了？</h3>
     <div class="seg" id="segSp"><button type="button" data-v="dog" class="on">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
@@ -3359,7 +3360,7 @@ function renderInjured(){
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
     <label class="chk agree"><input type="checkbox" name="agree" data-agree><span>我已閱讀並同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a></span></label>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出受傷通報</button></div>
-  </form>`;
+  </form></div></details>`;
   $('#btnQuick').onclick=quickReport;
   let species='dog',where='here';const inj=new Set();
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -3507,7 +3508,7 @@ async function renderFound(id){const _n=navId;
   if(_n!==navId)return;
   if(!f){(_n===navId?app:_void).innerHTML=isNetErr(fe)?netErrHTML():'<div class="empty">找不到這筆通報<br><a href="#/">回首頁</a></div>';return}
   if(userHidden(f)){(_n===navId?app:_void).innerHTML=`<div class="empty-card"><div class="big">${ic('flag')}</div><b>你已經檢舉或封鎖了這則內容</b><p class="small">它不會再出現在你的畫面上。</p><button type="button" class="btn ghost" id="btnUnhide">恢復顯示</button> <a class="btn" href="#/">回首頁</a></div>`;$('#btnUnhide').onclick=()=>{try{localStorage.setItem('wh_hidden',JSON.stringify(lsList('wh_hidden').filter(x=>x!==f.id)));localStorage.setItem('wh_blocked',JSON.stringify(lsList('wh_blocked').filter(x=>x!==f.poster)))}catch(_){}route()};return}
-  const title=`${f.kind==='injured'?'受傷':f.kind==='found'?'拾獲':'目擊'}：${[SIZE[f.size],f.colour].filter(Boolean).join('')}${sp(f.species).name}`;
+  const title=`${f.kind==='injured'?'受傷的':f.kind==='found'?'有人撿到一隻':'有人看到一隻'}${[SIZE[f.size],f.colour].filter(Boolean).join('')}${sp(f.species).name}`;
   setTitle(title);
   const photos=f.photos||[];const url=CONFIG.SITE_URL+'#/found/'+id;
   (_n===navId?app:_void).innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span class="status-pill ${f.status==='open'?(f.kind==='injured'?'injured':'found'):'closed'}">${f.status==='open'?(f.kind==='injured'?'受傷通報':f.kind==='found'?'等待飼主認領':'目擊通報'):f.status==='reunited'?'已回到主人身邊':'已結案'}</span></div>
@@ -3526,7 +3527,12 @@ async function renderFound(id){const _n=navId;
       ${f.notes?`<dt>補充</dt><dd>${esc(f.notes)}</dd>`:''}
       <dt>通報者</dt><dd>${esc(f.reporter_name||'熱心網友')}${f.reporter_line?' · LINE：'+esc(f.reporter_line):''}</dd>
     </dl></div>
-    ${f.reporter_phone?`<div class="phone"><a href="tel:${esc(f.reporter_phone)}">${ic('phone')} ${esc(f.reporter_phone)}</a></div><p class="muted small" style="text-align:center">是你的毛孩嗎？請準備照片或晶片號碼證明</p>`:'<p class="muted small" style="text-align:center;margin-top:8px">通報者未公開電話。'+(f.reporter_line?'請用 LINE 聯絡。':'')+'</p>'}
+    ${f.status==='open'&&f.kind!=='injured'?`<div class="cact">
+      ${f.reporter_phone?`<a class="btn big call" href="tel:${esc(String(f.reporter_phone).replace(/[^\d+#]/g,''))}">${ic('phone')} 是我的毛孩！打給${esc(f.reporter_name||'通報者')}<span class="cact-num">${esc(f.reporter_phone)}</span></a>`:''}
+      ${f.reporter_line?`<a class="btn big line" target="_blank" rel="noopener" href="https://line.me/R/ti/p/${String(f.reporter_line).startsWith('@')?'@'+encodeURIComponent(String(f.reporter_line).slice(1)):'~'+encodeURIComponent(f.reporter_line)}">用 LINE 聯絡（${esc(f.reporter_line)}）</a>`:''}
+      ${!f.reporter_phone&&!f.reporter_line?`<p class="tipbox" style="margin:0">通報者沒有留電話。${f.current_place?`牠目前在：<b>${esc(f.current_place)}</b>，可以直接去詢問。`:''}如果是你的毛孩，<a href="#/new">登記走失</a>，系統會自動比對、通知你。</p>`:''}
+    </div>
+    <p class="muted small" style="text-align:center;margin:8px 0 0">聯絡時請準備照片或晶片號碼，證明是你的毛孩。</p>`:(f.reporter_phone?`<div class="phone"><a href="tel:${esc(f.reporter_phone)}">${ic('phone')} ${esc(f.reporter_phone)}</a></div>`:'')}
     <div class="sharebar"><a class="btn sm line" data-share="line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a><a class="btn sm fb" data-share="fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a><button class="btn sm ghost" data-share="copy">複製連結</button></div>
     <p class="small" style="text-align:right;margin:4px 0 0"><button type="button" class="linkbtn" id="btnFM" style="color:var(--ink-3)">${ic("key")} 我是通報者</button>　<button type="button" class="linkbtn" id="btnReportF" style="color:var(--ink-3)">${ic("flag")} 檢舉</button>　<button type="button" class="linkbtn" id="btnBlockF" style="color:var(--ink-3)">封鎖發布者</button></p>
     </div></div>
