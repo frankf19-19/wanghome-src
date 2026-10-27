@@ -1253,6 +1253,9 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 @keyframes afFlash{0%{box-shadow:0 0 0 3px var(--green)}100%{box-shadow:0 0 0 0 transparent}}.autofill{animation:afFlash 1.6s ease-out}
 .reward-note{text-align:center;margin:8px 4px 0;line-height:1.6}
 .qpick{margin:6px 0 4px;gap:6px}.qpick .fchip{padding:6px 11px;font-size:13.5px;min-height:34px}.qpick .more{border-style:dashed}.qp-t{display:block;margin:8px 0 0;color:var(--ink-2)}
+.q-call{font-size:20px;min-height:60px;margin-top:10px}
+.q-script{background:var(--sheet,#fff);border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;margin:6px 0 12px}.q-script dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:8px 0 10px;font-size:17px}.q-script dt{color:var(--ink-3);font-weight:700}.q-script dd{margin:0;font-weight:700;color:var(--ink)}
+.q-wait-tips{background:var(--butter,#FFF3C4);border-radius:16px;padding:12px 14px;margin:0 0 10px;color:var(--ink)}.q-wait-tips ul{margin:6px 0 0;padding-left:20px;font-size:15px;line-height:1.7}
 .adm-tabs{margin-top:20px}
 .adm-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
 .mp-h>a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px 0 10px}
@@ -1448,7 +1451,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.9';
+const BUILD = 'v5.0.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -3039,14 +3042,14 @@ async function reverseGeo(lat,lng){
       const c=[a.county,a.city,a.state,a.province].map(norm).find(x=>TW[x]);
       if(c){city=c;geoOk=true}
       const cand=[a.city,a.town,a.city_district,a.suburb,a.district,a.municipality,a.village].filter(Boolean).map(norm);district=cand.find(x=>(TW[city]||[]).includes(x))||'';
-      address=[a.road,a.house_number&&a.house_number+'號'].filter(Boolean).join('')||(j.name||'');
+      address=[a.road,a.house_number&&(/號$/.test(a.house_number)?a.house_number:a.house_number+'號')].filter(Boolean).join('')||(j.name||'');
       address=geoOk||inTW?`${city}${district}${address}`:'';}
   }catch(_){}
   return {city,district,address:address||(city?`${city}${district}`:'目前位置（請在下方選縣市）'),geoOk};
 }
 function callScript(q){
   const t=new Date(q.seen_at);const hm=`${t.getHours()}點${String(t.getMinutes()).padStart(2,'0')}分`;
-  return `您好，我要通報路上受傷的${sp(q.species).name}。\n地點：${q.address}${q.place_text?'（'+q.place_text+'）':''}\nGPS 座標：${q.lat.toFixed(5)}, ${q.lng.toFixed(5)}\n時間：今天 ${hm}\n狀況：${q.injury||'受傷'}，${q.where==='taken'?'我已經帶走／送醫':'牠還在原地'}。${q.url?'\n照片和地圖：'+q.url:''}`;
+  return `您好，我要通報路上受傷的${sp(q.species).name}。\n地點：${q.address}${q.place_text&&!String(q.address).includes(q.place_text)?'（'+q.place_text+'）':''}\n狀況：${q.injury||'受傷'}，${q.where==='taken'?'我已經帶走／送醫':'牠還在原地'}\n時間：今天 ${hm}\nGPS 座標：${q.lat.toFixed(5)}, ${q.lng.toFixed(5)}${q.url?'\n照片和地圖：'+q.url:''}`;
 }
 async function quickReport(){
   const box=$('#quick');
@@ -3088,10 +3091,15 @@ async function quickReport(){
       const url=`${CONFIG.SITE_URL}#/found/${data.id}`;
       const script=callScript({...q,address:g.address,where,place_text:$('#qPlace').value.trim(),url});
       const mapUrl=`https://www.google.com/maps?q=${lat},${lng}`;
-      box.innerHTML=`<div class="q-done"><b>${ic("aid")} 已送出通報</b><span>本站無法派人救援，下一步請打電話給動保單位，照著下面的通報稿唸就好。</span></div>
-        <div class="er-call" style="margin:10px 0"><a class="btn lg" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a><a class="btn lg ghost" href="tel:1999">${ic("phone")} 接不通改撥 1999</a></div>
-        <label class="f"><span>電話通報稿</span><textarea id="qScript" readonly style="min-height:170px">${esc(script)}</textarea></label>
-        <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報稿</button><a class="btn sm line" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(script)}">用 LINE 傳送</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} 在 Google 地圖打開</a><a class="btn sm ghost" href="#/found/${data.id}">查看通報頁</a></div>`;
+      const kv=[['地點',g.address+(($('#qPlace').value.trim()&&!g.address.includes($('#qPlace').value.trim()))?'（'+$('#qPlace').value.trim()+'）':'')],['狀況',(q.injury||'受傷')+'，'+(where==='taken'?'我已經帶走／送醫':'牠還在原地')],['動物',sp(species).name],['座標',lat.toFixed(5)+', '+lng.toFixed(5)]];
+      box.innerHTML=`<div class="q-done"><b>${ic("aid")} 通報已記錄，現在請打電話</b><span>本站無法派人到現場，要請當地動保單位來救援。</span></div>
+        <a class="btn lg block q-call" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a>
+        <p class="small muted" style="margin:6px 2px 10px">1959 會轉到當地動保單位。接不通或夜間沒人接，改撥 <a href="tel:1999"><b>1999</b></a> 市民專線，或 <a href="tel:110"><b>110</b></a>（動物擋在車道、危及交通時）。</p>
+        <div class="q-script"><b>電話裡被問到時，照著唸：</b><dl>${kv.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+          <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報內容</button><a class="btn sm line" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(script)}">用 LINE 傳給動保／朋友</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} Google 地圖</a></div>
+          <textarea id="qScript" readonly hidden>${esc(script)}</textarea></div>
+        <div class="q-wait-tips"><b>等救援時</b><ul><li>保持距離，不要徒手抱牠，受傷的動物會因為害怕咬人。</li><li>注意自己的安全，不要站在車道上；可以開車燈、放三角錐提醒來車。</li><li>不要餵食或餵水，可能要麻醉手術。</li><li>手機保持暢通，救援人員可能會回電問路。</li></ul></div>
+        <p class="small"><a href="#/found/${data.id}">查看通報頁</a>（附近的人和飼主看得到這則通報）</p>`;
       $('#qCopy').onclick=()=>copy($('#qScript').value);
       window.scrollTo({top:box.getBoundingClientRect().top+scrollY-(innerWidth>760?(document.querySelector('header')?.offsetHeight||0)+16:20),behavior:RM()?'auto':'smooth'});
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='再送一次';
