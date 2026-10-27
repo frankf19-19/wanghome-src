@@ -233,7 +233,7 @@ body[data-space="health"]{background:var(--paper);background:color-mix(in srgb,v
 .space svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .space .sp-t{display:flex;flex-direction:column;min-width:0}
 .space b{font-family:var(--head);font-size:19px;line-height:1.2;color:inherit}
-.space small{font-size:13.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:641px){.space a{padding-top:6px;padding-bottom:7px}.space .sp-ic{width:32px;height:32px;border-radius:10px}.space b{font-size:17px}.space small{display:none}}.space small{font-size:13.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body[data-space="lost"] .space a[data-s="lost"]{color:var(--red);border-bottom-color:var(--red);background:color-mix(in srgb,var(--red) 6%,transparent)}
 body[data-space="lost"] .space a[data-s="lost"] .sp-ic{background:var(--red-fill);color:#fff;box-shadow:none}
 body[data-space="health"] .space a[data-s="health"]{color:var(--green);border-bottom-color:var(--green);background:color-mix(in srgb,var(--green) 7%,transparent)}
@@ -1015,7 +1015,7 @@ details.more>:last-child{margin-bottom:14px}
 .bs-health svg{width:22px;height:22px;color:var(--green-fill);flex:none}.bs-health span:nth-child(2){flex:1}
 .bs-rule{margin:4px 2px 0;font-size:15px;color:var(--ink-2)}
 .choose{display:grid;gap:12px;margin-top:14px}
-@media (min-width:900px){.bigstart{grid-template-columns:repeat(3,minmax(0,1fr))!important}.bs-hello,.bs-health,.bs-rule,.mypets{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:1fr 1fr}}
+@media (min-width:900px){.bigstart{grid-template-columns:repeat(3,minmax(0,1fr))!important}.bs-hello,.bs-health,.bs-rule,.mypets{grid-column:1/-1}.bigbtn{min-height:120px}.choose{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
 /* v3.11.0 分步驟表單 */
 .wprog{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;font-weight:700;color:var(--ink-2);font-size:15px}
 .wdots{display:flex;gap:6px}.wdots i{width:28px;height:8px;border-radius:8px;background:var(--sheet);background:color-mix(in srgb,var(--ink-3) 35%,var(--sheet))}
@@ -1389,8 +1389,8 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .sri.s5{background:#FFD9C7;color:#B5502A}
 
 /* 首頁快捷：領養、受傷、攻略 */
-.qrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-@media (min-width:600px){.qrow{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.qrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:599px){.qk{align-items:center;text-align:center;padding:12px 6px}.qk small{display:none}}
 @media (min-width:900px){.qrow{grid-column:1/-1}}
 .qk{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px;border-radius:20px;background:var(--sheet);box-shadow:var(--lift);text-decoration:none!important;color:var(--ink)!important;min-width:0}
 .qk:active{transform:scale(.97)}
@@ -1459,10 +1459,8 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
     <span class="navlinks lost-only" style="display:contents">
       <a href="#/lost" class="link hide-sm">協尋列表</a>
       <a href="#/injured" class="link hide-sm">受傷通報</a>
-      <a href="#/resources" class="link hide-sm">協尋攻略</a>
       <a href="#/adopt" class="link hide-sm">領養</a>
       <a href="#/learn" class="link hide-sm">小學堂</a>
-      <a href="#/thanks" class="link hide-sm app-hide">感謝牆</a>
       <a href="#/seen" class="btn sm green hide-sm">看到／撿到</a>
       <a href="#/new" class="btn sm hide-sm">＋ 登記走失</a>
     </span>
@@ -1508,7 +1506,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.2.0';
+const BUILD = 'v5.2.2';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1989,6 +1987,7 @@ function route(){
   if((m=path.match(/^#\/report\/([0-9a-f-]{36})$/)))return renderReport(m[1]);
   if((m=path.match(/^#\/manage\/([0-9a-f-]{36})$/)))return renderManage(m[1],qs(h).t,qs(h).m);
   if((m=path.match(/^#\/poster\/([0-9a-f-]{36})$/)))return renderPoster(m[1]);
+  if(path==='#/guide'){goReplace('#/resources');return}
   if(path==='#/found/new')return renderFoundNew();
   if(path==='#/injured')return renderInjured();
   if(path==='#/seen')return renderSeen();
@@ -2183,7 +2182,6 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
     <div id="lostPrev" class="lostprev"></div>
     <div class="qrow" aria-label="更多服務">
       <a href="#/adopt" class="qk"><span class="qi q1">${ic('shelter')}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
-      <a href="#/injured" class="qk"><span class="qi q2">${ic('siren')}</span><b>受傷通報</b><small>一鍵撥打 1959</small></a>
       <a href="#/resources" class="qk"><span class="qi q3">${ic('clipboard')}</span><b>協尋攻略</b><small>黃金 48 小時</small></a>
       <a href="#/learn" class="qk"><span class="qi q4" aria-hidden="true">🎓</span><b>毛孩小學堂</b><small>狗狗貓咪照顧知識</small></a>
     </div>
@@ -2218,8 +2216,6 @@ ${bigStartHTML()}
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
   </div>
   <div id="homeWrap" class="hidden"><h2>${ic("paw")} 最近回家的毛孩</h2><div class="reunite" id="reunite"></div></div>
-  <a class="crosslink" href="#/adopt"><span class="cl-ic">${ic("shelter")}</span><span><b>想領養毛孩？</b>全台公立收容所有上千隻狗狗、貓咪在等一個家。依縣市看照片，一鍵打電話給收容所</span><em>看等待領養的毛孩</em></a>
-  <a class="crosslink m-hide" href="#/health"><span class="cl-ic">${ic("steth")}</span><span><b>想記錄自家毛孩的健康？</b>回診、疫苗、驅蟲到期自動提醒，同步手機日曆。到「健康手冊」免費使用</span><em>前往健康手冊</em></a>
   `;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c)c.textContent=n?` ${n}`:'';const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
   $('#btnFilter').onclick=()=>openFilterSheet(()=>{showF();loadList()});
@@ -2605,9 +2601,8 @@ async function renderCase(id){const _n=navId;
         <a class="btn big cact-main" href="#/report/${id}">${ic("eye")} 我看到牠了，回報</a>
         ${c.contact_phone?`<a class="btn big call" href="tel:${esc(String(c.contact_phone).replace(/[^\d+#]/g,''))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(c.contact_phone)}</span></a>`:''}
       </div>
-      ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}飼主沒有公開電話，按上面的「我看到牠了」留言，飼主會收到通知。</p>`}
-      <p class="tipbox">🐾 看到牠：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。</p>`:''}
-      ${active&&c.reward>0?`<p class="small muted reward-note">💰 獎金由飼主自行支付，本站不經手；要你先匯款的都可能是詐騙。</p>`:''}
+      ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}按上面按鈕回報，飼主會收到通知。</p>`}
+      <p class="tipbox">🐾 看到牠：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">💰 獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</p>`:''}
       <div class="cact-sub">
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
         ${active?`<button class="btn ghost" id="btnFollow" data-on="0">${ic("star")} 追蹤</button>
@@ -2625,15 +2620,10 @@ async function renderCase(id){const _n=navId;
   <div id="foundMatches"></div>
 
   <h2>${ic("megaphone")} 幫忙擴散</h2>
-  <div class="sharebar">
-    <a class="btn sm line" data-share="line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a>
-    <a class="btn sm fb" data-share="fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a>
-    <button class="btn sm ghost" data-share="copy">只複製網址</button>
-  </div>
   <div class="card">
     <p class="small" style="margin-top:0"><b>貼到社團最有效：</b>按「複製協尋貼文」，整段（含網址）貼到當地協尋社團、LINE 群。</p>
     <details class="sharetext"><summary>看貼文內容</summary><textarea id="shareText" aria-label="分享文案" readonly style="min-height:150px;margin-top:8px">${esc(shareText(c,url))}</textarea></details>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製協尋貼文</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a><a class="btn sm ghost" href="#/resources">協尋攻略</a></div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製協尋貼文</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a></div>
   </div>
   </div>
       <p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">封鎖發布者</button></p>
@@ -2697,7 +2687,7 @@ async function renderCase(id){const _n=navId;
       const {data:m2}=await sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false);
       const box=$('#shelterBox');if(!box)return;
       box.innerHTML=shelterBoxHTML(m2,false)||`<h2>${ic('shelter')} 收容所比對</h2><p class="muted small">目前 ${esc(c.lost_city)} 收容所沒有走失日之後收容、特徵相符的動物。每次有人打開這頁都會重新比對最新資料。</p>`;
-    }).catch(()=>{const st=$('#shelterStatus');if(st)st.textContent='收容所資料暫時讀取不到（農業部網站只接受台灣網路連線），稍後重新整理再試。'});
+    }).catch(()=>{const st=$('#shelterStatus');if(!st)return;if(/正在比對/.test(st.textContent)){const box=$('#shelterBox');if(box)box.innerHTML=''}});
   }
 
   // 可能相符的拾獲通報（即時計算）
@@ -2818,7 +2808,7 @@ function renderNew(){
       <label class="f"><span>電話 <i class="req">*</i></span><input type="tel" name="contact_phone" required pattern="${PHONE_PAT}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
     </div>
     <label class="chk"><input type="checkbox" name="phone_public" checked> 讓看到牠的人可以直接打電話給我（電話會顯示在案件頁）</label>
-    <label class="f"><span><b class="lbl">Email</b><small class="hint long">可以不填。有填的話，我們會先寄一封確認信，按確認後有人回報就會立刻寄信通知你（不會公開）</small></span><input type="email" name="contact_email" inputmode="email" autocomplete="email" placeholder="沒有可以空白"></label>
+    <label class="f"><span><b class="lbl">Email</b><small class="hint long">可不填；填了，有人回報會寄信通知你（不公開）</small></span><input type="email" name="contact_email" inputmode="email" autocomplete="email" placeholder="沒有可以空白"></label>
     <details class="more"><summary>LINE、獎金（可以不填）</summary>
     <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line"></label>
     <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" max="10000000" step="1" inputmode="numeric" placeholder="0"></label>
@@ -3323,7 +3313,7 @@ function renderInjured(){
   <div class="quick" id="quick">
     <a class="btn lg block q-call" href="tel:1959">${ic("phone")} 打 1959 動保專線</a>
     <button type="button" class="btn lg block ghost" id="btnQuick" style="margin-top:10px">${ic("pin")} 用定位找當地動保電話</button>
-    <p class="small muted" style="margin:8px 2px 0">定位後會顯示你所在縣市的動保直撥電話，和講電話時可以照著唸的通報稿。接不通打 <a href="tel:1999"><b>1999</b></a>；動物在車道上、危及交通打 <a href="tel:110"><b>110</b></a>。</p>
+    <p class="small muted" style="margin:8px 2px 0">定位後顯示當地動保電話和通報稿。<br>接不通打 <a href="tel:1999"><b>1999</b></a>；動物在車道上、危及交通打 <a href="tel:110"><b>110</b></a>。</p>
   </div>
   ${emergencyHTML()}
   <details class="mg-sec" id="fullDet" style="margin-top:16px"><summary id="fullForm">${ic("clipboard")} 定位失敗？手動填寫通報</summary><div class="mg-body">
@@ -3455,7 +3445,9 @@ function renderFoundNew(){
     <div class="submitbar"><button class="btn lg block green" type="submit" id="btnSubmit">送出拾獲通報</button></div>
   </form>`;
   let kind='found',species=null;
-  $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    // 第 1 步只有狗／貓：選了就直接到下一步
+    const st=b.closest('.wstep');if(st&&!st.hidden)setTimeout(()=>{const n=$('#f .wnext');if(n&&!n.hidden&&!st.hidden)n.click()},220)});
   $('#segKind').querySelectorAll('button').forEach(b=>b.onclick=()=>{kind=b.dataset.v;$('#segKind').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#curWrap').classList.toggle('hidden',kind!=='found')});
   {const k=qs(location.hash).k;
    const setLabel=()=>{const seen=kind==='seen';$('#btnSubmit').textContent=seen?'送出目擊通報':'送出拾獲通報';
@@ -3718,27 +3710,27 @@ async function renderAdopt(){const _n=navId;
   const nMore=()=>st.size.length+st.sex.length+st.age.length+(st.photo?0:1);
   app.innerHTML=`<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
-  <div class="notice green"><b>想領養？先打電話給收容所</b>確認牠還在、問清楚領養流程與要帶的證件（通常要帶身分證），再親自去看看牠。各收容所規定不同，以收容所說明為準。</div>
+  <p class="tipbox">📞 想領養？先打電話給收容所，確認牠還在、問清楚流程（通常要帶身分證）。</p>
   <div class="card adopt-f">
     <div class="seg" id="aKind" role="group" aria-label="狗或貓"><button type="button" data-v="狗" aria-pressed="${st.kind==='狗'}" class="${st.kind==='狗'?'on':''}">${spIc('dog')} 狗</button><button type="button" data-v="貓" aria-pressed="${st.kind==='貓'}" class="${st.kind==='貓'?'on':''}">${spIc('cat')} 貓</button></div>
     <div class="row2" style="margin-top:10px">
       <label class="f" style="margin:0"><span>縣市</span><select id="aCity">${cityOptions(st.city)}</select></label>
-      <label class="f" style="margin:0"><span>排序</span><select id="aSort">${opt([['new','最新入所'],['old','待最久的']],st.sort)}</select></label>
+      <label class="f" style="margin:0" id="aSortL"><span>排序</span><select id="aSort">${opt([['new','最新入所'],['old','待最久的']],st.sort)}</select></label>
     </div>
-    <div id="aDyn"></div>
+    <div id="afMore"><div id="aDyn"></div>
     <div class="fgrp"><b>結紮</b><div class="fchips">${chips('ster',STR)}</div></div>
     <details class="more" style="margin-top:8px" ${nMore()?'open':''}><summary>更多條件（體型、性別、年紀）</summary>
       <div class="fgrp"><b>體型</b><div class="fchips">${chips('size',SZ)}</div></div>
       <div class="fgrp"><b>性別</b><div class="fchips">${chips('sex',SX)}</div></div>
       <div class="fgrp"><b>年紀</b><div class="fchips">${chips('age',AG)}</div></div>
       <label class="chk"><input type="checkbox" id="aPhoto" ${st.photo?'checked':''}> 只看有照片的</label>
-    </details>
+    </details></div>
     <div class="fsum" id="aSum"></div>
   </div>
   <div id="aList" style="margin-top:14px" aria-live="polite"></div>`;
   const save=()=>{try{localStorage.setItem('wh_adopt',JSON.stringify({city:st.city,dist:st.dist,kind:st.kind}))}catch(_){}};
   const sum=()=>{const n=st.dist.length+st.variety.length+st.colour.length+st.ster.length+nMore();const e=$('#aSum');if(e)e.innerHTML=n?`已選 ${n} 個條件 <button type="button" class="linkbtn" id="aClear">全部清除</button>`:'';const c=$('#aClear');if(c)c.onclick=()=>{['dist','variety','colour','ster','size','sex','age'].forEach(k=>st[k]=[]);st.photo=true;st.limit=30;renderAdopt()}};
-  const load=async()=>{const el=$('#aList');if(!el)return;save();sum();
+  const load=async()=>{const el=$('#aList');if(!el)return;save();sum();{const m=$('#afMore'),sl=$('#aSortL');if(m)m.hidden=!st.city;if(sl)sl.style.visibility=st.city?'':'hidden'}
     if(!st.city){el.innerHTML=`<div class="empty-card"><div class="big">${ic('pin')}</div><b>先選你住的縣市</b><p class="small">選好就會列出那裡收容所等待領養的${st.kind==='貓'?'貓':'狗'}。</p><div class="citygrid">${Object.keys(MOA_AREA).map(c=>`<button type="button" class="btn ghost" data-city="${c}">${c}</button>`).join('')}</div></div>`;
       el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;st.dist=[];$('#aCity').value=st.city;load()});return}
     const my=navId,seq=++adoptSeq;const stale=()=>seq!==adoptSeq||my!==navId||!el.isConnected;   // 換了條件或換頁：舊的結果不要蓋上來
@@ -4243,7 +4235,7 @@ function renderLogin(){
     <p class="muted">只要 Email，不用密碼。我們寄一封信給你，按信裡的按鈕就${su?'完成註冊':'登入'}了。</p>
     <form onsubmit="return false" id="lf" data-nodirty>
       <label class="f"><span>Email</span><input type="email" id="em" required autocomplete="email" inputmode="email" placeholder="you@example.com"></label>
-      <button class="btn lg block" style="margin-top:12px" id="btnSend">${su?'免費註冊（寄確認信）':'寄登入信給我'}</button>
+      <button class="btn lg block" style="margin-top:12px" id="btnSend">${su?'寄確認信給我':'寄登入信給我'}</button>
     </form>
     <p class="small muted" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
 ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
@@ -4403,7 +4395,7 @@ function petCardHTML(p){
     </div></div>`;
 }
 async function renderPet(id){const _n=navId;
-  if(!requireLogin(id?'編輯寵物檔案需要登入':'建立寵物檔案需要登入'))return;
+  if(!requireLogin(id!=='new'?'編輯寵物檔案需要登入':'建立寵物檔案需要登入'))return;
   let p={species:'dog',photos:[]};
   if(id!=='new'){const {data,error}=await sb.from('pets').select('*').eq('id',id).maybeSingle();if(error){(_n===navId?app:_void).innerHTML=netErrHTML();return}if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}p=data}
   if(_n!==navId)return;
@@ -4434,16 +4426,19 @@ async function renderPet(id){const _n=navId;
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
     <div class="submitbar row"><button class="btn" id="btnSave">儲存</button>${id!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>
   </form>`;
-  let species=p.species,photos=(p.photos||[]).slice();
+  let species=p.species,photos=(p.photos||[]).slice();const origPh=photos.slice(),freshPh=[];let didSave=false;
+  const phPath=u=>(String(u).split('/object/public/photos/')[1]||'');const rmPh=l=>{const ps=l.map(phPath).filter(x=>x.startsWith('pets/'));if(ps.length)removeAllFiles('photos',[...ps,...ps.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]).catch(()=>{})};
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
   const pv=$('#pv');
-  const draw=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);draw()};d.appendChild(x);pv.appendChild(d)})};draw();
-  $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,6-photos.length)){toast('上傳中…');try{photos.push(await uploadPhoto(f,'pets'))}catch(err){toast('上傳失敗：'+err.message)}}draw();e.target.value=''};
+  const draw=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','移除這張照片');x.onclick=()=>{photos.splice(i,1);draw()};d.appendChild(x);pv.appendChild(d)})};draw();
+  {const pf=$('#pf');const mo=new MutationObserver(()=>{if(pf.isConnected)return;mo.disconnect();if(!didSave&&freshPh.length)rmPh(freshPh)});mo.observe(app,{childList:true})}
+  $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,6-photos.length)){toast('上傳中…');try{const u=await uploadPhoto(f,'pets');photos.push(u);freshPh.push(u)}catch(err){toast('上傳失敗：'+err.message)}}draw();e.target.value=''};
   $('#pf').onsubmit=once(async e=>{
     e.preventDefault();const fd=new FormData(e.target);
     const row={species,name:fd.get('name').trim(),sex:fd.get('sex')||null,size:fd.get('size')||null,birthday:fd.get('birthday')||null,breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_no:fd.get('chip_no'),neutered:fd.get('neutered')===''?null:fd.get('neutered')==='true',notes:fd.get('notes'),photos,updated_at:new Date().toISOString()};
     const {data:saved,error}=id==='new'?await sb.from('pets').insert(row).select('id').single():await sb.from('pets').update(row).eq('id',id).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
+    didSave=true;rmPh(origPh.concat(freshPh).filter(x=>!photos.includes(x)));
     if(id!=='new')lnSync(true);toast('已儲存');goReplace('#/pet/'+(saved?.id||id));
   });
   if(id!=='new')$('#btnDel').onclick=async()=>{if(!confirm(`確定刪除 ${p.name} 的寵物檔案？健康紀錄、用藥和照片會一起刪除，無法復原。`))return;
@@ -4513,7 +4508,7 @@ function weightChart(points){
   const d=points.map((p,i)=>`${i?'L':'M'}${X(xs[i]).toFixed(1)},${Y(ys[i]).toFixed(1)}`).join(' ');
   const md=x=>String(x).slice(5).replace('-','/');
   const last=points.slice(-4).reverse();
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-width:640px" role="img" aria-label="體重變化：${esc(points.map(p=>p.date+' '+p.w+'公斤').join('、'))}">
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-height:240px" role="img" aria-label="體重變化：${esc(points.map(p=>p.date+' '+p.w+'公斤').join('、'))}">
     <path d="${d}" fill="none" stroke="var(--red)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
     ${points.map((p,i)=>`<circle cx="${X(xs[i]).toFixed(1)}" cy="${Y(ys[i]).toFixed(1)}" r="5.5" fill="var(--sheet)" stroke="var(--red)" stroke-width="3"/>`).join('')}
     <text x="${P}" y="${H-8}" font-size="15" fill="var(--ink-3)">${points[0].date}</text>
@@ -4577,7 +4572,7 @@ async function renderPetView(id){const _n=navId;
   ${calPrompt?`<div class="calprompt" id="calPrompt"><div class="b"><b>已設定提醒：${esc(calPrompt.title)}</b><br><span class="muted">${calPrompt.next_due}・${dueText(calPrompt.next_due)}，要順便加到手機日曆嗎？</span></div><div class="acts">${calButtons(p.name,calPrompt)}<button type="button" class="btn sm ghost" id="calPromptX">不用</button></div></div>`:''}
   <h2>${ic("pill")} 用藥與保養品 <a class="btn sm ghost" href="#/pet/${id}/med/new" style="margin-left:auto">${ic("plus")} 新增</a></h2>
   ${meds.length?`${medToday.length?`<div class="card med-card"><div class="med-title">今天吃了沒？<span class="muted small">餵完點一下</span></div>${medToday.join('')}</div>`:''}
-  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span></b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a>`).join('')}</div>`
+  ${medToday.length?`<details class="mg-sec" style="margin-top:12px"><summary>藥品與保養品清單 <span class="muted small">${meds.length} 項・點進去可修改</span></summary><div class="mg-body">`:''}  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span></b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a>`).join('')}</div>${medToday.length?'</div></details>':''}`
   :`<div class="empty-card"><div class="big">${ic("pill")}</div><b>還沒有記錄用藥或保養品</b><p class="small">記下藥名、每次劑量和一天幾次，家人餵藥時就不會搞錯或重複餵。</p><div class="btns"><a class="btn green" href="#/pet/${id}/med/new">新增藥品</a><a class="btn ghost" href="#/pet/${id}/med/new?kind=supplement">新增保養品</a></div></div>`}
   ${medsOff.length?`<details class="med-off"><summary>已停用 ${medsOff.length} 項</summary>${medsOff.map(x=>`<a href="#/pet/${id}/med/${x.id}">${esc(x.name)}・${esc(medLine(x))}${x.end_date?`・到 ${x.end_date}`:''}</a>`).join('')}</details>`:''}
 
@@ -4618,7 +4613,7 @@ async function renderRecord(petId,recId){const _n=navId;
     <div class="seg" id="segK">${Object.entries(REC_KINDS).map(([k,[e,t]])=>`<button type="button" data-v="${k}" class="${r.kind===k?'on':''}">${recIc(k)} ${t}</button>`).join('')}</div>
     <div class="notice green hidden" id="medHint" style="margin-top:10px"><b>要每天吃的藥？</b>這裡只記一次。要每天提醒、打勾「今天吃了沒」，請改用 <a href="#/pet/${petId}/med/new">設定每天吃藥</a>。</div>
     <div class="row2">
-      <label class="f"><span>日期 <i class="req">*</i></span><input type="date" name="date" required value="${esc(r.date)}"></label>
+      <label class="f"><span>日期 <i class="req">*</i></span><input type="date" name="date" required max="${todayStr()}" value="${esc(r.date)}"></label>
       <label class="f"><span>醫院／店家</span><input name="clinic" maxlength="60" list="clinicList" value="${esc(r.clinic||'')}" placeholder="醫院名稱"><datalist id="clinicList">${clinics.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label>
     </div>
     <label class="f"><span>項目 <i class="req">*</i></span><input name="title" required maxlength="60" value="${esc(r.title||'')}" placeholder="例：狂犬病疫苗、皮膚過敏回診"></label>
@@ -4802,7 +4797,7 @@ async function renderPoster(id){const _n=navId;
   if(!c){(_n===navId?app:_void).innerHTML=isNetErr(ce)?netErrHTML():'<div class="empty">找不到案件</div>';return}
   if(_n!==navId)return;
   setTitle('海報');   // 使用者已經換頁：不要畫到別的頁面上
-  (_n===navId?app:_void).innerHTML=`<h1>協尋海報</h1><p class="muted small">自動產生。手機請按「儲存或分享」存到相簿、傳到 LINE，或長按下方圖片儲存；掃 QR Code 就能回報目擊。</p>
+  (_n===navId?app:_void).innerHTML=`<h1>協尋海報</h1><p class="muted small">按「儲存或分享」存到相簿或傳到 LINE。</p>
   <div class="fchips" id="pstyles" role="group" aria-label="海報樣式" style="justify-content:center;margin:4px 0 12px"></div><div class="posterwrap"><img id="pimg" alt="協尋海報" style="display:none;width:100%;height:auto;border-radius:12px;box-shadow:var(--lift)"><div id="pwait" class="empty">海報產生中…</div></div>
   <canvas id="pc" width="1080" height="1350" style="display:none"></canvas>
   <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap"><button class="btn" id="btnShareP" disabled>${ic("share")} 儲存或分享圖片</button><button class="btn ghost" id="btnDl" disabled>${ic("download")} 下載 PNG</button><a class="btn ghost" href="#/case/${id}">回案件頁</a></div>
@@ -4834,7 +4829,7 @@ async function renderPoster(id){const _n=navId;
   // ---- 海報共用資料 ----
   const PT=sp(c.species).poster;
   const LOC=c.lost_city+(c.lost_district||'')+(c.lost_place?'・'+c.lost_place:'');
-  const STATUS=c.status==='found'?'已經找到了，謝謝大家！':`走失第 ${daysSince(c.lost_at)} 天，急盼平安回家`;
+  const STATUS=c.status==='found'?'已經找到了，謝謝大家！':c.status==='closed'?'協尋已結束':`走失第 ${daysSince(c.lost_at)} 天，急盼平安回家`;
   const LOOK=[c.colour,SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,SEX[c.sex],c.age_text].filter(Boolean).join('・')||sp(c.species).name;
   const DETAIL=[c.breed,c.has_chip?'有晶片'+(c.chip_last4?' 末四碼 '+c.chip_last4:''):null,c.neutered===true?'已結紮':null].filter(Boolean).join('｜');
   const LATEST=ss&&ss[0]?`最新目擊｜${fmtDT(ss[0].seen_at)}  ${ss[0].place_text||''}${ss[0].direction?'  往'+ss[0].direction:''}`:`走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`;
@@ -4856,7 +4851,7 @@ async function renderPoster(id){const _n=navId;
   const contactRow=(y,qsize,color,sub)=>{const QX=W-M-qsize,leftW=QX-M-24;
     ctx.fillStyle=sub;ctx.fillText(fit(HOWTO,leftW,400,30,22),M,y+34);
     if(c.contact_phone){icon(PHONE,M,y+64,72,color);ctx.fillStyle=color;ctx.fillText(fit(c.contact_phone,leftW-90,900,92,44),M+90,y+128)}
-    else{ctx.fillStyle=color;ctx.fillText(fit(qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,56,34),M,y+116)}
+    else{ctx.fillStyle=color;ctx.fillText(fit(c.status!=='searching'?'掃 QR 看最新消息':qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,56,34),M,y+116)}
     drawQR(QX,y,qsize)};
 
   // 大照片：照片佔滿上半部，適合 LINE、FB 貼文
@@ -4894,7 +4889,7 @@ async function renderPoster(id){const _n=navId;
     const qs=Math.min(210,H-yb-40),QX=W-M-qs,leftW=QX-M-24;
     ctx.fillStyle=Y;ctx.fillText(fit(WARN,leftW,900,40,26),M,yb+52);
     if(c.contact_phone){icon(PHONE,M,yb+76,70,Y);ctx.fillStyle=Y;ctx.fillText(fit(c.contact_phone,leftW-90,900,88,44),M+88,yb+140)}
-    else{ctx.fillStyle=Y;ctx.fillText(fit(qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,52,32),M,yb+132)}
+    else{ctx.fillStyle=Y;ctx.fillText(fit(c.status!=='searching'?'掃 QR 看最新消息':qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,52,32),M,yb+132)}
     ctx.fillStyle='#ddd';ctx.fillText(fit(HOWTO,leftW,400,26,18),M,yb+186);
     drawQR(QX,yb+20,qs);
     ctx.fillStyle='#bbb';ctx.fillText(fit(FOOT,leftW,400,22,16),M,H-20)};
@@ -4916,7 +4911,7 @@ async function renderPoster(id){const _n=navId;
     ctx.fillStyle=red;ctx.fillText(fit(WARN,leftW,900,44,30),m,yb+46);
     ctx.fillStyle=ink;ctx.fillText(fit(HOWTO,leftW,400,30,20),m,yb+96);
     if(c.contact_phone){icon(PHONE,m,yb+128,84,ink);ctx.fillStyle=ink;ctx.fillText(fit(c.contact_phone,leftW-104,900,110,54),m+104,yb+204)}
-    else{ctx.fillStyle=ink;ctx.fillText(fit(qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,60,34),m,yb+196)}
+    else{ctx.fillStyle=ink;ctx.fillText(fit(c.status!=='searching'?'掃 QR 看最新消息':qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,60,34),m,yb+196)}
     if(qrc)drawQR(W-m-qs,yb+8,qs);
     ctx.fillStyle='#8A8A8A';ctx.fillText(fit(FOOT,700,400,26,18),m,H-34)};
 
@@ -4972,7 +4967,7 @@ async function renderPoster(id){const _n=navId;
   const QX=W-M-240,QY=y2+105,leftW=QX-M-20;
   ctx.fillStyle=ink;ctx.fillText(fit(HOWTO,leftW,400,30,22),M,y2+140);
   if(c.contact_phone){icon(PHONE,M,y2+180,72,red);ctx.fillStyle=red;ctx.fillText(fit(c.contact_phone,leftW-90,900,92,44),M+90,y2+245)}
-  else{ctx.fillStyle=red;ctx.fillText(fit(qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,56,34),M,y2+230)}
+  else{ctx.fillStyle=red;ctx.fillText(fit(c.status!=='searching'?'掃 QR 看最新消息':qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,56,34),M,y2+230)}
   if(qrc){ctx.fillStyle='#fff';ctx.fillRect(QX,QY,240,240);ctx.drawImage(qrc,QX+8,QY+8,224,224)}
   ctx.fillStyle='#8A8A8A';ctx.fillText(fit(`${CONFIG.SITE_NAME}・${CONFIG.SITE_URL.replace(/^https?:\/\//,'').replace(/\/$/,'')}`,leftW,400,24,18),M,H-30);
   };
@@ -5143,7 +5138,7 @@ function renderResources(){
   </div>
   <h2>找回統計</h2><div class="card" id="foundStats"><p class="muted">載入中…</p></div>`;
   $('#selCity').onchange=()=>{const c=$('#selCity').value;$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?(AGENCY[c]?`<p class="small" style="margin:0 0 8px"><b>${esc(AGENCY[c].n)}</b>：${AGENCY[c].t.map(e=>`<a href="${agTel(e)}">${esc(agNum(e))}</a>${e.h?'（'+agHours(e.h)+'）':''}`).join('、')}</p>`:'')+`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
-  sb.from('found_stats').select('*').then(({data,error})=>{const el=$('#foundStats');if(!el)return;if(error){el.innerHTML='<p class="muted">網路不穩，統計暫時載入不到。</p>';return}data=(data||[]).filter(d=>d.n>0);if(!data.length){el.innerHTML='<p class="muted">等第一批案件結案後，這裡會顯示「哪種方法最常找回」。</p>';return}const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:#eee;border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red-fill);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
+  sb.from('found_stats').select('*').then(({data,error})=>{const el=$('#foundStats');if(!el)return;if(error){el.innerHTML='<p class="muted">網路不穩，統計暫時載入不到。</p>';return}data=(data||[]).filter(d=>d.n>0);if(!data.length){el.innerHTML='<p class="muted">等第一批案件結案後，這裡會顯示「哪種方法最常找回」。</p>';return}const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:var(--line);border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red-fill);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
 }
 function renderAbout(){
   setTitle('關於');
