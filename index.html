@@ -1508,7 +1508,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.2.6';
+const BUILD = 'v5.2.7';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2134,6 +2134,7 @@ function getMine(){try{const l=JSON.parse(localStorage.getItem('wh_mine')||'[]')
 function rememberMine(t,id,name){try{const l=getMine().filter(x=>x.id!==id);l.unshift({t,id,name:String(name||'').slice(0,30),at:Date.now()});localStorage.setItem('wh_mine',JSON.stringify(l.slice(0,20)))}catch(_){}}
 function mineHTML(excl){const l=getMine().filter(x=>!(excl&&excl.has(x.id)));if(!l.length)return '';
   return `<div class="mine card"><b>${ic("paw")} ${excl?'這支手機登記過、還沒綁定帳號':'你在這支手機登記過'}</b>${excl?'<p class="small muted" style="margin:4px 0 6px">點進管理頁按「綁定」，換手機也能管理。</p>':''}${l.slice(0,5).map(x=>`<a class="mine-row" href="#/${x.t==='case'?'manage':'found-manage'}/${esc(x.id)}"><span>${esc(x.name||'我的通報')}<small>${x.t==='case'?'走失協尋':'拾獲／目擊通報'}</small></span><em>管理・標記找到了 ›</em></a>`).join('')}</div>`}
+function otpDigits(s){s=String(s||'').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));const m=s.match(/\d[\d\s-]{4,14}\d/g);if(m){const c=m.map(x=>x.replace(/\D/g,'')).find(x=>x.length>=6&&x.length<=10);if(c)return c}return s.replace(/\D/g,'').slice(0,10)}
 function extractToken(v){v=String(v||'').trim();const m=v.match(/[?&]t=([^&\s]+)/);if(!m)return v;try{return decodeURIComponent(m[1])}catch(_){return m[1]}}
 
 // 飼主／通報者管理入口（取代瀏覽器的輸入框）
@@ -4271,17 +4272,21 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       try{localStorage.setItem('wh_registered','1')}catch(_){}
       const su=sm==='signup';
       app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div style="font-size:56px">📬</div><h1>請收信</h1><p>${su?'確認信':'登入信'}已寄到 <b>${esc(email)}</b></p>
-        <form id="otpf" data-nodirty style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="10" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">用驗證碼登入</button></form>
+        <form id="otpf" data-nodirty novalidate style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">用驗證碼登入</button></form>
         <p class="muted small">${IS_APP?'':`也可以直接按信裡的大按鈕，就會${su?'完成註冊並':''}登入。`}幾分鐘沒收到請看垃圾郵件匣。${su?'（如果這個 Email 之前註冊過，會收到「你的登入連結」，一樣輸入驗證碼就好）':''}</p><button type="button" class="btn ghost" id="btnReLogin">換一個 Email</button></div>`;
       $('#btnReLogin').onclick=()=>{draw();$('#em').value=email};
       {const rb=document.createElement('button');rb.type='button';rb.className='btn ghost';rb.id='btnResend';rb.style.marginLeft='8px';$('#btnReLogin').after(rb);let left=60;const tick=()=>{if(!rb.isConnected)return;rb.disabled=left>0;rb.textContent=left>0?`重寄（${left} 秒）`:'重寄一封';if(left-->0)setTimeout(tick,1000)};tick();
         rb.onclick=async()=>{rb.disabled=true;rb.textContent='寄送中…';const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:su}});if(error){toast('寄送失敗：請等一分鐘再試',4000);left=30}else{toast('已重寄，請看最新的那封信');left=60}tick()}}
       // 用驗證碼登入（App 裡點信件連結會開到瀏覽器，所以 App 一定要能輸入驗證碼）
-      $('#otpf').onsubmit=async ev=>{ev.preventDefault();const code=$('#otp').value.replace(/\D/g,'');if(code.length<6)return toast('請輸入信裡的數字驗證碼');
+      // 從信裡複製時常會連前後文字、空白、換行一起貼上，或是全形數字：只取出那組數字
+      const otpIn=$('#otp');
+      otpIn.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text');if(t==null)return;e.preventDefault();otpIn.value=otpDigits(t);if(otpIn.value.length>=6)setTimeout(()=>$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click(),150)});
+      otpIn.addEventListener('input',()=>{const v=otpDigits(otpIn.value);if(v!==otpIn.value)otpIn.value=v});
+      $('#otpf').onsubmit=async ev=>{ev.preventDefault();const code=otpDigits($('#otp').value);$('#otp').value=code;if(code.length<6)return toast('請輸入信裡的數字驗證碼（6 位數以上）');
         const b=$('#btnOtp');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
         let {data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'email'});
         if(error&&su)({data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'signup'}));
-        if(error||!vd?.session){b.disabled=false;b.textContent='用驗證碼登入';return toast(/expired|invalid/i.test(error?.message||'')?'驗證碼不正確或已過期，請再寄一次':'登入失敗：'+(error?.message||'請再試一次'),4500)}
+        if(error||!vd?.session){b.disabled=false;b.textContent='用驗證碼登入';return toast(/expired|invalid/i.test(error?.message||'')?'驗證碼不正確或已過期。如果按過「重寄」，請用最新那封信的驗證碼':'登入失敗：'+(error?.message||'請再試一次'),4500)}
         session=vd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;   // 登入通知已經帶回原本的頁面
         toast('✅ 已登入'+(vd.session.user?.email?'：'+vd.session.user.email:''),3500);
         let back='#/me';back=takeReturn();goReplace(back)};
