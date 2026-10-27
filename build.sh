@@ -27,4 +27,6 @@ check dist/index.html
 # 版本檔：網站用來檢查有沒有新版（很小，不用整頁重新下載）
 V=$(grep -oE "const BUILD = 'v[0-9.]+'" index.html | grep -oE "v[0-9.]+")
 [ -n "$V" ] && printf '{"v":"%s"}\n' "$V" > dist/version.json
+# 每次發版換 service worker 的快取名稱，舊快取（圖示、manifest）才會更新
+[ -n "$V" ] && sed -i "s/const CACHE = 'wanghome-[^']*'/const CACHE = 'wanghome-$V'/" dist/sw.js
 echo "built: $(find dist -type f | wc -l) files"
