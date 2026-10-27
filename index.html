@@ -2043,8 +2043,8 @@ function setHomeTab(t){const base=(location.hash||'#/').split('?')[0]==='#/lost'
 // 這支手機登記過的案件／通報（不用登入也找得回來）
 function getMine(){try{const l=JSON.parse(localStorage.getItem('wh_mine')||'[]');return Array.isArray(l)?l.filter(x=>x&&/^[0-9a-f-]{36}$/.test(x.id)&&(x.t==='case'||x.t==='found')):[]}catch(_){return []}}
 function rememberMine(t,id,name){try{const l=getMine().filter(x=>x.id!==id);l.unshift({t,id,name:String(name||'').slice(0,30),at:Date.now()});localStorage.setItem('wh_mine',JSON.stringify(l.slice(0,20)))}catch(_){}}
-function mineHTML(){const l=getMine();if(!l.length)return '';
-  return `<div class="mine card"><b>${ic("paw")} 你在這支手機登記過</b>${l.slice(0,5).map(x=>`<a class="mine-row" href="#/${x.t==='case'?'manage':'found-manage'}/${esc(x.id)}"><span>${esc(x.name||'我的通報')}<small>${x.t==='case'?'走失協尋':'拾獲／目擊通報'}</small></span><em>管理・標記找到了 ›</em></a>`).join('')}</div>`}
+function mineHTML(excl){const l=getMine().filter(x=>!(excl&&excl.has(x.id)));if(!l.length)return '';
+  return `<div class="mine card"><b>${ic("paw")} ${excl?'這支手機登記過、還沒綁定帳號':'你在這支手機登記過'}</b>${excl?'<p class="small muted" style="margin:4px 0 6px">點進管理頁按「綁定」，換手機也能管理。</p>':''}${l.slice(0,5).map(x=>`<a class="mine-row" href="#/${x.t==='case'?'manage':'found-manage'}/${esc(x.id)}"><span>${esc(x.name||'我的通報')}<small>${x.t==='case'?'走失協尋':'拾獲／目擊通報'}</small></span><em>管理・標記找到了 ›</em></a>`).join('')}</div>`}
 function extractToken(v){v=String(v||'').trim();const m=v.match(/[?&]t=([^&\s]+)/);return m?decodeURIComponent(m[1]):v}
 
 // 飼主／通報者管理入口（取代瀏覽器的輸入框）
@@ -3997,20 +3997,20 @@ async function lnSync(force){
       const dose=m.dose_amount?`（${String(+m.dose_amount)}${m.dose_unit||''}）`:'';
       const title=`💊 ${nm[m.pet_id]||'毛孩'}該${m.kind==='supplement'?'吃保養品':'吃藥'}了`,body=m.name+dose;
       for(const t of times){const [hh,mm]=t.split(':').map(Number);
-        // 有停藥日、而且一週內就停：逐天排，停藥後不會再響；其他每天固定時間重複
-        if(/^daily/.test(m.freq)&&m.end_date){const last=m.end_date<addDays(today,13)?m.end_date:addDays(today,13);for(let d=today;d<=last;d=addDays(d,1)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}}
-        else if(/^daily/.test(m.freq))list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch});
-        else if(m.freq==='weekly'&&m.end_date){const wd0=lnAt(m.start_date||today,12,0).getDay();let d=today;for(let k=0;k<7&&lnAt(d,12,0).getDay()!==wd0;k++)d=addDays(d,1);for(let k=0;k<4&&d<=m.end_date;k++,d=addDays(d,7)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}}
-        else if(m.freq==='weekly'){const wd=lnAt(m.start_date||today,12,0).getDay()+1;list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{weekday:wd,hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}
+        // 有停藥日、而且兩週內就停：逐天排，停藥後不會再響；其他每天固定時間重複（停藥後下次開 App 會自動取消）
+        if(/^daily/.test(m.freq)&&m.end_date&&m.end_date<addDays(today,13)){const last=m.end_date<addDays(today,13)?m.end_date:addDays(today,13);for(let d=today;d<=last;d=addDays(d,1)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
+        else if(/^daily/.test(m.freq))list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch});
+        else if(m.freq==='weekly'&&m.end_date){const wd0=lnAt(m.start_date||today,12,0).getDay();let d=today;for(let k=0;k<7&&lnAt(d,12,0).getDay()!==wd0;k++)d=addDays(d,1);for(let k=0;k<4&&d<=m.end_date;k++,d=addDays(d,7)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
+        else if(m.freq==='weekly'){const wd=lnAt(m.start_date||today,12,0).getDay()+1;list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{weekday:wd,hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}
         else if(m.freq==='every_other'){let d=today;if(lnDiffDays(m.start_date||today,d)%2)d=addDays(d,1);
-          for(let k=0;k<6;k++,d=addDays(d,2)){if(m.end_date&&d>m.end_date)break;const at=lnAt(d,hh,mm);if(at<=now)continue;list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id},...ch})}}
+          for(let k=0;k<6;k++,d=addDays(d,2)){if(m.end_date&&d>m.end_date)break;const at=lnAt(d,hh,mm);if(at<=now)continue;list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
       }
     }
     // 先排每天固定時間的（重複提醒），其他依時間先後；iPhone 一個 App 最多排 64 則
-    list.sort((a,b)=>{const ra=!!a.schedule.on,rb=!!b.schedule.on;if(ra!==rb)return ra?-1:1;return (a.schedule.at||0)-(b.schedule.at||0)});
+    list.sort((a,b)=>{const ra=!!a.schedule.on,rb=!!b.schedule.on;if(ra!==rb)return ra?-1:1;const ma=!!(a.extra&&a.extra.m),mb=!!(b.extra&&b.extra.m);if(ma!==mb)return ma?1:-1;return (a.schedule.at||0)-(b.schedule.at||0)});   // 回診、疫苗到期優先，逐天的吃藥提醒排後面
     const use=list.slice(0,60);
     if(!lnOn()||!me())return;   // 抓資料的時候使用者關掉提醒或登出了：不要再排回去
-    await lnClear();
+    await lnClear();if(!lnOn()||!me())return;
     if(use.length)await LN.schedule({notifications:use});
     try{localStorage.setItem(LN_IDS,JSON.stringify(use.map(n=>n.id)))}catch(_){}
     lnLast=Date.now();
@@ -4147,6 +4147,8 @@ async function renderMeBody(){const _n=navId;
   <h2>${ic("hand")} 我的拾獲通報</h2>
   <div class="grid">${(fs||[]).length?fs.map(f=>foundCardHTML(f).replace('href="#/found/','href="#/found-manage/')).join(''):'<p class="muted" style="grid-column:1/-1">沒有。</p>'}</div>
 
+  ${mineHTML(new Set([...(cs||[]),...(fs||[])].map(x=>x.id)))}
+
   <h2>${ic("star")} 追蹤中的案件</h2>
   <div class="grid">${followed.length?followed.map(cardHTML).join(''):'<p class="muted" style="grid-column:1/-1">在案件頁按「⭐ 追蹤」，有新目擊時會通知你。</p>'}</div>
 
@@ -4186,10 +4188,10 @@ async function renderMeBody(){const _n=navId;
       try{const [{data:ps},{data:rs}]=await Promise.all([sb.from('pets').select('photos'),sb.from('pet_records').select('files')]);
         pub=(ps||[]).flatMap(x=>x.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(Boolean);
         const pv=new Set((rs||[]).flatMap(x=>x.files||[]));(await listAllFiles('pet-private',me().id)).forEach(x=>pv.add(x));priv=[...pv]}catch(_){}
-      const {error}=await sb.rpc('delete_my_account',{p_delete_content:!!$('#delContent')?.checked});if(error)throw error;
+      const delC=!!$('#delContent')?.checked;const {error}=await sb.rpc('delete_my_account',{p_delete_content:delC});if(error)throw error;
       try{if(pub.length)await sb.storage.from('photos').remove([...pub,...pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]);if(priv.length)await removeAllFiles('pet-private',priv)}catch(_){}
-      // 這支手機上的管理網址、登記紀錄也一起清掉
-      try{Object.keys(localStorage).filter(k=>/^wh_/.test(k)&&k!=='wh_theme').forEach(k=>localStorage.removeItem(k))}catch(_){}
+      // 這支手機上的個人資料清掉；選擇保留案件時，留下管理網址，之後還能標記「找到了」或關閉
+      try{Object.keys(localStorage).filter(k=>/^wh_/.test(k)&&k!=='wh_theme'&&(delC||!/^wh_(token|ftoken)_|^wh_mine$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}
       await sb.auth.signOut().catch(()=>{});toast('帳號已刪除，謝謝你曾經使用汪喵回家',4000);goReplace('#/');
     }catch(err){toast('刪除失敗：'+(err.message||err));b.disabled=false;b.textContent='永久刪除我的帳號'}
   };
@@ -4307,7 +4309,7 @@ function bdayInfo(bd){if(!bd||!/^\d{4}-\d{2}-\d{2}$/.test(bd))return null;const 
   let n=new Date(t.getFullYear(),m-1,d);if(n<t)n=new Date(t.getFullYear()+1,m-1,d);const age=n.getFullYear()-y;if(age<1)return null;return {days:Math.round((n-t)/864e5),age,md:`${m}/${d}`}}
 function bdayText(bd){const b=bdayInfo(bd);if(!b)return '';return b.days===0?`🎂 今天 ${b.age} 歲生日！`:b.days<=30?`🎂 再 ${b.days} 天滿 ${b.age} 歲`:`🎂 生日 ${b.md}`}
 function bdayChip(bd){const t=bdayText(bd);if(!t)return '';const b=bdayInfo(bd);return `<span class="bd-chip ${b.days<=30?'soon':''}">${t}</span>`}
-function petAge(bd){if(!bd)return '';const b=new Date(bd),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';if(m<1){const dd=Math.max(0,Math.round((n-b)/864e5));return dd<1?'剛出生':`${dd} 天`}return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
+function petAge(bd){if(!bd)return '';const [y,mo,d]=String(bd).slice(0,10).split('-').map(Number);const b=new Date(y,mo-1,d),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';if(m<1){const dd=Math.max(0,Math.round((n-b)/864e5));return dd<1?'剛出生':`${dd} 天`}return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
 function dueText(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return days<0?`已過期 ${-days} 天`:days===0?'今天到期':`${days} 天後`}
 function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new Date(r.next_due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return `<span class="tag ${days<0?'red':days<=14?'amber':'gray'}">下次 ${r.next_due.slice(5).replace('-','/')}・${dueText(r.next_due)}</span>`}
 // 列出某個資料夾底下全部檔案（含子資料夾），刪除帳號／寵物時用
@@ -4402,7 +4404,7 @@ async function renderPetView(id){const _n=navId;
   <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[e,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${recIc(k)} ${t}</button>`).join('')}</div>
   ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
       <a href="#/pet/${id}/record/${r.id}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}</div>
-      <div class="where">${esc([REC_KINDS[r.kind][1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
+      <div class="where">${esc([(REC_KINDS[r.kind]||[,'其他'])[1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
       ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
@@ -4418,7 +4420,7 @@ async function renderRecord(petId,recId){const _n=navId;
   if(!requireLogin())return;
   const {data:p}=await sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle();
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻寵物</div>';return}
-  let r={kind:qs(location.hash).kind||'vet',date:todayStr(),files:[]};
+  let r={kind:REC_KINDS[qs(location.hash).kind]?qs(location.hash).kind:'vet',date:todayStr(),files:[]};
   if(recId!=='new'){const {data}=await sb.from('pet_records').select('*').eq('id',recId).maybeSingle();if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆紀錄</div>';return}r=data}
   const {data:prev}=await sb.from('pet_records').select('clinic').eq('pet_id',petId).not('clinic','is',null).limit(200);
   const clinics=[...new Set((prev||[]).map(x=>x.clinic).filter(Boolean))];
@@ -4469,6 +4471,7 @@ async function renderRecord(petId,recId){const _n=navId;
     const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files};
     if(row.next_due&&row.date&&row.next_due<row.date)return toast('「下次到期」不能早於紀錄日期，請再確認一下',4000);
     if(f.elements.done)row.done=f.elements.done.checked;else if(recId==='new')row.done=false;
+    if(recId!=='new'&&row.next_due&&row.next_due!==(r.next_due||null))row.done=false;   // 到期日換了＝新的一次，要重新提醒
     const {data:saved,error}=recId==='new'?await sb.from('pet_records').insert(row).select('id').single():await sb.from('pet_records').update(row).eq('id',recId).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
     didSave=true;lnSync(true);
@@ -4589,7 +4592,7 @@ async function renderPetPrint(id){const _n=navId;
   const rs=recs||[];const ph=p.photos?.[0];
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
   const weights=rs.filter(r=>r.weight_kg);
-  const row=r=>`<tr><td style="white-space:nowrap">${r.date}</td><td style="white-space:nowrap">${REC_KINDS[r.kind][1]}</td><td><b>${esc(r.title)}</b>${r.notes?`<div class="small" style="white-space:pre-wrap;color:var(--ink-2)">${esc(r.notes)}</div>`:''}</td><td>${esc(r.clinic||'')}</td></tr>`;
+  const row=r=>`<tr><td style="white-space:nowrap">${r.date}</td><td style="white-space:nowrap">${(REC_KINDS[r.kind]||[,'其他'])[1]}</td><td><b>${esc(r.title)}</b>${r.notes?`<div class="small" style="white-space:pre-wrap;color:var(--ink-2)">${esc(r.notes)}</div>`:''}</td><td>${esc(r.clinic||'')}</td></tr>`;
   (_n===navId?app:_void).innerHTML=`<div class="noprint" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><a class="btn ghost sm" href="#/pet/${id}">← 返回</a><button class="btn sm app-hide" onclick="window.print()">${ic("printer")} 列印／存成 PDF</button><span class="muted small" style="align-self:center">看診時直接把這頁給獸醫看也可以</span></div>
   <div class="card printsheet">
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
