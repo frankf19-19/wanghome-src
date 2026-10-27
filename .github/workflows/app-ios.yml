@@ -54,8 +54,15 @@ jobs:
           AUTH="-allowProvisioningUpdates -authenticationKeyPath $KP -authenticationKeyID $ASC_KEY_ID -authenticationKeyIssuerID $ASC_ISSUER"
           # 失敗時把錯誤訊息寫成 GitHub 的「註解」，方便從外面看到原因
           run_log(){ local L="$RUNNER_TEMP/$1.log"; shift; if ! "$@" > "$L" 2>&1; then tail -40 "$L"; grep -E "error|Error|ERROR|fail|No profiles|No Accounts|certificate|provision" "$L" | grep -v "^\s*$" | tail -12 | while IFS= read -r line; do echo "::error::${line:0:400}"; done; rm -f "$KP"; exit 1; fi; tail -15 "$L"; }
-          run_log archive xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
-            -archivePath "$RUNNER_TEMP/App.xcarchive" DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGN_STYLE=Automatic $AUTH archive
+          # 沒有登記任何測試手機時，Apple 不給「開發用」描述檔，所以打包時直接用「上架用（Apple Distribution）」簽章
+          if ! xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY="Apple Distribution" $AUTH archive > "$RUNNER_TEMP/archiveA.log" 2>&1; then
+            grep -E "error" "$RUNNER_TEMP/archiveA.log" | tail -4 | while IFS= read -r line; do echo "::warning::A ${line:0:400}"; done
+            echo "改用不簽章打包，再於匯出時由 Apple 雲端簽章"
+            rm -rf "$RUNNER_TEMP/App.xcarchive"
+            run_log archive xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' \
+              -archivePath "$RUNNER_TEMP/App.xcarchive" DEVELOPMENT_TEAM=$TEAM_ID CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
+          else tail -15 "$RUNNER_TEMP/archiveA.log"; fi
           cat > "$RUNNER_TEMP/export.plist" <<PL
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
