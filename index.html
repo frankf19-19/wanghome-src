@@ -1253,7 +1253,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 @keyframes afFlash{0%{box-shadow:0 0 0 3px var(--green)}100%{box-shadow:0 0 0 0 transparent}}.autofill{animation:afFlash 1.6s ease-out}
 .reward-note{text-align:center;margin:8px 4px 0;line-height:1.6}
 .qpick{margin:6px 0 4px;gap:6px}.qpick .fchip{padding:6px 11px;font-size:13.5px;min-height:34px}.qpick .more{border-style:dashed}.qp-t{display:block;margin:8px 0 0;color:var(--ink-2)}
-.q-call{font-size:20px;min-height:60px;margin-top:10px}
+.q-call{font-size:20px;min-height:60px;margin-top:10px;white-space:normal;text-align:center;line-height:1.25}.q-call span{display:flex;flex-direction:column;align-items:center}.q-call small{display:block;font-size:14px;font-weight:600;opacity:.92}.q-call2{margin-top:8px}
 .q-script{background:var(--sheet,#fff);border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;margin:6px 0 12px}.q-script dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:8px 0 10px;font-size:17px}.q-script dt{color:var(--ink-3);font-weight:700}.q-script dd{margin:0;font-weight:700;color:var(--ink)}
 .q-wait-tips{background:var(--butter,#FFF3C4);border-radius:16px;padding:12px 14px;margin:0 0 10px;color:var(--ink)}.q-wait-tips ul{margin:6px 0 0;padding-left:20px;font-size:15px;line-height:1.7}
 .adm-tabs{margin-top:20px}
@@ -1451,7 +1451,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.0.0';
+const BUILD='v5.0.1';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -3014,6 +3014,50 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
    ============================================================ */
 
 const INJURIES=['被車撞','流血','不能走／拖著腳','骨折或腳受傷','意識不清／躺著不動','很虛弱','皮膚病','被夾到／卡住'];
+// ---- 各縣市動保單位直撥電話（受傷犬貓救援）。2026-10 依各縣市動保單位網站查證 ----
+// h：w＝週一到週五、a＝每天；f/to＝時段（24 小時制，例 800＝8:00）；off＝下班與假日時段；null＝網站沒寫時段
+const H24={a:1,f:0,to:2400},WK={w:1,f:800,to:1700},WK5={w:1,f:800,to:1730},OFF={off:1};
+const AGENCY={
+  '臺北市':{n:'臺北市動物保護處',t:[{p:'02-87913064',h:H24},{p:'02-87913065',h:H24}]},
+  '新北市':{n:'新北市動物保護防疫處',t:[{p:'02-29596353',h:H24}]},
+  '桃園市':{n:'桃園市動物保護處',t:[{p:'03-3326742',h:WK}]},
+  '臺中市':{n:'臺中市動物急難救助通報中心',t:[{p:'04-23850949',h:WK}]},
+  '臺南市':{n:'臺南市動物防疫保護處',t:[{p:'06-2965945',h:null,l:'流浪犬貓緊急救援專線'}]},
+  '高雄市':{n:'高雄市動物保護處',t:[{p:'07-7462368',h:WK}]},
+  '基隆市':{n:'基隆市動物保護防疫所',t:[{p:'02-24280677',h:WK}]},
+  '新竹市':{n:'新竹市動物保護及防疫所',t:[{p:'03-5368329',h:WK}]},
+  '新竹縣':{n:'新竹縣動物保護防疫所',t:[{p:'03-5519548',x:'229',h:WK},{p:'0963-375553',h:OFF}]},
+  '苗栗縣':{n:'苗栗縣動物保護防疫所',t:[{p:'037-320049',x:'301',h:WK},{p:'0921-217929',h:OFF}]},
+  '彰化縣':{n:'彰化縣動物防疫所',t:[{p:'04-7620774',h:WK},{p:'0911-952821',h:{w:1,f:1700,to:2200}}]},
+  '南投縣':{n:'南投縣家畜疾病防治所',t:[{p:'049-2222542',h:WK5}]},
+  '雲林縣':{n:'雲林縣動植物防疫所',t:[{p:'05-5523250',h:WK5}]},
+  '嘉義市':{n:'嘉義市動物保護教育園區',t:[{p:'05-2168661',h:WK}]},
+  '嘉義縣':{n:'嘉義縣家畜疾病防治所',t:[{p:'05-3620025',h:WK}]},
+  '屏東縣':{n:'屏東縣動物保護及保育科',t:[{p:'08-7320415',x:'3761',h:WK}]},
+  '宜蘭縣':{n:'宜蘭縣動植物防疫所',t:[{p:'03-9602350',h:WK},{p:'0910-165475',h:OFF,l:'值班手機'}]},
+  '花蓮縣':{n:'花蓮縣動植物防疫所',t:[{p:'03-8227431',h:WK5},{p:'0983-670878',h:{a:1,f:900,to:1700},l:'救援專線'}]},
+  '臺東縣':{n:'臺東縣動物防疫所',t:[{p:'089-233720',h:{a:1,f:800,to:2200}}]},
+  '澎湖縣':{n:'澎湖縣家畜疾病防治所',t:[{p:'06-9212839',h:WK}]},
+  '金門縣':{n:'金門縣動植物防疫所',t:[{p:'082-336625',h:WK}]}
+};
+function agOpen(h,d=new Date()){if(!h)return true;const wd=d.getDay()>=1&&d.getDay()<=5,m=d.getHours()*100+d.getMinutes();
+  if(h.off)return !agOpen(WK,d);return (h.a||wd)&&m>=h.f&&m<h.to}
+function agHours(h){if(!h)return'';if(h.off)return'下班時間與假日';if(h.a&&h.f===0&&h.to===2400)return'24 小時';const t=v=>Math.floor(v/100)+':'+String(v%100).padStart(2,'0');return(h.a?'每天 ':'週一到週五 ')+t(h.f)+'–'+t(h.to)}
+const agTel=e=>'tel:'+e.p.replace(/-/g,'')+(e.x?','+e.x:'');
+const agNum=e=>e.p+(e.x?' 分機 '+e.x:'');
+// 受傷通報用：現在打得通的當地直撥放最大，1959 當備用；當地下班時 1959 放最大
+function agencyCallHTML(city){
+  const a=AGENCY[city];const big1959=`<a class="btn lg block q-call" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a>`;
+  const foot=`<p class="small muted" style="margin:6px 2px 10px">接不通或夜間沒人接，改撥 <a href="tel:1999"><b>1999</b></a> 市民專線；動物擋在車道、危及交通時撥 <a href="tel:110"><b>110</b></a>。</p>`;
+  if(!a)return big1959+`<p class="small muted" style="margin:6px 2px 0">1959 會自動轉到你所在縣市的動保單位。</p>`+foot;
+  const open=a.t.filter(e=>agOpen(e.h)),rest=a.t.filter(e=>!open.includes(e));
+  const line=e=>`<a href="${agTel(e)}"><b>${esc(agNum(e))}</b></a>${e.l||e.h?'（'+[e.l,agHours(e.h)].filter(Boolean).join('，')+'）':''}`;
+  if(open.length){const p=open[0];
+    return `<a class="btn lg block q-call" href="${agTel(p)}">${ic("phone")}<span>直撥${esc(a.n)}<small>${esc(agNum(p))}${p.h?'<br>'+agHours(p.h):''}</small></span></a>
+      <a class="btn block ghost q-call2" href="tel:1959">${ic("phone")} 打不通改撥 1959 動保專線</a>
+      ${open.length>1||rest.length?`<p class="small muted" style="margin:6px 2px 0">其他號碼：${[...open.slice(1),...rest].map(line).join('、')}</p>`:''}`+foot}
+  return big1959+`<p class="small muted" style="margin:6px 2px 0">${esc(a.n)}現在不是上班時間，請先撥 1959。上班時間可直撥 ${rest.map(line).join('、')}。</p>`+foot;
+}
 function emergencyHTML(){
   return `<div class="er">
     <div class="er-head">${ic("aid")} 先做這幾件事</div>
@@ -3025,7 +3069,7 @@ function emergencyHTML(){
       <li><b>送到動物醫院</b><span>能安全移動的話，先打電話確認醫院有沒有開、能不能收，再就近送醫，並請醫院掃晶片。</span>
         <div class="er-call"><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/24%E5%B0%8F%E6%99%82%E5%8B%95%E7%89%A9%E9%86%AB%E9%99%A2">${ic("map")} 找附近 24 小時動物醫院</a></div></li>
     </ol>
-    <p class="small er-foot">各縣市動物保護單位電話：<a target="_blank" rel="noopener" href="https://www.moa.gov.tw/ws.php?id=20036">農業部「各縣市動物保護申訴電話」</a>。本站不是救援單位，無法派人到現場。</p>
+    <p class="small er-foot">各縣市動保單位直撥電話：<a href="#/resources">資源頁選縣市查詢</a>；用上面的「一鍵通報」會自動顯示你所在縣市的電話。本站不是救援單位，無法派人到現場。</p>
   </div>`;
 }
 
@@ -3093,8 +3137,7 @@ async function quickReport(){
       const mapUrl=`https://www.google.com/maps?q=${lat},${lng}`;
       const kv=[['地點',g.address+(($('#qPlace').value.trim()&&!g.address.includes($('#qPlace').value.trim()))?'（'+$('#qPlace').value.trim()+'）':'')],['狀況',(q.injury||'受傷')+'，'+(where==='taken'?'我已經帶走／送醫':'牠還在原地')],['動物',sp(species).name],['座標',lat.toFixed(5)+', '+lng.toFixed(5)]];
       box.innerHTML=`<div class="q-done"><b>${ic("aid")} 通報已記錄，現在請打電話</b><span>本站無法派人到現場，要請當地動保單位來救援。</span></div>
-        <a class="btn lg block q-call" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a>
-        <p class="small muted" style="margin:6px 2px 10px">1959 會轉到當地動保單位。接不通或夜間沒人接，改撥 <a href="tel:1999"><b>1999</b></a> 市民專線，或 <a href="tel:110"><b>110</b></a>（動物擋在車道、危及交通時）。</p>
+        ${agencyCallHTML(qCity)}
         <div class="q-script"><b>電話裡被問到時，照著唸：</b><dl>${kv.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
           <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報內容</button><a class="btn sm line" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(script)}">用 LINE 傳給動保／朋友</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} Google 地圖</a></div>
           <textarea id="qScript" readonly hidden>${esc(script)}</textarea></div>
@@ -3106,7 +3149,7 @@ async function quickReport(){
       // 網站沒送出也要能馬上打電話求救：顯示撥號按鈕與通報稿（沒有網址）
       if(!$('#qFail')){const sc=callScript({...q,address:g.address,where,place_text:$('#qPlace').value.trim(),url:''});
         box.insertAdjacentHTML('afterbegin',`<div id="qFail" class="notice red" style="margin-bottom:10px"><b>網站暫時沒送出，先打電話救援</b>可以等一下再按「再送一次」。</div>
-        <div class="er-call" style="margin:0 0 10px"><a class="btn lg" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a><a class="btn lg ghost" href="tel:1999">${ic("phone")} 接不通改撥 1999</a></div>
+        ${agencyCallHTML(qCity)}
         <label class="f"><span>電話通報稿</span><textarea readonly style="min-height:150px">${esc(sc)}</textarea></label>`)}}
   };
 }
@@ -4897,11 +4940,11 @@ function renderResources(){
   <div class="res-grid">
     <div class="res"><b>農業部 寵物登記管理資訊網</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報</a>（有晶片一定要做）</li><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/">晶片查詢 / 遺失啟事</a></li></ul></div>
     <div class="res"><b>全國動物收容管理系統</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">查看各收容所收容公告</a></li><li>本站每日自動比對來源</li></ul></div>
-    <div class="res"><b>各縣市動保處</b><ul><li>市話 1999 轉動保處（多數縣市）</li><li>或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" aria-label="選擇縣市" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
+    <div class="res"><b>各縣市動保處</b><ul><li>受傷動物先撥 1959 動保專線，或選縣市看直撥電話</li><li>也可以打 1999 轉動保處，或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" aria-label="選擇縣市" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
     <div class="res"><b>民間協尋平台（多貼一處多一分機會）</b><ul><li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li><li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li><li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li><li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li><li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各縣市 FB 協尋社團清單</a></li></ul></div>
   </div>
   <h2>找回統計</h2><div class="card" id="foundStats"><p class="muted">載入中…</p></div>`;
-  $('#selCity').onchange=()=>{const c=$('#selCity').value;$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
+  $('#selCity').onchange=()=>{const c=$('#selCity').value;$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?(AGENCY[c]?`<p class="small" style="margin:0 0 8px"><b>${esc(AGENCY[c].n)}</b>：${AGENCY[c].t.map(e=>`<a href="${agTel(e)}">${esc(agNum(e))}</a>${e.h?'（'+agHours(e.h)+'）':''}`).join('、')}</p>`:'')+`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
   sb.from('found_stats').select('*').then(({data})=>{const el=$('#foundStats');if(!el)return;if(!data||!data.length){el.innerHTML='<p class="muted">等第一批案件結案後，這裡會顯示「哪種方法最常找回」。</p>';return}const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:#eee;border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red-fill);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
 }
 function renderAbout(){
