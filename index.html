@@ -128,7 +128,7 @@ header{position:sticky;top:0;z-index:50;background:var(--paper);background:color
 
 /* ---------- 按鈕 ---------- */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;cursor:pointer;border-radius:var(--r-pill);padding:11px 18px;font-size:15px;font-weight:700;line-height:1.2;background:var(--red-fill);color:#fff;transition:transform .08s ease,background .15s;white-space:nowrap;text-decoration:none}
-.btn:hover{background:var(--red-ink);text-decoration:none}
+.btn:hover{text-decoration:none}@media (hover:hover){.btn:hover{background:var(--red-ink)}}
 .btn:active{transform:translateY(1px)}
 .btn.sm{padding:8px 13px;font-size:14.5px}
 .btn.lg{padding:15px 24px;font-size:17px}
@@ -587,7 +587,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 @media(max-width:760px){
   :root{--tabbar-h:64px}
   .hero .rule{font-size:clamp(27px,8vw,40px)}
-  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--sheet);background:color-mix(in srgb,var(--sheet) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));height:calc(var(--tabbar-h) + env(safe-area-inset-bottom))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--sheet);background:color-mix(in srgb,var(--sheet) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));height:calc(var(--tabbar-h) + env(safe-area-inset-bottom))}
   .tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:600;color:var(--ink-3);border-radius:10px}
   .tabbar a:hover{text-decoration:none}
   .tabbar a .i{line-height:1}
@@ -871,7 +871,7 @@ body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
 
 /* v3.18.3 底部選單：4 個，兩個主要動作用紅、綠圓角底，不再浮起來 */
 @media (max-width:760px){
-  .tabbar{grid-template-columns:repeat(4,1fr)!important}
+  .tabbar{grid-template-columns:repeat(4,minmax(0,1fr))!important}
   .tabbar a.cta .i,.tabbar a.cta2 .i{width:52px!important;height:30px!important;border-radius:99px!important;margin-top:0!important;box-shadow:none!important}
   .tabbar a.cta2 .i{background:var(--green-fill)!important}
   .tabbar a.cta .i svg,.tabbar a.cta2 .i svg{width:18px!important;height:18px!important}
@@ -1224,7 +1224,7 @@ body{touch-action:manipulation}
 
 /* ===== v4.2 App 導覽：固定 5 個分頁＋中間新增鈕、底部滑出選單 ===== */
 @media (max-width:760px){
-  .tabbar{grid-template-columns:repeat(5,1fr)!important}
+  .tabbar{grid-template-columns:repeat(5,minmax(0,1fr))!important}
   .tabbar a.cta .i{width:54px!important;height:54px!important;border-radius:50%!important;margin-top:-26px!important;background:var(--red-fill)!important;box-shadow:0 8px 18px -6px rgba(184,53,99,.6),0 0 0 5px var(--sheet)!important}
   .tabbar a.cta .i svg{width:26px!important;height:26px!important}
   .tabbar a.cta{color:var(--ink-3)!important;font-weight:600!important}
@@ -1294,6 +1294,25 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .hd-av{display:none}
 .profile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--sheet);border-radius:24px;padding:16px;box-shadow:var(--lift)}
 .pf-av{flex:none;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#FFC6D3,#D9D2FF);color:#4A3442;font:800 26px var(--head)}
+/* 深色模式：滑鼠移上去的按鈕用深一點的紅，白字才看得清楚 */
+@media (hover:hover){:root[data-theme="dark"] .btn:not(.ghost):not(.green):not(.line):not(.fb):not(.call):hover{background:#9E2752}}
+@media (hover:hover) and (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn:not(.ghost):not(.green):not(.line):not(.fb):not(.call):hover{background:#9E2752}}
+/* 字放大 200%（畫面約 200px 寬）時：按鈕和標籤可以換行、卡片改一欄 */
+@media (max-width:300px){
+  .btn,.tag{white-space:normal}.acts,.calbtns,.chips{flex-wrap:wrap}
+  .grid{grid-template-columns:1fr!important}.tiles{grid-template-columns:1fr}
+  .mp-h,.wprog{flex-wrap:wrap}.wprog span{white-space:nowrap}
+  .pf-t h1,#mTitle{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .q-done,.q-script,.q-wait-tips{padding-left:10px;padding-right:10px}
+  .tabbar a,.tabbar button{font-size:clamp(10px,3.2vw,12px)}
+}
+@media (max-width:360px){.tabs button{padding:9px 6px;font-size:14px}}
+@media (max-height:480px){.wnext{min-height:44px;font-size:16px}}
+/* 手機橫放：上方的「找毛孩／健康手冊」切換列先藏起來，讓出畫面 */
+@media (max-height:500px) and (min-width:761px){header .space{display:none}}
+/* iPad 直向：導覽列只留主要的，logo 不換行 */
+.logo,#siteName,.nav .btn.sm{white-space:nowrap}
+@media (min-width:761px) and (max-width:1000px){.nav a[href="#/learn"].link,.nav a[href="#/resources"].link{display:none}.nav a.link{min-height:40px;display:inline-flex;align-items:center}}
 .pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:760px){
   .hd-av{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--sheet);color:var(--ink-2);box-shadow:var(--lift);margin-left:auto}
@@ -1455,7 +1474,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.0.8';
+const BUILD = 'v5.0.9';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -3096,7 +3115,7 @@ function agencyCallHTML(city){
   const open=a.t.filter(e=>agOpen(e.h)),rest=a.t.filter(e=>!open.includes(e));
   const line=e=>`<a href="${agTel(e)}"><b>${esc(agNum(e))}</b></a>${e.l||e.h?'（'+[e.l,agHours(e.h)].filter(Boolean).join('，')+'）':''}`;
   if(open.length){const p=open[0];
-    return `<a class="btn lg block q-call" href="${agTel(p)}">${ic("phone")}<span>直撥${esc(a.n)}<small>${esc(agNum(p))}${p.h?'<br>'+agHours(p.h):''}</small></span></a>
+    return `<a class="btn lg block q-call" href="${agTel(p)}">${ic("phone")}<span>直撥${esc(a.n)}<small><span style="white-space:nowrap">${esc(agNum(p))}</span>${p.h?'<br>'+agHours(p.h):''}</small></span></a>
       <a class="btn block ghost q-call2" href="tel:1959">${ic("phone")} 打不通改撥 1959 動保專線</a>
       ${open.length>1||rest.length?`<p class="small muted" style="margin:6px 2px 0">其他號碼：${[...open.slice(1),...rest].map(line).join('、')}</p>`:''}`+foot}
   return big1959+`<p class="small muted" style="margin:6px 2px 0">${esc(a.n)}現在不是上班時間，請先撥 1959。上班時間可直撥 ${rest.map(line).join('、')}。</p>`+foot;
