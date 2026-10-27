@@ -1474,7 +1474,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.1.0';
+const BUILD = 'v5.1.1';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1953,7 +1953,7 @@ function route(){
   if(path==='#/new')return renderNew();
   if((m=path.match(/^#\/case\/([0-9a-f-]{36})$/)))return renderCase(m[1]);
   if((m=path.match(/^#\/report\/([0-9a-f-]{36})$/)))return renderReport(m[1]);
-  if((m=path.match(/^#\/manage\/([0-9a-f-]{36})$/)))return renderManage(m[1],qs(h).t);
+  if((m=path.match(/^#\/manage\/([0-9a-f-]{36})$/)))return renderManage(m[1],qs(h).t,qs(h).m);
   if((m=path.match(/^#\/poster\/([0-9a-f-]{36})$/)))return renderPoster(m[1]);
   if(path==='#/found/new')return renderFoundNew();
   if(path==='#/injured')return renderInjured();
@@ -2967,9 +2967,12 @@ async function renderReport(id){const _n=navId;
 /* ============================================================
    飼主管理
    ============================================================ */
-async function renderManage(id,token){const _n=navId;setTitle('管理我的案件');
+async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的案件');
   let saved=null;try{saved=localStorage.getItem('wh_token_'+id)}catch(_){}
   if(!token)token=saved;
+  // 從通知信點進來（信件專用鑰匙，30 天有效）：這支手機沒存過管理代碼才用它，而且不存起來
+  if(!mkey)try{mkey=sessionStorage.getItem('wh_mkey_'+id)}catch(_){}   // 網址拿掉後，同一次瀏覽還能繼續用
+  let mailOnly=false;if(!token&&mkey&&/^[0-9a-f]{48}$/.test(mkey)){token=mkey;mailOnly=true;try{sessionStorage.setItem('wh_mkey_'+id,mkey)}catch(_){}}
   if(!token&&!me()){(_n===navId?app:_void).innerHTML=entryHTML('case',id);bindEntry('case',id);return}
   token=token||null;
   (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>驗證中…</div>';
@@ -2983,13 +2986,13 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
   ]);
   if(isFetchErr(error)){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(error||!c){(_n===navId?app:_void).innerHTML=`<div class="notice red" style="margin-bottom:12px"><b>${token?'這個管理網址不正確':'這不是你登記的案件'}</b>請確認是不是貼了完整的網址，或換成 LINE 裡那則訊息的網址。</div>`+entryHTML('case',id);bindEntry('case',id);return}
-  if(token)try{localStorage.setItem('wh_token_'+id,token)}catch(_){}
+  if(token&&!mailOnly)try{localStorage.setItem('wh_token_'+id,token)}catch(_){}
   if(_n!==navId)return;
   // 管理代碼從網址列拿掉（避免截圖、複製網址時外流）；這支手機已經記住了
-  if(/[?&]t=/.test(location.hash))try{const h='#/manage/'+id;history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h);if(typeof curHash!=='undefined')curHash=h}catch(_){}
+  if(/[?&][tm]=/.test(location.hash))try{const h='#/manage/'+id;history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h);if(typeof curHash!=='undefined')curHash=h}catch(_){}
   setTitle(`管理 ${c.name||''}`);
   const pending=(Array.isArray(ss)?ss:[]).filter(s=>s.status==='pending');
-  (_n===navId?app:_void).innerHTML=`<h1>管理：${esc(c.name)}</h1>${c.hidden?'<div class="notice red"><b>這個案件目前沒有公開</b>可能是系統偵測到可疑字眼（例如匯款、訂金），或被檢舉後由站方隱藏。站方確認後會恢復；如有疑問請寫信到 service@wangmiaotw.com。</div>':''}
+  (_n===navId?app:_void).innerHTML=`<h1>管理：${esc(c.name)}</h1>${mailOnly?`<div class="notice"><b>你是從通知信點進來的</b>信裡的按鈕 30 天內都能直接進來管理。想長期管理：${me()?'按下面的「綁定到我的帳號」':'登入會員後按「綁定到我的帳號」'}，或用登記時收到的管理網址。</div>`:''}${c.hidden?'<div class="notice red"><b>這個案件目前沒有公開</b>可能是系統偵測到可疑字眼（例如匯款、訂金），或被檢舉後由站方隱藏。站方確認後會恢復；如有疑問請寫信到 service@wangmiaotw.com。</div>':''}
   <p class="muted small" style="margin-bottom:6px">管理連結請勿公開。</p><div class="row-btns" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><a class="btn sm" href="#/poster/${id}">${ic("image")} 產生海報</a><a class="btn sm ghost" href="#/case/${id}">查看公開頁</a></div>
   ${c.is_mine?'<p class="small"><span class="tag green">✓ 已綁定你的帳號</span></p>':c.owner_id?'':me()&&token?'<div class="notice green"><b>把這個案件綁定到你的帳號？</b>綁定後換手機也能管理，不怕管理網址弄丟。<div style="margin-top:8px"><button class="btn sm green" id="btnClaim">綁定到我的帳號</button></div></div>':!me()?'<p class="small muted"><a href="#/login">登入</a>後可把案件綁定帳號，不怕管理網址弄丟。</p>':''}
   ${pending.length?`<div class="notice" id="pendNotice"><b>有 <span id="pendN">${pending.length}</span> 筆目擊待你確認</b>確認後才會顯示在公開地圖上；明顯不是牠的請按「退回」。</div>`:''}

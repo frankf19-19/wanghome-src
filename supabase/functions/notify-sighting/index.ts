@@ -1,4 +1,4 @@
-// 汪喵回家 — 飼主 Email 通知 v1.8（用 Resend 從 noreply@wangmiaotw.com 寄出）
+// 汪喵回家 — 飼主 Email 通知 v1.9（用 Resend 從 noreply@wangmiaotw.com 寄出）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-sighting
 //   1. {"case_id":"<uuid>"}                                   網友送出目擊後由網頁呼叫：寄目擊通知給飼主
 //   2. {"case_id":"<uuid>","action":"verify","token":"<管理代碼>"}  寄「確認信箱」信給飼主（登記後、改 Email 後、按重寄）
@@ -7,6 +7,7 @@
 //       v1.6：每個網路位址每小時有上限；每日寄信額度分類（確認信 ≤15、目擊 ≤45）；只有「協尋中」的案件才寄目擊通知；同一案件一天最多 20 封。
 //       v1.7：每個網路位址另有每天上限（目擊通知 15、確認信 6）；IPv6 位址分組修正。
 //       v1.8：目擊通知改成有版面的信：照片直接顯示、地圖與管理頁用大按鈕。
+//       v1.9：信裡的管理按鈕附 30 天有效的信件專用鑰匙，點了直接進管理頁。
 // 需關閉 JWT 驗證（訪客也能回報）。
 // Secrets（Supabase → Edge Functions → Secrets）：RESEND_API_KEY（建議）；或舊方式 GMAIL_USER、GMAIL_APP_PASSWORD
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -207,6 +208,10 @@ Deno.serve(async (req) => {
     return json({ sent: false, reason: "throttled" });
   }
 
+  // 信件專用管理鑰匙（30 天有效）：點信裡的按鈕就能直接管理，不用另外找管理網址
+  let mk = "";
+  try { const { data } = await sb.rpc("issue_mail_key", { p_case: caseId }); if (typeof data === "string" && /^[0-9a-f]{48}$/.test(data)) mk = data; } catch (_) { /* 沒有鑰匙就用一般連結 */ }
+  const manageUrl = `${SITE}#/manage/${caseId}${mk ? "?m=" + mk : ""}`;
   const lines = [`你的毛孩「${c.name}」剛剛有 ${ss.length} 筆新的目擊回報：`, ""];
   for (const s of ss) {
     lines.push(`・${fmt(s.seen_at)}  ${s.place_text || "（見地圖）"}  ${s.direction ? "往" + s.direction : ""}`);
@@ -217,8 +222,8 @@ Deno.serve(async (req) => {
     lines.push("");
   }
   lines.push("以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。",
-    "確認後才會顯示在公開地圖上，請到管理頁處理（需要你的管理網址）：",
-    `${SITE}#/manage/${caseId}`, "", "看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。", "", `— ${SITE_NAME}`);
+    "確認後才會顯示在公開地圖上，點下面的網址就能直接到管理頁處理（30 天內有效，請勿轉傳）：",
+    manageUrl, "", "看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。", "", `— ${SITE_NAME}`);
 
   // 信件版面（HTML）：照片直接顯示在信裡、地圖和管理頁用大按鈕；網友填的文字一律跳脫
   const okPhoto = (u: string) => typeof u === "string" && u.startsWith(Deno.env.get("SUPABASE_URL") + "/storage/v1/object/public/photos/");
@@ -245,8 +250,8 @@ ${map ? btn(map, "📍 在 Google 地圖看位置", "#ffffff", "#CC3F1E", "#CC3F
 <tr><td style="padding:22px 24px 4px"><p style="margin:0;font-size:22px;font-weight:900">有人看到${escH(c.name)}了！</p>
 <p style="margin:6px 0 0;font-size:16px;color:#36454B">剛剛有 ${ss.length} 筆新的目擊回報：</p></td></tr>
 ${items}
-<tr><td style="padding:14px 24px 6px">${btn(`${SITE}#/manage/${caseId}`, "到管理頁確認這筆目擊", "#CC3F1E")}
-<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上（需要你的管理網址，或用登記時的帳號登入）。</p></td></tr>
+<tr><td style="padding:14px 24px 6px">${btn(manageUrl, "到管理頁確認這筆目擊", "#CC3F1E")}
+<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上。這個按鈕 30 天內都能直接進入管理，<b>請勿轉寄這封信</b>。</p></td></tr>
 <tr><td style="padding:12px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
 以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。<br>看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。<br>${SITE_NAME}｜全台走失毛孩協尋平台　<a href="${SITE}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
 </table></td></tr></table></body></html>`;

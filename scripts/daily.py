@@ -333,6 +333,17 @@ def mark_notified(table, ids):
                 if attempt == 2: print(f"標記已通知失敗（{table}，{len(part)} 筆），下一輪可能重寄：", type(e).__name__)
                 else: time.sleep(3)
 
+_MK = {}
+def manage_url(cid):
+    """管理頁網址，附信件專用鑰匙（30 天有效）；拿不到鑰匙就用一般網址。同一輪同一案件只產生一把。"""
+    if cid not in _MK:
+        try:
+            k = sb("POST", "rpc/issue_mail_key", body={"p_case": cid})
+            _MK[cid] = k if isinstance(k, str) and re.fullmatch(r"[0-9a-f]{48}", k) else ""
+        except Exception as e:
+            print("產生信件鑰匙失敗（改用一般網址）：", type(e).__name__); _MK[cid] = ""
+    return f"{SITE_URL}#/manage/{cid}" + (f"?m={_MK[cid]}" if _MK[cid] else "")
+
 def sighting_html(c, cid, lst):
     """目擊通知的信件版面：照片直接顯示、地圖與管理頁用大按鈕；網友填的文字一律跳脫。"""
     E = lambda x: _html.escape(str(x or ""), quote=True)
@@ -360,8 +371,8 @@ def sighting_html(c, cid, lst):
 <tr><td style="padding:22px 24px 4px"><p style="margin:0;font-size:22px;font-weight:900">有人看到{E(c.get('name'))}了！</p>
 <p style="margin:6px 0 0;font-size:16px;color:#36454B">有 {len(lst)} 筆新的目擊回報：</p></td></tr>
 {sep.join(items)}
-<tr><td style="padding:14px 24px 6px">{btn(f"{SITE_URL}#/manage/{cid}", "到管理頁確認這筆目擊", "#CC3F1E")}
-<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上（需要你的管理網址，或用登記時的帳號登入）。</p></td></tr>
+<tr><td style="padding:14px 24px 6px">{btn(manage_url(cid), "到管理頁確認這筆目擊", "#CC3F1E")}
+<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上。這個按鈕 30 天內都能直接進入管理，<b>請勿轉寄這封信</b>。</p></td></tr>
 <tr><td style="padding:12px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
 以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。<br>看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。<br>{SITE_NAME}｜全台走失毛孩協尋平台　<a href="{SITE_URL}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
 </table></td></tr></table></body></html>"""
@@ -393,7 +404,7 @@ def run_notifications():
             if s.get("lat"): lines.append(f"  地圖 https://www.google.com/maps?q={s['lat']},{s['lng']}")
             if s.get("reporter_contact"): lines.append(f"  回報者聯絡：{s['reporter_contact']}")
             lines.append("")
-        lines += ["請到管理頁確認後才會顯示在公開地圖：", f"{SITE_URL}#/manage/{cid}", "（需要你的管理網址）", "", f"— {SITE_NAME}"]
+        lines += ["請到管理頁確認後才會顯示在公開地圖（30 天內點這個網址就能直接管理，請勿轉傳）：", manage_url(cid), "", f"— {SITE_NAME}"]
         try:
             if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines), html=sighting_html(c, cid, lst)): continue
             print(f"已通知目擊：{c['name']} x{len(lst)}")
