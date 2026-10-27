@@ -1508,7 +1508,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.1.9';
+const BUILD = 'v5.2.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2217,7 +2217,6 @@ ${bigStartHTML()}
   <p class="muted small" id="nearInfo" style="margin:6px 2px 0">${homeState.near?'依離你的距離排序（不會儲存你的位置）':''}</p>
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
   </div>
-  <div id="recentWrap" class="hidden"><h2>${ic("eye")} 最新目擊</h2><div class="recent" id="recent"></div></div>
   <div id="homeWrap" class="hidden"><h2>${ic("paw")} 最近回家的毛孩</h2><div class="reunite" id="reunite"></div></div>
   <a class="crosslink" href="#/adopt"><span class="cl-ic">${ic("shelter")}</span><span><b>想領養毛孩？</b>全台公立收容所有上千隻狗狗、貓咪在等一個家。依縣市看照片，一鍵打電話給收容所</span><em>看等待領養的毛孩</em></a>
   <a class="crosslink m-hide" href="#/health"><span class="cl-ic">${ic("steth")}</span><span><b>想記錄自家毛孩的健康？</b>回診、疫苗、驅蟲到期自動提醒，同步手機日曆。到「健康手冊」免費使用</span><em>前往健康手冊</em></a>
@@ -2238,7 +2237,7 @@ ${bigStartHTML()}
   if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   // 手機首頁看不到完整名單（在「協尋」分頁），不用先下載；電腦版和協尋分頁才載入
-  loadStats();loadRecent();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO)loadLostPrev(_n);
+  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO)loadLostPrev(_n);
 }
 function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" aria-labelledby="promoT">
   <div class="promo-txt">
