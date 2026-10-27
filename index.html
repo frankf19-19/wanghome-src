@@ -1474,7 +1474,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.0.9';
+const BUILD = 'v5.1.0';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1597,8 +1597,12 @@ const app = $('#app');let navId=0;const _void=document.createElement('div');
 let sb = null;
 function safeU(u){u=String(u??'');return /^https:\/\/[^\s'"()\\<>]+$/.test(u)?u:''}
 function esc(s){return String(s??'').replace(/[\u202A-\u202E\u2066-\u2069]/g,'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function friendlyErr(m){m=String(m??'');if(/cases_email_ok/.test(m))return 'Email 格式不對，請檢查一下（例如 name@gmail.com）';if(/row-level security/i.test(m)&&/storage|object/i.test(m))return '照片上傳太頻繁，請過一會兒再試';if(/violates check constraint/i.test(m))return m.replace(/new row[\s\S]*|[^：:]*violates check constraint[\s\S]*/i,'')+'有欄位內容太長或格式不對，請檢查後再送出';if(/value too long/i.test(m))return '有欄位內容太長，請縮短後再送出';if(/violates (not-null|foreign key)/i.test(m))return '資料不完整，請重新整理後再試';if(/duplicate key/i.test(m))return '這筆資料已經存在';if(/Failed to fetch|NetworkError|Load failed/i.test(m))return m.replace(/(Failed to fetch|NetworkError[^ ]*|Load failed).*/,'')+'網路連線不穩，請確認網路後再試一次';if(/JWT|jwt expired|invalid claim/i.test(m))return '登入已過期，請重新登入';if(/row-level security/i.test(m))return '沒有權限進行這個操作（可能需要重新登入）';return m}
-function toast(m,ms=2600){m=friendlyErr(m);if(/已儲存/.test(m)&&!/失敗/.test(m))__dirty=false;const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
+function friendlyErr(m){m=String(m??'');if(/cases_email_ok/.test(m))return 'Email 格式不對，請檢查一下（例如 name@gmail.com）';if(/row-level security/i.test(m)&&/storage|object/i.test(m))return '照片上傳太頻繁，請過一會兒再試';if(/violates check constraint/i.test(m))return m.replace(/new row[\s\S]*|[^：:]*violates check constraint[\s\S]*/i,'')+'有欄位內容太長或格式不對，請檢查後再送出';if(/value too long/i.test(m))return '有欄位內容太長，請縮短後再送出';if(/violates (not-null|foreign key)/i.test(m))return '資料不完整，請重新整理後再試';if(/duplicate key/i.test(m))return '這筆資料已經存在';if(/Failed to fetch|NetworkError|Load failed/i.test(m))return m.replace(/(TypeError|Error):\s*/g,'').replace(/[（(]?\s*(Failed to fetch|NetworkError[^ ]*|Load failed).*/,'')+(/網路/.test(m)?'':'網路連線不穩，請確認網路後再試一次');if(/JWT|jwt expired|invalid claim/i.test(m))return '登入已過期，請重新登入';if(/row-level security/i.test(m))return '沒有權限進行這個操作（可能需要重新登入）';
+  if(/照片上傳逾時/.test(m))return m.replace(/(TypeError|Error):\s*/g,'');
+  if(/等太久|逾時|timed? ?out|AbortError|aborted/i.test(m)){const pre=(m.match(/^([^：:\s]{1,8}失敗)[：:]/)||[])[1];return (pre?pre+'：':'')+'等太久沒有回應，網路可能不穩，請再試一次'}
+  if(/Internal Server Error|Service Unavailable|Bad Gateway|Gateway Time|upstream connect|\b(HTTP|status|code)\s*50[0-4]\b/i.test(m)){const pre=(m.match(/^([^：:\s]{1,8}失敗)[：:]/)||[])[1];return (pre?pre+'：':'')+'伺服器暫時忙碌，請稍後再試一次'}
+  return m.replace(/^(TypeError|Error):\s*/,'').replace(/(送出失敗|儲存失敗)：(TypeError|Error):\s*/,'$1：')}
+function toast(m,ms=2600){m=friendlyErr(m);if(ms===2600&&/失敗|不穩|忙碌|逾時|錯誤|過期|沒有權限|太久/.test(m))ms=5500;if(/已儲存/.test(m)&&!/失敗/.test(m))__dirty=false;const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
 // 日期一律用台灣時間（UTC+8）顯示；不是今年的加上年份
 function tw(s){const d=new Date(new Date(s).getTime()+8*3600e3);return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate(),h:d.getUTCHours(),mi:d.getUTCMinutes()}}
 function fmtDT(s){if(!s)return '';const t=tw(s),now=tw(Date.now());return `${t.y!==now.y?t.y+'/':''}${t.m}/${t.d} ${String(t.h).padStart(2,'0')}:${String(t.mi).padStart(2,'0')}`}
@@ -1614,6 +1618,9 @@ function nowLocalInput(d=new Date()){const p=n=>String(n).padStart(2,'0');return
 function simLabel(n){n=+n||0;return n>=80?'很像':n>=60?'有點像':'可能相關'}
 // 電話格式：至少 8 碼（可含空白、-、括號、#分機、全形數字）。用 String.raw 才不會在網頁樣板裡吃掉反斜線
 const PHONE_PAT=String.raw`[0-9０-９+＋\-－\s\(\)#＃]{8,30}`;
+// 今天的給藥紀錄沒讀到：不能讓人以為還沒餵（可能重複給藥），先停用勾選並提醒
+function medLogFail(n){setTimeout(()=>{if(n!==navId)return;const bs=[...document.querySelectorAll('#app [data-medlog]')];if(!bs.length)return;bs.forEach(b=>{b.disabled=true;b.title='給藥紀錄沒有載入'});
+  const first=bs[0].closest('.card')||bs[0].parentElement;if(first&&!document.getElementById('medLogErr'))first.insertAdjacentHTML('beforebegin','<div class="notice red" id="medLogErr"><b>今天的給藥紀錄沒有載入</b>網路不穩，看不出今天餵過了沒，請重新整理後再勾選，避免重複給藥。 <a href="javascript:location.reload()">重新整理</a></div>')},0)}
 function caseUrl(id){return CONFIG.SITE_URL+'#/case/'+id}
 // 複製：新式 API → 舊式 execCommand → 最後才跳出視窗讓使用者自己複製（LINE／FB 內建瀏覽器常常沒有 clipboard）
 function copyLegacy(t){try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);const ok=document.execCommand('copy');ta.remove();return ok}catch(_){return false}}
@@ -1647,7 +1654,7 @@ async function uploadPhoto_(file,folder){
   const uid=folder==='pets'?me()?.id:null;if(folder==='pets'&&!uid)throw new Error('請先登入');
   const base=`${folder}/${uid?uid+'/':''}${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
   // 網路卡住時 40 秒就放棄，不要讓「送出中…」一直轉
-  const tmo=(pr,ms)=>Promise.race([pr,new Promise((_,no)=>setTimeout(()=>no(new Error('照片上傳逾時，請確認網路後再送出一次（Failed to fetch）')),ms))]);
+  const tmo=(pr,ms)=>Promise.race([pr,new Promise((_,no)=>setTimeout(()=>no(new Error('照片上傳逾時，請確認網路後再送出一次')),ms))]);
   const {error}=await tmo(sb.storage.from('photos').upload(base+'.jpg',blob,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'}),40000);if(error)throw error;
   // 小縮圖（清單用，約 30KB）；失敗不影響主圖
   if(thumb)await tmo(sb.storage.from('photos').upload(base+'_t.jpg',thumb,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'}),20000).catch(()=>{});
@@ -1756,7 +1763,11 @@ async function init(){
    $('#themeBtn').onclick=()=>{let cur='auto';try{cur=localStorage.getItem('wh_theme')||'auto'}catch(_){}const nx=THEMES[(THEMES.findIndex(x=>x[0]===cur)+1)%3][0];try{localStorage.setItem('wh_theme',nx)}catch(_){}applyTheme(nx)}}
   $('#siteName').textContent=CONFIG.SITE_NAME;$('#footName').textContent=CONFIG.SITE_NAME;
   if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_ANON_KEY){return renderSetup()}
-  sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',persistSession:true,detectSessionInUrl:true,autoRefreshToken:true}});
+  // 每個連線都有等待上限：讀資料 20 秒、送出 45 秒、照片 90 秒；逾時就當成失敗，按鈕會恢復、可以重送（不會永遠轉圈）
+  const tfetch=(u,o={})=>{const url=String(u&&u.url||u),m=(o.method||'GET').toUpperCase();const ms=/\/storage\/v1\//.test(url)?90000:m==='GET'||m==='HEAD'?20000:45000;
+    const c=new AbortController();const t=setTimeout(()=>c.abort(new DOMException('等太久沒有回應','TimeoutError')),ms);if(o.signal){if(o.signal.aborted)c.abort(o.signal.reason);else o.signal.addEventListener('abort',()=>c.abort(o.signal.reason),{once:true})}
+    return fetch(u,{...o,signal:c.signal}).catch(e=>{if(c.signal.aborted&&!(o.signal&&o.signal.aborted))throw new TypeError('等太久沒有回應，網路可能不穩，請再試一次');throw e}).finally(()=>clearTimeout(t))};
+  sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',persistSession:true,detectSessionInUrl:true,autoRefreshToken:true},global:{fetch:tfetch}});
   try{await initAuth()}catch(e){console.warn('auth init',e)}
   route();
 }
@@ -2227,7 +2238,7 @@ async function renderHealth(){const _n=navId;
     sb.from('pet_meds').select('*').eq('active',true).order('created_at')
   ]);
   if(pe){if(_n===navId)app.innerHTML=netErrHTML();return}
-  const hMeds=medsA||[];let hLogs=[];if(hMeds.length){const {data}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',hMeds.map(x=>x.id)).gte('given_at',todayStartISO());hLogs=data||[]}
+  const hMeds=medsA||[];let hLogs=[];if(hMeds.length){const {data,error}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',hMeds.map(x=>x.id)).gte('given_at',todayStartISO());hLogs=data||[];if(error)medLogFail(_n)}
   const p=prof||{};const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const ds=dues||[];const overdue=ds.filter(r=>r.next_due<todayStr()).length;const soon=ds.filter(r=>r.next_due>=todayStr()&&r.next_due<=addDays(todayStr(),14)).length;
   if(!(pets||[]).length){(_n===navId?app:_void).innerHTML=`<div class="health-hero art"><img src="duo.svg" alt="" width="220" height="150"><div><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div></div>
@@ -2241,7 +2252,7 @@ async function renderHealth(){const _n=navId;
   ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">新增紀錄時填「下次到期日」（例如疫苗一年後），就會出現在這裡，到期前寄 Email 提醒你。</div>`}
   ${lnSection()}<div id="calSec">${calSection(p)}</div>`;
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:RM()?'auto':'smooth'})},60);
@@ -2339,6 +2350,7 @@ async function loadList(){
     if(/^\d{4}$/.test(kw))ors.push(`chip_last4.eq.${kw}`);
     q=q.or(ors.join(','))}
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
+  if(error&&homeState._more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState._more=false;homeState.limit=Math.max(60,(homeState.limit||120)-60);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
   if(error){el.innerHTML=`<div class="empty">網路好像不太穩，清單沒有載入。<br><button type="button" class="btn" style="margin-top:10px" onclick="loadList()">再試一次</button></div>`;return}
   if(!data.length){
     if(homeState.near){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有協尋中的案件</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}
@@ -2358,6 +2370,7 @@ async function loadFoundList(el){
   q=fIn(q,'city',homeState.city);q=fSp(q);
   if(homeState.near){const {lat,lng}=homeState.near;q=q.gte('lat',lat-.55).lte('lat',lat+.55).gte('lng',lng-.6).lte('lng',lng+.6)}
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
+  if(error&&homeState._more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState._more=false;homeState.limit=Math.max(60,(homeState.limit||120)-60);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
   if(error){el.innerHTML=`<div class="empty">網路好像不太穩，清單沒有載入。<br><button type="button" class="btn" style="margin-top:10px" onclick="loadList()">再試一次</button></div>`;return}
   if(!data.length){if(homeState.near){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有拾獲／目擊通報</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}el.innerHTML=emptyCard('found');return}
   el.innerHTML=sortNear(data,'lat','lng').map(foundCardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
@@ -3046,7 +3059,7 @@ async function renderManage(id,token){const _n=navId;setTitle('管理我的案�
     if(v==='searching'){if($('#foundNote'))$('#foundNote').value='';if($('#foundMethod'))$('#foundMethod').selectedIndex=0}   // 改回協尋中：資料庫也清掉了，畫面一起清
     toast(v==='found'?'🎉 恭喜！已標記為找到。下面可以補寫是怎麼找到的（可以不寫）':'已儲存：'+STATUS[v]);
     if(v==='found')$('#foundBox').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})});
-  $('#btnStatus').onclick=async()=>{const p={status:'found',found_method:$('#foundMethod').value,found_note:$('#foundNote').value};const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('已儲存，謝謝你的分享');setTimeout(()=>goReplace('#/case/'+id),1200)};
+  $('#btnStatus').onclick=async e=>{const bt=e.currentTarget;if(bt.disabled)return;bt.disabled=true;const p={status:'found',found_method:$('#foundMethod').value,found_note:$('#foundNote').value};const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});bt.disabled=false;if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('已儲存，謝謝你的分享');setTimeout(()=>goReplace('#/case/'+id),1200)};
   // 確認／退回目擊：只更新那一筆，不重畫整頁（避免清掉正在編輯的資料）
   const bindOps=root=>root.querySelectorAll('.ops [data-s]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const v=b.dataset.v;const {error}=await sb.rpc('set_sighting_status',{p_case:id,p_sighting:b.dataset.s,p_token:token,p_status:v});if(error){b.disabled=false;return toast(friendlyErr(error.message))}
     toast(v==='confirmed'?'✅ 已確認，會顯示在公開頁':v==='rejected'?'已退回，不會公開':'已改回待確認');const row=b.closest('.tl');if(!row)return;
@@ -3191,12 +3204,13 @@ async function quickReport(){
     // 縣市或鄉鎮改過：用使用者選的重組地址（不沿用定位反查的路名，避免救援跑錯地方）
     const addr=(qCity===g.city&&(qDist||'')===(g.district||''))?g.address:qCity+(qDist||'')+($('#qPlace').value.trim()?'':'（GPS 位置）');
     const btn=$('#qSend');btn.disabled=true;btn.textContent='送出中…';
+    const slowT=setTimeout(()=>{if(btn.isConnected&&btn.disabled)showCall('網路比較慢，還在送出中，先打電話救援','通報送出後，這裡會自動換成完整的通報資訊。')},8000);
     let q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),lat,lng};
     try{
       if(photo&&!upUrl)upUrl=await tryUpload(photo,'found');   // 再送一次時不重複上傳同一張
       const photos=photo&&upUrl?[upUrl]:[];
       q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),city:qCity,district:qDist||null,place_text:$('#qPlace').value.trim()||addr,lat,lng,current_place:where==='taken'?'通報者已帶走／送醫':'通報時仍在原地',photos,phone_public:false};
-      const {data,error}=await sb.rpc('create_found',{p:q});if(error)throw error;
+      const {data,error}=await sb.rpc('create_found',{p:q});if(error)throw error;clearTimeout(slowT);
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
       rememberMine('found',data.id,'受傷的'+sp(species).name);
       const url=`${CONFIG.SITE_URL}#/found/${data.id}`;
@@ -3212,10 +3226,11 @@ async function quickReport(){
         <p class="small"><a href="#/found/${data.id}">查看通報頁</a>（附近的人和飼主看得到這則通報）</p>`;
       $('#qCopy').onclick=()=>copy($('#qScript').value);
       window.scrollTo({top:box.getBoundingClientRect().top+scrollY-(innerWidth>760?(document.querySelector('header')?.offsetHeight||0)+16:20),behavior:RM()?'auto':'smooth'});
-    }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='再送一次';
-      // 網站沒送出也要能馬上打電話求救：顯示撥號按鈕與通報稿（沒有網址）
+    }catch(err){clearTimeout(slowT);toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='再送一次';showCall('網站暫時沒送出，先打電話救援','可以等一下再按「再送一次」。')}
+    // 網站沒送出（或送很久）也要能馬上打電話求救：顯示撥號按鈕與通報稿（沒有網址）
+    function showCall(title,sub){
       {const sc=callScript({...q,address:addr,where,place_text:$('#qPlace').value.trim(),url:''});$('#qFailBox')?.remove();
-        box.insertAdjacentHTML('afterbegin',`<div id="qFailBox"><div id="qFail" class="notice red" style="margin-bottom:10px"><b>網站暫時沒送出，先打電話救援</b>可以等一下再按「再送一次」。</div>
+        box.insertAdjacentHTML('afterbegin',`<div id="qFailBox"><div id="qFail" class="notice red" style="margin-bottom:10px"><b>${title}</b>${sub}</div>
         ${agencyCallHTML(qCity)}
         <label class="f"><span>電話通報稿</span><textarea readonly style="min-height:150px">${esc(sc)}</textarea></label></div>`);
         $('#qFailBox').scrollIntoView({block:'start',behavior:RM()?'auto':'smooth'})}}
@@ -3710,8 +3725,9 @@ const REASON_TEXT=Object.fromEntries(REPORT_REASONS);
 async function renderAdmin(){const _n=navId;
   setTitle('管理後台');
   if(!requireLogin())return;
-  const {data:isA}=await sb.rpc('is_admin');
+  const {data:isA,error:aErr}=await sb.rpc('is_admin');
   if(_n!==navId)return;
+  if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
   const q=qs(location.hash),TABS=[['reports','檢舉'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
@@ -3935,7 +3951,7 @@ async function initAuth(){
   sb.auth.onAuthStateChange((ev,s)=>{
     const was=!!session;session=s;updateAuthUI();
     if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}}
-    if(ev==='SIGNED_OUT'){toast('已登出');if(IS_APP)lnClear()}
+    if(ev==='SIGNED_OUT'){if(window.__userSignOut){window.__userSignOut=false;toast('已登出')}else{setReturn(location.hash||'#/me');toast('登入已過期，請重新登入',6000);setTimeout(()=>{try{route()}catch(_){}},50)}if(IS_APP)lnClear()}   // 不是自己按登出：多半是登入過期
     if(ev==='SIGNED_IN'&&IS_APP)setTimeout(()=>lnSync(),1500);
   });
   updateAuthUI();
@@ -4242,7 +4258,7 @@ async function renderMeBody(){const _n=navId;
   </details>`;
   {const ub=$('#btnUnblockAll');if(ub)ub.onclick=()=>{try{localStorage.removeItem('wh_hidden');localStorage.removeItem('wh_blocked')}catch(_){}toast('已全部恢復顯示');renderMe()}}
   $('#btnOut').onclick=async()=>{const clearMine=confirm('要一併清除這支手機上記住的案件管理連結嗎？\n（共用手機建議清除；自己的手機可以按「取消」保留）');
-    await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|lnids$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}try{lnClear&&lnClear()}catch(_){}goReplace('#/')};
+    window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|lnids$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}try{lnClear&&lnClear()}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
     if(!confirm('確定要永久刪除你的帳號和所有毛孩資料嗎？刪除後無法復原。'))return;
     if(!confirm('最後確認：真的要刪除嗎？'))return;
@@ -4257,7 +4273,7 @@ async function renderMeBody(){const _n=navId;
       try{if(pub.length)await sb.storage.from('photos').remove([...pub,...pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]);if(priv.length)await removeAllFiles('pet-private',priv)}catch(_){}
       // 這支手機上的個人資料清掉；選擇保留案件時，留下管理網址，之後還能標記「找到了」或關閉
       try{Object.keys(localStorage).filter(k=>/^wh_/.test(k)&&k!=='wh_theme'&&(delC||!/^wh_(token|ftoken)_|^wh_mine$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}
-      await sb.auth.signOut().catch(()=>{});toast('帳號已刪除，謝謝你曾經使用汪喵回家',4000);goReplace('#/');
+      window.__userSignOut=true;await sb.auth.signOut().catch(()=>{});toast('帳號已刪除，謝謝你曾經使用汪喵回家',4000);goReplace('#/');
     }catch(err){toast('刪除失敗：'+(err.message||err));b.disabled=false;b.textContent='永久刪除我的帳號'}
   };
   const picker=pickerMap('hmap',p.home_lat?[p.home_lat,p.home_lng]:[23.9,121]);
@@ -4283,7 +4299,7 @@ function petCardHTML(p){
     </div></div>`;
 }
 async function renderPet(id){const _n=navId;
-  if(!requireLogin('建立寵物檔案需要登入'))return;
+  if(!requireLogin(id?'編輯寵物檔案需要登入':'建立寵物檔案需要登入'))return;
   let p={species:'dog',photos:[]};
   if(id!=='new'){const {data,error}=await sb.from('pets').select('*').eq('id',id).maybeSingle();if(error){(_n===navId?app:_void).innerHTML=netErrHTML();return}if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}p=data}
   if(_n!==navId)return;
@@ -4412,7 +4428,7 @@ async function renderPetView(id){const _n=navId;
   if(_n!==navId)return;
   setTitle(p.name);
   const meds=(medsAll||[]).filter(x=>x.active),medsOff=(medsAll||[]).filter(x=>!x.active);
-  let mlogs=[];if(meds.length){const {data}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',meds.map(x=>x.id)).gte('given_at',todayStartISO());mlogs=data||[]}
+  let mlogs=[];if(meds.length){const {data,error}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',meds.map(x=>x.id)).gte('given_at',todayStartISO());mlogs=data||[];if(error)medLogFail(_n)}
   const medToday=meds.map(x=>medTodayHTML(x,mlogs)).filter(Boolean);
   const rs=recs||[];
   const filter=qs(location.hash).k||'';
@@ -4475,7 +4491,7 @@ async function renderPetView(id){const _n=navId;
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);lnSync(true);if(error)return toast(error.message);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
   {const mc=document.querySelector('#app .med-card'),g=document.querySelector('#app .gallery');if(mc&&g){const host=g.closest('.detail-head')||g;host.parentNode.insertBefore(mc,host);mc.style.marginBottom='14px'}}
   bindMedSlots(()=>rerender(()=>renderPetView(id)));
