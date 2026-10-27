@@ -1508,7 +1508,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.2.5';
+const BUILD = 'v5.2.6';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -3929,7 +3929,7 @@ function admRow(t,r){
   const place=t==='case'?[r.lost_city,r.lost_district,r.lost_place]:t==='found'?[r.city,r.district,r.place_text]:[r.place_text];
   const ph=r.photo||r.photo_url;const hidden=t==='sighting'?r.status==='rejected':r.hidden;
   return `<div class="card adm-card">
-    <div class="adm-row">${ph?`<img class="adm-ph" src="${esc(thumbUrl(ph))}" alt="" loading="lazy">`:''}<div class="adm-main">
+    <div class="adm-row">${ph?`<img class="adm-ph" src="${esc(thumbUrl(ph))}" data-full="${esc(safeU(ph))}" onerror="if(this.dataset.full&&this.src!==this.dataset.full){this.src=this.dataset.full;this.dataset.full=''}else{this.style.visibility='hidden'}" alt="" loading="lazy">`:''}<div class="adm-main">
       <div class="adm-h"><b>${esc(title||'(未命名)')}</b><span class="tag ${hidden?'':'green'}">${esc(stt||r.status)}</span>${r.hidden?'<span class="tag">已隱藏</span>':''}${r.open_reports>0?`<span class="tag red">檢舉 ${r.open_reports}</span>`:''}</div>
       <div class="small muted">${fmtDT(r.created_at)} 登記${place.filter(Boolean).length?'　'+esc(place.filter(Boolean).join(' ')):''}${t==='case'?`　瀏覽 ${r.view_count||0}・目擊 ${r.sightings||0}`:''}</div>
       ${t==='sighting'&&r.note?`<div class="small">${esc(r.note)}</div>`:''}
