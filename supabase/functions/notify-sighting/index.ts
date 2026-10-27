@@ -1,10 +1,11 @@
-// 汪喵回家 — 飼主 Email 通知 v1.6（用 Resend 從 noreply@wangmiaotw.com 寄出）
+// 汪喵回家 — 飼主 Email 通知 v1.7（用 Resend 從 noreply@wangmiaotw.com 寄出）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-sighting
 //   1. {"case_id":"<uuid>"}                                   網友送出目擊後由網頁呼叫：寄目擊通知給飼主
 //   2. {"case_id":"<uuid>","action":"verify","token":"<管理代碼>"}  寄「確認信箱」信給飼主（登記後、改 Email 後、按重寄）
 // 安全：飼主的 Email 必須先點確認信才會收到通知（避免有人拿別人的信箱登記來灌信）。
 //       確認信內容固定、不含任何網友填的文字；同一案件 10 分鐘最多 1 封、一天最多 3 封；同一信箱一天最多 3 封；確認信全站每小時 30 封，目擊通知另計 150 封。
 //       v1.6：每個網路位址每小時有上限；每日寄信額度分類（確認信 ≤15、目擊 ≤45）；只有「協尋中」的案件才寄目擊通知；同一案件一天最多 20 封。
+//       v1.7：每個網路位址另有每天上限（目擊通知 15、確認信 6）；IPv6 位址分組修正。
 // 需關閉 JWT 驗證（訪客也能回報）。
 // Secrets（Supabase → Edge Functions → Secrets）：RESEND_API_KEY（建議）；或舊方式 GMAIL_USER、GMAIL_APP_PASSWORD
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -57,6 +58,15 @@ async function sendMail(to: string, subject: string, text: string, html?: string
   finally { try { await client.close(); } catch (_) { /* ignore */ } }
 }
 
+// IPv6 取前 64 位元當一組（同一個家用網路的裝置算同一個人）；正確處理 "::" 縮寫
+function v6net64(ip: string): string {
+  const a = ip.split("%")[0].toLowerCase();
+  const [l, r] = a.includes("::") ? a.split("::") : [a, null];
+  const L = l ? l.split(":") : [], R = r ? r.split(":") : [];
+  const full = r === null ? L : [...L, ...Array(Math.max(0, 8 - L.length - R.length)).fill("0"), ...R];
+  return full.slice(0, 4).map((x) => (parseInt(x || "0", 16) || 0).toString(16)).join(":") + "::/64";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method" }, 405);
@@ -70,12 +80,17 @@ Deno.serve(async (req) => {
   // 每個網路位址每小時的呼叫上限（確認信 10 次、目擊通知 30 次）
   // 只信任 Cloudflare 給的位址（x-forwarded-for 可以被偽造）；IPv6 以 /64 為一組
   let ip = (req.headers.get("cf-connecting-ip") ?? "unknown").trim();
-  if (ip.includes(":")) ip = ip.split(":").slice(0, 4).join(":") + "::/64";
+  if (ip.includes(":")) ip = v6net64(ip);
   const isVerify = body.action === "verify";
   {
-    const { data: rok, error: re } = await sb.rpc("edge_rate_ok", {
-      p_kind: isVerify ? "edge_verify" : "edge_notify", p_ip: ip, p_max: isVerify ? 10 : 30, p_window: "1 hour" });
-    if (re || rok !== true) return json({ sent: false, reason: "throttled" }, 429);
+    // 每小時上限，加上每天上限（避免同一個人慢慢把全站一天的寄信額度用光）
+    const lim: [string, number, string][] = isVerify
+      ? [["edge_verify", 10, "1 hour"], ["edge_verify_d", 6, "1 day"]]
+      : [["edge_notify", 30, "1 hour"], ["edge_notify_d", 15, "1 day"]];
+    for (const [k, n, w] of lim) {
+      const { data: rok, error: re } = await sb.rpc("edge_rate_ok", { p_kind: k, p_ip: ip, p_max: n, p_window: w });
+      if (re || rok !== true) return json({ sent: false, reason: "throttled" }, 429);
+    }
   }
   const { data: c, error: ce } = await sb.from("cases")
     .select("id,name,status,contact_email,hidden,email_verified,email_verify_sent_at,email_verify_hash").eq("id", caseId).maybeSingle();

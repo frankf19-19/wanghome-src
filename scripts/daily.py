@@ -362,7 +362,11 @@ def run_notifications():
             skip_unverified("shelter_matches", lst, key="matched_at"); continue
         lines = [f"系統在收容所資料中找到 {len(lst)} 筆與「{c['name']}」疑似相符的狗狗，請盡快親自確認：", ""]
         for m in lst[:10]:
-            lines.append(f"・{m.get('shelter_name') or '收容所'}  相似 {m['score']}  {m.get('sex') or ''} {m.get('bodytype') or ''} {m.get('colour') or ''}")
+            sim = "很像" if (m.get("score") or 0) >= 80 else "有點像" if (m.get("score") or 0) >= 60 else "可能相關"
+            if m.get("shelter_tel"):   # 系統自己向農業部查到的（可信）
+                lines.append(f"・{m.get('shelter_name') or '收容所'}（{sim}）  {m.get('sex') or ''} {m.get('bodytype') or ''} {m.get('colour') or ''}")
+            else:                      # 網友瀏覽時回報的：信裡不放任何網友可填的文字，避免被拿來夾帶詐騙訊息
+                lines.append(f"・收容所裡一隻疑似的毛孩（{sim}）")
             if m.get("shelter_tel"):
                 lines.append(f"  拾獲地：{m.get('found_place') or '未註明'}  電話：{m['shelter_tel']}")
             else:
@@ -491,7 +495,7 @@ def run_report_alerts():
 # ---------------------------------------------------------------- 清掉沒人用的公開照片
 # 案件／通報被刪除、或編輯時換掉的照片，會留在 storage。每天清一次：
 # 只看 cases/、found/、sightings/ 三個資料夾（寵物照片由會員自己管理），
-# 只刪「沒有任何資料用到」而且「上傳超過 3 天」的檔案（避免刪到正在填表、還沒送出的照片）。
+# 只刪「沒有任何資料用到」而且「上傳超過 12 小時」的檔案（照片是按送出時才上傳，12 小時足夠）。
 PUBLIC_PREFIX = "/storage/v1/object/public/photos/"
 def storage(method, path, body=None):
     url = f"{SUPABASE_URL}/storage/v1/{path}"
@@ -514,8 +518,8 @@ def run_photo_cleanup(dry=False):
     for r in sb_all("sightings", {"select": "id,photo_url"}, cap=10**7, strict=True): add(r.get("photo_url"))
     if not used:
         print("照片清理：找不到任何使用中的照片，為了安全這次不刪"); return
-    cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=3)
-    stale, total = [], 0
+    cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=12)
+    stale, total, in_use_found = [], 0, 0
     for folder in ("cases", "found", "sightings"):
         off = 0
         while True:
@@ -528,11 +532,14 @@ def run_photo_cleanup(dry=False):
                 ts = it.get("created_at") or it.get("updated_at") or ""
                 try: old = dt.datetime.fromisoformat(ts.replace("Z", "+00:00")) < cutoff
                 except Exception: old = False
-                if old and key not in used: stale.append(key)
+                if key in used: in_use_found += 1
+                elif old: stale.append(key)
             if len(items) < 1000: break
             off += 1000
-    if total and len(stale) > total * 0.8 and len(stale) > 20:
-        print(f"照片清理：要刪的比例異常（{len(stale)}/{total}），為了安全這次不刪"); return
+    # 安全檢查：如果 storage 裡一張「使用中」的照片都對不到，可能是程式出錯，這次不刪
+    # （不用「要刪的比例」判斷：有人大量亂傳照片時，比例本來就會很高，反而更需要清）
+    if total > 20 and in_use_found == 0:
+        print(f"照片清理：storage 裡找不到任何使用中的照片（共 {total} 個檔案），為了安全這次不刪"); return
     print(f"照片清理：共 {total} 個檔案，使用中 {len(used)//2}，要刪 {len(stale)}")
     if dry: print("（試跑，不刪除）", stale[:20]); return
     for i in range(0, len(stale), 100):
