@@ -104,7 +104,9 @@ if(h.indexOf('#mig=')===0){
 :root[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.8) contrast(1.05) saturate(.8)}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-bottom:var(--tabbar-h)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom))}
+/* 手機：底部選單、浮動按鈕不要蓋住最後的內容 */
+@media(max-width:760px){body:not(.formpage):not(.bare){padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 24px)}body.has-cta:not(.formpage){padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 96px)}}
 a{color:var(--blue);text-decoration:none}
 a:hover{text-decoration:underline}
 button{font-family:inherit;color:inherit}
@@ -1508,7 +1510,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.2.9';
+const BUILD = 'v5.3.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1741,7 +1743,7 @@ function waitLeaflet(){if(window.__lfail&&!window.L)leafletGaveUp=true;if(window
   if(!document.getElementById('leafletCss')){const c=document.createElement('link');c.id='leafletCss';c.rel='stylesheet';c.href='vendor/leaflet-1.9.4.css';document.head.insertBefore(c,document.head.querySelector('style'))}
   let e=document.getElementById('leafletJs');if(!e){e=document.createElement('script');e.id='leafletJs';e.src='vendor/leaflet-1.9.4.js';e.async=true;e.onerror=()=>{window.__lfail=1};e.addEventListener('load',()=>{leafletGaveUp=false;_lw=null});document.head.appendChild(e)}
   const done=()=>{if(!window.L)leafletGaveUp=true;ok()};if(!e){done();return}e.addEventListener('load',done);e.addEventListener('error',done);setTimeout(done,8000)}))}
-function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);(IS_APP?L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; OpenStreetMap &copy; CARTO'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);return m}
+function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);return m}
 function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
 // 定位或點地圖後：自動帶入縣市、區、地點描述（只填空的或跟位置不一樣的），並請使用者確認
@@ -1974,6 +1976,7 @@ function route(){
   const h=location.hash||'#/';
   const path=h.split('?')[0];
   renderChrome(path,h);
+  document.body.classList.remove('has-cta');
   document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
   app.classList.remove('enter');void app.offsetWidth;app.classList.add('enter');
@@ -2641,6 +2644,7 @@ async function renderCase(id){const _n=navId;
   app.querySelectorAll('.gallery [role=button]').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click()}}));
   // 底部固定的「回報目擊」：頁面上的回報按鈕看得到時先藏起來，捲過去才出現（小螢幕不擋照片）
   {const st=document.querySelector('.sticky-cta'),inPage=[...app.querySelectorAll('a[href="#/report/'+id+'"]')].filter(a=>!a.closest('.sticky-cta'));
+   document.body.classList.toggle('has-cta',!!st);
    const gal=app.querySelector('.gallery');
    if(st&&inPage.length&&'IntersectionObserver' in window){st.classList.add('auto');const vis=new Set();
      const io=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?vis.add(e.target):vis.delete(e.target));st.classList.toggle('show',!vis.size)},{rootMargin:'0px 0px -80px 0px'});
