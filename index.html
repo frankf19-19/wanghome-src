@@ -208,7 +208,7 @@ body[data-space="health"]{background:var(--paper);background:color-mix(in srgb,v
 .pd-av .ico{width:24px;height:24px;color:var(--ink-2)}
 .ownerline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 0}
 .ownerline a,.linkbtn{color:var(--ink-3);font-size:14px}
-.linkbtn{background:none;border:0;padding:0;cursor:pointer;font:inherit;display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.linkbtn{background:none;border:0;padding:0;cursor:pointer;font:inherit;display:inline-flex;align-items:center;gap:4px;font-weight:600}.fm button.linkbtn{color:inherit;font-size:inherit;font-weight:inherit;text-decoration:underline;text-underline-offset:3px}
 .linkbtn:hover{color:var(--ink);text-decoration:underline}
 @keyframes posterIn{from{opacity:0;transform:translateY(-18px) rotate(-3deg)}to{opacity:1;transform:rotate(1.8deg)}}
 @keyframes tapeIn{from{opacity:0;transform:scaleX(.3)}}
@@ -1426,14 +1426,14 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
   </nav>
 </header>
 
-<div class="mbar" id="mbar"><button type="button" class="mb-back" id="mBack" aria-label="回上一頁"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span></button><b id="mTitle"></b><a href="#/" class="mb-home" aria-label="回首頁"><img src="icon.svg" alt="" width="30" height="30"></a></div>
+<div class="mbar" id="mbar" role="navigation" aria-label="頁面導覽"><button type="button" class="mb-back" id="mBack" aria-label="返回"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span></button><b id="mTitle"></b><a href="#/" class="mb-home" aria-label="回首頁"><img src="icon.svg" alt="" width="30" height="30"></a></div>
 <main id="app" tabindex="-1"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></main>
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
   <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/learn">毛孩小學堂</a><a href="#/health" class="tb-dup">毛孩健康手冊</a><a href="#/me" class="tb-dup">我的帳號</a><a href="#/seen" class="tb-dup">看到／撿到</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
   <p class="health-note small">毛孩健康手冊的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷。用藥與治療請依獸醫師指示。</p>
-  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><a href="javascript:void 0" id="themeBtn">🌓 外觀：自動</a><span>© 2026 汪喵回家 版權所有</span><span id="buildV"></span></div>
+  <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><button type="button" class="linkbtn" id="themeBtn">🌓 外觀：自動</button><span>© 2026 汪喵回家 版權所有</span><span id="buildV"></span></div>
 </footer>
 
 <nav class="tabbar" id="tabbar" aria-label="主要導覽"></nav>
@@ -1455,7 +1455,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.0.5';
+const BUILD = 'v5.0.6';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
