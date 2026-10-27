@@ -1444,7 +1444,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v4.9.2';
+const BUILD = 'v4.9.3';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -4585,22 +4585,29 @@ async function renderPoster(id){const _n=navId;
     contactRow(yb+90,190,red,'#333');
     ctx.fillStyle='#8A8A8A';ctx.fillText(fit(FOOT,600,400,24,18),M,H-24)};
 
-  // 粉彩可愛：跟網站同色系，圓形照片
-  const drawPastel=()=>{W=1080;H=1350;cv.width=W;cv.height=H;
-    const P='#B83563',PS='#FFD3DF',BG='#FFF6F8';
-    ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
-    ctx.fillStyle=PS;[[90,90,70],[1000,140,52],[60,700,46],[1020,620,64]].forEach(([x,y,r])=>{ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()});
-    center(`${PT}`,118,W-M*4,900,78,48,P);
-    ctx.fillStyle=P;ctx.beginPath();ctx.arc(W/2,410,246,0,Math.PI*2);ctx.fill();
-    drawPhoto(W/2-230,180,460,460,'circle','#F4D9E2');
-    center(c.name,760,W-M*4,900,92,52,'#4A3442');
-    center(LOC,822,W-M*4,700,38,26,'#715A6A');
-    pill(M*2,858,W-M*4,74,37,P);center(STATUS,908,W-M*6,900,44,30,'#fff');
-    ctx.font=font(700,34);ctx.fillStyle='#4A3442';ctx.textAlign='center';const lk=fit(LOOK+(DETAIL?'｜'+DETAIL:''),W-M*4,700,34,24);ctx.fillText(lk,W/2,980);ctx.textAlign='left';
-    if(REWARD){center(REWARD,1030,W-M*4,900,40,28,'#1F5FBF')}
-    const yb=REWARD?1046:1004;
-    contactRow(yb+10,Math.min(240,H-yb-60),P,'#715A6A');
-    ctx.fillStyle='#B3A0AE';ctx.fillText(fit(FOOT+'　'+WARN,W-M*2-220,400,22,16),M,H-24)};
+  // 醒目黃：像警示牌一樣，遠遠就看得到
+  const drawAlert=()=>{W=1080;H=1350;cv.width=W;cv.height=H;const Y='#FFD400',K='#111';
+    ctx.fillStyle=Y;ctx.fillRect(0,0,W,H);
+    // 上方：大標題
+    ctx.fillStyle=K;ctx.fillRect(0,0,W,150);center(PT,112,W-M*2,900,104,60,Y);
+    // 照片（黑框）
+    ctx.fillStyle=K;ctx.fillRect(M-6,180-6,W-M*2+12,560+12);drawPhoto(M,180,W-M*2,560,0,'#DDD');
+    if(REWARD){ctx.font=font(900,40);const rw=Math.min(600,ctx.measureText(REWARD).width+56);pill(W-M-rw,196,rw,70,8,red);ctx.fillStyle='#fff';ctx.fillText(fit(REWARD,rw-48,900,40,26),W-M-rw+28,244)}
+    // 名字＋狀態
+    ctx.fillStyle=K;ctx.fillText(fit(c.name,W-M*2,900,100,56),M,850);
+    ctx.fillStyle=red;ctx.fillText(fit(STATUS,W-M*2,900,46,30),M,912);
+    // 地點、特徵
+    icon(PIN,M-4,934,46,K);ctx.fillStyle=K;ctx.fillText(fit(LOC,W-M*2-56,900,40,26),M+52,972);
+    ctx.font=font(700,34);let y=wrap(LOOK+(DETAIL?'｜'+DETAIL:'')+(c.features?'｜'+c.features:''),M,1024,W-M*2,44,2);
+    // 下方黑底：警語＋電話＋QR
+    const yb=Math.max(y+6,1088);ctx.fillStyle=K;ctx.fillRect(0,yb,W,H-yb);
+    const qs=Math.min(210,H-yb-40),QX=W-M-qs,leftW=QX-M-24;
+    ctx.fillStyle=Y;ctx.fillText(fit(WARN,leftW,900,40,26),M,yb+52);
+    if(c.contact_phone){icon(PHONE,M,yb+76,70,Y);ctx.fillStyle=Y;ctx.fillText(fit(c.contact_phone,leftW-90,900,88,44),M+88,yb+140)}
+    else{ctx.fillStyle=Y;ctx.fillText(fit(qrc?'請掃 QR 線上回報':'到網站搜尋這隻毛孩回報',leftW,900,52,32),M,yb+132)}
+    ctx.fillStyle='#ddd';ctx.fillText(fit(HOWTO,leftW,400,26,18),M,yb+186);
+    drawQR(QX,yb+20,qs);
+    ctx.fillStyle='#bbb';ctx.fillText(fit(FOOT,leftW,400,22,16),M,H-20)};
 
   // A4 列印：黑白印也清楚，大照片、大電話
   const drawA4=()=>{W=1240;H=1754;cv.width=W;cv.height=H;const m=70;
@@ -4679,8 +4686,8 @@ async function renderPoster(id){const _n=navId;
   if(qrc){ctx.fillStyle='#fff';ctx.fillRect(QX,QY,240,240);ctx.drawImage(qrc,QX+8,QY+8,224,224)}
   ctx.fillStyle='#8A8A8A';ctx.fillText(fit(`${CONFIG.SITE_NAME}・${CONFIG.SITE_URL.replace(/^https?:\/\//,'').replace(/\/$/,'')}`,leftW,400,24,18),M,H-30);
   };
-  const STYLES=[['classic','經典',drawClassic],['photo','大照片',drawPhotoStyle],['pastel','粉彩可愛',drawPastel],['a4','A4 列印',drawA4],['story','限時動態',drawStory]];
-  let styleKey='classic';try{const v=localStorage.getItem('wh_poster_style');if(STYLES.some(x=>x[0]===v))styleKey=v}catch(_){}
+  const STYLES=[['classic','經典',drawClassic],['photo','大照片',drawPhotoStyle],['alert','醒目黃',drawAlert],['a4','A4 列印',drawA4],['story','限時動態',drawStory]];
+  let styleKey='classic';try{let v=localStorage.getItem('wh_poster_style');if(v==='pastel')v='alert';if(STYLES.some(x=>x[0]===v))styleKey=v}catch(_){}
   const fname=`${sp(c.species).poster}-${c.name}.png`;let dataUrl='';
   const renderStyle=async key=>{const st=STYLES.find(x=>x[0]===key)||STYLES[0];styleKey=st[0];
     ctx.setTransform(1,0,0,1,0,0);ctx.textBaseline='alphabetic';ctx.textAlign='left';await st[2]();
