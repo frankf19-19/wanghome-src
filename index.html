@@ -1451,7 +1451,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.0.1';
+const BUILD = 'v5.0.2';
 try{document.getElementById('buildV').textContent='BUILD '+BUILD}catch(_){}
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1675,11 +1675,12 @@ function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;retu
 document.addEventListener('invalid',e=>{const x=e.target;if(!x||!x.validity)return;const v=x.validity;
   x.setCustomValidity(v.valueMissing?(x.tagName==='SELECT'?'請選一個項目':x.type==='checkbox'?'請勾選這一項':'請填寫這個欄位'):v.typeMismatch?(x.type==='email'?'Email 格式不對，例如 name@gmail.com':'格式不對'):v.tooLong?'字數太多了':v.patternMismatch?'格式不對':v.rangeUnderflow||v.rangeOverflow?'數值超出範圍':'')},true);
 ['input','change'].forEach(t=>document.addEventListener(t,e=>{const x=e.target;if(x&&x.setCustomValidity)x.setCustomValidity('')},true));
-let __afT=null;
-function autoFillPlace(mapEl,lat,lng,now){clearTimeout(__afT);__afT=setTimeout(async()=>{
+let __afT=null,__afSeq=0;
+function autoFillPlace(mapEl,lat,lng,now){clearTimeout(__afT);const seq=++__afSeq;__afT=setTimeout(async()=>{
   const box=typeof mapEl==='string'?document.getElementById(mapEl):mapEl;const f=box&&box.closest('form');if(!f)return;
   const cs=f.querySelector('#city'),ds=f.querySelector('#dist');if(!cs)return;
-  const g=await reverseGeo(lat,lng);if(!box.isConnected||!g.city||!TW[g.city])return;
+  const g=await reverseGeo(lat,lng);if(seq!==__afSeq||!box.isConnected||!g.city||!TW[g.city])return;   // 只套用最後一次點選的結果
+  if(!g.geoOk&&cs.value)return;   // 查不到地址時只是猜最近的縣市，不要蓋掉使用者選好的
   if(cs.value!==g.city){cs.value=g.city;if(ds)ds.innerHTML=distOptions(g.city,g.district)}else if(ds&&g.district)ds.value=g.district;
   const pt=f.querySelector('[name=lost_place],[name=place_text]');let road='';
   if(g.geoOk){road=g.address.replace(g.city,'').replace(g.district,'').trim();if(pt&&!pt.value.trim()&&road)pt.value=road}
@@ -1777,7 +1778,7 @@ const scrollMem={};let curHash=location.hash||'#/',navByPop=false,overlayOpen=nu
 let __selfPop=false;
 window.addEventListener('popstate',e=>{
   if(__selfPop){__selfPop=false;return}                                    // 自己關視窗時退的那一步，不算「上一頁」
-  if(overlayOpen){const o=overlayOpen;overlayOpen=null;o.remove();return}   // 上一頁先關掉視窗
+  if(overlayOpen){const o=overlayOpen,t=o._trigger;overlayOpen=null;o.remove();if(t&&t.isConnected)try{t.focus({preventScroll:true})}catch(_){};return}   // 上一頁先關掉視窗
   if(e.state&&e.state.overlay&&e.state.h===(location.hash||'#/')){try{history.back()}catch(_){}return}   // 視窗已經不在的空紀錄：直接再退一步
   if(__wiz&&__wiz.onPop(e))return;                                         // 分步驟表單：回上一步
   navByPop=true;
@@ -1850,15 +1851,16 @@ const QPICK={breed:{dog:['米克斯','台灣犬','柴犬','貴賓','博美','吉
   colour:{dog:['黑','白','黃','咖啡','奶油','灰','虎斑','黑白','黑黃','花色'],cat:['橘','白','黑','灰','三花','玳瑁','虎斑','黑白（賓士）','橘白','灰白','暹羅色']}};
 function qpSpecies(f){const on=f.querySelector('#segSp .on');return on?on.dataset.v:(f.dataset.sp||'dog')}
 function qpDraw(inp){const f=inp.form;if(!f)return;const k=inp.name,sp=qpSpecies(f)==='cat'?'cat':'dog',box=inp._qp;if(!box)return;
-  const cur=inp.value.split(/[、,，\s]+/).filter(Boolean);
+  const cur=inp.value.split(/\s*[、,，]\s*/).filter(Boolean);
   box.innerHTML=QPICK[k][sp].map(v=>`<button type="button" class="fchip qp ${k==='breed'?(inp.value.trim()===v?'on':''):(cur.includes(v)?'on':'')}" data-v="${v}">${v}</button>`).join('')+`<button type="button" class="fchip qp more" data-own>其他（自己輸入）</button>`}
+function qpRedraw(f){if(f)f.querySelectorAll('input[name=breed],input[name=colour]').forEach(qpDraw)}
 function qpEnhance(root){root.querySelectorAll('form input[name=breed],form input[name=colour]').forEach(inp=>{if(inp._qp)return;const lab=inp.closest('label')||inp;
   const box=document.createElement('div');box.className='fchips qpick';box.setAttribute('aria-label',inp.name==='breed'?'常見品種':'常見毛色');inp._qp=box;
   // 兩欄並排時，選項放到整排下面
   const row=lab.closest('.row2');(row&&row.contains(lab)?(row._qpHost||(row._qpHost=(()=>{const h=document.createElement('div');row.after(h);return h})())):lab).appendChild(box);
   if(row){const t=document.createElement('b');t.className='qp-t small';t.textContent=inp.name==='breed'?'品種':'毛色';box.before(t)}
-  box.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-own')){inp.focus();inp.select&&inp.select();return}
-    const v=b.dataset.v;if(inp.name==='breed')inp.value=inp.value.trim()===v?'':v;else{let a=inp.value.split(/[、,，\s]+/).filter(Boolean);a=a.includes(v)?a.filter(x=>x!==v):[...a,v];inp.value=a.join('、')}
+  box.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-own')){if(inp.name==='colour'&&inp.value.trim()&&!/[、,，]\s*$/.test(inp.value))inp.value=inp.value.trim()+'、';inp.focus();const L=inp.value.length;try{inp.setSelectionRange(L,L)}catch(_){}return}
+    const v=b.dataset.v;if(inp.name==='breed')inp.value=inp.value.trim()===v?'':v;else{let a=inp.value.split(/\s*[、,，]\s*/).filter(Boolean);a=a.includes(v)?a.filter(x=>x!==v):[...a,v];inp.value=a.join('、')}
     inp.dispatchEvent(new Event('input',{bubbles:true}));qpDraw(inp)};
   inp.addEventListener('input',()=>qpDraw(inp));qpDraw(inp);
   const seg=inp.form&&inp.form.querySelector('#segSp');if(seg&&!seg._qp){seg._qp=1;seg.addEventListener('click',()=>setTimeout(()=>inp.form.querySelectorAll('input[name=breed],input[name=colour]').forEach(qpDraw),0))}})}
@@ -2224,7 +2226,7 @@ async function renderHealthAdd(){const _n=navId;
     <div class="choose"><a class="bigbtn b-green" href="#/health/add?type=rec"><span class="bb-ic">${ic("clipboard")}</span><span class="bb-t"><b>看診、疫苗、驅蟲</b><small>記一次，可以設下次到期提醒</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a class="bigbtn b-white" href="#/health/add?type=med"><span class="bb-ic">${ic("pill")}</span><span class="bb-t"><b>每天要吃的藥、保養品</b><small>每天打勾「今天吃了沒」</small></span><span class="bb-go" aria-hidden="true">›</span></a></div>`;return}
   const dest=x=>type==='med'?`#/pet/${x}/med/new`:`#/pet/${x}/record/new`;
-  if(pets.length===1){location.replace(dest(pets[0].id));return}
+  if(pets.length===1){goReplace(dest(pets[0].id));return}
   (_n===navId?app:_void).innerHTML=`<h1>${type==='med'?'設定每天吃藥':'新增紀錄'}</h1><p class="muted">要記錄哪一隻？</p>
   <div class="pickpet">${pets.map(x=>`<a href="${dest(x.id)}"><span class="pp-ph ${x.photos?.[0]?'':'noimg'}" ${x.photos?.[0]?`style="background-image:url('${esc(safeU(thumbUrl(x.photos[0])))}'),url('${esc(safeU(x.photos[0]))}')"`:''}>${x.photos?.[0]?'':sp(x.species).emoji}</span><b>${esc(x.name)}</b></a>`).join('')}</div>`;
 }
@@ -2662,7 +2664,7 @@ function lightbox(u){u=safeU(u);if(!u)return;const d=document.createElement('div
 function renderNew(){
   setTitle('登記走失');
   app.innerHTML=`<h1>登記走失毛孩</h1><p class="lede">免費、不用註冊。照著步驟填，大約 2 分鐘。</p>
-  ${me()?`<div class="notice green"><b>✓ 你已登入：${esc(me().email||'')}</b>這個案件會自動綁定到這個帳號，換手機也能管理。不是你的帳號？請先到「我的」登出。</div>`:'<p class="small" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">不登入也可以登記。想換手機也能管理？<a class="btn sm ghost" href="#/login" onclick="try{localStorage.setItem(\'wh_return\',\'#/new\')}catch(_){}">登入／免費註冊</a></p>'}
+  ${me()?`<div class="notice green"><b>✓ 你已登入：${esc(me().email||'')}</b>這個案件會自動綁定到這個帳號，換手機也能管理。不是你的帳號？請先到「我的」登出。</div>`:'<p class="small" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">不登入也可以登記。想換手機也能管理？<a class="btn sm ghost" href="#/login" onclick="setReturn(\'#/new\')">登入／免費註冊</a></p>'}
   <form onsubmit="return false" class="card steps" id="f" autocomplete="on">
     <h3>牠叫什麼名字？長什麼樣子？</h3>
     <div class="seg" id="segSp" role="group" aria-label="狗還是貓"><button type="button" data-v="dog">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
@@ -2723,7 +2725,7 @@ function renderNew(){
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出登記</button></div>
   </form>`;
   let photoFiles=[],presetPhotos=[],species='';
-  const setSp=v=>{species=v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v))};
+  const setSp=v=>{species=v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));qpRedraw($('#f'))};
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>setSp(b.dataset.v));
   const pv=$('#pv');
   $('#photoIn').onchange=e=>{const all=photoFiles.concat([...e.target.files]),max=4-presetPhotos.length;if(all.length>max)toast(`最多 4 張照片，只保留前 ${max} 張`,4000);photoFiles=all.slice(0,max);drawPV();e.target.value=''};
@@ -2739,7 +2741,7 @@ function renderNew(){
     $('#clrDraft').onclick=()=>{try{localStorage.removeItem(DKEY)}catch(_){};renderNew()}}}catch(_){}}
   if(petId&&me()){sb.from('pets').select('*').eq('id',petId).maybeSingle().then(({data:pt})=>{if(!pt)return;const f=$('#f');setSp(pt.species);
     const set=(n,v)=>{if(f.elements[n]!=null&&v!=null)f.elements[n].value=v};
-    set('name',pt.name);set('sex',pt.sex||'');set('size',pt.size||'');set('breed',pt.breed);set('colour',pt.colour);set('features',pt.features);set('temperament',pt.temperament);
+    set('name',pt.name);set('sex',pt.sex||'');set('size',pt.size||'');set('breed',pt.breed);set('colour',pt.colour);qpRedraw(f);set('features',pt.features);set('temperament',pt.temperament);
     if(pt.birthday){const y=Math.floor((Date.now()-new Date(pt.birthday))/31557600000);set('age_text',y>0?y+'歲':'未滿1歲')}
     f.elements['has_chip'].checked=!!pt.has_chip;if(pt.chip_no)set('chip_last4',String(pt.chip_no).slice(-4));if(pt.neutered!=null)set('neutered',String(pt.neutered));
     presetPhotos=(pt.photos||[]).slice(0,4);drawPV();toast(`已帶入 ${pt.name} 的資料，請補上走失時間地點`)})}
@@ -3040,9 +3042,11 @@ const AGENCY={
   '澎湖縣':{n:'澎湖縣家畜疾病防治所',t:[{p:'06-9212839',h:WK}]},
   '金門縣':{n:'金門縣動植物防疫所',t:[{p:'082-336625',h:WK}]}
 };
-function agOpen(h,d=new Date()){if(!h)return true;const wd=d.getDay()>=1&&d.getDay()<=5,m=d.getHours()*100+d.getMinutes();
+// 一律用台灣時間判斷（手機時區設成國外也一樣）
+function twNow(){try{const p=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Taipei',hourCycle:'h23',weekday:'short',hour:'numeric',minute:'numeric'}).formatToParts(new Date()).map(x=>[x.type,x.value]));const wd=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(p.weekday);return {getDay:()=>wd,getHours:()=>+p.hour%24,getMinutes:()=>+p.minute}}catch(_){return new Date()}}
+function agOpen(h,d=twNow()){if(!h)return true;const wd=d.getDay()>=1&&d.getDay()<=5,m=d.getHours()*100+d.getMinutes();
   if(h.off)return !agOpen(WK,d);return (h.a||wd)&&m>=h.f&&m<h.to}
-function agHours(h){if(!h)return'';if(h.off)return'下班時間與假日';if(h.a&&h.f===0&&h.to===2400)return'24 小時';const t=v=>Math.floor(v/100)+':'+String(v%100).padStart(2,'0');return(h.a?'每天 ':'週一到週五 ')+t(h.f)+'–'+t(h.to)}
+function agHours(h){if(!h)return'';if(h.off)return'下班時間與假日';if(h.a&&h.f===0&&h.to===2400)return'24 小時';const t=v=>Math.floor(v/100)+':'+String(v%100).padStart(2,'0');return(h.a?'每天 ':'週一到週五 ')+t(h.f)+'–'+t(h.to)+(h.a?'':'，國定假日除外')}
 const agTel=e=>'tel:'+e.p.replace(/-/g,'')+(e.x?','+e.x:'');
 const agNum=e=>e.p+(e.x?' 分機 '+e.x:'');
 // 受傷通報用：現在打得通的當地直撥放最大，1959 當備用；當地下班時 1959 放最大
@@ -3119,23 +3123,25 @@ async function quickReport(){
   segOne('#qSp',v=>species=v);segOne('#qWhere',v=>where=v);
   $('#qCity').onchange=()=>{$('#qDist').innerHTML=distOptions($('#qCity').value)};
   $('#qInj').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;inj.has(v)?inj.delete(v):inj.add(v);b.classList.toggle('on',inj.has(v))});
-  $('#qPhoto').onchange=e=>{photo=e.target.files[0]||null;if(photo)$('#qPhL').querySelector('span').textContent='已選 1 張照片（點這裡換一張）'};
+  let upUrl=null;$('#qPhoto').onchange=e=>{photo=e.target.files[0]||null;upUrl=null;if(photo)$('#qPhL').querySelector('span').textContent='已選 1 張照片（點這裡換一張）'};
   $('#qSend').onclick=async()=>{
     const qCity=$('#qCity').value,qDist=$('#qDist').value;
     if(!qCity){toast('請選擇縣市');return}
-    if(qCity!==g.city){g.address=qCity+(qDist||'')+($('#qPlace').value.trim()?'':'（GPS 位置）');}
+    // 縣市或鄉鎮改過：用使用者選的重組地址（不沿用定位反查的路名，避免救援跑錯地方）
+    const addr=(qCity===g.city&&(qDist||'')===(g.district||''))?g.address:qCity+(qDist||'')+($('#qPlace').value.trim()?'':'（GPS 位置）');
     const btn=$('#qSend');btn.disabled=true;btn.textContent='送出中…';
     let q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),lat,lng};
     try{
-      const photos=photo?[await tryUpload(photo,'found')].filter(Boolean):[];
-      q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),city:qCity,district:qDist||null,place_text:$('#qPlace').value.trim()||g.address,lat,lng,current_place:where==='taken'?'通報者已帶走／送醫':'通報時仍在原地',photos,phone_public:false};
+      if(photo&&!upUrl)upUrl=await tryUpload(photo,'found');   // 再送一次時不重複上傳同一張
+      const photos=photo&&upUrl?[upUrl]:[];
+      q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),city:qCity,district:qDist||null,place_text:$('#qPlace').value.trim()||addr,lat,lng,current_place:where==='taken'?'通報者已帶走／送醫':'通報時仍在原地',photos,phone_public:false};
       const {data,error}=await sb.rpc('create_found',{p:q});if(error)throw error;
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
       rememberMine('found',data.id,'受傷的'+sp(species).name);
       const url=`${CONFIG.SITE_URL}#/found/${data.id}`;
-      const script=callScript({...q,address:g.address,where,place_text:$('#qPlace').value.trim(),url});
+      const script=callScript({...q,address:addr,where,place_text:$('#qPlace').value.trim(),url});
       const mapUrl=`https://www.google.com/maps?q=${lat},${lng}`;
-      const kv=[['地點',g.address+(($('#qPlace').value.trim()&&!g.address.includes($('#qPlace').value.trim()))?'（'+$('#qPlace').value.trim()+'）':'')],['狀況',(q.injury||'受傷')+'，'+(where==='taken'?'我已經帶走／送醫':'牠還在原地')],['動物',sp(species).name],['座標',lat.toFixed(5)+', '+lng.toFixed(5)]];
+      const kv=[['地點',addr+(($('#qPlace').value.trim()&&!addr.includes($('#qPlace').value.trim()))?'（'+$('#qPlace').value.trim()+'）':'')],['狀況',(q.injury||'受傷')+'，'+(where==='taken'?'我已經帶走／送醫':'牠還在原地')],['動物',sp(species).name],['座標',lat.toFixed(5)+', '+lng.toFixed(5)]];
       box.innerHTML=`<div class="q-done"><b>${ic("aid")} 通報已記錄，現在請打電話</b><span>本站無法派人到現場，要請當地動保單位來救援。</span></div>
         ${agencyCallHTML(qCity)}
         <div class="q-script"><b>電話裡被問到時，照著唸：</b><dl>${kv.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
@@ -3147,10 +3153,11 @@ async function quickReport(){
       window.scrollTo({top:box.getBoundingClientRect().top+scrollY-(innerWidth>760?(document.querySelector('header')?.offsetHeight||0)+16:20),behavior:RM()?'auto':'smooth'});
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='再送一次';
       // 網站沒送出也要能馬上打電話求救：顯示撥號按鈕與通報稿（沒有網址）
-      if(!$('#qFail')){const sc=callScript({...q,address:g.address,where,place_text:$('#qPlace').value.trim(),url:''});
-        box.insertAdjacentHTML('afterbegin',`<div id="qFail" class="notice red" style="margin-bottom:10px"><b>網站暫時沒送出，先打電話救援</b>可以等一下再按「再送一次」。</div>
+      {const sc=callScript({...q,address:addr,where,place_text:$('#qPlace').value.trim(),url:''});$('#qFailBox')?.remove();
+        box.insertAdjacentHTML('afterbegin',`<div id="qFailBox"><div id="qFail" class="notice red" style="margin-bottom:10px"><b>網站暫時沒送出，先打電話救援</b>可以等一下再按「再送一次」。</div>
         ${agencyCallHTML(qCity)}
-        <label class="f"><span>電話通報稿</span><textarea readonly style="min-height:150px">${esc(sc)}</textarea></label>`)}}
+        <label class="f"><span>電話通報稿</span><textarea readonly style="min-height:150px">${esc(sc)}</textarea></label></div>`);
+        $('#qFailBox').scrollIntoView({block:'start',behavior:RM()?'auto':'smooth'})}}
   };
 }
 function renderInjured(){
@@ -3616,7 +3623,7 @@ async function renderAdoptOne(id){const _n=navId;
   </div>`;
   const ph=$('#aPh');if(ph)ph.onclick=()=>lightbox(r.photo);
   // 上一隻／下一隻：換掉這一頁（按返回會直接回清單），清單也會多顯示到這一隻
-  const go=nid=>{if(!nid)return;const k=adoptOrder.indexOf(nid);if(k>=adoptState.limit)adoptState.limit=Math.ceil((k+1)/30)*30;location.replace(location.pathname+location.search+'#/adopt/'+encodeURIComponent(nid))};
+  const go=nid=>{if(!nid)return;const k=adoptOrder.indexOf(nid);if(k>=adoptState.limit)adoptState.limit=Math.ceil((k+1)/30)*30;goReplace('#/adopt/'+encodeURIComponent(nid))};
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
   // 手機：照片往左滑看下一隻、往右滑看上一隻
   const g=app.querySelector('.gallery');if(g&&oi>=0){let x0=null,y0=0;g.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
@@ -3650,7 +3657,7 @@ async function renderAdmin(){const _n=navId;
   <div class="stats adm-stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已找回'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??'–'}</b>${t}</div>`).join('')}</div>
   <div class="tabs adm-tabs" role="tablist">${TABS.map(([v,t])=>`<button type="button" role="tab" data-tab="${v}" class="${v===tab?'on':''}" aria-selected="${v===tab}">${t}${v==='reports'&&st?.open_reports?`<span class="cnt">${st.open_reports}</span>`:''}</button>`).join('')}</div>
   <div id="adm"></div>`;
-  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>location.replace('#/admin?tab='+b.dataset.tab));
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>goReplace('#/admin?tab='+b.dataset.tab));
   const box=$('#adm');
   if(tab==='reports')return admReports(box,q.all==='1');
   if(tab==='members')return admMembers(box,q.q||'');
@@ -3692,13 +3699,15 @@ async function admReports(box,showAll){const _n=navId;
   box.querySelectorAll('[data-res]').forEach(b=>b.onclick=async()=>{const {error}=await sb.rpc('admin_resolve',{p_target:b.dataset.res});if(error)return toast(error.message);toast('已標記處理');admReports(box,showAll)});
 }
 // 共用按鈕：隱藏／恢復、停權、刪除、編輯
+// 停權天數：回傳天數、null＝永久、undefined＝取消
+function admAskDays(){const v=prompt('停權幾天？輸入天數（例如 30）；輸入 0 代表永久停權。\n按「取消」就不停權。','30');if(v===null)return undefined;const n=parseInt(String(v).replace(/[^\d]/g,''),10);if(isNaN(n)||n<0||n>3650){toast('請輸入 0 到 3650 的天數');return undefined}return n===0?null:n}
 function admBind(box,reload,rows){
   box.querySelectorAll('[data-hide]').forEach(b=>b.onclick=async()=>{const [t,id,h]=b.dataset.hide.split('|');const {error}=await sb.rpc('admin_set_hidden',{p_type:t,p_id:id,p_hidden:h==='1'});if(error)return toast(error.message);toast(h==='1'?'已隱藏':'已恢復顯示');reload()});
   box.querySelectorAll('[data-ban]').forEach(b=>b.onclick=async()=>{const [t,id]=b.dataset.ban.split('|');
     const why=prompt('停權原因（會記錄在後台，不會告訴對方）：','詐騙／濫用');if(why===null)return;
-    const days=confirm('要永久停權嗎？\n按「確定」＝永久；按「取消」＝停權 30 天')?null:30;
+    const days=admAskDays();if(days===undefined)return;
     const {data,error}=await sb.rpc('admin_ban',{p_type:t,p_id:id,p_reason:why,p_days:days});if(error)return toast(error.message);
-    toast(data&&data.banned?`已停權${days?' 30 天':''}並隱藏內容`:(data&&data.note)||'已隱藏內容',4000);reload()});
+    toast(data&&data.banned?`已停權${days?' '+days+' 天':'（永久）'}並隱藏內容`:(data&&data.note)||'已隱藏內容',4000);reload()});
   box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const [t,id]=b.dataset.del.split('|');
     if(!confirm(`確定要永久刪除這則${ADM_T[t]}嗎？\n刪除後無法復原${t==='case'?'（目擊回報也會一起刪除）':''}。\n只是暫時不想公開的話，請改用「隱藏」。`))return;
     const {error}=await sb.rpc('admin_delete',{p_type:t,p_id:id});if(error)return toast(error.message);toast('已刪除');reload()});
@@ -3711,7 +3720,7 @@ async function admList(box,t,query,f){const _n=navId;let off=0,rows=[];
   box.innerHTML=`<form class="adm-search" id="admQ" role="search"><input type="search" name="q" value="${esc(query)}" placeholder="搜尋名字、地點、電話、Email…" aria-label="搜尋"><button class="btn sm">搜尋</button></form>
   <div class="fchips adm-f">${FL.map(([v,x])=>`<button type="button" class="fchip ${v===f?'on':''}" data-f="${v}" aria-pressed="${v===f}">${x}</button>`).join('')}</div>
   <div id="admRows"><div class="empty">載入中…</div></div><div id="admMore"></div>`;
-  const go=(nq,nf)=>location.replace(`#/admin?tab=${t}${nq?'&q='+encodeURIComponent(nq):''}${nf&&nf!=='all'?'&f='+nf:''}`);
+  const go=(nq,nf)=>goReplace(`#/admin?tab=${t}${nq?'&q='+encodeURIComponent(nq):''}${nf&&nf!=='all'?'&f='+nf:''}`);
   $('#admQ').onsubmit=e=>{e.preventDefault();go(e.target.q.value.trim(),f)};
   box.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>go(query,b.dataset.f));
   const load=async(reset)=>{if(reset){off=0;rows=[]}
@@ -3721,7 +3730,7 @@ async function admList(box,t,query,f){const _n=navId;let off=0,rows=[];
     const got=Array.isArray(data)?data:[];rows=rows.concat(got);off+=got.length;
     $('#admRows').innerHTML=rows.length?rows.map(r=>admRow(t,r)).join(''):'<p class="muted">沒有符合的內容</p>';
     $('#admMore').innerHTML=got.length===30?'<button class="btn ghost" id="admMoreB" style="width:100%">載入更多</button>':'';
-    const mb=$('#admMoreB');if(mb)mb.onclick=()=>load(false);
+    const mb=$('#admMoreB');if(mb)mb.onclick=()=>{mb.disabled=true;mb.textContent='載入中…';load(false)};
     admBind($('#admRows'),()=>load(true),rows)};
   load(true);
 }
@@ -3769,7 +3778,7 @@ function admEdit(t,r,after){
 async function admMembers(box,query){const _n=navId;let off=0,rows=[];
   box.innerHTML=`<form class="adm-search" id="admQ" role="search"><input type="search" name="q" value="${esc(query)}" placeholder="搜尋 Email 或暱稱…" aria-label="搜尋"><button class="btn sm">搜尋</button></form>
   <div id="admRows"><div class="empty">載入中…</div></div><div id="admMore"></div>`;
-  $('#admQ').onsubmit=e=>{e.preventDefault();const v=e.target.q.value.trim();location.replace('#/admin?tab=members'+(v?'&q='+encodeURIComponent(v):''))};
+  $('#admQ').onsubmit=e=>{e.preventDefault();const v=e.target.q.value.trim();goReplace('#/admin?tab=members'+(v?'&q='+encodeURIComponent(v):''))};
   const load=async(reset)=>{if(reset){off=0;rows=[]}
     const {data,error}=await sb.rpc('admin_members',{p_q:query,p_offset:off});
     if(_n!==navId)return;
@@ -3787,12 +3796,12 @@ async function admMembers(box,query){const _n=navId;let off=0,rows=[];
         ${m.is_admin||m.banned?'':`<button class="btn sm danger" data-mban="${m.id}">停權</button>`}
       </div></div>`).join(''):'<p class="muted">沒有符合的會員</p>';
     $('#admMore').innerHTML=got.length===50?'<button class="btn ghost" id="admMoreB" style="width:100%">載入更多</button>':'';
-    const mb=$('#admMoreB');if(mb)mb.onclick=()=>load(false);
+    const mb=$('#admMoreB');if(mb)mb.onclick=()=>{mb.disabled=true;mb.textContent='載入中…';load(false)};
     box.querySelectorAll('[data-mban]').forEach(b=>b.onclick=async()=>{
       const why=prompt('停權原因（會記錄在後台，不會告訴對方）：','詐騙／濫用');if(why===null)return;
-      const days=confirm('要永久停權嗎？\n按「確定」＝永久；按「取消」＝停權 30 天')?null:30;
+      const days=admAskDays();if(days===undefined)return;
       const {error}=await sb.rpc('admin_ban_member',{p_user:b.dataset.mban,p_reason:why,p_days:days});if(error)return toast(error.message);
-      toast(`已停權${days?' 30 天':''}。他之前發的內容沒有隱藏，需要的話請到各分頁處理`,5000);load(true)})};
+      toast(`已停權${days?' '+days+' 天':'（永久）'}。他之前發的內容沒有隱藏，需要的話請到各分頁處理`,5000);load(true)})};
   load(true);
 }
 async function admBans(box){const _n=navId;
@@ -4166,7 +4175,7 @@ async function renderMeBody(){const _n=navId;
   </details>`;
   {const ub=$('#btnUnblockAll');if(ub)ub.onclick=()=>{try{localStorage.removeItem('wh_hidden');localStorage.removeItem('wh_blocked')}catch(_){}toast('已全部恢復顯示');renderMe()}}
   $('#btnOut').onclick=async()=>{const clearMine=confirm('要一併清除這支手機上記住的案件管理連結嗎？\n（共用手機建議清除；自己的手機可以按「取消」保留）');
-    await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|lnids$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}try{lnClear&&lnClear()}catch(_){}goReplace('#/')};
+    await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|lnids$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}try{lnClear&&lnClear()}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
     if(!confirm('確定要永久刪除你的帳號和所有毛孩資料嗎？刪除後無法復原。'))return;
     if(!confirm('最後確認：真的要刪除嗎？'))return;
