@@ -1428,7 +1428,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 #ptr .spin{animation-play-state:paused}#ptr.ready .spin,#ptr.busy .spin{animation-play-state:running}#ptr.busy{transform:translate(-50%,40px)!important}
 body.has-cta .toast{bottom:calc(var(--tabbar-h) + 76px + env(safe-area-inset-bottom))}
 .home-done{background:var(--green-soft);border-radius:16px;padding:18px 16px;margin:0 0 14px;text-align:center}.home-done .hd-ic{font-size:40px;line-height:1}.home-done b{display:block;font-size:20px;margin:6px 0 4px}.home-done p{margin:0 0 12px;color:var(--ink-2)}
-.ln-pref{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:15px}.ln-pref select,.ln-pref input{width:auto;min-width:0;padding:7px 10px;font-size:15px}.ln-pref .small{flex-basis:100%}.ln-state{margin:0 0 10px}.ln-state b{display:block;font-size:15.5px}.ln-state.on b{color:var(--green)}.ln-state span{display:block;margin-top:2px}
+.ln-pref{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:15px}.ln-pref select,.ln-pref input{width:auto;min-width:0;padding:7px 10px;font-size:15px}.ln-pref .small{flex-basis:100%}.ln-pref.ln-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 6px}.ln-slots>span{grid-column:1/-1}.ln-slots label{display:grid;gap:2px;justify-items:center;min-width:0}.ln-slots label small{font-size:12px;color:var(--ink-3)}.ln-slots input{padding:7px 4px;font-size:14px;width:100%;text-align:center}.ln-pref input[type=time]::-webkit-calendar-picker-indicator{display:none}.ln-state{margin:0 0 10px}.ln-state b{display:block;font-size:15.5px}.ln-state.on b{color:var(--green)}.ln-state span{display:block;margin-top:2px}
 .me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
 .mg-sec.danger-zone>summary{color:var(--red-ink)}
 .mg-foot{margin:16px 2px 0;text-align:center}
@@ -1591,7 +1591,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.13';
+const BUILD = 'v5.4.14';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -4414,10 +4414,15 @@ function bindCal(rerender){
    ============================================================ */
 const LN_KEY='wh_lnotify',LN_IDS='wh_lnids';let lnLast=0,lnBusy=false,lnAgain=false;
 // 到期提醒要提前幾天、幾點響：使用者自己設（存在手機上）
-function lnPref(){let d=1,t='09:00';try{d=+localStorage.getItem('wh_ln_days')||1;t=localStorage.getItem('wh_ln_time')||'09:00'}catch(_){}if(![1,3,7].includes(d))d=1;if(!/^\d{2}:\d{2}$/.test(t))t='09:00';return{days:d,time:t}}
-function lnPrefText(){const o=lnPref();const [h,m]=o.time.split(':').map(Number);const hh=h<12?`早上 ${h||12}`:h<18?`下午 ${h-12||12}`:`晚上 ${h-12}`;return `到期前 ${o.days} 天${hh}${m?':'+String(m).padStart(2,'0'):' 點'}`}
-function lnPrefHTML(){const o=lnPref();return `<div class="ln-pref"><span>到期提醒</span><select id="lnDays" aria-label="提前幾天">${[1,3,7].map(d=>`<option value="${d}"${d===o.days?' selected':''}>前 ${d} 天</option>`).join('')}</select><input type="time" id="lnTime" value="${o.time}" aria-label="幾點提醒"><span class="muted small">餵藥時間照每筆用藥設定</span></div>`}
-function bindLnPref(){const d=$('#lnDays'),t=$('#lnTime');const save=()=>{try{if(d)localStorage.setItem('wh_ln_days',d.value);if(t&&/^\d{2}:\d{2}$/.test(t.value))localStorage.setItem('wh_ln_time',t.value)}catch(_){}const s=$('#lnSum');if(s)s.textContent=lnPrefText()+'提醒你';clearTimeout(bindLnPref._tm);bindLnPref._tm=setTimeout(()=>{lnSync(true);toast('已改成'+lnPrefText()+'提醒',3000)},900)};if(d)d.onchange=save;if(t)t.onchange=save}
+const LN_SLOT_DEF={'早上':'08:00','中午':'12:00','晚上':'19:00','睡前':'22:00'};
+function lnPref(){let d=1,t='09:00';try{const dv=localStorage.getItem('wh_ln_days');d=dv===null?1:+dv;t=localStorage.getItem('wh_ln_time')||'09:00'}catch(_){}if(![0,1,3,7].includes(d))d=1;if(!/^\d{2}:\d{2}$/.test(t))t='09:00';return{days:d,time:t}}
+// 「早上／中午／晚上／睡前」各是幾點：使用者自己設（餵藥提醒照這個時間響）
+function lnSlots(){let o={};try{o=JSON.parse(localStorage.getItem('wh_ln_slots')||'{}')||{}}catch(_){o={}}const r={};for(const k in LN_SLOT_DEF)r[k]=/^\d{2}:\d{2}$/.test(o[k]||'')?o[k]:LN_SLOT_DEF[k];return r}
+function fmtHM(t){const [h,m]=t.split(':').map(Number);const hh=h<12?`早上 ${h||12}`:h<18?`下午 ${h-12||12}`:`晚上 ${h-12}`;return hh+(m?':'+String(m).padStart(2,'0'):' 點')}
+function lnPrefText(){const o=lnPref();return (o.days?`到期前 ${o.days} 天`:'到期當天')+fmtHM(o.time)}
+function lnPrefHTML(){const o=lnPref(),sl=lnSlots();return `<div class="ln-pref"><span>到期提醒</span><select id="lnDays" aria-label="提前幾天">${[0,1,3,7].map(d=>`<option value="${d}"${d===o.days?' selected':''}>${d?`前 ${d} 天`:'當天'}</option>`).join('')}</select><input type="time" id="lnTime" value="${o.time}" aria-label="幾點提醒"></div>
+  <div class="ln-pref ln-slots"><span>餵藥時間</span>${Object.keys(sl).map(k=>`<label><small>${k}</small><input type="time" data-slot="${k}" value="${sl[k]}" aria-label="${k}幾點"></label>`).join('')}<span class="muted small">每筆用藥選的「早上／中午／晚上／睡前」，就照這裡的時間響。</span></div>`}
+function bindLnPref(){const d=$('#lnDays'),t=$('#lnTime');const save=()=>{try{if(d)localStorage.setItem('wh_ln_days',d.value);if(t&&/^\d{2}:\d{2}$/.test(t.value))localStorage.setItem('wh_ln_time',t.value);const o={};document.querySelectorAll('.ln-slots input[data-slot]').forEach(i=>{if(/^\d{2}:\d{2}$/.test(i.value))o[i.dataset.slot]=i.value});localStorage.setItem('wh_ln_slots',JSON.stringify(o))}catch(_){}const s=$('#lnSum');if(s)s.textContent=lnPrefText()+'提醒你';clearTimeout(bindLnPref._tm);bindLnPref._tm=setTimeout(()=>{lnSync(true);toast('已更新提醒時間',2500)},900)};if(d)d.onchange=save;if(t)t.onchange=save;document.querySelectorAll('.ln-slots input[data-slot]').forEach(i=>i.onchange=save)}
 function lnOn(){return IS_APP}   // 開不開看手機設定（舊版 App 內開關已移除）
 function lnId(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return ((h>>>1)%2000000000)+1}
 function lnAt(d,hh,mm){const [y,m,dd]=d.split('-').map(Number);return new Date(y,m-1,dd,hh,mm,0,0)}
@@ -4444,16 +4449,16 @@ async function lnSync(force){
     // Android 不要求精準鬧鐘（不然每次都會跳到系統的「鬧鐘與提醒」設定頁）
     const ch=(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android')?{channelId:'care'}:{};
     for(const r of recs||[]){
-      const pf=lnPref(),[ph,pm]=pf.time.split(':').map(Number);let at=lnAt(addDays(r.next_due,-pf.days),ph,pm),when=pf.days===1?'明天':`${pf.days} 天後`;
+      const pf=lnPref(),[ph,pm]=pf.time.split(':').map(Number);let at=lnAt(addDays(r.next_due,-pf.days),ph,pm),when=pf.days===0?'今天':pf.days===1?'明天':`${pf.days} 天後`;
       if(at<=now){const d0=lnAt(today,ph,pm)>now?today:addDays(today,1);if(d0<=r.next_due){at=lnAt(d0,ph,pm);const k=lnDiffDays(d0,r.next_due);when=k===0?'今天':k===1?'明天':`${k} 天後`}}
       if(at<=now)continue;
       list.push({id:lnId('r'+r.id),title:`🐾 ${nm[r.pet_id]||'毛孩'}${when}到期：${REC_KINDS[r.kind]?.[1]||'提醒'}`,body:r.title,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:r.pet_id},...ch});
     }
     for(const m of meds||[]){
       if(m.end_date&&m.end_date<today)continue;if(m.start_date&&m.start_date>today)continue;
-      const SLOT={'早上':'08:00','中午':'12:00','晚上':'19:00','睡前':'22:00'};
+      const SLOT=lnSlots();
       let times=[...new Set((m.times||[]).map(t=>SLOT[t]||t).filter(t=>/^\d{2}:\d{2}$/.test(t)))].slice(0,4);
-      if(!times.length){if(m.freq==='asneeded'||m.freq==='other')continue;times=m.freq==='daily2'?['08:00','19:00']:m.freq==='daily3'?['08:00','12:00','19:00']:['08:00']}
+      if(!times.length){if(m.freq==='asneeded'||m.freq==='other')continue;times=m.freq==='daily2'?[SLOT['早上'],SLOT['晚上']]:m.freq==='daily3'?[SLOT['早上'],SLOT['中午'],SLOT['晚上']]:[SLOT['早上']]}
       const dose=m.dose_amount?`（${String(+m.dose_amount)}${m.dose_unit||''}）`:'';
       const title=`💊 ${nm[m.pet_id]||'毛孩'}該${m.kind==='supplement'?'吃保養品':'吃藥'}了`,body=m.name+dose;
       for(const t of times){const [hh,mm]=t.split(':').map(Number);
