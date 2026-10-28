@@ -1203,6 +1203,7 @@ body{touch-action:manipulation}
 @keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 /* 載入中：小圓圈 */
 .empty.loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:70px 0;color:var(--ink-3)}
+.spin.sm{width:18px;height:18px;border-width:3px;display:inline-block;vertical-align:-3px}
 .spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--red-soft);border-top-color:var(--red);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
@@ -1391,7 +1392,12 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .sa-k1,.sa-k2{display:inline-block;vertical-align:middle;margin:0 3px}
 .sa-k1{width:22px;border-top:3px dashed #B8325E}
 .sa-k2{width:14px;height:14px;border-radius:50%;border:2px dashed #B8325E;background:rgba(184,50,94,.08)}
-.mk.last{box-shadow:0 0 0 4px rgba(184,50,94,.28)}.me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
+.mk.last{box-shadow:0 0 0 4px rgba(184,50,94,.28)}.del-acct{margin:18px auto 8px;max-width:520px;text-align:center}
+.del-acct>summary{list-style:none;cursor:pointer;display:inline-block;font-size:14px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px;padding:10px 12px}
+.del-acct>summary::-webkit-details-marker{display:none}
+.del-acct[open]{text-align:left;background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:6px 16px 16px}
+.del-acct[open]>summary{color:var(--red-ink);text-decoration:none;font-weight:800;padding-left:0}
+.me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
 .mg-sec.danger-zone>summary{color:var(--red-ink)}
 .mg-foot{margin:16px 2px 0;text-align:center}
 .pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-acts{display:flex;gap:8px;flex-basis:100%;justify-content:flex-end}@media(min-width:600px){.pf-acts{flex-basis:auto}}
@@ -1553,7 +1559,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.3.8';
+const BUILD = 'v5.4.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1817,19 +1823,36 @@ function autoFillPlace(mapEl,lat,lng,now){clearTimeout(__afT);const seq=++__afSe
   let n=f.querySelector('.af-note');if(!n){n=document.createElement('p');n.className='af-note small';n.setAttribute('aria-live','polite');(cs.closest('.row2')||cs.closest('label')).after(n)}
   n.innerHTML=`📍 已依位置帶入：<b>${esc(g.city+(g.district||''))}</b>${road&&pt&&pt.value===road?'　'+esc(road):''}，請確認是否正確；不對的話直接改選就好。`;
   __dirty=true},now?0:700)}
-/* 快速定位：先用網路／Wi‑Fi 的大概位置（1–3 秒），再在背景用 GPS 修正得更準。
-   onPos(lat,lng,acc,final) 可能被呼叫兩次；onFail(code) code=1 沒權限、3 逾時、2 其他 */
+/* 快速定位
+   iPhone 的「單次定位」常要等 5 秒以上；改用「持續定位」：手機有現成位置會馬上給（通常 1 秒內），
+   之後再越來越準，夠準（30 公尺內）或 20 秒後就停。
+   另外在地圖一出現時就先在背景暖機（已經允許過定位才做，不會跳權限視窗），按下按鈕時通常已經有位置。
+   onPos(lat,lng,acc,final) 可能被呼叫多次；onFail(code) code=1 沒權限、3 逾時、2 其他 */
+let __fix=null;   // 最近一次定位 {lat,lng,acc,t}
+function geoWatch(cb,opt){   // 回傳停止函式
+  const G=IS_APP&&capPlugin('Geolocation');
+  if(G&&G.watchPosition){let id=null,stopped=false;G.watchPosition({enableHighAccuracy:true,timeout:20000,maximumAge:opt&&opt.maximumAge||300000},(p,err)=>{if(stopped)return;if(err){const m=String(err&&err.message||err);cb(null,/denied|permission|權限/i.test(m)?1:/time ?out|逾時/i.test(m)?3:2);return}if(p&&p.coords)cb(p)}).then(x=>{id=x;if(stopped)G.clearWatch({id})}).catch(()=>cb(null,2));return()=>{stopped=true;if(id)G.clearWatch({id}).catch(()=>{})}}
+  if(!navigator.geolocation){cb(null,2);return()=>{}}
+  const id=navigator.geolocation.watchPosition(p=>cb(p),e=>cb(null,e&&e.code||2),{enableHighAccuracy:true,timeout:20000,maximumAge:opt&&opt.maximumAge||300000});
+  return()=>navigator.geolocation.clearWatch(id)}
+async function geoGranted(){try{const G=IS_APP&&capPlugin('Geolocation');if(G&&G.checkPermissions){const r=await G.checkPermissions();return r.location==='granted'||r.coarseLocation==='granted'}if(navigator.permissions){const r=await navigator.permissions.query({name:'geolocation'});return r.state==='granted'}}catch(_){}return false}
+let __warm=0;
+function geoWarm(){if(Date.now()-__warm<60000)return;__warm=Date.now();geoGranted().then(ok=>{if(!ok)return;let n=0;const stop=geoWatch(p=>{if(!p)return stop();__fix={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy||999,t:Date.now()};if(++n>=4||__fix.acc<=30)stop()});setTimeout(stop,20000)})}
 function geoFast(onPos,onFail){
-  if(!navigator.geolocation){onFail&&onFail(2);return}
-  const g=navigator.geolocation;let got=false,best=1e9,done=false;
-  const use=(p,final)=>{const a=p.coords.accuracy||999;if(a<best||!got){best=a;got=true;onPos(p.coords.latitude,p.coords.longitude,a,final)}};
-  // 1. 快：接受 2 分鐘內的舊位置、不開 GPS
-  g.getCurrentPosition(p=>{if(!done)use(p,false)},e=>{if(e&&e.code===1){done=true;onFail&&onFail(1)}},{enableHighAccuracy:false,timeout:6000,maximumAge:120000});
-  // 2. 準：開 GPS，最多等 20 秒；拿不到也沒關係（已經有大概位置）
-  g.getCurrentPosition(p=>{if(done)return;done=true;use(p,true)},e=>{if(done)return;done=true;if(!got)onFail&&onFail(e&&e.code||2)},{enableHighAccuracy:true,timeout:20000,maximumAge:0});
-}
+  let best=1e9,got=false,ended=false;
+  const fin=()=>{if(ended)return;ended=true;stop()};
+  // 1. 剛剛（2 分鐘內）暖機拿到的位置：立刻用
+  if(__fix&&Date.now()-__fix.t<120000){got=true;best=__fix.acc;onPos(__fix.lat,__fix.lng,__fix.acc,__fix.acc<=30)}
+  // 2. 持續定位：第一筆通常 1 秒內，之後越來越準
+  let n=0;const stop=geoWatch((p,code)=>{if(ended)return;
+    if(!p){if(code===1||!got){fin();onFail&&onFail(code||2)}return}
+    const a=p.coords.accuracy||999;__fix={lat:p.coords.latitude,lng:p.coords.longitude,acc:a,t:Date.now()};n++;
+    const good=a<=30||n>=5;
+    if(!got||a<best-5){best=a;got=true;onPos(__fix.lat,__fix.lng,a,good)}
+    if(good)fin()});
+  setTimeout(()=>{if(ended)return;fin();if(!got)onFail&&onFail(3)},20000)}
 function geoFailMsg(code){return code===1?(IS_APP?'沒有定位權限：請到手機「設定」→「汪喵回家」→「位置」打開，或直接點地圖':'沒有定位權限：請允許瀏覽器使用位置，或直接點地圖'):code===3?'定位太久沒有回應（室內訊號較差），請直接點地圖':'無法取得定位，請直接點地圖'}
-function pickerMap(el,center){const m=makeMap(el,center,13);let mk=null,val=null,user=false;const set=(lat,lng,fly)=>{if(m.__stub){val={lat,lng};toast('✅ 已記下你的位置');return}if(!m._mapPane)return;val={lat,lng};if(!mk){mk=marker([lat,lng],'📍','me').addTo(m)}else mk.setLatLng([lat,lng]);if(fly)m.setView([lat,lng],16)};m.on('click',e=>{__dirty=true;user=true;set(e.latlng.lat,e.latlng.lng);autoFillPlace(el,e.latlng.lat,e.latlng.lng)});return{map:m,get:()=>val,get touched(){return user},set,locate(){if(!navigator.geolocation){toast('此裝置不支援定位');return}toast('定位中…',2000);let first=true,clickedAfter=false;const mark=()=>{clickedAfter=true};m.once('click',mark);geoFast((lat,lng,acc,final)=>{if(clickedAfter)return;__dirty=true;user=true;set(lat,lng,first);if(first){autoFillPlace(el,lat,lng,true);if(!final&&acc>150)toast('已標出大概位置，正在用 GPS 修正…',3000)}else if(final)toast('✅ 已修正到更準的位置',2000);first=false;if(final)m.off('click',mark)},code=>{m.off('click',mark);toast(geoFailMsg(code),5000)})}}}
+function pickerMap(el,center){const m=makeMap(el,center,13);geoWarm();let mk=null,val=null,user=false;const set=(lat,lng,fly)=>{if(m.__stub){val={lat,lng};toast('✅ 已記下你的位置');return}if(!m._mapPane)return;val={lat,lng};if(!mk){mk=marker([lat,lng],'📍','me').addTo(m)}else mk.setLatLng([lat,lng]);if(fly)m.setView([lat,lng],16)};m.on('click',e=>{__dirty=true;user=true;set(e.latlng.lat,e.latlng.lng);autoFillPlace(el,e.latlng.lat,e.latlng.lng)});return{map:m,get:()=>val,get touched(){return user},set,locate(ev){if(!navigator.geolocation&&!(IS_APP&&capPlugin('Geolocation'))){toast('此裝置不支援定位');return}const btn=(ev&&ev.currentTarget)||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('button'));const lbl=btn&&btn.innerHTML;const busy=on=>{if(!btn||!btn.isConnected)return;btn.disabled=on;btn.classList.toggle('locating',on);if(on)btn.innerHTML='<span class="spin sm" aria-hidden="true"></span> 定位中…';else btn.innerHTML=lbl};busy(true);setTimeout(()=>busy(false),20500);let first=true,clickedAfter=false;const mark=()=>{clickedAfter=true};m.once('click',mark);geoFast((lat,lng,acc,final)=>{busy(false);if(clickedAfter)return;__dirty=true;user=true;set(lat,lng,first);if(first){autoFillPlace(el,lat,lng,true);if(!final&&acc>150)toast('已標出大概位置，正在用 GPS 修正…',3000)}else if(final)toast('✅ 已修正到更準的位置',2000);first=false;if(final)m.off('click',mark)},code=>{busy(false);m.off('click',mark);toast(geoFailMsg(code),5000)})}}}
 
 /* ============================================================
    路由
@@ -3398,7 +3421,7 @@ async function quickReport(){
   if(!navigator.geolocation){toast('這支手機不支援定位，請用下方完整通報');(document.getElementById('fullDet')||{}).open=true;document.getElementById('fullForm')?.scrollIntoView({behavior:RM()?'auto':'smooth'});return}
   box.innerHTML=`<div class="q-wait">${ic("pin")} 正在定位…（請允許${IS_APP?'汪喵回家':'瀏覽器'}使用位置）</div>`;
   let pos;try{pos=await new Promise((ok,no)=>{let r=false;geoFast((lat,lng)=>{if(!r){r=true;ok({coords:{latitude:lat,longitude:lng}})}},code=>{if(!r){r=true;no(code)}})})}
-  catch(_){box.innerHTML=`<div class="notice red"><b>定位失敗</b>請確認已允許${IS_APP?'汪喵回家（手機「設定」裡）':'瀏覽器'}使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;$('#btnQuick').onclick=quickReport;return}
+  catch(_){if(!box.isConnected)return;box.innerHTML=`<div class="notice red"><b>定位失敗</b>請確認已允許${IS_APP?'汪喵回家（手機「設定」裡）':'瀏覽器'}使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;const rb=box.querySelector('#btnQuick');if(rb)rb.onclick=quickReport;return}
   const lat=pos.coords.latitude,lng=pos.coords.longitude;
   box.innerHTML=`<div class="q-wait">${ic("pin")} 已定位，查詢地址中…</div>`;
   const g=await reverseGeo(lat,lng);
@@ -3456,7 +3479,7 @@ async function quickReport(){
         $('#qFailBox').scrollIntoView({block:'start',behavior:RM()?'auto':'smooth'})}}
   };
 }
-function renderInjured(){
+function renderInjured(){geoWarm();
   setTitle('受傷毛孩通報');
   app.innerHTML=`<h1>看到受傷的毛孩</h1>
   <p class="muted">本站不能派人到現場，請先打電話請動保單位救援。</p>
@@ -4451,7 +4474,9 @@ function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'au
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
   <p class="mver">汪喵回家 ${BUILD}・全台走失狗貓協尋平台</p></div>`}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cycle-theme]'))cycleTheme()});
-async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&location.hash.split('?')[0]==='#/me'&&!$('.morelist'))app.insertAdjacentHTML('beforeend',moreListHTML())}
+async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&location.hash.split('?')[0]==='#/me'&&!$('.morelist'))app.insertAdjacentHTML('beforeend',moreListHTML());
+  // 刪除帳號放到整頁最下面（版本號下方），不跟常用功能擠在一起
+  const d=$('#delSec');if(d&&_n===navId)app.appendChild(d)}
 async function renderMeBody(){const _n=navId;
   setTitle('我的');
   if(!me()){app.innerHTML=`<h1>我的</h1>${mineHTML()||'<p class="lede">這支手機還沒有登記過案件。</p>'}
@@ -4499,7 +4524,7 @@ async function renderMeBody(){const _n=navId;
   </form>
   </div></details>
   ${(()=>{const n=lsList('wh_hidden').length+lsList('wh_blocked').length;return n?`<div class="card" style="margin-top:20px"><b>你隱藏或封鎖的內容（${n} 項）</b><p class="small muted" style="margin:4px 0 8px">檢舉過的內容和封鎖的發布者，只會在這支手機上隱藏。</p><button type="button" class="btn sm ghost" id="btnUnblockAll">全部恢復顯示</button></div>`:''})()}
-  <details class="more danger-zone" style="margin-top:28px"><summary>刪除帳號</summary>
+  <details class="del-acct" id="delSec"><summary>刪除帳號</summary>
     <p>刪除後會<b>永久刪除</b>：你的會員資料、毛孩檔案與照片、健康紀錄、用藥紀錄、收據病歷照片、追蹤與通知設定。無法復原。</p>
     <label class="chk"><input type="checkbox" id="delContent" checked> 一併刪除我登記的走失案件、拾獲／目擊通報與我送出的目擊回報（包含電話、照片）</label>
     <p class="small muted">取消勾選的話，這些內容會保留在網站上繼續協尋，但不再屬於這個帳號。</p>
