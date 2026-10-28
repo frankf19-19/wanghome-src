@@ -701,6 +701,8 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 .pillbar{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .pillbar::-webkit-scrollbar{display:none}
 .pill{flex:none;width:auto!important;display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px!important;border-radius:999px!important;border:1.5px solid var(--line)!important;background:var(--sheet);color:var(--ink);font-size:14.5px!important;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
+select{appearance:none;-webkit-appearance:none;padding-right:38px!important;background-repeat:no-repeat;background-position:right 13px center;background-size:16px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A8F88' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+input[type=date],input[type=datetime-local],input[type=time]{-webkit-appearance:none;appearance:none;min-height:48px;text-align:left}
 select.pill{padding-right:34px!important;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2356636A' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:14px}
 .pill.on,.pill:has(input:checked){background:var(--ink);color:var(--paper);border-color:var(--ink)!important}
 .pill .ico{width:16px;height:16px}
@@ -860,7 +862,7 @@ h2 > .ico:first-child{box-sizing:content-box;width:18px;height:18px;padding:7px;
 body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
 /* 已完成：輕一點的按鈕 */
 .pwmore{margin-top:12px;text-align:center}.pwmore summary{display:inline-block;cursor:pointer;font-size:14px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px}.pwmore[open]{text-align:left}.pwmore[open] summary{display:block;text-align:center;margin-bottom:6px}
-.sharetext summary{cursor:pointer;font-weight:700;color:var(--ink-2);font-size:14px;display:list-item;list-style:disclosure-closed inside}.sharetext[open] summary{list-style-type:disclosure-open}
+.sharetext summary{cursor:pointer;font-weight:700;color:var(--ink-2);font-size:14px;list-style:none;display:inline-flex;align-items:center;gap:8px;min-height:44px}.sharetext summary::-webkit-details-marker{display:none}.sharetext summary::before{content:'';width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg) translate(-1px,-1px);transition:transform .15s}.sharetext[open] summary::before{transform:rotate(45deg)}
 .tl-rep{font-size:13px!important;color:var(--ink-3)!important;opacity:.85}
 .btn.lost-btn{color:var(--red-ink)!important}
 .done-chip{background:var(--green-soft)!important;color:var(--green)!important;border:1.5px solid transparent!important;box-shadow:none!important}
@@ -925,6 +927,7 @@ body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
   #mTitle{flex:1;min-width:0;text-align:center;font-family:var(--head);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
   .mb-home{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
   .mb-home img{width:30px;height:30px;border-radius:9px}
+  .mb-act{flex:none;display:grid;place-items:center}.mb-act:empty{display:none}.mb-act:not(:empty)+.mb-home{display:none}.mb-act button{width:44px;height:44px;border:0;background:none;color:var(--red);display:grid;place-items:center;border-radius:50%;cursor:pointer}.mb-act button:active{background:var(--red-soft)}.mb-act .ico{width:24px;height:24px}
   body.inner #app{padding-top:10px}
   body.inner .backlink{display:none}   /* 上方已經有「返回」 */
 }
@@ -1140,8 +1143,8 @@ a.bigbtn{opacity:1!important;text-decoration:none!important}
 .tile4 b{font-family:var(--head);font-size:18px;line-height:1.3;margin-top:4px}
 .tile4 small{font-size:13px;opacity:.78}
 .tile4.tp{background:#FFC6D3}.tile4.tm{background:#BFEBD9}.tile4.tb{background:#FFE7A8}.tile4.tl{background:#D9D2FF}
-:root[data-theme="dark"] .tile4{filter:saturate(.85) brightness(.92)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4{filter:saturate(.85) brightness(.92)}}
+:root[data-theme="dark"] .tile4{filter:none;color:var(--ink)}:root[data-theme="dark"] .tile4.tp{background:#4A2A35}:root[data-theme="dark"] .tile4.tm{background:#213E34}:root[data-theme="dark"] .tile4.tb{background:#4A3E20}:root[data-theme="dark"] .tile4.tl{background:#332E52}:root[data-theme="dark"] .tile4 .te{background:color-mix(in srgb,var(--sheet) 70%,transparent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4{filter:none;color:var(--ink)}:root:not([data-theme="light"]) .tile4.tp{background:#4A2A35}:root:not([data-theme="light"]) .tile4.tm{background:#213E34}:root:not([data-theme="light"]) .tile4.tb{background:#4A3E20}:root:not([data-theme="light"]) .tile4.tl{background:#332E52}:root:not([data-theme="light"]) .tile4 .te{background:color-mix(in srgb,var(--sheet) 70%,transparent)}}
 .bigstart .bs-rule{background:var(--sheet);border-color:var(--line)}
 /* 卡片與按鈕 */
 .ccard{border-radius:26px!important;box-shadow:var(--lift)!important}
@@ -1202,8 +1205,8 @@ body{touch-action:manipulation}
 .btn:active,.pill:active,.mrow:active,.ccard:active,.mp:active{transform:scale(.97)}
 .btn,.pill,.ccard,.mp,.mrow{transition:transform .12s ease}
 /* 換頁淡入 */
-@media (prefers-reduced-motion:no-preference){#app.enter{animation:appIn .22s ease-out}}
-@keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:no-preference){#app.enter{animation:appIn .22s ease-out}#app.enter.push{animation:pushIn .24s cubic-bezier(.2,.8,.2,1)}#app.enter.pop{animation:popIn .22s cubic-bezier(.2,.8,.2,1)}}
+@keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes pushIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}@keyframes popIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
 /* 載入中：小圓圈 */
 .empty.loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:70px 0;color:var(--ink-3)}
 .spin.sm{width:18px;height:18px;border-width:3px;display:inline-block;vertical-align:-3px}
@@ -1225,7 +1228,10 @@ body{touch-action:manipulation}
 .mri.c1{background:#E86A92}.mri.c2{background:#F08A5D}.mri.c3{background:#3FAF84}.mri.c4{background:#5B8DEF}.mri.c5{background:#8E7CE0}
 .mrl{flex:1;font-size:16px;font-weight:600}.mrv{color:var(--ink-3);font-size:15px}
 .mrc{color:var(--ink-3);width:18px;height:18px}
-.mver{text-align:center;color:var(--ink-3);font-size:13px;margin:22px 0 8px}
+.mver{text-align:center;color:var(--ink-3);font-size:12px;letter-spacing:.2px;margin:22px 0 8px}
+.pskel{display:grid;gap:12px;padding:8px 0}.pskel .sk{background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 55%,var(--sheet)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px}.pskel .card{display:grid;gap:10px}
+.btn.danger{background:#C62828;color:#fff;border-color:#C62828}.sheet.ask .sh-t{font-size:19px;margin-top:10px}.sheet.ask .sheet-x{display:none}
+.del-row{text-align:center;margin:28px 0 12px}.danger-text{color:#C62828!important;font-size:15px;min-height:44px}.danger-text .ico{width:18px;height:18px}
 @media (max-width:760px){
   .morelist{display:block}
   footer{display:none!important}
@@ -1333,7 +1339,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .cact .btn.call{text-align:center;flex-wrap:wrap;gap:4px 8px}.cact-num{white-space:nowrap;font-family:var(--display);letter-spacing:.02em}
 .tipbox{background:var(--mark-soft,#FFF5CC);color:var(--ink);border-radius:14px;padding:10px 14px;margin:12px 0 0;font-size:15px;line-height:1.55}
 .cact-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}.cact-sub .btn{justify-content:center;padding-left:6px;padding-right:6px}
-.ownerfoot{justify-content:flex-start;gap:6px 18px;margin:26px 0 0;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.ownerfoot{display:grid;gap:0;margin:26px 0 0;border-top:1px solid var(--line)}.ownerfoot .linkbtn{min-height:48px;width:100%;justify-content:flex-start;font-size:15px;color:var(--ink-2);border-bottom:1px solid var(--line);gap:8px}.ownerfoot .linkbtn:hover{text-decoration:none}
 @media(min-width:900px){#quick,.er,#fullDet{max-width:720px;margin-left:auto;margin-right:auto}}
 .injstrip{display:flex;align-items:center;gap:10px;margin:12px 0 4px;padding:12px 16px;border-radius:16px;background:var(--red-soft);color:var(--red-ink);text-decoration:none;font-size:15px;min-height:52px}
 .injstrip:hover{text-decoration:none}.injstrip span:first-of-type{flex:1}.injstrip b{margin-right:6px}.injstrip>span:last-child{font-size:22px}
@@ -1359,7 +1365,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1.25fr 1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.mg-ai{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:14px 14px 6px;margin:0 0 14px}
 .mg-ai-row{display:flex;align-items:center;gap:12px;padding:10px 2px;border-top:1px solid var(--line);color:inherit!important;text-decoration:none!important;min-height:52px}
 .mg-ai .sa-head+.mg-ai-row{border-top:0;margin-top:4px}
-.mg-ai-row>span:first-child{font-size:22px;flex:none;width:30px;text-align:center}
+.mg-ai-row>span:first-child{font-size:22px;flex:none;width:30px;text-align:center;display:grid;place-items:center}.mg-ai-row>span:first-child .ico{width:22px;height:22px;color:var(--red)}.mg-ai-row.warn>span:first-child .ico{color:var(--red-ink)}.sa-spark .ico{width:18px;height:18px;color:var(--red)}
 .mg-ai-row b{display:block;font-size:15.5px;line-height:1.35}.mg-ai-row small{display:block;font-size:13.5px;color:var(--ink-3);line-height:1.4}
 .mg-ai-row.warn b{color:var(--red-ink)}
 .mg-ai-row em{margin-left:auto;font-style:normal;font-size:20px;color:var(--ink-3)}
@@ -1403,7 +1409,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .bs-sub{margin:-6px 0 12px;font-size:15px;color:var(--ink-2)}
 .out-sec{max-width:520px;margin:18px auto 0}
 .del-acct{margin:8px auto 8px;max-width:520px;text-align:center}
-.del-acct>summary{list-style:none;cursor:pointer;display:inline-block;font-size:14px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px;padding:10px 12px}
+.del-acct>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:700;color:#C62828;padding:6px 12px}.del-acct>summary::-webkit-details-marker{display:none}
 .del-acct>summary::-webkit-details-marker{display:none}
 .del-acct[open]{text-align:left;background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:6px 16px 16px}
 .del-acct[open]>summary{color:var(--red-ink);text-decoration:none;font-weight:800;padding-left:0}
@@ -1547,7 +1553,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
   </nav>
 </header>
 
-<div class="mbar" id="mbar" role="navigation" aria-label="頁面導覽"><button type="button" class="mb-back" id="mBack" aria-label="返回"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span></button><b id="mTitle"></b><a href="#/" class="mb-home" aria-label="回首頁"><img src="icon.svg" alt="" width="30" height="30"></a></div>
+<div class="mbar" id="mbar" role="navigation" aria-label="頁面導覽"><button type="button" class="mb-back" id="mBack" aria-label="返回"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span></button><b id="mTitle"></b><span id="mAct" class="mb-act"></span><a href="#/" class="mb-home" aria-label="回首頁"><img src="icon.svg" alt="" width="30" height="30"></a></div>
 <main id="app" tabindex="-1"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></main>
 
 <footer>
@@ -1576,7 +1582,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.11';
+const BUILD = 'v5.4.12';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1746,6 +1752,7 @@ function cityOptions(sel){return '<option value="">選擇縣市</option>'+Object
 function distOptions(city,sel){return '<option value="">選擇區</option>'+(TW[city]||[]).map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('')}
 function qs(h){const i=h.indexOf('?');if(i<0)return{};return Object.fromEntries(new URLSearchParams(h.slice(i+1)))}
 function RM(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(_){return false}}
+function setNavAction(html,fn){const s=document.getElementById('mAct');if(!s)return;s.innerHTML=html||'';if(fn&&s.firstElementChild)s.firstElementChild.onclick=fn}
 function setTitle(t){t=String(t||'').replace(/[\u202A-\u202E\u2066-\u2069]/g,'');document.title=(t?t+' — ':'')+CONFIG.SITE_NAME;const m=document.getElementById('mTitle');if(m)m.textContent=t||CONFIG.SITE_NAME}
 // 很長的清單（例如 200 筆目擊）：先顯示 20 筆，其餘按按鈕再顯示
 function capList(box,n=20){if(!box)return;const items=[...box.children].filter(x=>x.classList.contains('tl'));if(items.length<=n)return;items.slice(n).forEach(x=>x.classList.add('hidden'));const b=document.createElement('button');b.type='button';b.className='btn ghost block';b.style.marginTop='8px';b.textContent=`顯示全部（還有 ${items.length-n} 筆）`;b.onclick=()=>{items.forEach(x=>x.classList.remove('hidden'));b.remove()};box.appendChild(b)}
@@ -1946,14 +1953,11 @@ function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/health','health',
 function openAddSheet(){
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   const r=(h,i,c,t,d)=>`<a class="srow" href="${h}"><span class="sri ${c}">${i}</span><span class="srt"><b>${t}</b><small>${d}</small></span>${ic('chev','mrc')}</a>`;
-  el.innerHTML=`<div class="sheet" role="dialog" aria-label="新增"><div class="grab" aria-hidden="true"></div><p class="sh-t">要做什麼呢？</p>
+  el.innerHTML=`<div class="sheet" role="dialog" aria-label="新增"><div class="grab" aria-hidden="true"></div><p class="sh-t">新增</p>
     ${r('#/new',ic('megaphone'),'s1','我的毛孩走失了','登記協尋，自動做海報')}
     ${r('#/seen',ic('eye'),'s2','我看到／撿到毛孩','拍照回報給飼主')}
-    ${r('#/health/add',ic('clipboard'),'s3','新增健康紀錄','看診、疫苗、驅蟲、體重')}
+    ${r('#/health/add',ic('clipboard'),'s3','新增健康紀錄','看診、疫苗、驅蟲、用藥')}
     ${r('#/pet/new',ic('paw'),'s4','新增毛孩檔案','生日、晶片、照片')}
-    ${r('#/lost',ic('search'),'s5','看正在協尋的毛孩','幫忙找、分享出去')}
-    ${r('#/adopt',ic('shelter'),'s6','我想領養毛孩','全台公立收容所，依縣市看照片')}
-    ${r('#/learn',ic('star'),'s3','毛孩小學堂','狗狗、貓咪的照顧小知識')}
     <button type="button" class="btn ghost block sh-x">取消</button></div>`;
   el.onclick=e=>{const a=e.target.closest('a.srow');if(a){e.preventDefault();const h=a.getAttribute('href');overlayOpen=null;el.remove();location.replace(location.pathname+location.search+h);return}
     if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};
@@ -2008,7 +2012,18 @@ function isFetchErr(e){return !!e&&(!e.code||/fetch|network|load failed/i.test(e
 function netErrHTML(){return `<div class="empty-card"><div class="big">📶</div><b>網路好像不太穩，資料沒有載入</b><p class="small">請確認網路後再試一次。</p><button type="button" class="btn" onclick="route()">再試一次</button></div>`}
 function rerender(fn){const y=scrollY;return Promise.resolve(fn()).then(()=>restoreScroll(y)).catch(()=>{})}
 // 回到上一頁時捲回原本位置：等新頁面畫好、名單載完（不是灰色載入卡片）再捲，不然會被壓到比較上面
-function restoreScroll(y){const id=navId;let n=0;const t=()=>{if(id!==navId)return;const busy=app.querySelector('.skel,.empty.loading');if((!busy&&document.documentElement.scrollHeight>=y+innerHeight*0.5)||n>60){window.scrollTo(0,y);return}n++;setTimeout(t,50)};setTimeout(t,0)}
+function pageSkel(kind){const b=(w,h=14)=>`<div class="sk" style="width:${w};height:${h}px"></div>`;
+  if(kind==='pet')return `<div class="pskel" role="status" aria-label="載入中"><div class="sk" style="height:230px;border-radius:24px"></div>${b('40%',26)}${b('60%')}<div class="card">${b('100%',48)}${b('100%',48)}</div>${b('100%',120)}</div>`;
+  if(kind==='case')return `<div class="pskel" role="status" aria-label="載入中">${b('30%',22)}${b('65%',28)}${b('50%')}<div class="sk" style="height:340px;border-radius:24px"></div>${b('100%',56)}</div>`;
+  return `<div class="pskel" role="status" aria-label="載入中">${b('45%',28)}<div class="card">${b('100%',48)}${b('100%',48)}${b('100%',48)}</div>${b('100%',120)}</div>`}
+/* 取代 confirm()：底部確認單，紅色按鈕代表會刪除／無法復原 */
+function askSheet({title,body,ok='確定',danger=false,cancel='取消'}){return new Promise(res=>{
+  const el=document.createElement('div');el.className='lightbox sheet-bg';
+  el.innerHTML=`<div class="sheet ask" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p>${body?`<p class="muted" style="margin:0 0 16px;white-space:pre-line">${esc(body)}</p>`:''}<button type="button" class="btn big block ${danger?'danger':''}" data-ok>${esc(ok)}</button><button type="button" class="btn big block ghost sh-x" style="margin-top:8px">${esc(cancel)}</button></div>`;
+  let done=false;const fin=v=>{if(done)return;done=true;if(v&&danger)__submitting=true;closeOverlay(el);res(v)};
+  el.onclick=e=>{if(e.target.closest('[data-ok]'))fin(true);else if(e.target===el||e.target.closest('.sh-x'))fin(false)};
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))})}
+function restoreScroll(y){const id=navId;let n=0;const t=()=>{if(id!==navId)return;const busy=app.querySelector('.skel,.empty.loading,.pskel');if((!busy&&document.documentElement.scrollHeight>=y+innerHeight*0.5)||n>60){window.scrollTo(0,y);return}n++;setTimeout(t,50)};setTimeout(t,0)}
 window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
 // ===== 手機「返回」：記住在網站裡走了幾步；有上一頁就退回，直接打開內頁時回到合理的上一層 =====
 let navDepth=0,__replacing=false,__firstRoute=true;
@@ -2090,9 +2105,10 @@ function route(){window.__lastRoute=Date.now();
   document.body.classList.remove('has-cta');
   document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
-  app.classList.remove('enter');void app.offsetWidth;app.classList.add('enter');
-  const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;curHash=newHash;const trav=trackDepth(wasPop);
-  document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent=''}
+  const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
+  app.classList.remove('enter','push','pop');void app.offsetWidth;app.classList.add('enter');if(IS_APP&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(wasPop?'pop':'push');
+  curHash=newHash;const trav=trackDepth(wasPop);
+  document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
   let m;
@@ -2144,7 +2160,7 @@ function route(){window.__lastRoute=Date.now();
    ============================================================ */
 let __wiz=null,__dirty=false,__dirtyMsg='';
 // 表單裡點選項按鈕（狗／貓、疫苗快速選項…）也算有填資料；換步驟的按鈕不算
-document.addEventListener('click',e=>{if(!e.isTrusted)return;const b=e.target.closest&&e.target.closest('#app form button[type=button]');if(b&&!b.closest('.wnav,.submitbar')&&!/wnext|wprev|wback/.test(b.className)){const f=b.closest('form');if(f&&!f.hasAttribute('data-nodirty'))__dirty=true}},true);
+document.addEventListener('click',e=>{if(!e.isTrusted)return;const b=e.target.closest&&e.target.closest('#app form button[type=button]');if(b&&!b.closest('.wnav,.submitbar,.del-row')&&!/wnext|wprev|wback/.test(b.className)){const f=b.closest('form');if(f&&!f.hasAttribute('data-nodirty'))__dirty=true}},true);
 document.addEventListener('input',e=>{if(e.target.type==='datetime-local'||e.target.type==='date')e.target.dataset.touched='1';const f=e.target.closest&&e.target.closest('#app form');if(f&&!f.hasAttribute('data-nodirty'))__dirty=true},true);
 // 填到一半要離開：先問一下（送出中、送出後跳頁不問）
 let __submitting=false,__skipRoute=false;
@@ -2395,7 +2411,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
 async function renderHealth(){const _n=navId;
   setTitle('毛孩健康手冊');
   if(!me())return renderHealthLanding();
-  (_n===navId?app:_void).innerHTML=`<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>`;
+  (_n===navId?app:_void).innerHTML=pageSkel('health');
   const [prof,{data:pets,error:pe},{data:dues},{data:medsA}]=await Promise.all([
     getProfile(), sb.from('pets').select('*').order('created_at'),
     sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),2)).order('next_due').limit(40),
@@ -2414,10 +2430,11 @@ async function renderHealth(){const _n=navId;
   <div class="grid">${pets.map(petCardHTML).join('')}</div>
   ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2 id="medSec">${ic("pill")} 今天的用藥與保養品</h2><p class="muted small" style="margin:-6px 0 8px">餵完按一下就打勾，再按一次可以取消。</p><div class="card med-card">${rows.join('')}</div>`:''})()}
   <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
-  ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">到期前 2 個月會出現在這裡，到期前會提醒你。全部的到期日在各毛孩頁的「下次到期」。</div>`}
+  ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due" data-go="#/pet/${r.pet_id}"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">到期前 2 個月會出現在這裡，到期前會提醒你。全部的到期日在各毛孩頁的「下次到期」。</div>`}
   ${IS_APP?`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("bell")} 手機通知 <span class="muted small" id="lnSum">${lnPrefText()}提醒你</span></summary><div class="mg-body">${lnSection().replace(/<h2>[\s\S]*?<\/h2>/g,'')}
     <details class="calhelp calmore" style="margin-top:14px"><summary>也想加到手機日曆？（可以不用）</summary>${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</details></div></details>`
   :`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("calendar")} 加到手機日曆 <span class="muted small">到期前提醒你</span></summary><div class="mg-body">${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</div></details>`}`;
+  app.querySelectorAll('.due[data-go]').forEach(d=>d.onclick=e=>{if(e.target.closest('button,details,a,select,input'))return;location.hash=d.dataset.go});
   {const d=$('#calSec');if(d){d.ontoggle=()=>{window.__calOpen=d.open};if(IS_APP&&qs(location.hash).cal){const c=d.querySelector('.calmore');if(c)c.open=true}}}
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
@@ -2520,13 +2537,13 @@ function sightAnalysis(c,pts){
 // 頁面內跳轉（#dueSec 這類），不要被當成換頁
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[data-jump]');if(!a)return;e.preventDefault();const el=document.querySelector(a.getAttribute('href'));if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>760?150:70),behavior:RM()?'auto':'smooth'})});
 function healthAdvice(pets,ds,meds,logs,petName){const out=[],today=todayStr();
-  ds.filter(r=>r.next_due<today).slice(0,2).forEach(r=>out.push(['#dueSec','⚠️',`${esc(petName[r.pet_id]||'')}的「${esc(r.title)}」${dueText(r.next_due)}`,'做完了就在下面按「標記完成」','warn']));
+  ds.filter(r=>r.next_due<today).slice(0,2).forEach(r=>out.push(['#dueSec',ic('alert'),`${esc(petName[r.pet_id]||'')}的「${esc(r.title)}」${dueText(r.next_due)}`,'做完了就在下面按「標記完成」','warn']));
   let left=0,names=[];(meds||[]).forEach(m=>{const sl=medSlots(m);if(!sl||!sl.length)return;const done=logs.filter(l=>l.med_id===m.id).map(l=>l.slot);const rem=sl.filter(x=>!done.includes(x));if(rem.length){left+=rem.length;names.push(`${petName[m.pet_id]||''}的${m.name}`)}});
-  if(left)out.push(['#medSec','💊',`今天還有 ${left} 次要餵`,esc(names.slice(0,2).join('、'))+(names.length>2?' 等':''),'']);
-  const next=ds.find(r=>r.next_due>=today);if(next&&out.length<3)out.push(['#dueSec','📅',`${esc(petName[next.pet_id]||'')}的「${esc(next.title)}」${dueText(next.next_due)}`,`日期 ${next.next_due}，到期前會提醒你`,'']);
-  (pets||[]).forEach(p=>{const b=bdayInfo(p.birthday);if(b&&b.days<=14&&out.length<3)out.push([`#/pet/${p.id}`,'🎂',b.days===0?`${esc(p.name)}今天 ${b.age} 歲生日！`:`${esc(p.name)}再 ${b.days} 天滿 ${b.age} 歲`,'記得幫牠拍張照、記一下體重','']) });
+  if(left)out.push(['#medSec',ic('pill'),`今天還有 ${left} 次要餵`,esc(names.slice(0,2).join('、'))+(names.length>2?' 等':''),'']);
+  const next=ds.find(r=>r.next_due>=today);if(next&&out.length<3)out.push(['#dueSec',ic('calendar'),`${esc(petName[next.pet_id]||'')}的「${esc(next.title)}」${dueText(next.next_due)}`,`日期 ${next.next_due}，到期前會提醒你`,'']);
+  (pets||[]).forEach(p=>{const b=bdayInfo(p.birthday);if(b&&b.days<=14&&out.length<3)out.push([`#/pet/${p.id}`,ic('cake'),b.days===0?`${esc(p.name)}今天 ${b.age} 歲生日！`:`${esc(p.name)}再 ${b.days} 天滿 ${b.age} 歲`,'記得幫牠拍張照、記一下體重','']) });
   if(!out.length)out.push(['#/health/add','✅',`近期沒有要做的事，${esc((pets||[]).map(p=>p.name).slice(0,2).join('、'))}都照顧得很好`,'看診、打疫苗後記一筆，下次到期會自動提醒','']);
-  return `<div class="mg-ai"><div class="sa-head"><span class="sa-spark" aria-hidden="true">✨</span><b>健康小幫手</b><small>今天要注意的事</small></div>${out.slice(0,3).map(([h,i,t,sub,cls])=>`<a class="mg-ai-row ${cls}" href="${h}" ${h.startsWith('#/')?'':'data-jump'}><span aria-hidden="true">${i}</span><span><b>${t}</b><small>${sub}</small></span><em aria-hidden="true">›</em></a>`).join('')}</div>`}
+  return `<div class="mg-ai"><div class="sa-head"><span class="sa-spark" aria-hidden="true">${ic('sparkle')}</span><b>健康小幫手</b><small>今天要注意的事</small></div>${out.slice(0,3).map(([h,i,t,sub,cls])=>`<a class="mg-ai-row ${cls}" href="${h}" ${h.startsWith('#/')?'':'data-jump'}><span aria-hidden="true">${i}</span><span><b>${t}</b><small>${sub}</small></span><em aria-hidden="true">›</em></a>`).join('')}</div>`}
 function mgAdvice(c,pendS,ss,go,id){const N=esc(c.name||'牠'),d=daysSince(c.lost_at),out=[];
   const conf=(ss||[]).filter(x=>x.status==='confirmed'&&x.seen_at).sort((a,b)=>new Date(b.seen_at)-new Date(a.seen_at))[0];
   if(conf&&(Date.now()-new Date(conf.seen_at))/36e5<24)out.push([`#/case/${id}`,'📍',`${N}剛在「${esc(conf.place_text||'地圖上的位置')}」附近被看到`,'現在去那一帶找，帶熟悉的零食或衣服']);
@@ -2648,7 +2665,7 @@ function cardHTML(c){
       <div class="t">${esc(c.name)}</div>
       <div class="m">${esc([sp(c.species).name,c.breed,SEX[c.sex],c.colour].filter(Boolean).join('、'))}</div>
       <div class="loc">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</div>
-      <div class="chips">${fresh?`<span class="tag amber">👀 剛有人看到</span>`:c.sighting_count?`<span class="tag">目擊 ${c.sighting_count} 次</span>`:''}${staleTag(c)}${distText(c.lost_lat,c.lost_lng)}</div>
+      <div class="chips">${fresh?`<span class="tag amber">${ic("eye")} 剛有人看到</span>`:c.sighting_count?`<span class="tag">目擊 ${c.sighting_count} 次</span>`:''}${staleTag(c)}${distText(c.lost_lat,c.lost_lng)}</div>
     </div></a>`;
 }
 function foundCardHTML(f){
@@ -2758,7 +2775,7 @@ async function liveShelterMatch(c,token){
 const viewedCases=new Set();
 async function renderCase(id){const _n=navId;
   clearInterval(refreshTimer);refreshTimer=null;
-  if(app.dataset.case!==id)(_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  if(app.dataset.case!==id)(_n===navId?app:_void).innerHTML=pageSkel('case');
   let [{data:c,error},{data:sightings},{data:matches}]=await Promise.all([
     sb.from('cases_public').select('*').eq('id',id).single(),
     sb.from('sightings_public').select('*').eq('case_id',id).order('seen_at',{ascending:true}),
@@ -2833,7 +2850,7 @@ async function renderCase(id){const _n=navId;
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製協尋貼文</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a></div>
   </div>
   </div>
-      <p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">封鎖發布者</button></p>
+      <p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">${ic("shield")} 封鎖發布者</button></p>
   ${active?`<div class="sticky-cta"><a class="btn block" href="#/report/${id}">${ic("eye")} 我看到${esc(c.name||"牠")}了，回報目擊</a></div>`:''}`;
 
   document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${safeU(photos[+t.dataset.i])}')`});
@@ -2856,6 +2873,7 @@ async function renderCase(id){const _n=navId;
   getShareUrl('s',id).then(u=>{if(u===url||location.hash.split('?')[0]!=='#/case/'+id)return;applyShareUrl(u,shareTitle);const t=$('#shareText');if(t)t.value=shareText(c,u)});
   $('#btnReport').onclick=()=>openReport('case',id,c.poster);
   {const bb=$('#btnBlock');if(bb)bb.onclick=()=>blockPoster(c.poster,()=>{location.hash='#/'})}
+  if(_n===navId)setNavAction(`<button type="button" aria-label="分享">${ic('share')}</button>`,()=>{const b=$('#btnShare');if(b)b.click()});
   $('#btnManage').onclick=async()=>{
     let t=null;try{t=localStorage.getItem('wh_token_'+id)}catch(_){}
     if(t||me()){const {data}=await sb.rpc('can_manage_case',{p_id:id,p_token:t});if(data){location.hash=`#/manage/${id}`;return}}
@@ -2975,8 +2993,8 @@ function lightbox(u){u=safeU(u);if(!u)return;const d=document.createElement('div
    ============================================================ */
 function renderNew(){
   setTitle('登記走失');
-  app.innerHTML=`<h1>登記走失毛孩</h1><p class="lede">免費、不用註冊。照著步驟填，大約 2 分鐘。</p>
-  ${me()?`<p class="small muted">✓ 已登入（${esc(me().email||'')}），案件會存到你的帳號。</p>`:''}
+  app.innerHTML=`<h1>登記走失毛孩</h1><p class="lede">${IS_APP?(me()?'照著步驟填，大約 2 分鐘。':'不用註冊也能登記。照著步驟填，大約 2 分鐘。'):'免費、不用註冊。照著步驟填，大約 2 分鐘。'}</p>
+  ${me()?`<p class="small muted">✓ 案件會存到你的帳號，之後在「我的」就能管理。</p>`:''}
   <form onsubmit="return false" class="card steps" id="f" autocomplete="on">
     <h3>牠叫什麼名字？長什麼樣子？</h3>
     <div class="seg" id="segSp" role="group" aria-label="狗還是貓"><button type="button" data-v="dog">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
@@ -3353,7 +3371,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   if($('#mgCopy'))$('#mgCopy').onclick=()=>copy(shareText(c,shareUrl));
   if($('#btnClaim'))$('#btnClaim').onclick=async e=>{const cb=e.currentTarget;if(cb.disabled)return;cb.disabled=true;const {error}=await sb.rpc('claim_case',{p_id:id,p_token:token});if(error){cb.disabled=false;return toast(error.message)}toast('✅ 已存到你的帳號，換手機也能管理');if(__dirty){const x=$('#btnClaim');const box=x&&(x.closest('.notice,.card')||x);if(box)box.remove()}else renderManage(id,mailOnly?null:token,mailOnly?token:undefined)};   // 正在改資料時不要整頁重畫，免得改到一半的內容不見
   let status=c.status;
-  if($('#btnHome'))$('#btnHome').onclick=async()=>{if(!confirm(`${c.name} 回家了嗎？\n按「確定」：案件會改成「已回家」，大家就知道不用再找了（之後還能改回來）。`))return;
+  if($('#btnHome'))$('#btnHome').onclick=async()=>{if(!await askSheet({title:`${c.name} 回家了嗎？`,body:'案件會改成「已回家」，大家就知道不用再找了。之後還能改回來。',ok:'對，回家了 🎉'}))return;
     const b=$('#btnHome');b.disabled=true;const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p:{status:'found'}});b.disabled=false;
     if(error)return toast('儲存失敗：'+error.message);toast('✅ 已改成「已回家」');try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}
     status='found';markSeg('found');b.remove();const pp=b.previousElementSibling;if(pp&&pp.tagName==='P')pp.remove();
@@ -3386,7 +3404,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   let photos=(c.photos||[]).slice();const pv=$('#pv');
   const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
   $('#photoIn').onchange=async e=>{if(photos.length>=4){toast('最多 4 張照片，請先刪掉一張再加');e.target.value='';return}for(const f of [...e.target.files].slice(0,4-photos.length)){toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
-  $('#btnDelCase').onclick=async()=>{if(!confirm(`要永久刪除「${c.name}」這個案件嗎？\n所有目擊回報也會一起刪除，無法復原。\n（只是找到了的話，請改按「${c.name}回家了」）`))return;if(!confirm('最後確認：真的要永久刪除嗎？'))return;
+  $('#btnDelCase').onclick=async()=>{if(!await askSheet({title:`永久刪除「${c.name}」的案件？`,body:`所有目擊回報也會一起刪除，無法復原。只是找到了的話，請改按「${c.name}回家了」。`,ok:'刪除案件',danger:true}))return;
     const {error}=await sb.rpc('delete_case',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
     try{localStorage.removeItem('wh_token_'+id);sessionStorage.removeItem('wh_mkey_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這個案件',3000);goReplace('#/')};
   $('#fe').onsubmit=once(async e=>{e.preventDefault();const fd=new FormData(e.target);const p={photos};['name','colour','features','collar_desc','temperament','lost_place','contact_name','contact_phone','contact_email','contact_line','notes'].forEach(k=>p[k]=String(fd.get(k)??'').trim());p.phone_public=!!fd.get('phone_public');p.reward=Math.max(0,Math.round(+(fd.get('reward')||0))||0);if(!p.contact_phone&&!p.contact_email&&!p.contact_line)return toast('電話、Email、LINE 請至少留一種，看到牠的人才聯絡得到你',5000);if(p.contact_phone&&!p.phone_public&&!p.contact_email&&!p.contact_line)return toast('電話設成不公開的話，請再留 Email 或 LINE，不然沒人聯絡得到你',5000);const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);
@@ -3845,10 +3863,10 @@ async function renderFoundManage(id,token){const _n=navId;setTitle('管理我的
     </section>
   </div>
   <p class="small muted mg-foot">管理連結請勿轉傳。</p>`;
-  if($('#btnReunite'))$('#btnReunite').onclick=async e=>{e.preventDefault();if(!confirm('牠已經回到主人身邊了嗎？\n按「確定」：這則通報會改成「已回到主人身邊」，大家就知道不用再找了。'))return;
+  if($('#btnReunite'))$('#btnReunite').onclick=async e=>{e.preventDefault();if(!await askSheet({title:'牠已經回到主人身邊了嗎？',body:'這則通報會改成「已回到主人身邊」，大家就知道不用再找了。',ok:'對，回到主人身邊了'}))return;
     const {error}=await sb.rpc('update_found',{p_id:id,p_token:token,p:{status:'reunited',current_place:f.current_place,reporter_phone:f.reporter_phone,phone_public:f.phone_public,notes:f.notes}});
     if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('🎉 太好了，謝謝你！',3500);route()};
-  $('#btnDelFound').onclick=async()=>{if(!confirm('要永久刪除這則通報嗎？\n刪除後地圖上就看不到，飼主也聯絡不到你。\n（只是牠已經回家的話，請改按「牠回到主人身邊了」）'))return;const {error}=await sb.rpc('delete_found',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
+  $('#btnDelFound').onclick=async()=>{if(!await askSheet({title:'永久刪除這則通報？',body:'刪除後地圖上就看不到，飼主也聯絡不到你。只是牠已經回家的話，請改按「牠回到主人身邊了」。',ok:'刪除通報',danger:true}))return;const {error}=await sb.rpc('delete_found',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
     try{localStorage.removeItem('wh_ftoken_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這則通報',3000);goReplace('#/')};
   if($('#btnClaimF'))$('#btnClaimF').onclick=async e=>{const cb=e.currentTarget;if(cb.disabled)return;cb.disabled=true;const {error}=await sb.rpc('claim_found',{p_id:id,p_token:token});if(error){cb.disabled=false;return toast(error.message)}toast('✅ 已存到你的帳號，換手機也能管理');renderFoundManage(id,token)};
   let st=f.status;
@@ -3887,7 +3905,7 @@ function applyShareUrl(url,title){
 function lsList(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[]}catch(_){return []}}
 function lsAdd(k,v){if(!v)return;try{const l=lsList(k);if(!l.includes(v)){l.push(v);localStorage.setItem(k,JSON.stringify(l.slice(-500)))}}catch(_){}}
 function userHidden(x){if(!x)return false;return lsList('wh_hidden').includes(x.id)||(!!x.poster&&lsList('wh_blocked').includes(x.poster))}
-function blockPoster(poster,after){if(!poster)return;if(!confirm('封鎖這位發布者？\n他發布的走失案件、通報和目擊，之後都不會再出現在你的畫面上。\n可以到「我的」頁恢復。'))return;lsAdd('wh_blocked',poster);toast('已封鎖。想反悔可到「我的」→「全部恢復顯示」',3500);if(after)after()}
+async function blockPoster(poster,after){if(!poster)return;if(!await askSheet({title:'封鎖這位發布者？',body:'他發布的走失案件、通報和目擊，之後都不會再出現在你的畫面上。可以到「我的」頁恢復。',ok:'封鎖',danger:true}))return;lsAdd('wh_blocked',poster);toast('已封鎖。想反悔可到「我的」→「全部恢復顯示」',3500);if(after)after()}
 const REPORT_REASONS=[['fake','假案件／詐騙（例如要求先匯款）'],['spam','廣告或與協尋無關'],['inappropriate','不當照片或言論'],['privacy','洩漏他人個資'],['resolved','已經找到了但沒有結案'],['other','其他']];
 function openReport(type,id,poster,after){
   const d=document.createElement('div');d.className='lightbox';d.style.alignItems='flex-start';d.style.overflow='auto';d.setAttribute('aria-label','檢舉這則內容');
@@ -4379,7 +4397,7 @@ function calSubButtons(u,web){
 }
 function bindCal(rerender){
   if($('#btnCalCopy'))$('#btnCalCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#calU').value);toast('已複製，貼到日曆 App 的「訂閱日曆」')}catch(_){$('#calU').select();toast('請長按複製')}};
-  if($('#btnCalReset'))$('#btnCalReset').onclick=async()=>{if(!confirm('要重設日曆網址嗎？\n按「確定」：舊網址立刻失效，手機日曆要重新訂閱一次。'))return;const {error}=await sb.rpc('rotate_calendar_token');if(error)return toast('重設失敗：'+error.message);toast('已重設，請重新訂閱');rerender()};
+  if($('#btnCalReset'))$('#btnCalReset').onclick=async()=>{if(!confirm('要重設訂閱連結嗎？\n按「確定」：舊連結立刻失效，手機日曆要重新訂閱一次。'))return;const {error}=await sb.rpc('rotate_calendar_token');if(error)return toast('重設失敗：'+error.message);toast('已重設，請重新訂閱');rerender()};
 }
 /* ============================================================
    App 通知提醒（只在 App 裡）：回診／疫苗／驅蟲到期前一天早上 9 點、每天的用藥時間，手機直接跳通知。
@@ -4562,9 +4580,9 @@ function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'au
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
   <p class="mlh">協尋資源</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}${row('#/injured','siren','受傷毛孩通報','c2')}${row('#/adopt','shelter','領養毛孩','c3')}${row('#/?tab=map','map','走失地圖','c4')}</div>
-  <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info','關於本站','c4')}${IS_APP?'':row('#/thanks','heart','贊助感謝牆','c1')}${row('#/contact','mail','聯絡我們','c3')}${row('#/terms','doc','使用條款','c5')}${row('#/privacy','shield','隱私權政策','c5')}</div>
+  <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${IS_APP?'':row('#/thanks','heart','贊助感謝牆','c1')}${row('#/contact','mail','聯絡我們','c3')}${row('#/terms','doc','使用條款','c5')}${row('#/privacy','shield','隱私權政策','c5')}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
-  <p class="mver">汪喵回家 ${BUILD}・全台走失狗貓協尋平台</p></div>`}
+  <p class="mver">汪喵回家 ${BUILD}${IS_APP?'':'・全台走失狗貓協尋平台'}</p></div>`}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cycle-theme]'))cycleTheme()});
 async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&location.hash.split('?')[0]==='#/me'&&!$('.morelist'))app.insertAdjacentHTML('beforeend',moreListHTML());
   // 刪除帳號放到整頁最下面（版本號下方），不跟常用功能擠在一起
@@ -4573,7 +4591,7 @@ async function renderMeBody(){const _n=navId;
   setTitle('我的');
   if(!me()){app.innerHTML=`<h1>我的</h1>${mineHTML()||'<p class="lede">這支手機還沒有登記過案件。</p>'}
     <div class="card" style="margin-top:14px"><b>加入會員（免費，可以不加入）</b><p class="small muted">加入後換手機也能管理案件，還能用毛孩健康手冊、收到附近走失通知。只要 Email，不用設密碼。</p><div class="bigacts"><a class="btn big" href="#/login?mode=signup" onclick="setReturn('#/me')">免費註冊</a><a class="btn big ghost" href="#/login?mode=login" onclick="setReturn('#/me')">我已經有帳號，登入</a></div></div>`;return}
-  (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  (_n===navId?app:_void).innerHTML=pageSkel('me');
   const [prof,{data:cs,error:ce1},{data:fs},{data:pend},{data:fl},{data:pets,error:pe1},{data:dues}]=await Promise.all([
     getProfile(), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
     sb.from('follows').select('case_id,created_at').order('created_at',{ascending:false}),
@@ -4627,8 +4645,7 @@ async function renderMeBody(){const _n=navId;
   $('#btnOut').onclick=async()=>{const clearMine=confirm('這是共用的手機嗎？\n按「確定」：登出並清除這支手機記住的管理網址和聯絡資料（共用手機建議這樣）。\n按「取消」：只登出，資料留著下次用（自己的手機）。');
     window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
-    if(!confirm('要永久刪除你的帳號嗎？\n毛孩檔案、健康紀錄、照片都會一起刪除，無法復原。'))return;
-    if(!confirm('最後確認：真的要刪除嗎？'))return;
+    if(!await askSheet({title:'永久刪除你的帳號？',body:'毛孩檔案、健康紀錄、照片都會一起刪除，無法復原。',ok:'刪除帳號',danger:true}))return;
     const b=$('#btnDelAcct');b.disabled=true;b.textContent='刪除中…';
     try{
       // 先記下要清的照片路徑，帳號刪除成功後才刪檔（不然刪帳號失敗時照片已經不見了）
@@ -4672,7 +4689,7 @@ async function renderPet(id){const _n=navId;
   if(id!=='new'){const {data,error}=await sb.from('pets').select('*').eq('id',id).maybeSingle();if(error){(_n===navId?app:_void).innerHTML=netErrHTML();return}if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}p=data}
   if(_n!==navId)return;
   setTitle(id==='new'?'新增寵物檔案':'編輯 '+p.name);
-  (_n===navId?app:_void).innerHTML=`<h1>${id==='new'?'新增寵物檔案':'✏️ '+esc(p.name)}</h1><p class="muted small">這份檔案只有你看得到。照片越多越好：正面、側面、特徵特寫。</p>
+  (_n===navId?app:_void).innerHTML=`<h1>${id==='new'?'新增寵物檔案':esc(p.name)}</h1><p class="muted small">這份檔案只有你看得到。照片越多越好：正面、側面、特徵特寫。</p>
   <form onsubmit="return false" class="card" id="pf">
     <div class="seg" id="segSp"><button type="button" data-v="dog" class="${p.species!=='cat'?'on':''}">${spIc("dog")} 狗</button><button type="button" data-v="cat" class="${p.species==='cat'?'on':''}">${spIc("cat")} 貓</button></div>
     <label class="f"><span>名字 <i class="req">*</i></span><input name="name" required maxlength="30" value="${esc(p.name||'')}"></label>
@@ -4696,7 +4713,7 @@ async function renderPet(id){const _n=navId;
     <h3>照片（最多 6 張）</h3>
     <div class="photos-preview" id="pv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
-    <div class="submitbar row"><button class="btn" id="btnSave">儲存</button>${id!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>
+    <div class="submitbar row"><button class="btn" id="btnSave">儲存</button><a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>${id!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDel">${ic('trash')} 刪除這份寵物檔案</button></p>`:''}
   </form>`;
   let species=p.species,photos=(p.photos||[]).slice();const origPh=photos.slice(),freshPh=[];let didSave=false;
   const phPath=u=>(String(u).split('/object/public/photos/')[1]||'');const rmPh=l=>{const ps=l.map(phPath).filter(x=>x.startsWith('pets/'));if(ps.length)removeAllFiles('photos',[...ps,...ps.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]).catch(()=>{})};
@@ -4713,7 +4730,7 @@ async function renderPet(id){const _n=navId;
     didSave=true;rmPh(origPh.concat(freshPh).filter(x=>!photos.includes(x)));
     if(id!=='new')lnSync(true);toast('已儲存');goReplace('#/pet/'+(saved?.id||id));
   });
-  if(id!=='new')$('#btnDel').onclick=async()=>{if(!confirm(`確定刪除 ${p.name} 的寵物檔案？健康紀錄、用藥和照片會一起刪除，無法復原。`))return;
+  if(id!=='new')$('#btnDel').onclick=async()=>{if(!await askSheet({title:`刪除 ${p.name} 的寵物檔案？`,body:'健康紀錄、用藥和照片會一起刪除，無法復原。',ok:'刪除檔案',danger:true}))return;
     const priv=await listAllFiles('pet-private',`${me().id}/${id}`).catch(()=>[]);
     const pub=(p.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(x=>x.startsWith('pets/'));
     const {error}=await sb.from('pets').delete().eq('id',id);if(error)return toast(error.message);lnSync(true);
@@ -4792,7 +4809,7 @@ function weightChart(points){
 
 async function renderPetView(id){const _n=navId;
   if(!requireLogin())return;
-  (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  (_n===navId?app:_void).innerHTML=pageSkel('pet');
   const [{data:p,error:pe},{data:recs},{data:medsAll}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).order('created_at')]);
   if(pe){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
@@ -4863,6 +4880,7 @@ async function renderPetView(id){const _n=navId;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
+  if(_n===navId)setNavAction(`<button type="button" aria-label="編輯資料">${ic('edit')}</button>`,()=>{location.hash='#/pet/'+id+'/edit'});
   {const mc=document.querySelector('#app .med-card'),ab=document.querySelector('#app .detail-head .actionbar');if(mc&&ab){ab.after(mc);mc.style.marginTop='14px'}}
   bindMedSlots(()=>rerender(()=>renderPetView(id)));
   if($('#calPromptX'))$('#calPromptX').onclick=()=>$('#calPrompt').remove();
@@ -4903,7 +4921,7 @@ async function renderRecord(petId,recId){const _n=navId;
     <div class="photos-preview" id="fv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 加入照片<input type="file" id="fileIn" accept="image/*" multiple></label>
     </details>
-    <div class="submitbar row"><button class="btn" id="btnSave">儲存紀錄</button>${recId!=='new'?'<button type="button" class="btn ghost" id="btnDel">刪除</button>':''}<a class="btn ghost" href="#/pet/${petId}">取消</a></div>
+    <div class="submitbar row"><button class="btn" id="btnSave">儲存紀錄</button><a class="btn ghost" href="#/pet/${petId}">取消</a></div>${recId!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDel">${ic('trash')} 刪除這筆紀錄</button></p>`:''}
   </form>`;
   const f=$('#rf');let kind=r.kind,files=origFiles.slice(),didSave=false;const fresh=[];
   // 下次到期日：記住「幾個月後」，日期改了就跟著重算；手動改過就不再自動動它
@@ -4939,7 +4957,7 @@ async function renderRecord(petId,recId){const _n=navId;
   {const mo=new MutationObserver(()=>{if(f.isConnected)return;mo.disconnect();
     Object.values(urls).forEach(u=>{if(String(u).startsWith('blob:'))URL.revokeObjectURL(u)});
     if(!didSave&&fresh.length)sb.storage.from('pet-private').remove(fresh).catch(()=>{})});mo.observe(app,{childList:true})}
-  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!confirm('要刪除這筆健康紀錄嗎？\n附的照片和到期提醒也會一起刪除，無法復原。'))return;const {error}=await sb.from('pet_records').delete().eq('id',recId);lnSync(true);if(error)return toast('刪除失敗：'+friendlyErr(error.message));const all=[...new Set([...files,...origFiles])];if(all.length)await sb.storage.from('pet-private').remove(all).catch(()=>{});goReplace('#/pet/'+petId)};
+  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!await askSheet({title:'刪除這筆健康紀錄？',body:'附的照片和到期提醒也會一起刪除，無法復原。',ok:'刪除紀錄',danger:true}))return;const {error}=await sb.from('pet_records').delete().eq('id',recId);lnSync(true);if(error)return toast('刪除失敗：'+friendlyErr(error.message));const all=[...new Set([...files,...origFiles])];if(all.length)await sb.storage.from('pet-private').remove(all).catch(()=>{});goReplace('#/pet/'+petId)};
 }
 
 
@@ -4953,7 +4971,7 @@ const MED_PRESETS={
   supplement:{dog:['關節保健（葡萄糖胺）','魚油','益生菌','綜合維他命','皮毛保健','護眼保健','腸胃保健','潔牙保健'],cat:['離胺酸','魚油','益生菌','化毛膏','泌尿保健','腸胃保健','綜合維他命','關節保健']},
   med:{dog:['抗生素','消炎止痛藥','止癢藥','胃藥','心臟藥','眼藥水','耳藥','皮膚外用藥'],cat:['抗生素','消炎止痛藥','腎臟用藥','甲狀腺藥','胃藥','眼藥水','耳藥','皮膚外用藥']}
 };
-ICONS.pill='<rect x="2.8" y="8.5" width="18.4" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="m8.5 8.5 7 7"/>';
+ICONS.alert='<path d="M12 3.5 2.5 20h19z"/><path d="M12 9.5v5M12 17.5h.01"/>';ICONS.sparkle='<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.5 6.5l2 2M15.5 15.5l2 2M6.5 17.5l2-2M15.5 8.5l2-2"/>';ICONS.cake='<path d="M4 20h16v-7H4zM6 13V9.5h12V13M12 9.5V6"/><path d="M4 16c2 1.5 4-1.5 6 0s4 1.5 6 0 2 1.5 4 0"/>';ICONS.trash='<path d="M5 7h14M9 7V4.5h6V7M7 7l.8 13h8.4L17 7"/><path d="M10 11v6M14 11v6"/>';ICONS.edit='<path d="M4 20h4l10.5-10.5-4-4L4 16z"/><path d="M13 7l4 4"/>';ICONS.pill='<rect x="2.8" y="8.5" width="18.4" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="m8.5 8.5 7 7"/>';
 ICONS.leaf='<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/>';
 function doseText(m){const a=m.dose_amount!=null?String(+m.dose_amount):'';return a?`${a} ${m.dose_unit||''}`.trim():''}
 function medSlots(m,dateStr){
@@ -5021,7 +5039,7 @@ async function renderMed(petId,medId){const _n=navId;
     <label class="f"><span>備註</span><textarea name="notes" maxlength="500" placeholder="例：飯後吃、磨成粉拌飯、冷藏保存">${esc(m.notes||'')}</textarea></label>
     </details>
     ${medId!=='new'?`<label class="chk"><input type="checkbox" name="active" ${m.active?'checked':''}> 目前還在吃（取消勾選＝停用，紀錄會保留）</label>`:''}
-    <div class="submitbar row"><button class="btn green">儲存</button>${medId!=='new'?'<button type="button" class="btn ghost" id="btnDelM">刪除</button>':''}<a class="btn ghost" href="#/pet/${petId}">取消</a></div>
+    <div class="submitbar row"><button class="btn green">儲存</button><a class="btn ghost" href="#/pet/${petId}">取消</a></div>${medId!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDelM">${ic('trash')} 刪除這筆用藥</button></p>`:''}
   </form>`;
   const f=$('#mf');let kind=m.kind;const times=new Set(m.times||[]);
   let files=origFiles.slice(),didSave=false;const fresh=[];const mfv=$('#mfv');
@@ -5045,7 +5063,7 @@ async function renderMed(petId,medId){const _n=navId;
     lnSync(true);setTimeout(lnAskOnce,600);
     toast('已儲存');goReplace('#/pet/'+petId);
   });
-  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!confirm('確定刪除？給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。'))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);didSave=true;{const all=origFiles.concat(fresh);if(all.length)sb.storage.from('pet-private').remove(all).catch(()=>{})}lnSync(true);goReplace('#/pet/'+petId)};
+  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!await askSheet({title:'刪除這筆用藥？',body:'給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。',ok:'刪除用藥',danger:true}))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);didSave=true;{const all=origFiles.concat(fresh);if(all.length)sb.storage.from('pet-private').remove(all).catch(()=>{})}lnSync(true);goReplace('#/pet/'+petId)};
 }
 async function renderPetPrint(id){const _n=navId;
   if(!requireLogin())return;
