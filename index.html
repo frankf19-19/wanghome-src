@@ -1573,7 +1573,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.4';
+const BUILD = 'v5.4.5';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1697,7 +1697,7 @@ Object.assign(ICONS,{info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7
 function ic(n,cls=''){return `<svg class="ico ${cls}" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`}
 
 const SIZE = {small:'小型',medium:'中型',large:'大型'};
-const STATUS = {searching:'協尋中',found:'已找到',closed:'已結案'};
+const STATUS = {searching:'協尋中',found:'已回家',closed:'已結案'};
 const FOUND_METHODS = ['網友目擊回報','自己在附近找到','收容所／動保處通報','動物醫院掃晶片','FB／LINE 社團貼文','實體海報','鄰居／里長協助','外送員／郵差等看到','自己回家','其他'];
 
 /* ============================================================
@@ -2237,7 +2237,7 @@ function openFilterSheet(after){const st={species:[...homeState.species],city:[.
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet fsheet" role="dialog" aria-label="篩選"><div class="grab" aria-hidden="true"></div><p class="sh-t">篩選（可以多選）</p>
    <div class="fgrp"><b>種類</b><div class="fchips">${ch('species','dog','狗')}${ch('species','cat','貓')}</div></div>
-   ${homeState.tab==='found'?'':`<div class="fgrp"><b>狀態</b><div class="fchips">${ch('status','searching','協尋中')}${ch('status','found','已找到')}${ch('status','closed','已結案')}</div></div>`}
+   ${homeState.tab==='found'?'':`<div class="fgrp"><b>狀態</b><div class="fchips">${ch('status','searching','協尋中')}${ch('status','found','已回家')}${ch('status','closed','已結案')}</div></div>`}
    <div class="fgrp"><b>縣市</b><div class="fchips">${Object.keys(CITY_CENTER).map(c=>ch('city',c,c)).join('')}</div></div>
    ${homeState.tab==='found'?'':`<div class="fgrp"><b>其他</b><div class="fchips"><button type="button" class="fchip ${st.reward?'on':''}" data-rw="1" aria-pressed="${st.reward}">有獎金</button></div></div>`}
    <div class="fs-acts"><button type="button" class="btn ghost" data-clear>全部清除</button><button type="button" class="btn" data-apply>套用</button></div></div>`;
@@ -2248,7 +2248,7 @@ function openFilterSheet(after){const st={species:[...homeState.species],city:[.
     if(e.target===el)closeOverlay(el)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
 function fActiveHTML(){const a=[];homeState.species.length===1&&a.push(['sp',homeState.species[0]==='dog'?'狗':'貓']);homeState.city.forEach(c=>a.push(['city',c,c]));
-  const f=homeState.tab==='found';if(!f&&!(homeState.status.length===1&&homeState.status[0]==='searching'))a.push(['st',homeState.status.map(x=>({searching:'協尋中',found:'已找到',closed:'已結案'})[x]).join('＋')]);!f&&homeState.reward&&a.push(['rw','有獎金']);
+  const f=homeState.tab==='found';if(!f&&!(homeState.status.length===1&&homeState.status[0]==='searching'))a.push(['st',homeState.status.map(x=>({searching:'協尋中',found:'已回家',closed:'已結案'})[x]).join('＋')]);!f&&homeState.reward&&a.push(['rw','有獎金']);
   return a.map(([k,t,v])=>`<button type="button" class="pill fact" data-rm="${k}" data-v="${esc(v||'')}" aria-label="取消 ${esc(t)}">${esc(t)} ✕</button>`).join('')}
 function setHomeTab(t){const base=(location.hash||'#/').split('?')[0]==='#/lost'?'#/lost':'#/';const h=t==='lost'?base:base+'?tab='+t;if(location.hash===h)return;try{history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h)}catch(_){}curHash=location.hash;scrollMem[curHash]=scrollY;renderChrome(base,location.hash)}
 
@@ -2256,7 +2256,7 @@ function setHomeTab(t){const base=(location.hash||'#/').split('?')[0]==='#/lost'
 function getMine(){try{const l=JSON.parse(localStorage.getItem('wh_mine')||'[]');return Array.isArray(l)?l.filter(x=>x&&/^[0-9a-f-]{36}$/.test(x.id)&&(x.t==='case'||x.t==='found')):[]}catch(_){return []}}
 function rememberMine(t,id,name){try{const l=getMine().filter(x=>x.id!==id);l.unshift({t,id,name:String(name||'').slice(0,30),at:Date.now()});localStorage.setItem('wh_mine',JSON.stringify(l.slice(0,20)))}catch(_){}}
 function mineHTML(excl){const l=getMine().filter(x=>!(excl&&excl.has(x.id)));if(!l.length)return '';
-  return `<div class="mine card"><b>${ic("paw")} ${excl?'這支手機登記過、還沒綁定帳號':'你在這支手機登記過'}</b>${excl?'<p class="small muted" style="margin:4px 0 6px">點進管理頁按「綁定」，換手機也能管理。</p>':''}${l.slice(0,5).map(x=>`<a class="mine-row" href="#/${x.t==='case'?'manage':'found-manage'}/${esc(x.id)}"><span>${esc(x.name||'我的通報')}<small>${x.t==='case'?'走失協尋':'拾獲／目擊通報'}</small></span><em>管理・標記找到了 ›</em></a>`).join('')}</div>`}
+  return `<div class="mine card"><b>${ic("paw")} ${excl?'這支手機登記過、還沒綁定帳號':'你在這支手機登記過'}</b>${excl?'<p class="small muted" style="margin:4px 0 6px">點進管理頁按「綁定」，換手機也能管理。</p>':''}${l.slice(0,5).map(x=>`<a class="mine-row" href="#/${x.t==='case'?'manage':'found-manage'}/${esc(x.id)}"><span>${esc(x.name||'我的通報')}<small>${x.t==='case'?'走失協尋':'拾獲／目擊通報'}</small></span><em>${x.t==='case'?'管理・標記找到了':'管理・標記已回家'} ›</em></a>`).join('')}</div>`}
 // 信裡的驗證碼是 8 位數（Supabase 設定）：多出來的數字（iPhone 自動填入有時會重複貼上一段）一律只取前 8 位
 const OTP_LEN=8;
 function otpDigits(s){s=String(s||'').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));{const e=s.match(/(?<!\d)\d{8}(?!\d)/);if(e)return e[0]}const m=s.match(/\d[\d\s-]{4,30}\d/g);if(m){const c=m.map(x=>x.replace(/\D/g,'')).find(x=>x.length>=6);if(c)return c.slice(0,OTP_LEN)}return s.replace(/\D/g,'').slice(0,OTP_LEN)}
@@ -2410,7 +2410,7 @@ async function renderHealth(){const _n=navId;
   <div class="grid">${pets.map(petCardHTML).join('')}</div>
   ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2 id="medSec">${ic("pill")} 今天的用藥與保養品</h2><p class="muted small" style="margin:-6px 0 8px">餵完按一下就打勾，再按一次可以取消。</p><div class="card med-card">${rows.join('')}</div>`:''})()}
   <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
-  ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">新增紀錄時填「下次到期日」（例如疫苗一年後），就會出現在這裡，到期前寄 Email 提醒你。</div>`}
+  ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">到期前 2 個月會出現在這裡，到期前會提醒你。全部的到期日在各毛孩頁的「下次到期」。</div>`}
   <details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("calendar")} ${IS_APP?'手機通知・':''}日曆同步 <span class="muted small">到期前提醒你</span></summary><div class="mg-body">${(lnSection()+calSection(p)).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</div></details>`;
   {const d=$('#calSec');if(d)d.ontoggle=()=>{window.__calOpen=d.open}}
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
@@ -2494,13 +2494,13 @@ const DIR8=['北','東北','東','東南','南','西南','西','西北'];
 function bearing8(a,b){const r=x=>x*Math.PI/180,y=Math.sin(r(b.lng-a.lng))*Math.cos(r(b.lat)),x=Math.cos(r(a.lat))*Math.sin(r(b.lat))-Math.sin(r(a.lat))*Math.cos(r(b.lat))*Math.cos(r(b.lng-a.lng));return DIR8[Math.round(((Math.atan2(y,x)*180/Math.PI+360)%360)/45)%8]}
 function searchRadiusKm(hours){return hours<6?0.5:hours<24?1:hours<72?2:3}
 function bearingDeg(a,b){const r=x=>x*Math.PI/180,y=Math.sin(r(b.lng-a.lng))*Math.cos(r(b.lat)),x=Math.cos(r(a.lat))*Math.sin(r(b.lat))-Math.sin(r(a.lat))*Math.cos(r(b.lat))*Math.cos(r(b.lng-a.lng));return (Math.atan2(y,x)*180/Math.PI+360)%360}
-const fmtKm=d=>d<1?Math.round(d*1000/10)*10+' 公尺':(Math.abs(d-Math.round(d))<0.05?Math.round(d):d.toFixed(1))+' 公里';
+const fmtKm=d=>d<0.995?Math.max(10,Math.round(d*1000/10)*10)+' 公尺':(Math.abs(d-Math.round(d))<0.05?Math.round(d):d.toFixed(1))+' 公里';
 function sightAnalysis(c,pts){
   const geo=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t));
   const seen=geo.filter(p=>p.cls!=='start');if(!seen.length||c.status!=='searching')return null;
   const last=seen[seen.length-1],start=geo.find(p=>p.cls==='start');
   const hrs=Math.max(0,(Date.now()-new Date(last.t))/36e5),rad=searchRadiusKm(hrs);
-  const a={name:c.name||'牠',species:c.species,last,rad,n:seen.length,hrs,ago:hrs<1?'不到 1 小時前':hrs<24?Math.round(hrs)+' 小時前':Math.round(hrs/24)+' 天前'};
+  const a={name:c.name||'牠',species:c.species,last,rad,n:seen.length,hrs,ago:hrs<1?'不到 1 小時前':hrs<24?Math.floor(hrs)+' 小時前':Math.floor(hrs/24)+' 天前'};
   if(start){a.dist=km(start,last);a.deg=bearingDeg(start,last);a.dir=bearing8(start,last)}
   if(seen.length>=2){const prev=seen[seen.length-2],d=km(prev,last);if(d>=0.15)a.move={from:prev.label,to:last.label,d,dir:bearing8(prev,last),deg:bearingDeg(prev,last)}}
   // 出現時段（台灣時間）
@@ -2556,7 +2556,7 @@ function sightAnaHTML(a){if(!a)return '';
   <p class="sa-note">只用飼主確認過的目擊推算，僅供參考。地圖上的<span class="sa-k1"></span>是移動路線，<span class="sa-k2"></span>是建議先找的範圍。</p>
 </section>`}
 function km(a,b){const R=6371,toR=x=>x*Math.PI/180;const dLat=toR(b.lat-a.lat),dLng=toR(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
-function distText(lat,lng){if(!homeState.near||lat==null)return '';const d=km(homeState.near,{lat,lng});return `<span class="dist">距你 ${d<1?Math.round(d*1000)+' m':d.toFixed(1)+' km'}</span>`}
+function distText(lat,lng){if(!homeState.near||lat==null)return '';const d=km(homeState.near,{lat,lng});return `<span class="dist">距你 ${fmtKm(d)}</span>`}
 function sortNear(arr,latK,lngK){if(!homeState.near)return arr;return arr.slice().sort((a,b)=>{const da=a[latK]==null?1e9:km(homeState.near,{lat:a[latK],lng:a[lngK]});const db=b[latK]==null?1e9:km(homeState.near,{lat:b[latK],lng:b[lngK]});return da-db})}
 let listSeq=0;
 async function loadList(){
@@ -3258,11 +3258,12 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
     ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>`:''}
     <div class="ops">${sightOps(s.id,s.status)}</div></div>`;
-  const STATUS_TAG={searching:'<span class="tag red">協尋中</span>',found:'<span class="tag green">已找到</span>',closed:'<span class="tag gray">已結案</span>'};
+  const STATUS_TAG={searching:'<span class="tag red">協尋中</span>',found:'<span class="tag green">已回家</span>',closed:'<span class="tag gray">已結案</span>'};
   // 管理頁分成「首頁」和幾個單一工作的頁面（網址 ?p=...），一次只做一件事
   const P=qs(location.hash).p||'';const go=k=>`#/manage/${id}${k?'?p='+k:''}`;
   const tile=(k,icon,title,sub,cls='')=>`<a class="mg-tile ${cls}" href="${go(k)}"><span class="mg-ic" aria-hidden="true">${icon}</span><span class="mg-tt"><b>${title}</b><small>${sub}</small></span><span class="mg-go" aria-hidden="true">›</span></a>`;
   const shareUrl=caseUrl(id);
+  const mgAnaHTML=()=>{const conf=(ss||[]).filter(x=>x.status==='confirmed'&&x.seen_at&&!x.hidden).sort((x,y)=>new Date(x.seen_at)-new Date(y.seen_at));const pts=[];if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,t:c.lost_at,cls:'start',label:'走'});conf.forEach((x,i)=>{if(x.lat)pts.push({lat:x.lat,lng:x.lng,t:x.seen_at,cls:'',label:String(i+1),where:x.place_text})});const h=sightAnaHTML(sightAnalysis(c,pts));return h?h+`<p class="small" style="margin:-6px 0 14px"><a href="#/case/${id}">看地圖上的路線和範圍 ›</a></p>`:''};
   (_n===navId?app:_void).innerHTML=`
   <div ${P?'hidden':''}>
     <div class="mg-head"><h1>${esc(c.name)} ${STATUS_TAG[c.status]||''}</h1><p class="muted">${c.status==='searching'?`走失第 ${daysSince(c.lost_at)} 天。要做什麼？點下面一項就好。`:c.status==='found'?'牠已經回家了，謝謝你回來更新 🎉':'這個案件已結案。'}</p></div>
@@ -3281,7 +3282,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <a class="mg-back" href="${go('')}">‹ 回到「${esc(c.name)}」的管理</a>
     <section ${P==='see'?'':'hidden'}>
       <h1>目擊回報</h1>
-      ${(()=>{const conf=(ss||[]).filter(x=>x.status==='confirmed'&&x.seen_at&&!x.hidden).sort((x,y)=>new Date(x.seen_at)-new Date(y.seen_at));const pts=[];if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,t:c.lost_at,cls:'start',label:'走'});conf.forEach((x,i)=>{if(x.lat)pts.push({lat:x.lat,lng:x.lng,t:x.seen_at,cls:'',label:String(i+1),where:x.place_text})});const h=sightAnaHTML(sightAnalysis(c,pts));return h?h+`<p class="small" style="margin:-6px 0 14px"><a href="#/case/${id}">看地圖上的路線和範圍 ›</a></p>`:''})()}
+      <div id="mgAna">${mgAnaHTML()}</div>
       ${pendS.length?`<section class="mg-pend" id="pendNotice"><h2>有 <span id="pendN">${pendS.length}</span> 筆等你確認</h2><p class="small muted" style="margin:-4px 0 8px">是${esc(c.name||'牠')}就按「是牠」，會顯示在公開地圖上；不是就按「不是牠」。</p><div class="timeline">${pendS.map(sItem).join('')}</div></section>`:''}
       ${doneS.length?`<h2>${pendS.length?'之前的回報':'所有回報'}</h2><div class="timeline">${doneS.map(sItem).join('')}</div>`:(pendS.length?'':'<p class="muted">還沒有人回報。有人回報時會寄信通知你。</p>')}
       <h2>收容所疑似資料</h2>
@@ -3368,6 +3369,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     const dot=row.querySelector('.dot'),tag=row.querySelector('.when .tag');dot.className='dot '+(v==='pending'?'pending':v==='rejected'?'start':'');dot.textContent=v==='pending'?'?':v==='rejected'?'×':'✓';
     if(tag){tag.className='tag '+(v==='pending'?'amber':v==='rejected'?'gray':'green');tag.textContent=v==='pending'?'待確認':v==='rejected'?'已退回':'已確認'}
     const ops=row.querySelector('.ops');ops.innerHTML=sightOps(b.dataset.s,v);bindOps(ops);
+    {const it=(ss||[]).find(x=>x.id===b.dataset.s);if(it)it.status=v;const an=$('#mgAna');if(an)an.innerHTML=mgAnaHTML()}
     const n=app.querySelectorAll('.timeline .when .tag.amber').length,pn=$('#pendN');if(pn){if(n)pn.textContent=n;else{const h=$('#pendNotice h2');if(h)h.textContent='✓ 都處理好了，謝謝你';const t=$('#pendNotice p');if(t)t.remove()}}});
   bindOps(app);capList(app.querySelector('.timeline'));
   app.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{b.disabled=true;const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error){b.disabled=false;return toast(error.message)}
@@ -4068,7 +4070,7 @@ async function renderAdmin(){const _n=navId;
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
   app.innerHTML=`<h1>管理後台</h1>
-  <div class="stats adm-stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已找回'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??'–'}</b>${t}</div>`).join('')}</div>
+  <div class="stats adm-stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已回家'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??'–'}</b>${t}</div>`).join('')}</div>
   <div class="tabs adm-tabs" role="tablist">${TABS.map(([v,t])=>`<button type="button" role="tab" data-tab="${v}" class="${v===tab?'on':''}" aria-selected="${v===tab}">${t}${v==='reports'&&st?.open_reports?`<span class="cnt">${st.open_reports}</span>`:''}</button>`).join('')}</div>
   <div id="adm"></div>`;
   app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>goReplace('#/admin?tab='+b.dataset.tab));
@@ -4080,7 +4082,7 @@ async function renderAdmin(){const _n=navId;
 }
 const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊'};
 const ADM_MAX={name:30,lost_place:200,place_text:200,current_place:200,contact_phone:30,reporter_phone:30,contact_line:60,reporter_line:60,direction:20};
-const FSTATUS_T={open:'協尋中',reunited:'已找到飼主',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
+const FSTATUS_T={open:'等飼主中',reunited:'已回到主人身邊',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
 const admUrl=(t,id,caseId)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:`#/case/${caseId}`;
 function admMail(email,title){return email?`<a href="mailto:${esc(email)}?subject=${encodeURIComponent('【汪喵回家】關於'+(title?'「'+title+'」':'你在網站上的內容'))}">${esc(email)}</a>`:''}
 function admContact(r){const rows=[];
@@ -4128,8 +4130,8 @@ function admBind(box,reload,rows){
   box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{const r=(rows||[]).find(x=>x.id===b.dataset.edit);if(r)admEdit(b.dataset.t,r,reload)});
 }
 async function admList(box,t,query,f){const _n=navId;let off=0,rows=[];
-  const FL={case:[['all','全部'],['searching','協尋中'],['found','已找到'],['closed','已結案'],['hidden','已隱藏'],['reported','被檢舉']],
-            found:[['all','全部'],['open','協尋中'],['reunited','已找到飼主'],['closed','已結案'],['hidden','已隱藏'],['reported','被檢舉']],
+  const FL={case:[['all','全部'],['searching','協尋中'],['found','已回家'],['closed','已結案'],['hidden','已隱藏'],['reported','被檢舉']],
+            found:[['all','全部'],['open','等飼主中'],['reunited','已回到主人身邊'],['closed','已結案'],['hidden','已隱藏'],['reported','被檢舉']],
             sighting:[['all','全部'],['pending','待確認'],['confirmed','已確認'],['hidden','已退回'],['reported','被檢舉']]}[t];
   box.innerHTML=`<form class="adm-search" id="admQ" role="search"><input type="search" name="q" value="${esc(query)}" placeholder="搜尋名字、地點、電話、Email…" aria-label="搜尋"><button class="btn sm">搜尋</button></form>
   <div class="fchips adm-f">${FL.map(([v,x])=>`<button type="button" class="fchip ${v===f?'on':''}" data-f="${v}" aria-pressed="${v===f}">${x}</button>`).join('')}</div>
@@ -4723,15 +4725,15 @@ const REC_PRESETS={
 function addMonths(dateStr,m){const [y,mo,da]=dateStr.split('-').map(Number);const t=new Date(Date.UTC(y,mo-1+m,1));const last=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0)).getUTCDate();t.setUTCDate(Math.min(da,last));return t.toISOString().slice(0,10)}
 function addDays(dateStr,n){const [y,mo,da]=dateStr.split('-').map(Number);return new Date(Date.UTC(y,mo-1,da+n)).toISOString().slice(0,10)}
 function todayStr(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
-function agoText(d){const m=Math.round((Date.now()-new Date(d+'T00:00:00'))/2629800000);return m<1?'本月':m<12?`${m} 個月前`:`${Math.floor(m/12)} 年${m%12?m%12+'個月':''}前`}
+function agoText(d){const [y,mo]=String(d).slice(0,10).split('-').map(Number),n=new Date();const m=(n.getFullYear()-y)*12+(n.getMonth()+1-mo);return m<1?'本月':m<12?`${m} 個月前`:`${Math.floor(m/12)} 年${m%12?' '+(m%12)+' 個月':''}前`}
 // 生日：下次生日還有幾天、會滿幾歲
 function bdayInfo(bd){if(!bd||!/^\d{4}-\d{2}-\d{2}$/.test(bd))return null;const [y,m,d]=bd.split('-').map(Number);const t=new Date();t.setHours(0,0,0,0);
   let n=new Date(t.getFullYear(),m-1,d);if(n<t)n=new Date(t.getFullYear()+1,m-1,d);const age=n.getFullYear()-y;if(age<1)return null;return {days:Math.round((n-t)/864e5),age,md:`${m}/${d}`}}
 function bdayText(bd){const b=bdayInfo(bd);if(!b)return '';return b.days===0?`🎂 今天 ${b.age} 歲生日！`:b.days<=30?`🎂 再 ${b.days} 天滿 ${b.age} 歲`:`🎂 生日 ${b.md}`}
 function bdayChip(bd){const t=bdayText(bd);if(!t)return '';const b=bdayInfo(bd);return `<span class="bd-chip ${b.days<=30?'soon':''}">${t}</span>`}
-function petAge(bd){if(!bd)return '';const [y,mo,d]=String(bd).slice(0,10).split('-').map(Number);const b=new Date(y,mo-1,d),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';if(m<1){const dd=Math.max(0,Math.round((n-b)/864e5));return dd<1?'剛出生':`${dd} 天`}return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
+function petAge(bd){if(!bd)return '';const [y,mo,d]=String(bd).slice(0,10).split('-').map(Number);const b=new Date(y,mo-1,d),n=new Date();let m=(n.getFullYear()-b.getFullYear())*12+n.getMonth()-b.getMonth();if(n.getDate()<b.getDate())m--;if(m<0)return '';if(m<1){const dd=Math.max(0,Math.floor((n-b)/864e5));return dd<1?'剛出生':`${dd} 天`}return m<12?`${m} 個月`:`${Math.floor(m/12)} 歲${m%12?` ${m%12} 個月`:''}`}
 function dueText(d){const days=Math.round((new Date(d+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return days<0?`已過期 ${-days} 天`:days===0?'今天到期':`${days} 天後`}
-function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new Date(r.next_due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return `<span class="tag ${days<0?'red':days<=14?'amber':'gray'}">下次 ${r.next_due.slice(5).replace('-','/')}・${dueText(r.next_due)}</span>`}
+function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new Date(r.next_due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);return `<span class="tag ${days<0?'red':days<=14?'amber':'gray'}">下次 ${(r.next_due.slice(0,4)===todayStr().slice(0,4)?r.next_due.slice(5):r.next_due).replace(/-/g,'/')}・${dueText(r.next_due)}</span>`}
 // 列出某個資料夾底下全部檔案（含子資料夾），刪除帳號／寵物時用
 async function listAllFiles(bucket,prefix){const out=[];const walk=async(p,depth)=>{if(depth>4)return;let off=0;for(;;){const {data,error}=await sb.storage.from(bucket).list(p,{limit:1000,offset:off});if(error||!data)break;for(const x of data){const full=(p?p+'/':'')+x.name;if(x.id)out.push(full);else await walk(full,depth+1)}if(data.length<1000)break;off+=1000}};await walk(prefix,0);return out}
 async function removeAllFiles(bucket,paths){for(let i=0;i<paths.length;i+=100){await sb.storage.from(bucket).remove(paths.slice(i,i+100)).catch(()=>{})}}
@@ -5033,7 +5035,7 @@ async function renderPetPrint(id){const _n=navId;
     </div>
     ${p.notes?`<h3>過敏、慢性病與注意事項</h3><p style="white-space:pre-wrap">${esc(p.notes)}</p>`:''}
     ${curMeds.length?`<h3>目前用藥與保養品</h3><table class="rtable"><thead><tr><th>名稱</th><th>類別</th><th>劑量與頻率</th><th>用途／期間</th></tr></thead><tbody>${curMeds.map(x=>`<tr><td><b>${esc(x.name)}</b>${x.clinic?`<div class="small">${esc(x.clinic)}</div>`:''}</td><td style="white-space:nowrap">${x.kind==='supplement'?'保養品':'藥品'}</td><td>${esc(medLine(x)||'—')}</td><td>${esc([x.purpose,`${x.start_date} 起`,x.end_date?`到 ${x.end_date}`:'持續'].filter(Boolean).join('，'))}${x.notes?`<div class="small">${esc(x.notes)}</div>`:''}</td></tr>`).join('')}</tbody></table>`:''}
-    ${due.length?`<h3>即將到期</h3><ul style="margin:0;padding-left:20px">${due.map(r=>`<li>${r.next_due}　${esc(r.title)}</li>`).join('')}</ul>`:''}
+    ${due.length?`<h3>待辦／到期日</h3><ul style="margin:0;padding-left:20px">${due.map(r=>`<li>${r.next_due}　${esc(r.title)}${r.next_due<todayStr()?'（已過期）':''}</li>`).join('')}</ul>`:''}
     ${['vaccine','deworm','vet','surgery','med'].map(k=>{const list=rs.filter(r=>r.kind===k);return list.length?`<h3>${REC_KINDS[k][1]}紀錄</h3><table class="rtable"><thead><tr><th>日期</th><th>類別</th><th>項目與說明</th><th>醫院</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table>`:''}).join('')}
     <p class="muted small" style="margin-top:18px">由飼主自行記錄，僅供參考。產生於 ${todayStr()}・${esc(CONFIG.SITE_NAME)}</p>
   </div>`;
@@ -5047,6 +5049,7 @@ async function renderPoster(id){const _n=navId;
   const [{data:c,error:ce},{data:ss}]=await Promise.all([sb.from('cases_public').select('*').eq('id',id).single(),sb.from('sightings_public').select('seen_at,place_text,direction').eq('case_id',id).order('seen_at',{ascending:false}).limit(1)]);
   if(!c){(_n===navId?app:_void).innerHTML=isNetErr(ce)?netErrHTML():'<div class="empty">找不到案件</div>';return}
   if(_n!==navId)return;
+  if(c.status!=='searching'){toast(c.status==='found'?`${c.name} 已經找到了，不需要海報了 🎉`:'這個案件已結案，不需要海報了',4000);goReplace('#/case/'+id);return}
   setTitle('海報');   // 使用者已經換頁：不要畫到別的頁面上
   (_n===navId?app:_void).innerHTML=`<h1>協尋海報</h1><p class="muted small">按下面的按鈕，存到相簿或傳到 LINE。</p>
   <div class="fchips" id="pstyles" role="group" aria-label="海報樣式" style="justify-content:center;margin:4px 0 12px"></div><button class="btn lg block" id="btnShareP" disabled style="margin:0 0 12px">${ic("share")} 儲存或分享圖片</button><div class="posterwrap"><img id="pimg" alt="協尋海報" style="display:none;width:100%;height:auto;border-radius:12px;box-shadow:var(--lift)"><div id="pwait" class="empty">海報產生中…</div></div>
