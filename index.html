@@ -1573,7 +1573,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.3';
+const BUILD = 'v5.4.4';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -3226,6 +3226,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   let saved=null;try{saved=localStorage.getItem('wh_token_'+id)}catch(_){}
   if(!token)token=saved;
   // 從通知信點進來（信件專用鑰匙，30 天有效）：這支手機沒存過管理代碼才用它，而且不存起來
+  if(token&&/^[0-9a-f]{48}$/.test(token)){mkey=token;token=null}   // 有人把信件鑰匙貼成 ?t=：當成鑰匙用，不要存成永久代碼
   if(!mkey)try{mkey=sessionStorage.getItem('wh_mkey_'+id)}catch(_){}   // 網址拿掉後，同一次瀏覽還能繼續用
   let mailOnly=false;if(!token&&mkey&&/^[0-9a-f]{48}$/.test(mkey)){token=mkey;mailOnly=true;try{sessionStorage.setItem('wh_mkey_'+id,mkey)}catch(_){}}
   if(!token&&!me()){(_n===navId?app:_void).innerHTML=entryHTML('case',id);bindEntry('case',id);return}

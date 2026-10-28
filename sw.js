@@ -1,4 +1,4 @@
-// 汪喵回家 service worker v3.18.0
+// 汪喵回家 service worker（快取名稱由 build.sh 依網站版本自動填入）
 // 只快取網站外殼，讓離線時也能打開；資料（Supabase）一律走網路，不快取。
 const CACHE = 'wanghome-v3.17.0';
 // 不放 './index.html'：Cloudflare 會把 /index.html 轉址到 /，快取到轉址回應會讓離線開不起來

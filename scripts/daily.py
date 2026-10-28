@@ -300,9 +300,18 @@ def case_mail_ok(to):
             cr = r.headers.get("Content-Range", "*/0")
         return int(cr.split("/")[-1] or 0) if cr.split("/")[-1] != "*" else 0
     try:
-        return cnt({"to_email": f"eq.{to.lower()}", "sent_at": f"gte.{hour}"}) < 6 and cnt({"sent_at": f"gte.{hour}"}) < 150
+        return cnt({"to_email": f"eq.{norm_mail(to)}", "sent_at": f"gte.{hour}"}) < 6 and cnt({"sent_at": f"gte.{hour}"}) < 150
     except Exception as e:
         print("查寄信上限失敗，這次先不寄：", type(e).__name__); return False
+
+def norm_mail(e):
+    """跟 Edge Function 一樣的信箱正規化（Gmail 去點、去 +tag），寄信上限才算同一個人"""
+    e = (e or "").strip().lower()
+    u, _, d = e.partition("@")
+    if d == "googlemail.com": d = "gmail.com"
+    u = u.split("+")[0]
+    if d == "gmail.com": u = u.replace(".", "")
+    return f"{u}@{d}" if d else e
 
 def send_case_mail(c, subject, body, html=None):
     """寄給案件飼主：只寄已確認的信箱、遵守上限、寄完記錄。回傳 True 才算寄出。"""
@@ -310,7 +319,7 @@ def send_case_mail(c, subject, body, html=None):
     if not to or not c.get("email_verified"): return False
     if not case_mail_ok(to): print("達寄信上限，下次再寄：", c.get("name")); return False
     if not send_mail(to, subject, body, html=html): return False
-    try: sb("POST", "case_mail_log", body={"case_id": c["id"], "to_email": to}, prefer="return=minimal")
+    try: sb("POST", "case_mail_log", body={"case_id": c["id"], "to_email": norm_mail(to)}, prefer="return=minimal")
     except Exception as e: print("寫入寄信紀錄失敗：", type(e).__name__)
     return True
 
@@ -388,15 +397,31 @@ def run_notifications():
         old = [x["id"] for x in lst if x.get(key) and x[key] < old_cut]   # 沒有時間欄位就先留著，不要誤刪
         if old: mark_notified(table, old)
     # 目擊
-    pend = sb_all("sightings", {"select": "*", "notified": "eq.false", "status": "neq.rejected", "order": "created_at.asc"})
+    # 先把待通知的目擊「佔走」（原子更新），再寄信；寄不出去的再還原成未通知。
+    # 這樣就算網友剛回報、Edge Function 同時在寄，也不會重複寄兩封。
+    try:
+        pend = sb("PATCH", "sightings", body={"notified": True},
+                  params={"notified": "eq.false", "status": "neq.rejected", "select": "*"}, prefer="return=representation") or []
+    except Exception as e:
+        print("佔位待通知目擊失敗：", type(e).__name__); pend = []
+    pend.sort(key=lambda s: s.get("created_at") or "")
+    def unclaim(ids):
+        ids = list(ids)
+        for i in range(0, len(ids), 150):
+            try: sb("PATCH", "sightings", body={"notified": False}, params={"id": f"in.({','.join(ids[i:i+150])})"}, prefer="return=minimal")
+            except Exception as e: print("還原未通知失敗：", type(e).__name__)
     by_case = {}
     for s in pend: by_case.setdefault(s["case_id"], []).append(s)
     for cid, lst in by_case.items():
         c = cases.get(cid)
         if not c or not c.get("contact_email") or c.get("status") != "searching":
-            mark_notified("sightings", [s["id"] for s in lst]); continue
+            continue   # 已經標記為已通知：這些本來就寄不出去
         if not c.get("email_verified"):
-            skip_unverified("sightings", lst); continue
+            unclaim([s["id"] for s in lst]); skip_unverified("sightings", lst); continue
+        # 3: 先確認寄得出去，再簽發信件鑰匙（避免被限流時累積沒用到的鑰匙）
+        to = (c.get("contact_email") or "").strip().lower()
+        if not case_mail_ok(to):
+            print("達寄信上限，下次再寄：", c.get("name")); unclaim([s["id"] for s in lst]); continue
         lines = [f"你的案件「{c['name']}」有 {len(lst)} 筆新的目擊回報：", ""]
         for s in lst:
             lines.append(f"・{fmt(s['seen_at'])}  {s.get('place_text') or '（見地圖）'}  {('往'+s['direction']) if s.get('direction') else ''}")
@@ -406,11 +431,11 @@ def run_notifications():
             lines.append("")
         lines += ["請到管理頁確認後才會顯示在公開地圖（30 天內點這個網址就能直接管理，請勿轉傳）：", manage_url(cid), "", f"— {SITE_NAME}"]
         try:
-            if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines), html=sighting_html(c, cid, lst)): continue
+            if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines), html=sighting_html(c, cid, lst)):
+                unclaim([s["id"] for s in lst]); continue
             print(f"已通知目擊：{c['name']} x{len(lst)}")
         except Exception as e:
-            print("寄信失敗：", type(e).__name__); continue
-        mark_notified("sightings", [s["id"] for s in lst])
+            print("寄信失敗：", type(e).__name__); unclaim([s["id"] for s in lst]); continue
     # 收容所比對
     pend = sb_all("shelter_matches", {"select": "*", "notified": "eq.false", "dismissed": "eq.false", "order": "score.desc"})
     by_case = {}
