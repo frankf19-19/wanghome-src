@@ -1214,7 +1214,7 @@ body{touch-action:manipulation}
 .btn:active,.pill:active,.mrow:active,.ccard:active,.mp:active{transform:scale(.97)}
 .btn,.pill,.ccard,.mp,.mrow{transition:transform .12s ease}
 /* 換頁淡入 */
-@media (prefers-reduced-motion:no-preference){#app.enter{animation:appIn .22s ease-out}#app.enter.push{animation:pushIn .24s cubic-bezier(.2,.8,.2,1)}#app.enter.pop{animation:popIn .22s cubic-bezier(.2,.8,.2,1)}}
+@media (prefers-reduced-motion:no-preference){#app.enter>*:not(.sticky-cta):not(.lightbox):not(#ptr){animation:appIn .22s ease-out}#app.enter.push>*:not(.sticky-cta):not(.lightbox):not(#ptr){animation:pushIn .24s cubic-bezier(.2,.8,.2,1)}#app.enter.pop>*:not(.sticky-cta):not(.lightbox):not(#ptr){animation:popIn .22s cubic-bezier(.2,.8,.2,1)}}
 @keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes pushIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}@keyframes popIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
 /* 載入中：小圓圈 */
 .empty.loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:70px 0;color:var(--ink-3)}
@@ -1591,7 +1591,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.14';
+const BUILD = 'v5.4.15';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2029,9 +2029,9 @@ function pageSkel(kind){const b=(w,h=14)=>`<div class="sk" style="width:${w};hei
 function askSheet({title,body,ok='確定',danger=false,cancel='取消'}){return new Promise(res=>{
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet ask" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p>${body?`<p class="muted" style="margin:0 0 16px;white-space:pre-line">${esc(body)}</p>`:''}<button type="button" class="btn big block ${danger?'danger':''}" data-ok>${esc(ok)}</button><button type="button" class="btn big block ghost sh-x" style="margin-top:8px">${esc(cancel)}</button></div>`;
-  let done=false;const fin=v=>{if(done)return;done=true;if(v&&danger)__submitting=true;closeOverlay(el);res(v)};
+  let done=false;const fin=v=>{if(done)return;done=true;if(v&&danger)__submitting=true;const back=overlayOpen===el;closeOverlay(el);if(!back)return res(v);let t;const ok=()=>{clearTimeout(t);removeEventListener('popstate',ok);res(v)};addEventListener('popstate',ok);t=setTimeout(ok,500)};
   el.onclick=e=>{if(e.target.closest('[data-ok]'))fin(true);else if(e.target===el||e.target.closest('.sh-x'))fin(false)};
-  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))})}
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'));if(danger)setTimeout(()=>{if(el.isConnected){const x=el.querySelector('.sh-x');if(x)x.focus({preventScroll:true})}},280)})}
 function restoreScroll(y){const id=navId;let n=0;const t=()=>{if(id!==navId)return;const busy=app.querySelector('.skel,.empty.loading,.pskel');if((!busy&&document.documentElement.scrollHeight>=y+innerHeight*0.5)||n>60){window.scrollTo(0,y);return}n++;setTimeout(t,50)};setTimeout(t,0)}
 window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
 // ===== 手機「返回」：記住在網站裡走了幾步；有上一頁就退回，直接打開內頁時回到合理的上一層 =====
@@ -2090,7 +2090,7 @@ function qpEnhance(root){root.querySelectorAll('form input[name=breed],form inpu
   inp.addEventListener('input',()=>qpDraw(inp));qpDraw(inp);
   const seg=inp.form&&inp.form.querySelector('#segSp');if(seg&&!seg._qp){seg._qp=1;seg.addEventListener('click',()=>setTimeout(()=>inp.form.querySelectorAll('input[name=breed],input[name=colour]').forEach(qpDraw),0))}})}
 new MutationObserver(()=>qpEnhance(document.getElementById('app'))).observe(document.getElementById('app'),{childList:true,subtree:true});
-function updScrolled(){const h=document.querySelector('#app h1');const b=h?h.getBoundingClientRect().bottom:0;document.body.classList.toggle('scrolled',!h||b<60)}
+function updScrolled(){const h=document.querySelector('#app h1');const busy=app.querySelector('.pskel,.empty.loading');const b=h?h.getBoundingClientRect().bottom:0;document.body.classList.toggle('scrolled',!busy&&(!h||b<60))}
 window.addEventListener('scroll',updScrolled,{passive:true});
 try{new MutationObserver(()=>updScrolled()).observe(document.getElementById('app'),{childList:true})}catch(_){}
 function route(){window.__lastRoute=Date.now();
@@ -2115,8 +2115,9 @@ function route(){window.__lastRoute=Date.now();
   document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
-  app.classList.remove('enter','push','pop');void app.offsetWidth;app.classList.add('enter');if(IS_APP&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(wasPop?'pop':'push');
-  curHash=newHash;const trav=trackDepth(wasPop);
+  const trav=trackDepth(wasPop);
+  app.classList.remove('enter','push','pop');void app.offsetWidth;app.classList.add('enter');if(IS_APP&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
+  curHash=newHash;
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));document.body.classList.toggle('toplvl',IS_APP&&/^#\/(health|lost|me)(\?|$)/.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
@@ -3414,7 +3415,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
   $('#photoIn').onchange=async e=>{if(photos.length>=4){toast('最多 4 張照片，請先刪掉一張再加');e.target.value='';return}for(const f of [...e.target.files].slice(0,4-photos.length)){toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
   $('#btnDelCase').onclick=async()=>{if(!await askSheet({title:`永久刪除「${c.name}」的案件？`,body:`所有目擊回報也會一起刪除，無法復原。只是找到了的話，請改按「${c.name}回家了」。`,ok:'刪除案件',danger:true}))return;
-    const {error}=await sb.rpc('delete_case',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
+    const {error}=await sb.rpc('delete_case',{p_id:id,p_token:token});if(error){__submitting=false;return toast('刪除失敗：'+error.message)}
     try{localStorage.removeItem('wh_token_'+id);sessionStorage.removeItem('wh_mkey_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這個案件',3000);goReplace('#/')};
   $('#fe').onsubmit=once(async e=>{e.preventDefault();const fd=new FormData(e.target);const p={photos};['name','colour','features','collar_desc','temperament','lost_place','contact_name','contact_phone','contact_email','contact_line','notes'].forEach(k=>p[k]=String(fd.get(k)??'').trim());p.phone_public=!!fd.get('phone_public');p.reward=Math.max(0,Math.round(+(fd.get('reward')||0))||0);if(!p.contact_phone&&!p.contact_email&&!p.contact_line)return toast('電話、Email、LINE 請至少留一種，看到牠的人才聯絡得到你',5000);if(p.contact_phone&&!p.phone_public&&!p.contact_email&&!p.contact_line)return toast('電話設成不公開的話，請再留 Email 或 LINE，不然沒人聯絡得到你',5000);const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);
     const mailChanged=p.contact_email&&p.contact_email.toLowerCase()!==String(c.contact_email||'').trim().toLowerCase();
@@ -3875,7 +3876,7 @@ async function renderFoundManage(id,token){const _n=navId;setTitle('管理我的
   if($('#btnReunite'))$('#btnReunite').onclick=async e=>{e.preventDefault();if(!await askSheet({title:'牠已經回到主人身邊了嗎？',body:'這則通報會改成「已回到主人身邊」，大家就知道不用再找了。',ok:'對，回到主人身邊了'}))return;
     const {error}=await sb.rpc('update_found',{p_id:id,p_token:token,p:{status:'reunited',current_place:f.current_place,reporter_phone:f.reporter_phone,phone_public:f.phone_public,notes:f.notes}});
     if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('🎉 太好了，謝謝你！',3500);route()};
-  $('#btnDelFound').onclick=async()=>{if(!await askSheet({title:'永久刪除這則通報？',body:'刪除後地圖上就看不到，飼主也聯絡不到你。只是牠已經回家的話，請改按「牠回到主人身邊了」。',ok:'刪除通報',danger:true}))return;const {error}=await sb.rpc('delete_found',{p_id:id,p_token:token});if(error)return toast('刪除失敗：'+error.message);
+  $('#btnDelFound').onclick=async()=>{if(!await askSheet({title:'永久刪除這則通報？',body:'刪除後地圖上就看不到，飼主也聯絡不到你。只是牠已經回家的話，請改按「牠回到主人身邊了」。',ok:'刪除通報',danger:true}))return;const {error}=await sb.rpc('delete_found',{p_id:id,p_token:token});if(error){__submitting=false;return toast('刪除失敗：'+error.message)}
     try{localStorage.removeItem('wh_ftoken_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這則通報',3000);goReplace('#/')};
   if($('#btnClaimF'))$('#btnClaimF').onclick=async e=>{const cb=e.currentTarget;if(cb.disabled)return;cb.disabled=true;const {error}=await sb.rpc('claim_found',{p_id:id,p_token:token});if(error){cb.disabled=false;return toast(error.message)}toast('✅ 已存到你的帳號，換手機也能管理');renderFoundManage(id,token)};
   let st=f.status;
@@ -4747,7 +4748,7 @@ async function renderPet(id){const _n=navId;
   if(id!=='new')$('#btnDel').onclick=async()=>{if(!await askSheet({title:`刪除 ${p.name} 的寵物檔案？`,body:'健康紀錄、用藥和照片會一起刪除，無法復原。',ok:'刪除檔案',danger:true}))return;
     const priv=await listAllFiles('pet-private',`${me().id}/${id}`).catch(()=>[]);
     const pub=(p.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(x=>x.startsWith('pets/'));
-    const {error}=await sb.from('pets').delete().eq('id',id);if(error)return toast(error.message);lnSync(true);
+    const {error}=await sb.from('pets').delete().eq('id',id);if(error){__submitting=false;return toast(error.message)}lnSync(true);
     removeAllFiles('pet-private',priv);if(pub.length)removeAllFiles('photos',[...pub,...pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]);
     goReplace('#/health')};
 }
@@ -4971,7 +4972,7 @@ async function renderRecord(petId,recId){const _n=navId;
   {const mo=new MutationObserver(()=>{if(f.isConnected)return;mo.disconnect();
     Object.values(urls).forEach(u=>{if(String(u).startsWith('blob:'))URL.revokeObjectURL(u)});
     if(!didSave&&fresh.length)sb.storage.from('pet-private').remove(fresh).catch(()=>{})});mo.observe(app,{childList:true})}
-  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!await askSheet({title:'刪除這筆健康紀錄？',body:'附的照片和到期提醒也會一起刪除，無法復原。',ok:'刪除紀錄',danger:true}))return;const {error}=await sb.from('pet_records').delete().eq('id',recId);lnSync(true);if(error)return toast('刪除失敗：'+friendlyErr(error.message));const all=[...new Set([...files,...origFiles])];if(all.length)await sb.storage.from('pet-private').remove(all).catch(()=>{});goReplace('#/pet/'+petId)};
+  if(recId!=='new')$('#btnDel').onclick=async()=>{if(!await askSheet({title:'刪除這筆健康紀錄？',body:'附的照片和到期提醒也會一起刪除，無法復原。',ok:'刪除紀錄',danger:true}))return;const {error}=await sb.from('pet_records').delete().eq('id',recId);lnSync(true);if(error){__submitting=false;return toast('刪除失敗：'+friendlyErr(error.message))}const all=[...new Set([...files,...origFiles])];if(all.length)await sb.storage.from('pet-private').remove(all).catch(()=>{});goReplace('#/pet/'+petId)};
 }
 
 
@@ -5077,7 +5078,7 @@ async function renderMed(petId,medId){const _n=navId;
     lnSync(true);setTimeout(lnAskOnce,600);
     toast('已儲存');goReplace('#/pet/'+petId);
   });
-  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!await askSheet({title:'刪除這筆用藥？',body:'給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。',ok:'刪除用藥',danger:true}))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);didSave=true;{const all=origFiles.concat(fresh);if(all.length)sb.storage.from('pet-private').remove(all).catch(()=>{})}lnSync(true);goReplace('#/pet/'+petId)};
+  if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!await askSheet({title:'刪除這筆用藥？',body:'給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。',ok:'刪除用藥',danger:true}))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error){__submitting=false;return toast(error.message)}didSave=true;{const all=origFiles.concat(fresh);if(all.length)sb.storage.from('pet-private').remove(all).catch(()=>{})}lnSync(true);goReplace('#/pet/'+petId)};
 }
 async function renderPetPrint(id){const _n=navId;
   if(!requireLogin())return;
