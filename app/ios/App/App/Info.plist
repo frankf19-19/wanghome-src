@@ -75,5 +75,12 @@
 	<string>UIStatusBarStyleDefault</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key><string>com.wangmiaotw.app</string>
+			<key>CFBundleURLSchemes</key><array><string>wangmiaotw</string></array>
+		</dict>
+	</array>
 </dict>
 </plist>

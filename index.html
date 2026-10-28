@@ -1690,6 +1690,7 @@ body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green)
 .btn.sl{gap:10px;font-weight:700;box-shadow:none}
 .btn.sl-apple{background:#000!important;color:#fff!important;border:1px solid #000}
 .btn.sl-google{background:#fff!important;color:#3c4043!important;border:1px solid #dadce0}
+.btn.sl-fb{background:#1877F2!important;color:#fff!important;border:1px solid #1877F2}
 .btn.sl:active{transform:scale(.99)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.sl-apple{background:#fff!important;color:#000!important;border-color:#fff}}
 :root[data-theme="dark"] .btn.sl-apple{background:#fff!important;color:#000!important;border-color:#fff}
@@ -1760,10 +1761,11 @@ const CONFIG = {
   GOOGLE_WEB_CLIENT_ID: '',  // Google Cloud 的「網頁應用程式」用戶端 ID（App 內 Google 登入要用；Android 也用這個）
   GOOGLE_IOS_CLIENT_ID: '',  // Google Cloud 的「iOS」用戶端 ID
   APPLE_LOGIN: false,        // 在 Supabase 設定好 Apple 登入後改成 true（iOS App 內是原生「使用 Apple 登入」）
+  FACEBOOK_LOGIN: false,     // 在 Supabase 設定好 Facebook 登入後改成 true（App 內會開瀏覽器授權再跳回來）
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.1';
+const BUILD = 'v5.6.2';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1790,7 +1792,11 @@ if(IS_APP){
   try{const A=capPlugin('App');if(A){
     A.addListener('backButton',()=>{if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue)&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
     // 從連結打開 App（分享頁 /s/、/f/、網站網址）：跳到對應頁面
-    A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
+    A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);
+      if(/^wangmiaotw:/.test(u.protocol)&&/auth/.test(u.host+u.pathname)){const code=u.searchParams.get('code');const err=u.searchParams.get('error_description')||u.searchParams.get('error');try{const B=capPlugin('Browser');if(B)B.close().catch(()=>{})}catch(_){}
+        if(err){toast('登入沒有成功：'+err,5000);return}
+        if(code&&sb)sb.auth.exchangeCodeForSession(code).then(({data,error})=>{if(error)return toast('登入沒有成功：'+friendlyErr(error.message),5000);if(data&&data.session){session=data.session;updateAuthUI()}toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}});return}
+      const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
       if(m)location.hash=(m[1]==='s'?'#/case/':'#/found/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
     A.addListener('pause',()=>{window.__pausedAt=Date.now();try{document.dispatchEvent(new Event('app-pause'))}catch(_){}});
     A.addListener('resume',()=>{try{lnSync()}catch(_){}try{if($('#btnLnWrap'))bindLnBtn()}catch(_){}
@@ -4727,15 +4733,20 @@ async function getProfile(){
 function socialProviders(){const plat=IS_APP&&window.Capacitor.getPlatform?window.Capacitor.getPlatform():'web';const list=[];
   if(CONFIG.APPLE_LOGIN&&(plat==='ios'||plat==='web'))list.push('apple');
   if(CONFIG.GOOGLE_LOGIN&&(plat==='web'||CONFIG.GOOGLE_WEB_CLIENT_ID))list.push('google');
+  if(CONFIG.FACEBOOK_LOGIN)list.push('facebook');
   if(plat==='ios')return list;   // iOS：Apple 排第一（App Store 規定有第三方登入就要有 Apple）
-  return list.sort((a,b)=>a==='google'?-1:1)}
+  const ord={google:0,apple:1,facebook:2};return list.sort((a,b)=>ord[a]-ord[b])}
 function socialBtnsHTML(su){const ps=socialProviders();if(!ps.length)return '';
   const G='<svg class="sl-g" viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.42 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>';
   const A='<svg class="sl-a" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M16.37 12.7c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.19-1.73-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.63 1.11 8.8.73 1.06 1.6 2.25 2.75 2.21 1.1-.04 1.52-.71 2.85-.71s1.71.71 2.88.69c1.19-.02 1.94-1.08 2.67-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.32-.89-2.33-3.56zM14.2 6.23c.61-.74 1.02-1.76.91-2.79-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.98-.5 2.59-1.23z"/></svg>';
-  return `<div class="sl-or"><span>或</span></div><div class="sl-btns">${ps.map(p=>p==='apple'?`<button type="button" class="btn lg block sl sl-apple" data-social="apple">${A} 使用 Apple ${su?'註冊':'登入'}</button>`:`<button type="button" class="btn lg block sl sl-google" data-social="google">${G} 使用 Google ${su?'註冊':'登入'}</button>`).join('')}</div>`}
+  const F='<svg class="sl-f" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>';
+  return `<div class="sl-or"><span>或</span></div><div class="sl-btns">${ps.map(p=>p==='apple'?`<button type="button" class="btn lg block sl sl-apple" data-social="apple">${A} 使用 Apple ${su?'註冊':'登入'}</button>`:p==='facebook'?`<button type="button" class="btn lg block sl sl-fb" data-social="facebook">${F} 使用 Facebook ${su?'註冊':'登入'}</button>`:`<button type="button" class="btn lg block sl sl-google" data-social="google">${G} 使用 Google ${su?'註冊':'登入'}</button>`).join('')}</div>`}
 async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disabled=true}
   try{
-    const SL=IS_APP?capPlugin('SocialLogin'):null;
+    const SL=IS_APP&&provider!=='facebook'?capPlugin('SocialLogin'):null;
+    if(IS_APP&&!SL){   // App 內走瀏覽器授權，授權完用 wangmiaotw://auth 跳回 App
+      const {data,error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:'wangmiaotw://auth',skipBrowserRedirect:true}});if(error)throw error;
+      const B=capPlugin('Browser');if(B&&data&&data.url)await B.open({url:data.url,presentationStyle:'popover'});else if(data&&data.url)location.href=data.url;return}
     if(SL){const r=await SL.login({provider,options:provider==='apple'?{scopes:['email','name']}:{scopes:['email','profile']}});
       const token=r&&r.result&&r.result.idToken;if(!token)throw new Error('沒有拿到登入憑證');
       const {data,error}=await sb.auth.signInWithIdToken({provider,token});if(error)throw error;

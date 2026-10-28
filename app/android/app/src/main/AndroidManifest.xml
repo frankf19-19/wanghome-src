@@ -30,6 +30,13 @@
                 <data android:scheme="https" android:host="wangmiaotw.com" android:pathPrefix="/s/" />
                 <data android:scheme="https" android:host="wangmiaotw.com" android:pathPrefix="/f/" />
             </intent-filter>
+            <!-- 第三方登入授權完跳回 App：wangmiaotw://auth -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="wangmiaotw" android:host="auth" />
+            </intent-filter>
         </activity>
 
         <provider
