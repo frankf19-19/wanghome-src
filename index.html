@@ -1413,6 +1413,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 #ptr .spin{animation-play-state:paused}#ptr.ready .spin,#ptr.busy .spin{animation-play-state:running}#ptr.busy{transform:translate(-50%,40px)!important}
 body.has-cta .toast{bottom:calc(var(--tabbar-h) + 76px + env(safe-area-inset-bottom))}
 .home-done{background:var(--green-soft);border-radius:16px;padding:18px 16px;margin:0 0 14px;text-align:center}.home-done .hd-ic{font-size:40px;line-height:1}.home-done b{display:block;font-size:20px;margin:6px 0 4px}.home-done p{margin:0 0 12px;color:var(--ink-2)}
+.ln-state{margin:0 0 10px}.ln-state b{display:block;font-size:15.5px}.ln-state.on b{color:var(--green)}.ln-state span{display:block;margin-top:2px}
 .me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
 .mg-sec.danger-zone>summary{color:var(--red-ink)}
 .mg-foot{margin:16px 2px 0;text-align:center}
@@ -1575,7 +1576,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.8';
+const BUILD = 'v5.4.9';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2414,7 +2415,7 @@ async function renderHealth(){const _n=navId;
   ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2 id="medSec">${ic("pill")} 今天的用藥與保養品</h2><p class="muted small" style="margin:-6px 0 8px">餵完按一下就打勾，再按一次可以取消。</p><div class="card med-card">${rows.join('')}</div>`:''})()}
   <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
   ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><a href="#/pet/${r.pet_id}" style="color:inherit"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b></a><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">到期前 2 個月會出現在這裡，到期前會提醒你。全部的到期日在各毛孩頁的「下次到期」。</div>`}
-  ${IS_APP?`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("bell")} 手機通知 <span class="muted small">${lnOn()?'已開啟':'到期前提醒你'}</span></summary><div class="mg-body">${lnSection().replace(/<h2>[\s\S]*?<\/h2>/g,'')}
+  ${IS_APP?`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("bell")} 手機通知 <span class="muted small" id="lnSum">到期前提醒你</span></summary><div class="mg-body">${lnSection().replace(/<h2>[\s\S]*?<\/h2>/g,'')}
     <details class="calhelp calmore" style="margin-top:14px"><summary>也想加到手機日曆？（可以不用）</summary>${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</details></div></details>`
   :`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("calendar")} 加到手機日曆 <span class="muted small">到期前提醒你</span></summary><div class="mg-body">${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</div></details>`}`;
   {const d=$('#calSec');if(d)d.ontoggle=()=>{window.__calOpen=d.open}}
@@ -4384,7 +4385,7 @@ function bindCal(rerender){
    提醒排在這支手機上（不經過網路、不寄信）；登出或關閉時全部取消。
    ============================================================ */
 const LN_KEY='wh_lnotify',LN_IDS='wh_lnids';let lnLast=0,lnBusy=false,lnAgain=false;
-function lnOn(){try{return IS_APP&&localStorage.getItem(LN_KEY)==='1'}catch(_){return false}}
+function lnOn(){try{return IS_APP&&localStorage.getItem(LN_KEY)!=='0'}catch(_){return IS_APP}}
 function lnId(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return ((h>>>1)%2000000000)+1}
 function lnAt(d,hh,mm){const [y,m,dd]=d.split('-').map(Number);return new Date(y,m-1,dd,hh,mm,0,0)}
 function lnDiffDays(a,b){return Math.round((lnAt(b,12,0)-lnAt(a,12,0))/864e5)}
@@ -4442,18 +4443,33 @@ async function lnSync(force){
 }
 async function lnToggle(btn){
   const LN=capPlugin('LocalNotifications');if(!LN)return toast('這個版本不支援通知，請更新 App');
-  if(lnOn()){try{localStorage.setItem(LN_KEY,'0')}catch(_){}await lnClear();toast('已關閉手機通知提醒');{const w=$('#lnWarn');if(w)w.remove()}if(btn&&btn.isConnected)btn.outerHTML=lnBtnHTML();bindLnBtn();return}
   let p;try{p=await LN.requestPermissions()}catch(_){p={display:'denied'}}
-  if(p.display!=='granted')return toast('通知沒有開啟。請到手機「設定」→「汪喵回家」→「通知」打開，再按一次。',6000);
+  if(p.display!=='granted'){lnOpenSettings();bindLnBtn();return}
   try{localStorage.setItem(LN_KEY,'1')}catch(_){}
-  await lnSync(true);toast('已開啟：到期前一天早上 9 點、用藥時間會提醒你',4500);if(btn&&btn.isConnected)btn.outerHTML=lnBtnHTML();bindLnBtn();
+  await lnSync(true);toast('✅ 已開啟：到期前一天早上 9 點、餵藥時間會提醒你',4500);bindLnBtn();
 }
-function lnBtnHTML(){return lnOn()?`<button type="button" class="btn sm ghost" id="btnLn">${ic('bell')} 關閉手機通知</button>`:`<button type="button" class="btn sm" id="btnLn">${ic('bell')} 開啟手機通知</button>`}
-function bindLnBtn(){const b=$('#btnLn');if(!b)return;b.onclick=()=>lnToggle(b);
-  // 開著提醒、但使用者到手機設定把通知關掉了：提示一下，不然會以為有在提醒
-  const LN=capPlugin('LocalNotifications');if(lnOn()&&LN)LN.checkPermissions().then(p=>{if(p.display!=='granted'&&b.isConnected&&!$('#lnWarn'))b.insertAdjacentHTML('afterend','<p class="notice" id="lnWarn" style="margin:10px 0 0">手機的通知權限被關掉了，提醒不會跳出來。請到手機「設定」→「汪喵回家」→「通知」打開。</p>')}).catch(()=>{})}
+/* 跟其他 App 一樣，在需要的時候才問一次：第一次存了有到期日的紀錄或每天要吃的藥時 */
+async function lnAskOnce(){if(!IS_APP||!me())return;const LN=capPlugin('LocalNotifications');if(!LN)return;
+  try{if(localStorage.getItem('wh_ln_asked')==='1')return;const p=await LN.checkPermissions();if(p.display!=='prompt'&&p.display!=='prompt-with-rationale')return;
+    localStorage.setItem('wh_ln_asked','1');const r=await LN.requestPermissions();if(r.display==='granted'){localStorage.setItem(LN_KEY,'1');lnSync(true);toast('✅ 到期前一天和餵藥時間，手機會提醒你',4000)}}catch(_){}}
+// 打開 iPhone／Android 的「設定 → 汪喵回家 → 通知」
+async function lnOpenSettings(){const NS=capPlugin('NativeSettings')||capPlugin('App');try{if(NS&&NS.openIOS&&window.Capacitor.getPlatform()==='ios'){await NS.openIOS({option:'appNotification'});return}if(NS&&NS.openAndroid){await NS.openAndroid({option:'app_notification'});return}}catch(_){}
+  try{if(window.Capacitor.getPlatform()==='ios'){location.href='app-settings:';return}}catch(_){}
+  toast('請到手機「設定」→「汪喵回家」→「通知」打開',6000)}
+function lnBtnHTML(){return `<span id="btnLnWrap"><button type="button" class="btn sm ghost" id="btnLn">${ic('bell')} 檢查中…</button></span>`}
+function bindLnBtn(){const w=$('#btnLnWrap');if(!w)return;const LN=capPlugin('LocalNotifications');
+  // 跟其他 App 一樣：通知開不開，看 iPhone 的「設定」。這裡只顯示目前狀態，按了就帶去設定
+  const draw=state=>{if(!w.isConnected)return;
+    if(state==='granted'&&lnOn())w.innerHTML=`<p class="ln-state on"><b>✅ 通知已開啟</b><span class="muted small">想關掉或調整，到手機「設定」→「汪喵回家」→「通知」</span></p><button type="button" class="btn sm ghost" id="btnLn">${ic('bell')} 打開手機設定</button>`;
+    else if(state==='prompt'||state==='prompt-with-rationale')w.innerHTML=`<button type="button" class="btn" id="btnLn">${ic('bell')} 開啟手機通知</button>`;
+    else w.innerHTML=`<p class="ln-state off"><b>通知目前是關的</b><span class="muted small">提醒不會跳出來。到手機「設定」→「汪喵回家」→「通知」打開。</span></p><button type="button" class="btn sm" id="btnLn">${ic('bell')} 打開手機設定</button>`;
+    const b=$('#btnLn');if(b)b.onclick=()=>{if(state==='prompt'||state==='prompt-with-rationale'){lnToggle(b)}else lnOpenSettings()}};
+  if(!LN){w.innerHTML='<p class="muted small">這個版本不支援通知，請更新 App。</p>';return}
+  LN.checkPermissions().then(p=>{draw(p.display)}).catch(()=>draw('denied'));
+  // 從手機設定回來時重新檢查
+  const A=capPlugin('App');if(A&&!w._res){w._res=true;A.addListener('resume',()=>{if(w.isConnected)LN.checkPermissions().then(p=>{draw(p.display);if(p.display==='granted'&&lnOn())lnSync(true)}).catch(()=>{})})}}
 function lnSection(){if(!IS_APP)return '';
-  return `<h2>${ic("bell")} 手機通知提醒</h2><div class="card"><p style="margin:0 0 10px">到期前一天早上 9 點，還有每天的餵藥時間，手機會直接跳通知。</p>${lnBtnHTML()}<p class="muted small" style="margin:8px 0 0">換手機或重新安裝後，要再開一次。</p></div>`}
+  return `<h2>${ic("bell")} 手機通知提醒</h2><div class="card"><p style="margin:0 0 10px">到期前一天早上 9 點，還有每天的餵藥時間，手機會直接跳通知。</p>${lnBtnHTML()}</div>`}
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
 
 async function getProfile(){
@@ -4906,7 +4922,7 @@ async function renderRecord(petId,recId){const _n=navId;
     didSave=true;lnSync(true);
     // 從紀錄移除的照片，也從雲端刪掉
     const dropped=origFiles.concat(fresh).filter(x=>!files.includes(x));if(dropped.length)sb.storage.from('pet-private').remove(dropped).catch(()=>{});
-    const dueChanged=row.next_due&&!row.done&&(recId==='new'||row.next_due!==r.next_due);
+    const dueChanged=row.next_due&&!row.done&&(recId==='new'||row.next_due!==r.next_due);if(dueChanged)setTimeout(lnAskOnce,600);
     if(dueChanged&&saved?.id){try{sessionStorage.setItem('wh_cal_prompt',saved.id)}catch(_){}}
     toast('已儲存');goReplace('#/pet/'+petId);
   });
@@ -5016,7 +5032,7 @@ async function renderMed(petId,medId){const _n=navId;
     const {error}=medId==='new'?await sb.from('pet_meds').insert(row):await sb.from('pet_meds').update(row).eq('id',medId);
     if(error)return toast('儲存失敗：'+error.message);
     didSave=true;{const dropped=origFiles.concat(fresh).filter(x=>!files.includes(x));if(dropped.length)sb.storage.from('pet-private').remove(dropped).catch(()=>{})}
-    lnSync(true);
+    lnSync(true);setTimeout(lnAskOnce,600);
     toast('已儲存');goReplace('#/pet/'+petId);
   });
   if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!confirm('確定刪除？給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。'))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error)return toast(error.message);didSave=true;{const all=origFiles.concat(fresh);if(all.length)sb.storage.from('pet-private').remove(all).catch(()=>{})}lnSync(true);goReplace('#/pet/'+petId)};
