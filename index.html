@@ -615,7 +615,11 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
   .stats{gap:16px}
   .stat b{font-size:22px}
 }
-.leaflet-container{font:inherit;background:var(--line)}
+.leaflet-container{font:inherit;background:#EEF0EA}
+:root[data-theme=dark] .leaflet-container{background:#2A2F2C}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .leaflet-container{background:#2A2F2C}}
+/* 地圖圖片還沒到之前，底下先顯示「地圖載入中…」，不會像壞掉 */
+.leaflet-container::before{content:'地圖載入中…';position:absolute;inset:0;display:grid;place-items:center;color:#8A8F88;font-size:14px;font-weight:600;z-index:0;pointer-events:none}
 .nomap{display:flex;align-items:center;justify-content:center;min-height:120px!important;height:auto!important;background:var(--beige);border-radius:12px}.nomap-msg{padding:16px;text-align:center;font-size:15px;color:var(--ink-2)}
 .mk{background:var(--red-fill);color:#fff;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-weight:900;font-size:13px;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 .mk.start{background:#1F2A2E}
@@ -1510,7 +1514,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.3.3';
+const BUILD = 'v5.3.4';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1743,7 +1747,7 @@ function waitLeaflet(){if(window.__lfail&&!window.L)leafletGaveUp=true;if(window
   if(!document.getElementById('leafletCss')){const c=document.createElement('link');c.id='leafletCss';c.rel='stylesheet';c.href='vendor/leaflet-1.9.4.css';document.head.insertBefore(c,document.head.querySelector('style'))}
   let e=document.getElementById('leafletJs');if(!e){e=document.createElement('script');e.id='leafletJs';e.src='vendor/leaflet-1.9.4.js';e.async=true;e.onerror=()=>{window.__lfail=1};e.addEventListener('load',()=>{leafletGaveUp=false;_lw=null});document.head.appendChild(e)}
   const done=()=>{if(!window.L)leafletGaveUp=true;ok()};if(!e){done();return}e.addEventListener('load',done);e.addEventListener('error',done);setTimeout(done,8000)}))}
-function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);return m}
+function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);return m}
 function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
 // 定位或點地圖後：自動帶入縣市、區、地點描述（只填空的或跟位置不一樣的），並請使用者確認

@@ -27,7 +27,7 @@ export async function onRequestGet({ params, request, waitUntil }) {
   } catch (_) { return new Response("upstream", { status: 502, headers: cors }); }
   if (!r.ok) return new Response("upstream", { status: 502, headers: cors });
   const body = await r.arrayBuffer();
-  const out = new Response(body, { status: 200, headers: { "Content-Type": "image/png", "Cache-Control": "public, max-age=2592000" } });
+  const out = new Response(body, { status: 200, headers: { "Content-Type": "image/png", "Cache-Control": "public, max-age=2592000, immutable" } });
   waitUntil(cache.put(key, out.clone()));
   const h = new Headers(out.headers); Object.entries(cors).forEach(([k, v]) => h.set(k, v));
   return new Response(body, { status: 200, headers: h });
