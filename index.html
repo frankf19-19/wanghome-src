@@ -1522,6 +1522,67 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 .lsec ul{margin:0;padding-left:20px}.lsec li{margin:8px 0;line-height:1.7;font-size:15.5px}
 .lsec li::marker{color:var(--red)}
 #navHome{display:none!important}
+
+/* =====================================================================
+   v5.5 精緻化：層次、光影、質感（只調外觀，不動版面）
+   ===================================================================== */
+body{position:relative}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(90% 34% at 50% -8%,color-mix(in srgb,var(--red-soft) 60%,transparent) 0%,transparent 70%),
+  radial-gradient(60% 30% at 100% 18%,color-mix(in srgb,var(--mint,#C9F0DF) 28%,transparent) 0%,transparent 70%),var(--paper)}
+@media print{body::before{display:none}}
+/* 上方品牌列：透明融入背景，捲動後才有一條細線 */
+header{background:color-mix(in srgb,var(--paper) 55%,transparent);border-bottom:1px solid transparent;transition:border-color .2s}
+body.scrolled header{border-bottom-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.brand img,.mb-home img{box-shadow:0 2px 6px rgba(120,40,70,.18),0 0 0 1px rgba(255,255,255,.6)}
+/* 卡片：細邊 + 兩層陰影 */
+.card,.ccard,.mgroup,.empty-card,.sponsor:not(.due),.pickpet a,.mg-ai{box-shadow:0 1px 2px rgba(120,40,70,.04),0 14px 30px -16px rgba(184,51,95,.22);border:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.card .card{box-shadow:none}
+/* 主要按鈕：微漸層 + 內側高光 + 同色系投影（去掉硬邊「遊戲按鈕」） */
+.btn:not(.ghost):not(.sm):not(.danger):not(.green){background:linear-gradient(180deg,color-mix(in srgb,var(--red-fill) 86%,#fff) 0%,var(--red-fill) 55%,color-mix(in srgb,var(--red-fill) 92%,#000) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 8px 16px -8px color-mix(in srgb,var(--red-fill) 70%,transparent)}
+.btn.green:not(.ghost){background:linear-gradient(180deg,color-mix(in srgb,var(--green-fill) 86%,#fff) 0%,var(--green-fill) 55%,color-mix(in srgb,var(--green-fill) 92%,#000) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 8px 16px -8px color-mix(in srgb,var(--green-fill) 70%,transparent)}
+.btn.danger{background:linear-gradient(180deg,#D43B3B,#B71F1F);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 16px -8px rgba(183,31,31,.6)}
+.btn.ghost{background:var(--sheet);border:1px solid var(--line);box-shadow:0 1px 2px rgba(120,40,70,.05)}
+.btn:not(.ghost):active{transform:translateY(1px) scale(.99);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 3px 8px -6px rgba(0,0,0,.3)}
+/* 底部 Tab Bar：毛玻璃 + 中央按鈕光環 */
+@media (max-width:760px){
+  .tabbar{background:color-mix(in srgb,var(--sheet) 93%,transparent);backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px);border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent);box-shadow:0 -8px 24px -16px rgba(120,40,70,.18)}
+  .tabbar a.cta .i,.tabbar a.cta2 .i{background:linear-gradient(180deg,color-mix(in srgb,var(--red-fill) 84%,#fff),var(--red-fill) 60%,color-mix(in srgb,var(--red-fill) 90%,#000));box-shadow:0 0 0 4px var(--paper),0 10px 20px -8px color-mix(in srgb,var(--red-fill) 75%,transparent),inset 0 1px 0 rgba(255,255,255,.3)!important}
+  body[data-space="health"] .tabbar a.cta2 .i{background:linear-gradient(180deg,color-mix(in srgb,var(--green-fill) 84%,#fff),var(--green-fill) 60%,color-mix(in srgb,var(--green-fill) 90%,#000))}
+  .tabbar a.on{color:var(--red-ink)}
+}
+/* 首頁四格：頂部柔光 + 圖示圓底有立體感 */
+.tile4{background-image:linear-gradient(180deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,0) 55%);box-shadow:0 10px 24px -14px rgba(120,40,70,.28),inset 0 1px 0 rgba(255,255,255,.5)}
+.tile4 .te{box-shadow:0 6px 14px -6px rgba(90,30,50,.22),inset 0 1px 0 rgba(255,255,255,.9)}
+.tile4:active{transform:scale(.97);box-shadow:0 4px 12px -8px rgba(120,40,70,.3)}
+/* 章節標題的小圓圖示 */
+h2 > .ico:first-child{box-shadow:0 4px 10px -5px rgba(120,40,70,.25),inset 0 1px 0 rgba(255,255,255,.8)}
+/* 數字：等寬對齊 */
+.pstat b,.pstat strong,.stat b,.num,.count,.tag{font-variant-numeric:tabular-nums}
+/* 輸入框：聚焦有柔和光圈 */
+select:focus,input:focus,textarea:focus{box-shadow:0 0 0 3px var(--red-soft)}
+body[data-space="health"] select:focus,body[data-space="health"] input:focus,body[data-space="health"] textarea:focus{box-shadow:0 0 0 3px var(--green-soft);border-color:var(--green)}
+/* 標籤／快選 chip：按下回饋 */
+.fchip:active,.tag:active,.srow:active,.mrow:active,.mg-ai-row:active{transform:scale(.98)}
+.fchip.on{box-shadow:0 4px 10px -6px color-mix(in srgb,var(--red-fill) 60%,transparent)}
+/* 走失天數徽章：微光 */
+.hp-days,.ccard .band{box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
+/* 骨架與空狀態圖更柔 */
+.empty-card .big{filter:drop-shadow(0 6px 10px rgba(120,40,70,.12))}
+/* 深色模式：光暈與陰影改用黑 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body::before{background:radial-gradient(90% 38% at 50% -6%,color-mix(in srgb,var(--red-soft) 70%,transparent) 0%,transparent 70%),var(--paper)}
+  :root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .ccard,:root:not([data-theme="light"]) .mgroup,:root:not([data-theme="light"]) .empty-card,:root:not([data-theme="light"]) .mg-ai{box-shadow:0 1px 0 rgba(0,0,0,.35),0 14px 30px -16px rgba(0,0,0,.8);border-color:color-mix(in srgb,var(--line) 80%,transparent)}
+  :root:not([data-theme="light"]) .tile4{background-image:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 55%);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+  :root:not([data-theme="light"]) .tile4 .te{box-shadow:0 6px 14px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1)}
+  :root:not([data-theme="light"]) .brand img,:root:not([data-theme="light"]) .mb-home img{box-shadow:0 2px 6px rgba(0,0,0,.5)}}
+:root[data-theme="dark"] body::before{background:radial-gradient(90% 38% at 50% -6%,color-mix(in srgb,var(--red-soft) 70%,transparent) 0%,transparent 70%),var(--paper)}
+:root[data-theme="dark"] .card,:root[data-theme="dark"] .ccard,:root[data-theme="dark"] .mgroup,:root[data-theme="dark"] .empty-card,:root[data-theme="dark"] .mg-ai{box-shadow:0 1px 0 rgba(0,0,0,.35),0 14px 30px -16px rgba(0,0,0,.8);border-color:color-mix(in srgb,var(--line) 80%,transparent)}
+:root[data-theme="dark"] .tile4{background-image:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 55%);box-shadow:0 10px 24px -14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+:root[data-theme="dark"] .tile4 .te{box-shadow:0 6px 14px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1)}
+:root[data-theme="dark"] .brand img,:root[data-theme="dark"] .mb-home img{box-shadow:0 2px 6px rgba(0,0,0,.5)}
+:root[data-theme="dark"] .tile4{color:var(--ink)!important}:root[data-theme="dark"] .tile4 .te{background:rgba(255,255,255,.1)}:root[data-theme="dark"] .tile4.tp .te{color:#FF9DBD}:root[data-theme="dark"] .tile4.tm .te{color:#7FE0B0}:root[data-theme="dark"] .tile4.tb .te{color:#FFD36B}:root[data-theme="dark"] .tile4.tl .te{color:#BDB0FF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4{color:var(--ink)!important}:root:not([data-theme="light"]) .tile4 .te{background:rgba(255,255,255,.1)}:root:not([data-theme="light"]) .tile4.tp .te{color:#FF9DBD}:root:not([data-theme="light"]) .tile4.tm .te{color:#7FE0B0}:root:not([data-theme="light"]) .tile4.tb .te{color:#FFD36B}:root:not([data-theme="light"]) .tile4.tl .te{color:#BDB0FF}}
+@media (prefers-reduced-motion:reduce){.btn:active,.tile4:active,.fchip:active{transform:none}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1588,7 +1649,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.17';
+const BUILD = 'v5.5.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
