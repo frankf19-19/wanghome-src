@@ -930,15 +930,6 @@ body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
   .mb-act{flex:none;display:grid;place-items:center}.mb-act:empty{display:none}.mb-act:not(:empty)+.mb-home{display:none}.mb-act button{width:44px;height:44px;border:0;background:none;color:var(--red);display:grid;place-items:center;border-radius:50%;cursor:pointer}.mb-act button:active{background:var(--red-soft)}.mb-act .ico{width:24px;height:24px}
   body.inner #app{padding-top:10px}
   body.inner .backlink{display:none}   /* 上方已經有「返回」 */
-  /* App 的頂層頁（健康／協尋／我的）：像 iPhone 一樣只有大標題，往下捲才在上方列出現小標題，沒有「返回」 */
-  .is-app body.toplvl header{display:none}
-  .is-app body.toplvl .mbar{display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:55;min-height:52px;padding:4px 10px;padding-top:calc(4px + env(safe-area-inset-top));background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:none}
-  .is-app body.toplvl.scrolled .mbar{box-shadow:0 1px 0 var(--line)}
-  .is-app body.toplvl .mb-back{visibility:hidden;width:44px;padding:0;box-shadow:none;background:none}
-  .is-app body.toplvl #mTitle{opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s}
-  .is-app body.toplvl.scrolled #mTitle{opacity:1;transform:none}
-  .is-app body.toplvl #app{padding-top:6px}
-  .is-app body.toplvl #app>h1:first-child{margin-top:4px}
 }
 @media print{.mbar{display:none!important}}
 /* 頁尾 */
@@ -1597,7 +1588,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.16';
+const BUILD = 'v5.4.17';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2127,7 +2118,7 @@ function route(){window.__lastRoute=Date.now();
   const trav=trackDepth(wasPop);
   app.classList.remove('enter','push','pop');void app.offsetWidth;app.classList.add('enter');if(IS_APP&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
   curHash=newHash;
-  document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));document.body.classList.toggle('toplvl',IS_APP&&/^#\/(health|lost|me)(\?|$)/.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
+  document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
   let m;
