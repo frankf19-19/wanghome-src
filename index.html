@@ -347,7 +347,7 @@ label.f>span{display:block;font-size:14px;font-weight:700;color:var(--ink-2);mar
 label.f>span .req{color:var(--red);font-style:normal}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media(max-width:520px){.row3{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.row3{grid-template-columns:1fr 1fr}.row3 label.chk{grid-column:1/-1;margin:0 0 2px}}.row3 label.chk{align-self:center;margin:0}
 .chk{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:15px;cursor:pointer}
 .chk input{width:24px;height:24px;flex:none;accent-color:var(--red)}
 #app input[type=checkbox]{min-width:22px;min-height:22px;accent-color:var(--red)}
@@ -1238,8 +1238,9 @@ body{touch-action:manipulation}
 .mrl{flex:1;font-size:16px;font-weight:600}.mrv{color:var(--ink-3);font-size:15px}
 .mrc{color:var(--ink-3);width:18px;height:18px}
 .mver{text-align:center;color:var(--ink-3);font-size:12px;letter-spacing:.2px;margin:22px 0 8px}
-.pskel{display:grid;gap:12px;padding:8px 0}.pskel .sk{background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 55%,var(--sheet)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px}.pskel .card{display:grid;gap:10px}
+.pskel{display:grid;gap:12px;padding:8px 0;position:relative}.pskel::after{content:'載入比較久，網路可能不穩…';position:absolute;left:0;right:0;top:-2px;text-align:center;font-size:13px;color:var(--ink-3);opacity:0;animation:slowHint .3s 4s forwards}@keyframes slowHint{to{opacity:1}}.pskel .sk{background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 55%,var(--sheet)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px}.pskel .card{display:grid;gap:10px}
 .btn.danger{background:#C62828;color:#fff;border-color:#C62828}.sheet.ask .sh-t{font-size:19px;margin-top:10px}.sheet.ask .sheet-x{display:none}
+.toast .ico.tk{width:18px;height:18px;vertical-align:-3px;margin-right:6px;color:var(--green)}.done-ic{display:grid;place-items:center;width:72px;height:72px;margin:0 auto 6px;border-radius:50%;background:var(--red-soft)}.done-ic .ico{width:36px;height:36px;color:var(--red)}.empty-card .big .ico{width:44px;height:44px;color:var(--ink-3)}
 .del-row{text-align:center;margin:28px 0 12px}.danger-text{color:#C62828!important;font-size:15px;min-height:44px}.danger-text .ico{width:18px;height:18px}
 @media (max-width:760px){
   .morelist{display:block}
@@ -1346,6 +1347,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}.mg-acts .btn{justify-content:center}
 .cact{display:flex;flex-direction:column;gap:10px;margin:14px 0 0}.cact .btn{width:100%;justify-content:center}
 .cact .btn.call{text-align:center;flex-wrap:wrap;gap:4px 8px}.cact-num{white-space:nowrap;font-family:var(--display);letter-spacing:.02em}
+.tipbox.ic-tip{display:flex;gap:10px;align-items:flex-start}.tipbox .tb-ic{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.7)}.tipbox .tb-ic .ico{width:17px;height:17px}.casemeta{margin:18px 0 0;display:flex;align-items:center;gap:6px}
 .tipbox{background:var(--mark-soft,#FFF5CC);color:var(--ink);border-radius:14px;padding:10px 14px;margin:12px 0 0;font-size:15px;line-height:1.55}
 .cact-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}.cact-sub .btn{justify-content:center;padding-left:6px;padding-right:6px}
 .ownerfoot{display:grid;gap:0;margin:26px 0 0;border-top:1px solid var(--line)}.ownerfoot .linkbtn{min-height:48px;width:100%;justify-content:flex-start;font-size:15px;color:var(--ink-2);border-bottom:1px solid var(--line);gap:8px}.ownerfoot .linkbtn:hover{text-decoration:none}
@@ -1422,12 +1424,16 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .del-acct>summary::-webkit-details-marker{display:none}
 .del-acct[open]{text-align:left;background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:6px 16px 16px}
 .del-acct[open]>summary{color:var(--red-ink);text-decoration:none;font-weight:800;padding-left:0}
-.ferr{color:var(--red-ink);font-weight:700;font-size:14.5px;margin:-2px 0 12px}
+.ferr{color:var(--red-ink);font-weight:700;font-size:14.5px;margin:-2px 0 12px}.seg.seg-bad button,.map.pick.seg-bad{outline:2px solid var(--red);outline-offset:1px}.tipbox.seg-bad{box-shadow:inset 0 0 0 2px var(--red)}
+@media (max-width:760px){html{scroll-padding-bottom:calc(120px + env(safe-area-inset-bottom))}body.formpage .f:focus-within{scroll-margin-bottom:120px}}
 [aria-invalid=true]{border-color:var(--red)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 18%,transparent)!important}
 #ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 4px);transform:translate(-50%,-60px);z-index:90;width:38px;height:38px;border-radius:50%;background:var(--sheet);box-shadow:var(--lift);display:grid;place-items:center;transition:transform .15s;pointer-events:none}
 #ptr .spin{animation-play-state:paused}#ptr.ready .spin,#ptr.busy .spin{animation-play-state:running}#ptr.busy{transform:translate(-50%,40px)!important}
 body.has-cta .toast{bottom:calc(var(--tabbar-h) + 76px + env(safe-area-inset-bottom))}
 .home-done{background:var(--green-soft);border-radius:16px;padding:18px 16px;margin:0 0 14px;text-align:center}.home-done .hd-ic{font-size:40px;line-height:1}.home-done b{display:block;font-size:20px;margin:6px 0 4px}.home-done p{margin:0 0 12px;color:var(--ink-2)}
+.tl-meta{display:flex;align-items:center;gap:8px;margin-top:0;min-height:28px}.tl-meta .tl-rep{margin-left:auto;min-height:44px;min-width:44px;justify-content:center;padding:0 8px!important;color:var(--ink-3)}
+#otp{font-family:ui-monospace,Menlo,monospace;font-size:24px!important;letter-spacing:.45em!important;padding-left:.4em!important;text-align:center}#otp::placeholder{letter-spacing:.2em;font-size:15px;font-family:var(--body)}
+.map.pick{position:relative}.pin-hint{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:500;background:var(--ink);color:var(--paper);font-size:13px;font-weight:700;padding:6px 12px;border-radius:99px;pointer-events:none;display:flex;gap:6px;align-items:center;white-space:nowrap;max-width:92%}.pin-hint .ico{width:15px;height:15px}.map.pick.picked .pin-hint{display:none}
 .ln-pref{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:15px}.ln-pref select,.ln-pref input{width:auto;min-width:0;padding:7px 10px;font-size:15px}.ln-pref .small{flex-basis:100%}.ln-pref.ln-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 6px}.ln-slots>span{grid-column:1/-1}.ln-slots label{display:grid;gap:2px;justify-items:center;min-width:0}.ln-slots label small{font-size:12px;color:var(--ink-3)}.ln-slots input{padding:7px 4px;font-size:14px;width:100%;text-align:center}.ln-pref input[type=time]::-webkit-calendar-picker-indicator{display:none}.ln-state{margin:0 0 10px}.ln-state b{display:block;font-size:15.5px}.ln-state.on b{color:var(--green)}.ln-state span{display:block;margin-top:2px}
 .me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
 .mg-sec.danger-zone>summary{color:var(--red-ink)}
@@ -1591,7 +1597,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.15';
+const BUILD = 'v5.4.16';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1732,7 +1738,7 @@ function friendlyErr(m){m=String(m??'');if(/cases_email_ok/.test(m))return 'Emai
   if(/等太久|逾時|timed? ?out|AbortError|aborted/i.test(m)){const pre=(m.match(/^([^：:\s]{1,8}失敗)[：:]/)||[])[1];return (pre?pre+'：':'')+'等太久沒有回應，網路可能不穩，請再試一次'}
   if(/Internal Server Error|Service Unavailable|Bad Gateway|Gateway Time|upstream connect|\b(HTTP|status|code)\s*50[0-4]\b/i.test(m)){const pre=(m.match(/^([^：:\s]{1,8}失敗)[：:]/)||[])[1];return (pre?pre+'：':'')+'伺服器暫時忙碌，請稍後再試一次'}
   return m.replace(/^(TypeError|Error):\s*/,'').replace(/(送出失敗|儲存失敗)：(TypeError|Error):\s*/,'$1：')}
-function toast(m,ms=2600){m=friendlyErr(m);try{const HP=IS_APP&&capPlugin('Haptics');if(HP){if(/失敗|錯誤|不正確|沒有權限|無法/.test(m))HP.notification({type:'ERROR'}).catch(()=>{});else if(/^✅|已送出|已登記|已儲存|已勾選|已確認|已登入/.test(m))HP.notification({type:'SUCCESS'}).catch(()=>{})}}catch(_){}if(ms===2600&&/失敗|不穩|忙碌|逾時|錯誤|過期|沒有權限|太久/.test(m))ms=5500;else if(ms===2600&&[...m].length>15)ms=4500;if(/已儲存/.test(m)&&!/失敗/.test(m))__dirty=false;const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
+function toast(m,ms=2600){m=friendlyErr(m);try{const HP=IS_APP&&capPlugin('Haptics');if(HP){if(/失敗|錯誤|不正確|沒有權限|無法/.test(m))HP.notification({type:'ERROR'}).catch(()=>{});else if(/^✅|已送出|已登記|已儲存|已勾選|已確認|已登入/.test(m))HP.notification({type:'SUCCESS'}).catch(()=>{})}}catch(_){}if(ms===2600&&/失敗|不穩|忙碌|逾時|錯誤|過期|沒有權限|太久/.test(m))ms=5500;else if(ms===2600&&[...m].length>15)ms=4500;if(/已儲存/.test(m)&&!/失敗/.test(m))__dirty=false;const t=$('#toast');if(/^✅/.test(m)){t.innerHTML=ic('check','tk')+esc(m.replace(/^✅\s*/,''))}else t.textContent=m.replace(/^(🎉|⚠️|📍|💡)\s*/,'');t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
 // 日期一律用台灣時間（UTC+8）顯示；不是今年的加上年份
 function tw(s){const d=new Date(new Date(s).getTime()+8*3600e3);return {y:d.getUTCFullYear(),m:d.getUTCMonth()+1,d:d.getUTCDate(),h:d.getUTCHours(),mi:d.getUTCMinutes()}}
 function fmtDT(s){if(!s)return '';const t=tw(s),now=tw(Date.now());return `${t.y!==now.y?t.y+'/':''}${t.m}/${t.d} ${String(t.h).padStart(2,'0')}:${String(t.mi).padStart(2,'0')}`}
@@ -1901,7 +1907,7 @@ function geoFast(onPos,onFail){
     if(good)fin()});
   setTimeout(()=>{if(ended)return;fin();if(!got)onFail&&onFail(3)},20000)}
 function geoFailMsg(code){return code===1?(IS_APP?'沒有定位權限：請到手機「設定」→「汪喵回家」→「位置」打開，或直接點地圖':'沒有定位權限：請允許瀏覽器使用位置，或直接點地圖'):code===3?'定位太久沒有回應（室內訊號較差），請直接點地圖':'無法取得定位，請直接點地圖'}
-function pickerMap(el,center){const m=makeMap(el,center,13);geoWarm();let mk=null,val=null,user=false;const set=(lat,lng,fly)=>{if(m.__stub){val={lat,lng};toast('✅ 已記下你的位置');return}if(!m._mapPane)return;val={lat,lng};if(!mk){mk=marker([lat,lng],'📍','me').addTo(m)}else mk.setLatLng([lat,lng]);if(fly)m.setView([lat,lng],16)};m.on('click',e=>{__dirty=true;user=true;set(e.latlng.lat,e.latlng.lng);autoFillPlace(el,e.latlng.lat,e.latlng.lng)});return{map:m,get:()=>val,get touched(){return user},set,locate(ev){if(!navigator.geolocation&&!(IS_APP&&capPlugin('Geolocation'))){toast('這支手機沒辦法定位，請直接在地圖上點位置');return}const btn=(ev&&ev.currentTarget)||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('button'));const lbl=btn&&btn.innerHTML;const busy=on=>{if(!btn||!btn.isConnected)return;btn.disabled=on;btn.classList.toggle('locating',on);if(on)btn.innerHTML='<span class="spin sm" aria-hidden="true"></span> 定位中…';else btn.innerHTML=lbl};busy(true);const bt=setTimeout(()=>busy(false),20500);let first=true,clickedAfter=false;const mark=()=>{clickedAfter=true};m.once('click',mark);geoFast((lat,lng,acc,final)=>{clearTimeout(bt);busy(false);if(clickedAfter)return;__dirty=true;user=true;set(lat,lng,first);if(first){autoFillPlace(el,lat,lng,true);if(!final&&acc>150)toast('已標出大概位置，正在用 GPS 修正…',3000)}else if(final)toast('✅ 已修正到更準的位置',2000);first=false},code=>{clearTimeout(bt);busy(false);toast(geoFailMsg(code),5000)})}}}
+function pickerMap(el,center){const m=makeMap(el,center,13);geoWarm();let mk=null,val=null,user=false;const set=(lat,lng,fly)=>{if(m.__stub){val={lat,lng};toast('✅ 已記下你的位置');return}if(!m._mapPane)return;val={lat,lng};try{el.classList.add('picked')}catch(_){}if(!mk){mk=marker([lat,lng],'📍','me').addTo(m)}else mk.setLatLng([lat,lng]);if(fly)m.setView([lat,lng],16)};m.on('click',e=>{__dirty=true;user=true;set(e.latlng.lat,e.latlng.lng);autoFillPlace(el,e.latlng.lat,e.latlng.lng)});return{map:m,get:()=>val,get touched(){return user},set,locate(ev){if(!navigator.geolocation&&!(IS_APP&&capPlugin('Geolocation'))){toast('這支手機沒辦法定位，請直接在地圖上點位置');return}const btn=(ev&&ev.currentTarget)||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('button'));const lbl=btn&&btn.innerHTML;const busy=on=>{if(!btn||!btn.isConnected)return;btn.disabled=on;btn.classList.toggle('locating',on);if(on)btn.innerHTML='<span class="spin sm" aria-hidden="true"></span> 定位中…';else btn.innerHTML=lbl};busy(true);const bt=setTimeout(()=>busy(false),20500);let first=true,clickedAfter=false;const mark=()=>{clickedAfter=true};m.once('click',mark);geoFast((lat,lng,acc,final)=>{clearTimeout(bt);busy(false);if(clickedAfter)return;__dirty=true;user=true;set(lat,lng,first);if(first){autoFillPlace(el,lat,lng,true);if(!final&&acc>150)toast('已標出大概位置，正在用 GPS 修正…',3000)}else if(final)toast('✅ 已修正到更準的位置',2000);first=false},code=>{clearTimeout(bt);busy(false);toast(geoFailMsg(code),5000)})}}}
 
 /* ============================================================
    路由
@@ -1965,7 +1971,8 @@ function openAddSheet(){
   el.innerHTML=`<div class="sheet" role="dialog" aria-label="新增"><div class="grab" aria-hidden="true"></div><p class="sh-t">新增</p>
     ${r('#/new',ic('megaphone'),'s1','我的毛孩走失了','登記協尋，自動做海報')}
     ${r('#/seen',ic('eye'),'s2','我看到／撿到毛孩','拍照回報給飼主')}
-    ${r('#/health/add',ic('clipboard'),'s3','新增健康紀錄','看診、疫苗、驅蟲、用藥')}
+    ${r('#/health/add?type=rec',ic('clipboard'),'s3','看診、疫苗、驅蟲','記一次，可設到期提醒')}
+    ${r('#/health/add?type=med',ic('pill'),'s3','每天吃的藥、保養品','每天打勾「今天吃了沒」')}
     ${r('#/pet/new',ic('paw'),'s4','新增毛孩檔案','生日、晶片、照片')}
     <button type="button" class="btn ghost block sh-x">取消</button></div>`;
   el.onclick=e=>{const a=e.target.closest('a.srow');if(a){e.preventDefault();const h=a.getAttribute('href');overlayOpen=null;el.remove();location.replace(location.pathname+location.search+h);return}
@@ -2018,9 +2025,10 @@ function sightOps(id,st){id=esc(id);return (st!=='confirmed'?`<button class="btn
 function isNetErr(e){return !!e&&e.code!=='PGRST116'}
 // 連不上（不是資料庫回的錯誤）：沒有錯誤代碼，或訊息是 fetch 失敗
 function isFetchErr(e){return !!e&&(!e.code||/fetch|network|load failed/i.test(e.message||''))}
-function netErrHTML(){return `<div class="empty-card"><div class="big">📶</div><b>網路好像不太穩，資料沒有載入</b><p class="small">請確認網路後再試一次。</p><button type="button" class="btn" onclick="route()">再試一次</button></div>`}
+function netErrHTML(){return `<div class="empty-card"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，資料沒有載入</b><p class="small">請確認網路後再試一次。</p><button type="button" class="btn" onclick="route()">再試一次</button></div>`}
 function rerender(fn){const y=scrollY;return Promise.resolve(fn()).then(()=>restoreScroll(y)).catch(()=>{})}
 // 回到上一頁時捲回原本位置：等新頁面畫好、名單載完（不是灰色載入卡片）再捲，不然會被壓到比較上面
+function offlineGate(){if(navigator.onLine!==false)return false;app.innerHTML=netErrHTML();return true}
 function pageSkel(kind){const b=(w,h=14)=>`<div class="sk" style="width:${w};height:${h}px"></div>`;
   if(kind==='pet')return `<div class="pskel" role="status" aria-label="載入中"><div class="sk" style="height:230px;border-radius:24px"></div>${b('40%',26)}${b('60%')}<div class="card">${b('100%',48)}${b('100%',48)}</div>${b('100%',120)}</div>`;
   if(kind==='case')return `<div class="pskel" role="status" aria-label="載入中">${b('30%',22)}${b('65%',28)}${b('50%')}<div class="sk" style="height:340px;border-radius:24px"></div>${b('100%',56)}</div>`;
@@ -2041,7 +2049,7 @@ function trackDepth(wasPop){const st=history.state,h=location.hash||'#/';
   if(st&&typeof st.d==='number'&&st.h===h){const trav=!__firstRoute;navDepth=st.d;__firstRoute=false;__replacing=false;return trav}
   if(__firstRoute)navDepth=0;else if(!__replacing)navDepth=navDepth+1;__firstRoute=false;   // 新的一頁（瀏覽器在換 #網址時也會發 popstate，所以不能靠它判斷是不是上一頁）
   __replacing=false;try{history.replaceState(Object.assign({},st||{},{d:navDepth,h}),'')}catch(_){}return false}
-const TOP_PAGES=/^#\/?(\?.*)?$|^#\/(health|me|login|seen|lost)(\?.*)?$/;
+const TOP_PAGES=IS_APP?/^#\/?(\?.*)?$|^#\/(health|me|login|lost)(\?.*)?$/:/^#\/?(\?.*)?$|^#\/(health|me|login|seen|lost)(\?.*)?$/;
 function parentOf(h){const p=h.split('?')[0];let m;
   if((m=p.match(/^#\/(report|manage|poster)\/([0-9a-f-]{36})/)))return '#/case/'+m[2];
   if((m=p.match(/^#\/found-manage\/([0-9a-f-]{36})/)))return '#/found/'+m[1];
@@ -2077,14 +2085,15 @@ const QPICK={breed:{dog:['米克斯','台灣犬','柴犬','貴賓','博美','吉
 function qpSpecies(f){const on=f.querySelector('#segSp .on');return on?on.dataset.v:(f.dataset.sp||'dog')}
 function qpDraw(inp){const f=inp.form;if(!f)return;const k=inp.name,sp=qpSpecies(f)==='cat'?'cat':'dog',box=inp._qp;if(!box)return;
   const cur=inp.value.split(/\s*[、,，]\s*/).filter(Boolean);
-  box.innerHTML=QPICK[k][sp].map(v=>`<button type="button" class="fchip qp ${k==='breed'?(inp.value.trim()===v?'on':''):(cur.includes(v)?'on':'')}" data-v="${v}">${v}</button>`).join('')+`<button type="button" class="fchip qp more" data-own>其他（自己輸入）</button>`}
+  const list=QPICK[k][sp],open=box.dataset.open==='1'||list.some(v=>k==='breed'?inp.value.trim()===v:cur.includes(v))&&list.indexOf(k==='breed'?inp.value.trim():cur.find(c=>list.includes(c)))>=8,show=open?list:list.slice(0,8);
+  box.innerHTML=show.map(v=>`<button type="button" class="fchip qp ${k==='breed'?(inp.value.trim()===v?'on':''):(cur.includes(v)?'on':'')}" data-v="${v}">${v}</button>`).join('')+(open||list.length<=8?'':`<button type="button" class="fchip qp more" data-more>更多 ${list.length-8} 種</button>`)+`<button type="button" class="fchip qp more" data-own>其他（自己輸入）</button>`}
 function qpRedraw(f){if(f)f.querySelectorAll('input[name=breed],input[name=colour]').forEach(qpDraw)}
 function qpEnhance(root){root.querySelectorAll('form input[name=breed],form input[name=colour]').forEach(inp=>{if(inp._qp)return;const lab=inp.closest('label')||inp;
   const box=document.createElement('div');box.className='fchips qpick';box.setAttribute('aria-label',inp.name==='breed'?'常見品種':'常見毛色');inp._qp=box;
   // 兩欄並排時，選項放到整排下面
   const row=lab.closest('.row2');(row&&row.contains(lab)?(row._qpHost||(row._qpHost=(()=>{const h=document.createElement('div');row.after(h);return h})())):lab).appendChild(box);
   if(row){const t=document.createElement('b');t.className='qp-t small';t.textContent=inp.name==='breed'?'品種':'毛色';box.before(t)}
-  box.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-own')){if(inp.name==='colour'&&inp.value.trim()&&!/[、,，]\s*$/.test(inp.value))inp.value=inp.value.trim()+'、';inp.focus();const L=inp.value.length;try{inp.setSelectionRange(L,L)}catch(_){}return}
+  box.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-more')){box.dataset.open='1';qpDraw(inp);return}if(b.hasAttribute('data-own')){if(inp.name==='colour'&&inp.value.trim()&&!/[、,，]\s*$/.test(inp.value))inp.value=inp.value.trim()+'、';inp.focus();const L=inp.value.length;try{inp.setSelectionRange(L,L)}catch(_){}return}
     const v=b.dataset.v;if(inp.name==='breed')inp.value=inp.value.trim()===v?'':v;else{let a=inp.value.split(/\s*[、,，]\s*/).filter(Boolean);a=a.includes(v)?a.filter(x=>x!==v):[...a,v];inp.value=a.join('、')}
     inp.dispatchEvent(new Event('input',{bubbles:true}));qpDraw(inp)};
   inp.addEventListener('input',()=>qpDraw(inp));qpDraw(inp);
@@ -2213,12 +2222,26 @@ function wizard(form,checks={}){
   const firstBad=st=>[...st.querySelectorAll('input,select,textarea')].find(el=>!el.disabled&&el.offsetParent!==null&&!el.checkValidity());
   // 送出前檢查所有步驟（隱藏的步驟也要看；收起來的選填區塊與隱藏欄位不算）
   const firstBadAll=st=>[...st.querySelectorAll('input,select,textarea')].find(el=>!el.disabled&&el.type!=='hidden'&&!el.closest('details:not([open]),.hidden')&&!el.checkValidity());
-  const stepOk=k=>{const bad=firstBad(steps[k]);if(bad){fieldErr(bad);return false}
-    for(const x of steps[k].querySelectorAll('input[type=datetime-local]')){if(x.value&&twParse(x.value).getTime()>Date.now()+15*60e3){toast('時間不能是未來，請再確認一次',5000);try{x.focus()}catch(_){}return false}}
-    const fn=checks[titles[k]];const msg=fn&&fn();if(msg){toast(msg,5000);return false}return true};
+  const stepOk=k=>{const fn=checks[titles[k]];const msg=fn&&fn();
+    // 先看區塊層級的（沒選狗貓），再看欄位；聯絡方式那種「至少填一種」則等欄位格式都對了再說
+    if(msg&&!/至少/.test(msg)){stepErr(steps[k],msg);return false}
+    const bad=firstBad(steps[k]);if(bad){fieldErr(bad);return false}
+    for(const x of steps[k].querySelectorAll('input[type=datetime-local]')){if(x.value&&twParse(x.value).getTime()>Date.now()+15*60e3){fieldErr(x,'時間不能是未來，請再確認一次');return false}}
+    if(msg){stepErr(steps[k],msg);return false}return true};
+  // 步驟級的錯誤（沒選狗貓、沒留聯絡方式…）：直接顯示在該區塊下面，不用 toast
+  const stepErr=(st,msg)=>{document.querySelectorAll('.ferr').forEach(x=>x.remove());const tgt=st.querySelector('.seg,.tipbox,.map.pick,label.f,input,select,textarea')||st.querySelector('h3');
+    const p=document.createElement('p');p.className='ferr';p.setAttribute('role','alert');p.textContent=msg;tgt.insertAdjacentElement('afterend',p);tgt.classList.add('seg-bad');
+    const clr=()=>{p.remove();tgt.classList.remove('seg-bad')};st.addEventListener('click',clr,{once:true});st.addEventListener('input',clr,{once:true});
+    window.scrollTo({top:Math.max(0,tgt.getBoundingClientRect().top+scrollY-120),behavior:RM()?'auto':'smooth'});
+    try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'WARNING'}).catch(()=>{})}catch(_){}};
+  // Enter 跳下一格，最後一格顯示「完成」
+  steps.forEach(st=>{const ins=[...st.querySelectorAll('input:not([type=checkbox]):not([type=file]):not([type=date]):not([type=datetime-local]):not([type=hidden]),textarea')];
+    ins.forEach((x,j)=>{if(!x.enterKeyHint)x.enterKeyHint=j<ins.length-1?'next':'done';if(x.tagName!=='TEXTAREA')x.addEventListener('keydown',e=>{if(e.key==='Enter'&&j<ins.length-1){e.preventDefault();try{ins[j+1].focus()}catch(_){}}})})});
   const show=(k,scroll=true)=>{i=Math.max(0,Math.min(N-1,k));steps.forEach((st,j)=>st.hidden=j!==i);
     prog.innerHTML=`<div class="wdots">${steps.map((_,j)=>`<i class="${j<i?'done':j===i?'on':''}"></i>`).join('')}</div><span>第 ${i+1} 步，共 ${N} 步</span>`;
     bBack.hidden=i===0;bNext.hidden=i===N-1;submit.hidden=i!==N-1;
+    {const pv=steps[i].querySelector('.photos-preview');const upd=()=>{if(!pv||!pv.isConnected)return;const none=!pv.children.length;bNext.textContent=none?'先跳過，之後再補照片':'下一步';bNext.classList.toggle('ghost',none)};
+      if(pv){upd();if(!pv._mo){pv._mo=new MutationObserver(upd);pv._mo.observe(pv,{childList:true})}}else{bNext.textContent='下一步';bNext.classList.remove('ghost')}}
     if(scroll){const y=form.getBoundingClientRect().top+scrollY-(innerWidth>760?(document.querySelector('header')?.offsetHeight||0)+16:70);window.scrollTo({top:Math.max(0,y),behavior:RM()?'auto':'smooth'})}
     setTimeout(()=>window.dispatchEvent(new Event('resize')),60)};   // 讓地圖重新算大小
   let _nt=0;bNext.onclick=()=>{const t=Date.now();if(t-_nt<500)return;_nt=t;if(!stepOk(i))return;try{history.pushState({wiz:i+1},'',location.href)}catch(_){}show(i+1)};
@@ -2236,7 +2259,7 @@ document.addEventListener('submit',e=>{if(__wiz&&e.target===__wiz.form)__wiz.onS
 
 function renderSeen(){
   setTitle('看到或撿到毛孩');
-  app.innerHTML=`<h1>你遇到的是哪一種？</h1><p class="tipbox" style="margin:6px 0 12px">⚠️ <b>先別追</b>，追趕只會讓牠跑更遠。拍照、記下時間地點就好。</p>
+  app.innerHTML=`<h1>你遇到的是哪一種？</h1><p class="tipbox ic-tip" style="margin:6px 0 12px"><span class="tb-ic">${ic('alert')}</span><span><b>先別追</b>，追趕只會讓牠跑更遠。拍照、記下時間地點就好。</p>
   <div class="choose">
     <a class="bigbtn b-red" href="#/injured"><span class="bb-ic">${ic("aid")}</span><span class="bb-t"><b>牠受傷了</b><small>一鍵通報位置、撥打 1959 救援</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a class="bigbtn b-green" href="#/found/new?k=found"><span class="bb-ic">${pawSvg()}</span><span class="bb-t"><b>牠在我這裡</b><small>我已經帶走、收留或送醫了</small></span><span class="bb-go" aria-hidden="true">›</span></a>
@@ -2469,7 +2492,7 @@ function renderHealthLanding(){
   <div style="text-align:center;margin:26px 0 8px"><a class="btn lg green" href="#/pet/new">免費開始使用</a></div>`;
 }
 async function renderHealthAdd(){const _n=navId;
-  setTitle('新增紀錄');
+  setTitle('新增紀錄');if(offlineGate())return;
   if(!requireLogin('免費註冊或登入後，就能記錄毛孩健康'))return;
   const {data:pets,error:pe}=await sb.from('pets').select('id,name,species,photos').order('created_at');
   if(_n!==navId)return;
@@ -2614,7 +2637,7 @@ async function loadList(){
     q=q.or(ors.join(','))}
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
   if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(60,(homeState.limit||120)-60);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
-  if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">📶</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
+  if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
   if(!data.length){
     if(homeState.near&&!(homeState.q||homeState.chip||fCount()>0)){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有協尋中的案件</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}
     const filtered=homeState.q||homeState.chip||fCount()>0;
@@ -2634,7 +2657,7 @@ async function loadFoundList(el,more){
   if(homeState.near){const {lat,lng}=homeState.near;q=q.gte('lat',lat-.55).lte('lat',lat+.55).gte('lng',lng-.6).lte('lng',lng+.6)}
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
   if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(60,(homeState.limit||120)-60);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
-  if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">📶</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
+  if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
   if(!data.length){if(homeState.near){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有拾獲／目擊通報</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}el.innerHTML=emptyCard('found');return}
   el.innerHTML=sortNear(data,'lat','lng').map(foundCardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
 }
@@ -2808,7 +2831,7 @@ async function renderCase(id){const _n=navId;
   <div class="poster-head">
     <span class="status-pill ${c.status}">${STATUS[c.status]}</span>
     ${c.reward>0?`<span class="tag blue">尋獲獎金 NT$${c.reward.toLocaleString()}</span>`:''}
-    <span class="tag gray">瀏覽 ${((c.view_count||0)+(firstView?1:0)).toLocaleString()}</span>
+
   </div>
   <h1>${sp(c.species).poster}｜${esc(c.name)}</h1>
   <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}</span></p>
@@ -2835,7 +2858,7 @@ async function renderCase(id){const _n=navId;
         ${c.contact_phone?`<a class="btn big call" href="tel:${esc(String(c.contact_phone).replace(/[^\d+#]/g,''))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(c.contact_phone)}</span></a>`:''}
       </div>
       ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}按上面按鈕回報，飼主會收到通知。</p>`}
-      <p class="tipbox">🐾 看到${esc(c.name||"牠")}：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">💰 獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</p>`:''}
+      <p class="tipbox ic-tip"><span class="tb-ic">${ic('paw')}</span><span>看到${esc(c.name||"牠")}：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</span></p>`:''}
       <div class="cact-sub">
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
         ${active?`<button class="btn ghost" id="btnFollow" data-on="0">${ic("star")} 追蹤</button>
@@ -2860,7 +2883,7 @@ async function renderCase(id){const _n=navId;
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製協尋貼文</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a></div>
   </div>
   </div>
-      <p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">${ic("shield")} 封鎖發布者</button></p>
+      <p class="small muted casemeta">${ic('eye')} 瀏覽 ${((c.view_count||0)+(firstView?1:0)).toLocaleString()}　·　${fmtDT(c.created_at)} 登記</p><p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">${ic("shield")} 封鎖發布者</button></p>
   ${active?`<div class="sticky-cta"><a class="btn block" href="#/report/${id}">${ic("eye")} 我看到${esc(c.name||"牠")}了，回報目擊</a></div>`:''}`;
 
   document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${safeU(photos[+t.dataset.i])}')`});
@@ -2915,7 +2938,7 @@ async function renderCase(id){const _n=navId;
     <div class="where">${ic("pin")} ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
     ${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
     ${p.photo?`<div class="ph" style="background-image:url('${esc(safeU(p.photo))}')" data-lightbox="${esc(safeU(p.photo))}"></div>`:''}
-    ${p.by||p.verified?`<div class="small muted">回報者：${esc(p.by||'會員')}${p.verified?' <span class="tag green">✓ 會員回報</span>':''}</div>`:''}${p.sid?`<div class="small"><button type="button" class="linkbtn tl-rep" aria-label="檢舉這筆目擊" data-sid="${esc(p.sid)}" data-poster="${esc(p.poster||'')}">${ic('flag')} 檢舉</button></div>`:''}</div>`).join('');
+    ${(p.by||p.verified||p.sid)?`<div class="tl-meta small muted">${p.by||p.verified?`<span>${esc(p.by||'會員')}${p.verified?' · ✓ 會員':''}</span>`:''}${p.sid?`<button type="button" class="linkbtn tl-rep" aria-label="檢舉這筆目擊" data-sid="${esc(p.sid)}" data-poster="${esc(p.poster||'')}">${ic('flag')}</button>`:''}</div>`:''}</div>`).join('');
 
   // 電腦版時間軸是可以捲動的框：內容比框高時，底部提示還有更早的紀錄
   requestAnimationFrame(()=>{if(!tl.isConnected||tl.scrollHeight<=tl.clientHeight+8)return;const h=document.createElement('div');h.className='tl-hint';h.textContent='往下捲，看更早的紀錄（共 '+pts.length+' 筆）';tl.appendChild(h);
@@ -3046,13 +3069,12 @@ function renderNew(){
     <label class="f"><span>走失地點描述</span><input type="text" name="lost_place" placeholder="例：淡水漁人碼頭、沙崙沙灘附近"></label>
     <button type="button" class="btn big block ghost" id="btnLoc" style="margin:4px 0 10px">${ic("pin")} 我就在走失的地方（用手機定位）</button>
     <label class="f"><span><b class="lbl">在地圖上點選走失位置</b><small class="hint">可以不點</small></span></label>
-    <div class="map pick" id="pmap"></div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><span class="muted small" style="align-self:center">點地圖任一點即可標記</span></div>
+    <div class="map pick" id="pmap"><div class="pin-hint">${ic('pin')} 點一下地圖，標出走失位置</div></div>
 
     <h3>怎麼聯絡你？</h3>
     <p class="tipbox" style="margin:0 0 6px">電話、Email、LINE <b>至少填一種</b>，看到<span class="pn">牠</span>的人才聯絡得到你。</p>
-    <label class="f"><span>怎麼稱呼你</span><input type="text" name="contact_name" placeholder="例：陳小姐"></label>
-    <label class="f"><span><b class="lbl">電話</b><small class="hint">會顯示在案件頁</small></span><input type="tel" name="contact_phone" pattern="${PHONE_PAT}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
+    <label class="f"><span>怎麼稱呼你</span><input type="text" name="contact_name" autocomplete="name" placeholder="例：陳小姐"></label>
+    <label class="f"><span><b class="lbl">電話</b><small class="hint">會顯示在案件頁</small></span><input type="tel" name="contact_phone" autocomplete="tel" pattern="${PHONE_PAT}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
     <label class="chk" id="ppWrap"><input type="checkbox" name="phone_public" checked> 讓看到<span class="pn">牠</span>的人可以直接打電話給我</label>
     <label class="f"><span><b class="lbl">Email</b><small class="hint long">不公開；有人回報會寄信通知你</small></span><input type="email" name="contact_email" inputmode="email" autocomplete="email" placeholder="例：mingmei@gmail.com"></label>
     <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line" autocapitalize="off" spellcheck="false"></label>
@@ -3722,7 +3744,7 @@ function renderFoundNew(){
    const setLabel=()=>{const seen=kind==='seen';$('#btnSubmit').textContent=seen?'送出看到通報':'送出撿到通報';
      $('#fnTitle').textContent=seen?'我看到一隻毛孩':'牠在我這裡';setTitle(seen?'我看到一隻毛孩':'牠在我這裡');
      const L=a=>'<ol class="tips3">'+a.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
-     $('#fnTips').innerHTML=seen?'💡 不要追，拍照、記下地點和牠往哪走，在這裡回報就好。':'💡 先帶去任何動物醫院<b>免費掃晶片</b>，有晶片就能馬上找到飼主。'};
+     $('#fnTips').innerHTML=seen?'不要追，拍照、記下地點和牠往哪走，在這裡回報就好。':'先帶去任何動物醫院<b>免費掃晶片</b>，有晶片就能馬上找到飼主。'};
    setLabel();
    $('#segKind').querySelectorAll('button').forEach(b=>b.addEventListener('click',setLabel));
    if(k==='seen')$('#segKind [data-v=seen]').click();
@@ -4560,7 +4582,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
         const ec=(error.code||'')+' '+error.message;return toast('寄送失敗：'+(/rate|limit|over_email|security purposes|after \d+ seconds/i.test(ec)?'寄得太頻繁了，請等一分鐘再試':/email_address_invalid|invalid/i.test(ec)?'Email 格式不對，請檢查一下（例如 name@gmail.com）':/fetch|network|load failed|timeout/i.test(ec)?'網路不穩，請換個地方或稍後再試':'請稍後再試一次'),5000)}
       try{localStorage.setItem('wh_registered','1')}catch(_){}
       const su=sm==='signup';
-      app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div style="font-size:56px">📬</div><h1>請收信</h1><p>${su?'確認信':'登入信'}已寄到 <b>${esc(email)}</b></p>
+      app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div class="done-ic">${ic('mail')}</div><h1>請收信</h1><p>${su?'確認信':'登入信'}已寄到 <b>${esc(email)}</b></p>
         <form id="otpf" data-nodirty novalidate style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" type="text" maxlength="40" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">用驗證碼登入</button></form>
         <p class="muted small">${IS_APP?'':`也可以直接按信裡的大按鈕，就會${su?'完成註冊並':''}登入。`}幾分鐘沒收到請看垃圾郵件匣。${su?'（如果這個 Email 之前註冊過，會收到「你的登入連結」，一樣輸入驗證碼就好）':''}</p><button type="button" class="btn ghost" id="btnReLogin">換一個 Email</button></div>`;
       $('#btnReLogin').onclick=()=>{draw();$('#em').value=email};
@@ -4568,7 +4590,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
         rb.onclick=async()=>{rb.disabled=true;rb.textContent='寄送中…';const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:su}});if(error){toast('寄送失敗：請等一分鐘再試',4000);left=30}else{toast('已重寄，請看最新的那封信');left=60}tick()}}
       // 用驗證碼登入（App 裡點信件連結會開到瀏覽器，所以 App 一定要能輸入驗證碼）
       // 從信裡複製時常會連前後文字、空白、換行一起貼上，或是全形數字：只取出那組數字
-      const otpIn=$('#otp');
+      const otpIn=$('#otp');requestAnimationFrame(()=>{try{otpIn.focus({preventScroll:true})}catch(_){}});
       otpIn.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text');if(t==null)return;e.preventDefault();otpIn.value=otpDigits(t);if(otpIn.value.length===OTP_LEN)setTimeout(()=>$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click(),150)});
       // 打字或 iPhone 自動填入：等它填完再整理，湊滿 8 位就自動登入（不在輸入過程中改值，避免跟自動填入打架）
       let otpT=0;otpIn.addEventListener('input',e=>{if(e.isComposing)return;const v=otpDigits(otpIn.value);if(v!==otpIn.value)otpIn.value=v;clearTimeout(otpT);if(v.length===OTP_LEN)otpT=setTimeout(()=>{if(!$('#btnOtp').disabled&&otpDigits(otpIn.value).length===OTP_LEN)$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click()},300)});
@@ -4986,7 +5008,7 @@ const MED_PRESETS={
   supplement:{dog:['關節保健（葡萄糖胺）','魚油','益生菌','綜合維他命','皮毛保健','護眼保健','腸胃保健','潔牙保健'],cat:['離胺酸','魚油','益生菌','化毛膏','泌尿保健','腸胃保健','綜合維他命','關節保健']},
   med:{dog:['抗生素','消炎止痛藥','止癢藥','胃藥','心臟藥','眼藥水','耳藥','皮膚外用藥'],cat:['抗生素','消炎止痛藥','腎臟用藥','甲狀腺藥','胃藥','眼藥水','耳藥','皮膚外用藥']}
 };
-ICONS.alert='<path d="M12 3.5 2.5 20h19z"/><path d="M12 9.5v5M12 17.5h.01"/>';ICONS.sparkle='<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.5 6.5l2 2M15.5 15.5l2 2M6.5 17.5l2-2M15.5 8.5l2-2"/>';ICONS.cake='<path d="M4 20h16v-7H4zM6 13V9.5h12V13M12 9.5V6"/><path d="M4 16c2 1.5 4-1.5 6 0s4 1.5 6 0 2 1.5 4 0"/>';ICONS.trash='<path d="M5 7h14M9 7V4.5h6V7M7 7l.8 13h8.4L17 7"/><path d="M10 11v6M14 11v6"/>';ICONS.edit='<path d="M4 20h4l10.5-10.5-4-4L4 16z"/><path d="M13 7l4 4"/>';ICONS.pill='<rect x="2.8" y="8.5" width="18.4" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="m8.5 8.5 7 7"/>';
+ICONS.check='<path d="m5 12.5 4.5 4.5L19 7.5"/>';ICONS.wifi='<path d="M2.5 9a15 15 0 0 1 19 0M5.5 12.5a10.5 10.5 0 0 1 13 0M8.5 16a6 6 0 0 1 7 0"/><path d="M12 19.5h.01"/><path d="m4 4 16 16"/>';ICONS.alert='<path d="M12 3.5 2.5 20h19z"/><path d="M12 9.5v5M12 17.5h.01"/>';ICONS.sparkle='<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.5 6.5l2 2M15.5 15.5l2 2M6.5 17.5l2-2M15.5 8.5l2-2"/>';ICONS.cake='<path d="M4 20h16v-7H4zM6 13V9.5h12V13M12 9.5V6"/><path d="M4 16c2 1.5 4-1.5 6 0s4 1.5 6 0 2 1.5 4 0"/>';ICONS.trash='<path d="M5 7h14M9 7V4.5h6V7M7 7l.8 13h8.4L17 7"/><path d="M10 11v6M14 11v6"/>';ICONS.edit='<path d="M4 20h4l10.5-10.5-4-4L4 16z"/><path d="M13 7l4 4"/>';ICONS.pill='<rect x="2.8" y="8.5" width="18.4" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="m8.5 8.5 7 7"/>';
 ICONS.leaf='<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/>';
 function doseText(m){const a=m.dose_amount!=null?String(+m.dose_amount):'';return a?`${a} ${m.dose_unit||''}`.trim():''}
 function medSlots(m,dateStr){
