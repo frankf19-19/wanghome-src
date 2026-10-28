@@ -431,7 +431,7 @@ def run_notifications():
             lines.append("")
         lines += ["請到管理頁確認後才會顯示在公開地圖（30 天內點這個網址就能直接管理，請勿轉傳）：", manage_url(cid), "", f"— {SITE_NAME}"]
         try:
-            if not send_case_mail(c, f"【{SITE_NAME}】{c['name']} 有新的目擊回報", "\n".join(lines), html=sighting_html(c, cid, lst)):
+            if not send_case_mail(c, f"【{SITE_NAME}】有人看到{c['name']}了！", "\n".join(lines), html=sighting_html(c, cid, lst)):
                 unclaim([s["id"] for s in lst]); continue
             print(f"已通知目擊：{c['name']} x{len(lst)}")
         except Exception as e:
@@ -446,7 +446,7 @@ def run_notifications():
             mark_notified("shelter_matches", [m["id"] for m in lst]); continue
         if not c.get("email_verified"):
             skip_unverified("shelter_matches", lst, key="matched_at"); continue
-        lines = [f"系統在收容所資料中找到 {len(lst)} 筆與「{c['name']}」疑似相符的狗狗，請盡快親自確認：", ""]
+        lines = [f"系統在收容所資料中找到 {len(lst)} 筆與「{c['name']}」疑似相符的毛孩，請盡快親自確認：", ""]
         for m in lst[:10]:
             sim = "很像" if (m.get("score") or 0) >= 80 else "有點像" if (m.get("score") or 0) >= 60 else "可能相關"
             if m.get("shelter_tel"):   # 系統自己向農業部查到的（可信）
