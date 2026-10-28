@@ -1583,6 +1583,42 @@ body[data-space="health"] select:focus,body[data-space="health"] input:focus,bod
 :root[data-theme="dark"] .tile4{color:var(--ink)!important}:root[data-theme="dark"] .tile4 .te{background:rgba(255,255,255,.1)}:root[data-theme="dark"] .tile4.tp .te{color:#FF9DBD}:root[data-theme="dark"] .tile4.tm .te{color:#7FE0B0}:root[data-theme="dark"] .tile4.tb .te{color:#FFD36B}:root[data-theme="dark"] .tile4.tl .te{color:#BDB0FF}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4{color:var(--ink)!important}:root:not([data-theme="light"]) .tile4 .te{background:rgba(255,255,255,.1)}:root:not([data-theme="light"]) .tile4.tp .te{color:#FF9DBD}:root:not([data-theme="light"]) .tile4.tm .te{color:#7FE0B0}:root:not([data-theme="light"]) .tile4.tb .te{color:#FFD36B}:root:not([data-theme="light"]) .tile4.tl .te{color:#BDB0FF}}
 @media (prefers-reduced-motion:reduce){.btn:active,.tile4:active,.fchip:active{transform:none}}
+
+/* ---- v5.5.1 精美：首頁英雄區、相片層次、分析卡、統計、個人頁 ---- */
+.bs-hero{display:flex;align-items:center;gap:6px;margin:2px 0 16px;padding:12px 6px 10px 18px;border-radius:30px;background:linear-gradient(120deg,#FFE3EC 0%,#FFF3F6 48%,#E3F6EC 100%);box-shadow:0 14px 30px -18px rgba(184,51,95,.35),inset 0 1px 0 rgba(255,255,255,.8);overflow:hidden;position:relative}
+.bs-hero::after{content:"";position:absolute;right:-40px;top:-50px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.75),rgba(255,255,255,0) 70%);pointer-events:none}
+.bs-txt{flex:1;min-width:0}.bs-hero .bs-hello{margin:0!important;font-size:21px!important;line-height:1.35!important}.bs-hero .bs-hello em{white-space:nowrap}.bs-hero .bs-sub{margin:6px 0 0;font-size:14px}
+.bs-duo{flex:none;width:124px;height:auto;filter:drop-shadow(0 8px 10px rgba(120,40,70,.18));position:relative;z-index:1}
+@media (max-width:360px){.bs-duo{width:112px}}
+/* 相片卡：底部暗角，徽章與文字更浮出 */
+.ccard .ph::after,.hp-ph::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(to top,rgba(20,10,15,.30),rgba(20,10,15,0));pointer-events:none}
+.ccard .ph img{transition:transform .35s ease}.ccard:active .ph img{transform:scale(1.03)}
+.ccard .b .t{font-size:17px;letter-spacing:.01em}
+.pv-head .gallery .main{border-radius:26px;box-shadow:0 18px 34px -20px rgba(120,40,70,.45)}
+/* 健康小幫手／目擊分析：頂端淡淡的色帶 + 標題更有份量 */
+.mg-ai{background:linear-gradient(180deg,color-mix(in srgb,var(--red-soft) 70%,var(--sheet)) 0,var(--sheet) 72px)}
+body[data-space="health"] .mg-ai{background:linear-gradient(180deg,color-mix(in srgb,var(--green-soft) 80%,var(--sheet)) 0,var(--sheet) 72px)}
+.mg-ai .sa-head{padding-bottom:8px}.mg-ai .sa-head b{font-size:17px;letter-spacing:.01em}
+.mg-ai-row em{color:var(--ink-3);opacity:.6}
+/* 毛孩頁統計：每格一塊淡色底 */
+.detail-head .stats{gap:8px;margin-top:14px}
+.detail-head .stat{border-left:0;background:color-mix(in srgb,var(--green-soft) 55%,var(--sheet));border-radius:16px;padding:10px 12px;text-align:center}
+.detail-head .stat b{display:block;font-size:24px;line-height:1.15;margin-bottom:2px;color:var(--green)}
+@media (max-width:400px){.detail-head .stats{row-gap:8px}.detail-head .stat:nth-child(odd){padding-left:12px}}
+/* 個人頁：頭像漸層圓 + 光環 */
+.pf-av{background:linear-gradient(135deg,var(--red-soft),color-mix(in srgb,var(--red-fill) 45%,#fff));color:var(--red-ink);box-shadow:0 0 0 4px var(--sheet),0 10px 22px -10px color-mix(in srgb,var(--red-fill) 60%,transparent)}
+.profile{background:linear-gradient(120deg,color-mix(in srgb,var(--red-soft) 60%,var(--sheet)),var(--sheet) 70%)}
+/* 區塊標題節奏 */
+#app>h2{margin-top:34px}
+/* 一般小按鈕：更輕 */
+.btn.sm.ghost{box-shadow:none;border-color:color-mix(in srgb,var(--line) 85%,transparent)}
+/* 列表列與交叉連結：按下有底色回饋 */
+.mrow:active,.srow:active,.crosslink:active,.sponsor.due:active{background:color-mix(in srgb,var(--red-soft) 50%,var(--sheet))}
+/* 深色 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bs-hero{background:linear-gradient(120deg,#3D2230 0%,#2A2028 50%,#1F3328 100%);box-shadow:0 14px 30px -18px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}:root:not([data-theme="light"]) .bs-hero::after{background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)}
+  :root:not([data-theme="light"]) .detail-head .stat{background:color-mix(in srgb,var(--green-soft) 70%,var(--sheet))}:root:not([data-theme="light"]) .pf-av{background:linear-gradient(135deg,#3D2230,#6A2C47);color:#FFB6CE}:root:not([data-theme="light"]) .pv-head .gallery .main{box-shadow:0 18px 34px -20px rgba(0,0,0,.8)}}
+:root[data-theme="dark"] .bs-hero{background:linear-gradient(120deg,#3D2230 0%,#2A2028 50%,#1F3328 100%);box-shadow:0 14px 30px -18px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}:root[data-theme="dark"] .bs-hero::after{background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)}
+:root[data-theme="dark"] .detail-head .stat{background:color-mix(in srgb,var(--green-soft) 70%,var(--sheet))}:root[data-theme="dark"] .pf-av{background:linear-gradient(135deg,#3D2230,#6A2C47);color:#FFB6CE}:root[data-theme="dark"] .pv-head .gallery .main{box-shadow:0 18px 34px -20px rgba(0,0,0,.8)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1649,7 +1685,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.5.0';
+const BUILD = 'v5.5.1';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2405,7 +2441,7 @@ async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
 }
 function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     ${mineHTML()}
-    <p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}
+    <div class="bs-hero"><div class="bs-txt"><p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}</div><img class="bs-duo" src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>
     <div class="tiles4">
       <a href="#/new" class="tile4 tp"><span class="te">${ic("megaphone")}</span><b>毛孩走失了</b><small>登記・做協尋海報</small></a>
       <a href="#/seen" class="tile4 tm"><span class="te">${ic("eye")}</span><b>看到／撿到</b><small>拍照回報給飼主</small></a>
