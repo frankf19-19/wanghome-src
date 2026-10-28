@@ -1514,7 +1514,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.3.4';
+const BUILD = 'v5.3.5';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2834,14 +2834,13 @@ function renderNew(){
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"><span class="muted small" style="align-self:center">點地圖任一點即可標記</span></div>
 
     <h3>怎麼聯絡你？</h3>
-    <div class="row2">
-      <label class="f"><span>稱呼</span><input type="text" name="contact_name" placeholder="例：陳小姐"></label>
-      <label class="f"><span>電話 <i class="req">*</i></span><input type="tel" name="contact_phone" required pattern="${PHONE_PAT}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
-    </div>
-    <label class="chk"><input type="checkbox" name="phone_public" checked> 讓看到牠的人可以直接打電話給我（電話會顯示在案件頁）</label>
-    <label class="f"><span><b class="lbl">Email</b><small class="hint long">可不填；填了，有人回報會寄信通知你（不公開）</small></span><input type="email" name="contact_email" inputmode="email" autocomplete="email" placeholder="沒有可以空白"></label>
-    <details class="more"><summary>LINE、獎金（可以不填）</summary>
-    <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line"></label>
+    <p class="tipbox" style="margin:0 0 6px">電話、Email、LINE <b>至少填一種</b>，看到牠的人才聯絡得到你。</p>
+    <label class="f"><span>稱呼</span><input type="text" name="contact_name" placeholder="例：陳小姐"></label>
+    <label class="f"><span><b class="lbl">電話</b><small class="hint">會顯示在案件頁</small></span><input type="tel" name="contact_phone" pattern="${PHONE_PAT}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
+    <label class="chk" id="ppWrap"><input type="checkbox" name="phone_public" checked> 讓看到牠的人可以直接打電話給我</label>
+    <label class="f"><span><b class="lbl">Email</b><small class="hint long">不公開；有人回報會寄信通知你</small></span><input type="email" name="contact_email" inputmode="email" autocomplete="email" placeholder="you@example.com"></label>
+    <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line" autocapitalize="off" spellcheck="false"></label>
+    <details class="more"><summary>獎金、補充（可以不填）</summary>
     <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" max="10000000" step="1" inputmode="numeric" placeholder="0"></label>
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：可以用雞肉吸引牠"></textarea></label>
     </details>
@@ -2901,7 +2900,7 @@ function renderNew(){
       renderCreated(data.id,data.token,(p.contact_email||'').trim());
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出登記'}
   };
-  wizard($('#f'),{'牠叫什麼名字？長什麼樣子？':()=>species?'':'請先選「狗」或「貓」','怎麼聯絡你？':()=>{const f=$('#f');return !f.elements.contact_email.value.trim()&&!f.elements.phone_public.checked?'沒有填 Email 的話，請勾選「讓看到牠的人可以直接打電話給我」，不然有人看到牠也聯絡不到你':''}});
+  wizard($('#f'),{'牠叫什麼名字？長什麼樣子？':()=>species?'':'請先選「狗」或「貓」','怎麼聯絡你？':()=>{const e=$('#f').elements,ph=e.contact_phone.value.trim(),em=e.contact_email.value.trim(),ln=e.contact_line.value.trim();if(!ph&&!em&&!ln)return '電話、Email、LINE 請至少填一種，看到牠的人才聯絡得到你';if(ph&&!e.phone_public.checked&&!em&&!ln)return '電話不公開的話，請再填 Email 或 LINE，不然有人看到牠也聯絡不到你';return ''}});
 }
 // 寄「確認信箱」信（飼主信箱要確認過，有人回報才會寄通知）
 async function sendVerifyMail(id,token){
