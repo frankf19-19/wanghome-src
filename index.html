@@ -1683,6 +1683,17 @@ body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green)
 .detail-head .gallery .main{border-radius:26px;box-shadow:0 18px 34px -20px rgba(120,40,70,.45)}
 /* 段落節奏 */
 .lede{font-size:16.5px;color:var(--ink-2)}
+
+/* 第三方登入 */
+.sl-or{display:flex;align-items:center;gap:12px;margin:16px 0 10px;color:var(--ink-3);font-size:13px}.sl-or::before,.sl-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.sl-btns{display:grid;gap:10px}
+.btn.sl{gap:10px;font-weight:700;box-shadow:none}
+.btn.sl-apple{background:#000!important;color:#fff!important;border:1px solid #000}
+.btn.sl-google{background:#fff!important;color:#3c4043!important;border:1px solid #dadce0}
+.btn.sl:active{transform:scale(.99)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.sl-apple{background:#fff!important;color:#000!important;border-color:#fff}}
+:root[data-theme="dark"] .btn.sl-apple{background:#fff!important;color:#000!important;border-color:#fff}
+.sheet .grab{width:44px;height:5px;cursor:grab}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1745,11 +1756,14 @@ const CONFIG = {
   ECPAY_URL: '',             // 綠界實況主收款網址，例：https://p.ecpay.com.tw/XXXXXXX
   CONTACT_EMAIL: 'service@wangmiaotw.com',
   OPERATOR: '汪喵回家站長（個人經營）',   // 隱私權政策上的「蒐集者」名稱
-  GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true         // 站長聯絡信箱（顯示在關於頁）
+  GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true
+  GOOGLE_WEB_CLIENT_ID: '',  // Google Cloud 的「網頁應用程式」用戶端 ID（App 內 Google 登入要用；Android 也用這個）
+  GOOGLE_IOS_CLIENT_ID: '',  // Google Cloud 的「iOS」用戶端 ID
+  APPLE_LOGIN: false,        // 在 Supabase 設定好 Apple 登入後改成 true（iOS App 內是原生「使用 Apple 登入」）
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.0';
+const BUILD = 'v5.6.1';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1794,6 +1808,7 @@ if(IS_APP){
   // 輕輕震動：按底部選單、四宮格、大按鈕時（只有 App 裡）
   try{const HP=capPlugin('Haptics');if(HP){let last=0;document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('.tabbar a,.tile4,.srow,.bigbtn,.btn,.mrow,.mb-back,.slot,.seg button,.fchip,.mg-tile,.mg-ai-row,.qk');if(!t)return;const n=Date.now();if(n-last<120)return;last=n;HP.impact({style:'LIGHT'}).catch(()=>{})},true)}}catch(_){}
   // 點通知：打開那隻毛孩的頁面
+  try{const SL=capPlugin('SocialLogin');if(SL&&(CONFIG.GOOGLE_LOGIN||CONFIG.APPLE_LOGIN)){const o={};if(CONFIG.GOOGLE_LOGIN&&CONFIG.GOOGLE_WEB_CLIENT_ID)o.google={webClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,iOSClientId:CONFIG.GOOGLE_IOS_CLIENT_ID||CONFIG.GOOGLE_WEB_CLIENT_ID,mode:'online'};if(CONFIG.APPLE_LOGIN)o.apple={};SL.initialize(o).catch(()=>{})}}catch(_){}
   try{const LN=capPlugin('LocalNotifications');if(LN){
     LN.addListener('localNotificationActionPerformed',e=>{const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
     if(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'&&LN.createChannel)LN.createChannel({id:'care',name:'毛孩照護提醒',description:'回診、疫苗、驅蟲、用藥提醒',importance:4,visibility:1}).catch(()=>{});
@@ -2167,6 +2182,12 @@ function openOverlay(el){
   const ae=document.activeElement;el._trigger=ae&&ae!==document.body?ae:null;
   const focusables=()=>[...el.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>x.getClientRects().length>0||x===document.activeElement);
   el.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const f=focusables();if(!f.length){e.preventDefault();return}const i=f.indexOf(document.activeElement);if(e.shiftKey&&(i<=0)){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}});
+  // 往下拉就關掉（像 iOS 的底部選單）：抓把手或在清單頂端往下拉
+  {const sh=el.querySelector('.sheet');if(sh&&'ontouchstart' in window){let y0=0,dy=0,on=false;
+    sh.addEventListener('touchstart',e=>{if(sh.scrollTop>0&&!e.target.closest('.grab'))return;y0=e.touches[0].clientY;dy=0;on=true;sh.style.transition='none'},{passive:true});
+    sh.addEventListener('touchmove',e=>{if(!on)return;dy=Math.max(0,e.touches[0].clientY-y0);if(dy>0&&sh.scrollTop<=0)sh.style.transform=`translateY(${dy}px)`},{passive:true});
+    const end=()=>{if(!on)return;on=false;sh.style.transition='';if(dy>90){sh.style.transform='translateY(110%)';el.classList.remove('show');setTimeout(()=>closeOverlay(el),200)}else sh.style.transform=''};
+    sh.addEventListener('touchend',end);sh.addEventListener('touchcancel',end)}}
   document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{if(!el.isConnected||(el.contains(document.activeElement)&&document.activeElement!==el))return;const f=focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el;try{f.focus({preventScroll:true})}catch(_){}},260);
   try{history.pushState({overlay:1,d:navDepth,h:location.hash||'#/'},'',location.href)}catch(_){}
 }
@@ -4702,6 +4723,29 @@ async function getProfile(){
   return data;
 }
 
+/* 第三方登入：網頁走 Supabase OAuth 跳轉；App 內走原生（Apple／Google）拿 id_token 再交給 Supabase */
+function socialProviders(){const plat=IS_APP&&window.Capacitor.getPlatform?window.Capacitor.getPlatform():'web';const list=[];
+  if(CONFIG.APPLE_LOGIN&&(plat==='ios'||plat==='web'))list.push('apple');
+  if(CONFIG.GOOGLE_LOGIN&&(plat==='web'||CONFIG.GOOGLE_WEB_CLIENT_ID))list.push('google');
+  if(plat==='ios')return list;   // iOS：Apple 排第一（App Store 規定有第三方登入就要有 Apple）
+  return list.sort((a,b)=>a==='google'?-1:1)}
+function socialBtnsHTML(su){const ps=socialProviders();if(!ps.length)return '';
+  const G='<svg class="sl-g" viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.42 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>';
+  const A='<svg class="sl-a" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M16.37 12.7c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.19-1.73-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.63 1.11 8.8.73 1.06 1.6 2.25 2.75 2.21 1.1-.04 1.52-.71 2.85-.71s1.71.71 2.88.69c1.19-.02 1.94-1.08 2.67-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.32-.89-2.33-3.56zM14.2 6.23c.61-.74 1.02-1.76.91-2.79-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.7-.93 2.7.98.08 1.98-.5 2.59-1.23z"/></svg>';
+  return `<div class="sl-or"><span>或</span></div><div class="sl-btns">${ps.map(p=>p==='apple'?`<button type="button" class="btn lg block sl sl-apple" data-social="apple">${A} 使用 Apple ${su?'註冊':'登入'}</button>`:`<button type="button" class="btn lg block sl sl-google" data-social="google">${G} 使用 Google ${su?'註冊':'登入'}</button>`).join('')}</div>`}
+async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disabled=true}
+  try{
+    const SL=IS_APP?capPlugin('SocialLogin'):null;
+    if(SL){const r=await SL.login({provider,options:provider==='apple'?{scopes:['email','name']}:{scopes:['email','profile']}});
+      const token=r&&r.result&&r.result.idToken;if(!token)throw new Error('沒有拿到登入憑證');
+      const {data,error}=await sb.auth.signInWithIdToken({provider,token});if(error)throw error;
+      if(data&&data.session){session=data.session;updateAuthUI()}
+      // Apple 只在第一次給名字：順手存成暱稱
+      try{const nm=r.result.profile&&(r.result.profile.givenName||r.result.profile.name);if(nm&&data.user&&!(data.user.user_metadata||{}).display_name)sb.from('profiles').update({display_name:String(nm).slice(0,30)}).eq('id',data.user.id).then(()=>{})}catch(_){}
+      toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}
+    }else{setReturn(takeReturn()||'#/me');const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:CONFIG.SITE_URL}});if(error)throw error;return}
+  }catch(e){const m=String(e&&e.message||e);if(!/cancel|取消|1001|user closed|popup_closed|12501/i.test(m))toast('登入沒有成功：'+friendlyErr(m),5000)}
+  finally{if(btn&&btn.isConnected)btn.disabled=false}}
 function renderLogin(){
   if(me()){let back='#/me';back=takeReturn();goReplace(back);return}
   // 預設：這支手機登入過 → 「登入」；沒登入過 → 「免費註冊」。網址 ?mode=signup / ?mode=login 可以指定
@@ -4722,7 +4766,7 @@ function renderLogin(){
 ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       <form id="pwf" data-nodirty><label class="f"><span>Email</span><input type="email" id="pwe" autocomplete="username" required></label><label class="f"><span>密碼</span><input type="password" id="pwp" autocomplete="current-password" required></label><button class="btn block ghost" id="btnPw" style="margin-top:8px">用密碼登入</button></form>
     </details>`}
-    ${CONFIG.GOOGLE_LOGIN&&!IS_APP?`<div style="text-align:center;margin:14px 0" class="muted small">或</div><button class="btn lg block ghost" id="btnGoogle">使用 Google ${su?'註冊':'登入'}</button>`:''}
+    ${socialBtnsHTML(su)}
     ${IS_APP?'':`<details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。</p></details>`}
     <ul class="small muted" style="padding-left:20px;margin:16px 0 0;line-height:1.8">
       <li>案件存在帳號裡，換手機也能管理</li>
@@ -4768,7 +4812,7 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       const {data:pd,error}=await sb.auth.signInWithPassword({email:$('#pwe').value.trim(),password:$('#pwp').value});
       if(error||!pd?.session){b.disabled=false;b.textContent='用密碼登入';return toast('密碼不對。一般會員不用密碼，請改用上面的「寄登入信給我」',4500)}
       session=pd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 已登入');let back='#/me';back=takeReturn();goReplace(back)};
-    if(CONFIG.GOOGLE_LOGIN&&!IS_APP)$('#btnGoogle').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:CONFIG.SITE_URL}});
+    document.querySelectorAll('[data-social]').forEach(b=>b.onclick=()=>socialLogin(b.dataset.social,b));
   };
   draw();
 }

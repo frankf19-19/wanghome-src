@@ -23,6 +23,7 @@
     "@capacitor/splash-screen": "8.0.2",
     "@capacitor/status-bar": "8.0.4",
     "@capacitor/text-zoom": "8.0.1",
+    "@capgo/capacitor-social-login": "8.7.5",
     "capacitor-native-settings": "8.2.0"
   },
   "devDependencies": {
