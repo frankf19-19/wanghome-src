@@ -1576,7 +1576,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.4.10';
+const BUILD = 'v5.4.11';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1606,7 +1606,7 @@ if(IS_APP){
     A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
       if(m)location.hash=(m[1]==='s'?'#/case/':'#/found/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
     A.addListener('pause',()=>{window.__pausedAt=Date.now();try{document.dispatchEvent(new Event('app-pause'))}catch(_){}});
-    A.addListener('resume',()=>{try{lnSync()}catch(_){}
+    A.addListener('resume',()=>{try{lnSync()}catch(_){}try{if($('#btnLnWrap'))bindLnBtn()}catch(_){}
       // 離開超過 5 分鐘再回來：自動重新整理目前這頁（填表中不動）
       try{const typed=[...document.querySelectorAll('#app textarea:not([readonly]),#app input[type=text],#app input[type=tel],#app input[type=email]')].some(x=>x.value!==x.defaultValue);if(window.__pausedAt&&Date.now()-window.__pausedAt>5*60e3&&!(__dirty||__wiz||typed||document.body.classList.contains('formpage')))route()}catch(_){}});
   }}catch(_){}
@@ -2418,7 +2418,7 @@ async function renderHealth(){const _n=navId;
   ${IS_APP?`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("bell")} 手機通知 <span class="muted small" id="lnSum">${lnPrefText()}提醒你</span></summary><div class="mg-body">${lnSection().replace(/<h2>[\s\S]*?<\/h2>/g,'')}
     <details class="calhelp calmore" style="margin-top:14px"><summary>也想加到手機日曆？（可以不用）</summary>${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</details></div></details>`
   :`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("calendar")} 加到手機日曆 <span class="muted small">到期前提醒你</span></summary><div class="mg-body">${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</div></details>`}`;
-  {const d=$('#calSec');if(d)d.ontoggle=()=>{window.__calOpen=d.open}}
+  {const d=$('#calSec');if(d){d.ontoggle=()=>{window.__calOpen=d.open};if(IS_APP&&qs(location.hash).cal){const c=d.querySelector('.calmore');if(c)c.open=true}}}
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
@@ -2444,9 +2444,10 @@ function renderHealthLanding(){
 async function renderHealthAdd(){const _n=navId;
   setTitle('新增紀錄');
   if(!requireLogin('免費註冊或登入後，就能記錄毛孩健康'))return;
-  const {data:pets}=await sb.from('pets').select('id,name,species,photos').order('created_at');
+  const {data:pets,error:pe}=await sb.from('pets').select('id,name,species,photos').order('created_at');
   if(_n!==navId)return;
-  if(!pets||!pets.length){toast('先建立毛孩檔案，就能設定提醒',3500);goReplace('#/pet/new');return}
+  if(pe||!pets){app.innerHTML=netErrHTML();return}
+  if(!pets.length){toast('先建立毛孩檔案，就能設定提醒',3500);goReplace('#/pet/new');return}
   const type=qs(location.hash).type;
   if(!type){(_n===navId?app:_void).innerHTML=`<h1>要記錄什麼？</h1>
     <div class="choose"><a class="bigbtn b-green" href="#/health/add?type=rec"><span class="bb-ic">${ic("clipboard")}</span><span class="bb-t"><b>看診、疫苗、驅蟲</b><small>記一次，可以設下次到期提醒</small></span><span class="bb-go" aria-hidden="true">›</span></a>
@@ -4389,8 +4390,8 @@ const LN_KEY='wh_lnotify',LN_IDS='wh_lnids';let lnLast=0,lnBusy=false,lnAgain=fa
 function lnPref(){let d=1,t='09:00';try{d=+localStorage.getItem('wh_ln_days')||1;t=localStorage.getItem('wh_ln_time')||'09:00'}catch(_){}if(![1,3,7].includes(d))d=1;if(!/^\d{2}:\d{2}$/.test(t))t='09:00';return{days:d,time:t}}
 function lnPrefText(){const o=lnPref();const [h,m]=o.time.split(':').map(Number);const hh=h<12?`早上 ${h||12}`:h<18?`下午 ${h-12||12}`:`晚上 ${h-12}`;return `到期前 ${o.days} 天${hh}${m?':'+String(m).padStart(2,'0'):' 點'}`}
 function lnPrefHTML(){const o=lnPref();return `<div class="ln-pref"><span>到期提醒</span><select id="lnDays" aria-label="提前幾天">${[1,3,7].map(d=>`<option value="${d}"${d===o.days?' selected':''}>前 ${d} 天</option>`).join('')}</select><input type="time" id="lnTime" value="${o.time}" aria-label="幾點提醒"><span class="muted small">餵藥時間照每筆用藥設定</span></div>`}
-function bindLnPref(){const d=$('#lnDays'),t=$('#lnTime');const save=()=>{try{if(d)localStorage.setItem('wh_ln_days',d.value);if(t&&/^\d{2}:\d{2}$/.test(t.value))localStorage.setItem('wh_ln_time',t.value)}catch(_){}const s=$('#lnSum');if(s)s.textContent=lnPrefText()+'提醒你';lnSync(true);toast('已改成'+lnPrefText()+'提醒',3000)};if(d)d.onchange=save;if(t)t.onchange=save}
-function lnOn(){try{return IS_APP&&localStorage.getItem(LN_KEY)!=='0'}catch(_){return IS_APP}}
+function bindLnPref(){const d=$('#lnDays'),t=$('#lnTime');const save=()=>{try{if(d)localStorage.setItem('wh_ln_days',d.value);if(t&&/^\d{2}:\d{2}$/.test(t.value))localStorage.setItem('wh_ln_time',t.value)}catch(_){}const s=$('#lnSum');if(s)s.textContent=lnPrefText()+'提醒你';clearTimeout(bindLnPref._tm);bindLnPref._tm=setTimeout(()=>{lnSync(true);toast('已改成'+lnPrefText()+'提醒',3000)},900)};if(d)d.onchange=save;if(t)t.onchange=save}
+function lnOn(){return IS_APP}   // 開不開看手機設定（舊版 App 內開關已移除）
 function lnId(s){let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return ((h>>>1)%2000000000)+1}
 function lnAt(d,hh,mm){const [y,m,dd]=d.split('-').map(Number);return new Date(y,m-1,dd,hh,mm,0,0)}
 function lnDiffDays(a,b){return Math.round((lnAt(b,12,0)-lnAt(a,12,0))/864e5)}
@@ -4414,9 +4415,11 @@ async function lnSync(force){
     if(e1||e2||e3||!pets)return;   // 沒網路：保留手機上原本的提醒
     const nm={};pets.forEach(p=>nm[p.id]=p.name||'毛孩');const now=Date.now()+60000,list=[];
     // Android 不要求精準鬧鐘（不然每次都會跳到系統的「鬧鐘與提醒」設定頁）
-    const ch=(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android')?{channelId:'care',isExactNotification:false}:{};
+    const ch=(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android')?{channelId:'care'}:{};
     for(const r of recs||[]){
-      const pf=lnPref(),[ph,pm]=pf.time.split(':').map(Number);let at=lnAt(addDays(r.next_due,-pf.days),ph,pm),when=pf.days===1?'明天':`${pf.days} 天後`;if(at<=now){at=lnAt(addDays(r.next_due,-1),ph,pm);when='明天'}if(at<=now){at=lnAt(r.next_due,ph,pm);when='今天'}if(at<=now)continue;
+      const pf=lnPref(),[ph,pm]=pf.time.split(':').map(Number);let at=lnAt(addDays(r.next_due,-pf.days),ph,pm),when=pf.days===1?'明天':`${pf.days} 天後`;
+      if(at<=now){const d0=lnAt(today,ph,pm)>now?today:addDays(today,1);if(d0<=r.next_due){at=lnAt(d0,ph,pm);const k=lnDiffDays(d0,r.next_due);when=k===0?'今天':k===1?'明天':`${k} 天後`}}
+      if(at<=now)continue;
       list.push({id:lnId('r'+r.id),title:`🐾 ${nm[r.pet_id]||'毛孩'}${when}到期：${REC_KINDS[r.kind]?.[1]||'提醒'}`,body:r.title,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:r.pet_id},...ch});
     }
     for(const m of meds||[]){
@@ -4448,6 +4451,7 @@ async function lnSync(force){
 }
 async function lnToggle(btn){
   const LN=capPlugin('LocalNotifications');if(!LN)return toast('這個版本不支援通知，請更新 App');
+  if(btn&&btn.disabled)return;if(btn)btn.disabled=true;
   let p;try{p=await LN.requestPermissions()}catch(_){p={display:'denied'}}
   if(p.display!=='granted'){lnOpenSettings();bindLnBtn();return}
   try{localStorage.setItem(LN_KEY,'1')}catch(_){}
@@ -4455,8 +4459,8 @@ async function lnToggle(btn){
 }
 /* 跟其他 App 一樣，在需要的時候才問一次：第一次存了有到期日的紀錄或每天要吃的藥時 */
 async function lnAskOnce(){if(!IS_APP||!me())return;const LN=capPlugin('LocalNotifications');if(!LN)return;
-  try{if(localStorage.getItem('wh_ln_asked')==='1')return;const p=await LN.checkPermissions();if(p.display!=='prompt'&&p.display!=='prompt-with-rationale')return;
-    localStorage.setItem('wh_ln_asked','1');const r=await LN.requestPermissions();if(r.display==='granted'){localStorage.setItem(LN_KEY,'1');lnSync(true);toast('✅ 到期前一天和餵藥時間，手機會提醒你',4000)}}catch(_){}}
+  try{if(localStorage.getItem('wh_ln_asked')==='1')return;const p=await LN.checkPermissions();if(p.display!=='prompt'&&p.display!=='prompt-with-rationale'){localStorage.setItem('wh_ln_asked','1');return}
+    const r=await LN.requestPermissions();localStorage.setItem('wh_ln_asked','1');if(r.display==='granted'){localStorage.setItem(LN_KEY,'1');lnSync(true);toast('✅ '+lnPrefText()+'和餵藥時間，手機會提醒你',4000)}}catch(_){}}
 // 打開 iPhone／Android 的「設定 → 汪喵回家 → 通知」
 async function lnOpenSettings(){const NS=capPlugin('NativeSettings')||capPlugin('App');try{if(NS&&NS.openIOS&&window.Capacitor.getPlatform()==='ios'){await NS.openIOS({option:'appNotification'});return}if(NS&&NS.openAndroid){await NS.openAndroid({option:'app_notification'});return}}catch(_){}
   try{if(window.Capacitor.getPlatform()==='ios'){location.href='app-settings:';return}}catch(_){}
@@ -4465,14 +4469,13 @@ function lnBtnHTML(){return `<span id="btnLnWrap"><button type="button" class="b
 function bindLnBtn(){const w=$('#btnLnWrap');if(!w)return;const LN=capPlugin('LocalNotifications');
   // 跟其他 App 一樣：通知開不開，看 iPhone 的「設定」。這裡只顯示目前狀態，按了就帶去設定
   const draw=state=>{if(!w.isConnected)return;
-    if(state==='granted'&&lnOn())w.innerHTML=`<p class="ln-state on"><b>✅ 通知已開啟</b><span class="muted small">想關掉，到手機「設定」→「汪喵回家」→「通知」</span></p>${lnPrefHTML()}<button type="button" class="btn sm ghost" id="btnLn">${ic('bell')} 打開手機設定</button>`;
+    if(state==='granted'&&lnOn()){const su=$('#lnSum');if(su)su.textContent=lnPrefText()+'提醒你';w.innerHTML=`<p class="ln-state on"><b>✅ 通知已開啟</b><span class="muted small">想關掉，到手機「設定」→「汪喵回家」→「通知」</span></p>${lnPrefHTML()}<button type="button" class="btn sm ghost" id="btnLn">${ic('bell')} 打開手機設定</button>`}
     else if(state==='prompt'||state==='prompt-with-rationale')w.innerHTML=`<button type="button" class="btn" id="btnLn">${ic('bell')} 開啟手機通知</button>`;
-    else w.innerHTML=`<p class="ln-state off"><b>通知目前是關的</b><span class="muted small">提醒不會跳出來。到手機「設定」→「汪喵回家」→「通知」打開。</span></p><button type="button" class="btn sm" id="btnLn">${ic('bell')} 打開手機設定</button>`;
+    else {const su=$('#lnSum');if(su)su.textContent='通知目前是關的';w.innerHTML=`<p class="ln-state off"><b>通知目前是關的</b><span class="muted small">提醒不會跳出來。到手機「設定」→「汪喵回家」→「通知」打開。</span></p><button type="button" class="btn sm" id="btnLn">${ic('bell')} 打開手機設定</button>`}
     bindLnPref();const b=$('#btnLn');if(b)b.onclick=()=>{if(state==='prompt'||state==='prompt-with-rationale'){lnToggle(b)}else lnOpenSettings()}};
   if(!LN){w.innerHTML='<p class="muted small">這個版本不支援通知，請更新 App。</p>';return}
   LN.checkPermissions().then(p=>{draw(p.display)}).catch(()=>draw('denied'));
-  // 從手機設定回來時重新檢查
-  const A=capPlugin('App');if(A&&!w._res){w._res=true;A.addListener('resume',()=>{if(w.isConnected)LN.checkPermissions().then(p=>{draw(p.display);if(p.display==='granted'&&lnOn())lnSync(true)}).catch(()=>{})})}}
+}   // 從手機設定回來時：全域 resume 會再呼叫一次 bindLnBtn 重新檢查
 function lnSection(){if(!IS_APP)return '';
   return `<h2>${ic("bell")} 手機通知提醒</h2><div class="card"><p style="margin:0 0 10px">到期前、還有每天的餵藥時間，手機會直接跳通知。時間可以自己設。</p>${lnBtnHTML()}</div>`}
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
@@ -4622,7 +4625,7 @@ async function renderMeBody(){const _n=navId;
   </details>`;
   {const ub=$('#btnUnblockAll');if(ub)ub.onclick=()=>{try{localStorage.removeItem('wh_hidden');localStorage.removeItem('wh_blocked')}catch(_){}toast('已全部恢復顯示');renderMe()}}
   $('#btnOut').onclick=async()=>{const clearMine=confirm('這是共用的手機嗎？\n按「確定」：登出並清除這支手機記住的管理網址和聯絡資料（共用手機建議這樣）。\n按「取消」：只登出，資料留著下次用（自己的手機）。');
-    window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|lnids$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}try{lnClear&&lnClear()}catch(_){}goReplace('#/')};
+    window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
     if(!confirm('要永久刪除你的帳號嗎？\n毛孩檔案、健康紀錄、照片都會一起刪除，無法復原。'))return;
     if(!confirm('最後確認：真的要刪除嗎？'))return;
@@ -4867,7 +4870,8 @@ async function renderPetView(id){const _n=navId;
 
 async function renderRecord(petId,recId){const _n=navId;
   if(!requireLogin())return;
-  const {data:p}=await sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle();
+  const {data:p,error:pe}=await sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle();
+  if(pe){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻寵物</div>';return}
   let r={kind:REC_KINDS[qs(location.hash).kind]?qs(location.hash).kind:'vet',date:todayStr(),files:[]};
   if(recId!=='new'){const {data}=await sb.from('pet_records').select('*').eq('id',recId).maybeSingle();if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆紀錄</div>';return}r=data}
@@ -4984,7 +4988,8 @@ function bindMedSlots(rerender){
 }
 async function renderMed(petId,medId){const _n=navId;
   if(!requireLogin())return;
-  const {data:p}=await sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle();
+  const {data:p,error:pe}=await sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle();
+  if(pe){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻寵物</div>';return}
   let m={kind:qs(location.hash).kind==='supplement'?'supplement':'med',freq:'daily1',times:[],start_date:todayStr(),active:true,dose_unit:'顆'};
   if(medId!=='new'){const {data}=await sb.from('pet_meds').select('*').eq('id',medId).maybeSingle();if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆資料</div>';return}m=data}
