@@ -1352,7 +1352,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-sec>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);opacity:.5;transition:transform .15s}
 .mg-sec[open]>summary::after{transform:rotate(225deg)}
 .mg-sec>summary .muted,.mg-sec>summary .tag{font-weight:600}
-.mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1.25fr 1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
+.mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1.25fr 1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.s-ana{margin:0 0 12px;padding:14px 16px}.s-ana-t{display:flex;align-items:center;gap:6px;font-size:16px;margin-bottom:6px}.s-ana dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:15px}.s-ana dt{color:var(--ink-3);white-space:nowrap}.s-ana dd{margin:0}@media(max-width:420px){.s-ana dl{grid-template-columns:1fr}.s-ana dt{margin-top:6px}}.me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
 .mg-sec.danger-zone>summary{color:var(--red-ink)}
 .mg-foot{margin:16px 2px 0;text-align:center}
 .pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-acts{display:flex;gap:8px;flex-basis:100%;justify-content:flex-end}@media(min-width:600px){.pf-acts{flex-basis:auto}}
@@ -1514,7 +1514,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.3.5';
+const BUILD = 'v5.3.6';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2383,6 +2383,24 @@ async function loadRecent(){
   $('#recentWrap').classList.remove('hidden');
   $('#recent').innerHTML=data.map(r=>`<a href="#/case/${r.case_id}"><div class="ph">${thumbImg(r.photo_url||r.case_photo,'')}</div><div class="b"><b>${spIc(r.species)} ${esc(r.case_name)}</b><span>${fmtDT(r.seen_at)} · ${esc(r.lost_city)}${esc(r.lost_district||'')}</span><span>${ic('pin')} ${esc(r.place_text||'見地圖')}</span></div></a>`).join('');
 }
+/* 目擊分析：最後在哪、往哪走、建議先找的範圍、常出現的時段 */
+const DIR8=['北','東北','東','東南','南','西南','西','西北'];
+function bearing8(a,b){const r=x=>x*Math.PI/180,y=Math.sin(r(b.lng-a.lng))*Math.cos(r(b.lat)),x=Math.cos(r(a.lat))*Math.sin(r(b.lat))-Math.sin(r(a.lat))*Math.cos(r(b.lat))*Math.cos(r(b.lng-a.lng));return DIR8[Math.round(((Math.atan2(y,x)*180/Math.PI+360)%360)/45)%8]}
+function searchRadiusKm(hours){return hours<6?0.5:hours<24?1:hours<72?2:3}
+function sightAnalysis(c,pts){
+  const geo=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t));
+  const seen=geo.filter(p=>p.cls!=='start');if(!seen.length||c.status!=='searching')return null;
+  const last=seen[seen.length-1],start=geo.find(p=>p.cls==='start');
+  const hrs=Math.max(0,(Date.now()-new Date(last.t))/36e5),rad=searchRadiusKm(hrs);
+  const ago=hrs<1?'不到 1 小時前':hrs<24?Math.round(hrs)+' 小時前':Math.round(hrs/24)+' 天前';
+  const out={last,rad,rows:[]};
+  out.rows.push(['最後一次被看到',`${ago}（${fmtDT(last.t)}）${last.where?'・'+esc(last.where):''}`]);
+  if(start){const d=km(start,last);out.rows.push(['離走失地點',`${d<1?Math.round(d*1000)+' 公尺':d.toFixed(1)+' 公里'}，往${bearing8(start,last)}方`])}
+  if(seen.length>=2){const prev=seen[seen.length-2],d=km(prev,last);if(d>=0.15)out.rows.push(['最近的移動',`目擊 ${prev.label} → ${last.label}：往${bearing8(prev,last)}約 ${d<1?Math.round(d*1000)+' 公尺':d.toFixed(1)+' 公里'}`])}
+  if(seen.length>=3){const P=[['清晨',5,8],['白天',8,17],['傍晚',17,20],['晚上',20,24],['深夜',0,5]];const cnt={};seen.forEach(p=>{const h=+new Intl.DateTimeFormat('en-GB',{hour:'2-digit',hour12:false,timeZone:'Asia/Taipei'}).format(new Date(p.t))%24;const k=P.find(([,a,b])=>h>=a&&h<b)[0];cnt[k]=(cnt[k]||0)+1});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];if(top[1]>=2)out.rows.push(['常被看到的時段',`${top[0]}（${top[1]} 次），這個時段去找機會比較大`])}
+  out.rows.push(['建議先找',`最後目擊點周圍 ${rad<1?rad*1000+' 公尺':rad+' 公里'}（地圖上的虛線圈）`]);
+  return out}
+function sightAnaHTML(a){if(!a)return '';return `<div class="card s-ana"><b class="s-ana-t">${ic('search')} 目擊分析</b><dl>${a.rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl><p class="muted small" style="margin:6px 0 0">依飼主確認過的目擊自動推算，只是參考。走失的狗貓常躲在附近安靜的地方，清晨和傍晚比較會出來。</p></div>`}
 function km(a,b){const R=6371,toR=x=>x*Math.PI/180;const dLat=toR(b.lat-a.lat),dLng=toR(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function distText(lat,lng){if(!homeState.near||lat==null)return '';const d=km(homeState.near,{lat,lng});return `<span class="dist">距你 ${d<1?Math.round(d*1000)+' m':d.toFixed(1)+' km'}</span>`}
 function sortNear(arr,latK,lngK){if(!homeState.near)return arr;return arr.slice().sort((a,b)=>{const da=a[latK]==null?1e9:km(homeState.near,{lat:a[latK],lng:a[lngK]});const db=b[latK]==null?1e9:km(homeState.near,{lat:b[latK],lng:b[lngK]});return da-db})}
@@ -2640,6 +2658,7 @@ async function renderCase(id){const _n=navId;
 
   <h2>${ic("map")} 目擊位置與時間軸</h2>
   ${c.pending_count>0?`<p class="notice pend-n">🕒 另有 <b>${c.pending_count}</b> 則新的目擊回報，等飼主確認後會顯示在地圖上。</p>`:''}
+  <div id="sAna"></div>
   <div class="trail"><div class="trail-map"><div id="map"></div></div><div class="timeline" id="tl"></div></div>
 
   <div id="shelterBox">${shelterBoxHTML(matches,c.status==='searching')}</div>
@@ -2687,10 +2706,15 @@ async function renderCase(id){const _n=navId;
   sightings.forEach((s,i)=>pts.push({lat:s.lat,lng:s.lng,label:String(i+1),cls:'',t:s.seen_at,title:`目擊 ${i+1}`,where:s.place_text,dir:s.direction,note:s.note,photo:s.photo_url,by:s.reporter_name,onote:s.owner_note,verified:s.verified,sid:s.id,poster:s.poster}));
   const center=pts.find(p=>p.lat)?[pts.find(p=>p.lat).lat,pts.find(p=>p.lat).lng]:(CITY_CENTER[c.lost_city]||[23.7,121]);
   // 地圖程式還沒下載完也先把案件內容顯示出來，地圖等它好了再畫（分享連結最常開這頁）
+  const ana=sightAnalysis(c,pts);{const sa=$('#sAna');if(sa)sa.innerHTML=sightAnaHTML(ana)}
   const drawMap=()=>{const map=makeMap('map',center,pts.find(p=>p.lat)?15:10);
+  // 依時間把走失點和目擊點連起來，並圈出建議先找的範圍
+  if(typeof L!=='undefined'&&map&&map.addLayer){const line=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t)).map(p=>[p.lat,p.lng]);
+    if(line.length>=2)L.polyline(line,{color:'#B8325E',weight:3,opacity:.75,dashArray:'6 8'}).addTo(map);
+    if(ana)map.__anaCircle=L.circle([ana.last.lat,ana.last.lng],{radius:ana.rad*1000,color:'#B8325E',weight:2,dashArray:'4 6',fillColor:'#B8325E',fillOpacity:.07}).addTo(map)}
   const bounds=[];
   pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
-  if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})};
+  if(map.__anaCircle&&typeof L!=='undefined'){const bb=L.latLngBounds(bounds.length?bounds:[[ana.last.lat,ana.last.lng]]);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})};
   if(window.L||leafletGaveUp)drawMap();else waitLeaflet().then(()=>{if(_n===navId&&$('#map')&&!$('#map').classList.contains('leaflet-container'))drawMap()});
   const tl=$('#tl');
   if(!pts.length){tl.innerHTML=c.pending_count>0?'<p class="muted">目前還沒有飼主確認過的目擊。</p>':'<p class="muted">還沒有目擊回報。</p>'}
