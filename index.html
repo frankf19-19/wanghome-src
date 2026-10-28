@@ -1352,7 +1352,35 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-sec>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);opacity:.5;transition:transform .15s}
 .mg-sec[open]>summary::after{transform:rotate(225deg)}
 .mg-sec>summary .muted,.mg-sec>summary .tag{font-weight:600}
-.mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1.25fr 1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.s-ana{margin:0 0 12px;padding:14px 16px}.s-ana-t{display:flex;align-items:center;gap:6px;font-size:16px;margin-bottom:6px}.s-ana dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:15px}.s-ana dt{color:var(--ink-3);white-space:nowrap}.s-ana dd{margin:0}@media(max-width:420px){.s-ana dl{grid-template-columns:1fr}.s-ana dt{margin-top:6px}}.me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
+.mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1.25fr 1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.sa{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:16px;margin:0 0 14px;display:grid;gap:12px}
+.sa small{display:block;font-size:13px;color:var(--ink-3);font-weight:600;line-height:1.3}
+.sa-hero{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--paper)}
+.sa-hero.fresh{background:var(--red-soft)}
+.sa-hero>div{flex:1;min-width:0}.sa-hero b{display:block;font-family:var(--display);font-size:24px;line-height:1.2;color:var(--ink)}
+.sa-hero span:not(.sa-dot){display:block;font-size:14px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sa-hero em{font-style:normal;font-size:12.5px;font-weight:800;color:#fff;background:var(--red-fill);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.sa-dot{flex:none;width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 color-mix(in srgb,var(--red) 50%,transparent)}
+.sa-hero.fresh .sa-dot{animation:saPulse 2s ease-out infinite}
+@keyframes saPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--red) 55%,transparent)}100%{box-shadow:0 0 0 12px transparent}}
+@media (prefers-reduced-motion:reduce){.sa-hero.fresh .sa-dot{animation:none}}
+.sa-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.sa-stats>div{border:1px solid var(--line);border-radius:12px;padding:9px 11px}
+.sa-stats b{display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;font-size:16.5px;line-height:1.35;margin-top:2px}
+.sa-stats .hi{border-color:color-mix(in srgb,var(--red) 45%,var(--line));background:color-mix(in srgb,var(--red) 6%,transparent)}
+.sa-stats .hi b{color:var(--red-ink)}
+.sa-arrow{width:16px;height:16px;flex:none;fill:currentColor;color:var(--red)}
+.sa-line{display:flex;align-items:center;gap:8px;margin:0;font-size:14.5px;color:var(--ink-2)}
+.sa-slots>div{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px;height:64px;align-items:end}
+.sa-slots span{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch}
+.sa-slots i{display:block;min-height:3px;border-radius:6px 6px 2px 2px;background:color-mix(in srgb,var(--ink-3) 35%,transparent);margin-bottom:20px}
+.sa-slots span.top i{background:var(--red)}
+.sa-slots em{position:absolute;bottom:0;left:0;right:0;text-align:center;font-style:normal;font-size:12.5px;color:var(--ink-3)}
+.sa-slots span.top em{color:var(--red-ink);font-weight:800}
+.sa-note{margin:0;font-size:13px;line-height:1.6;color:var(--ink-3)}
+.sa-k1,.sa-k2{display:inline-block;vertical-align:middle;margin:0 3px}
+.sa-k1{width:22px;border-top:3px dashed #B8325E}
+.sa-k2{width:14px;height:14px;border-radius:50%;border:2px dashed #B8325E;background:rgba(184,50,94,.08)}
+.mk.last{box-shadow:0 0 0 4px rgba(184,50,94,.28)}.me-acts{display:flex;gap:8px;flex-wrap:wrap}.me-acts .btn{flex:1 1 180px}.mg-body>.card{box-shadow:none;padding:0;background:none}
 .mg-sec.danger-zone>summary{color:var(--red-ink)}
 .mg-foot{margin:16px 2px 0;text-align:center}
 .pf-t{flex:1;min-width:0}.pf-t h1{margin:0;font-size:22px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-t .muted{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pf-acts{display:flex;gap:8px;flex-basis:100%;justify-content:flex-end}@media(min-width:600px){.pf-acts{flex-basis:auto}}
@@ -1514,7 +1542,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.3.6';
+const BUILD = 'v5.3.7';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2387,20 +2415,39 @@ async function loadRecent(){
 const DIR8=['北','東北','東','東南','南','西南','西','西北'];
 function bearing8(a,b){const r=x=>x*Math.PI/180,y=Math.sin(r(b.lng-a.lng))*Math.cos(r(b.lat)),x=Math.cos(r(a.lat))*Math.sin(r(b.lat))-Math.sin(r(a.lat))*Math.cos(r(b.lat))*Math.cos(r(b.lng-a.lng));return DIR8[Math.round(((Math.atan2(y,x)*180/Math.PI+360)%360)/45)%8]}
 function searchRadiusKm(hours){return hours<6?0.5:hours<24?1:hours<72?2:3}
+function bearingDeg(a,b){const r=x=>x*Math.PI/180,y=Math.sin(r(b.lng-a.lng))*Math.cos(r(b.lat)),x=Math.cos(r(a.lat))*Math.sin(r(b.lat))-Math.sin(r(a.lat))*Math.cos(r(b.lat))*Math.cos(r(b.lng-a.lng));return (Math.atan2(y,x)*180/Math.PI+360)%360}
+const fmtKm=d=>d<1?Math.round(d*1000/10)*10+' 公尺':(Math.abs(d-Math.round(d))<0.05?Math.round(d):d.toFixed(1))+' 公里';
 function sightAnalysis(c,pts){
   const geo=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t));
   const seen=geo.filter(p=>p.cls!=='start');if(!seen.length||c.status!=='searching')return null;
   const last=seen[seen.length-1],start=geo.find(p=>p.cls==='start');
   const hrs=Math.max(0,(Date.now()-new Date(last.t))/36e5),rad=searchRadiusKm(hrs);
-  const ago=hrs<1?'不到 1 小時前':hrs<24?Math.round(hrs)+' 小時前':Math.round(hrs/24)+' 天前';
-  const out={last,rad,rows:[]};
-  out.rows.push(['最後一次被看到',`${ago}（${fmtDT(last.t)}）${last.where?'・'+esc(last.where):''}`]);
-  if(start){const d=km(start,last);out.rows.push(['離走失地點',`${d<1?Math.round(d*1000)+' 公尺':d.toFixed(1)+' 公里'}，往${bearing8(start,last)}方`])}
-  if(seen.length>=2){const prev=seen[seen.length-2],d=km(prev,last);if(d>=0.15)out.rows.push(['最近的移動',`目擊 ${prev.label} → ${last.label}：往${bearing8(prev,last)}約 ${d<1?Math.round(d*1000)+' 公尺':d.toFixed(1)+' 公里'}`])}
-  if(seen.length>=3){const P=[['清晨',5,8],['白天',8,17],['傍晚',17,20],['晚上',20,24],['深夜',0,5]];const cnt={};seen.forEach(p=>{const h=+new Intl.DateTimeFormat('en-GB',{hour:'2-digit',hour12:false,timeZone:'Asia/Taipei'}).format(new Date(p.t))%24;const k=P.find(([,a,b])=>h>=a&&h<b)[0];cnt[k]=(cnt[k]||0)+1});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];if(top[1]>=2)out.rows.push(['常被看到的時段',`${top[0]}（${top[1]} 次），這個時段去找機會比較大`])}
-  out.rows.push(['建議先找',`最後目擊點周圍 ${rad<1?rad*1000+' 公尺':rad+' 公里'}（地圖上的虛線圈）`]);
-  return out}
-function sightAnaHTML(a){if(!a)return '';return `<div class="card s-ana"><b class="s-ana-t">${ic('search')} 目擊分析</b><dl>${a.rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl><p class="muted small" style="margin:6px 0 0">依飼主確認過的目擊自動推算，只是參考。走失的狗貓常躲在附近安靜的地方，清晨和傍晚比較會出來。</p></div>`}
+  const a={last,rad,n:seen.length,hrs,ago:hrs<1?'不到 1 小時前':hrs<24?Math.round(hrs)+' 小時前':Math.round(hrs/24)+' 天前'};
+  if(start){a.dist=km(start,last);a.deg=bearingDeg(start,last);a.dir=bearing8(start,last)}
+  if(seen.length>=2){const prev=seen[seen.length-2],d=km(prev,last);if(d>=0.15)a.move={from:prev.label,to:last.label,d,dir:bearing8(prev,last),deg:bearingDeg(prev,last)}}
+  // 出現時段（台灣時間）
+  const P=[['清晨',5,8],['白天',8,17],['傍晚',17,20],['晚上',20,24],['深夜',0,5]];a.slots=P.map(([k])=>({k,n:0}));
+  seen.forEach(p=>{const h=+new Intl.DateTimeFormat('en-GB',{hour:'2-digit',hour12:false,timeZone:'Asia/Taipei'}).format(new Date(p.t))%24;a.slots[P.findIndex(([,x,y])=>h>=x&&h<y)].n++});
+  const top=a.slots.slice().sort((x,y)=>y.n-x.n)[0];a.topSlot=seen.length>=3&&top.n>=2?top.k:null;
+  return a}
+function sightAnaHTML(a){if(!a)return '';
+  const arrow=deg=>`<svg class="sa-arrow" viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(${Math.round(deg)}deg)"><path d="M12 3l6 9h-4v9h-4v-9H6z"/></svg>`;
+  const fresh=a.hrs<24;
+  const max=Math.max(1,...a.slots.map(x=>x.n));
+  return `<section class="sa" aria-label="目擊分析">
+  <div class="sa-hero ${fresh?'fresh':''}">
+    <span class="sa-dot" aria-hidden="true"></span>
+    <div><small>最後一次被看到</small><b>${a.ago}</b><span>${fmtDT(a.last.t)}${a.last.where?'・'+esc(a.last.where):''}</span></div>
+    <em>目擊 ${a.last.label}</em>
+  </div>
+  <div class="sa-stats">
+    ${a.dist!=null?`<div><small>離走失地點</small><b>${fmtKm(a.dist)}</b></div><div><small>方向</small><b>${arrow(a.deg)}${a.dir}方</b></div>`:''}
+    <div class="hi"><small>建議先找周圍</small><b>${fmtKm(a.rad)}</b></div>
+  </div>
+  ${a.move?`<p class="sa-line">${arrow(a.move.deg)}<span>最近一次移動：目擊 ${a.move.from} → ${a.move.to}，往${a.move.dir}約 ${fmtKm(a.move.d)}</span></p>`:''}
+  ${a.n>=2?`<div class="sa-slots" role="img" aria-label="各時段被看到的次數"><small>常被看到的時段${a.topSlot?`：<b>${a.topSlot}</b>，這時候去找機會比較大`:''}</small><div>${a.slots.map(x=>`<span class="${x.n&&x.n===max?'top':''}"><i style="height:${Math.round(x.n/max*100)}%"></i><em>${x.k}</em></span>`).join('')}</div></div>`:''}
+  <p class="sa-note">依飼主確認過的 ${a.n} 次目擊推算，只是參考。走失的狗貓常躲在附近安靜處，清晨和傍晚最常出來。地圖上的<span class="sa-k1"></span>是移動路線，<span class="sa-k2"></span>是建議先找的範圍。</p>
+</section>`}
 function km(a,b){const R=6371,toR=x=>x*Math.PI/180;const dLat=toR(b.lat-a.lat),dLng=toR(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function distText(lat,lng){if(!homeState.near||lat==null)return '';const d=km(homeState.near,{lat,lng});return `<span class="dist">距你 ${d<1?Math.round(d*1000)+' m':d.toFixed(1)+' km'}</span>`}
 function sortNear(arr,latK,lngK){if(!homeState.near)return arr;return arr.slice().sort((a,b)=>{const da=a[latK]==null?1e9:km(homeState.near,{lat:a[latK],lng:a[lngK]});const db=b[latK]==null?1e9:km(homeState.near,{lat:b[latK],lng:b[lngK]});return da-db})}
@@ -2710,10 +2757,10 @@ async function renderCase(id){const _n=navId;
   const drawMap=()=>{const map=makeMap('map',center,pts.find(p=>p.lat)?15:10);
   // 依時間把走失點和目擊點連起來，並圈出建議先找的範圍
   if(typeof L!=='undefined'&&map&&map.addLayer){const line=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t)).map(p=>[p.lat,p.lng]);
-    if(line.length>=2)L.polyline(line,{color:'#B8325E',weight:3,opacity:.75,dashArray:'6 8'}).addTo(map);
+    if(line.length>=2){L.polyline(line,{color:'#fff',weight:6,opacity:.8}).addTo(map);L.polyline(line,{color:'#B8325E',weight:3,opacity:.9,dashArray:'6 8',lineCap:'round'}).addTo(map)}
     if(ana)map.__anaCircle=L.circle([ana.last.lat,ana.last.lng],{radius:ana.rad*1000,color:'#B8325E',weight:2,dashArray:'4 6',fillColor:'#B8325E',fillOpacity:.07}).addTo(map)}
   const bounds=[];
-  pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
+  pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,ana&&p===ana.last?(p.cls+' last'):p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
   if(map.__anaCircle&&typeof L!=='undefined'){const bb=L.latLngBounds(bounds.length?bounds:[[ana.last.lat,ana.last.lng]]);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})};
   if(window.L||leafletGaveUp)drawMap();else waitLeaflet().then(()=>{if(_n===navId&&$('#map')&&!$('#map').classList.contains('leaflet-container'))drawMap()});
   const tl=$('#tl');
@@ -3109,7 +3156,8 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <a class="mg-back" href="${go('')}">‹ 回到「${esc(c.name)}」的管理</a>
     <section ${P==='see'?'':'hidden'}>
       <h1>目擊回報</h1>
-      ${pendS.length?`<section class="mg-pend" id="pendNotice"><h2>有 <span id="pendN">${pendS.length}</span> 筆等你確認</h2><p class="small muted" style="margin:-4px 0 8px">是牠就按「是牠」，會顯示在公開地圖上；不是就按「退回」。</p><div class="timeline">${pendS.map(sItem).join('')}</div></section>`:''}
+      ${(()=>{const conf=(ss||[]).filter(x=>x.status==='confirmed'&&x.lat&&x.seen_at).sort((x,y)=>new Date(x.seen_at)-new Date(y.seen_at));const pts=[];if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,t:c.lost_at,cls:'start',label:'走'});conf.forEach((x,i)=>pts.push({lat:x.lat,lng:x.lng,t:x.seen_at,cls:'',label:String(i+1),where:x.place_text}));const h=sightAnaHTML(sightAnalysis(c,pts));return h?h+`<p class="small" style="margin:-6px 0 14px"><a href="#/case/${id}">看地圖上的路線和範圍 ›</a></p>`:''})()}
+      ${pendS.length?`<section class="mg-pend" id="pendNotice"><h2>有 <span id="pendN">${pendS.length}</span> 筆等你確認</h2><p class="small muted" style="margin:-4px 0 8px">是牠就按「是牠」，會顯示在公開地圖上；不是就按「不是牠」。</p><div class="timeline">${pendS.map(sItem).join('')}</div></section>`:''}
       ${doneS.length?`<h2>${pendS.length?'之前的回報':'所有回報'}</h2><div class="timeline">${doneS.map(sItem).join('')}</div>`:(pendS.length?'':'<p class="muted">還沒有人回報。有人回報時會寄信通知你。</p>')}
       <h2>收容所疑似資料</h2>
       <p class="muted small">系統用農業部收容所資料自動比對，只是粗略篩選，請看照片、打電話核對晶片。</p>
