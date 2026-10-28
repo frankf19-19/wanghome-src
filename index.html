@@ -1760,12 +1760,12 @@ const CONFIG = {
   GOOGLE_LOGIN: true,        // Supabase 已設定 Google 登入
   GOOGLE_WEB_CLIENT_ID: '898937620947-1g2cg11lee7h0d9371v59k08clfj8ndv.apps.googleusercontent.com',  // Google Cloud 的「網頁應用程式」用戶端 ID（App 內 Google 登入要用；Android 也用這個）
   GOOGLE_IOS_CLIENT_ID: '898937620947-vvrtmkqugb1g7us7015sr8uiabahfrpf.apps.googleusercontent.com',  // Google Cloud 的「iOS」用戶端 ID
-  APPLE_LOGIN: false,        // 在 Supabase 設定好 Apple 登入後改成 true（iOS App 內是原生「使用 Apple 登入」）
+  APPLE_LOGIN: true,         // Supabase 已設定 Apple 登入（iOS App 內是原生「使用 Apple 登入」，Services ID com.wangmiaotw.web）
   FACEBOOK_LOGIN: false,     // 在 Supabase 設定好 Facebook 登入後改成 true（App 內會開瀏覽器授權再跳回來）
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.3';
+const BUILD = 'v5.6.4';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
