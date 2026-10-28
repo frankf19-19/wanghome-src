@@ -1642,6 +1642,47 @@ body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green)
 .sheet.pick .srow:active{transform:scale(.99)}
 /* 底部儲存列：毛玻璃 */
 @media (max-width:760px){.submitbar{background:color-mix(in srgb,var(--sheet) 80%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}}
+
+/* ---- v5.6.0 圖示／字體、動效、首頁與毛孩頁 ---- */
+/* 標題字：更大、更緊 */
+@media (max-width:760px){h1{font-size:30px!important;letter-spacing:-.01em;line-height:1.22}h2{font-size:22px;letter-spacing:-.005em}.bs-hero .bs-hello{font-size:21.5px!important}}
+/* Tab Bar：選中時圖示填色、文字加粗、彈一下 */
+@media (max-width:760px){
+  .tabbar a .i{transition:transform .18s}
+  .tabbar a.on .i{fill:currentColor;fill-opacity:.16;stroke-width:2.4}
+  .tabbar a.on{font-weight:800}
+  .tabbar a .i.pop{animation:tabPop .36s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes tabPop{0%{transform:scale(1)}40%{transform:scale(1.22) translateY(-2px)}100%{transform:scale(1)}}
+}
+/* 進場：內容由上而下依序浮現 */
+@media (prefers-reduced-motion:no-preference){
+  #app.enter>*{animation-fill-mode:both}
+  #app.enter>*:nth-child(2){animation-delay:.04s}#app.enter>*:nth-child(3){animation-delay:.08s}#app.enter>*:nth-child(4){animation-delay:.12s}#app.enter>*:nth-child(5){animation-delay:.16s}#app.enter>*:nth-child(6){animation-delay:.2s}#app.enter>*:nth-child(n+7){animation-delay:.24s}
+  #app.enter .tiles4 .tile4{animation:tileIn .5s cubic-bezier(.2,.8,.2,1) both}#app.enter .tiles4 .tile4:nth-child(2){animation-delay:.06s}#app.enter .tiles4 .tile4:nth-child(3){animation-delay:.12s}#app.enter .tiles4 .tile4:nth-child(4){animation-delay:.18s}
+  @keyframes tileIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+  #app.enter .bs-duo{animation:duoIn .7s cubic-bezier(.34,1.4,.64,1) both .1s}@keyframes duoIn{from{opacity:0;transform:translateY(16px) scale(.9)}to{opacity:1;transform:none}}
+  #app.enter .lp-row .lp{animation:tileIn .45s cubic-bezier(.2,.8,.2,1) both}#app.enter .lp-row .lp:nth-child(2){animation-delay:.05s}#app.enter .lp-row .lp:nth-child(3){animation-delay:.1s}#app.enter .lp-row .lp:nth-child(4){animation-delay:.15s}
+  #app.enter .ccard{animation:tileIn .45s cubic-bezier(.2,.8,.2,1) both}#app.enter .grid .ccard:nth-child(2){animation-delay:.05s}#app.enter .grid .ccard:nth-child(3){animation-delay:.1s}#app.enter .grid .ccard:nth-child(4){animation-delay:.15s}#app.enter .grid .ccard:nth-child(n+5){animation-delay:.2s}
+  .slot.done,.done-chip:active{animation:popOk .35s cubic-bezier(.34,1.56,.64,1)}@keyframes popOk{40%{transform:scale(1.12)}100%{transform:scale(1)}}
+}
+/* 慶祝彩點 */
+.cf{position:fixed;width:8px;height:8px;border-radius:3px;z-index:1000;pointer-events:none;animation:cf .65s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes cf{from{opacity:1;transform:translate(-50%,-50%) scale(1)}to{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--rz)) scale(.4)}}
+/* 首頁四格：圖示更大、更有份量 */
+.tile4{min-height:132px;gap:4px}.tile4 .te{width:64px;height:64px}.tile4 .te .ico,.tile4 .te svg{width:30px;height:30px}.tile4 b{font-size:18.5px}
+/* 首頁橫滑卡：天數標籤改膠囊、名字更大 */
+.lp-ph em{background:color-mix(in srgb,var(--red-fill) 88%,#000);color:#fff;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:800;left:8px;bottom:8px;top:auto}
+.lp-ph::after{content:"";position:absolute;inset:auto 0 0 0;height:50%;background:linear-gradient(to top,rgba(20,10,15,.35),transparent);pointer-events:none}
+.lp b{font-size:16px}
+/* 毛孩頁：主照上疊名字 */
+.pv-head .gallery .main{position:relative}
+.pv-head .gallery .main::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top,rgba(20,10,15,.42) 0%,rgba(20,10,15,0) 55%);pointer-events:none}
+/* 列表相片卡：天數徽章膠囊 */
+.ccard .band{border-radius:99px;left:10px;bottom:10px;padding:4px 11px;font-size:13px}
+/* 案件頁主照 */
+.detail-head .gallery .main{border-radius:26px;box-shadow:0 18px 34px -20px rgba(120,40,70,.45)}
+/* 段落節奏 */
+.lede{font-size:16.5px;color:var(--ink-2)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1708,7 +1749,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.5.2';
+const BUILD = 'v5.6.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1877,6 +1918,11 @@ function cityOptions(sel){return '<option value="">選擇縣市</option>'+Object
 function distOptions(city,sel){return '<option value="">選擇區</option>'+(TW[city]||[]).map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('')}
 function qs(h){const i=h.indexOf('?');if(i<0)return{};return Object.fromEntries(new URLSearchParams(h.slice(i+1)))}
 function RM(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(_){return false}}
+/* 數字跳動：毛孩頁統計 */
+function countUp(root){if(RM())return;(root||document).querySelectorAll('.detail-head .stat b').forEach(b=>{const t=b.textContent.trim();const n=parseFloat(t.replace(/,/g,''));if(!isFinite(n)||!/^[\d,.]+$/.test(t))return;const dec=(t.split('.')[1]||'').length;const t0=performance.now(),D=650;const step=now=>{const k=Math.min(1,(now-t0)/D),e=1-Math.pow(1-k,3);b.textContent=(n*e).toLocaleString(undefined,{minimumFractionDigits:dec,maximumFractionDigits:dec});if(k<1)requestAnimationFrame(step);else b.textContent=t};requestAnimationFrame(step)})}
+/* 打勾慶祝：從按鈕中心噴出小彩點 */
+function burst(el,color){if(RM()||!el||!el.isConnected)return;const r=el.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;const cs=['#FF8FB5','#FFD36B','#7FE0B0','#BDB0FF',color||'#B8335F'];
+  for(let i=0;i<12;i++){const d=document.createElement('i');d.className='cf';const a=(Math.PI*2*i)/12+Math.random()*.5,dist=46+Math.random()*30;d.style.cssText=`left:${cx}px;top:${cy}px;background:${cs[i%cs.length]};--dx:${Math.cos(a)*dist}px;--dy:${Math.sin(a)*dist-20}px;--rz:${Math.random()*360}deg`;document.body.appendChild(d);setTimeout(()=>d.remove(),700)}}
 function setNavAction(html,fn){const s=document.getElementById('mAct');if(!s)return;s.innerHTML=html||'';if(fn&&s.firstElementChild)s.firstElementChild.onclick=fn}
 function setTitle(t){t=String(t||'').replace(/[\u202A-\u202E\u2066-\u2069]/g,'');document.title=(t?t+' — ':'')+CONFIG.SITE_NAME;const m=document.getElementById('mTitle');if(m)m.textContent=t||CONFIG.SITE_NAME}
 // 很長的清單（例如 200 筆目擊）：先顯示 20 筆，其餘按按鈕再顯示
@@ -2089,7 +2135,7 @@ function openAddSheet(){
     if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'));
 }
-document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.tb-add');if(a){e.preventDefault();openAddSheet()}});
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.tb-add');if(a){e.preventDefault();openAddSheet()}const t=e.target.closest&&e.target.closest('.tabbar a');if(t){const i=t.querySelector('.i');if(i){i.classList.remove('pop');void i.offsetWidth;i.classList.add('pop')}}});
 function renderChrome(path,h){
   document.body.dataset.route=(path.replace(/^#\/?/,'').split('/')[0]||'home');
   const space=spaceOf(path);document.body.dataset.space=space;
@@ -2240,7 +2286,7 @@ function route(){window.__lastRoute=Date.now();
   closeOverlays();
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
   const trav=trackDepth(wasPop);
-  app.classList.remove('enter','push','pop');void app.offsetWidth;app.classList.add('enter');if(IS_APP&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
+  app.classList.remove('enter','push','pop');void app.offsetWidth;app.classList.add('enter');clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
   curHash=newHash;
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
@@ -2585,7 +2631,7 @@ async function renderHealth(){const _n=navId;
   app.querySelectorAll('.due[data-go]').forEach(d=>d.onclick=e=>{if(e.target.closest('button,details,a,select,input'))return;location.hash=d.dataset.go});
   {const d=$('#calSec');if(d){d.ontoggle=()=>{window.__calOpen=d.open};if(IS_APP&&qs(location.hash).cal){const c=d.querySelector('.calmore');if(c)c.open=true}}}
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:RM()?'auto':'smooth'})},60);
@@ -5030,8 +5076,8 @@ async function renderPetView(id){const _n=navId;
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
-  bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
+  bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);countUp(app);
   if(_n===navId)setNavAction(`<button type="button" aria-label="編輯資料">${ic('edit')}</button>`,()=>{location.hash='#/pet/'+id+'/edit'});
   {const mc=document.querySelector('#app .med-card'),ab=document.querySelector('#app .detail-head .actionbar');if(mc&&ab){ab.after(mc);mc.style.marginTop='14px'}}
   bindMedSlots(()=>rerender(()=>renderPetView(id)));
@@ -5152,7 +5198,7 @@ function bindMedSlots(rerender){
   document.querySelectorAll('[data-medlog]').forEach(b=>b.onclick=async()=>{
     b.disabled=true;
     if(b.dataset.logid){const {error}=await sb.from('pet_med_logs').delete().eq('id',b.dataset.logid);if(error){b.disabled=false;return toast(error.message)}}
-    else{const {error}=await sb.from('pet_med_logs').insert({med_id:b.dataset.medlog,slot:b.dataset.slot});if(error){b.disabled=false;return toast(error.message)}toast(b.dataset.slot==='需要時'?'已記錄':'已勾選：'+b.dataset.slot)}
+    else{const {error}=await sb.from('pet_med_logs').insert({med_id:b.dataset.medlog,slot:b.dataset.slot});if(error){b.disabled=false;return toast(error.message)}toast(b.dataset.slot==='需要時'?'已記錄':'已勾選：'+b.dataset.slot);burst(b,'#16855A')}
     rerender();
   });
 }
