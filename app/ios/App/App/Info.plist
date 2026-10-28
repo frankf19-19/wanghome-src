@@ -81,6 +81,10 @@
 			<key>CFBundleURLName</key><string>com.wangmiaotw.app</string>
 			<key>CFBundleURLSchemes</key><array><string>wangmiaotw</string></array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key><string>google-signin</string>
+			<key>CFBundleURLSchemes</key><array><string>com.googleusercontent.apps.898937620947-vvrtmkqugb1g7us7015sr8uiabahfrpf</string></array>
+		</dict>
 	</array>
 </dict>
 </plist>

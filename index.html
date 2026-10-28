@@ -1757,15 +1757,15 @@ const CONFIG = {
   ECPAY_URL: '',             // 綠界實況主收款網址，例：https://p.ecpay.com.tw/XXXXXXX
   CONTACT_EMAIL: 'service@wangmiaotw.com',
   OPERATOR: '汪喵回家站長（個人經營）',   // 隱私權政策上的「蒐集者」名稱
-  GOOGLE_LOGIN: false,       // 在 Supabase 設定好 Google 登入後改成 true
-  GOOGLE_WEB_CLIENT_ID: '',  // Google Cloud 的「網頁應用程式」用戶端 ID（App 內 Google 登入要用；Android 也用這個）
-  GOOGLE_IOS_CLIENT_ID: '',  // Google Cloud 的「iOS」用戶端 ID
+  GOOGLE_LOGIN: true,        // Supabase 已設定 Google 登入
+  GOOGLE_WEB_CLIENT_ID: '898937620947-1g2cg11lee7h0d9371v59k08clfj8ndv.apps.googleusercontent.com',  // Google Cloud 的「網頁應用程式」用戶端 ID（App 內 Google 登入要用；Android 也用這個）
+  GOOGLE_IOS_CLIENT_ID: '898937620947-vvrtmkqugb1g7us7015sr8uiabahfrpf.apps.googleusercontent.com',  // Google Cloud 的「iOS」用戶端 ID
   APPLE_LOGIN: false,        // 在 Supabase 設定好 Apple 登入後改成 true（iOS App 內是原生「使用 Apple 登入」）
   FACEBOOK_LOGIN: false,     // 在 Supabase 設定好 Facebook 登入後改成 true（App 內會開瀏覽器授權再跳回來）
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.2';
+const BUILD = 'v5.6.3';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1814,7 +1814,7 @@ if(IS_APP){
   // 輕輕震動：按底部選單、四宮格、大按鈕時（只有 App 裡）
   try{const HP=capPlugin('Haptics');if(HP){let last=0;document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('.tabbar a,.tile4,.srow,.bigbtn,.btn,.mrow,.mb-back,.slot,.seg button,.fchip,.mg-tile,.mg-ai-row,.qk');if(!t)return;const n=Date.now();if(n-last<120)return;last=n;HP.impact({style:'LIGHT'}).catch(()=>{})},true)}}catch(_){}
   // 點通知：打開那隻毛孩的頁面
-  try{const SL=capPlugin('SocialLogin');if(SL&&(CONFIG.GOOGLE_LOGIN||CONFIG.APPLE_LOGIN)){const o={};if(CONFIG.GOOGLE_LOGIN&&CONFIG.GOOGLE_WEB_CLIENT_ID)o.google={webClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,iOSClientId:CONFIG.GOOGLE_IOS_CLIENT_ID||CONFIG.GOOGLE_WEB_CLIENT_ID,mode:'online'};if(CONFIG.APPLE_LOGIN)o.apple={};SL.initialize(o).catch(()=>{})}}catch(_){}
+  try{const SL=capPlugin('SocialLogin');if(SL&&(CONFIG.GOOGLE_LOGIN||CONFIG.APPLE_LOGIN)){const o={};if(CONFIG.GOOGLE_LOGIN&&CONFIG.GOOGLE_WEB_CLIENT_ID)o.google={webClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,iOSClientId:CONFIG.GOOGLE_IOS_CLIENT_ID||CONFIG.GOOGLE_WEB_CLIENT_ID,iOSServerClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,mode:'online'};if(CONFIG.APPLE_LOGIN)o.apple={};SL.initialize(o).catch(()=>{})}}catch(_){}
   try{const LN=capPlugin('LocalNotifications');if(LN){
     LN.addListener('localNotificationActionPerformed',e=>{const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
     if(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'&&LN.createChannel)LN.createChannel({id:'care',name:'毛孩照護提醒',description:'回診、疫苗、驅蟲、用藥提醒',importance:4,visibility:1}).catch(()=>{});

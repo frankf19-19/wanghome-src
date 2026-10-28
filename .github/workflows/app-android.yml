@@ -47,6 +47,7 @@ jobs:
         working-directory: app/android
         run: |
           echo "$KS" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          echo "::notice::上傳金鑰 SHA-1（Google 登入 Android 用戶端要填這個）"; keytool -list -v -keystore "$RUNNER_TEMP/upload.jks" -storepass "$KS_PASS" -alias "$KEY_ALIAS" 2>/dev/null | grep -E "SHA1|SHA256" || true
           ./gradlew --no-daemon bundleRelease \
             -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.jks" \
             -Pandroid.injected.signing.store.password="$KS_PASS" \
