@@ -1619,6 +1619,29 @@ body[data-space="health"] .mg-ai{background:linear-gradient(180deg,color-mix(in 
   :root:not([data-theme="light"]) .detail-head .stat{background:color-mix(in srgb,var(--green-soft) 70%,var(--sheet))}:root:not([data-theme="light"]) .pf-av{background:linear-gradient(135deg,#3D2230,#6A2C47);color:#FFB6CE}:root:not([data-theme="light"]) .pv-head .gallery .main{box-shadow:0 18px 34px -20px rgba(0,0,0,.8)}}
 :root[data-theme="dark"] .bs-hero{background:linear-gradient(120deg,#3D2230 0%,#2A2028 50%,#1F3328 100%);box-shadow:0 14px 30px -18px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}:root[data-theme="dark"] .bs-hero::after{background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)}
 :root[data-theme="dark"] .detail-head .stat{background:color-mix(in srgb,var(--green-soft) 70%,var(--sheet))}:root[data-theme="dark"] .pf-av{background:linear-gradient(135deg,#3D2230,#6A2C47);color:#FFB6CE}:root[data-theme="dark"] .pv-head .gallery .main{box-shadow:0 18px 34px -20px rgba(0,0,0,.8)}
+
+/* ---- v5.5.2 表單質感：欄位、上傳區、分段標題 ---- */
+.fsec{font-family:var(--head);font-size:15px;color:var(--ink-2);margin:22px 0 6px;display:flex;align-items:baseline;gap:8px;letter-spacing:.02em}.fsec:first-child{margin-top:2px}.fsec small{font-weight:500;font-size:12.5px;color:var(--ink-3)}
+.fsec::before{content:"";width:4px;height:14px;border-radius:2px;background:var(--red);align-self:center}body[data-space="health"] .fsec::before{background:var(--green)}
+label.f>span{font-size:14px;font-weight:700;color:var(--ink-2)}
+select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=number],input[type=datetime-local],input[type=date],input[type=time],textarea{background:color-mix(in srgb,var(--paper) 55%,var(--sheet));border-color:color-mix(in srgb,var(--line) 90%,transparent);box-shadow:inset 0 1px 2px rgba(120,40,70,.04)}
+select:focus,input:focus,textarea:focus{background:var(--sheet)}
+.seg{background:color-mix(in srgb,var(--paper) 60%,var(--sheet));border-radius:16px;padding:4px}.seg button{border-radius:12px}.seg button.on{box-shadow:0 4px 12px -6px rgba(120,40,70,.4)}
+.fchip{background:var(--sheet);box-shadow:0 1px 2px rgba(120,40,70,.05)}
+/* 上傳區：一個入口，App 裡點了跳「拍照／相簿」 */
+.uploadbtn{border:1.5px dashed color-mix(in srgb,var(--red) 45%,var(--line));background:color-mix(in srgb,var(--red-soft) 40%,var(--sheet));border-radius:18px;padding:16px 14px;min-height:64px;color:var(--ink);font-weight:700;gap:10px;margin-top:8px}
+.uploadbtn>.ico{width:34px;height:34px;padding:7px;box-sizing:border-box;border-radius:50%;background:var(--sheet);color:var(--red);box-shadow:0 4px 10px -5px rgba(120,40,70,.3);flex:none}
+.uploadbtn:hover{border-color:var(--red)}.uploadbtn:active{transform:scale(.99)}
+body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green) 45%,var(--line));background:color-mix(in srgb,var(--green-soft) 50%,var(--sheet))}body[data-space="health"] .uploadbtn>.ico{color:var(--green)}
+.uploadbtn.cam::after{content:"拍照或從相簿選";font-size:12.5px;font-weight:500;color:var(--ink-3);margin-left:auto}
+.photos-preview div{border-radius:14px;box-shadow:0 6px 14px -8px rgba(120,40,70,.35)}
+.photos-preview:empty{display:none}
+/* 選擇單 */
+.sheet.pick .srow{display:flex;align-items:center;gap:14px;width:100%;border:0;background:var(--sheet);border-radius:16px;padding:14px 16px;margin-top:8px;font:inherit;text-align:left;color:var(--ink);box-shadow:var(--lift);cursor:pointer}
+.sheet.pick .srow b{font-size:16px}.sheet.pick .sr-ic{width:40px;height:40px;border-radius:50%;background:var(--red-soft);color:var(--red);display:grid;place-items:center;flex:none}.sheet.pick .sr-ic .ico{width:20px;height:20px}
+.sheet.pick .srow:active{transform:scale(.99)}
+/* 底部儲存列：毛玻璃 */
+@media (max-width:760px){.submitbar{background:color-mix(in srgb,var(--sheet) 80%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1685,7 +1708,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.5.1';
+const BUILD = 'v5.5.2';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1744,14 +1767,13 @@ if(IS_APP){
       const B=capPlugin('Browser');if(B){e.preventDefault();B.open({url:href,presentationStyle:'popover'}).catch(()=>{window.open(href,'_system')})}}},true);
   // 拍照：每個「選照片」旁邊多一顆「拍照」，用原生相機拍完交給原本的上傳流程
   const addCam=()=>{const C=capPlugin('Camera');if(!C)return;document.querySelectorAll('#app label.uploadbtn').forEach(l=>{if(l.dataset.cam)return;const inp=l.querySelector('input[type=file]');if(!inp)return;l.dataset.cam=1;
-    // 看到／撿到毛孩的人多半在現場：「拍照」放第一個、做成主按鈕
-    const front=/^#\/(report\/|found\/new)/.test(location.hash);
-    const b=document.createElement('button');b.type='button';b.className=front?'btn big block uploadbtn-cam':'btn ghost uploadbtn-cam';b.innerHTML=ic('camera')+' 拍照';
-    b.onclick=async()=>{try{const ph=await C.getPhoto({source:'CAMERA',resultType:'uri',quality:85,correctOrientation:true,saveToGallery:false});
+    // App 裡：點上傳區跳出「拍照／從相簿選」（在現場的人拍照排第一）
+    l.classList.add('cam');
+    const shoot=async()=>{try{const ph=await C.getPhoto({source:'CAMERA',resultType:'uri',quality:85,correctOrientation:true,saveToGallery:false});
       const blob=await (await fetch(ph.webPath)).blob();const f=new File([blob],'photo-'+Date.now()+'.'+(ph.format||'jpg'),{type:blob.type||'image/jpeg'});
       const dt=new DataTransfer();if(inp.multiple)[...(inp.files||[])].forEach(x=>dt.items.add(x));dt.items.add(f);inp.files=dt.files;inp.dispatchEvent(new Event('change',{bubbles:true}))}
       catch(e){if(!/cancel/i.test(String(e&&e.message||e)))toast('無法開啟相機：請到手機「設定」允許汪喵回家使用相機',5000)}};
-    if(front){l.insertAdjacentElement('beforebegin',b);b.style.marginBottom='8px'}else l.insertAdjacentElement('afterend',b)})};
+    l.addEventListener('click',async e=>{if(e.target===inp)return;e.preventDefault();const v=await pickSheet('加照片',[['camera','拍照',ic('camera')],['image','從相簿選',ic('image')]]);if(v==='camera')shoot();else if(v==='image')inp.click()})})};
   new MutationObserver(addCam).observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
   // 管理代碼、登入狀態：同時備份到手機原生儲存（iOS 空間不足時可能清掉網頁儲存區）
   try{const P=capPlugin('Preferences');if(P){const KEEP=k=>/^(wh_|sb-)/.test(k),oset=Storage.prototype.setItem,orem=Storage.prototype.removeItem;
@@ -2122,6 +2144,11 @@ function pageSkel(kind){const b=(w,h=14)=>`<div class="sk" style="width:${w};hei
   if(kind==='case')return `<div class="pskel" role="status" aria-label="載入中">${b('30%',22)}${b('65%',28)}${b('50%')}<div class="sk" style="height:340px;border-radius:24px"></div>${b('100%',56)}</div>`;
   return `<div class="pskel" role="status" aria-label="載入中">${b('45%',28)}<div class="card">${b('100%',48)}${b('100%',48)}${b('100%',48)}</div>${b('100%',120)}</div>`}
 /* 取代 confirm()：底部確認單，紅色按鈕代表會刪除／無法復原 */
+function pickSheet(title,items){return new Promise(res=>{const el=document.createElement('div');el.className='lightbox sheet-bg';
+  el.innerHTML=`<div class="sheet pick" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p>${items.map(([v,t,i])=>`<button type="button" class="srow" data-v="${esc(v)}"><span class="sr-ic">${i||''}</span><b>${esc(t)}</b></button>`).join('')}<button type="button" class="btn big block ghost sh-x" style="margin-top:8px">取消</button></div>`;
+  let done=false;const fin=v=>{if(done)return;done=true;const back=overlayOpen===el;closeOverlay(el);if(!back)return res(v);let t;const ok=()=>{clearTimeout(t);removeEventListener('popstate',ok);res(v)};addEventListener('popstate',ok);t=setTimeout(ok,500)};
+  el.onclick=e=>{const b=e.target.closest('.srow');if(b)fin(b.dataset.v);else if(e.target===el||e.target.closest('.sh-x'))fin(null)};
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))})}
 function askSheet({title,body,ok='確定',danger=false,cancel='取消'}){return new Promise(res=>{
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet ask" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p>${body?`<p class="muted" style="margin:0 0 16px;white-space:pre-line">${esc(body)}</p>`:''}<button type="button" class="btn big block ${danger?'danger':''}" data-ok>${esc(ok)}</button><button type="button" class="btn big block ghost sh-x" style="margin-top:8px">${esc(cancel)}</button></div>`;
@@ -4816,6 +4843,10 @@ async function renderPet(id){const _n=navId;
   setTitle(id==='new'?'新增寵物檔案':'編輯 '+p.name);
   (_n===navId?app:_void).innerHTML=`<h1>${id==='new'?'新增寵物檔案':esc(p.name)}</h1><p class="muted small">這份檔案只有你看得到。照片越多越好：正面、側面、特徵特寫。</p>
   <form onsubmit="return false" class="card" id="pf">
+    <h3 class="fsec">照片 <small>最多 6 張，第一張是大頭照</small></h3>
+    <div class="photos-preview" id="pv"></div>
+    <label class="uploadbtn">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
+    <h3 class="fsec">基本資料</h3>
     <div class="seg" id="segSp"><button type="button" data-v="dog" class="${p.species!=='cat'?'on':''}">${spIc("dog")} 狗</button><button type="button" data-v="cat" class="${p.species==='cat'?'on':''}">${spIc("cat")} 貓</button></div>
     <label class="f"><span>名字 <i class="req">*</i></span><input name="name" required maxlength="30" value="${esc(p.name||'')}"></label>
     <div class="row3">
@@ -4823,10 +4854,9 @@ async function renderPet(id){const _n=navId;
       <label class="f"><span>體型</span><select name="size"><option value="">不確定</option><option value="small" ${p.size==='small'?'selected':''}>小型</option><option value="medium" ${p.size==='medium'?'selected':''}>中型</option><option value="large" ${p.size==='large'?'selected':''}>大型</option></select></label>
       <label class="f"><span>生日</span><input type="date" name="birthday" max="${todayStr()}" value="${esc(p.birthday||'')}"></label>
     </div>
-    <div class="row2">
-      <label class="f"><span>品種</span><input name="breed" maxlength="50" value="${esc(p.breed||'')}"></label>
-      <label class="f"><span>毛色</span><input name="colour" maxlength="50" value="${esc(p.colour||'')}"></label>
-    </div>
+    <label class="f"><span>品種</span><input name="breed" maxlength="50" value="${esc(p.breed||'')}"></label>
+    <label class="f"><span>毛色</span><input name="colour" maxlength="50" value="${esc(p.colour||'')}"></label>
+    <h3 class="fsec">身分與健康</h3>
     <label class="f"><span>特徵</span><textarea name="features" maxlength="1000">${esc(p.features||'')}</textarea></label>
     <label class="f"><span>個性</span><input name="temperament" maxlength="200" value="${esc(p.temperament||'')}"></label>
     <div class="row3">
@@ -4835,9 +4865,6 @@ async function renderPet(id){const _n=navId;
       <label class="f" style="margin:0"><span>結紮</span><select name="neutered"><option value="">不確定</option><option value="true" ${p.neutered===true?'selected':''}>已結紮</option><option value="false" ${p.neutered===false?'selected':''}>未結紮</option></select></label>
     </div>
     <label class="f"><span><b class="lbl">過敏、慢性病與注意事項</b><small class="hint">會印在「給獸醫看」頁</small></span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
-    <h3>照片（最多 6 張）</h3>
-    <div class="photos-preview" id="pv"></div>
-    <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
     <div class="submitbar row"><button class="btn" id="btnSave">儲存</button><a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>${id!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDel">${ic('trash')} 刪除這份寵物檔案</button></p>`:''}
   </form>`;
   let species=p.species,photos=(p.photos||[]).slice();const origPh=photos.slice(),freshPh=[];let didSave=false;
