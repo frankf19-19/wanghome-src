@@ -4,10 +4,9 @@
 # - 沒有設定時：只編譯模擬器版本，確認程式可以編譯
 # 注意：私人 repo 的 macOS 執行時間以 10 倍計算，請只在要送審／測試時執行
 name: App iOS
+# 2026-10-29 起正式打包改用 Xcode Cloud（app/ios/App/ci_scripts/ci_post_clone.sh），這裡只保留手動執行當備援
 on:
   workflow_dispatch:
-  push:
-    tags: ['app-v*']
 concurrency: { group: app-ios, cancel-in-progress: true }
 # 管線指令（例如 xcodebuild … | tail）中間失敗也要讓整個步驟失敗
 defaults:
@@ -16,7 +15,7 @@ defaults:
 jobs:
   build:
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 20
     env:
       ASC_KEY: ${{ secrets.ASC_API_KEY_P8 }}
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
