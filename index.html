@@ -1563,7 +1563,7 @@ h2 > .ico:first-child{box-shadow:0 4px 10px -5px rgba(120,40,70,.25),inset 0 1px
 select:focus,input:focus,textarea:focus{box-shadow:0 0 0 3px var(--red-soft)}
 body[data-space="health"] select:focus,body[data-space="health"] input:focus,body[data-space="health"] textarea:focus{box-shadow:0 0 0 3px var(--green-soft);border-color:var(--green)}
 /* 標籤／快選 chip：按下回饋 */
-.fchip:active,.tag:active,.srow:active,.mrow:active,.mg-ai-row:active{transform:scale(.98)}
+
 .fchip.on{box-shadow:0 4px 10px -6px color-mix(in srgb,var(--red-fill) 60%,transparent)}
 /* 走失天數徽章：微光 */
 .hp-days,.ccard .band{box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
@@ -1765,7 +1765,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.5';
+const BUILD = 'v5.6.6';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2313,10 +2313,12 @@ function route(){window.__lastRoute=Date.now();
   closeOverlays();
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
   const trav=trackDepth(wasPop);
-  app.classList.remove('enter','push','pop');void app.offsetWidth;app.classList.add('enter');clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
+  // 同一頁只換分頁籤／篩選（?tab=、?f=…）：不要播換頁動畫，畫面才不會晃
+  const samePage=curHash.split('?')[0]===newHash.split('?')[0];
+  app.classList.remove('enter','push','pop');if(!samePage){void app.offsetWidth;app.classList.add('enter')}clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!samePage&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
   curHash=newHash;
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
-  if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else window.scrollTo(0,0);
+  if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else if(!samePage)window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
   let m;
   if(!window.L&&!leafletGaveUp&&/^#\/(new$|report\/|found\/new|injured$|found\/[0-9a-f-]{36}$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
