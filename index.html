@@ -1765,7 +1765,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.4';
+const BUILD = 'v5.6.5';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -4747,9 +4747,13 @@ async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disa
     if(IS_APP&&!SL){   // App 內走瀏覽器授權，授權完用 wangmiaotw://auth 跳回 App
       const {data,error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:'wangmiaotw://auth',skipBrowserRedirect:true}});if(error)throw error;
       const B=capPlugin('Browser');if(B&&data&&data.url)await B.open({url:data.url,presentationStyle:'popover'});else if(data&&data.url)location.href=data.url;return}
-    if(SL){const r=await SL.login({provider,options:provider==='apple'?{scopes:['email','name']}:{scopes:['email','profile']}});
+    if(SL){
+      // 防重放的 nonce：雜湊值交給 Apple／Google 寫進憑證，原始值交給 Supabase 核對
+      const raw=[...crypto.getRandomValues(new Uint8Array(24))].map(b=>b.toString(16).padStart(2,'0')).join('');
+      const hashed=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+      const r=await SL.login({provider,options:provider==='apple'?{scopes:['email','name'],nonce:hashed}:{scopes:['email','profile'],nonce:hashed}});
       const token=r&&r.result&&r.result.idToken;if(!token)throw new Error('沒有拿到登入憑證');
-      const {data,error}=await sb.auth.signInWithIdToken({provider,token});if(error)throw error;
+      const {data,error}=await sb.auth.signInWithIdToken({provider,token,nonce:raw});if(error)throw error;
       if(data&&data.session){session=data.session;updateAuthUI()}
       // Apple 只在第一次給名字：順手存成暱稱
       try{const nm=r.result.profile&&(r.result.profile.givenName||r.result.profile.name);if(nm&&data.user&&!(data.user.user_metadata||{}).display_name)sb.from('profiles').update({display_name:String(nm).slice(0,30)}).eq('id',data.user.id).then(()=>{})}catch(_){}
