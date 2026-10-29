@@ -37,7 +37,10 @@ jobs:
           grep -n "versionCode\|versionName" app/build.gradle
       - name: 測試版 APK
         working-directory: app/android
-        run: ./gradlew --no-daemon assembleDebug
+        run: |
+          # 失敗時把 Gradle 的錯誤寫成 GitHub「註解」，方便從外面看到原因
+          if ! ./gradlew --no-daemon assembleDebug > "$RUNNER_TEMP/gradle.log" 2>&1; then tail -60 "$RUNNER_TEMP/gradle.log"; grep -E -A8 "What went wrong|error:|e: |FAILURE" "$RUNNER_TEMP/gradle.log" | grep -v "^\s*$" | head -30 | while IFS= read -r line; do echo "::error::${line:0:400}"; done; exit 1; fi
+          tail -5 "$RUNNER_TEMP/gradle.log"
       - name: 正式版 AAB（需要簽章密鑰）
         if: ${{ env.KS != '' }}
         env:
