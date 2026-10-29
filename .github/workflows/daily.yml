@@ -1,9 +1,8 @@
 name: WangHome daily match & notify
 
+# 2026-10-29 起：排程改由 Supabase 執行（Edge Function daily-run + pg_cron，見 supabase/migration_v1.33.sql），
+# 不再吃 GitHub Actions 額度。這裡只保留「手動執行」當備援，平常不會自動跑。
 on:
-  schedule:
-    - cron: "17 19 * * *"   # 每天 03:17 台灣時間：收容所比對 + 通知 + 保活
-    - cron: "21 */2 * * *"  # 每 2 小時：目擊通知
   workflow_dispatch:
     inputs:
       mode:

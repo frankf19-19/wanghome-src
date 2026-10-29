@@ -217,3 +217,13 @@ Supabase 內建寄信每小時只能寄很少封，只適合測試。建議用 R
 - 照片清理每週日跑一次；上傳照片改為 1080px（海報寬度）。
 - 排程同時只跑一個、最多 15 分鐘。
 - Cloudflare Pages 免費版一個月 500 次部署：修改請集中推送。
+
+## 每日比對／通知改由 Supabase 排程（v1.33，2026-10-29）
+原本 GitHub Actions 的 `daily.yml` 排程改到 Supabase 執行，不再吃 GitHub Actions 每月 2,000 分鐘額度
+（私人 repo 的 iOS 打包用 macOS，一分鐘算十分鐘，很容易用完，用完後通知就會停）。
+1. Supabase → Edge Functions → 建立函式 `daily-run`，貼上 `supabase/functions/daily-run/index.ts`，**關閉 Verify JWT**。
+   - 用的 Secrets 和 notify-sighting 相同（`RESEND_API_KEY`），不用另外設定；選填 `MOA_API_URL`、`ADMIN_EMAIL`。
+2. Supabase → SQL Editor 執行 `supabase/migration_v1.33.sql`（開啟 pg_cron／pg_net、產生排程密碼、建立三個排程）。
+3. 測試：SQL Editor 執行 `select public.daily_run_call('notify');`，幾秒後到 Edge Functions → daily-run → Logs 看結果。
+- 排程：每天 03:17 `nightly`（比對＋通知＋到期提醒＋定期清理）、03:47 `cleanup`（清照片）、每 2 小時 `notify`。
+- GitHub 的 `daily.yml` 只保留手動執行當備援；`scripts/daily.py` 暫時保留，邏輯和 daily-run 相同。
