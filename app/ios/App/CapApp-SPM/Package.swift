@@ -25,7 +25,8 @@ let package = Package(
         .package(name: "CapacitorStatusBar", path: "../../../node_modules/@capacitor/status-bar"),
         .package(name: "CapacitorTextZoom", path: "../../../node_modules/@capacitor/text-zoom"),
         .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/@capgo/capacitor-social-login"),
-        .package(name: "CapacitorNativeSettings", path: "../../../node_modules/capacitor-native-settings")
+        .package(name: "CapacitorNativeSettings", path: "../../../node_modules/capacitor-native-settings"),
+        .package(name: "WangmiaoLineLogin", path: "../../../plugins/line-login")
     ],
     targets: [
         .target(
@@ -46,7 +47,8 @@ let package = Package(
                 .product(name: "CapacitorStatusBar", package: "CapacitorStatusBar"),
                 .product(name: "CapacitorTextZoom", package: "CapacitorTextZoom"),
                 .product(name: "CapgoCapacitorSocialLogin", package: "CapgoCapacitorSocialLogin"),
-                .product(name: "CapacitorNativeSettings", package: "CapacitorNativeSettings")
+                .product(name: "CapacitorNativeSettings", package: "CapacitorNativeSettings"),
+                .product(name: "WangmiaoLineLogin", package: "WangmiaoLineLogin")
             ]
         )
     ]

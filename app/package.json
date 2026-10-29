@@ -24,7 +24,8 @@
     "@capacitor/status-bar": "8.0.4",
     "@capacitor/text-zoom": "8.0.1",
     "@capgo/capacitor-social-login": "8.7.5",
-    "capacitor-native-settings": "8.2.0"
+    "capacitor-native-settings": "8.2.0",
+    "wangmiao-line-login": "file:plugins/line-login"
   },
   "devDependencies": {
     "@capacitor/assets": "3.0.5",

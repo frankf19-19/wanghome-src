@@ -43,3 +43,6 @@ project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/
 
 include ':capacitor-native-settings'
 project(':capacitor-native-settings').projectDir = new File('../node_modules/capacitor-native-settings/android')
+
+include ':wangmiao-line-login'
+project(':wangmiao-line-login').projectDir = new File('../plugins/line-login/android')

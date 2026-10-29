@@ -1,0 +1,12 @@
+{
+  "name": "wangmiao-line-login",
+  "version": "1.0.0",
+  "private": true,
+  "description": "汪喵回家：用 LINE 官方 SDK 登入（直接開 LINE App 授權，沒裝 LINE 才開網頁）",
+  "main": "index.js",
+  "capacitor": {
+    "ios": { "src": "ios" },
+    "android": { "src": "android" }
+  },
+  "files": ["index.js", "Package.swift", "ios/", "android/"]
+}

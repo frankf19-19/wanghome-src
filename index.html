@@ -1762,12 +1762,13 @@ const CONFIG = {
   GOOGLE_WEB_CLIENT_ID: '898937620947-1g2cg11lee7h0d9371v59k08clfj8ndv.apps.googleusercontent.com',  // Google Cloud 的「網頁應用程式」用戶端 ID（App 內 Google 登入要用；Android 也用這個）
   GOOGLE_IOS_CLIENT_ID: '898937620947-vvrtmkqugb1g7us7015sr8uiabahfrpf.apps.googleusercontent.com',  // Google Cloud 的「iOS」用戶端 ID
   APPLE_LOGIN: true,         // Supabase 已設定 Apple 登入（iOS App 內是原生「使用 Apple 登入」，Services ID com.wangmiaotw.web）
-  LINE_LOGIN: true,          // Supabase 自訂 OIDC 登入 custom:line（LINE Login 頻道 2012285499）
+  LINE_LOGIN: true,
+  LINE_CHANNEL_ID: '2012285499',   // App 內用 LINE 官方 SDK 登入（直接開 LINE App）          // Supabase 自訂 OIDC 登入 custom:line（LINE Login 頻道 2012285499）
   FACEBOOK_LOGIN: false,     // 在 Supabase 設定好 Facebook 登入後改成 true（App 內會開瀏覽器授權再跳回來）
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.7';
+const BUILD = 'v5.6.8';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1794,7 +1795,8 @@ if(IS_APP){
   try{const A=capPlugin('App');if(A){
     A.addListener('backButton',()=>{if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue)&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
     // 從連結打開 App（分享頁 /s/、/f/、網站網址）：跳到對應頁面
-    A.addListener('appUrlOpen',({url})=>{try{const u=new URL(url);
+    A.addListener('appUrlOpen',({url})=>{try{if(/^line3rdp\./i.test(url))return;   // LINE App 授權完跳回，由原生 SDK 處理
+      const u=new URL(url);
       if(/^wangmiaotw:/.test(u.protocol)&&/auth/.test(u.host+u.pathname)){const code=u.searchParams.get('code');const err=u.searchParams.get('error_description')||u.searchParams.get('error');try{const B=capPlugin('Browser');if(B)B.close().catch(()=>{})}catch(_){}
         if(err){toast('登入沒有成功：'+err,5000);return}
         if(code&&sb)sb.auth.exchangeCodeForSession(code).then(({data,error})=>{if(error)return toast('登入沒有成功：'+friendlyErr(error.message),5000);if(data&&data.session){session=data.session;updateAuthUI()}toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}});return}
@@ -4751,6 +4753,18 @@ async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disa
   try{
     const SB_P=provider==='line'?'custom:line':provider;
     const SL=IS_APP&&(provider==='apple'||provider==='google')?capPlugin('SocialLogin'):null;
+    // App 內的 LINE：用 LINE 官方 SDK，直接跳 LINE App 確認（沒裝 LINE 會自動改開網頁）
+    const LL=IS_APP&&provider==='line'&&CONFIG.LINE_CHANNEL_ID&&window.Capacitor&&Capacitor.isPluginAvailable&&Capacitor.isPluginAvailable('LineLogin')?capPlugin('LineLogin'):null;
+    if(LL){
+      const raw=[...crypto.getRandomValues(new Uint8Array(24))].map(b=>b.toString(16).padStart(2,'0')).join('');
+      const hashed=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+      const r=await LL.login({channelId:CONFIG.LINE_CHANNEL_ID,nonce:hashed});
+      if(!r||!r.idToken)throw new Error('沒有拿到登入憑證');
+      const {data,error}=await sb.auth.signInWithIdToken({provider:'custom:line',token:r.idToken,nonce:raw});if(error)throw error;
+      if(data&&data.session){session=data.session;updateAuthUI()}
+      try{const nm=r.displayName;if(nm&&data.user&&!(data.user.user_metadata||{}).display_name)sb.from('profiles').update({display_name:String(nm).slice(0,30)}).eq('id',data.user.id).then(()=>{})}catch(_){}
+      toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}
+      return}
     if(IS_APP&&!SL){   // App 內走瀏覽器授權，授權完用 wangmiaotw://auth 跳回 App
       const {data,error}=await sb.auth.signInWithOAuth({provider:SB_P,options:{redirectTo:'wangmiaotw://auth',skipBrowserRedirect:true}});if(error)throw error;
       const B=capPlugin('Browser');if(B&&data&&data.url)await B.open({url:data.url,presentationStyle:'popover'});else if(data&&data.url)location.href=data.url;return}

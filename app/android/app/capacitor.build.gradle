@@ -23,6 +23,7 @@ dependencies {
     implementation project(':capacitor-text-zoom')
     implementation project(':capgo-capacitor-social-login')
     implementation project(':capacitor-native-settings')
+    implementation project(':wangmiao-line-login')
 
 }
 
