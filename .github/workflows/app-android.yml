@@ -39,7 +39,8 @@ jobs:
         working-directory: app/android
         run: |
           # 失敗時把 Gradle 的錯誤寫成 GitHub「註解」，方便從外面看到原因
-          if ! ./gradlew --no-daemon assembleDebug > "$RUNNER_TEMP/gradle.log" 2>&1; then tail -60 "$RUNNER_TEMP/gradle.log"; grep -E -A8 "What went wrong|error:|e: |FAILURE" "$RUNNER_TEMP/gradle.log" | grep -v "^\s*$" | head -30 | while IFS= read -r line; do echo "::error::${line:0:400}"; done; exit 1; fi
+          if ! ./gradlew --no-daemon assembleDebug > "$RUNNER_TEMP/gradle.log" 2>&1; then tail -60 "$RUNNER_TEMP/gradle.log"
+            for pat in "What went wrong" "error:" "e: "; do M=$(grep -E -A12 "$pat" "$RUNNER_TEMP/gradle.log" | head -40 | cut -c1-300 | awk 'BEGIN{ORS="%0A"}{print}'); [ -n "$M" ] && echo "::error::$M"; done; exit 1; fi
           tail -5 "$RUNNER_TEMP/gradle.log"
       - name: 正式版 AAB（需要簽章密鑰）
         if: ${{ env.KS != '' }}
