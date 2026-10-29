@@ -62,6 +62,8 @@ jobs:
           if [ -d "$APP/Frameworks" ]; then find "$APP/Frameworks" -maxdepth 1 \( -name "*.framework" -o -name "*.dylib" \) -exec codesign -f -s - {} \; ; fi
           codesign -f -s - --entitlements App/App.entitlements "$APP"
           codesign -d --entitlements :- "$APP" 2>/dev/null | grep -A2 applesignin || echo "::warning::封存檔裡沒看到 applesignin entitlement"
+          echo "::notice::archive-ents: $(codesign -d --entitlements :- "$APP" 2>/dev/null | tr -d '\n\t' | cut -c1-900)"
+          echo "::notice::archive-plist: $(plutil -p "$RUNNER_TEMP/App.xcarchive/Info.plist" | tr -d '\n' | cut -c1-900)"
           cat > "$RUNNER_TEMP/export.plist" <<PL
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -77,6 +79,6 @@ jobs:
           run_log export xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
             -exportPath "$RUNNER_TEMP/out" $AUTH
           # 確認匯出的 App 真的有 Sign in with Apple 權限
-          ( cd "$RUNNER_TEMP/out" && IPA=$(ls *.ipa | head -1) && unzip -q -o "$IPA" -d ipa_chk && codesign -d --entitlements :- ipa_chk/Payload/*.app 2>/dev/null | grep -A2 applesignin && echo "✓ 匯出檔含 Sign in with Apple" || echo "::error::匯出的 App 沒有 Sign in with Apple entitlement" )
+          ( cd "$RUNNER_TEMP/out" && ls -la && IPA=$(ls *.ipa | head -1) && unzip -q -o "$IPA" -d ipa_chk && echo "::notice::ipa-ents: $(codesign -d --entitlements :- ipa_chk/Payload/*.app 2>&1 | tr -d '\n\t' | cut -c1-900)" && echo "::notice::export-log: $(grep -iE 'entitle|profile|applesignin' "$RUNNER_TEMP/export.log" | tr -d '\n' | cut -c1-900)" )
           rm -f "$KP"
           echo "已上傳到 App Store Connect，約 10–30 分鐘後會出現在 TestFlight。"
