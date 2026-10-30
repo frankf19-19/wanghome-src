@@ -2035,7 +2035,8 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.10.0';
+const BUILD = 'v5.10.1';
+const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2108,7 +2109,7 @@ if(IS_APP){
   // 點通知：打開那隻毛孩的頁面
   try{const SL=capPlugin('SocialLogin');if(SL&&(CONFIG.GOOGLE_LOGIN||CONFIG.APPLE_LOGIN)){const o={};if(CONFIG.GOOGLE_LOGIN&&CONFIG.GOOGLE_WEB_CLIENT_ID)o.google={webClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,iOSClientId:CONFIG.GOOGLE_IOS_CLIENT_ID||CONFIG.GOOGLE_WEB_CLIENT_ID,iOSServerClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,mode:'online'};if(CONFIG.APPLE_LOGIN)o.apple={};SL.initialize(o).catch(()=>{})}}catch(_){}
   try{const LN=capPlugin('LocalNotifications');if(LN){
-    LN.addListener('localNotificationActionPerformed',e=>{if(e&&e.notification&&e.notification.extra&&e.notification.extra.buddy){location.hash='#/buddy';return}if(e&&e.notification&&e.notification.extra&&e.notification.extra.recapq){location.hash='#/';return}const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
+    LN.addListener('localNotificationActionPerformed',e=>{if(e&&e.notification&&e.notification.extra&&e.notification.extra.buddy){location.hash=BD_ON?'#/buddy':'#/';return}if(e&&e.notification&&e.notification.extra&&e.notification.extra.recapq){location.hash='#/';return}const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
     if(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'&&LN.createChannel)LN.createChannel({id:'care',name:'毛孩照護提醒',description:'回診、疫苗、驅蟲、用藥提醒',importance:4,visibility:1}).catch(()=>{});
   }}catch(_){}
   // 連結：站內的 #/ 連結留在 App 裡；網站網址轉成 App 內頁面；其他網站用 App 內瀏覽器開
@@ -2633,7 +2634,7 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/adopt\/(\d{1,10})$/)))return renderAdoptOne(m[1]);
   if(path==='#/login')return renderLogin();
   if(path==='#/set-username')return renderSetUsername();
-  if(path==='#/buddy')return renderBuddy();
+  if(path==='#/buddy'){if(!BD_ON){goReplace('#/');return}return renderBuddy()}
   if(path==='#/me')return renderMe();
   if(path==='#/admin')return renderAdmin();
   if(path==='#/pet/new')return renderPet('new');
@@ -2840,7 +2841,7 @@ async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
 }
 function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     ${mineHTML()}
-    ${me()?'<div id="albBanner"></div>':''}${me()?buddyHomeHTML():`<div class="bs-hero"><div class="bs-txt"><p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}</div><img class="bs-duo" src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>`}
+    ${me()?'<div id="albBanner"></div>':''}${me()&&BD_ON?buddyHomeHTML():`<div class="bs-hero"><div class="bs-txt"><p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}</div><img class="bs-duo" src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>`}
     <div class="tiles4">
       <a href="#/new" class="tile4 tp"><span class="te">${ic("megaphone")}</span><b>毛孩走失了</b><small>登記・做協尋海報</small></a>
       <a href="#/seen" class="tile4 tm"><span class="te">${ic("eye")}</span><b>看到／撿到</b><small>拍照回報給飼主</small></a>
@@ -5368,11 +5369,12 @@ document.addEventListener('app-pause',()=>{if(__bd){clearTimeout(__bdSaveT);bdSa
 // 每天第一次見面：見面禮＋連續天數
 function bdDaily(b){const d=bdToday();if(b.dd===d)return false;const y=addDays(d,-1);b.streak=b.ls===y?(b.streak||1)+1:1;b.ls=d;b.dd=d;b.dc={};b.tr=(b.tr||0)+1;b.aff=(b.aff||0)+1;return true}
 // 真毛孩的照護動作 → 電子毛孩得到點心（每天有上限）
-function buddyGive(kind){try{const b=bdLoad();if(!b)return;const g=BD_GIVE[kind];if(!g)return;bdTick(b);bdDaily(b);b.dc=b.dc||{};
+function buddyGive(kind){if(!BD_ON)return;try{const b=bdLoad();if(!b)return;const g=BD_GIVE[kind];if(!g)return;bdTick(b);bdDaily(b);b.dc=b.dc||{};
   if((b.dc[kind]||0)>=BD_DAILY_CAP[kind])return;b.dc[kind]=(b.dc[kind]||0)+1;b.tr=(b.tr||0)+g[0];b.aff=(b.aff||0)+g[1];b.s.m=bdClamp(b.s.m+3);bdSave();
   setTimeout(()=>toast(`🦴 ${b.name}得到 ${g[0]} 個點心（${g[2]}）`,3200),900)}catch(_){}}
 // App：牠快餓的時候發一則通知（只在白天）
 async function bdNotify(b){if(!IS_APP)return;const LN=capPlugin('LocalNotifications');if(!LN)return;const ID=990001;
+  if(!BD_ON){try{await LN.cancel({notifications:[{id:ID}]})}catch(_){}return}
   try{await LN.cancel({notifications:[{id:ID}]})}catch(_){}
   if(!b||b.nt===false)return;try{const p=await LN.checkPermissions();if(p.display!=='granted')return}catch(_){return}
   const s=b.s||{};if((s.f||0)<=28)return;let at=new Date(Date.now()+((s.f-25)/6.25)*36e5);const hh=at.getHours();
@@ -5401,7 +5403,7 @@ function buddyHomeHTML(){
   bdTick(b);const lv=bdLv(b.aff);
   return `<div class="bd-home" id="bdHome"><div class="bd-stage-mini" id="bdMini">${bdSVG(b)}</div><div class="bd-hinfo"><a href="#/buddy" class="bd-hname">${esc(b.name)} <small>Lv.${lv} ${bdTitle(lv)}</small></a><p class="bd-say" id="bdSay">${esc(bdLine(b))}</p>
     <div class="bd-hbtns"><button type="button" class="btn sm" data-bd="feed">🍚 餵飯</button><a class="btn sm ghost" href="#/buddy">陪牠玩 ›</a></div>${(b.art&&b.art.ok)||!BD_AI_ON?'':'<a class="bd-ai-mini" href="#/buddy?new=1&ai=1">✨ 用 AI 照照片畫得更像</a>'}</div></div>`}
-function buddyHomeBind(){const box=$('#bdHome');if(!box)return;const b=bdLoad();if(!b)return;const svg=box.querySelector('.bd-svg');
+function buddyHomeBind(){if(!BD_ON)return;const box=$('#bdHome');if(!box)return;const b=bdLoad();if(!b)return;const svg=box.querySelector('.bd-svg');
   bdApply(svg,b);if(bdDaily(b)){bdSave();setTimeout(()=>{toast(`🎁 每日見面禮：${b.name}得到 1 個點心`+(b.streak>1?`（連續 ${b.streak} 天）`:''),3500)},700)}
   if(!__bdGreeted&&!bdAsleep(b)){__bdGreeted=true;setTimeout(()=>{bdJump(svg);bdSay(box,(Date.now()-(b.seen||0)>864e5&&b.seen)?'好想你！你終於回來了！':'你回來了！'+bdSound(b))},500)}
   b.seen=Date.now();
