@@ -1712,6 +1712,91 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 /* 深色模式：刪除類的紅字調亮，維持可讀 */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .del-acct>summary,:root:not([data-theme="light"]) .del-row .linkbtn{color:#FF8A8A!important}}
 :root[data-theme="dark"] .del-acct>summary,:root[data-theme="dark"] .del-row .linkbtn{color:#FF8A8A!important}
+/* ═════════ 電子毛孩 ═════════ */
+.bd-svg{display:block;width:100%;height:auto;overflow:visible;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+.bd-svg .ey-happy,.bd-svg .ey-sleep,.bd-svg .ey-sad,.bd-svg .mo-open,.bd-svg .mo-sad,.bd-svg .bd-zzz{display:none}
+.bd-svg[data-mood=happy] .ey-open,.bd-svg[data-mood=sleep] .ey-open{display:none}
+.bd-svg[data-mood=happy] .ey-happy{display:inline}.bd-svg[data-mood=happy] .mo-smile{display:none}.bd-svg[data-mood=happy] .mo-open{display:inline}
+.bd-svg[data-mood=sleep] .ey-sleep{display:inline}.bd-svg[data-mood=sleep] .bd-zzz{display:inline}
+.bd-svg[data-mood=sad] .ey-sad{display:inline}.bd-svg[data-mood=sad] .mo-smile{display:none}.bd-svg[data-mood=sad] .mo-sad{display:inline}
+.bd-body{transform-box:fill-box;transform-origin:50% 100%;animation:bdBreath 3.2s ease-in-out infinite}
+.bd-head{transform-box:fill-box;transform-origin:50% 88%;animation:bdHead 5.5s ease-in-out infinite}
+.bd-tail{transform-box:view-box;animation:bdWag 1.1s ease-in-out infinite}
+.bd-svg[data-mood=happy] .bd-tail{animation-duration:.3s}
+.bd-svg[data-mood=sleep] .bd-tail,.bd-svg[data-mood=sad] .bd-tail{animation:none;transform:rotate(28deg)}
+.bd-svg[data-mood=sleep] .bd-body{animation-duration:5.5s}.bd-svg[data-mood=sleep] .bd-head{animation:none;transform:rotate(-4deg) translateY(3px)}
+.bd-svg[data-mood=sad] .bd-ear-l{transform:rotate(-14deg)}.bd-svg[data-mood=sad] .bd-ear-r{transform:rotate(14deg)}
+.ey-open{transform-box:fill-box;transform-origin:50% 50%;animation:bdBlink 4.8s infinite}
+.bd-ear{transform-box:view-box;animation:bdEar 7s infinite}.bd-ear-r{animation-delay:-3.1s}
+.bd-pupils{transition:transform .25s ease-out}
+.bd-svg.jump .bd-root{animation:bdJump .62s cubic-bezier(.3,.7,.4,1)}
+.bd-svg.petting .bd-head{animation:bdNuzzle .55s ease-in-out infinite}
+.bd-zzz{font:800 13px var(--head,sans-serif);fill:#7C6BD6;animation:bdZ 2.4s ease-in-out infinite}
+@keyframes bdBreath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.035)}}
+@keyframes bdHead{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2.5deg)}}
+@keyframes bdWag{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(16deg)}}
+@keyframes bdBlink{0%,93%,100%{transform:scaleY(1)}95.5%{transform:scaleY(.08)}}
+@keyframes bdEar{0%,86%,100%{transform:rotate(0)}89%{transform:rotate(-12deg)}92%{transform:rotate(5deg)}95%{transform:rotate(0)}}
+@keyframes bdJump{0%{transform:translateY(0)}30%{transform:translateY(-18px)}58%{transform:translateY(0)}74%{transform:translateY(-5px)}100%{transform:translateY(0)}}
+@keyframes bdNuzzle{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes bdZ{0%{opacity:0;transform:translate(0,4px)}40%{opacity:1}100%{opacity:0;transform:translate(6px,-10px)}}
+.bd-heart{position:fixed;z-index:9999;pointer-events:none;font-size:22px;color:#E85B8A;line-height:1;animation:bdFloat 1.4s ease-out forwards;opacity:0}
+@keyframes bdFloat{0%{opacity:0;transform:translate(-50%,0) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-76px) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.bd-svg *{animation:none!important}.bd-walker{transition:none!important}}
+
+/* 首頁小卡 */
+.bd-home{display:flex;align-items:center;gap:10px;margin:2px 0 16px;padding:10px 14px 10px 8px;border-radius:30px;background:linear-gradient(120deg,#FFE3EC 0%,#FFF3F6 50%,#E3F6EC 100%);box-shadow:0 14px 30px -18px rgba(184,51,95,.35);color:inherit;text-decoration:none;position:relative}
+.bd-stage-mini{flex:none;width:118px;margin:-4px 0 -6px}
+.bd-hinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.bd-hname{font:800 19px var(--head);color:var(--ink);text-decoration:none}.bd-hname small{font:700 12.5px var(--body);color:var(--red-ink);margin-left:4px}
+.bd-say{margin:0;background:#fff;border-radius:14px 14px 14px 4px;padding:7px 11px;font-size:14.5px;line-height:1.45;color:var(--ink);box-shadow:0 2px 8px rgba(120,40,70,.08);align-self:flex-start}
+.bd-say.pop,.bd-bubble.pop{animation:bdPop .35s ease-out}
+@keyframes bdPop{0%{transform:scale(.85);opacity:.4}100%{transform:scale(1);opacity:1}}
+.bd-hbtns{display:flex;gap:6px;flex-wrap:wrap}.bd-hbtns .btn{min-height:38px}
+.bd-adopt .bd-hinfo b{font:800 18px var(--head)}.bd-adopt .bd-hinfo span{font-size:14px;color:var(--ink-2)}.bd-adopt .bd-hinfo em{font-style:normal;align-self:flex-start}
+
+/* 房間 */
+.bd-room{max-width:620px;margin:0 auto}
+.bd-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:4px 0 10px}.bd-top h1{margin:0}
+.bd-lv{font-weight:800;color:var(--red-ink);background:var(--red-soft);border-radius:99px;padding:3px 10px;font-size:14px}
+.bd-stage{position:relative;height:310px;border-radius:30px;overflow:hidden;background:linear-gradient(180deg,#FFF1E3 0%,#FFE6EE 62%,#F5D7C4 62%,#EFCDB6 100%);box-shadow:inset 0 0 0 1px rgba(184,51,95,.08),0 14px 30px -18px rgba(184,51,95,.35);touch-action:pan-y}
+.bd-stage.night{background:linear-gradient(180deg,#2E2B52 0%,#4A4377 62%,#5B4C5E 62%,#4E4150 100%)}
+.bd-stage.lightsoff::after{content:"";position:absolute;inset:0;background:rgba(20,16,40,.42);pointer-events:none}
+.bd-window{position:absolute;left:22px;top:22px;width:92px;height:74px;border-radius:16px;background:linear-gradient(180deg,#BFE6FF,#E8F6FF);border:5px solid #fff;box-shadow:0 4px 10px rgba(120,60,40,.12);display:grid;place-items:center;font-size:26px}
+.night .bd-window{background:linear-gradient(180deg,#1C1A3A,#353068);border-color:#6E6496}
+.bd-bed{position:absolute;right:18px;bottom:22px;width:118px;height:40px;border-radius:50%;background:#B8335F;opacity:.85;box-shadow:inset 0 -8px 0 rgba(0,0,0,.12)}
+.bd-bowl{position:absolute;left:20px;bottom:24px;font-size:30px}
+.bd-bubble{position:absolute;left:50%;top:14px;transform:translateX(-50%);max-width:78%;margin:0;padding:8px 14px;border-radius:16px;background:#fff;color:var(--ink);font-weight:700;font-size:15px;line-height:1.45;text-align:center;box-shadow:0 4px 14px rgba(80,30,50,.14);z-index:2}
+.bd-bubble.pop{animation:bdPop2 .35s ease-out}@keyframes bdPop2{0%{transform:translateX(-50%) scale(.85)}100%{transform:translateX(-50%) scale(1)}}
+.bd-walker{position:absolute;bottom:20px;left:50%;width:178px;transform:translateX(-50%);transition:left 1.6s ease-in-out;z-index:1}
+.bd-walker.flip .bd-svg{transform:scaleX(-1)}.bd-walker.flip .bd-zzz{display:none}
+.bd-walker.walking .bd-root{animation:bdWalk .4s ease-in-out 4}.bd-walker.run .bd-root{animation:bdWalk .22s ease-in-out 6}
+@keyframes bdWalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.bd-ball{position:absolute;left:12%;bottom:60px;font-size:28px;z-index:3;animation:bdThrow 1.2s cubic-bezier(.3,.6,.5,1) forwards}
+@keyframes bdThrow{0%{transform:translate(0,0) rotate(0)}45%{transform:translate(110px,-120px) rotate(300deg)}100%{transform:translate(230px,10px) rotate(720deg);opacity:0}}
+.bd-panel{background:var(--sheet);border-radius:24px;margin-top:-18px;position:relative;z-index:3;padding:16px 16px 12px;box-shadow:0 10px 28px -16px rgba(184,51,95,.35)}
+.bd-bars{display:grid;gap:7px}
+.bd-bar{display:grid;grid-template-columns:3em 1fr 2.2em;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink-2)}
+.bd-bar i{height:10px;border-radius:99px;background:var(--line);overflow:hidden}.bd-bar i b{display:block;height:100%;border-radius:99px;transition:width .5s}
+.bd-bar em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.bd-acts{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:14px}
+.bd-act{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 7px;border:0;border-radius:16px;background:var(--red-soft);color:var(--ink);font:inherit;font-weight:800;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.bd-act i{font-style:normal;font-size:24px;line-height:1.1}.bd-act:active{transform:scale(.94)}
+.bd-act small{position:absolute;top:2px;right:6px;min-width:18px;height:18px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px}
+.bd-tip{margin:10px 2px 0;font-size:13.5px;color:var(--ink-3);text-align:center}
+.bd-info{margin-top:14px}
+.bd-aff{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:14.5px}.bd-aff i{height:10px;border-radius:99px;background:var(--line);overflow:hidden}.bd-aff i b{display:block;height:100%;background:linear-gradient(90deg,#FF8FB5,#E85B8A);border-radius:99px}
+.bd-stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;text-align:center;font-size:13px;color:var(--ink-3)}.bd-stats b{display:block;font:800 22px var(--head);color:var(--ink)}
+.bd-earn>div{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}.bd-earn>div:last-child{border-bottom:0}
+.bd-earn>div>b{margin-left:auto;color:var(--red-ink);font-weight:900}.bd-earn small{flex-basis:100%;color:var(--ink-3);font-size:12.5px;margin-top:-4px}
+.bd-preview{width:170px;margin:6px auto 0}
+.bd-coats{display:flex;flex-wrap:wrap;gap:8px}
+.bd-coats button{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px 0 8px;border-radius:99px;border:2px solid var(--line);background:var(--sheet);color:var(--ink);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.bd-coats button span{width:20px;height:20px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.bd-coats button.on{border-color:var(--red);background:var(--red-soft)}
+.bd-src .chip.on,#bdPat .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bd-say,:root:not([data-theme="light"]) .bd-bubble{background:#3A2E36;color:#F5E9EF}:root:not([data-theme="light"]) .bd-home{background:linear-gradient(120deg,#3D2230,#2E2430 55%,#213E34)}}
+:root[data-theme="dark"] .bd-say,:root[data-theme="dark"] .bd-bubble{background:#3A2E36;color:#F5E9EF}:root[data-theme="dark"] .bd-home{background:linear-gradient(120deg,#3D2230,#2E2430 55%,#213E34)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1784,7 +1869,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.7.4';
+const BUILD = 'v5.8.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1857,7 +1942,7 @@ if(IS_APP){
   // 點通知：打開那隻毛孩的頁面
   try{const SL=capPlugin('SocialLogin');if(SL&&(CONFIG.GOOGLE_LOGIN||CONFIG.APPLE_LOGIN)){const o={};if(CONFIG.GOOGLE_LOGIN&&CONFIG.GOOGLE_WEB_CLIENT_ID)o.google={webClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,iOSClientId:CONFIG.GOOGLE_IOS_CLIENT_ID||CONFIG.GOOGLE_WEB_CLIENT_ID,iOSServerClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,mode:'online'};if(CONFIG.APPLE_LOGIN)o.apple={};SL.initialize(o).catch(()=>{})}}catch(_){}
   try{const LN=capPlugin('LocalNotifications');if(LN){
-    LN.addListener('localNotificationActionPerformed',e=>{const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
+    LN.addListener('localNotificationActionPerformed',e=>{if(e&&e.notification&&e.notification.extra&&e.notification.extra.buddy){location.hash='#/buddy';return}const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
     if(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'&&LN.createChannel)LN.createChannel({id:'care',name:'毛孩照護提醒',description:'回診、疫苗、驅蟲、用藥提醒',importance:4,visibility:1}).catch(()=>{});
   }}catch(_){}
   // 連結：站內的 #/ 連結留在 App 裡；網站網址轉成 App 內頁面；其他網站用 App 內瀏覽器開
@@ -2382,6 +2467,7 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/adopt\/(\d{1,10})$/)))return renderAdoptOne(m[1]);
   if(path==='#/login')return renderLogin();
   if(path==='#/set-username')return renderSetUsername();
+  if(path==='#/buddy')return renderBuddy();
   if(path==='#/me')return renderMe();
   if(path==='#/admin')return renderAdmin();
   if(path==='#/pet/new')return renderPet('new');
@@ -2586,7 +2672,7 @@ async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
 }
 function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     ${mineHTML()}
-    <div class="bs-hero"><div class="bs-txt"><p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}</div><img class="bs-duo" src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>
+    ${me()?buddyHomeHTML():`<div class="bs-hero"><div class="bs-txt"><p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}</div><img class="bs-duo" src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>`}
     <div class="tiles4">
       <a href="#/new" class="tile4 tp"><span class="te">${ic("megaphone")}</span><b>毛孩走失了</b><small>登記・做協尋海報</small></a>
       <a href="#/seen" class="tile4 tm"><span class="te">${ic("eye")}</span><b>看到／撿到</b><small>拍照回報給飼主</small></a>
@@ -2647,6 +2733,7 @@ ${bigStartHTML()}
     navigator.geolocation.getCurrentPosition(p=>{if(_n!==navId||!$('#btnNear'))return;homeState.near={lat:p.coords.latitude,lng:p.coords.longitude};$('#btnNear').textContent='✕ 取消距離排序';$('#btnNear').classList.add('on');$('#nearInfo').textContent='依離你的距離排序（不會儲存你的位置）';loadList()},err=>toast(err&&err.code===1?(IS_APP?'你沒有允許定位。請到手機「設定」→ 汪喵回家，允許使用位置後再試一次':'你沒有允許定位。請到瀏覽器或手機設定，允許這個網站使用位置後再試一次'):'暫時抓不到你的位置（訊號不好或逾時），請稍後再試',6000),{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
   };
   if(qs(location.hash).near)setTimeout(()=>{if(_n!==navId)return;if(!homeState.near&&$('#btnNear'))$('#btnNear').click()},80);
+  try{buddyHomeBind()}catch(_){}
   if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   // 手機首頁看不到完整名單（在「協尋」分頁），不用先下載；電腦版和協尋分頁才載入
@@ -3494,7 +3581,7 @@ async function renderReport(id){const _n=navId;
       const place=fd.get('place_text')||'下面地圖連結標的位置';const dir=fd.get('direction');const note=fd.get('note');
       const msg=`你好，我在汪喵回家看到你在找「${c.name}」。\n我在 ${fmtDT(twParse(fd.get('seen_at')).toISOString())} 於「${place}」看到疑似牠${dir&&dir!=='不確定'?'，往'+dir+'走':''}。${note?'\n狀況：'+note:''}\n${loc?`地圖：https://www.google.com/maps?q=${loc.lat},${loc.lng}`:''}`;
       const tel=String(c.contact_phone||'').replace(/[^\d+]/g,'');const lineRaw=String(c.contact_line||'').trim();const lineId=lineRaw.replace(/^@/,'');const lineUrl=lineRaw.startsWith('@')?`https://line.me/R/ti/p/@${encodeURIComponent(lineId)}`:`https://line.me/R/ti/p/~${encodeURIComponent(lineId)}`;
-      (_n===navId?app:_void).innerHTML=`<div class="card done-card"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！回報已送出</h1>
+      buddyGive('sight');(_n===navId?app:_void).innerHTML=`<div class="card done-card"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！回報已送出</h1>
       <p class="small muted" style="margin:-6px 0 10px">為了避免假消息，目擊回報要等飼主確認後，才會顯示在公開的地圖上。</p>
       <p class="lede">${tel||lineId?`${mailed?'我們已經寄信通知飼主了。':''}<b>最快的方法是直接告訴飼主：</b>`:mailed?'我們已經寄信通知飼主了，飼主確認後會跟你聯絡。':'回報已經存好，飼主打開網站就會看到。'}</p>
       <p class="small" id="mailNote" style="color:var(--green);font-weight:700;margin:0 0 8px" aria-live="polite"></p>
@@ -3811,7 +3898,7 @@ async function quickReport(){
       q={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:new Date().toISOString(),city:qCity,district:qDist||null,place_text:$('#qPlace').value.trim()||addr,lat,lng,current_place:where==='taken'?'通報者已帶走／送醫':'通報時仍在原地',photos,phone_public:false};
       const {data,error}=await sb.rpc('create_found',{p:q});if(error)throw error;clearTimeout(slowT);
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
-      rememberMine('found',data.id,'受傷的'+sp(species).name);
+      buddyGive('sight');rememberMine('found',data.id,'受傷的'+sp(species).name);
       const url=`${CONFIG.SITE_URL}#/found/${data.id}`;
       const script=callScript({...q,address:addr,where,place_text:$('#qPlace').value.trim(),url});
       const mapUrl=`https://www.google.com/maps?q=${lat},${lng}`;
@@ -3906,7 +3993,7 @@ function renderInjured(){geoWarm();
       const p={species,kind:'injured',injury:[...inj].join('、')||null,seen_at:twParse(fd.get('seen_at')).toISOString(),city:fd.get('city'),district:fd.get('district'),place_text:fd.get('place_text'),lat:loc?.lat??null,lng:loc?.lng??null,current_place:where==='taken'?(fd.get('current_place')||'通報者已送醫／帶走'):'通報時仍在原地',size:fd.get('size'),colour:fd.get('colour'),features:fd.get('features'),photos,reporter_name:fd.get('reporter_name'),reporter_phone:fd.get('reporter_phone'),phone_public:!!fd.get('phone_public'),notes:fd.get('notes')};
       const {data,error}=await sb.rpc('create_found',{p});if(error)throw error;
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
-      rememberMine('found',data.id,'受傷的'+((p&&p.colour)||'')+sp(species).name);
+      buddyGive('sight');rememberMine('found',data.id,'受傷的'+((p&&p.colour)||'')+sp(species).name);
       const manage=`${CONFIG.SITE_URL}#/found-manage/${data.id}?t=${data.token}`;
       if(_n!==navId){toast('✅ 通報已送出。管理網址存在這支手機，到「我的」就找得到',6000);return}__dirty=false;__dirtyMsg='';app.innerHTML=`<div class="card done-card"><h1>謝謝你停下來幫牠</h1><p>受傷通報已公開，附近的人和可能的飼主都看得到。</p>
       <div class="notice red"><b>還沒打電話的話，請現在打</b>本站無法派人救援。</div>
@@ -4005,7 +4092,7 @@ function renderFoundNew(){
       const p={species,kind,seen_at:twParse(fd.get('seen_at')).toISOString(),city:fd.get('city'),district:fd.get('district'),place_text:fd.get('place_text'),lat:loc?.lat??null,lng:loc?.lng??null,current_place:kind==='found'?fd.get('current_place'):null,size:fd.get('size'),sex:fd.get('sex'),colour:fd.get('colour'),breed:fd.get('breed'),features:fd.get('features'),collar_desc:fd.get('collar_desc'),photos,reporter_name:fd.get('reporter_name'),reporter_phone:fd.get('reporter_phone'),phone_public:!!fd.get('phone_public'),reporter_email:fd.get('reporter_email'),reporter_line:fd.get('reporter_line'),notes:fd.get('notes')};
       const {data,error}=await sb.rpc('create_found',{p});if(error)throw error;
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}contactSave($('#f'),CT_FOUND);
-      rememberMine('found',data.id,((p&&p.colour)||'')+sp(species).name+(kind==='seen'?'（目擊）':'（拾獲）'));
+      buddyGive('sight');rememberMine('found',data.id,((p&&p.colour)||'')+sp(species).name+(kind==='seen'?'（目擊）':'（拾獲）'));
       const manage=`${CONFIG.SITE_URL}#/found-manage/${data.id}?t=${data.token}`;
       if(_n!==navId){toast('✅ 通報已送出。管理網址存在這支手機，到「我的」就找得到',6000);return}app.innerHTML=`<div class="card done-card created" data-keep="${kind==='seen'||me()?0:1}"><div class="done-ic">${pawSvg()}</div><h1>謝謝你！通報已送出</h1>
       <p class="lede">系統會自動比對附近的走失案件，飼主登記時也會看到你。</p>
@@ -4165,7 +4252,7 @@ function applyShareUrl(url,title){
   document.querySelectorAll('[data-share="line"]').forEach(a=>a.href='https://social-plugins.line.me/lineit/share?url='+enc);
   document.querySelectorAll('[data-share="fb"]').forEach(a=>a.href='https://www.facebook.com/sharer/sharer.php?u='+enc);
   document.querySelectorAll('[data-share="copy"]').forEach(b=>b.onclick=()=>copy(url));
-  document.querySelectorAll('[data-share="native"]').forEach(b=>b.onclick=()=>share(title,url));
+  document.querySelectorAll('[data-share="native"]').forEach(b=>b.onclick=()=>{share(title,url);buddyGive('share')});
 }
 
 /* 檢舉 */
@@ -4825,6 +4912,294 @@ async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disa
     }else{setReturn(takeReturn()||'#/me');const {error}=await sb.auth.signInWithOAuth({provider:SB_P,options:{redirectTo:CONFIG.SITE_URL}});if(error)throw error;return}
   }catch(e){const m=String(e&&e.message||e);if(!/cancel|取消|1001|user closed|popup_closed|12501/i.test(m))toast('登入沒有成功：'+friendlyErr(m),5000)}
   finally{if(btn&&btn.isConnected)btn.disabled=false}}
+// ═════════ 電子毛孩（會員專屬）═════════
+// 資料存在會員帳號的 user_metadata.buddy（換手機登入也在），本機另存一份讓畫面立刻出現
+// 四項數值照真實時間變化；晚上（台灣時間 22–7 點）會睡覺；真毛孩的照護動作會換到點心
+const BD_COATS={
+  golden:{n:'金黃',m:'#E3A866',d:'#B9773F',l:'#F7E4C8'},
+  cream:{n:'奶油',m:'#F2DDBB',d:'#D2B07E',l:'#FFF6E6'},
+  brown:{n:'咖啡',m:'#9A6440',d:'#6E4428',l:'#E8C9A8'},
+  orange:{n:'橘色',m:'#F0A04B',d:'#C9742A',l:'#FCE3C2'},
+  gray:{n:'灰色',m:'#A5AFB4',d:'#7E898F',l:'#EEF1F2'},
+  black:{n:'黑色',m:'#3E3633',d:'#26201E',l:'#8D7D72'},
+  white:{n:'白色',m:'#F6F1EA',d:'#DCD1C4',l:'#FFFFFF'}
+};
+const BD_PATS={solid:'純色',spots:'斑點',tabby:'虎斑',tux:'黑白賓士',calico:'三花'};
+const BD_DAILY_CAP={med:6,rec:3,sight:3,share:3,pet:12};
+const BD_GIVE={med:[1,1,'幫毛孩吃藥打勾'],rec:[2,2,'記一筆健康紀錄'],sight:[3,5,'回報目擊／拾獲'],share:[1,1,'分享協尋']};
+function bdToday(){return todayStr()}
+function bdTwHour(){return tw(new Date().toISOString()).h}
+function bdNight(){const h=bdTwHour();return h>=22||h<7}
+function bdLv(a){return 1+Math.floor((a||0)/30)}
+function bdTitle(lv){return lv>=15?'靈魂伴侶':lv>=10?'家人':lv>=6?'麻吉':lv>=3?'好朋友':'新朋友'}
+function bdSound(b){return b.sp==='cat'?'喵～':'汪！'}
+// 從健康手冊的毛色文字猜外型
+function bdGuess(colour,sp){const c=String(colour||'');
+  if(/黑白|賓士/.test(c))return {coat:'black',pat:'tux'};
+  if(/三花/.test(c))return {coat:'white',pat:'calico'};
+  if(/虎斑/.test(c))return {coat:/灰|銀|藍/.test(c)?'gray':/橘|紅|黃/.test(c)?'orange':'brown',pat:'tabby'};
+  const coat=/黑/.test(c)?'black':/白/.test(c)?'white':/橘|紅/.test(c)?'orange':/灰|銀|藍/.test(c)?'gray':/棕|咖啡|褐|巧克力/.test(c)?'brown':/米|奶油|淺/.test(c)?'cream':/黃|金/.test(c)?'golden':(sp==='cat'?'gray':'golden');
+  return {coat,pat:/花|斑點|大麥町/.test(c)?'spots':'solid'}}
+
+// ── 角色圖（SVG）：每個部位分組，CSS 負責呼吸、眨眼、搖尾巴、動耳朵 ──
+function bdSVG(b,cls=''){
+  const C=BD_COATS[b.coat]||BD_COATS.golden,dk=b.coat==='black',pat=b.pat||'solid';
+  const eyeRing=dk?'#F3E6D6':'none';
+  if(b.sp==='cat'){
+    const main=pat==='calico'?'#F6F1EA':C.m,belly=pat==='tux'?'#FFFFFF':C.l;
+    const stripes=pat==='tabby'?`<path d="M136 104q6 2 9-4M168 104q-6 2-9-4M134 118q7 1 10-4M170 118q-7 1-10-4" fill="none" stroke="${C.d}" stroke-width="3" stroke-linecap="round"/>`:'';
+    const headSt=pat==='tabby'?`<path d="M148 42q7-4 14 0M150 48q5-3 10 0" fill="none" stroke="${C.d}" stroke-width="3" stroke-linecap="round"/>`:'';
+    const spots=pat==='calico'?`<path d="M131 112c2-12 12-16 18-10s-2 18-12 18z" fill="#F0A04B"/><path d="M168 100c8-4 14 4 12 12s-12 6-14 0z" fill="#3E3633"/>`:pat==='spots'?`<ellipse cx="138" cy="112" rx="6" ry="5" fill="${C.d}"/><ellipse cx="170" cy="120" rx="5" ry="4" fill="${C.d}"/>`:'';
+    const headSpots=pat==='calico'?`<path d="M131 50c2-14 14-20 22-16l-6 18c-6 0-12 2-16-2z" fill="#F0A04B"/><path d="M168 38c8 2 14 10 12 18l-12-4z" fill="#3E3633"/>`:'';
+    const muzzle=pat==='tux'?`<path d="M141 66c4 14 24 14 28 0c-4 6-24 6-28 0z" fill="#FFFFFF"/>`:'';
+    return `<svg class="bd-svg sp-cat" data-mood="${cls==='mood-happy'?'happy':'ok'}" viewBox="108 18 104 130" role="img" aria-label="${esc(b.name)}">
+  <ellipse class="bd-shadow" cx="157" cy="141" rx="40" ry="5" fill="#000" opacity=".1"/>
+  <g class="bd-root">
+  <g class="bd-tail" style="transform-origin:184px 128px"><path d="M184 128c10 2 18-6 16-16" fill="none" stroke="${pat==='calico'?'#F0A04B':C.d}" stroke-width="8" stroke-linecap="round"/></g>
+  <g class="bd-body"><path d="M128 138c-4-26 4-50 26-52s32 24 28 52z" fill="${main}"/>${spots}<path d="M143 138c-1-14 3-24 12-24s13 10 12 24z" fill="${belly}"/>${stripes}
+    <ellipse cx="141" cy="138" rx="8" ry="4" fill="${pat==='tux'?'#fff':main}"/><ellipse cx="169" cy="138" rx="8" ry="4" fill="${pat==='tux'?'#fff':main}"/></g>
+  <g class="bd-head">
+    <g class="bd-ear bd-ear-l" style="transform-origin:136px 54px"><path d="M129 32l8 22-12 2z" fill="${main}"/><path d="M131 40l4 11-6 1z" fill="#F4B6B6"/></g>
+    <g class="bd-ear bd-ear-r" style="transform-origin:174px 54px"><path d="M181 32l-8 22 12 2z" fill="${pat==='calico'?'#3E3633':main}"/><path d="M179 40l-4 11 6 1z" fill="#F4B6B6"/></g>
+    <circle cx="155" cy="62" r="26" fill="${main}"/>${headSpots}${headSt}${muzzle}
+    <g class="bd-eyes">
+      <g class="ey-open"><g class="bd-pupils"><circle cx="145" cy="62" r="5.6" fill="${eyeRing}"/><circle cx="165" cy="62" r="5.6" fill="${eyeRing}"/><ellipse cx="145" cy="62" rx="3.6" ry="4.6" fill="#2B2320"/><ellipse cx="165" cy="62" rx="3.6" ry="4.6" fill="#2B2320"/><circle cx="146.2" cy="60.4" r="1.3" fill="#fff"/><circle cx="166.2" cy="60.4" r="1.3" fill="#fff"/></g></g>
+      <g class="ey-happy" fill="none" stroke="#2B2320" stroke-width="2.4" stroke-linecap="round"><path d="M141 63q4-5 8 0M161 63q4-5 8 0"/></g>
+      <g class="ey-sleep" fill="none" stroke="#2B2320" stroke-width="2.2" stroke-linecap="round"><path d="M141 62q4 3 8 0M161 62q4 3 8 0"/></g>
+      <g class="ey-sad" fill="none" stroke="#2B2320" stroke-width="2" stroke-linecap="round"><path d="M140 54l8 3M170 54l-8 3"/></g>
+    </g>
+    <path d="M152 70h6l-3 3.5z" fill="#F07C7C"/>
+    <g class="bd-mouth" fill="none" stroke="#2B2320" stroke-width="1.8" stroke-linecap="round">
+      <path class="mo-smile" d="M155 73.5c-1 3-5 4-7 2M155 73.5c1 3 5 4 7 2"/>
+      <path class="mo-open" d="M150 74.5q5 9 10 0z" fill="#B23A4A" stroke-width="1.4"/>
+      <path class="mo-sad" d="M150 78q5-4 10 0"/>
+    </g>
+    <path d="M138 70l-14-2M138 74l-13 3M172 70l14-2M172 74l13 3" stroke="${dk?'#CFC3B5':'#5E686D'}" stroke-width="1.3" stroke-linecap="round"/>
+    <ellipse class="bd-blush" cx="140" cy="74" rx="4" ry="2.6" fill="#F4B6B6" opacity=".75"/><ellipse class="bd-blush" cx="170" cy="74" rx="4" ry="2.6" fill="#F4B6B6" opacity=".75"/>
+  </g>
+ <text class="bd-zzz" x="178" y="34">Z z</text>
+  <g class="bd-dirt" fill="#8A6A4A" opacity="0"><ellipse cx="139" cy="112" rx="6" ry="4"/><ellipse cx="170" cy="96" rx="4" ry="3"/><ellipse cx="166" cy="48" rx="3.5" ry="2.5"/><circle cx="150" cy="126" r="2.5"/></g>
+  </g></svg>`}
+  const main=pat==='calico'?'#F6F1EA':C.m,ear=pat==='tux'?C.m:C.d,belly=pat==='tux'?'#FFFFFF':C.l;
+  const spots=pat==='spots'||pat==='calico'?`<ellipse cx="50" cy="112" rx="7" ry="6" fill="${pat==='calico'?'#F0A04B':C.d}"/><ellipse cx="96" cy="104" rx="6" ry="5" fill="${pat==='calico'?'#3E3633':C.d}"/>`:'';
+  const headSpot=pat==='spots'||pat==='calico'?`<ellipse cx="88" cy="40" rx="8" ry="7" fill="${pat==='calico'?'#3E3633':C.d}"/>`:pat==='tabby'?`<path d="M64 33q8-4 16 0M66 39q6-3 12 0" fill="none" stroke="${C.d}" stroke-width="3" stroke-linecap="round"/>`:'';
+  const stripes=pat==='tabby'?`<path d="M46 108q7 2 10-4M100 108q-7 2-10-4M44 122q8 1 11-4" fill="none" stroke="${C.d}" stroke-width="3.2" stroke-linecap="round"/>`:'';
+  return `<svg class="bd-svg sp-dog" data-mood="${cls==='mood-happy'?'happy':'ok'}" viewBox="22 14 112 136" role="img" aria-label="${esc(b.name)}">
+  <ellipse class="bd-shadow" cx="76" cy="142" rx="44" ry="5" fill="#000" opacity=".1"/>
+  <g class="bd-root">
+  <g class="bd-tail" style="transform-origin:104px 120px"><path d="M104 120c14-2 20-14 18-26" fill="none" stroke="${C.m}" stroke-width="9" stroke-linecap="round"/></g>
+  <g class="bd-body"><path d="M38 138c-6-30 4-58 34-60s42 28 36 60z" fill="${main}"/>${spots}${stripes}<path d="M58 138c-2-18 4-30 16-30s18 12 16 30z" fill="${belly}"/>
+    <ellipse cx="50" cy="138" rx="9" ry="4.5" fill="${pat==='tux'?'#fff':main}"/><ellipse cx="96" cy="138" rx="9" ry="4.5" fill="${pat==='tux'?'#fff':main}"/>
+    <path d="M52 92q20 8 40 0" fill="none" stroke="#D7261E" stroke-width="5" stroke-linecap="round"/><circle class="bd-tag" cx="72" cy="99" r="4.5" fill="#FFD23F"/></g>
+  <g class="bd-head">
+    <g class="bd-ear bd-ear-l" style="transform-origin:52px 38px"><path d="M46 40c-12 4-16 22-10 34 4 8 12 6 14-2l4-24z" fill="${ear}"/></g>
+    <g class="bd-ear bd-ear-r" style="transform-origin:92px 38px"><path d="M98 40c12 4 16 22 10 34-4 8-12 6-14-2l-4-24z" fill="${ear}"/></g>
+    <circle cx="72" cy="58" r="30" fill="${main}"/>${headSpot}
+    <ellipse cx="72" cy="70" rx="16" ry="12" fill="${pat==='tux'?'#FFFFFF':C.l}"/>
+    <g class="bd-eyes">
+      <g class="ey-open"><g class="bd-pupils"><circle cx="61" cy="52" r="5.2" fill="${eyeRing}"/><circle cx="83" cy="52" r="5.2" fill="${eyeRing}"/><circle cx="61" cy="52" r="3.6" fill="#2B2320"/><circle cx="83" cy="52" r="3.6" fill="#2B2320"/><circle cx="62.3" cy="50.7" r="1.2" fill="#fff"/><circle cx="84.3" cy="50.7" r="1.2" fill="#fff"/></g></g>
+      <g class="ey-happy" fill="none" stroke="#2B2320" stroke-width="2.6" stroke-linecap="round"><path d="M57 53q4-5 8 0M79 53q4-5 8 0"/></g>
+      <g class="ey-sleep" fill="none" stroke="#2B2320" stroke-width="2.4" stroke-linecap="round"><path d="M57 52q4 3 8 0M79 52q4 3 8 0"/></g>
+      <g class="ey-sad" fill="none" stroke="#2B2320" stroke-width="2.2" stroke-linecap="round"><path d="M55 44l9 3M89 44l-9 3"/></g>
+    </g>
+    <ellipse cx="72" cy="63" rx="5.5" ry="4" fill="#2B2320"/>
+    <g class="bd-mouth" fill="none" stroke="#2B2320" stroke-width="2" stroke-linecap="round">
+      <g class="mo-smile"><path d="M72 67v5M66 73c3 3 9 3 12 0"/></g>
+      <g class="mo-open"><path d="M72 67v4"/><path d="M65 72q7 12 14 0z" fill="#8E2F3A" stroke-width="1.6"/><path d="M69 77q3 6 6 0z" fill="#F07C7C" stroke="none"/></g>
+      <g class="mo-sad"><path d="M72 67v5M66 77c3-3 9-3 12 0"/></g>
+    </g>
+    <ellipse class="bd-blush" cx="58" cy="64" rx="4" ry="2.6" fill="#F07C7C" opacity=".4"/><ellipse class="bd-blush" cx="86" cy="64" rx="4" ry="2.6" fill="#F07C7C" opacity=".4"/>
+  </g>
+ <text class="bd-zzz" x="100" y="26">Z z</text>
+  <g class="bd-dirt" fill="#8A6A4A" opacity="0"><ellipse cx="52" cy="118" rx="7" ry="4"/><ellipse cx="94" cy="110" rx="5" ry="3"/><ellipse cx="84" cy="38" rx="4" ry="2.5"/><circle cx="64" cy="128" r="3"/></g>
+  </g></svg>`}
+
+// ── 狀態：讀取、時間流逝、存檔 ──
+let __bd=null,__bdUid='',__bdSaveT=0,__bdGreeted=false;
+function bdKey(){return 'wh_buddy_'+(me()?me().id:'')}
+function bdLoad(){if(!me())return null;if(__bd&&__bdUid===me().id)return __bd;
+  let loc=null;try{loc=JSON.parse(localStorage.getItem(bdKey())||'null')}catch(_){}
+  const rem=(me().user_metadata||{}).buddy||null;
+  let b=loc&&rem?((loc.t||0)>=(rem.t||0)?loc:rem):(loc||rem);
+  if(b&&(!b.name||!b.sp))b=null;
+  __bd=b;__bdUid=me().id;return b}
+function bdClamp(v){return Math.max(0,Math.min(100,Math.round(v*10)/10))}
+function bdAsleep(b,now=Date.now()){if(b.sl)return true;if(b.wk&&now<b.wk)return false;return bdNight()}
+// 經過的時間：飽足約 16 小時見底、心情約 1 天、乾淨約 3 天；睡覺時精神回復
+function bdTick(b,now=Date.now()){if(!b)return b;const h=Math.max(0,Math.min(96,(now-(b.t||now))/36e5));if(h<0.002){b.t=now;return b}
+  const s=b.s||(b.s={f:80,m:80,c:90,e:80});const slp=bdAsleep(b,now);
+  s.f=bdClamp(s.f-h*(slp?4:6.25));s.m=bdClamp(s.m-h*(s.f<30?6:4));s.c=bdClamp(s.c-h*1.4);s.e=bdClamp(s.e+(slp?h*14:-h*3));
+  if(b.sl&&s.e>=100){b.sl=false}   // 睡飽自己醒來
+  b.t=now;return b}
+function bdSave(now){const b=__bd;if(!b||!me())return;b.t=b.t||Date.now();try{localStorage.setItem(bdKey(),JSON.stringify(b))}catch(_){}
+  clearTimeout(__bdSaveT);const go=()=>{if(!me()||__bd!==b)return;sb.auth.updateUser({data:{buddy:b}}).then(({error})=>{if(!error)bdNotify(b)}).catch(()=>{})};
+  if(now)go();else __bdSaveT=setTimeout(go,3500)}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&__bd&&__bdSaveT){clearTimeout(__bdSaveT);__bdSaveT=0;bdSave(true)}});
+document.addEventListener('app-pause',()=>{if(__bd){clearTimeout(__bdSaveT);bdSave(true)}});
+// 每天第一次見面：見面禮＋連續天數
+function bdDaily(b){const d=bdToday();if(b.dd===d)return false;const y=addDays(d,-1);b.streak=b.ls===y?(b.streak||1)+1:1;b.ls=d;b.dd=d;b.dc={};b.tr=(b.tr||0)+1;b.aff=(b.aff||0)+1;return true}
+// 真毛孩的照護動作 → 電子毛孩得到點心（每天有上限）
+function buddyGive(kind){try{const b=bdLoad();if(!b)return;const g=BD_GIVE[kind];if(!g)return;bdTick(b);bdDaily(b);b.dc=b.dc||{};
+  if((b.dc[kind]||0)>=BD_DAILY_CAP[kind])return;b.dc[kind]=(b.dc[kind]||0)+1;b.tr=(b.tr||0)+g[0];b.aff=(b.aff||0)+g[1];b.s.m=bdClamp(b.s.m+3);bdSave();
+  setTimeout(()=>toast(`🦴 ${b.name}得到 ${g[0]} 個點心（${g[2]}）`,3200),900)}catch(_){}}
+// App：牠快餓的時候發一則通知（只在白天）
+async function bdNotify(b){if(!IS_APP)return;const LN=capPlugin('LocalNotifications');if(!LN)return;const ID=990001;
+  try{await LN.cancel({notifications:[{id:ID}]})}catch(_){}
+  if(!b||b.nt===false)return;try{const p=await LN.checkPermissions();if(p.display!=='granted')return}catch(_){return}
+  const s=b.s||{};if((s.f||0)<=28)return;let at=new Date(Date.now()+((s.f-25)/6.25)*36e5);const hh=at.getHours();
+  if(hh>=21||hh<8){if(hh>=21)at.setDate(at.getDate()+1);at.setHours(8,30,0,0)}
+  const em=b.sp==='cat'?'🐱':'🐶';
+  try{await LN.schedule({notifications:[{id:ID,title:`${em} ${b.name}肚子餓了`,body:'回來餵牠吃飯吧，牠在等你～',schedule:{at,allowWhileIdle:true},extra:{buddy:1}}]})}catch(_){}}
+
+// ── 表情與對白 ──
+function bdMood(b){const s=b.s;if(bdAsleep(b))return 'sleep';if(s.f<25||s.m<25||s.e<15)return 'sad';if(s.m>=70&&s.f>=50)return 'happy';return 'ok'}
+function bdLine(b){const s=b.s,n=b.name;
+  if(bdAsleep(b))return b.sl?'呼…呼…（午睡中）':'呼…呼…（晚上了，睡著了）';
+  if(s.f<25)return '肚子好餓…可以餵我吃飯嗎？';if(s.c<25)return '身上髒髒的，想洗澡～';if(s.e<15)return '好累喔…想睡一下';if(s.m<30)return '好無聊，陪我玩球好不好？';
+  const L=b.sp==='cat'?['喵～今天也最喜歡你了','摸摸我的頭～','呼嚕呼嚕…','陽光好舒服喵']:['汪！今天也最喜歡你了！','摸摸我～','要不要玩球？','尾巴停不下來！'];
+  if((b.tr||0)>0&&s.f<85)L.push(`我聞到點心的味道了（還有 ${b.tr} 個）`);
+  return L[Math.floor(Date.now()/9e4)%L.length]}
+function bdApply(el,b,extra){if(!el)return;const m=extra||bdMood(b);el.dataset.mood=m;
+  const d=el.querySelector('.bd-dirt');if(d)d.setAttribute('opacity',String(Math.max(0,Math.min(.85,(60-b.s.c)/60))))}
+function bdBars(b){const s=b.s;const row=(k,lbl,v,col)=>`<div class="bd-bar"><span>${lbl}</span><i><b style="width:${Math.max(3,v)}%;background:${v<25?'#E5484D':col}"></b></i><em>${Math.round(v)}</em></div>`;
+  return row('f','飽足',s.f,'#F0A04B')+row('m','心情',s.m,'#E85B8A')+row('c','乾淨',s.c,'#3FA7D6')+row('e','精神',s.e,'#43B581')}
+
+// ── 首頁上方的小卡 ──
+function buddyHomeHTML(){
+  if(!me())return '';
+  const b=bdLoad();
+  if(!b)return `<a class="bd-home bd-adopt" href="#/buddy"><div class="bd-stage-mini">${bdSVG({name:'電子毛孩',sp:'dog',coat:'golden',pat:'solid',s:{f:80,m:80,c:90,e:80}},'mood-happy')}</div><div class="bd-hinfo"><b>領養你的電子毛孩</b><span>可以照你家毛孩的樣子做，每天陪牠玩、照顧牠</span><em class="btn sm">去領養</em></div></a>`;
+  bdTick(b);const lv=bdLv(b.aff);
+  return `<div class="bd-home" id="bdHome"><div class="bd-stage-mini" id="bdMini">${bdSVG(b)}</div><div class="bd-hinfo"><a href="#/buddy" class="bd-hname">${esc(b.name)} <small>Lv.${lv} ${bdTitle(lv)}</small></a><p class="bd-say" id="bdSay">${esc(bdLine(b))}</p>
+    <div class="bd-hbtns"><button type="button" class="btn sm" data-bd="feed">🍚 餵飯</button><a class="btn sm ghost" href="#/buddy">陪牠玩 ›</a></div></div></div>`}
+function buddyHomeBind(){const box=$('#bdHome');if(!box)return;const b=bdLoad();if(!b)return;const svg=box.querySelector('.bd-svg');
+  bdApply(svg,b);if(bdDaily(b)){bdSave();setTimeout(()=>{toast(`🎁 每日見面禮：${b.name}得到 1 個點心`+(b.streak>1?`（連續 ${b.streak} 天）`:''),3500)},700)}
+  if(!__bdGreeted&&!bdAsleep(b)){__bdGreeted=true;setTimeout(()=>{bdJump(svg);bdSay(box,(Date.now()-(b.seen||0)>864e5&&b.seen)?'好想你！你終於回來了！':'你回來了！'+bdSound(b))},500)}
+  b.seen=Date.now();
+  bdPetting(svg,b,box);
+  box.querySelector('[data-bd=feed]').onclick=e=>{bdAct(b,'feed',box);e.currentTarget.blur()}}
+function bdSay(box,t){const s=box&&box.querySelector('#bdSay,.bd-bubble');if(!s)return;s.textContent=t;s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop')}
+function bdJump(svg){if(!svg||RM())return;svg.classList.remove('jump');void svg.getBoundingClientRect();svg.classList.add('jump');setTimeout(()=>svg.classList.remove('jump'),650)}
+function bdHearts(svg,n=3,ch='❤️'){if(RM()||!svg)return;const r=svg.getBoundingClientRect();for(let i=0;i<n;i++){const h=document.createElement('span');h.className='bd-heart';h.textContent=ch;h.style.left=(r.left+r.width*(0.3+Math.random()*0.4))+'px';h.style.top=(r.top+r.height*0.25)+'px';h.style.animationDelay=(i*120)+'ms';document.body.appendChild(h);setTimeout(()=>h.remove(),1500)}}
+function bdHaptic(){try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.impact({style:'LIGHT'}).catch(()=>{})}catch(_){}}
+
+// 摸摸：手指在牠身上滑動；點一下會叫一聲跳起來；眼睛會看你碰的地方
+function bdPetting(svg,b,box){if(!svg)return;let down=false,dist=0,lx=0,ly=0,strokes=0,lastPet=0;
+  const look=(x,y)=>{const p=svg.querySelector('.bd-pupils');if(!p)return;const r=svg.getBoundingClientRect();const dx=Math.max(-1,Math.min(1,(x-(r.left+r.width/2))/(r.width/2))),dy=Math.max(-1,Math.min(1,(y-(r.top+r.height*0.35))/(r.height/2)));p.style.transform=`translate(${dx*1.6}px,${dy*1.4}px)`;clearTimeout(p._t);p._t=setTimeout(()=>p.style.transform='',1800)};
+  svg.addEventListener('pointerdown',e=>{down=true;dist=0;lx=e.clientX;ly=e.clientY;look(e.clientX,e.clientY)});
+  svg.addEventListener('pointermove',e=>{look(e.clientX,e.clientY);if(!down)return;dist+=Math.hypot(e.clientX-lx,e.clientY-ly);lx=e.clientX;ly=e.clientY;
+    if(dist>60){dist=0;strokes++;bdTick(b);if(bdAsleep(b)&&!b.sl){bdApply(svg,b,'sleep');return}
+      svg.classList.add('petting');bdApply(svg,b,'happy');bdHearts(svg,1);bdHaptic();
+      if(Date.now()-lastPet>2500){lastPet=Date.now();b.s.m=bdClamp(b.s.m+4);b.dc=b.dc||{};if((b.dc.pet||0)<BD_DAILY_CAP.pet){b.dc.pet=(b.dc.pet||0)+1;b.aff=(b.aff||0)+1}bdSave();bdSay(box,b.sp==='cat'?'呼嚕呼嚕～好舒服':'好舒服～再摸一下！');box.dispatchEvent(new Event('bd-change'))}}});
+  const up=()=>{if(!down)return;down=false;setTimeout(()=>{svg.classList.remove('petting');bdApply(svg,b)},900)};
+  svg.addEventListener('pointerup',e=>{const tap=strokes===0&&dist<12;up();strokes=0;if(!tap)return;
+    if(bdAsleep(b)){if(b.sl){bdSay(box,'Zzz…（睡得很熟）');return}b.wk=Date.now()+10*6e4;bdTick(b);bdApply(svg,b,'ok');bdSay(box,'唔…被你叫醒了，陪你 10 分鐘喔');bdSave();box.dispatchEvent(new Event('bd-change'));return}
+    bdJump(svg);bdHaptic();bdApply(svg,b,'happy');bdSay(box,bdSound(b));setTimeout(()=>bdApply(svg,b),1400)});
+  svg.addEventListener('pointerleave',up);svg.addEventListener('pointercancel',up);
+  svg.style.touchAction='none'}
+
+// ── 動作：餵飯、點心、玩球、洗澡、睡覺 ──
+function bdAct(b,a,box){bdTick(b);bdDaily(b);const s=b.s,svg=box.querySelector('.bd-svg');
+  if(bdAsleep(b)&&a!=='sleep'){if(b.sl){bdSay(box,'牠在午睡，先讓牠睡一下吧（或按「叫醒」）');return}bdSay(box,'晚上了，牠睡著了。點牠一下可以叫醒');return}
+  if(a==='feed'){if(s.f>=92){bdSay(box,'吃不下了～肚子圓滾滾');return}s.f=bdClamp(s.f+35);s.m=bdClamp(s.m+3);b.aff=(b.aff||0)+1;bdFx(box,'🍚');bdSay(box,b.sp==='cat'?'好吃！喵嗚～':'好好吃！汪汪！')}
+  else if(a==='treat'){if(!(b.tr>0)){bdSay(box,'點心吃完了。照顧真毛孩、回報目擊都能換到點心喔');return}b.tr--;s.f=bdClamp(s.f+10);s.m=bdClamp(s.m+15);b.aff=(b.aff||0)+3;bdFx(box,'🦴');bdHearts(svg,4);bdSay(box,'點心！最愛你了！')}
+  else if(a==='play'){if(s.e<15){bdSay(box,'好累…先讓牠睡一下');return}s.m=bdClamp(s.m+20);s.e=bdClamp(s.e-15);s.f=bdClamp(s.f-5);s.c=bdClamp(s.c-6);b.aff=(b.aff||0)+2;bdBall(box);bdSay(box,b.sp==='cat'?'抓到了！再一次！':'接到了！再丟一次！')}
+  else if(a==='bath'){if(s.c>=90){bdSay(box,'已經很乾淨了，香香的～');return}s.c=100;s.m=bdClamp(s.m-3);b.aff=(b.aff||0)+1;bdFx(box,'🫧',8);bdSay(box,b.sp==='cat'?'喵！不要水…好啦，香香的':'洗香香！甩甩甩～')}
+  else if(a==='sleep'){b.sl=!b.sl;if(!b.sl)b.wk=bdNight()?Date.now()+10*6e4:0;bdSay(box,b.sl?'晚安～（精神會慢慢回來）':'睡飽了！')}
+  bdApply(svg,b,a==='sleep'?undefined:(a==='bath'?'ok':'happy'));if(a!=='sleep'&&svg){bdJump(svg);bdHaptic()}setTimeout(()=>bdApply(svg,b),1500);
+  bdSave();box.dispatchEvent(new Event('bd-change'))}
+function bdFx(box,ch,n=5){const svg=box.querySelector('.bd-svg');bdHearts(svg,n,ch)}
+function bdBall(box){const st=box.querySelector('.bd-stage');if(!st||RM())return;const ball=document.createElement('span');ball.className='bd-ball';ball.textContent='⚽';st.appendChild(ball);const pet=st.querySelector('.bd-walker');if(pet){pet.classList.add('run');setTimeout(()=>pet.classList.remove('run'),1200)}setTimeout(()=>ball.remove(),1300)}
+
+// ── 領養頁／寵物房間 ──
+async function renderBuddy(){const _n=navId;setTitle('電子毛孩');
+  if(!me()){app.innerHTML=`<div class="card login-card" style="max-width:520px;margin:20px auto;text-align:center"><div style="width:160px;margin:0 auto">${bdSVG({name:'電子毛孩',sp:'dog',coat:'golden',pat:'solid',s:{f:80,m:80,c:90,e:80}},'mood-happy')}</div><h1>領養電子毛孩</h1><p class="muted">會員專屬：照你家毛孩的樣子做一隻電子毛孩，每天餵牠、摸摸牠、陪牠玩。</p><a class="btn lg block" href="#/login?mode=signup" onclick="setReturn('#/buddy')">免費註冊／登入</a></div>`;return}
+  if(me().id){try{const {data}=await sb.auth.getUser();if(data&&data.user&&_n===navId){const rem=(data.user.user_metadata||{}).buddy;const cur=bdLoad();if(rem&&(!cur||(rem.t||0)>(cur.t||0))){__bd=rem}}}catch(_){}}
+  if(_n!==navId)return;
+  const b=bdLoad();if(!b||qs(location.hash).new==='1')return renderBuddyAdopt(b);
+  bdTick(b);if(bdDaily(b)){bdSave();setTimeout(()=>toast(`🎁 每日見面禮：${b.name}得到 1 個點心`,3200),500)}
+  const draw=()=>{const lv=bdLv(b.aff),pr=Math.round(((b.aff||0)%30)/30*100),days=Math.max(1,lnDiffDays(String(b.born||bdToday()).slice(0,10),bdToday())+1),night=bdNight();
+    app.innerHTML=`<div class="bd-room" id="bdRoom">
+    <div class="bd-top"><h1>${esc(b.name)}</h1><span class="bd-lv">Lv.${lv}・${bdTitle(lv)}</span></div>
+    <div class="bd-stage ${night?'night':''} ${b.sl?'lightsoff':''}" id="bdStage">
+      <div class="bd-window"><span>${night?'🌙':'☀️'}</span></div><div class="bd-bed"></div><div class="bd-bowl">🥣</div>
+      <p class="bd-bubble" id="bdSay">${esc(bdLine(b))}</p>
+      <div class="bd-walker" id="bdWalker">${bdSVG(b)}</div>
+      <div class="bd-floor"></div>
+    </div>
+    <div class="bd-panel">
+      <div class="bd-bars">${bdBars(b)}</div>
+      <div class="bd-acts">
+        <button type="button" class="bd-act" data-a="feed"><i>🍚</i>餵飯</button>
+        <button type="button" class="bd-act" data-a="treat"><i>🦴</i>點心<small>${b.tr||0}</small></button>
+        <button type="button" class="bd-act" data-a="play"><i>⚽</i>玩球</button>
+        <button type="button" class="bd-act" data-a="bath"><i>🫧</i>洗澡</button>
+        <button type="button" class="bd-act" data-a="sleep"><i>${b.sl?'☀️':'💤'}</i>${b.sl?'叫醒':'睡覺'}</button>
+      </div>
+      <p class="bd-tip">手指在牠身上滑一滑就是「摸摸」，點一下牠會回應你。</p>
+    </div>
+    <div class="card bd-info">
+      <div class="bd-aff"><b>好感度 Lv.${lv}</b><i><b style="width:${pr}%"></b></i><small>${pr}%</small></div>
+      <div class="bd-stats"><span><b>${days}</b>一起的天數</span><span><b>${b.streak||1}</b>連續見面</span><span><b>${b.tr||0}</b>點心</span></div>
+    </div>
+    <h2>🦴 怎麼換到點心</h2>
+    <div class="card bd-earn">
+      <div><span>每天來看牠</span><b>+1</b></div>
+      <div><a href="#/health">幫毛孩吃藥打勾</a><b>+1</b><small>每天最多 ${BD_DAILY_CAP.med} 次</small></div>
+      <div><a href="#/health">記一筆健康紀錄</a><b>+2</b><small>每天最多 ${BD_DAILY_CAP.rec} 次</small></div>
+      <div><a href="#/seen">回報目擊／拾獲</a><b>+3</b><small>每天最多 ${BD_DAILY_CAP.sight} 次</small></div>
+      <div><a href="#/lost">分享協尋案件</a><b>+1</b><small>每天最多 ${BD_DAILY_CAP.share} 次</small></div>
+    </div>
+    <details class="mg-sec"><summary>⚙️ 設定</summary><div class="mg-body">
+      <label class="f"><span><b class="lbl">名字</b></span><input type="text" id="bdName" maxlength="12" value="${esc(b.name)}"></label>
+      ${IS_APP?`<label class="chk"><input type="checkbox" id="bdNt" ${b.nt!==false?'checked':''}> 牠肚子餓的時候通知我（只在白天）</label>`:''}
+      <div class="row" style="gap:8px;margin-top:10px"><button type="button" class="btn ghost" id="bdSaveSet">儲存</button><a class="btn ghost" href="#/buddy?new=1">換外型</a></div>
+    </div></details></div>`;
+    const room=$('#bdRoom'),svg=room.querySelector('.bd-svg');bdApply(svg,b);bdPetting(svg,b,room);
+    room.querySelectorAll('[data-a]').forEach(x=>x.onclick=()=>bdAct(b,x.dataset.a,room));
+    room.addEventListener('bd-change',()=>{const bars=room.querySelector('.bd-bars');if(bars)bars.innerHTML=bdBars(b);const t=room.querySelector('[data-a=treat] small');if(t)t.textContent=b.tr||0;
+      const sl=room.querySelector('[data-a=sleep]');if(sl)sl.innerHTML=`<i>${b.sl?'☀️':'💤'}</i>${b.sl?'叫醒':'睡覺'}`;$('#bdStage').classList.toggle('lightsoff',!!b.sl)});
+    $('#bdSaveSet').onclick=()=>{const n=$('#bdName').value.trim().slice(0,12);if(!n)return toast('請輸入名字');b.name=n;if($('#bdNt'))b.nt=$('#bdNt').checked;bdSave(true);toast('✅ 已儲存');draw()};
+    bdWander(_n);if(!__bdGreeted&&!bdAsleep(b)){__bdGreeted=true;setTimeout(()=>{bdJump(svg);bdSay(room,'你回來了！'+bdSound(b))},400)}};
+  draw();
+  // 每分鐘更新一次數值（數值照真實時間變化）
+  const iv=setInterval(()=>{if(_n!==navId||!$('#bdRoom')){clearInterval(iv);return}bdTick(b);$('#bdRoom').dispatchEvent(new Event('bd-change'));const s=$('#bdSay');if(s&&!s.classList.contains('pop'))s.textContent=bdLine(b);bdApply($('#bdRoom .bd-svg'),b)},60000)}
+// 牠會在房間裡走來走去（睡覺時不動）
+function bdWander(_n){const w=$('#bdWalker');if(!w||RM())return;let x=50;
+  const step=()=>{if(_n!==navId||!w.isConnected)return;const b=__bd;if(b&&!bdAsleep(b)&&!w.querySelector('.petting')){const nx=Math.max(18,Math.min(82,x+(Math.random()-.5)*50));w.classList.toggle('flip',nx<x);w.classList.add('walking');w.style.left=nx+'%';x=nx;setTimeout(()=>w.classList.remove('walking'),1600)}
+    setTimeout(step,3500+Math.random()*4000)};setTimeout(step,2500)}
+
+async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'領養電子毛孩');
+  const {data:pets}=await sb.from('pets').select('id,name,species,colour').order('created_at');if(_n!==navId)return;
+  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',pat:cur?.pat||'solid',name:cur?.name||'',src:cur?.src||null};
+  const prev=()=>bdSVG({name:st.name||'電子毛孩',...st,s:{f:80,m:80,c:90,e:80}},'mood-happy');
+  app.innerHTML=`<div class="card login-card bd-adopt-card" style="max-width:560px;margin:14px auto">
+    <h1>${cur?'換外型':'領養你的電子毛孩'}</h1>
+    <p class="muted">${cur?'名字、點心和好感度都會保留。':'每天餵牠、摸摸牠、陪牠玩。照顧你家真毛孩、回報目擊，牠也會得到點心。'}</p>
+    <div class="bd-preview" id="bdPrev">${prev()}</div>
+    ${(pets||[]).length?`<p class="lbl" style="margin:14px 0 6px">照我家的毛孩做</p><div class="chips bd-src">${pets.map(p=>`<button type="button" class="chip" data-src="${p.id}">${p.species==='cat'?'🐱':'🐶'} ${esc(p.name)}</button>`).join('')}</div>`:''}
+    <p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
+    <p class="lbl" style="margin:14px 0 6px">毛色</p><div class="bd-coats" id="bdCoat">${Object.entries(BD_COATS).map(([k,c])=>`<button type="button" data-v="${k}" style="--c:${c.m}" aria-label="${c.n}"><span></span>${c.n}</button>`).join('')}</div>
+    <p class="lbl" style="margin:14px 0 6px">花紋</p><div class="chips" id="bdPat">${Object.entries(BD_PATS).map(([k,n])=>`<button type="button" class="chip" data-v="${k}">${n}</button>`).join('')}</div>
+    <label class="f" style="margin-top:14px"><span><b class="lbl">名字</b></span><input type="text" id="bdNm" maxlength="12" placeholder="例：小麥" value="${esc(st.name)}"></label>
+    <button class="btn lg block" id="bdGo" style="margin-top:14px">${cur?'儲存外型':'領養牠'}</button>
+    ${cur?`<a class="btn ghost block" href="#/buddy" style="margin-top:8px">取消</a>`:''}
+  </div>`;
+  const sync=()=>{$('#bdPrev').innerHTML=prev();
+    app.querySelectorAll('#bdSp button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.sp));
+    app.querySelectorAll('#bdCoat button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.coat));
+    app.querySelectorAll('#bdPat button').forEach(x=>{x.classList.toggle('on',x.dataset.v===st.pat);x.hidden=x.dataset.v==='calico'&&st.sp!=='cat'});
+    app.querySelectorAll('[data-src]').forEach(x=>x.classList.toggle('on',x.dataset.src===st.src))};
+  app.querySelectorAll('#bdSp button').forEach(x=>x.onclick=()=>{st.sp=x.dataset.v;if(st.pat==='calico'&&st.sp!=='cat')st.pat='solid';st.src=null;sync()});
+  app.querySelectorAll('#bdCoat button').forEach(x=>x.onclick=()=>{st.coat=x.dataset.v;st.src=null;sync()});
+  app.querySelectorAll('#bdPat button').forEach(x=>x.onclick=()=>{st.pat=x.dataset.v;st.src=null;sync()});
+  app.querySelectorAll('[data-src]').forEach(x=>x.onclick=()=>{const p=pets.find(z=>z.id===x.dataset.src);if(!p)return;const g=bdGuess(p.colour,p.species);st.sp=p.species==='cat'?'cat':'dog';st.coat=g.coat;st.pat=g.pat==='calico'&&st.sp!=='cat'?'spots':g.pat;st.src=p.id;if(!$('#bdNm').value.trim()||!cur){$('#bdNm').value=p.name;st.name=p.name}sync()});
+  $('#bdNm').oninput=()=>{st.name=$('#bdNm').value.trim()};
+  sync();
+  $('#bdGo').onclick=()=>{const name=$('#bdNm').value.trim().slice(0,12);if(!name){toast('幫牠取個名字吧');$('#bdNm').focus();return}
+    const now=Date.now();const b=cur?{...cur,name,sp:st.sp,coat:st.coat,pat:st.pat,src:st.src}:{v:1,name,sp:st.sp,coat:st.coat,pat:st.pat,src:st.src,born:bdToday(),s:{f:70,m:80,c:95,e:85},t:now,aff:0,tr:3,dd:bdToday(),ls:bdToday(),streak:1,dc:{},nt:true};
+    __bd=b;__bdUid=me().id;bdSave(true);__bdGreeted=false;toast(cur?'✅ 外型已更新':`🎉 ${name}來到你家了！送你 3 個點心`);if((location.hash||'')==='#/buddy')route();else goReplace('#/buddy')}}
+
 // ── 使用者名稱：註冊時設定，之後不能改（資料庫 migration v1.34 也會擋） ──
 const UN_RE=/^[A-Za-z0-9_一-鿿㐀-䶿]{2,20}$/;
 function unFmtMsg(n){n=String(n||'').trim();if(!n)return '請輸入使用者名稱';if(n.length<2)return '至少 2 個字';if(n.length>20)return '最多 20 個字';if(!UN_RE.test(n))return '只能用中文、英文、數字和底線 _（不能有空白或符號）';return ''}
@@ -5359,7 +5734,7 @@ async function renderRecord(petId,recId){const _n=navId;
     if(recId!=='new'&&row.next_due&&row.next_due!==(r.next_due||null))row.done=false;   // 到期日換了＝新的一次，要重新提醒
     const {data:saved,error}=recId==='new'?await sb.from('pet_records').insert(row).select('id').single():await sb.from('pet_records').update(row).eq('id',recId).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
-    didSave=true;lnSync(true);
+    didSave=true;lnSync(true);if(recId==='new')buddyGive('rec');
     // 從紀錄移除的照片，也從雲端刪掉
     const dropped=origFiles.concat(fresh).filter(x=>!files.includes(x));if(dropped.length)sb.storage.from('pet-private').remove(dropped).catch(()=>{});
     const dueChanged=row.next_due&&!row.done&&(recId==='new'||row.next_due!==r.next_due);if(dueChanged)setTimeout(lnAskOnce,600);
@@ -5414,7 +5789,7 @@ function bindMedSlots(rerender){
   document.querySelectorAll('[data-medlog]').forEach(b=>b.onclick=async()=>{
     const n=navId;b.disabled=true;
     if(b.dataset.logid){const {error}=await sb.from('pet_med_logs').delete().eq('id',b.dataset.logid);if(error){b.disabled=false;return toast(error.message)}}
-    else{const {error}=await sb.from('pet_med_logs').insert({med_id:b.dataset.medlog,slot:b.dataset.slot});if(error){b.disabled=false;return toast(error.message)}toast(b.dataset.slot==='需要時'?'已記錄':'已勾選：'+b.dataset.slot);burst(b,'#16855A')}
+    else{const {error}=await sb.from('pet_med_logs').insert({med_id:b.dataset.medlog,slot:b.dataset.slot});if(error){b.disabled=false;return toast(error.message)}toast(b.dataset.slot==='需要時'?'已記錄':'已勾選：'+b.dataset.slot);burst(b,'#16855A');buddyGive('med')}
     if(n===navId)rerender();   // 已經換頁就不要把舊頁面畫回來
   });
 }
