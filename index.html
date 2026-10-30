@@ -1852,6 +1852,14 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .bd-prevwrap{position:sticky;top:calc(env(safe-area-inset-top) + 56px);z-index:3;background:var(--sheet);margin:0 -8px;padding:4px 8px 0;border-radius:0 0 18px 18px}
 #bdMarks .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
 .forgot{margin:6px 2px 0;text-align:right}.forgot .linkbtn{font-size:14px;font-weight:700;color:var(--red-ink);min-height:36px}
+/* 對準照片 */
+.bd-alignbtn{margin-top:12px}
+.bd-align{position:fixed;inset:0;z-index:1200;background:rgba(20,10,16,.82);display:grid;place-items:center;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 12px)}
+.bd-al-box{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px;max-height:100%}
+.bd-al-t{margin:0;color:#fff;font:800 18px var(--head);text-align:center}
+.bd-al-img{position:relative;align-self:center;max-height:70vh;cursor:crosshair;touch-action:manipulation}.bd-al-img img{display:block;max-width:100%;max-height:70vh;border-radius:14px}
+.bd-al-dot{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--red);color:#fff;font:800 13px/22px var(--body);text-align:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
+.bd-al-acts{display:flex;gap:8px;justify-content:center}.bd-al-acts .btn{background:#fff}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1924,7 +1932,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.8.4';
+const BUILD = 'v5.8.5';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -5039,14 +5047,14 @@ function bdSVG(b,cls=''){
   const mood=cls==='mood-happy'?'happy':'ok';
   let M=C.m,D=C.d,L=C.l;if(pat==='calico'){M='#F7F2EA';D='#DCCFBF';L='#FFFFFF'}if(pat==='tux'){L='#FFFFFF'}
   const HI=bdMix(M,'#FFFFFF',.38),SH=bdMix(D,'#000000',.18),INK='#24160E';
-  const irisC=cat?({black:'#E3B23C',orange:'#D9A23A',gray:'#86B868',white:'#7DB9E8',brown:'#C9A443',cream:'#9CC07A',golden:'#C9A443'}[b.coat]||(dark?'#E3B23C':'#C9A443')):(dark?'#A4703E':'#6E4320');
+  const irisC=b.iris?b.iris:cat?({black:'#E3B23C',orange:'#D9A23A',gray:'#86B868',white:'#7DB9E8',brown:'#C9A443',cream:'#9CC07A',golden:'#C9A443'}[b.coat]||(dark?'#E3B23C':'#C9A443')):(dark?'#A4703E':'#6E4320');
   const defs=`<defs>
     <radialGradient id="bg${u}" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="${HI}"/><stop offset=".55" stop-color="${M}"/><stop offset="1" stop-color="${SH}"/></radialGradient>
     <radialGradient id="hg${u}" cx="50%" cy="32%" r="72%"><stop offset="0" stop-color="${HI}"/><stop offset=".6" stop-color="${M}"/><stop offset="1" stop-color="${D}"/></radialGradient>
     <linearGradient id="lg${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${L}"/><stop offset="1" stop-color="${bdMix(L,D,.22)}"/></linearGradient>
     <linearGradient id="dg${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${D}"/><stop offset="1" stop-color="${SH}"/></linearGradient>
     <radialGradient id="ig${u}" cx="42%" cy="38%" r="70%"><stop offset="0" stop-color="${bdMix(irisC,'#FFFFFF',.35)}"/><stop offset=".55" stop-color="${irisC}"/><stop offset="1" stop-color="${bdMix(irisC,'#000000',.55)}"/></radialGradient>
-    <radialGradient id="ng${u}" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="${cat?'#F4A7AE':'#6A5552'}"/><stop offset="1" stop-color="${cat?'#C96874':'#120C0B'}"/></radialGradient>
+    <radialGradient id="ng${u}" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="${b.noseC?bdMix(b.noseC,'#FFFFFF',.25):cat?'#F4A7AE':'#6A5552'}"/><stop offset="1" stop-color="${b.noseC?bdMix(b.noseC,'#000000',.25):cat?'#C96874':'#120C0B'}"/></radialGradient>
     <radialGradient id="mg${u}" cx="50%" cy="78%" r="62%"><stop offset="0" stop-color="${L}"/><stop offset=".55" stop-color="${L}" stop-opacity=".85"/><stop offset="1" stop-color="${L}" stop-opacity="0"/></radialGradient>
     <radialGradient id="tg${u}" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#FFE45E"/><stop offset="1" stop-color="#C99A12"/></radialGradient>
     <filter id="fz${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="${b.hair==='long'?7.5:4.2}" xChannelSelector="R" yChannelSelector="G"/></filter>
@@ -5115,7 +5123,7 @@ function bdSVG(b,cls=''){
   </g></svg>`}
   // ── 狗（成犬比例，參考台灣米克斯）──
   const ear=b.ear||'drop';
-  const sn={short:-6,long:7}[b.snout]||0,fw={narrow:.92,wide:1.1}[b.face]||1;
+  const sn=typeof b.snN==='number'?b.snN:({short:-6,long:7}[b.snout]||0),fw={narrow:.92,wide:1.1}[b.face]||1;
   const skull=`M100 28c-21 0-35 13-37 30c-1 9 1 17 6 24c5 7 9 ${13+sn} 11 ${21+sn}c2 9 10 14 20 14s18-5 20-14c2-8 6-${14+sn} 11-${21+sn}c5-7 7-15 6-24c-2-17-16-30-37-30z`;
   const white='#FBF8F3';
   const torso='M74 126c-15 22-19 54-13 84h78c6-30 2-62-13-84c-12-6-40-6-52 0z';
@@ -5165,7 +5173,7 @@ function bdSVG(b,cls=''){
     ${b.brow?`<ellipse cx="85" cy="53.5" rx="5.6" ry="3.2" fill="${dark?'#D9A066':bdMix(L,'#FFFFFF',.3)}" filter="url(#fs${u})"/><ellipse cx="115" cy="53.5" rx="5.6" ry="3.2" fill="${dark?'#D9A066':bdMix(L,'#FFFFFF',.3)}" filter="url(#fs${u})"/>`:`<ellipse cx="86" cy="54.5" rx="4.5" ry="2.4" fill="${L}" opacity=".55"/><ellipse cx="114" cy="54.5" rx="4.5" ry="2.4" fill="${L}" opacity=".55"/>`}
     ${ear==='drop'?earG(0)+earG(1):''}
     <g transform="translate(0 ${sn*.6})"><path d="M100 66c-12 0-20 9-21 20c-1 12 5 26 21 30c16-4 22-18 21-30c-1-11-9-20-21-20z" fill="url(#mg${u})"/>
-    ${b.mask?`<path d="M100 80c-9 0-14 7-15 15c-1 9 4 18 15 21c11-3 16-12 15-21c-1-8-6-15-15-15z" fill="${bdMix(D,'#000000',.45)}" opacity=".62" filter="url(#fs${u})"/>`:''}</g>
+    ${b.mask?`<path d="M100 80c-9 0-14 7-15 15c-1 9 4 18 15 21c11-3 16-12 15-21c-1-8-6-15-15-15z" fill="${b.maskC||bdMix(D,'#000000',.45)}" opacity="${b.maskC?.85:.62}" filter="url(#fs${u})"/>`:''}</g>
     ${eyes}
     <g transform="translate(0 ${sn})"><path d="M100 95c-9 0-13 2.3-13 6.5c0 4.4 6.6 8.8 13 9.7c6.4-.9 13-5.3 13-9.7c0-4.2-4-6.5-13-6.5z" fill="url(#ng${u})"/>
     <ellipse cx="96" cy="97.6" rx="3.4" ry="1.6" fill="#fff" opacity=".5"/><path d="M93.5 103.5q2-1 3.2.6M106.5 103.5q-2-1-3.2.6" stroke="#000" stroke-width="1.2" fill="none" opacity=".6"/>
@@ -5421,9 +5429,69 @@ function bdPaletteFromPhoto(url){return new Promise(res=>{let done=false;const f
   // 去掉最暗的 12%（鼻子、眼睛、陰影）
   fur.sort((a,b)=>a[3]-b[3]);fur=fur.slice(Math.floor(fur.length*.12));if(fur.length<40)return fin(null);
   fin({m:pick(fur,.55,.8),d:pick(fur,.08,.25),l:pick(fur,.92,1)})}catch(_){fin(null)}};im.onerror=()=>fin(null);im.src=safeU(url);setTimeout(()=>fin(null),7000)}catch(_){fin(null)}})}
+// ── 對準照片：在照片上點左眼、右眼、鼻子，量出臉的比例、分區取色（額頭、臉頰、嘴邊、下巴、耳朵、眼睛、鼻子）──
+function bdAlign(url,sp){return new Promise(res=>{
+  const ov=document.createElement('div');ov.className='bd-align';
+  const steps=sp==='cat'?['點牠的左眼（照片裡左邊那隻）','點右眼','點鼻子']:['點牠的左眼（照片裡左邊那隻）','點右眼','點鼻頭'];
+  ov.innerHTML=`<div class="bd-al-box"><p class="bd-al-t" id="alT">${steps[0]}</p><div class="bd-al-img" id="alWrap"><img id="alImg" alt="" crossorigin="anonymous"></div>
+    <div class="bd-al-acts"><button type="button" class="btn ghost" id="alRedo">重來</button><button type="button" class="btn ghost" id="alCancel">取消</button></div></div>`;
+  document.body.appendChild(ov);const img=ov.querySelector('#alImg'),wrap=ov.querySelector('#alWrap');let pts=[];const done=v=>{ov.remove();res(v)};
+  ov.querySelector('#alCancel').onclick=()=>done(null);
+  ov.querySelector('#alRedo').onclick=()=>{pts=[];wrap.querySelectorAll('.bd-al-dot').forEach(d=>d.remove());ov.querySelector('#alT').textContent=steps[0]};
+  img.onerror=()=>{toast('這張照片讀不到，換一張試試');done(null)};
+  img.onload=()=>{const W=Math.min(800,img.naturalWidth),H=Math.round(img.naturalHeight*W/img.naturalWidth);const cv=document.createElement('canvas');cv.width=W;cv.height=H;const cx=cv.getContext('2d');
+    let data=null;try{cx.drawImage(img,0,0,W,H);data=cx.getImageData(0,0,W,H).data}catch(_){toast('這張照片讀不到顏色，換一張試試');return done(null)}
+    wrap.onclick=e=>{const r=img.getBoundingClientRect();const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;if(x<0||x>1||y<0||y>1)return;
+      pts.push([x*W,y*H]);const d=document.createElement('span');d.className='bd-al-dot';d.textContent=pts.length;d.style.left=(x*100)+'%';d.style.top=(y*100)+'%';wrap.appendChild(d);
+      if(pts.length<3){ov.querySelector('#alT').textContent=steps[pts.length];return}
+      ov.querySelector('#alT').textContent='分析中…';setTimeout(()=>done(bdAnalyze(data,W,H,pts,sp)),60)}};
+  img.src=safeU(url)})}
+function bdAnalyze(data,W,H,pts,sp){
+  const [L,R,N]=pts;const e=Math.hypot(R[0]-L[0],R[1]-L[1])||1;const mid=[(L[0]+R[0])/2,(L[1]+R[1])/2];
+  let dn=[N[0]-mid[0],N[1]-mid[1]];const nl=Math.hypot(dn[0],dn[1])||1;dn=[dn[0]/nl,dn[1]/nl];const side=[-dn[1],dn[0]];
+  const at=(p,a,b)=>[p[0]+dn[0]*a*e+side[0]*b*e,p[1]+dn[1]*a*e+side[1]*b*e];
+  const px=(x,y)=>{x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=W||y>=H)return null;const i=(y*W+x)*4;return [data[i],data[i+1],data[i+2]]};
+  const lum=c=>.3*c[0]+.59*c[1]+.11*c[2];
+  // 取一個圓形區域的顏色：去掉最亮、最暗的 15%（反光、陰影），平均剩下的
+  const area=(p,rad,keep)=>{const r=Math.max(2,rad*e),a=[];for(let dy=-r;dy<=r;dy+=Math.max(1,r/6))for(let dx=-r;dx<=r;dx+=Math.max(1,r/6)){if(dx*dx+dy*dy>r*r)continue;const c=px(p[0]+dx,p[1]+dy);if(c)a.push(c)}
+    if(!a.length)return null;a.sort((x,y)=>lum(x)-lum(y));const k=keep||[.15,.85];const s=a.slice(Math.floor(a.length*k[0]),Math.max(Math.floor(a.length*k[0])+1,Math.ceil(a.length*k[1])));
+    const t=[0,0,0];s.forEach(c=>{t[0]+=c[0];t[1]+=c[1];t[2]+=c[2]});return t.map(v=>v/s.length)};
+  const hex=c=>'#'+c.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
+  const avg=(...cs)=>{cs=cs.filter(Boolean);if(!cs.length)return null;return [0,1,2].map(i=>cs.reduce((a,c)=>a+c[i],0)/cs.length)};
+  const sat=c=>{const mx=Math.max(...c),mn=Math.min(...c);return mx?(mx-mn)/mx:0};
+  const hue=c=>{const [r,g,bb]=c,mx=Math.max(r,g,bb),mn=Math.min(r,g,bb),d=mx-mn;if(!d)return 0;let h=mx===r?((g-bb)/d)%6:mx===g?(bb-r)/d+2:(r-g)/d+4;return (h*60+360)%360};
+  const hd=(a,b)=>{const d=Math.abs(a-b)%360;return Math.min(d,360-d)};
+  const boost=(c,k=1.45)=>{const l=lum(c);return c.map(v=>l+(v-l)*k)};
+  // 臉周圍（以兩眼距離為單位）的像素：找出毛的主要色相
+  const face=[];for(let a=-1.1;a<=1.4;a+=.07)for(let bb=-1.3;bb<=1.3;bb+=.07){const p=at(mid,a,bb),c=px(p[0],p[1]);if(c&&lum(c)>30&&lum(c)<240)face.push(c)}
+  const col=face.filter(c=>sat(c)>.18);let furHue=null;
+  if(col.length>face.length*.3){const bins=new Array(24).fill(0);col.forEach(c=>bins[Math.floor(hue(c)/15)]++);furHue=bins.indexOf(Math.max(...bins))*15+7.5}
+  const isFur=c=>c&&(furHue==null?true:(sat(c)>.1&&hd(hue(c),furHue)<32));
+  const fur=(furHue==null?face:face.filter(isFur)).sort((x,y)=>lum(x)-lum(y));
+  const pct=(a,b)=>{if(!fur.length)return null;const s2=fur.slice(Math.floor(fur.length*a),Math.max(Math.floor(fur.length*a)+1,Math.ceil(fur.length*b)));return [0,1,2].map(i=>s2.reduce((t,c)=>t+c[i],0)/s2.length)};
+  // 各區域：只採用顏色跟毛相符的
+  const pick=(...cs)=>avg(...cs.filter(isFur));
+  const forehead=area(at(mid,-.45,0),.18),between=area(at(mid,.12,0),.1),cheekL=area(at(N,-.2,-.6),.16),cheekR=area(at(N,-.2,.6),.16);
+  const main=pick(forehead,between,cheekL,cheekR)||pct(.5,.78)||[200,160,110];
+  const chin=area(at(N,.55,0),.16),muzL=area(at(N,.15,-.48),.1),muzR=area(at(N,.15,.48),.1);
+  const earL=area(at(L,-.7,-.5),.14),earR=area(at(R,-.7,.5),.14);
+  const earC=pick(earL,earR);
+  const dark=earC&&lum(earC)<lum(main)-10?earC:(pct(.06,.22)||main.map(v=>v*.68));
+  const lightCand=[chin,muzL,muzR].filter(c=>c&&lum(c)>lum(main)+10&&(isFur(c)||sat(c)<.25));
+  const light=lightCand.length?avg(...lightCand):(pct(.9,1)||main.map(v=>v+(255-v)*.45));
+  const out={cc:{m:hex(boost(main)),d:hex(boost(dark)),l:hex(boost(light,1.25).map(v=>Math.min(255,v+(255-v)*.25)))}};
+  const muz=avg(muzL,muzR);
+  if(sp!=='cat'){const ratio=nl/e;out.snN=Math.max(-8,Math.min(11,Math.round((ratio-1.05)*16)));
+    out.mask=!!(muz&&lum(muz)<lum(main)-45&&lum(muz)>25);if(out.mask)out.maskC=hex(muz)}
+  const browL=area(at(L,-.3,0),.08),browR=area(at(R,-.3,0),.08),fl=lum(main);
+  out.brow=!!(browL&&browR&&lum(avg(browL,browR))>fl+30&&fl<140);
+  const iris=avg(area(L,.07,[.35,.8]),area(R,.07,[.35,.8]));if(iris)out.iris=hex(boost(iris,1.5).map(v=>Math.min(255,v*1.1)));
+  const nose=area(N,.1,[.2,.7]);if(nose){const pink=nose[0]>nose[2]+25&&lum(nose)>90;out.noseC=pink?hex(nose):null}
+  return out}
+
 async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'領養電子毛孩');
   const {data:pets}=await sb.from('pets').select('id,name,species,colour,photos').order('created_at');if(_n!==navId)return;
-  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',build:cur?.build||'mid',tail:cur?.tail||'curl',hair:cur?.hair||'short',snout:cur?.snout||'mid',face:cur?.face||'mid',eyes:cur?.eyes||'mid',brow:!!cur?.brow,mask:!!cur?.mask,bib:!!cur?.bib,socks:!!cur?.socks,name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null};
+  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',build:cur?.build||'mid',tail:cur?.tail||'curl',hair:cur?.hair||'short',snout:cur?.snout||'mid',snN:cur?.snN,iris:cur?.iris||null,noseC:cur?.noseC||null,maskC:cur?.maskC||null,face:cur?.face||'mid',eyes:cur?.eyes||'mid',brow:!!cur?.brow,mask:!!cur?.mask,bib:!!cur?.bib,socks:!!cur?.socks,name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null};
   if(st.coat==='custom'&&!st.cc)st.coat='golden';
   const srcPet=()=>(pets||[]).find(z=>z.id===st.src);const phs=()=>((srcPet()||{}).photos||[]).filter(Boolean).slice(0,6);
   const prev=()=>bdSVG({name:st.name||'電子毛孩',...st,s:{f:80,m:80,c:90,e:80}},'mood-happy');
@@ -5432,7 +5500,8 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     <p class="muted">${cur?'名字、點心和好感度都會保留。':'照你家毛孩的樣子做一隻。每天餵牠、摸摸牠、陪牠玩；照顧真毛孩、回報目擊，牠也會得到點心。'}</p>
     <div class="bd-prevwrap"><div class="bd-preview" id="bdPrev">${prev()}</div><figure class="bd-ref" id="bdRef" hidden><img alt="參考照片"><figcaption>參考照片</figcaption></figure></div>
     ${(pets||[]).length?`<p class="lbl" style="margin:14px 0 6px">照我家的毛孩做</p><div class="chips bd-src">${pets.map(p=>`<button type="button" class="chip" data-src="${p.id}">${p.species==='cat'?'🐱':'🐶'} ${esc(p.name)}</button>`).join('')}</div>`:''}
-    <div id="bdRefWrap" hidden><p class="lbl" style="margin:14px 0 6px">用哪張照片對毛色</p><div class="bd-phs" id="bdPhs"></div><p class="small muted" id="bdRefMsg" style="margin:6px 0 0"></p></div>
+    <div id="bdRefWrap" hidden><p class="lbl" style="margin:14px 0 6px">用哪張照片對毛色</p><div class="bd-phs" id="bdPhs"></div><p class="small muted" id="bdRefMsg" style="margin:6px 0 0"></p>
+      <button type="button" class="btn block bd-alignbtn" id="bdAlignBtn">📍 對準照片，讓牠更像</button><p class="small muted" style="margin:6px 2px 0">在照片上點牠的左眼、右眼、鼻子，會量出嘴巴長短，並分別取額頭、嘴邊、下巴、耳朵、眼睛和鼻子的顏色。</p></div>
     <p class="muted small" id="bdNoPh" hidden style="margin:8px 0 0">到<a id="bdPhLink" href="#/health">健康手冊</a>幫牠加一張照片，就能照照片對毛色。</p>
     <p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
     <div id="bdEarWrap"><p class="lbl" style="margin:14px 0 6px">耳朵</p><div class="seg" id="bdEar"><button type="button" data-v="drop">垂耳</button><button type="button" data-v="semi">半立耳</button><button type="button" data-v="prick">立耳</button></div></div>
@@ -5466,17 +5535,21 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
   const useRef=u=>{st.ref=u;$('#bdRefMsg').textContent='正在從照片調毛色…';sync();const sid=st.src;
     bdPaletteFromPhoto(u).then(c=>{if(st.src!==sid||st.ref!==u)return;if(c){st.cc=c;st.coat='custom';$('#bdRefMsg').textContent='✓ 已照照片調好毛色（深、主、淺三層）'}else $('#bdRefMsg').textContent='這張照片讀不到顏色，已用毛色文字猜一個';sync()})};
   app.querySelectorAll('#bdEar button').forEach(x=>x.onclick=()=>{st.ear=x.dataset.v;sync()});
-  [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair'],['#bdSnout','snout'],['#bdFace','face'],['#bdEyes','eyes']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.onclick=()=>{st[k]=x.dataset.v;sync()}));
+  [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair'],['#bdSnout','snout'],['#bdFace','face'],['#bdEyes','eyes']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.onclick=()=>{st[k]=x.dataset.v;if(k==='snout')st.snN=undefined;sync()}));
   app.querySelectorAll('#bdMarks [data-m]').forEach(x=>x.onclick=()=>{st[x.dataset.m]=!st[x.dataset.m];sync()});
   app.querySelectorAll('#bdSp button').forEach(x=>x.onclick=()=>{st.sp=x.dataset.v;if(st.pat==='calico'&&st.sp!=='cat')st.pat='solid';sync()});
   app.querySelectorAll('#bdCoat button').forEach(x=>x.onclick=()=>{st.coat=x.dataset.v;sync()});
   app.querySelectorAll('#bdPat button').forEach(x=>x.onclick=()=>{st.pat=x.dataset.v;sync()});
-  app.querySelectorAll('[data-src]').forEach(x=>x.onclick=()=>{const p=pets.find(z=>z.id===x.dataset.src);if(!p)return;const g=bdGuess(p.colour,p.species);st.sp=p.species==='cat'?'cat':'dog';st.coat=g.coat;st.cc=null;st.pat=g.pat==='calico'&&st.sp!=='cat'?'spots':g.pat;st.src=p.id;st.ref=null;
+  app.querySelectorAll('[data-src]').forEach(x=>x.onclick=()=>{const p=pets.find(z=>z.id===x.dataset.src);if(!p)return;const g=bdGuess(p.colour,p.species);st.sp=p.species==='cat'?'cat':'dog';st.coat=g.coat;st.cc=null;st.pat=g.pat==='calico'&&st.sp!=='cat'?'spots':g.pat;st.src=p.id;st.ref=null;st.snN=undefined;st.iris=null;st.noseC=null;st.maskC=null;
     if(!$('#bdNm').value.trim()||!cur){$('#bdNm').value=p.name;st.name=p.name}const ps=phs();if(ps.length)useRef(ps[0]);else sync()});
   $('#bdNm').oninput=()=>{st.name=$('#bdNm').value.trim()};
+  $('#bdAlignBtn').onclick=async()=>{const u=st.ref||phs()[0];if(!u)return;const r=await bdAlign(u,st.sp);if(!r)return;
+    st.cc=r.cc;st.coat='custom';st.iris=r.iris||null;st.noseC=r.noseC||null;st.brow=r.brow;
+    if(st.sp!=='cat'){st.snN=r.snN;st.snout=r.snN<=-4?'short':r.snN>=5?'long':'mid';st.mask=r.mask;st.maskC=r.maskC||null}
+    $('#bdRefMsg').textContent='✓ 已照照片調好：毛色分區、嘴巴長短、眼睛和鼻子顏色'+(r.mask?'、黑嘴':'')+(r.brow?'、眉點':'');sync();toast('✅ 已照照片調整，看看像不像')};
   sync();
   $('#bdGo').onclick=()=>{const name=$('#bdNm').value.trim().slice(0,12);if(!name){toast('幫牠取個名字吧');$('#bdNm').focus();return}
-    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,build:st.build,tail:st.tail,hair:st.hair,snout:st.snout,face:st.face,eyes:st.eyes,brow:st.brow,mask:st.sp==='dog'&&st.mask,bib:st.bib,socks:st.socks,src:st.src,ref:st.ref,look:'draw',photo:null};
+    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,build:st.build,tail:st.tail,hair:st.hair,snout:st.snout,snN:st.snN,iris:st.iris,noseC:st.noseC,maskC:st.mask?st.maskC:null,face:st.face,eyes:st.eyes,brow:st.brow,mask:st.sp==='dog'&&st.mask,bib:st.bib,socks:st.socks,src:st.src,ref:st.ref,look:'draw',photo:null};
     const b=cur?{...cur,...look}:{v:1,...look,born:bdToday(),s:{f:70,m:80,c:95,e:85},t:now,aff:0,tr:3,dd:bdToday(),ls:bdToday(),streak:1,dc:{},nt:true};
     __bd=b;__bdUid=me().id;bdSave(true);__bdGreeted=false;toast(cur?'✅ 外型已更新':`🎉 ${name}來到你家了！送你 3 個點心`);if((location.hash||'')==='#/buddy')route();else goReplace('#/buddy')}}
 
