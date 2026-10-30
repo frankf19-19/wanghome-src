@@ -1903,6 +1903,66 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .bd-man>summary{cursor:pointer;font-weight:700;list-style:none}.bd-man>summary::-webkit-details-marker{display:none}.bd-man>summary::after{content:' ›';opacity:.6}.bd-man[open]>summary::after{content:' ⌄'}
 :root[data-theme=dark] .bd-ai-cta{background:linear-gradient(135deg,#4A3220,#4A2638)}:root[data-theme=dark] .bd-ai-mini{color:#FDBA74}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .bd-ai-cta{background:linear-gradient(135deg,#4A3220,#4A2638)}:root:not([data-theme=light]) .bd-ai-mini{color:#FDBA74}}
+/* 毛孩相簿＋回顧 */
+.alb-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.alb-grid.sm{grid-template-columns:repeat(4,1fr)}
+@media (min-width:700px){.alb-grid{grid-template-columns:repeat(6,1fr)}}
+.alb-cell{position:relative;display:block;aspect-ratio:1;border:0;padding:0;border-radius:12px;background:#F3E3EA center/cover no-repeat;cursor:pointer;overflow:hidden}
+.alb-fav{position:absolute;right:4px;bottom:2px;font-style:normal;font-size:14px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.alb-add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--sheet,#fff);border:2px dashed var(--line,#E8D3DC);color:var(--ink-3,#8a6f7a);font-size:22px;font-weight:700}
+.alb-add span{font-size:12px}
+.alb-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.alb-head h1{margin:0;flex:1}
+.alb-month{display:flex;align-items:baseline;gap:8px;margin:20px 0 8px}.alb-month small{font-weight:500;color:var(--ink-3,#8a6f7a)}
+.alb-recap{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#FFE8D6,#FFD6E7);color:#3A2730;text-decoration:none;box-shadow:0 6px 18px rgba(214,90,140,.16)}
+.alb-recap.home{margin:0 0 14px}
+.alb-rc-ic{font-size:30px;flex:none}.alb-rc-t{flex:1;min-width:0}.alb-rc-t b{display:block;font-size:16px}.alb-rc-t small{display:block;color:#7A5B66;margin-top:2px}
+.alb-rc-t em{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#E0457B;color:#fff;font-style:normal;font-size:12px;vertical-align:2px}
+.alb-rc-go{flex:none;font-weight:800;color:#C2185B;white-space:nowrap}
+.alb-recaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.alb-rq{display:block;color:inherit;text-decoration:none;background:var(--sheet,#fff);border-radius:16px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.alb-rq-cv{display:block;aspect-ratio:4/5;border-radius:12px;background:#F3E3EA center/cover;margin-bottom:8px}
+.alb-rq b{display:block}.alb-rq small{color:var(--ink-3,#8a6f7a)}
+.alb-empty .big{font-size:40px}
+.alb-up{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:3000;background:#3A2730;color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.alb-lb{display:flex;flex-direction:column;background:rgba(20,12,16,.96)!important}
+.alb-lb-img{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;padding:56px 8px 8px}
+.alb-lb-img img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
+.alb-lb-bar{padding:12px 16px calc(14px + env(safe-area-inset-bottom));color:#fff}
+.alb-lb-meta b{font-size:17px}.alb-lb-meta small{margin-left:8px;opacity:.7}.alb-lb-meta p{margin:4px 0 10px;opacity:.92}.alb-lb-meta .muted{color:rgba(255,255,255,.55)}
+.alb-lb-acts{display:flex;gap:8px;flex-wrap:wrap}.alb-lb-acts .btn{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.2)}
+.alb-nav{position:absolute;top:45%;width:44px;height:64px;border:0;border-radius:12px;background:rgba(255,255,255,.14);color:#fff;font-size:32px;cursor:pointer}.alb-nav.prev{left:8px}.alb-nav.next{right:8px}
+.rc{position:fixed;inset:0;z-index:2500;background:#1E1418;color:#fff;overflow:hidden;user-select:none;-webkit-user-select:none}
+.rc-bars{position:absolute;top:calc(10px + env(safe-area-inset-top));left:10px;right:10px;display:flex;gap:4px;z-index:5}
+.rc-bars i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}.rc-bars b{display:block;height:100%;width:0;background:#fff}
+.rc-x{position:absolute;top:calc(22px + env(safe-area-inset-top));right:12px;z-index:6;width:40px;height:40px;border:0;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;font-size:18px;cursor:pointer}
+.rc-stage{position:absolute;inset:0}
+.rc-s{position:absolute;inset:0;opacity:0;transition:opacity .6s ease;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.rc-s.on{opacity:1;pointer-events:auto}
+.rc-tap{position:absolute;top:70px;bottom:0;width:35%;z-index:4;border:0;background:transparent;cursor:pointer}.rc-tap.prev{left:0}.rc-tap.next{right:0;width:65%}
+.rc.last .rc-tap{display:none}
+.rc-img{position:absolute;inset:0;background:#000 center/cover no-repeat;transform:scale(1.02)}
+.rc-s.on .rc-img{animation:rcKB 4.2s ease-out forwards}
+@keyframes rcKB{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.12) translate(-1.5%,-1.5%)}}
+.rc-cap{position:absolute;left:0;right:0;bottom:0;padding:80px 22px calc(34px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.65));text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.rc-cap b{font-size:20px}.rc-cap p{margin:6px 0 0;font-size:17px;line-height:1.5}
+.rc-cover{background:linear-gradient(160deg,#FFB38A,#F06292 60%,#8E4A9C)}
+.rc-collage{position:absolute;inset:0;display:grid;gap:4px;opacity:.55}
+.rc-collage.n1{grid-template-columns:1fr}.rc-collage.n2{grid-template-columns:1fr 1fr}.rc-collage.n3,.rc-collage.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.rc-collage.n3 span:first-child{grid-row:span 2}
+.rc-collage span{background:center/cover no-repeat}
+.rc-cv-t{position:relative;text-align:center;padding:0 24px;text-shadow:0 2px 14px rgba(80,0,40,.45)}
+.rc-cv-t small{font-size:15px;letter-spacing:.08em;opacity:.95}.rc-cv-t h1{font-size:clamp(34px,10vw,52px);line-height:1.15;margin:10px 0 12px;color:#fff}.rc-cv-t p{font-size:17px;margin:0}
+.rc-s.on .rc-cv-t{animation:rcUp 1s ease-out}
+@keyframes rcUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.rc-stats,.rc-end{background:linear-gradient(160deg,#FFE9DD,#FFD3E3)}
+.rc-card{width:min(88%,460px);background:rgba(255,255,255,.88);color:#3A2730;border-radius:26px;padding:28px 24px;box-shadow:0 18px 50px rgba(160,40,90,.22)}
+.rc-card h2{margin:0 0 16px;font-size:24px}
+.rc-card ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.rc-card li{display:flex;gap:12px;align-items:flex-start;font-size:17px;line-height:1.45}.rc-card li span:first-child{font-size:22px;flex:none}
+.rc-s.on .rc-card li{animation:rcUp .6s ease-out both}.rc-s.on .rc-card li:nth-child(2){animation-delay:.25s}.rc-s.on .rc-card li:nth-child(3){animation-delay:.5s}.rc-s.on .rc-card li:nth-child(4){animation-delay:.75s}.rc-s.on .rc-card li:nth-child(5){animation-delay:1s}.rc-s.on .rc-card li:nth-child(6){animation-delay:1.25s}
+.rc-endc{text-align:center}.rc-heart{font-size:46px;margin-bottom:6px}.rc-endc h2{font-size:26px;line-height:1.35}.rc-endc p{margin:0 0 18px;color:#8A5A6C;font-weight:700}
+.rc-btns{display:grid;gap:8px;position:relative;z-index:6}
+@media (prefers-reduced-motion:reduce){.rc-s.on .rc-img,.rc-s.on .rc-cv-t,.rc-s.on .rc-card li{animation:none}.rc-s{transition:none}}
+:root[data-theme=dark] .alb-cell{background-color:#3A2A30}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1975,7 +2035,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.9.3';
+const BUILD = 'v5.10.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2048,7 +2108,7 @@ if(IS_APP){
   // 點通知：打開那隻毛孩的頁面
   try{const SL=capPlugin('SocialLogin');if(SL&&(CONFIG.GOOGLE_LOGIN||CONFIG.APPLE_LOGIN)){const o={};if(CONFIG.GOOGLE_LOGIN&&CONFIG.GOOGLE_WEB_CLIENT_ID)o.google={webClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,iOSClientId:CONFIG.GOOGLE_IOS_CLIENT_ID||CONFIG.GOOGLE_WEB_CLIENT_ID,iOSServerClientId:CONFIG.GOOGLE_WEB_CLIENT_ID,mode:'online'};if(CONFIG.APPLE_LOGIN)o.apple={};SL.initialize(o).catch(()=>{})}}catch(_){}
   try{const LN=capPlugin('LocalNotifications');if(LN){
-    LN.addListener('localNotificationActionPerformed',e=>{if(e&&e.notification&&e.notification.extra&&e.notification.extra.buddy){location.hash='#/buddy';return}const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
+    LN.addListener('localNotificationActionPerformed',e=>{if(e&&e.notification&&e.notification.extra&&e.notification.extra.buddy){location.hash='#/buddy';return}if(e&&e.notification&&e.notification.extra&&e.notification.extra.recapq){location.hash='#/';return}const p=e&&e.notification&&e.notification.extra&&e.notification.extra.pet;if(p&&/^[0-9a-f-]{36}$/.test(p))location.hash='#/pet/'+p});
     if(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'&&LN.createChannel)LN.createChannel({id:'care',name:'毛孩照護提醒',description:'回診、疫苗、驅蟲、用藥提醒',importance:4,visibility:1}).catch(()=>{});
   }}catch(_){}
   // 連結：站內的 #/ 連結留在 App 裡；網站網址轉成 App 內頁面；其他網站用 App 內瀏覽器開
@@ -2580,6 +2640,8 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})$/)))return renderPetView(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/edit$/)))return renderPet(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/print$/)))return renderPetPrint(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/album$/)))return renderAlbum(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/recap\/(\d{4}-Q[1-4])$/)))return renderRecap(m[1],m[2]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/record\/(new|[0-9a-f-]{36})$/)))return renderRecord(m[1],m[2]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/med\/(new|[0-9a-f-]{36})$/)))return renderMed(m[1],m[2]);
   if(path==='#/health')return renderHealth();
@@ -2778,7 +2840,7 @@ async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
 }
 function bigStartHTML(){return `  <section class="bigstart" aria-label="你需要什麼幫忙">
     ${mineHTML()}
-    ${me()?buddyHomeHTML():`<div class="bs-hero"><div class="bs-txt"><p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}</div><img class="bs-duo" src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>`}
+    ${me()?'<div id="albBanner"></div>':''}${me()?buddyHomeHTML():`<div class="bs-hero"><div class="bs-txt"><p class="bs-hello">嗨<span id="hiName"></span>！<br>今天要<em>幫什麼忙</em>呢？</p>${me()||getMine().length?'':'<p class="bs-sub">全台走失狗貓協尋＋毛孩健康手冊，免註冊就能用。</p>'}</div><img class="bs-duo" src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>`}
     <div class="tiles4">
       <a href="#/new" class="tile4 tp"><span class="te">${ic("megaphone")}</span><b>毛孩走失了</b><small>登記・做協尋海報</small></a>
       <a href="#/seen" class="tile4 tm"><span class="te">${ic("eye")}</span><b>看到／撿到</b><small>拍照回報給飼主</small></a>
@@ -2840,6 +2902,7 @@ ${bigStartHTML()}
   };
   if(qs(location.hash).near)setTimeout(()=>{if(_n!==navId)return;if(!homeState.near&&$('#btnNear'))$('#btnNear').click()},80);
   try{buddyHomeBind()}catch(_){}
+  try{albHomeBanner().catch(()=>{})}catch(_){}
   if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   // 手機首頁看不到完整名單（在「協尋」分頁），不用先下載；電腦版和協尋分頁才載入
@@ -6060,6 +6123,165 @@ function dueTag(r){if(!r.next_due||r.done)return '';const days=Math.round((new D
 async function listAllFiles(bucket,prefix){const out=[];const walk=async(p,depth)=>{if(depth>4)return;let off=0;for(;;){const {data,error}=await sb.storage.from(bucket).list(p,{limit:1000,offset:off});if(error||!data)break;for(const x of data){const full=(p?p+'/':'')+x.name;if(x.id)out.push(full);else await walk(full,depth+1)}if(data.length<1000)break;off+=1000}};await walk(prefix,0);return out}
 async function removeAllFiles(bucket,paths){for(let i=0;i<paths.length;i+=100){await sb.storage.from(bucket).remove(paths.slice(i,i+100)).catch(()=>{})}}
 async function uploadPrivate(file,petId){__uploading++;try{return await uploadPrivate_(file,petId)}finally{__uploading--}}
+// ── 毛孩相簿＋每三個月的回顧相簿（照片放私密空間，只有自己看得到） ──
+const ALB_Q=[['新年到春天','1～3 月'],['春末到初夏','4～6 月'],['夏天','7～9 月'],['秋天到冬天','10～12 月']];
+function albDay(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+function albQKey(date){return date.slice(0,4)+'-Q'+Math.ceil(+date.slice(5,7)/3)}
+function albQInfo(k){const y=+k.slice(0,4),q=+k.slice(6);const x=ALB_Q[q-1]||ALB_Q[0];const sm=(q-1)*3+1;return {y,q,name:x[0],range:x[1],title:`${y} 年${x[0]}`,start:`${y}-${String(sm).padStart(2,'0')}-01`,end:q===4?`${y+1}-01-01`:`${y}-${String(sm+3).padStart(2,'0')}-01`}}
+function albQEnded(k){return todayStr()>=albQInfo(k).end}
+function albPrevQ(){const t=todayStr();const k=albQKey(t);const y=+k.slice(0,4),q=+k.slice(6);return q===1?`${y-1}-Q4`:`${y}-Q${q-1}`}
+function albThumb(p){return p.replace(/\.jpg$/,'_t.jpg')}
+function albSeenKey(petId,k){return 'wh_recap_'+petId+'_'+k}
+function albSeen(petId,k){try{return !!localStorage.getItem(albSeenKey(petId,k))}catch(_){return false}}
+function albMD(d){return `${+d.slice(5,7)} 月 ${+d.slice(8,10)} 日`}
+async function albFetch(petId){const {data,error}=await sb.from('pet_photos').select('id,path,taken_on,caption,fav,created_at').eq('pet_id',petId).order('taken_on',{ascending:false}).order('created_at',{ascending:false}).limit(600);if(error)throw error;return data||[]}
+function albQuarters(ph){const m={};ph.forEach(x=>{const k=albQKey(x.taken_on);(m[k]=m[k]||[]).push(x)});return Object.entries(m).sort((a,b)=>b[0].localeCompare(a[0]))}
+async function albPhotoDate(file){try{await loadScript(LIB.exif);if(window.exifr){const d=await exifr.parse(file,['DateTimeOriginal','CreateDate']);const t=d&&(d.DateTimeOriginal||d.CreateDate);if(t instanceof Date&&!isNaN(t)&&t.getTime()<=Date.now()+864e5&&t.getFullYear()>=1990)return albDay(t)}}catch(_){}
+  if(file.lastModified&&file.lastModified<=Date.now()+864e5&&file.lastModified>Date.UTC(1990,0,1))return albDay(new Date(file.lastModified));return todayStr()}
+async function albAddFiles(petId,files,onProg){const uid=me()?.id;if(!uid)throw new Error('請先登入');let ok=0,bad=0;
+  for(let i=0;i<files.length;i++){const f=files[i];onProg&&onProg(i,files.length);
+    try{if(!/^image\//.test(f.type||'image/'))throw 0;const [blob,thumb,day]=await Promise.all([compressImage(f,1600,.84),compressImage(f,480,.74),albPhotoDate(f)]);
+      const path=`${uid}/${petId}/album/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+      const {error:e1}=await sb.storage.from('pet-private').upload(path,blob,{contentType:'image/jpeg'});if(e1)throw e1;
+      await sb.storage.from('pet-private').upload(albThumb(path),thumb,{contentType:'image/jpeg'}).catch(()=>{});
+      const {error:e2}=await sb.from('pet_photos').insert({pet_id:petId,path,taken_on:day});if(e2){sb.storage.from('pet-private').remove([path,albThumb(path)]).catch(()=>{});throw e2}
+      ok++}catch(e){bad++;if(e&&e.message&&/滿了/.test(e.message)){toast(friendlyErr(e.message),5000);break}}}
+  onProg&&onProg(files.length,files.length);albNotify();return {ok,bad}}
+function albPicker(petId,done){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;inp.style.display='none';document.body.appendChild(inp);
+  inp.onchange=async()=>{const fs=[...inp.files].slice(0,30);inp.remove();if(!fs.length)return;if(inp.files.length>30)toast('一次最多 30 張，先加前 30 張',3500);
+    const t=document.createElement('div');t.className='alb-up';t.setAttribute('role','status');document.body.appendChild(t);
+    const r=await albAddFiles(petId,fs,(i,n)=>{t.textContent=i<n?`正在放進相簿…（${i+1}/${n}）`:'完成！'}).catch(e=>({ok:0,bad:fs.length,err:e}));setTimeout(()=>t.remove(),600);
+    if(r.ok)toast(`📷 已加入 ${r.ok} 張照片`+(r.bad?`（${r.bad} 張沒成功）`:''),3000);else toast('照片沒有加進去，請檢查網路再試一次',4000);done&&done()};
+  inp.click()}
+// 每一季結束的隔天早上 10 點提醒（App）
+async function albNotify(){if(!IS_APP)return;const LN=capPlugin('LocalNotifications');if(!LN)return;const ID=990200;
+  try{const p=await LN.checkPermissions();if(p.display!=='granted')return}catch(_){return}
+  try{await LN.cancel({notifications:[{id:ID}]})}catch(_){}
+  const end=albQInfo(albQKey(todayStr())).end;const [y,m,d]=end.split('-').map(Number);const at=new Date(y,m-1,d,10,0,0);const k=albQKey(todayStr());
+  try{await LN.schedule({notifications:[{id:ID,title:'🎞️ 這一季的回顧相簿做好了',body:`你和毛孩的${albQInfo(k).name}，三個月的甜蜜時光都在這裡`,schedule:{at,allowWhileIdle:true},extra:{recapq:k}}]})}catch(_){}}
+
+// 寵物頁上的相簿區塊
+async function albSection(box,pet){const _n=navId;let ph=[];try{ph=await albFetch(pet.id)}catch(_){if(navId===_n&&box.isConnected)box.innerHTML='';return}
+  if(navId!==_n||!box.isConnected)return;
+  const qs_=albQuarters(ph).filter(([,l])=>l.length>=3);const rq=qs_[0];
+  const shown=ph.slice(0,7);const urls=await signedUrls(shown.map(x=>albThumb(x.path))).catch(()=>({}));if(navId!==_n||!box.isConnected)return;
+  const isNew=rq&&albQEnded(rq[0])&&!albSeen(pet.id,rq[0]);
+  box.innerHTML=`<h2>📷 ${esc(pet.name)}的相簿 ${ph.length?`<a class="btn sm ghost" href="#/pet/${pet.id}/album" style="margin-left:auto">看全部 ${ph.length} 張</a>`:''}</h2>
+    ${rq?`<a class="alb-recap ${isNew?'new':''}" href="#/pet/${pet.id}/recap/${rq[0]}"><span class="alb-rc-ic">🎞️</span><span class="alb-rc-t"><b>${esc(pet.name)}的 ${esc(albQInfo(rq[0]).title)}回顧${isNew?'<em>新</em>':''}</b><small>${rq[1].length} 張照片・${albQInfo(rq[0]).range}${albQEnded(rq[0])?'':'・到目前為止'}</small></span><span class="alb-rc-go">播放 ›</span></a>`:''}
+    ${ph.length?`<div class="alb-grid sm">${shown.map(x=>`<a href="#/pet/${pet.id}/album?p=${x.id}" class="alb-cell" style="background-image:url('${esc(safeU(urls[albThumb(x.path)]||''))}')" aria-label="${esc(albMD(x.taken_on))}的照片">${x.fav?'<i class="alb-fav">❤️</i>':''}</a>`).join('')}<button type="button" class="alb-cell alb-add" id="albAdd">＋<span>加照片</span></button></div>
+      <p class="small muted" style="margin:8px 2px 0">${ph.length<3?'再多拍幾張，':''}每三個月會幫你做一本回顧相簿。</p>`
+    :`<div class="empty-card alb-empty"><div class="big">📷</div><b>幫${esc(pet.name)}留下每一天的樣子</b><p class="small">照片只有你自己看得到。每三個月，會把這段時間的照片做成一本回顧相簿，可以一張一張慢慢看，也能分享給家人。</p><div class="btns"><button type="button" class="btn" id="albAdd">＋ 加第一張照片</button></div></div>`}`;
+  $('#albAdd').onclick=()=>albPicker(pet.id,()=>{if(navId===_n&&box.isConnected)albSection(box,pet)})}
+
+// 全部照片
+async function renderAlbum(petId){const _n=navId;if(!requireLogin())return;
+  app.innerHTML=pageSkel('pet');
+  const [{data:pet},phR]=await Promise.all([sb.from('pets').select('id,name,species').eq('id',petId).maybeSingle(),albFetch(petId).then(v=>({v}),e=>({e}))]);
+  if(_n!==navId)return;if(!pet){app.innerHTML='<div class="empty">找不到這隻毛孩<br><a href="#/health">回健康手冊</a></div>';return}
+  if(phR.e){app.innerHTML=netErrHTML();return}
+  const ph=phR.v;setTitle(pet.name+'的相簿');
+  const urls=await signedUrls(ph.map(x=>albThumb(x.path))).catch(()=>({}));if(_n!==navId)return;
+  const byM={};ph.forEach(x=>{const k=x.taken_on.slice(0,7);(byM[k]=byM[k]||[]).push(x)});
+  const qs_=albQuarters(ph).filter(([,l])=>l.length>=3);
+  app.innerHTML=`<p class="small"><a class="backlink" href="#/pet/${petId}">‹ 回${esc(pet.name)}</a></p>
+    <div class="alb-head"><h1>📷 ${esc(pet.name)}的相簿</h1><button type="button" class="btn" id="albAdd2">＋ 加照片</button></div>
+    ${qs_.length?`<h2>🎞️ 回顧相簿</h2><div class="alb-recaps">${qs_.map(([k,l])=>{const i=albQInfo(k);return `<a class="alb-rq" href="#/pet/${petId}/recap/${k}"><span class="alb-rq-cv" style="background-image:url('${esc(safeU(urls[albThumb((l.find(x=>x.fav)||l[0]).path)]||''))}')"></span><b>${esc(i.title)}</b><small>${l.length} 張・${i.range}${albQEnded(k)?'':'・進行中'}</small></a>`}).join('')}</div>`:''}
+    ${ph.length?Object.entries(byM).map(([m,l])=>`<h3 class="alb-month">${+m.slice(0,4)} 年 ${+m.slice(5)} 月 <small>${l.length} 張</small></h3><div class="alb-grid">${l.map(x=>`<button type="button" class="alb-cell" data-ph="${x.id}" style="background-image:url('${esc(safeU(urls[albThumb(x.path)]||''))}')" aria-label="${esc(albMD(x.taken_on))}的照片${x.caption?'：'+esc(x.caption):''}">${x.fav?'<i class="alb-fav">❤️</i>':''}</button>`).join('')}</div>`).join('')
+      :`<div class="empty-card alb-empty"><div class="big">📷</div><b>相簿還是空的</b><p class="small">按「加照片」，可以一次選很多張。會自動照拍照日期排好。</p></div>`}
+    <p class="small muted" style="margin-top:18px">照片只有你自己看得到。刪除這隻毛孩的檔案時，相簿也會一起刪除。</p>`;
+  $('#albAdd2').onclick=()=>albPicker(petId,()=>{if(_n===navId)route()});
+  app.querySelectorAll('[data-ph]').forEach(b=>b.onclick=()=>albView(pet,ph,ph.findIndex(x=>x.id===b.dataset.ph)));
+  const open=qs(location.hash).p;if(open){const i=ph.findIndex(x=>x.id===open);if(i>=0)albView(pet,ph,i)}}
+
+// 看單張：左右滑、寫一句話、最愛、刪除
+function albView(pet,ph,i){if(i<0)return;const d=document.createElement('div');d.className='lightbox alb-lb';let cur=i;
+  const draw=async()=>{const x=ph[cur];d.innerHTML=`<button type="button" class="lb-x" aria-label="關閉">✕</button>
+    <div class="alb-lb-img"><img alt="${esc(albMD(x.taken_on))}的照片"></div>
+    <div class="alb-lb-bar"><div class="alb-lb-meta"><b>${esc(albMD(x.taken_on))}</b>${x.taken_on.slice(0,4)!==String(new Date().getFullYear())?`<small>${x.taken_on.slice(0,4)} 年</small>`:''}<p>${x.caption?esc(x.caption):'<span class="muted">還沒寫下這天的事</span>'}</p></div>
+      <div class="alb-lb-acts"><button type="button" class="btn sm ghost" data-a="fav" aria-pressed="${x.fav}">${x.fav?'❤️ 最愛':'🤍 設為最愛'}</button><button type="button" class="btn sm ghost" data-a="cap">✏️ 寫一句話</button><button type="button" class="btn sm ghost danger" data-a="del">${ic('trash')} 刪除</button></div></div>
+    ${cur>0?'<button type="button" class="alb-nav prev" data-a="prev" aria-label="上一張">‹</button>':''}${cur<ph.length-1?'<button type="button" class="alb-nav next" data-a="next" aria-label="下一張">›</button>':''}`;
+    const m=await signedUrls([x.path]).catch(()=>({}));const im=d.querySelector('img');if(im&&ph[cur]===x)im.src=m[x.path]||''};
+  d.onclick=async e=>{const b=e.target.closest('[data-a],.lb-x');if(!b){if(e.target===d)closeOverlay(d);return}e.stopPropagation();if(b.classList.contains('lb-x'))return closeOverlay(d);const x=ph[cur],a=b.dataset.a;
+    if(a==='prev'){cur--;draw()}else if(a==='next'){cur++;draw()}
+    else if(a==='fav'){x.fav=!x.fav;draw();const {error}=await sb.from('pet_photos').update({fav:x.fav}).eq('id',x.id);if(error){x.fav=!x.fav;draw();toast('沒有儲存成功，請再試一次')}}
+    else if(a==='cap'){const v=await albAsk(x.caption||'');if(v===null)return;const t=v.trim().slice(0,80);const {error}=await sb.from('pet_photos').update({caption:t||null}).eq('id',x.id);if(error)return toast('沒有儲存成功：'+friendlyErr(error.message));x.caption=t||null;draw()}
+    else if(a==='del'){if(!await askSheet({title:'刪除這張照片？',body:'刪除後無法復原。',ok:'刪除照片',danger:true}))return;const {error}=await sb.from('pet_photos').delete().eq('id',x.id);if(error)return toast('刪除失敗：'+friendlyErr(error.message));sb.storage.from('pet-private').remove([x.path,albThumb(x.path)]).catch(()=>{});ph.splice(cur,1);closeOverlay(d);toast('已刪除');setTimeout(()=>{if(/\/album/.test(location.hash))route()},450)}};
+  let sx=null;d.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});d.addEventListener('touchend',e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)<50)return;if(dx<0&&cur<ph.length-1){cur++;draw()}else if(dx>0&&cur>0){cur--;draw()}},{passive:true});
+  draw();openOverlay(d)}
+function albAsk(v){return new Promise(res=>{const d=document.createElement('div');d.className='lightbox sheet-bg';d.innerHTML=`<div class="sheet ask" role="dialog" aria-label="寫下這天的事"><div class="grab" aria-hidden="true"></div><p class="sh-t">寫下這天的事</p><input type="text" id="albCap" maxlength="80" placeholder="例：第一次去海邊，玩到不想回家" value="${esc(v)}" style="width:100%"><button type="button" class="btn big block" data-v="1" style="margin-top:12px">儲存</button><button type="button" class="btn big block ghost" data-v="0" style="margin-top:8px">取消</button></div>`;
+  let done=false;const inp=()=>d.querySelector('#albCap');const fin=ok=>{if(done)return;done=true;const val=inp().value;d.remove();res(ok?val:null)};
+  d.onclick=e=>{const b=e.target.closest('[data-v]');if(b)fin(b.dataset.v==='1');else if(e.target===d)fin(false)};
+  d.style.zIndex='3100';document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add('show'));setTimeout(()=>{const i=inp();if(i){i.focus();i.onkeydown=e=>{if(e.key==='Enter')fin(true)}}},120)})}
+// 回顧相簿：像限時動態一樣一張一張播放
+async function renderRecap(petId,k){const _n=navId;if(!requireLogin())return;app.innerHTML=pageSkel('pet');
+  const info=albQInfo(k);
+  const [{data:pet},{data:ph,error},{data:recs}]=await Promise.all([sb.from('pets').select('id,name,species,birthday').eq('id',petId).maybeSingle(),
+    sb.from('pet_photos').select('id,path,taken_on,caption,fav').eq('pet_id',petId).gte('taken_on',info.start).lt('taken_on',info.end).order('taken_on').order('created_at'),
+    sb.from('pet_records').select('kind,date,weight_kg').eq('pet_id',petId).gte('date',info.start).lt('date',info.end).order('date')]);
+  if(_n!==navId)return;if(error){app.innerHTML=netErrHTML();return}if(!pet){app.innerHTML='<div class="empty">找不到這隻毛孩</div>';return}
+  const all=ph||[];if(all.length<1){app.innerHTML=`<div class="empty">這三個月還沒有照片<br><a href="#/pet/${petId}/album">去相簿加照片</a></div>`;return}
+  setTitle(`${pet.name}的${info.title}`);
+  // 挑最多 12 張：最愛優先，其餘平均分布在三個月裡
+  let pick=all.filter(x=>x.fav).slice(0,12);const rest=all.filter(x=>!x.fav);const need=12-pick.length;
+  if(need>0&&rest.length){const step=rest.length/Math.min(need,rest.length);for(let i=0;i<Math.min(need,rest.length);i++)pick.push(rest[Math.floor(i*step)])}
+  pick=[...new Set(pick)].sort((a,b)=>a.taken_on.localeCompare(b.taken_on));
+  const urls=await signedUrls([...new Set(pick.map(x=>x.path))]).catch(()=>({}));if(_n!==navId)return;
+  const days={};all.forEach(x=>days[x.taken_on]=(days[x.taken_on]||0)+1);const topDay=Object.entries(days).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0];
+  const ws=(recs||[]).filter(r=>r.weight_kg);const vets=(recs||[]).filter(r=>r.kind==='vet').length,vacs=(recs||[]).filter(r=>r.kind==='vaccine').length;
+  const stats=[[`📷`,`拍了 <b>${all.length}</b> 張照片`],[`🗓️`,`最常拍照的一天：<b>${albMD(topDay[0])}</b>${topDay[1]>1?`（${topDay[1]} 張）`:''}`],
+    ...(ws.length>=2?[[`⚖️`,`體重從 <b>${ws[0].weight_kg}</b> 到 <b>${ws[ws.length-1].weight_kg}</b> 公斤`]]:ws.length?[[`⚖️`,`體重 <b>${ws[0].weight_kg}</b> 公斤`]]:[]),
+    ...(vets?[[`🩺`,`看了 <b>${vets}</b> 次獸醫，辛苦了`]]:[]),...(vacs?[[`💉`,`打了 <b>${vacs}</b> 劑疫苗，好勇敢`]]:[]),
+    ...(all.filter(x=>x.caption).length?[[`✏️`,`寫下了 <b>${all.filter(x=>x.caption).length}</b> 段回憶`]]:[])];
+  const cat=pet.species==='cat';const S=[{t:'cover'},...pick.map(x=>({t:'ph',x})),{t:'stats'},{t:'end'}];
+  const cov=pick.slice(0,4);
+  app.innerHTML=`<div class="rc" id="rc"><div class="rc-bars">${S.map(()=>'<i><b></b></i>').join('')}</div>
+    <button type="button" class="rc-x" aria-label="關閉回顧">✕</button>
+    <div class="rc-stage" id="rcStage">${S.map((s,i)=>`<section class="rc-s rc-${s.t}" data-i="${i}" aria-hidden="true">${
+      s.t==='cover'?`<div class="rc-collage n${cov.length}">${cov.map(x=>`<span style="background-image:url('${esc(safeU(urls[x.path]||''))}')"></span>`).join('')}</div><div class="rc-cv-t"><small>${esc(info.range)}・${info.y}</small><h1>${esc(pet.name)}的<br>${esc(info.name)}</h1><p>這三個月，我們一起留下了 ${all.length} 個瞬間</p></div>`
+      :s.t==='ph'?`<div class="rc-img" style="background-image:url('${esc(safeU(urls[s.x.path]||''))}')"></div><div class="rc-cap"><b>${esc(albMD(s.x.taken_on))}</b>${s.x.caption?`<p>${esc(s.x.caption)}</p>`:''}</div>`
+      :s.t==='stats'?`<div class="rc-card"><h2>這三個月的${esc(pet.name)}</h2><ul>${stats.map(([e,t])=>`<li><span>${e}</span><span>${t}</span></li>`).join('')}</ul></div>`
+      :`<div class="rc-card rc-endc"><div class="rc-heart">${cat?'🐱':'🐶'}❤️</div><h2>謝謝你，<br>每天都陪著我。</h2><p>— ${esc(pet.name)}</p><div class="rc-btns"><button type="button" class="btn" id="rcShare">${ic('share')} 做成一張圖分享</button><button type="button" class="btn ghost" id="rcAgain">再看一次</button><a class="btn ghost" href="#/pet/${petId}/album">回相簿</a></div></div>`
+    }</section>`).join('')}</div>
+    <button type="button" class="rc-tap prev" aria-label="上一頁"></button><button type="button" class="rc-tap next" aria-label="下一頁"></button></div>`;
+  try{localStorage.setItem(albSeenKey(petId,k),'1')}catch(_){}
+  const rc=$('#rc'),secs=[...rc.querySelectorAll('.rc-s')],bars=[...rc.querySelectorAll('.rc-bars b')];let i=0,t0=0,el=0,paused=false,raf=0;const DUR=i=>S[i].t==='end'?1e12:S[i].t==='stats'?6000:S[i].t==='cover'?4500:3800;
+  const show=n=>{i=Math.max(0,Math.min(S.length-1,n));secs.forEach((s,j)=>{s.classList.toggle('on',j===i);s.setAttribute('aria-hidden',j!==i)});bars.forEach((b,j)=>b.style.width=j<i?'100%':'0%');rc.classList.toggle('last',i===S.length-1);el=0;t0=performance.now()};
+  const loop=now=>{if(navId!==_n||!rc.isConnected)return;if(!paused){el+=now-t0;const d=DUR(i);bars[i].style.width=Math.min(100,el/d*100)+'%';if(el>=d&&i<S.length-1)show(i+1)}t0=now;raf=requestAnimationFrame(loop)};
+  show(0);raf=requestAnimationFrame(loop);
+  rc.querySelector('.rc-tap.next').onclick=()=>show(i+1);rc.querySelector('.rc-tap.prev').onclick=()=>show(i-1);
+  rc.querySelector('.rc-x').onclick=()=>{cancelAnimationFrame(raf);goReplace('#/pet/'+petId+'/album')};
+  const hold=v=>()=>{paused=v};rc.addEventListener('pointerdown',e=>{if(!e.target.closest('button,a'))paused=true});['pointerup','pointercancel','pointerleave'].forEach(t=>rc.addEventListener(t,hold(false)));
+  document.addEventListener('keydown',function kd(e){if(!rc.isConnected){document.removeEventListener('keydown',kd);return}if(e.key==='ArrowRight')show(i+1);if(e.key==='ArrowLeft')show(i-1);if(e.key===' '){paused=!paused;e.preventDefault()}});
+  $('#rcAgain').onclick=()=>show(0);
+  $('#rcShare').onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{await albShareCollage(pet,info,pick,urls,all.length)}catch(err){toast('做圖失敗：'+(err.message||err),4000)}finally{b.disabled=false}}}
+
+// 分享：做成一張 1080×1350 的拼貼圖
+async function albShareCollage(pet,info,pick,urls,total){const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#FFF1E6');g.addColorStop(1,'#FFE1EC');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const F='"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif';
+  x.fillStyle='#B8336A';x.font=`700 34px ${F}`;x.textAlign='center';x.fillText(`${info.range}・${info.y}`,W/2,96);
+  x.fillStyle='#3A2730';x.font=`900 68px ${F}`;x.fillText(`${pet.name}的${info.name}`,W/2,180);
+  const ps=pick.length>=9?pick.filter((_,i)=>i%Math.max(1,Math.floor(pick.length/9))===0).slice(0,9):pick.slice(0,pick.length>=6?6:pick.length>=4?4:pick.length);
+  const n=ps.length,cols=n>=9||n===6?3:n>=2?2:1,rows=Math.ceil(n/cols),gap=16,top=230,bottom=H-150,cw=(W-80-gap*(cols-1))/cols,ch=Math.min(cw,(bottom-top-gap*(rows-1))/rows);
+  const load=u=>new Promise((ok,no)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=()=>no(new Error('照片讀不到'));im.src=u});
+  const ims=await Promise.all(ps.map(p=>load(urls[p.path]).catch(()=>null)));
+  const gh=rows*ch+gap*(rows-1),y0=top+(bottom-top-gh)/2;
+  ims.forEach((im,i)=>{const cx=40+(i%cols)*(cw+gap),cy=y0+Math.floor(i/cols)*(ch+gap);x.save();x.beginPath();x.roundRect?x.roundRect(cx,cy,cw,ch,24):x.rect(cx,cy,cw,ch);x.clip();
+    if(im){const s=Math.max(cw/im.width,ch/im.height),iw=im.width*s,ih=im.height*s;x.drawImage(im,cx+(cw-iw)/2,cy+(ch-ih)/2,iw,ih)}else{x.fillStyle='#F3D9E2';x.fillRect(cx,cy,cw,ch)}x.restore()});
+  x.fillStyle='#6B4E58';x.font=`600 34px ${F}`;x.fillText(`這三個月，一起留下了 ${total} 個瞬間 ❤️`,W/2,H-82);
+  x.fillStyle='#B08A97';x.font=`500 26px ${F}`;x.fillText('汪喵回家・毛孩相簿',W/2,H-36);
+  let data;try{data=c.toDataURL('image/jpeg',.9)}catch(_){throw new Error('照片無法放進圖片')}
+  const fname=`${pet.name}-${info.y}-${info.q}季回顧.jpg`,title=`${pet.name}的${info.title}`;
+  if(IS_APP){if(await appShareFile(data.split(',')[1],fname,title,title))return}
+  try{const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));const file=new File([blob],fname,{type:'image/jpeg'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title});return}}catch(e){if(e&&e.name==='AbortError')return}
+  const a=document.createElement('a');a.download=fname;a.href=data;document.body.appendChild(a);a.click();a.remove();toast('已下載圖片')}
+
+// 首頁：上一季的回顧做好了（季結束後 45 天內、還沒看過才出現）
+async function albHomeBanner(){const box=$('#albBanner');if(!box||!me())return;const _n=navId;const k=albPrevQ(),i=albQInfo(k);if(lnDiffDays(i.end,todayStr())>45)return;
+  const {data}=await sb.from('pet_photos').select('pet_id').gte('taken_on',i.start).lt('taken_on',i.end).limit(600);if(navId!==_n||!box.isConnected||!data)return;
+  const cnt={};data.forEach(x=>cnt[x.pet_id]=(cnt[x.pet_id]||0)+1);const pid=Object.keys(cnt).find(p=>cnt[p]>=3&&!albSeen(p,k));if(!pid)return;
+  const {data:pet}=await sb.from('pets').select('id,name').eq('id',pid).maybeSingle();if(!pet||navId!==_n||!box.isConnected)return;
+  box.innerHTML=`<a class="alb-recap new home" href="#/pet/${pet.id}/recap/${k}"><span class="alb-rc-ic">🎞️</span><span class="alb-rc-t"><b>${esc(pet.name)}的 ${esc(i.title)}回顧做好了<em>新</em></b><small>${cnt[pid]} 張照片，三個月的甜蜜時光</small></span><span class="alb-rc-go">看看 ›</span></a>`}
 async function uploadPrivate_(file,petId){const blob=await compressImage(file);const path=`${me().id}/${petId}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;const {error}=await sb.storage.from('pet-private').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;return path}
 async function signedUrls(paths){if(!paths.length)return {};const {data}=await sb.storage.from('pet-private').createSignedUrls(paths,3600);const m={};(data||[]).forEach(x=>{if(x.signedUrl)m[x.path]=x.signedUrl});return m}
 
@@ -6142,6 +6364,7 @@ async function renderPetView(id){const _n=navId;
 
   ${weights.length>=2?`<h2>${ic("scale")} 體重變化</h2><div class="card">${weightChart(weights)}</div>`:''}
 
+  <div id="pvAlbum" class="pv-album"></div>
   <h2>${ic("clipboard")} 健康紀錄</h2>
   <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[e,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${recIc(k)} ${t}</button>`).join('')}</div>
   ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><button type="button" class="trash-btn tl-del" data-del-rec="${r.id}" aria-label="刪除 ${esc(r.title)}">${ic('trash')}<span>刪除</span></button><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
@@ -6151,6 +6374,7 @@ async function renderPetView(id){const _n=navId;
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
+  {const ab=$('#pvAlbum');if(ab)albSection(ab,p)}
   // 垃圾桶：直接刪除用藥／健康紀錄（照片一起刪）
   app.querySelectorAll('[data-del-med]').forEach(b=>b.onclick=async e=>{e.preventDefault();e.stopPropagation();const m=(medsAll||[]).find(z=>z.id===b.dataset.delMed);if(!m)return;
     if(!await askSheet({title:`刪除「${m.name}」？`,body:'給藥紀錄也會一起刪除，無法復原。若只是不吃了，可以點進去改成「停用」。',ok:'刪除',danger:true}))return;
