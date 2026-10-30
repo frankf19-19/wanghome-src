@@ -530,7 +530,7 @@ header{padding-top:env(safe-area-inset-top)}
 @supports (-webkit-touch-callout:none){select.pill,.pill input,.pillbar select{font-size:16px!important}}   /* iOS：小於 16px 的輸入框一點就放大畫面 */
 .health-note{display:none;margin:0 0 10px;color:var(--ink-3)}body[data-space="health"] .health-note{display:block}
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.telrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 6px}.telrow .btn{flex:1 1 160px}
+.telrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 6px}.telrow .btn{flex:1 1 230px;white-space:nowrap}
 .calmenu{position:relative;display:inline-block}
 .calmenu>summary{list-style:none;cursor:pointer}.calmenu>summary::-webkit-details-marker{display:none}
 .calmenu .calpop{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:6px;min-width:180px;box-shadow:0 10px 28px -10px rgba(0,0,0,.35)}
@@ -965,6 +965,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* v3.11.0 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
+.wseg body{word-break:keep-all;overflow-wrap:break-word}   /* 搭配程式在詞與詞之間放的 <wbr>：只在詞的邊界換行 */
 /* 中文不用 balance／pretty（iPhone 會提早斷行、留一大片空白）；按鈕、標籤盡量不在詞中間斷開 */
 body :is(h1,h2,h3,h4,p,li,div,small,span,dd,td,a,label){text-wrap:wrap}
 body :is(button,.btn,.chip,.tag){text-wrap:wrap;word-break:keep-all;overflow-wrap:anywhere}
@@ -1362,7 +1363,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-sec>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);opacity:.5;transition:transform .15s}
 .mg-sec[open]>summary::after{transform:rotate(225deg)}
 .mg-sec>summary .muted,.mg-sec>summary .tag{font-weight:600}
-.mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1.25fr 1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.mg-ai{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:14px 14px 6px;margin:0 0 14px}
+.mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.mg-ai{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:14px 14px 6px;margin:0 0 14px}
 .mg-ai-row{display:flex;align-items:center;gap:12px;padding:10px 2px;border-top:1px solid var(--line);color:inherit!important;text-decoration:none!important;min-height:52px}
 .mg-ai .sa-head+.mg-ai-row{border-top:0;margin-top:4px}
 .mg-ai-row>span:first-child{font-size:22px;flex:none;width:30px;text-align:center;display:grid;place-items:center}.mg-ai-row>span:first-child .ico{width:22px;height:22px;color:var(--red)}.mg-ai-row.warn>span:first-child .ico{color:var(--red-ink)}.sa-spark .ico{width:18px;height:18px;color:var(--red)}
@@ -1697,6 +1698,11 @@ body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green)
 label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.f .pw-wrap input{width:100%;box-sizing:border-box;padding-right:52px}.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;border-radius:12px;cursor:pointer}.pw-eye.on{color:var(--red-ink)}.pw-eye svg{width:20px;height:20px}
 .un-msg{min-height:1.3em;margin:4px 2px 0;color:var(--ink-3)}.un-msg.bad{color:var(--red-ink)}.un-msg.ok{color:#18704F}
 .acct-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.acct-row:last-of-type{border-bottom:0}.acct-row b{flex:none}.acct-row span{text-align:right;overflow-wrap:anywhere}
+.delrow{display:flex;align-items:center;gap:4px}.delrow .sponsor{flex:1;min-width:0}
+.trash-btn{flex:none;width:44px;height:44px;border:0;background:none;border-radius:12px;display:grid;place-items:center;color:var(--ink-3);cursor:pointer}.trash-btn svg{width:20px;height:20px}.trash-btn:hover,.trash-btn:focus-visible{color:var(--red-ink);background:color-mix(in srgb,var(--red-fill) 12%,transparent)}.trash-btn:disabled{opacity:.4}
+.tl-del{position:absolute;top:-8px;right:-6px;z-index:1}.tl>a{padding-right:40px}
+.pv-head .stat{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pv-head .stat b{white-space:nowrap}.pv-head .stat span{display:block;white-space:nowrap}
+.tabs button,.seg button{white-space:nowrap}.adm-tabs{overflow-x:auto;flex-wrap:nowrap!important;scrollbar-width:none}.adm-tabs::-webkit-scrollbar{display:none}.adm-tabs button{flex:none}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1769,7 +1775,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.7.0';
+const BUILD = 'v5.7.1';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1778,6 +1784,27 @@ if(IS_APP)document.documentElement.classList.add('is-app');
    App（Capacitor）：在 App 裡改用原生的分享、拍照、定位、返回鍵、連結開啟。網頁版完全不受影響。
    網站沒有打包工具，原生外掛透過 Capacitor 在 App 裡提供的 window.Capacitor 取用。
    ============================================================ */
+// ── 中文依「詞」換行：用瀏覽器內建斷詞在詞與詞之間放 <wbr>，CSS 用 keep-all 讓字只在詞的邊界斷開
+//    （避免「處／理」「求／助」被拆開、最後一行只剩一個字）。不支援斷詞的舊瀏覽器維持原本的換行。
+const WSEG=(()=>{try{return Intl.Segmenter?new Intl.Segmenter('zh-Hant',{granularity:'word'}):null}catch(_){return null}})();
+const WSEG_CJK=/[㐀-鿿豈-﫿]/,WSEG_OPEN=/[「『（(《〈“‘\[【〔]$/,WSEG_SKIP=new Set(['SCRIPT','STYLE','TEXTAREA','INPUT','SELECT','OPTION','CODE','PRE','TITLE','NOSCRIPT','svg','SVG','WBR']);
+function wsegText(t){let s=t.data;if(!s||s.length<3||!WSEG_CJK.test(s))return;
+  // 數字跟旁邊的中文黏在一起（「打 110。」「24 小時」不會被拆到兩行）
+  {const s2=s.replace(/([\u3400-\u9fff]) (?=[\d$＄][\d,.]{0,7}(?![\d,.]))/g,'$1\u00a0').replace(/([\d,.]{1,8}) (?=[\u3400-\u9fff])/g,'$1\u00a0');if(s2!==s){t.data=s2;s=s2}}const par=t.parentNode;if(!par||par.nodeType!==1||WSEG_SKIP.has(par.nodeName))return;
+  if(par.closest('[data-nowbr],svg,.leaflet-container,[contenteditable="true"]'))return;
+  {const cs=getComputedStyle(par);if(/nowrap|pre/.test(cs.whiteSpace)||cs.textWrapMode==='nowrap')return}   // 不換行的按鈕、標籤：<wbr> 會破壞 nowrap，不加
+  const parts=[];let cur='',last='';
+  for(const g of WSEG.segment(s)){const x=g.segment;if(cur&&g.isWordLike&&!WSEG_OPEN.test(last)&&(WSEG_CJK.test(x)||WSEG_CJK.test(last)))(parts.push(cur),cur='');cur+=x;last=x}
+  parts.push(cur);
+  // 最後一段太短（一兩個字）就跟前一段黏在一起，不讓最後一行只剩一個字
+  if(parts.length>=2&&(parts[parts.length-1].match(/[㐀-鿿]/g)||[]).length<=1){const z=parts.pop();parts[parts.length-1]+=z}
+  if(parts.length<2)return;
+  const f=document.createDocumentFragment();parts.forEach((x,i)=>{if(i)f.appendChild(document.createElement('wbr'));f.appendChild(document.createTextNode(x))});par.replaceChild(f,t)}
+function wsegWalk(root){if(!WSEG||!root)return;if(root.nodeType===3)return wsegText(root);if(root.nodeType!==1||WSEG_SKIP.has(root.nodeName))return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),list=[];let n;while((n=w.nextNode()))list.push(n);list.forEach(wsegText)}
+if(WSEG){document.documentElement.classList.add('wseg');
+  const startWseg=()=>{wsegWalk(document.body);new MutationObserver(ms=>{for(const m of ms)m.addedNodes.forEach(wsegWalk)}).observe(document.body,{childList:true,subtree:true})};
+  if(document.body)startWseg();else document.addEventListener('DOMContentLoaded',startWseg)}
 function capPlugin(n){try{const C=window.Capacitor;return (C&&C.Plugins&&C.Plugins[n])||(C&&C.registerPlugin?C.registerPlugin(n):null)}catch(_){return null}}
 function b64utf8(t){return btoa(unescape(encodeURIComponent(t)))}
 // 把檔案存到 App 暫存區，再叫出系統分享選單（存到相簿、傳 LINE、加到行事曆…）
@@ -2582,7 +2609,7 @@ ${bigStartHTML()}
   <h2 id="listTitle">${ic("search")} ${isListOnly()?'正在協尋的毛孩':'大家正在找的毛孩'}</h2>
   <div class="tabs" id="tabs">
     <button data-t="lost">走失的<span class="cnt" id="cLost">…</span></button>
-    <button data-t="found">有人看到／撿到<span class="cnt" id="cFound">…</span></button>
+    <button data-t="found">看到／撿到<span class="cnt" id="cFound">…</span></button>
     <button data-t="map">${ic("map")} 地圖</button>
   </div>
   <div class="searchbar" id="lostFilters">${ic("search")}<input type="search" id="fQ" aria-label="搜尋走失毛孩" enterkeyhint="search" placeholder="搜名字、品種、地區" value="${esc(homeState.chip||homeState.q)}"></div>
@@ -2623,7 +2650,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
     <ul>
       <li>${ic("clipboard")}<span><b>健康紀錄</b>看診、疫苗、驅蟲、用藥、手術、體重，收據病歷也能拍照存</span></li>
       <li>${ic("calendar")}<span><b>到期提醒</b>${IS_APP?'手機直接跳通知，也能同步到日曆':'寄 Email，也能同步到 iPhone、Google 日曆'}</span></li>
-      <li>${ic("printer")}<span><b>給獸醫看</b>一鍵產生病歷摘要，換醫院不用重講</span></li>
+      <li>${ic("printer")}<span><b>完整健康資料</b>一頁看完病史、用藥和疫苗，看醫生直接給獸醫看</span></li>
       <li>${ic("siren")}<span><b>走失一鍵協尋</b>照片和特徵已建好，按「走失了」就能發出協尋</span></li>
     </ul>
     <div class="promo-btns">${me()?`<a class="btn green" href="#/health">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費開始使用</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">只要 Email 免費註冊，不用密碼</span>`}</div>
@@ -2676,7 +2703,7 @@ function renderHealthLanding(){
   app.innerHTML=`<div class="health-hero art">
     <img class="hh-img" src="duo.svg" alt="" width="220" height="150">
     <div><h1>毛孩健康手冊</h1>
-    <p class="lede">回診、疫苗、驅蟲、體重，全部記在同一個地方。到期前自動提醒，看醫生時一鍵給獸醫看。免費，只有你自己看得到。</p>
+    <p class="lede">回診、疫苗、驅蟲、體重，全部記在同一個地方。到期前自動提醒，看醫生時打開完整健康資料給獸醫看。免費，只有你自己看得到。</p>
     <a class="btn lg green" href="#/pet/new" style="margin-top:6px">免費開始使用</a></div>
   </div>
   ${promoHTML(true)}
@@ -5074,7 +5101,7 @@ async function renderPet(id){const _n=navId;
       <label class="f" style="margin:0"><span><b class="lbl">晶片號碼</b><small class="hint">私密</small></span><input name="chip_no" maxlength="20" inputmode="numeric" value="${esc(p.chip_no||'')}"></label>
       <label class="f" style="margin:0"><span>結紮</span><select name="neutered"><option value="">不確定</option><option value="true" ${p.neutered===true?'selected':''}>已結紮</option><option value="false" ${p.neutered===false?'selected':''}>未結紮</option></select></label>
     </div>
-    <label class="f"><span><b class="lbl">過敏、慢性病與注意事項</b><small class="hint">會印在「給獸醫看」頁</small></span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
+    <label class="f"><span><b class="lbl">過敏、慢性病與注意事項</b><small class="hint">會顯示在「完整健康資料」頁</small></span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
     <div class="submitbar row"><button class="btn" id="btnSave">儲存</button><a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>${id!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDel">${ic('trash')} 刪除這份寵物檔案</button></p>`:''}
   </form>`;
   let species=p.species,photos=(p.photos||[]).slice();const origPh=photos.slice(),freshPh=[];let didSave=false;
@@ -5199,15 +5226,14 @@ async function renderPetView(id){const _n=navId;
       <h1>${spIc(p.species)} ${esc(p.name)}</h1>
       <p class="muted">${esc([p.breed,SEX[p.sex],SIZE[p.size]&&SIZE[p.size]+sp(p.species).unit,p.colour,petAge(p.birthday)].filter(Boolean).join('、'))}</p>${p.birthday?`<p style="margin:4px 0 0">${bdayChip(p.birthday)}</p>`:''}
       <div class="stats" style="margin-top:12px">
-        <div class="stat"><b>${weights.length?weights[weights.length-1].w:'—'}</b>最新體重 kg</div>
-        <div class="stat"><b>${lastVac?agoText(lastVac.date):'—'}</b>上次疫苗</div>
-        <div class="stat"><b>${costYear?costYear.toLocaleString():'0'}</b>${year} 年花費</div>
-        <div class="stat"><b>${rs.length}</b>筆紀錄</div>
+        <div class="stat"><b>${weights.length?weights[weights.length-1].w:'—'}</b><span>體重 kg</span></div>
+        <div class="stat"><b>${lastVac?agoText(lastVac.date):'—'}</b><span>上次疫苗</span></div>
+        <div class="stat"><b>${costYear?costYear.toLocaleString():'0'}</b><span>今年花費</span></div>
+        <div class="stat"><b>${rs.length}</b><span>紀錄筆數</span></div>
       </div>
       <div class="actionbar pv-acts">
         <a class="btn" href="#/pet/${id}/record/new">${ic("plus")} 新增紀錄</a>
-        <a class="btn ghost" href="#/pet/${id}/print">${ic("steth")} 給獸醫看</a>
-        <a class="btn ghost" href="#/pet/${id}/edit">編輯資料</a>
+        <a class="btn ghost" href="#/pet/${id}/print">${ic("clipboard")} 完整健康資料</a>
       </div>
       <details class="mg-sec" style="margin-top:14px"><summary>基本資料 <span class="muted small">晶片、結紮${p.notes?'、注意事項':''}</span></summary><div class="mg-body"><dl class="kv">
         <dt>晶片</dt><dd>${p.has_chip?(p.chip_no?esc(p.chip_no):'有'):'無／未填'}</dd>
@@ -5223,7 +5249,7 @@ async function renderPetView(id){const _n=navId;
   ${calPrompt?`<div class="calprompt" id="calPrompt"><div class="b"><b>已設定提醒：${esc(calPrompt.title)}</b><br><span class="muted">${calPrompt.next_due}・${dueText(calPrompt.next_due)}，要順便加到手機日曆嗎？</span></div><div class="acts">${calButtons(p.name,calPrompt)}<button type="button" class="btn sm ghost" id="calPromptX">不用</button></div></div>`:''}
   <h2>${ic("pill")} 用藥與保養品 <a class="btn sm ghost" href="#/pet/${id}/med/new" style="margin-left:auto">${ic("plus")} 新增</a></h2>
   ${meds.length?`${medToday.length?`<div class="card med-card"><div class="med-title">今天吃了沒？<span class="muted small">餵完按一下就打勾</span></div>${medToday.join('')}</div>`:''}
-  ${medToday.length?`<details class="mg-sec" style="margin-top:12px"><summary>藥品與保養品清單 <span class="muted small">${meds.length} 項・點進去可修改</span></summary><div class="mg-body">`:''}  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span>${(x.files||[]).length?` <span class="tag" style="vertical-align:2px">${ic("image")} ${x.files.length}</span>`:''}</b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a>`).join('')}</div>${medToday.length?'</div></details>':''}`
+  ${medToday.length?`<details class="mg-sec" style="margin-top:12px"><summary>藥品與保養品清單 <span class="muted small">${meds.length} 項</span></summary><div class="mg-body">`:''}  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<div class="delrow"><a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span>${(x.files||[]).length?` <span class="tag" style="vertical-align:2px">${ic("image")} ${x.files.length}</span>`:''}</b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a><button type="button" class="trash-btn" data-del-med="${x.id}" aria-label="刪除 ${esc(x.name)}">${ic('trash')}</button></div>`).join('')}</div>${medToday.length?'</div></details>':''}`
   :`<div class="empty-card"><div class="big">${ic("pill")}</div><b>還沒有記錄用藥或保養品</b><p class="small">記下藥名、每次劑量和一天幾次，家人餵藥時就不會搞錯或重複餵。</p><div class="btns"><a class="btn green" href="#/pet/${id}/med/new">新增藥品</a><a class="btn ghost" href="#/pet/${id}/med/new?kind=supplement">新增保養品</a></div></div>`}
   ${medsOff.length?`<details class="med-off"><summary>已停用 ${medsOff.length} 項</summary>${medsOff.map(x=>`<a href="#/pet/${id}/med/${x.id}">${esc(x.name)}・${esc(medLine(x))}${x.end_date?`・到 ${x.end_date}`:''}</a>`).join('')}</details>`:''}
 
@@ -5233,13 +5259,22 @@ async function renderPetView(id){const _n=navId;
 
   <h2>${ic("clipboard")} 健康紀錄</h2>
   <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[e,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${recIc(k)} ${t}</button>`).join('')}</div>
-  ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
+  ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><button type="button" class="trash-btn tl-del" data-del-rec="${r.id}" aria-label="刪除 ${esc(r.title)}">${ic('trash')}</button><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
       <a href="#/pet/${id}/record/${r.id}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}</div>
       <div class="where">${esc([(REC_KINDS[r.kind]||[,'其他'])[1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
       ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
       <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
+  // 垃圾桶：直接刪除用藥／健康紀錄（照片一起刪）
+  app.querySelectorAll('[data-del-med]').forEach(b=>b.onclick=async e=>{e.preventDefault();e.stopPropagation();const m=(medsAll||[]).find(z=>z.id===b.dataset.delMed);if(!m)return;
+    if(!await askSheet({title:`刪除「${m.name}」？`,body:'給藥紀錄也會一起刪除，無法復原。若只是不吃了，可以點進去改成「停用」。',ok:'刪除',danger:true}))return;
+    b.disabled=true;const {error}=await sb.from('pet_meds').delete().eq('id',m.id);if(error){b.disabled=false;return toast('刪除失敗：'+friendlyErr(error.message))}
+    if((m.files||[]).length)sb.storage.from('pet-private').remove(m.files).catch(()=>{});lnSync(true);toast('已刪除「'+m.name+'」');route()});
+  app.querySelectorAll('[data-del-rec]').forEach(b=>b.onclick=async e=>{e.preventDefault();e.stopPropagation();const r=rs.find(z=>z.id===b.dataset.delRec);if(!r)return;
+    if(!await askSheet({title:`刪除「${r.title}」？`,body:'附的照片和到期提醒也會一起刪除，無法復原。',ok:'刪除',danger:true}))return;
+    b.disabled=true;const {error}=await sb.from('pet_records').delete().eq('id',r.id);if(error){b.disabled=false;return toast('刪除失敗：'+friendlyErr(error.message))}
+    if((r.files||[]).length)sb.storage.from('pet-private').remove(r.files).catch(()=>{});lnSync(true);toast('已刪除「'+r.title+'」');route()});
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);countUp(app);
   if(_n===navId)setNavAction(`<button type="button" aria-label="編輯資料">${ic('edit')}</button>`,()=>{location.hash='#/pet/'+id+'/edit'});
@@ -5432,7 +5467,7 @@ async function renderPetPrint(id){const _n=navId;
   const [{data:p},{data:recs},{data:pmeds}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).eq('active',true).order('kind').order('created_at')]);
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}
   if(_n!==navId)return;
-  setTitle(p.name+' 病歷摘要');
+  setTitle(p.name+' 完整健康資料');
   const curMeds=pmeds||[];
   const rs=recs||[];const ph=p.photos?.[0];
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
@@ -5442,7 +5477,7 @@ async function renderPetPrint(id){const _n=navId;
   <div class="card printsheet">
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
       ${ph?`<img src="${esc(ph)}" alt="" style="width:110px;height:110px;object-fit:cover;border-radius:8px">`:''}
-      <div><h1 style="margin:0">${esc(p.name)} 的病歷摘要</h1>
+      <div><h1 style="margin:0">${esc(p.name)} 的完整健康資料</h1>
       <p style="margin:4px 0">${esc([sp(p.species).name,p.breed,SEX[p.sex],p.colour,p.birthday?`生日 ${p.birthday}（${petAge(p.birthday)}）`:''].filter(Boolean).join('、'))}</p>
       <p class="small" style="margin:0">晶片：${p.has_chip?(esc(p.chip_no)||'有'):'無'}　結紮：${p.neutered===true?'是':p.neutered===false?'否':'未填'}${weights.length?`　最新體重：${weights[0].weight_kg} kg（${weights[0].date}）`:''}</p></div>
     </div>
