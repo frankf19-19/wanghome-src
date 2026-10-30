@@ -2090,7 +2090,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.12.0';
+const BUILD = 'v5.12.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2875,8 +2875,9 @@ function bindEntry(kind,id){const go=()=>{const raw=$('#tk').value,t=extractToke
   location.hash=`#/${k}/${tid}?t=${encodeURIComponent(t)}`};
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
 // 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
+const UNS={"c0VTrbsXtFU": "1509119993276-d691aff73209", "1Gj9tFSLCmk": "1746738771391-33d44630f5f8", "kPJSB1D_HzI": "1530153892876-56d69b38e5c1", "7ALrGfHusf4": "1583120513418-c078286682f4", "lyC6JP6tSXg": "1511377465862-2579b9c87623", "t6mHvgZHTeI": "1636500363634-80e552f1b94f", "ngqyo2AYYnE": "1507146426996-ef05306b995a", "YsWrfgEO1cM": "1535320730793-87242ae1f53d", "TL5U0zXhcEQ": "1519204247300-95d343acce1d"};const unsU=(id,w)=>`https://images.unsplash.com/photo-${UNS[id]}?w=${w}&q=75&fm=jpg&fit=crop`;
 // 「登記後會長這樣」：完整的協尋頁畫面介紹（固定內容，不是資料庫裡的案件；不進名單、地圖、統計，也不能回報或聯絡）
-const LOOK_U=id=>`https://unsplash.com/photos/${id}/download?w=900`;
+const LOOK_U=id=>unsU(id,900);
 const LOOK={
   xiaomai:{status:'searching',species:'dog',name:'小麥',photos:['c0VTrbsXtFU','1Gj9tFSLCmk'],place:'台北市大安區',spot:'大安森林公園附近',days:2,when:'10/29 18:30',
     traits:'柴犬 · 公 · 中型犬 · 赤柴 · 約 2 歲',features:'尾巴捲在背上，右耳尖有一個小缺口',collar:'紅色項圈，上面有一個小鈴鐺',temper:'有點怕生，叫「小麥」會停下來看你',chip:'有 · 已結紮',
@@ -2897,8 +2898,7 @@ function renderLook(key){const c=LOOK[key];if(!c){goReplace('#/');return}
   setTitle(c.lead+'會長這樣');const ph=c.photos.map(LOOK_U),fr=c.status==='found_report',found=c.status==='found';
   const pill=found?'<span class="status-pill found">已回家</span>':fr?'<span class="status-pill fr">拾獲</span>':'<span class="status-pill searching">協尋中</span>';
   const intro=found?'找到之後，按一下「已回家」，協尋頁會變成這樣，幫忙的人都會看到好消息。':fr?'撿到走失的狗貓，登記拾獲後，頁面會長這樣，飼主搜尋就找得到。':'登記走失之後，你的協尋頁會長這樣，可以分享給大家、印成海報、收到目擊回報。';
-  app.innerHTML=`<div class="look-top"><span>👀 ${esc(intro)}</span><a class="btn sm" href="${c.cta}">${fr?'登記拾獲':found?'登記走失毛孩':'登記我的毛孩'}</a></div>
-  <div class="pad-bottom look">
+  app.innerHTML=`<div class="pad-bottom look">
   <div class="poster-head">${pill}</div>
   <h1>${fr?'拾獲':sp(c.species).poster}｜${esc(c.name)}</h1>
   <p class="muted meta-line"><span class="mu">${ic('pin')} ${esc(c.place)} ${esc(c.spot)}</span> <span class="mu">${fr?'撿到於':'走失於'} ${esc(c.when)}</span></p>
@@ -2923,7 +2923,7 @@ function renderLook(key){const c=LOOK[key];if(!c){goReplace('#/');return}
   $('#gMain').onclick=()=>lightbox(ph[app.querySelector('.gallery .thumbs .on')?+app.querySelector('.gallery .thumbs .on').dataset.i:0]);
   app.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>toast('這是協尋頁的畫面介紹。登記你的毛孩後，這些按鈕就能用了',3500))}
 // 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
-function howToHTML(){const U=id=>`https://unsplash.com/photos/${id}/download?w=420`,P={shiba:U('c0VTrbsXtFU'),shiba2:U('c0VTrbsXtFU'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('1Gj9tFSLCmk'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
+function howToHTML(){const U=id=>unsU(id,420),P={shiba:U('c0VTrbsXtFU'),shiba2:U('c0VTrbsXtFU'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('1Gj9tFSLCmk'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
   const bg=u=>`style="background-image:url('${u}')"`;
   const card=(href,cls,mock,t,sub,photo)=>`<a class="ht ${cls}" href="${href}"><span class="ht-m ${photo?'ph':''}" ${photo?bg(photo):''} aria-hidden="true">${mock}</span><b>${t}</b><small>${sub}</small></a>`;
   return `<div class="mp-h"><b>${pawSvg()} 汪喵回家可以這樣幫你</b><a href="#/resources">協尋攻略 ›</a></div>
@@ -3281,7 +3281,7 @@ function emptyCard(kind){
 // 清單是空的時候：下面放「登記後會長這樣」的畫面介紹（點進去是介紹頁，不是案件）
 function lookGridHTML(kind){const ks=kind==='lost'?['xiaomai','mimi','doudou']:['black','doudou'];
   return `<div class="look-grid-wrap"><p class="look-grid-h">${kind==='lost'?'登記走失後，協尋頁會長這樣':'登記拾獲後，頁面會長這樣'}</p><div class="look-grid">${ks.map(k=>{const c=LOOK[k],fr=c.status==='found_report',f=c.status==='found';
-    return `<a class="look-card" href="#/look/${k}"><span class="lc-ph" style="background-image:url('${LOOK_U(c.photos[0]).replace('w=900','w=480')}')"><em class="${f?'ok':fr?'fr':''}">${f?'已回家':fr?'拾獲':'走失第 '+c.days+' 天'}</em></span><span class="lc-b"><b>${esc(f||fr?c.name:c.name+'・'+c.traits.split(' · ')[0])}</b><small>${esc(c.place)}・${esc(c.spot)}</small><small class="lc-go">看看協尋頁長怎樣 ›</small></span></a>`}).join('')}</div></div>`}
+    return `<a class="look-card" href="#/look/${k}"><span class="lc-ph" style="background-image:url('${unsU(c.photos[0],480)}')"><em class="${f?'ok':fr?'fr':''}">${f?'已回家':fr?'拾獲':'走失第 '+c.days+' 天'}</em></span><span class="lc-b"><b>${esc(f||fr?c.name:c.name+'・'+c.traits.split(' · ')[0])}</b><small>${esc(c.place)}・${esc(c.spot)}</small><small class="lc-go">看看協尋頁長怎樣 ›</small></span></a>`}).join('')}</div></div>`}
 async function loadMapAll(el){const my=listSeq;
   if(!window.L&&!leafletGaveUp){el.innerHTML='<div class="empty">地圖載入中…</div>';await waitLeaflet();if(my!==listSeq||!el.isConnected)return}
   el.className='';
