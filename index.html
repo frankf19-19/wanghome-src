@@ -1709,6 +1709,9 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 /* 照片上的刪除鈕：紅底白叉，看得出是「移除這張」 */
 .photos-preview div button{background:var(--red)!important;color:#fff!important;border:2px solid #fff!important;box-shadow:0 2px 6px rgba(120,30,60,.35);font-weight:900;display:grid;place-items:center}
 .mg-body>.card{box-shadow:none!important;border:0!important;background:none!important;padding:0!important;margin-top:0!important}
+/* 深色模式：刪除類的紅字調亮，維持可讀 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .del-acct>summary,:root:not([data-theme="light"]) .del-row .linkbtn{color:#FF8A8A!important}}
+:root[data-theme="dark"] .del-acct>summary,:root[data-theme="dark"] .del-row .linkbtn{color:#FF8A8A!important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2574,7 +2577,7 @@ async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
 }
 async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
   if(!me()){el.innerHTML='';return}   // 沒登入：四宮格裡已經有「健康手冊」，不再重複
-  getProfile().then(p=>{const n=(p&&p.display_name||'').trim();const h=$('#hiName');if(n&&h&&_n===navId)h.textContent=' '+n.slice(0,12)}).catch(()=>{});
+  getProfile().then(p=>{const n=(p&&(p.username||p.display_name)||'').trim();const h=$('#hiName');if(n&&h&&_n===navId)h.textContent=' '+n.slice(0,12)}).catch(()=>{});
   const {data,error}=await sb.from('pets').select('id,name,species,photos,birthday').order('created_at').limit(12);
   if(_n!==navId||!el.isConnected)return;
   if(error||!data||!data.length){el.innerHTML='';return}
@@ -2700,7 +2703,7 @@ async function renderHealth(){const _n=navId;
   app.querySelectorAll('.due[data-go]').forEach(d=>d.onclick=e=>{if(e.target.closest('button,details,a,select,input'))return;location.hash=d.dataset.go});
   {const d=$('#calSec');if(d){d.ontoggle=()=>{window.__calOpen=d.open};if(IS_APP&&qs(location.hash).cal){const c=d.querySelector('.calmore');if(c)c.open=true}}}
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;const n=navId;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);if(n===navId)rerender(renderHealth);const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(renderHealth)})});
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:RM()?'auto':'smooth'})},60);
@@ -3124,8 +3127,11 @@ async function renderCase(id){const _n=navId;
   {const st=document.querySelector('.sticky-cta'),inPage=[...app.querySelectorAll('a[href="#/report/'+id+'"]')].filter(a=>!a.closest('.sticky-cta'));
    document.body.classList.toggle('has-cta',!!st);
    // 飼主自己看自己的案件：主按鈕改成「管理我的案件」，不是「我看到牠了」
-   {let own=false;try{own=!!localStorage.getItem('wh_token_'+id)}catch(_){}if(!own&&me()&&c.owner_id)own=c.owner_id===me().id;
-    if(own&&active){const lbl=`${ic('clipboard')} 管理我的案件${c.pending_count>0?`（${c.pending_count} 筆目擊等你確認）`:''}`;app.querySelectorAll('a.cact-main, .sticky-cta a').forEach(a=>{a.href='#/manage/'+id;a.innerHTML=lbl});inPage.length=0;inPage.push(...app.querySelectorAll('a.cact-main'))}}
+   {let own=false;try{own=!!localStorage.getItem('wh_token_'+id)}catch(_){}
+    const ownUI=()=>{const lbl=`${ic('clipboard')} 管理我的案件${c.pending_count>0?`（${c.pending_count} 筆目擊等你確認）`:''}`;app.querySelectorAll('a.cact-main, .sticky-cta a').forEach(a=>{a.href='#/manage/'+id;a.innerHTML=lbl});inPage.length=0;inPage.push(...app.querySelectorAll('a.cact-main'))};
+    if(own&&active)ownUI();
+    // 換手機登入的飼主（這支手機沒有管理代碼）：問資料庫是不是他的案件
+    else if(!own&&active&&me())sb.rpc('can_manage_case',{p_id:id,p_token:null}).then(({data})=>{if(data&&_n===navId)ownUI()}).catch(()=>{})}
    const gal=app.querySelector('.gallery');
    if(st&&inPage.length&&'IntersectionObserver' in window){st.classList.add('auto');const vis=new Set();
      const io=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?vis.add(e.target):vis.delete(e.target));st.classList.toggle('show',!vis.size)},{rootMargin:'0px 0px -80px 0px'});
@@ -3337,7 +3343,7 @@ function renderNew(){
     const box=document.createElement('div');box.className='pn-pick';box.innerHTML=`<b>是哪一隻走失了？點一下就帶入牠的資料</b><div>${data.slice(0,6).map(x=>`<a href="#/new?pet=${x.id}" data-pet="${x.id}"><span class="${x.photos?.[0]?'':'noimg'}">${x.photos?.[0]?thumbImg(x.photos[0],x.name):spIc(x.species)}</span>${esc(x.name)}</a>`).join('')}</div><small>不是這幾隻，就直接在下面填</small>`;
     box.querySelectorAll('[data-pet]').forEach(a=>a.onclick=e=>{e.preventDefault();applyPet(a.dataset.pet);box.remove()});
     const st=form.querySelector('.wstep');if(st)st.prepend(box);else form.prepend(box)}).catch(()=>{});
-  function applyPet(pid){sb.from('pets').select('*').eq('id',pid).maybeSingle().then(({data:pt})=>{if(!pt)return;const f=$('#f');if(!f)return;setSp(pt.species);
+  function applyPet(pid){const _an=navId;sb.from('pets').select('*').eq('id',pid).maybeSingle().then(({data:pt})=>{if(!pt||_an!==navId)return;const f=$('#f');if(!f)return;setSp(pt.species);
     const set=(n,v)=>{if(f.elements[n]!=null&&v!=null)f.elements[n].value=v};
     set('name',pt.name);f.elements.name.dispatchEvent(new Event('input',{bubbles:true}));set('sex',pt.sex||'');set('size',pt.size||'');set('breed',pt.breed);set('colour',pt.colour);qpRedraw(f);set('features',pt.features);set('temperament',pt.temperament);
     if(pt.birthday){const y=Math.floor((Date.now()-new Date(pt.birthday))/31557600000);set('age_text',y>0?y+'歲':'未滿1歲')}
@@ -3463,7 +3469,7 @@ async function renderReport(id){const _n=navId;
   </form>
   <p class="muted small" style="text-align:center">回報會先通知飼主確認後才顯示在地圖上，避免誤導。</p>`;
   contactPrefill($('#f'),CT_REP);
-  if(me())getProfile().then(pr=>{const f=$('#f');if(f&&pr?.display_name&&!f.elements['reporter_name'].value)f.elements['reporter_name'].value=pr.display_name});
+  if(me()){const _gn=navId;getProfile().then(pr=>{if(_gn!==navId)return;const f=$('#f');if(f&&(pr?.username||pr?.display_name)&&!f.elements['reporter_name'].value)f.elements['reporter_name'].value=pr.username||pr.display_name})}
   const center=c.lost_lat?[c.lost_lat,c.lost_lng]:(CITY_CENTER[c.lost_city]||[23.9,121]);
   const picker=pickerMap('pmap',center);
   if(c.lost_lat)marker([c.lost_lat,c.lost_lng],'走','start').addTo(picker.map).bindPopup('走失地點');
@@ -3665,7 +3671,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     const w=b.closest('div[style*="opacity"]');if(w)w.style.opacity='.5';b.remove();toast('已隱藏這筆比對')});   // 只改這一筆，不整頁重畫（不會弄丟正在編輯的資料）
   let photos=(c.photos||[]).slice();const pv=$('#pv');
   const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
-  $('#photoIn').onchange=async e=>{if(photos.length>=4){toast('最多 4 張照片，請先刪掉一張再加');e.target.value='';return}for(const f of [...e.target.files].slice(0,4-photos.length)){toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
+  $('#photoIn').onchange=async e=>{if(photos.length>=4){toast('最多 4 張照片，請先刪掉一張再加');e.target.value='';return}for(const f of [...e.target.files].slice(0,4-photos.length)){if(photos.length>=4)break;toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
   $('#btnDelCase').onclick=async()=>{if(!await askSheet({title:`永久刪除「${c.name}」的案件？`,body:`所有目擊回報也會一起刪除，無法復原。只是找到了的話，請改按「${c.name}回家了」。`,ok:'刪除案件',danger:true}))return;
     const {error}=await sb.rpc('delete_case',{p_id:id,p_token:token});if(error){__submitting=false;return toast('刪除失敗：'+error.message)}
     try{localStorage.removeItem('wh_token_'+id);sessionStorage.removeItem('wh_mkey_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這個案件',3000);goReplace('#/')};
@@ -3761,7 +3767,7 @@ async function reverseGeo(lat,lng){
   return {city,district,address:address||(city?`${city}${district}`:'目前位置（請在下方選縣市）'),geoOk};
 }
 function callScript(q){
-  const t=new Date(q.seen_at);const hm=`${t.getHours()}點${String(t.getMinutes()).padStart(2,'0')}分`;
+  const t=tw(q.seen_at);const hm=`${t.h}點${String(t.mi).padStart(2,'0')}分`;
   return `您好，我要通報路上受傷的${sp(q.species).name}。\n地點：${q.address}${q.place_text&&!String(q.address).includes(q.place_text)?'（'+q.place_text+'）':''}\n狀況：${q.injury||'受傷'}，${q.where==='taken'?'我已經帶走／送醫':'牠還在原地'}\n時間：今天 ${hm}\nGPS 座標：${q.lat.toFixed(5)}, ${q.lng.toFixed(5)}${q.url?'\n照片和地圖：'+q.url:''}`;
 }
 async function quickReport(){
@@ -3902,7 +3908,7 @@ function renderInjured(){geoWarm();
       try{localStorage.setItem('wh_ftoken_'+data.id,data.token)}catch(_){}
       rememberMine('found',data.id,'受傷的'+((p&&p.colour)||'')+sp(species).name);
       const manage=`${CONFIG.SITE_URL}#/found-manage/${data.id}?t=${data.token}`;
-      if(_n!==navId){toast('✅ 通報已送出。管理網址存在這支手機，到「我的」就找得到',6000);return}app.innerHTML=`<div class="card"><h1>謝謝你停下來幫牠</h1><p>受傷通報已公開，附近的人和可能的飼主都看得到。</p>
+      if(_n!==navId){toast('✅ 通報已送出。管理網址存在這支手機，到「我的」就找得到',6000);return}__dirty=false;__dirtyMsg='';app.innerHTML=`<div class="card done-card"><h1>謝謝你停下來幫牠</h1><p>受傷通報已公開，附近的人和可能的飼主都看得到。</p>
       <div class="notice red"><b>還沒打電話的話，請現在打</b>本站無法派人救援。</div>
       <div class="bigacts"><a class="btn big" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a><a class="btn big ghost" href="tel:1999">${ic("phone")} 接不通改撥 1999</a></div>
       <section class="cstep"><h2><span class="cnum">✓</span>把「管理網址」存起來</h2><p>牠被救走或送醫後，用這個網址更新狀況。</p>
@@ -4552,7 +4558,7 @@ async function handleVerify(){
   app.innerHTML='<div class="empty">登入中，請稍候…</div>';
   let ok=false;
   // 已經登入別的帳號：先問一下（避免點了別人傳來的登入連結，變成用別人的帳號登記）
-  const cur=session?.user?.email;let skip=false;
+  const cur=session?.user?(session.user.email||'目前的帳號'):'';let skip=false;
   if(cur&&!__confirm(`你目前是用 ${cur} 登入。\n按「確定」：改用這封信的帳號登入。\n按「取消」：維持現在的帳號（這封信不是你申請的話請按取消）。`))skip=true;
   if(!skip&&/^[A-Za-z0-9_-]{10,200}$/.test(th)){
     try{const {data:vd,error}=await sb.auth.verifyOtp({token_hash:th,type:ty});if(!error&&vd?.session){session=vd.session;ok=true}}catch(_){}
@@ -4708,7 +4714,9 @@ async function lnSync(force){
       list.push({id:lnId('r'+r.id),title:`🐾 ${nm[r.pet_id]||'毛孩'}${when}到期：${REC_KINDS[r.kind]?.[1]||'提醒'}`,body:r.title,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:r.pet_id},...ch});
     }
     for(const m of meds||[]){
-      if(m.end_date&&m.end_date<today)continue;if(m.start_date&&m.start_date>today)continue;
+      if(m.end_date&&m.end_date<today)continue;
+      // 開始日期在未來：從開始那天起排「固定日期」的提醒（兩週內才排，之後開 App 會再補排）
+      const fut=!!(m.start_date&&m.start_date>today);if(fut&&lnDiffDays(today,m.start_date)>13)continue;const d0=fut?m.start_date:today;
       const SLOT=lnSlots();
       let times=[...new Set((m.times||[]).map(t=>SLOT[t]||t).filter(t=>/^\d{2}:\d{2}$/.test(t)))].slice(0,4);
       if(!times.length){if(m.freq==='asneeded'||m.freq==='other')continue;times=m.freq==='daily2'?[SLOT['早上'],SLOT['晚上']]:m.freq==='daily3'?[SLOT['早上'],SLOT['中午'],SLOT['晚上']]:[SLOT['早上']]}
@@ -4716,11 +4724,11 @@ async function lnSync(force){
       const title=`💊 ${nm[m.pet_id]||'毛孩'}該${m.kind==='supplement'?'吃保養品':'吃藥'}了`,body=m.name+dose;
       for(const t of times){const [hh,mm]=t.split(':').map(Number);
         // 有停藥日、而且兩週內就停：逐天排，停藥後不會再響；其他每天固定時間重複（停藥後下次開 App 會自動取消）
-        if(/^daily/.test(m.freq)&&m.end_date&&m.end_date<addDays(today,13)){const last=m.end_date<addDays(today,13)?m.end_date:addDays(today,13);for(let d=today;d<=last;d=addDays(d,1)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
+        if(/^daily/.test(m.freq)&&(fut||(m.end_date&&m.end_date<addDays(today,13)))){const last=m.end_date&&m.end_date<addDays(today,13)?m.end_date:addDays(today,13);for(let d=d0;d<=last;d=addDays(d,1)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
         else if(/^daily/.test(m.freq))list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch});
-        else if(m.freq==='weekly'&&m.end_date){const wd0=lnAt(m.start_date||today,12,0).getDay();let d=today;for(let k=0;k<7&&lnAt(d,12,0).getDay()!==wd0;k++)d=addDays(d,1);for(let k=0;k<4&&d<=m.end_date;k++,d=addDays(d,7)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
+        else if(m.freq==='weekly'&&(m.end_date||fut)){const wd0=lnAt(m.start_date||today,12,0).getDay();let d=d0;for(let k=0;k<7&&lnAt(d,12,0).getDay()!==wd0;k++)d=addDays(d,1);for(let k=0;k<4&&(!m.end_date||d<=m.end_date);k++,d=addDays(d,7)){const at=lnAt(d,hh,mm);if(at>now)list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
         else if(m.freq==='weekly'){const wd=lnAt(m.start_date||today,12,0).getDay()+1;list.push({id:lnId('m'+m.id+t),title,body,schedule:{on:{weekday:wd,hour:hh,minute:mm},allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}
-        else if(m.freq==='every_other'){let d=today;if(lnDiffDays(m.start_date||today,d)%2)d=addDays(d,1);
+        else if(m.freq==='every_other'){let d=d0;if(lnDiffDays(m.start_date||d0,d)%2)d=addDays(d,1);
           for(let k=0;k<6;k++,d=addDays(d,2)){if(m.end_date&&d>m.end_date)break;const at=lnAt(d,hh,mm);if(at<=now)continue;list.push({id:lnId('m'+m.id+t+d),title,body,schedule:{at,allowWhileIdle:true},extra:{wh:1,pet:m.pet_id,m:1},...ch})}}
       }
     }
@@ -4765,9 +4773,11 @@ function lnSection(){if(!IS_APP)return '';
   return `<h2>${ic("bell")} 手機通知提醒</h2><div class="card"><p style="margin:0 0 10px">到期前、還有每天的餵藥時間，手機會直接跳通知。時間可以自己設。</p>${lnBtnHTML()}</div>`}
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
 
-async function getProfile(){
+// strict：讀取失敗就丟出錯誤（存檔前一定要用，避免把「讀不到」當成「全部空白」覆蓋掉設定）
+async function getProfile(strict){
   if(!me())return null;
-  const {data}=await sb.from('profiles').select('*').eq('id',me().id).maybeSingle();
+  const {data,error}=await sb.from('profiles').select('*').eq('id',me().id).maybeSingle();
+  if(error&&strict)throw error;
   return data;
 }
 
@@ -4827,7 +4837,7 @@ function bindUnCheck(inp,msg){let t=0,seq=0;const run=async()=>{const v=inp.valu
 let __unOk='';
 const UN_EXEMPT=['#/set-username','#/login','#/verify','#/privacy','#/terms','#/delete-account','#/contact'];
 function checkUsername(path){if(!me()||__unOk===me().id||UN_EXEMPT.includes(path))return;const uid=me().id;
-  getProfile().then(p=>{if(!me()||me().id!==uid)return;if(!p||!('username' in p)||p.username){__unOk=uid;return}
+  getProfile(true).then(p=>{if(!me()||me().id!==uid)return;if(p&&(!('username' in p)||p.username)){__unOk=uid;return}
     const cur=(location.hash||'#/').split('?')[0];if(UN_EXEMPT.includes(cur))return;setReturn(location.hash||'#/me');goReplace('#/set-username')}).catch(()=>{})}
 async function renderSetUsername(){
   if(!me()){goReplace('#/login');return}const _n=navId;setTitle('設定使用者名稱');app.innerHTML=pageSkel?pageSkel('form'):'';
@@ -4848,7 +4858,7 @@ async function renderSetUsername(){
     if(!await askSheet({title:`使用「${v}」？`,body:'使用者名稱設定後就不能修改。',ok:'確定'}))return;
     b.disabled=true;b.textContent='設定中…';
     const {error}=await sb.rpc('set_username',{name:v});
-    if(error){b.disabled=false;b.textContent='確定使用這個名稱';const msg=/有人用|不能用/.test(error.message)?'這個名稱已經有人用了，換一個吧':/不能修改/.test(error.message)?'你已經設定過使用者名稱了':'設定失敗：'+friendlyErr(error.message);$('#unMsg').textContent=msg;$('#unMsg').className='small un-msg bad';return}
+    if(error){b.disabled=false;b.textContent='確定使用這個名稱';const msg=/有人用|不能用|duplicate|unique/i.test(error.message)?'這個名稱已經有人用了，換一個吧':/不能修改/.test(error.message)?'你已經設定過使用者名稱了':'設定失敗：'+friendlyErr(error.message);$('#unMsg').textContent=msg;$('#unMsg').className='small un-msg bad';return}
     __unOk=me().id;toast('✅ 使用者名稱設定完成');goReplace(takeReturn())}}
 
 function renderLogin(){
@@ -4906,7 +4916,7 @@ function renderLogin(){
           if(/already|registered|exists/i.test(ec)){msg('這個 Email 已經註冊過了。<button type="button" class="btn sm" id="goLi" style="margin-left:6px">改成登入</button>');$('#goLi').onclick=()=>{keep.em=email;mode='login';draw()};return}
           return msg(/weak|password/i.test(ec)?'密碼太簡單了，請換一個（至少 8 個字，混合英文和數字更安全）':/rate|limit|security purposes|after \d+ seconds/i.test(ec)?'太頻繁了，請等一分鐘再試':/fetch|network|load failed|timeout/i.test(ec)?'網路不穩，請稍後再試':'註冊失敗：'+friendlyErr(error.message),true)}
         try{localStorage.setItem('wh_registered','1')}catch(_){}
-        if(data&&data.session){session=data.session;updateAuthUI();toast('✅ 註冊完成');goReplace(takeReturn());return}
+        if(data&&data.session){session=data.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 註冊完成');goReplace(takeReturn());return}
         // 這個 Email 早就註冊過（Supabase 不會說破，回傳沒有 identities 的使用者）
         if(data&&data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length){b.disabled=false;b.textContent='註冊';msg('這個 Email 已經註冊過了。<button type="button" class="btn sm" id="goLi" style="margin-left:6px">改成登入</button>');$('#goLi').onclick=()=>{keep.em=email;mode='login';draw()};return}
         showOtp(email,'signup')}
@@ -4972,20 +4982,20 @@ async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&loc
 async function renderMeBody(){const _n=navId;
   setTitle('我的');
   if(!me()){app.innerHTML=`<h1>我的</h1>${mineHTML()||'<p class="lede">這支手機還沒有登記過案件。</p>'}
-    <div class="card" style="margin-top:14px"><b>加入會員（免費，可以不加入）</b><p class="small muted">加入後換手機也能管理案件，還能用毛孩健康手冊、收到附近走失通知。只要 Email，不用設密碼。</p><div class="bigacts"><a class="btn big" href="#/login?mode=signup" onclick="setReturn('#/me')">免費註冊</a><a class="btn big ghost" href="#/login?mode=login" onclick="setReturn('#/me')">我已經有帳號，登入</a></div></div>`;return}
+    <div class="card" style="margin-top:14px"><b>加入會員（免費，可以不加入）</b><p class="small muted">加入後換手機也能管理案件，還能用毛孩健康手冊、收到附近走失通知。用 Email、LINE、Google 或 Apple 都能註冊。</p><div class="bigacts"><a class="btn big" href="#/login?mode=signup" onclick="setReturn('#/me')">免費註冊</a><a class="btn big ghost" href="#/login?mode=login" onclick="setReturn('#/me')">我已經有帳號，登入</a></div></div>`;return}
   (_n===navId?app:_void).innerHTML=pageSkel('me');
   const [prof,{data:cs,error:ce1},{data:fs},{data:pend},{data:fl},{data:pets,error:pe1},{data:dues}]=await Promise.all([
-    getProfile(), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
+    getProfile(true).then(d=>({d}),e=>({e})), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
     sb.from('follows').select('case_id,created_at').order('created_at',{ascending:false}),
     sb.from('pets').select('*').order('created_at'),
     sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),1)).order('next_due').limit(20)
   ]);
-  if(ce1||pe1){if(_n===navId)app.innerHTML='<h1>我的</h1>'+netErrHTML();return}
+  if(ce1||pe1||prof.e){if(_n===navId)app.innerHTML='<h1>我的</h1>'+netErrHTML();return}
   const petName={};(pets||[]).forEach(x=>petName[x.id]=x.name);
   const pendMap={};(Array.isArray(pend)?pend:[]).forEach(p=>pendMap[p.case_id]=p.pending);
   let followed=[];
   if(fl&&fl.length){const {data}=await sb.from('cases_public').select('*').in('id',fl.map(f=>f.case_id));followed=data||[]}
-  const p=prof||{};
+  const p=prof.d||{};
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
   (_n===navId?app:_void).innerHTML=`<div class="profile"><span class="pf-av" aria-hidden="true">${esc([...(p.username||p.display_name||me().email||'會')][0].toUpperCase())}</span><div class="pf-t"><h1>${esc(p.username||p.display_name||me().email||'會員')}</h1>${(p.username||p.display_name)&&me().email?`<span class="muted small">${esc(me().email)}</span>`:''}</div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}</div></div>
 
@@ -5116,7 +5126,7 @@ async function renderPet(id){const _n=navId;
   const pv=$('#pv');
   const draw=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','移除這張照片');x.onclick=()=>{photos.splice(i,1);draw()};d.appendChild(x);pv.appendChild(d)})};draw();
   {const pf=$('#pf');const mo=new MutationObserver(()=>{if(pf.isConnected)return;mo.disconnect();if(!didSave&&freshPh.length)rmPh(freshPh)});mo.observe(app,{childList:true})}
-  $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,6-photos.length)){toast('上傳中…');try{const u=await uploadPhoto(f,'pets');photos.push(u);freshPh.push(u)}catch(err){toast('上傳失敗：'+err.message)}}draw();e.target.value=''};
+  $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,6-photos.length)){if(photos.length>=6){toast('最多 6 張照片');break}toast('上傳中…');try{const u=await uploadPhoto(f,'pets');photos.push(u);freshPh.push(u)}catch(err){toast('上傳失敗：'+err.message)}}draw();e.target.value=''};
   $('#pf').onsubmit=once(async e=>{
     e.preventDefault();const fd=new FormData(e.target);
     const row={species,name:fd.get('name').trim(),sex:fd.get('sex')||null,size:fd.get('size')||null,birthday:fd.get('birthday')||null,breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_no:fd.get('chip_no'),neutered:fd.get('neutered')===''?null:fd.get('neutered')==='true',notes:fd.get('notes'),photos,updated_at:new Date().toISOString()};
@@ -5281,7 +5291,7 @@ async function renderPetView(id){const _n=navId;
     if(!await askSheet({title:`刪除「${r.title}」？`,body:'附的照片和到期提醒也會一起刪除，無法復原。',ok:'刪除',danger:true}))return;
     b.disabled=true;const {error}=await sb.from('pet_records').delete().eq('id',r.id);if(error){b.disabled=false;return toast('刪除失敗：'+friendlyErr(error.message))}
     if((r.files||[]).length)sb.storage.from('pet-private').remove(r.files).catch(()=>{});lnSync(true);toast('已刪除「'+r.title+'」');route()});
-  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
+  document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;const n=navId;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);if(n===navId)rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);countUp(app);
   if(_n===navId)setNavAction(`<button type="button">${ic('edit')}<span>編輯</span></button>`,()=>{location.hash='#/pet/'+id+'/edit'});
   {const mc=document.querySelector('#app .med-card'),ab=document.querySelector('#app .detail-head .actionbar');if(mc&&ab){ab.after(mc);mc.style.marginTop='14px'}}
@@ -5340,7 +5350,7 @@ async function renderRecord(petId,recId){const _n=navId;
   f.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>setDue(+b.dataset.m));
   const fv=$('#fv');
   const drawFiles=()=>{fv.innerHTML='';files.forEach((path,i)=>{const d=document.createElement('div');if(urls[path])d.style.backgroundImage=`url('${urls[path]}')`;d.style.cursor='zoom-in';d.onclick=()=>urls[path]&&lightbox(urls[path]);const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=e=>{e.stopPropagation();files.splice(i,1);drawFiles()};d.appendChild(x);fv.appendChild(d)})};drawFiles();
-  $('#fileIn').onchange=async e=>{for(const file of [...e.target.files].slice(0,6-files.length)){toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);fresh.push(path);urls[path]=URL.createObjectURL(file)}catch(err){toast('上傳失敗：'+err.message)}}drawFiles();e.target.value=''};
+  $('#fileIn').onchange=async e=>{for(const file of [...e.target.files].slice(0,6-files.length)){if(files.length>=6){toast('最多 6 張附件');break}toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);fresh.push(path);urls[path]=URL.createObjectURL(file)}catch(err){toast('上傳失敗：'+err.message)}}drawFiles();e.target.value=''};
   f.onsubmit=once(async e=>{
     e.preventDefault();const fd=new FormData(f);
     const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files};
@@ -5379,6 +5389,7 @@ ICONS.leaf='<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11
 function doseText(m){const a=m.dose_amount!=null?String(+m.dose_amount):'';return a?`${a} ${m.dose_unit||''}`.trim():''}
 function medSlots(m,dateStr){
   if(m.freq==='asneeded')return [];
+  if(m.freq==='other'&&!(m.times&&m.times.length))return [];   // 「其他（看備註）」又沒選時段：不要每天提醒
   const d=dateStr||todayStr();
   if(m.start_date&&d<m.start_date)return null;
   if(m.end_date&&d>m.end_date)return null;
@@ -5401,10 +5412,10 @@ function medTodayHTML(m,logs,petName){
 }
 function bindMedSlots(rerender){
   document.querySelectorAll('[data-medlog]').forEach(b=>b.onclick=async()=>{
-    b.disabled=true;
+    const n=navId;b.disabled=true;
     if(b.dataset.logid){const {error}=await sb.from('pet_med_logs').delete().eq('id',b.dataset.logid);if(error){b.disabled=false;return toast(error.message)}}
     else{const {error}=await sb.from('pet_med_logs').insert({med_id:b.dataset.medlog,slot:b.dataset.slot});if(error){b.disabled=false;return toast(error.message)}toast(b.dataset.slot==='需要時'?'已記錄':'已勾選：'+b.dataset.slot);burst(b,'#16855A')}
-    rerender();
+    if(n===navId)rerender();   // 已經換頁就不要把舊頁面畫回來
   });
 }
 async function renderMed(petId,medId){const _n=navId;
@@ -5447,7 +5458,7 @@ async function renderMed(petId,medId){const _n=navId;
   const f=$('#mf');let kind=m.kind;const times=new Set(m.times||[]);
   let files=origFiles.slice(),didSave=false;const fresh=[];const mfv=$('#mfv');
   const drawF=()=>{mfv.innerHTML='';files.forEach((path,i)=>{const d=document.createElement('div');if(urls[path])d.style.backgroundImage=`url('${urls[path]}')`;d.style.cursor='zoom-in';d.setAttribute('role','button');d.tabIndex=0;d.setAttribute('aria-label','放大照片');d.onclick=()=>urls[path]&&lightbox(urls[path]);d.onkeydown=e=>{if(e.key==='Enter')d.click()};const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','移除這張照片');x.onclick=e=>{e.stopPropagation();files.splice(i,1);drawF();__dirty=true};d.appendChild(x);mfv.appendChild(d)})};drawF();
-  $('#mFileIn').onchange=async e=>{const list=[...e.target.files];if(files.length+list.length>4)toast('最多 4 張照片',3000);for(const file of list.slice(0,4-files.length)){toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);fresh.push(path);urls[path]=URL.createObjectURL(file);__dirty=true}catch(err){toast('上傳失敗：'+err.message)}}drawF();e.target.value=''};
+  $('#mFileIn').onchange=async e=>{const list=[...e.target.files];if(files.length+list.length>4)toast('最多 4 張照片',3000);for(const file of list.slice(0,4-files.length)){if(files.length>=4)break;toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);fresh.push(path);urls[path]=URL.createObjectURL(file);__dirty=true}catch(err){toast('上傳失敗：'+err.message)}}drawF();e.target.value=''};
   {const mo=new MutationObserver(()=>{if(f.isConnected)return;mo.disconnect();Object.values(urls).forEach(u=>{if(String(u).startsWith('blob:'))URL.revokeObjectURL(u)});if(!didSave&&fresh.length)sb.storage.from('pet-private').remove(fresh).catch(()=>{})});mo.observe(app,{childList:true})}
   const drawP=()=>{const list=(MED_PRESETS[kind]||{})[p.species==='cat'?'cat':'dog']||[];$('#mPresets').innerHTML=list.map(t=>`<button type="button" data-t="${esc(t)}">${esc(t)}</button>`).join('');$('#mPresets').querySelectorAll('button').forEach(b=>b.onclick=()=>{f.elements.name.value=b.dataset.t;if(!f.elements.purpose.value&&kind==='supplement')f.elements.purpose.value=b.dataset.t.replace(/（.*）/,'')})};
   drawP();
