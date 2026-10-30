@@ -18,6 +18,16 @@ public class LineLoginPlugin: CAPPlugin, CAPBridgedPlugin {
     override public func load() {
         // LINE App 授權完會用 line3rdp.<bundle id>:// 跳回來，交給 SDK 處理
         NotificationCenter.default.addObserver(self, selector: #selector(handleOpenURL(_:)), name: .capacitorOpenURL, object: nil)
+        // 有設定通用連結時，LINE 會用 https://wangmiaotw.com/line-auth/… 直接跳回（不會出現「Open this app?」）
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUniversalLink(_:)), name: .capacitorOpenUniversalLink, object: nil)
+    }
+
+    @objc func handleUniversalLink(_ note: Notification) {
+        guard let obj = note.object as? [String: Any], let url = obj["url"] as? URL else { return }
+        guard url.path.hasPrefix("/line-auth") else { return }
+        Task { @MainActor in
+            _ = LoginManager.shared.application(UIApplication.shared, open: url)
+        }
     }
 
     @objc func handleOpenURL(_ note: Notification) {
@@ -36,7 +46,8 @@ public class LineLoginPlugin: CAPPlugin, CAPBridgedPlugin {
         Task { @MainActor in
             let lm = LoginManager.shared
             if !lm.isSetupFinished {
-                lm.setup(channelID: channelId, universalLinkURL: nil)
+                let ul = call.getString("universalLink").flatMap { URL(string: $0) }
+                lm.setup(channelID: channelId, universalLinkURL: ul)
             }
             var params = LoginManager.Parameters()
             params.IDTokenNonce = nonce

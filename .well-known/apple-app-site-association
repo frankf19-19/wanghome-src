@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["ZUM3ZK5KB3.com.wangmiaotw.app"],
+        "components": [
+          { "/": "/line-auth/*", "comment": "LINE 登入授權完跳回 App" }
+        ]
+      }
+    ]
+  }
+}

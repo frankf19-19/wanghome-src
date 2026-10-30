@@ -1768,7 +1768,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.8';
+const BUILD = 'v5.6.9';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1795,7 +1795,7 @@ if(IS_APP){
   try{const A=capPlugin('App');if(A){
     A.addListener('backButton',()=>{if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue)&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
     // 從連結打開 App（分享頁 /s/、/f/、網站網址）：跳到對應頁面
-    A.addListener('appUrlOpen',({url})=>{try{if(/^line3rdp\./i.test(url))return;   // LINE App 授權完跳回，由原生 SDK 處理
+    A.addListener('appUrlOpen',({url})=>{try{if(/^line3rdp\./i.test(url)||/^https:\/\/wangmiaotw\.com\/line-auth/i.test(url))return;   // LINE App 授權完跳回，由原生 SDK 處理
       const u=new URL(url);
       if(/^wangmiaotw:/.test(u.protocol)&&/auth/.test(u.host+u.pathname)){const code=u.searchParams.get('code');const err=u.searchParams.get('error_description')||u.searchParams.get('error');try{const B=capPlugin('Browser');if(B)B.close().catch(()=>{})}catch(_){}
         if(err){toast('登入沒有成功：'+err,5000);return}
@@ -4758,7 +4758,7 @@ async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disa
     if(LL){
       const raw=[...crypto.getRandomValues(new Uint8Array(24))].map(b=>b.toString(16).padStart(2,'0')).join('');
       const hashed=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw)))].map(b=>b.toString(16).padStart(2,'0')).join('');
-      const r=await LL.login({channelId:CONFIG.LINE_CHANNEL_ID,nonce:hashed});
+      const r=await LL.login({channelId:CONFIG.LINE_CHANNEL_ID,nonce:hashed,universalLink:'https://wangmiaotw.com/line-auth/'});
       if(!r||!r.idToken)throw new Error('沒有拿到登入憑證');
       const {data,error}=await sb.auth.signInWithIdToken({provider:'custom:line',token:r.idToken,nonce:raw});if(error)throw error;
       if(data&&data.session){session=data.session;updateAuthUI()}
