@@ -1963,6 +1963,27 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .rc-btns{display:grid;gap:8px;position:relative;z-index:6}
 @media (prefers-reduced-motion:reduce){.rc-s.on .rc-img,.rc-s.on .rc-cv-t,.rc-s.on .rc-card li{animation:none}.rc-s{transition:none}}
 :root[data-theme=dark] .alb-cell{background-color:#3A2A30}
+/* 首頁：功能介紹卡 */
+.howto{margin-top:6px}
+.ht-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.ht-row::-webkit-scrollbar{display:none}
+.ht{flex:none;width:150px;scroll-snap-align:start;text-decoration:none!important;color:var(--ink)!important;display:flex;flex-direction:column;gap:2px}
+.ht b{font-size:15px}.ht small{color:var(--ink-3);font-size:12.5px;line-height:1.35}
+.ht-m{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;height:150px;border-radius:22px;overflow:hidden;margin-bottom:6px;box-shadow:var(--lift);padding:12px;background:#FDE7EE}
+.ht.h2 .ht-m,.ht.h8 .ht-m{background:#FFF3D6}.ht.h3 .ht-m,.ht.h6 .ht-m{background:#E3F4EC}.ht.h4 .ht-m,.ht.h5 .ht-m{background:#E6EEFB}.ht.h7 .ht-m{background:#EFE8FB}.ht.h9 .ht-m{background:#E8E3FA}.ht.h10 .ht-m{background:#FFE6DA}
+.htp{flex:none;width:46px;height:46px;border-radius:16px;background:#fff;display:grid;place-items:center;color:#C9772B;font-style:normal;box-shadow:0 2px 8px rgba(0,0,0,.06)}.htp .ico{width:30px;height:30px}.htp.cat{color:#E08A2E}.htp.blk{color:#3A2E2A}
+.ht.h1 .ht-m,.ht.h6 .ht-m,.ht.h7 .ht-m{flex-direction:column;gap:6px}.htl{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;text-align:center;white-space:nowrap}.htl b{font-size:15px}.htl em{font-style:normal;font-size:11px;font-weight:800;color:#fff;background:var(--red);border-radius:999px;padding:1px 8px;white-space:nowrap}.htl span{font-size:11px;color:var(--ink-3)}
+.hta4{width:92px;height:124px;background:#fff;border-radius:6px;box-shadow:0 3px 10px rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;padding:6px;gap:3px}
+.hta4 b{width:100%;text-align:center;background:#D62E3A;color:#fff;font-size:13px;border-radius:3px;letter-spacing:.3em}.hta4 i{color:#C9772B}.hta4 i .ico{width:40px;height:40px}.hta4 span{font-size:8px;font-weight:700;color:#D62E3A}.hta4 u{display:block;width:80%;height:4px;border-radius:2px;background:#EEE}
+.htsq{width:104px;height:104px;border-radius:16px;background:linear-gradient(150deg,#43B581,#2F8F67);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.htsq i{color:#fff}.htsq i .ico{width:38px;height:38px}.htsq b{font-size:14px}.htsq span{font-size:10px;opacity:.9}
+.htmap{position:absolute;inset:0;background:linear-gradient(90deg,transparent 47%,#fff 47% 53%,transparent 53%),linear-gradient(0deg,transparent 60%,#fff 60% 66%,transparent 66%),linear-gradient(135deg,#DCE8F7,#CFE3D8)}
+.htmap .pin{position:absolute;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#E5484D;box-shadow:0 2px 4px rgba(0,0,0,.2)}.htmap .pin.a{left:28%;top:30%}.htmap .pin.b{left:62%;top:52%;background:#F0A04B}.htmap .pin.c{left:40%;top:70%}
+.htmap .me{position:absolute;left:52%;top:38%;width:14px;height:14px;border-radius:50%;background:#3B82F6;box-shadow:0 0 0 6px rgba(59,130,246,.25)}
+.htbub{position:absolute;left:8px;right:8px;bottom:10px;background:#fff;border-radius:10px;padding:5px 8px;font-size:11px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.htok{display:flex;flex-direction:column;align-items:center;gap:3px}.htok i{width:54px;height:54px;border-radius:50%;background:#fff;display:grid;place-items:center;color:#C9772B;box-shadow:0 0 0 4px #43B581}.htok i .ico{width:34px;height:34px}.htok b{font-size:15px;color:#2F8F67}.htok span{font-size:10px;color:var(--ink-3)}
+.htrem{display:grid;gap:2px;width:100%;background:#fff;border-radius:12px;padding:8px 10px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:left}.htrem b{font-size:12px}.htrem span{font-size:11px;color:#E5484D;font-weight:700;margin-bottom:4px}
+.htalb{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:96px}.htalb i{aspect-ratio:1;border-radius:8px;background:linear-gradient(135deg,#FFC8A8,#F7A1C0)}.htalb i:nth-child(2){background:linear-gradient(135deg,#F9E0A0,#F6B26B)}.htalb i:nth-child(3){background:linear-gradient(135deg,#BFE3D0,#8FCFB0)}.htalb i:nth-child(4){background:linear-gradient(135deg,#D9CCF5,#B7A6EC)}.htalb b{grid-column:span 2;text-align:center;font-size:12px}
+:root[data-theme=dark] .ht-m{filter:brightness(.92)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2035,7 +2056,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.10.1';
+const BUILD = 'v5.10.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2819,6 +2840,22 @@ function bindEntry(kind,id){const go=()=>{const raw=$('#tk').value,t=extractToke
   location.hash=`#/${k}/${tid}?t=${encodeURIComponent(t)}`};
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
 // 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
+// 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
+function howToHTML(){const D=spIc('dog'),C=spIc('cat');
+  const card=(href,cls,mock,t,sub,id)=>`<a class="ht ${cls}" href="${href}" ${id?`id="${id}"`:''}><span class="ht-m" aria-hidden="true">${mock}</span><b>${t}</b><small>${sub}</small></a>`;
+  return `<div class="mp-h"><b>${pawSvg()} 汪喵回家可以這樣幫你</b><a href="#/resources">協尋攻略 ›</a></div>
+  <div class="ht-row">
+  ${card('#/new','h1',`<i class="htp">${D}</i><span class="htl"><b>小麥</b><em>走失第 1 天</em><span>大安區・紅色項圈</span></span>`,'走失協尋頁','照片、特徵、地點一次看清楚')}
+  ${card('#/new','h2',`<span class="hta4"><b>協尋</b><i>${D}</i><span>請勿追趕　拍照回報</span><u></u><u></u></span>`,'A4 協尋海報','自動排版，下載就能印')}
+  ${card('#/new','h3',`<span class="htsq"><i>${D}</i><b>幫忙分享</b><span>LINE・FB</span></span>`,'分享圖卡','一鍵傳到群組')}
+  ${card('#/seen','h4',`<span class="htmap"><i class="pin a"></i><i class="pin b"></i><span class="htbub">在公園看到疑似小麥</span></span>`,'目擊回報','拍照標地點，馬上通知飼主')}
+  ${card('#/lost','h5',`<span class="htmap n"><i class="pin a"></i><i class="pin b"></i><i class="pin c"></i><i class="me"></i></span>`,'附近走失','看看你家附近有誰在找')}
+  ${card('#/new','h6',`<i class="htp cat">${C}</i><span class="htl"><b>咪咪</b><em>走失第 2 天</em><span>橘貓・很怕生</span></span>`,'貓咪也可以','狗狗貓咪都能登記')}
+  ${card('#/seen?kind=found','h7',`<i class="htp blk">${D}</i><span class="htl"><b>撿到了</b><em>黑色米克斯</em><span>登記讓飼主找到</span></span>`,'拾獲登記','撿到狗貓，幫牠找家')}
+  ${card('#/new','h8',`<span class="htok"><i>${D}</i><b>回家了！</b><span>謝謝每一位幫忙的人</span></span>`,'找到了','標記回家，分享好消息')}
+  ${card('#/health','h9',`<span class="htrem"><b>💉 狂犬病疫苗</b><span>3 天後到期</span><b>💊 心絲蟲藥</b><span>今天 20:00</span></span>`,'健康手冊','疫苗、用藥到期提醒')}
+  ${card('#/health','h10',`<span class="htalb"><i></i><i></i><i></i><i></i><b>夏天回顧</b></span>`,'毛孩相簿','每三個月一本回顧相簿')}
+  </div>`}
 // 首頁：正在協尋的毛孩（左右滑的預覽），點「看全部」到協尋名單
 async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
   const [{data,error},{count}]=await Promise.all([sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,lost_at,status,poster').eq('status','searching').order('lost_at',{ascending:false}).limit(10),
@@ -2856,6 +2893,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <a href="#/learn" class="qk"><span class="qi q4" aria-hidden="true">${ic('star')}</span><b>毛孩小學堂</b><small>狗狗貓咪照顧知識</small></a>
     </div>
     <div id="myPets" class="mypets"></div>
+    <div class="howto">${howToHTML()}</div>
     <p class="bs-rule"><span class="bs-paw">${pawSvg()}</span><span><b>看到走失的狗貓：</b>先別追，拍照回報就好。</span></p>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   </section>
