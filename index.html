@@ -1984,6 +1984,16 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .htrem{display:grid;gap:2px;width:100%;background:#fff;border-radius:12px;padding:8px 10px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:left}.htrem b{font-size:12px}.htrem span{font-size:11px;color:#E5484D;font-weight:700;margin-bottom:4px}
 .htalb{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:96px}.htalb i{aspect-ratio:1;border-radius:8px;background:linear-gradient(135deg,#FFC8A8,#F7A1C0)}.htalb i:nth-child(2){background:linear-gradient(135deg,#F9E0A0,#F6B26B)}.htalb i:nth-child(3){background:linear-gradient(135deg,#BFE3D0,#8FCFB0)}.htalb i:nth-child(4){background:linear-gradient(135deg,#D9CCF5,#B7A6EC)}.htalb b{grid-column:span 2;text-align:center;font-size:12px}
 :root[data-theme=dark] .ht-m{filter:brightness(.92)}
+.ht-m.ph{background-size:cover;background-position:center;align-items:flex-end;justify-content:stretch;padding:0}
+.ht-m.ph::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.55))}
+.htc{position:relative;z-index:1;display:flex;flex-direction:column;gap:2px;padding:10px;color:#fff;width:100%;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.htc b{font-size:16px}.htc span{font-size:11px;opacity:.95}.htc em{align-self:flex-start;font-style:normal;font-size:11px;font-weight:800;background:var(--red);border-radius:999px;padding:1px 8px;text-shadow:none}.htc em.g{background:#7A5BD6}
+.htc.ok b{font-size:18px}.htc.ok{align-items:flex-start}.ht.h8 .ht-m.ph::after{background:linear-gradient(180deg,transparent 40%,rgba(20,110,70,.75))}
+.hta4 i{display:block;width:62px;height:62px;border-radius:6px;background:#eee center/cover}
+.htsq i{display:block;width:58px;height:58px;border-radius:50%;background:#fff center/cover;border:3px solid #fff}
+.htbub{display:flex;align-items:center;gap:6px}.htbub i{flex:none;width:24px;height:24px;border-radius:6px;background:center/cover}
+.ht.h9 .htrem{position:relative;z-index:1;margin:10px;width:auto}
+.htalb i{background-size:cover!important;background-position:center!important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2056,7 +2066,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.10.2';
+const BUILD = 'v5.10.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2841,20 +2851,21 @@ function bindEntry(kind,id){const go=()=>{const raw=$('#tk').value,t=extractToke
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
 // 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
 // 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
-function howToHTML(){const D=spIc('dog'),C=spIc('cat');
-  const card=(href,cls,mock,t,sub,id)=>`<a class="ht ${cls}" href="${href}" ${id?`id="${id}"`:''}><span class="ht-m" aria-hidden="true">${mock}</span><b>${t}</b><small>${sub}</small></a>`;
+function howToHTML(){const U=id=>`https://unsplash.com/photos/${id}/download?w=420`,P={shiba:U('c0VTrbsXtFU'),shiba2:U('1Gj9tFSLCmk'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('qO-PIF84Vxg'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
+  const bg=u=>`style="background-image:url('${u}')"`;
+  const card=(href,cls,mock,t,sub,photo)=>`<a class="ht ${cls}" href="${href}"><span class="ht-m ${photo?'ph':''}" ${photo?bg(photo):''} aria-hidden="true">${mock}</span><b>${t}</b><small>${sub}</small></a>`;
   return `<div class="mp-h"><b>${pawSvg()} 汪喵回家可以這樣幫你</b><a href="#/resources">協尋攻略 ›</a></div>
   <div class="ht-row">
-  ${card('#/new','h1',`<i class="htp">${D}</i><span class="htl"><b>小麥</b><em>走失第 1 天</em><span>大安區・紅色項圈</span></span>`,'走失協尋頁','照片、特徵、地點一次看清楚')}
-  ${card('#/new','h2',`<span class="hta4"><b>協尋</b><i>${D}</i><span>請勿追趕　拍照回報</span><u></u><u></u></span>`,'A4 協尋海報','自動排版，下載就能印')}
-  ${card('#/new','h3',`<span class="htsq"><i>${D}</i><b>幫忙分享</b><span>LINE・FB</span></span>`,'分享圖卡','一鍵傳到群組')}
-  ${card('#/seen','h4',`<span class="htmap"><i class="pin a"></i><i class="pin b"></i><span class="htbub">在公園看到疑似小麥</span></span>`,'目擊回報','拍照標地點，馬上通知飼主')}
+  ${card('#/new','h1',`<span class="htc"><b>小麥</b><em>走失第 1 天</em><span>大安區・紅色項圈</span></span>`,'走失協尋頁','照片、特徵、地點一次看清楚',P.shiba)}
+  ${card('#/new','h2',`<span class="hta4"><b>協尋</b><i ${bg(P.shiba)}></i><span>請勿追趕　拍照回報</span><u></u><u></u></span>`,'A4 協尋海報','自動排版，下載就能印')}
+  ${card('#/new','h3',`<span class="htsq"><i ${bg(P.shiba2)}></i><b>幫忙分享</b><span>LINE・FB</span></span>`,'分享圖卡','一鍵傳到群組')}
+  ${card('#/seen','h4',`<span class="htmap"><i class="pin a"></i><i class="pin b"></i><span class="htbub"><i ${bg(P.shiba)}></i>在公園看到疑似小麥</span></span>`,'目擊回報','拍照標地點，馬上通知飼主')}
   ${card('#/lost','h5',`<span class="htmap n"><i class="pin a"></i><i class="pin b"></i><i class="pin c"></i><i class="me"></i></span>`,'附近走失','看看你家附近有誰在找')}
-  ${card('#/new','h6',`<i class="htp cat">${C}</i><span class="htl"><b>咪咪</b><em>走失第 2 天</em><span>橘貓・很怕生</span></span>`,'貓咪也可以','狗狗貓咪都能登記')}
-  ${card('#/seen','h7',`<i class="htp blk">${D}</i><span class="htl"><b>撿到了</b><em>黑色米克斯</em><span>登記讓飼主找到</span></span>`,'拾獲登記','撿到狗貓，幫牠找家')}
-  ${card('#/new','h8',`<span class="htok"><i>${D}</i><b>回家了！</b><span>謝謝每一位幫忙的人</span></span>`,'找到了','標記回家，分享好消息')}
-  ${card('#/health','h9',`<span class="htrem"><b>💉 狂犬病疫苗</b><span>3 天後到期</span><b>💊 心絲蟲藥</b><span>今天 20:00</span></span>`,'健康手冊','疫苗、用藥到期提醒')}
-  ${card('#/health','h10',`<span class="htalb"><i></i><i></i><i></i><i></i><b>夏天回顧</b></span>`,'毛孩相簿','每三個月一本回顧相簿')}
+  ${card('#/new','h6',`<span class="htc"><b>咪咪</b><em>走失第 2 天</em><span>橘貓・很怕生</span></span>`,'貓咪也可以','狗狗貓咪都能登記',P.cat)}
+  ${card('#/seen','h7',`<span class="htc"><b>撿到了</b><em class="g">拾獲</em><span>黑色米克斯・很親人</span></span>`,'拾獲登記','撿到狗貓，幫牠找家',P.black)}
+  ${card('#/new','h8',`<span class="htc ok"><b>回家了！</b><span>謝謝每一位幫忙的人</span></span>`,'找到了','標記回家，分享好消息',P.happy)}
+  ${card('#/health','h9',`<span class="htrem"><b>💉 狂犬病疫苗</b><span>3 天後到期</span></span>`,'健康手冊','疫苗、用藥到期提醒',P.pup)}
+  ${card('#/health','h10',`<span class="htalb"><i ${bg(P.pup)}></i><i ${bg(P.a2)}></i><i ${bg(P.a3)}></i><i ${bg(P.a4)}></i><b>夏天回顧</b></span>`,'毛孩相簿','每三個月一本回顧相簿')}
   </div>`}
 // 首頁：正在協尋的毛孩（左右滑的預覽），點「看全部」到協尋名單
 async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
