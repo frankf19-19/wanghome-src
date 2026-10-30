@@ -1,0 +1,26 @@
+name: 資料庫 migration
+# 手動執行：把 supabase/ 底下指定的 migration 檔送到 Supabase 執行（用 SUPABASE_ACCESS_TOKEN）
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: '要執行的檔案，例如 supabase/migration_v1.34.sql'
+        required: true
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: 執行 SQL
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          FILE: ${{ inputs.file }}
+        run: |
+          [[ "$FILE" =~ ^supabase/(migration_v[0-9.]+|check_[a-z0-9_]+)\.sql$ ]] || { echo "::error::只能執行 supabase/migration_v*.sql 或 supabase/check_*.sql"; exit 1; }
+          [ -f "$FILE" ] || { echo "::error::找不到 $FILE"; exit 1; }
+          BODY=$(jq -Rs '{query: .}' < "$FILE")
+          CODE=$(curl -sS -o out.json -w '%{http_code}' -X POST "https://api.supabase.com/v1/projects/nopyhfpaykkiieudvoko/database/query" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" --data "$BODY")
+          R=$(head -c 3000 out.json | tr '\n' ' ')
+          if [[ "$CODE" =~ ^2 ]]; then echo "::notice::$FILE OK：$R"; else echo "::error::$FILE 失敗（HTTP $CODE）：$R"; exit 1; fi
