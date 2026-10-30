@@ -1860,6 +1860,41 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .bd-al-img{position:relative;align-self:center;max-height:70vh;cursor:crosshair;touch-action:manipulation}.bd-al-img img{display:block;max-width:100%;max-height:70vh;border-radius:14px}
 .bd-al-dot{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--red);color:#fff;font:800 13px/22px var(--body);text-align:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
 .bd-al-acts{display:flex;gap:8px;justify-content:center}.bd-al-acts .btn{background:#fff}
+/* 電子毛孩：AI 畫的樣子 */
+.bd-art .ai{display:none}.bd-art .ai-ok{display:inline}
+.bd-art[data-mood=happy] .ai,.bd-art[data-mood=sleep] .ai,.bd-art[data-mood=sad] .ai{display:none}
+.bd-art[data-mood=happy] .ai-happy,.bd-art[data-mood=sleep] .ai-sleep,.bd-art[data-mood=sad] .ai-sad{display:inline}
+.bd-art.pose-eat .ai{display:none}.bd-art.pose-eat .ai-eat{display:inline}
+.bd-art .bd-root,.bd-art .ai-b{transform-box:view-box;transform-origin:100px 212px}
+.bd-art .ai-b{animation:bdArtBreath 3.4s ease-in-out infinite}
+.bd-art[data-mood=happy] .ai-b{animation:bdArtHop .8s ease-in-out infinite}
+.bd-art[data-mood=sleep] .ai-b{animation:bdArtBreath 5.5s ease-in-out infinite}
+.bd-art.petting .ai-b{animation:bdArtWiggle .55s ease-in-out infinite}
+.bd-art.act-tilt .ai-b{animation:bdArtTilt 1.8s ease-in-out}
+.bd-art.act-sniff .ai-b{animation:bdArtSniff .2s ease-in-out 8}
+.bd-art.act-yawn .ai-b{animation:bdArtStretch 1.7s ease-in-out}
+.bd-art.act-look .ai-b{animation:bdArtLook 2.4s ease-in-out}
+.bd-art.pose-eat .ai-b{animation:bdArtEat .42s ease-in-out infinite}
+.bd-art image{pointer-events:none}
+@keyframes bdArtBreath{0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,.986)}}
+@keyframes bdArtHop{0%,100%{transform:translateY(0) scale(1,1)}40%{transform:translateY(-5px) scale(.99,1.02)}70%{transform:translateY(0) scale(1.02,.97)}}
+@keyframes bdArtWiggle{0%,100%{transform:rotate(-3deg) scale(1.01,.99)}50%{transform:rotate(3deg) scale(1.01,.99)}}
+@keyframes bdArtTilt{0%,100%{transform:rotate(0)}25%,75%{transform:rotate(-6deg)}}
+@keyframes bdArtSniff{0%,100%{transform:translateY(0)}50%{transform:translateY(2px)}}
+@keyframes bdArtStretch{0%,100%{transform:scale(1,1)}40%,70%{transform:scale(.97,1.05)}}
+@keyframes bdArtLook{0%,100%{transform:skewX(0)}25%,40%{transform:skewX(-2deg) translateX(-2px)}60%,80%{transform:skewX(2deg) translateX(2px)}}
+@keyframes bdArtEat{0%,100%{transform:translateY(0)}50%{transform:translateY(2.5px)}}
+.bd-ai{margin:14px 0 0;padding:14px;border-radius:16px;background:linear-gradient(135deg,#FFF6E9,#FDEBF3);border:1px solid #F4D9C4}
+.bd-ai-t{margin:0;font-weight:800;font-size:17px}
+.bd-ai-btns{flex-wrap:wrap}
+.bd-ai-on{margin:0 0 10px;font-weight:700;color:#2F7D4F}
+.bd-ai-wait{display:flex;align-items:center;gap:10px;margin:12px 0 0;font-weight:600}
+.bd-spin{flex:none;width:22px;height:22px;border-radius:50%;border:3px solid #F3C9B5;border-top-color:#E0703A;animation:spin .8s linear infinite}
+.bd-ai-err{margin:12px 0 0;color:#B42318;font-weight:600}
+.bd-ai-done{margin:12px 0 4px;font-weight:700}
+.bd-ai-img{display:block;width:100%;height:auto;max-height:260px;object-fit:contain}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .bd-ai{background:linear-gradient(135deg,#3A2A20,#3A2230);border-color:#5A4030}:root:not([data-theme=light]) .bd-ai-on{color:#7FD3A0}:root:not([data-theme=light]) .bd-ai-err{color:#FF8A80}}
+:root[data-theme=dark] .bd-ai{background:linear-gradient(135deg,#3A2A20,#3A2230);border-color:#5A4030}:root[data-theme=dark] .bd-ai-on{color:#7FD3A0}:root[data-theme=dark] .bd-ai-err{color:#FF8A80}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1932,7 +1967,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.8.5';
+const BUILD = 'v5.9.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -5040,7 +5075,7 @@ let __bdHair=1;   // 長毛：毛更長、更多
 function bdFur(r,box,n,cols,flow,len=7,w=1.1){let o='';n=Math.round(n*(__bdHair>1?1.3:1));len*=__bdHair;for(let i=0;i<n;i++){const x=box[0]+r()*(box[2]-box[0]),y=box[1]+r()*(box[3]-box[1]);const a=flow(x,y)+(r()-.5)*.6,L=len*(.6+r()*.7);
     const dx=Math.cos(a)*L,dy=Math.sin(a)*L,bx=(r()-.5)*2.4;o+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)}q${(dx/2+bx).toFixed(1)} ${(dy/2).toFixed(1)} ${dx.toFixed(1)} ${dy.toFixed(1)}" stroke="${cols[i%cols.length]}" stroke-width="${(w*(.7+r()*.6)).toFixed(2)}" opacity="${(.22+r()*.35).toFixed(2)}"/>`}
   return `<g fill="none" stroke-linecap="round">${o}</g>`}
-function bdSVG(b,cls=''){
+function bdSVG(b,cls=''){if(b&&b.art&&b.art.ok)return bdArtSVG(b,cls);
   const u='b'+(++__bdSeq),C=(b.coat==='custom'&&b.cc)?b.cc:(BD_COATS[b.coat]||BD_COATS.golden),pat=b.pat||'solid',cat=b.sp==='cat';
   const lum=h=>{const q=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));return .3*q[0]+.59*q[1]+.11*q[2]};const dark=lum(C.m)<100;
   const R=bdRng((b.name||'')+b.sp+(b.coat||'')+(C.m||''));__bdHair=b.hair==='long'?1.6:1;
@@ -5191,7 +5226,7 @@ function bdSVG(b,cls=''){
   </g></svg>`}
 
 // ── 側面（走路、跑步、撿球用）：四隻腳會一前一後擺動 ──
-function bdSideSVG(b){
+function bdSideSVG(b){if(b&&b.art&&b.art.ok)return bdArtSideSVG(b);
   const u='s'+(++__bdSeq),C=(b.coat==='custom'&&b.cc)?b.cc:(BD_COATS[b.coat]||BD_COATS.golden),pat=b.pat||'solid',cat=b.sp==='cat';
   let M=C.m,D=C.d,L=C.l;if(pat==='calico'){M='#F7F2EA';D='#DCCFBF';L='#FFFFFF'}if(pat==='tux'){L='#FFFFFF'}
   const HI=bdMix(M,'#FFFFFF',.35),SH=bdMix(D,'#000000',.2),INK='#24160E',W='#FBF8F3';
@@ -5489,10 +5524,46 @@ function bdAnalyze(data,W,H,pts,sp){
   const nose=area(N,.1,[.2,.7]);if(nose){const pink=nose[0]>nose[2]+25&&lum(nose)>90;out.noseC=pink?hex(nose):null}
   return out}
 
+// ── AI 畫的專屬毛孩（照會員的照片畫成 Q 版，6 個動作） ──
+const BD_ART_POSES=['ok','happy','sleep','eat','sad','walk'];
+function bdArtSVG(b,cls=''){const a=b.art,mood=cls==='mood-happy'?'happy':'ok';
+  const im=k=>{const u=safeU(a[k]||a.ok);return u?`<image class="ai ai-${k}" href="${esc(u)}" x="0" y="2" width="200" height="210" preserveAspectRatio="xMidYMax meet"/>`:''};
+  return `<svg class="bd-svg bd-art sp-${b.sp==='cat'?'cat':'dog'}" data-mood="${mood}" viewBox="0 0 200 222" role="img" aria-label="${esc(b.name)}"><ellipse cx="100" cy="212" rx="66" ry="6.5" fill="#000" opacity=".11"/><g class="bd-root"><g class="ai-b">${['ok','happy','sleep','eat','sad'].map(im).join('')}</g></g><text class="bd-zzz" x="150" y="40">Z z</text></svg>`}
+function bdArtSideSVG(b){const u=safeU(b.art.walk||b.art.ok);return `<svg class="bd-side bd-art-side" viewBox="0 0 240 170" aria-hidden="true"><ellipse cx="120" cy="164" rx="70" ry="5" fill="#000" opacity=".1"/><g class="sd-root"><image href="${esc(u)}" x="10" y="0" width="220" height="166" preserveAspectRatio="xMidYMax meet"/></g></svg>`}
+function bdLoadImg(src){return new Promise((res,rej)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=()=>rej(new Error('讀不到這張照片'));im.src=src})}
+// 照片縮小成 JPEG base64（送給 AI 用）
+function bdToB64(im,max=768,q=.86){const w=im.naturalWidth||im.width,h=im.naturalHeight||im.height,k=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q).split(',')[1]}
+// 去掉 AI 圖的綠色背景（從邊緣往內找，牠身上的綠眼睛不會被挖掉），裁掉空白，輸出透明 PNG
+function bdKeyOut(im){const W=im.naturalWidth,H=im.naturalHeight,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0);const id=x.getImageData(0,0,W,H),d=id.data,N=W*H;
+  const gr=i=>{const r=d[i*4],g=d[i*4+1],b=d[i*4+2];return g-Math.max(r,b)};
+  const isBg=i=>{const g=d[i*4+1];return g>90&&gr(i)>Math.max(38,g*.32)};
+  const bg=new Uint8Array(N),q=new Int32Array(N);let qh=0,qt=0;const push=i=>{if(!bg[i]&&isBg(i)){bg[i]=1;q[qt++]=i}};
+  for(let X=0;X<W;X++){push(X);push((H-1)*W+X)}for(let Y=0;Y<H;Y++){push(Y*W);push(Y*W+W-1)}
+  while(qh<qt){const i=q[qh++],X=i%W;if(X>0)push(i-1);if(X<W-1)push(i+1);if(i>=W)push(i-W);if(i<N-W)push(i+W)}
+  for(let i=0;i<N;i++)if(!bg[i]){const g=d[i*4+1];if(g>150&&gr(i)>110)bg[i]=1}   // 被身體圍起來的背景小洞
+  // 邊緣 3px：半透明＋去掉綠色反光
+  const dist=new Uint8Array(N);qh=qt=0;for(let i=0;i<N;i++)if(bg[i]){dist[i]=1;q[qt++]=i}
+  while(qh<qt){const i=q[qh++],X=i%W,dd=dist[i];if(dd>=4)continue;const nb=[X>0?i-1:-1,X<W-1?i+1:-1,i-W,i+W];for(const j of nb){if(j<0||j>=N||dist[j])continue;dist[j]=dd+1;q[qt++]=j}}
+  let x0=W,y0=H,x1=-1,y1=-1;
+  for(let i=0;i<N;i++){const o=i*4;if(bg[i]){d[o+3]=0;continue}const dd=dist[i];if(dd&&dd<=4){const r=d[o],g=d[o+1],b=d[o+2],m=Math.max(r,b);if(g>m){const sp=g-m;if(dd<=2)d[o+3]=Math.max(0,Math.min(255,255-sp*2.2));d[o+1]=Math.round(m+(g-m)*.15)}}
+    if(d[o+3]>24){const X=i%W,Y=(i-X)/W;if(X<x0)x0=X;if(X>x1)x1=X;if(Y<y0)y0=Y;if(Y>y1)y1=Y}}
+  if(x1<0)throw new Error('畫出來的圖是空的');
+  x.putImageData(id,0,0);const pad=6;x0=Math.max(0,x0-pad);y0=Math.max(0,y0-pad);x1=Math.min(W-1,x1+pad);y1=Math.min(H-1,y1+pad);
+  const cw=x1-x0+1,ch=y1-y0+1,k=Math.min(1,560/Math.max(cw,ch)),o=document.createElement('canvas');o.width=Math.round(cw*k);o.height=Math.round(ch*k);o.getContext('2d').drawImage(c,x0,y0,cw,ch,0,0,o.width,o.height);
+  return new Promise((res,rej)=>o.toBlob(bl=>bl?res(bl):rej(new Error('存不了圖')),'image/png'))}
+async function bdArtCall(pose,sp,photo,ref){let at=null;try{at=(await sb.auth.getSession()).data.session?.access_token}catch(_){}at=at||session?.access_token;if(!at)throw new Error('請先登入');
+  const ctl=new AbortController(),tt=setTimeout(()=>ctl.abort(),120000);let r;
+  try{r=await fetch(CONFIG.SUPABASE_URL+'/functions/v1/buddy-art',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:'Bearer '+at},body:JSON.stringify({pose,sp,photo,ref:ref||undefined}),signal:ctl.signal})}
+  catch(e){throw new Error(e&&e.name==='AbortError'?'AI 畫太久了，請再試一次':'網路連不上，請確認網路後再試')}finally{clearTimeout(tt)}
+  let j={};try{j=await r.json()}catch(_){}if(!r.ok||!j.image){const e=new Error(j.error||('AI 畫圖失敗（'+r.status+'）'));e.code=j.code;throw e}return j}
+async function bdArtUpload(blob,pose,ts){const uid=me()?.id;if(!uid)throw new Error('請先登入');const path=`pets/${uid}/buddy-${ts}-${pose}.png`;
+  const {error}=await sb.storage.from('photos').upload(path,blob,{contentType:'image/png',upsert:true,cacheControl:'31536000'});if(error)throw error;return sb.storage.from('photos').getPublicUrl(path).data.publicUrl}
+async function bdArtProcess(j,pose,ts){const im=await bdLoadImg('data:'+(j.mime||'image/png')+';base64,'+j.image);const bl=await bdKeyOut(im);return {url:await bdArtUpload(bl,pose,ts),im}}
+function bdArtRemoveOld(art){try{if(!art)return;const pre=CONFIG.SUPABASE_URL+'/storage/v1/object/public/photos/';const ks=[...new Set(Object.values(art).filter(u=>typeof u==='string'&&u.startsWith(pre)).map(u=>u.slice(pre.length)))];if(ks.length)sb.storage.from('photos').remove(ks).catch(()=>{})}catch(_){}}
 async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'領養電子毛孩');
   const {data:pets}=await sb.from('pets').select('id,name,species,colour,photos').order('created_at');if(_n!==navId)return;
-  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',build:cur?.build||'mid',tail:cur?.tail||'curl',hair:cur?.hair||'short',snout:cur?.snout||'mid',snN:cur?.snN,iris:cur?.iris||null,noseC:cur?.noseC||null,maskC:cur?.maskC||null,face:cur?.face||'mid',eyes:cur?.eyes||'mid',brow:!!cur?.brow,mask:!!cur?.mask,bib:!!cur?.bib,socks:!!cur?.socks,name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null};
-  if(st.coat==='custom'&&!st.cc)st.coat='golden';
+  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',build:cur?.build||'mid',tail:cur?.tail||'curl',hair:cur?.hair||'short',snout:cur?.snout||'mid',snN:cur?.snN,iris:cur?.iris||null,noseC:cur?.noseC||null,maskC:cur?.maskC||null,face:cur?.face||'mid',eyes:cur?.eyes||'mid',brow:!!cur?.brow,mask:!!cur?.mask,bib:!!cur?.bib,socks:!!cur?.socks,name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null,art:cur?.art&&cur.art.ok?cur.art:null};
+  if(st.coat==='custom'&&!st.cc)st.coat='golden';const ai={busy:false};
   const srcPet=()=>(pets||[]).find(z=>z.id===st.src);const phs=()=>((srcPet()||{}).photos||[]).filter(Boolean).slice(0,6);
   const prev=()=>bdSVG({name:st.name||'電子毛孩',...st,s:{f:80,m:80,c:90,e:80}},'mood-happy');
   app.innerHTML=`<div class="card login-card bd-adopt-card" style="max-width:560px;margin:14px auto">
@@ -5500,11 +5571,15 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     <p class="muted">${cur?'名字、點心和好感度都會保留。':'照你家毛孩的樣子做一隻。每天餵牠、摸摸牠、陪牠玩；照顧真毛孩、回報目擊，牠也會得到點心。'}</p>
     <div class="bd-prevwrap"><div class="bd-preview" id="bdPrev">${prev()}</div><figure class="bd-ref" id="bdRef" hidden><img alt="參考照片"><figcaption>參考照片</figcaption></figure></div>
     ${(pets||[]).length?`<p class="lbl" style="margin:14px 0 6px">照我家的毛孩做</p><div class="chips bd-src">${pets.map(p=>`<button type="button" class="chip" data-src="${p.id}">${p.species==='cat'?'🐱':'🐶'} ${esc(p.name)}</button>`).join('')}</div>`:''}
+    <div class="bd-ai" id="bdAi"><p class="bd-ai-t">✨ AI 照照片畫出牠</p><p class="small muted" style="margin:2px 0 10px">用一張臉清楚的照片，AI 會照牠的毛色、花紋、耳朵和臉型，畫成可愛的 Q 版，還有開心、睡覺、吃飯、撒嬌、走路等動作。</p>
+      <div id="bdAiState"></div>
+      <div class="row bd-ai-btns" style="gap:8px"><button type="button" class="btn" id="bdAiGo">✨ 用照片畫我的毛孩</button><button type="button" class="btn ghost" id="bdAiUp">上傳別張照片</button><input type="file" id="bdAiFile" accept="image/*" hidden></div>
+      <div id="bdAiOut" aria-live="polite"></div></div>
     <div id="bdRefWrap" hidden><p class="lbl" style="margin:14px 0 6px">用哪張照片對毛色</p><div class="bd-phs" id="bdPhs"></div><p class="small muted" id="bdRefMsg" style="margin:6px 0 0"></p>
-      <button type="button" class="btn block bd-alignbtn" id="bdAlignBtn">📍 對準照片，讓牠更像</button><p class="small muted" style="margin:6px 2px 0">在照片上點牠的左眼、右眼、鼻子，會量出嘴巴長短，並分別取額頭、嘴邊、下巴、耳朵、眼睛和鼻子的顏色。</p></div>
+      <div id="bdAlignWrap"><button type="button" class="btn block bd-alignbtn" id="bdAlignBtn">📍 對準照片，讓牠更像</button><p class="small muted" style="margin:6px 2px 0">在照片上點牠的左眼、右眼、鼻子，會量出嘴巴長短，並分別取額頭、嘴邊、下巴、耳朵、眼睛和鼻子的顏色。</p></div></div>
     <p class="muted small" id="bdNoPh" hidden style="margin:8px 0 0">到<a id="bdPhLink" href="#/health">健康手冊</a>幫牠加一張照片，就能照照片對毛色。</p>
     <p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
-    <div id="bdEarWrap"><p class="lbl" style="margin:14px 0 6px">耳朵</p><div class="seg" id="bdEar"><button type="button" data-v="drop">垂耳</button><button type="button" data-v="semi">半立耳</button><button type="button" data-v="prick">立耳</button></div></div>
+    <div id="bdManual"><div id="bdEarWrap"><p class="lbl" style="margin:14px 0 6px">耳朵</p><div class="seg" id="bdEar"><button type="button" data-v="drop">垂耳</button><button type="button" data-v="semi">半立耳</button><button type="button" data-v="prick">立耳</button></div></div>
     <div class="bd-group"><p class="bd-gt">臉</p>
     <div id="bdSnoutWrap"><p class="lbl" style="margin:10px 0 6px">嘴巴</p><div class="seg" id="bdSnout"><button type="button" data-v="short">短</button><button type="button" data-v="mid">中</button><button type="button" data-v="long">長</button></div></div>
     <p class="lbl" style="margin:10px 0 6px">臉型</p><div class="seg" id="bdFace"><button type="button" data-v="narrow">窄</button><button type="button" data-v="mid">中</button><button type="button" data-v="wide">寬</button></div>
@@ -5514,12 +5589,16 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     <div id="bdTailWrap"><p class="lbl" style="margin:14px 0 6px">尾巴</p><div class="seg" id="bdTail"><button type="button" data-v="curl">捲尾</button><button type="button" data-v="sickle">鐮刀尾</button><button type="button" data-v="down">垂尾</button></div></div>
     <p class="lbl" style="margin:14px 0 6px">毛長</p><div class="seg" id="bdHair"><button type="button" data-v="short">短毛</button><button type="button" data-v="long">長毛</button></div>
     <p class="lbl" style="margin:14px 0 6px">毛色</p><div class="bd-coats" id="bdCoat"><button type="button" data-v="custom" id="bdCustom" hidden><span></span>照片的毛色</button>${Object.entries(BD_COATS).map(([k,c])=>`<button type="button" data-v="${k}" style="--c:${c.m}" aria-label="${c.n}"><span></span>${c.n}</button>`).join('')}</div>
-    <p class="lbl" style="margin:14px 0 6px">花紋</p><div class="chips" id="bdPat">${Object.entries(BD_PATS).map(([k,n])=>`<button type="button" class="chip" data-v="${k}">${n}</button>`).join('')}</div>
+    <p class="lbl" style="margin:14px 0 6px">花紋</p><div class="chips" id="bdPat">${Object.entries(BD_PATS).map(([k,n])=>`<button type="button" class="chip" data-v="${k}">${n}</button>`).join('')}</div></div>
     <label class="f" style="margin-top:14px"><span><b class="lbl">名字</b></span><input type="text" id="bdNm" maxlength="12" placeholder="例：小麥" value="${esc(st.name)}"></label>
     <button class="btn lg block" id="bdGo" style="margin-top:14px">${cur?'儲存外型':'領養牠'}</button>
     ${cur?`<a class="btn ghost block" href="#/buddy" style="margin-top:8px">取消</a>`:''}
   </div>`;
   const sync=()=>{$('#bdPrev').innerHTML=prev();
+    $('#bdManual').hidden=!!st.art;$('#bdAlignWrap').hidden=!!st.art;
+    $('#bdAiState').innerHTML=st.art?`<p class="bd-ai-on">✓ 現在用的是 AI 畫的樣子 <button type="button" class="linkbtn" id="bdAiOff">改用手調的樣子</button></p>`:'';
+    if(st.art)$('#bdAiOff').onclick=()=>{st.art=null;$('#bdAiOut').innerHTML='';sync()};
+    $('#bdAiGo').textContent=st.art?'✨ 重新畫一次':'✨ 用照片畫我的毛孩';$('#bdAiGo').disabled=$('#bdAiUp').disabled=!!ai.busy;
     app.querySelectorAll('#bdSp button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.sp));
     app.querySelectorAll('#bdCoat button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.coat));
     const cb=$('#bdCustom');cb.hidden=!st.cc;if(st.cc)cb.querySelector('span').style.background=`linear-gradient(135deg,${st.cc.l} 0 33%,${st.cc.m} 33% 66%,${st.cc.d} 66%)`;
@@ -5537,21 +5616,44 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
   app.querySelectorAll('#bdEar button').forEach(x=>x.onclick=()=>{st.ear=x.dataset.v;sync()});
   [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair'],['#bdSnout','snout'],['#bdFace','face'],['#bdEyes','eyes']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.onclick=()=>{st[k]=x.dataset.v;if(k==='snout')st.snN=undefined;sync()}));
   app.querySelectorAll('#bdMarks [data-m]').forEach(x=>x.onclick=()=>{st[x.dataset.m]=!st[x.dataset.m];sync()});
-  app.querySelectorAll('#bdSp button').forEach(x=>x.onclick=()=>{st.sp=x.dataset.v;if(st.pat==='calico'&&st.sp!=='cat')st.pat='solid';sync()});
+  app.querySelectorAll('#bdSp button').forEach(x=>x.onclick=()=>{if(st.sp!==x.dataset.v)st.art=null;st.sp=x.dataset.v;if(st.pat==='calico'&&st.sp!=='cat')st.pat='solid';sync()});
   app.querySelectorAll('#bdCoat button').forEach(x=>x.onclick=()=>{st.coat=x.dataset.v;sync()});
   app.querySelectorAll('#bdPat button').forEach(x=>x.onclick=()=>{st.pat=x.dataset.v;sync()});
-  app.querySelectorAll('[data-src]').forEach(x=>x.onclick=()=>{const p=pets.find(z=>z.id===x.dataset.src);if(!p)return;const g=bdGuess(p.colour,p.species);st.sp=p.species==='cat'?'cat':'dog';st.coat=g.coat;st.cc=null;st.pat=g.pat==='calico'&&st.sp!=='cat'?'spots':g.pat;st.src=p.id;st.ref=null;st.snN=undefined;st.iris=null;st.noseC=null;st.maskC=null;
+  app.querySelectorAll('[data-src]').forEach(x=>x.onclick=()=>{const p=pets.find(z=>z.id===x.dataset.src);if(!p)return;const g=bdGuess(p.colour,p.species);st.sp=p.species==='cat'?'cat':'dog';st.coat=g.coat;st.cc=null;st.pat=g.pat==='calico'&&st.sp!=='cat'?'spots':g.pat;st.src=p.id;st.ref=null;st.art=null;$('#bdAiOut').innerHTML='';st.snN=undefined;st.iris=null;st.noseC=null;st.maskC=null;
     if(!$('#bdNm').value.trim()||!cur){$('#bdNm').value=p.name;st.name=p.name}const ps=phs();if(ps.length)useRef(ps[0]);else sync()});
   $('#bdNm').oninput=()=>{st.name=$('#bdNm').value.trim()};
   $('#bdAlignBtn').onclick=async()=>{const u=st.ref||phs()[0];if(!u)return;const r=await bdAlign(u,st.sp);if(!r)return;
     st.cc=r.cc;st.coat='custom';st.iris=r.iris||null;st.noseC=r.noseC||null;st.brow=r.brow;
     if(st.sp!=='cat'){st.snN=r.snN;st.snout=r.snN<=-4?'short':r.snN>=5?'long':'mid';st.mask=r.mask;st.maskC=r.maskC||null}
     $('#bdRefMsg').textContent='✓ 已照照片調好：毛色分區、嘴巴長短、眼睛和鼻子顏色'+(r.mask?'、黑嘴':'')+(r.brow?'、眉點':'');sync();toast('✅ 已照照片調整，看看像不像')};
+  const aiMsg=h=>{const o=$('#bdAiOut');if(o)o.innerHTML=h};
+  const aiFail=e=>{ai.busy=false;if(_n!==navId)return;const m=e&&e.code==='nokey'?'AI 畫圖還在準備中，過幾天再來試試。現在可以先用下面的方式手動調整。':(e&&e.message)||'AI 畫圖失敗，請再試一次';aiMsg(`<p class="bd-ai-err">${esc(m)}</p>`);sync()};
+  const aiWait=t=>`<p class="bd-ai-wait"><span class="bd-spin" aria-hidden="true"></span>${esc(t)}</p>`;
+  const aiStart=async src=>{if(ai.busy)return;ai.busy=true;sync();
+    try{aiMsg(aiWait('正在讀照片…'));const im=await bdLoadImg(src);ai.photo=bdToB64(im);ai.src=src;
+      aiMsg(aiWait(`AI 正在照照片畫${st.name||'牠'}…（大約 20～40 秒，先不要離開這頁）`));
+      const j=await bdArtCall('ok',st.sp,ai.photo);if(_n!==navId)return;ai.ts=Date.now();
+      const r=await bdArtProcess(j,'ok',ai.ts);if(_n!==navId)return;ai.ok=r.url;ai.ref=bdToB64(r.im,640,.85);ai.busy=false;sync();
+      $('#bdPrev').innerHTML=`<img class="bd-ai-img" src="${esc(safeU(r.url))}" alt="AI 畫的${esc(st.name||'毛孩')}">`;
+      aiMsg(`<p style="margin:10px 0 8px"><b>像不像？</b>像的話，AI 會接著畫開心、睡覺、吃飯、撒嬌、走路 5 個動作（大約 1～2 分鐘）。</p><div class="row" style="gap:8px"><button type="button" class="btn" id="bdAiYes">像！畫其他動作</button><button type="button" class="btn ghost" id="bdAiAgain">不太像，再畫一次</button></div><p class="small muted" style="margin:6px 0 0">今天還能畫 ${+j.left||0} 張</p>`);
+      $('#bdAiYes').onclick=aiRest;$('#bdAiAgain').onclick=()=>{bdArtRemoveOld({ok:ai.ok});aiStart(ai.src)}}
+    catch(e){aiFail(e)}};
+  const aiRest=async()=>{if(ai.busy)return;ai.busy=true;sync();const todo=['happy','sleep','eat','sad','walk'],art={ok:ai.ok};let done=0,stop=null;
+    const prog=()=>aiMsg(aiWait(`AI 正在畫其他動作…（${done}/${todo.length}）`));prog();
+    const one=async p=>{for(let t=0;t<2;t++){try{const j=await bdArtCall(p,st.sp,ai.photo,ai.ref);art[p]=(await bdArtProcess(j,p,ai.ts)).url;return}catch(e){if(['limit','cap','nokey'].includes(e.code)){stop=e;return}}}};
+    const q=[...todo];const worker=async()=>{while(q.length&&!stop){await one(q.shift());done++;if(_n===navId)prog()}};
+    await Promise.all([worker(),worker()]);ai.busy=false;if(_n!==navId)return;
+    st.art=art;sync();const miss=todo.filter(p=>!art[p]).length;
+    aiMsg(`<p class="bd-ai-done">🎉 畫好了！按下面的「${cur?'儲存外型':'領養牠'}」就完成。</p>`+(miss?`<p class="small muted">有 ${miss} 個動作這次沒畫出來${stop?'（'+esc(stop.message)+'）':''}，會先用坐著的樣子代替，之後可以再重畫。</p>`:''));
+    $('#bdGo').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})};
+  $('#bdAiGo').onclick=()=>{const u=st.ref||phs()[0];if(u)aiStart(u);else $('#bdAiFile').click()};
+  $('#bdAiUp').onclick=()=>$('#bdAiFile').click();
+  $('#bdAiFile').onchange=e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;if(!/^image\//.test(f.type)){toast('請選照片檔');return}aiStart(URL.createObjectURL(f))};
   sync();
   $('#bdGo').onclick=()=>{const name=$('#bdNm').value.trim().slice(0,12);if(!name){toast('幫牠取個名字吧');$('#bdNm').focus();return}
-    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,build:st.build,tail:st.tail,hair:st.hair,snout:st.snout,snN:st.snN,iris:st.iris,noseC:st.noseC,maskC:st.mask?st.maskC:null,face:st.face,eyes:st.eyes,brow:st.brow,mask:st.sp==='dog'&&st.mask,bib:st.bib,socks:st.socks,src:st.src,ref:st.ref,look:'draw',photo:null};
+    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,build:st.build,tail:st.tail,hair:st.hair,snout:st.snout,snN:st.snN,iris:st.iris,noseC:st.noseC,maskC:st.mask?st.maskC:null,face:st.face,eyes:st.eyes,brow:st.brow,mask:st.sp==='dog'&&st.mask,bib:st.bib,socks:st.socks,src:st.src,ref:st.ref,look:st.art?'ai':'draw',art:st.art||null,photo:null};
     const b=cur?{...cur,...look}:{v:1,...look,born:bdToday(),s:{f:70,m:80,c:95,e:85},t:now,aff:0,tr:3,dd:bdToday(),ls:bdToday(),streak:1,dc:{},nt:true};
-    __bd=b;__bdUid=me().id;bdSave(true);__bdGreeted=false;toast(cur?'✅ 外型已更新':`🎉 ${name}來到你家了！送你 3 個點心`);if((location.hash||'')==='#/buddy')route();else goReplace('#/buddy')}}
+    if(cur&&cur.art&&(!st.art||cur.art.ok!==st.art.ok))bdArtRemoveOld(cur.art);__bd=b;__bdUid=me().id;bdSave(true);__bdGreeted=false;toast(cur?'✅ 外型已更新':`🎉 ${name}來到你家了！送你 3 個點心`);if((location.hash||'')==='#/buddy')route();else goReplace('#/buddy')}}
 
 // ── 使用者名稱：註冊時設定，之後不能改（資料庫 migration v1.34 也會擋） ──
 const UN_RE=/^[A-Za-z0-9_一-鿿㐀-䶿]{2,20}$/;
