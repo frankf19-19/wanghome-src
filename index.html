@@ -1698,11 +1698,17 @@ body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green)
 label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.f .pw-wrap input{width:100%;box-sizing:border-box;padding-right:52px}.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;border-radius:12px;cursor:pointer}.pw-eye.on{color:var(--red-ink)}.pw-eye svg{width:20px;height:20px}
 .un-msg{min-height:1.3em;margin:4px 2px 0;color:var(--ink-3)}.un-msg.bad{color:var(--red-ink)}.un-msg.ok{color:#18704F}
 .acct-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.acct-row:last-of-type{border-bottom:0}.acct-row b{flex:none}.acct-row span{text-align:right;overflow-wrap:anywhere}
-.delrow{display:flex;align-items:center;gap:4px}.delrow .sponsor{flex:1;min-width:0}
-.trash-btn{flex:none;width:44px;height:44px;border:0;background:none;border-radius:12px;display:grid;place-items:center;color:var(--ink-3);cursor:pointer}.trash-btn svg{width:20px;height:20px}.trash-btn:hover,.trash-btn:focus-visible{color:var(--red-ink);background:color-mix(in srgb,var(--red-fill) 12%,transparent)}.trash-btn:disabled{opacity:.4}
-.tl-del{position:absolute;top:-8px;right:-6px;z-index:1}.tl>a{padding-right:40px}
+.delrow{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}.delrow:last-child{border-bottom:0}.delrow .sponsor{flex:1;min-width:0;border:0!important;box-shadow:none!important;background:none!important}
+.trash-btn{flex:none;display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 12px 0 9px;border:0;border-radius:99px;background:var(--red-soft);color:var(--red-ink);font:inherit;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap}.trash-btn svg{width:17px;height:17px}.trash-btn:active{transform:scale(.96)}.trash-btn:disabled{opacity:.45}
+.tl-del{position:absolute;top:-4px;right:0;z-index:1}.tl:has(.tl-del)>a{padding-right:76px}
 .pv-head .stat{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pv-head .stat b{white-space:nowrap}.pv-head .stat span{display:block;white-space:nowrap}
 .tabs button,.seg button{white-space:nowrap}.adm-tabs{overflow-x:auto;flex-wrap:nowrap!important;scrollbar-width:none}.adm-tabs::-webkit-scrollbar{display:none}.adm-tabs button{flex:none}
+/* 頂端右邊的動作（編輯、分享）：跟「返回」一樣是有字的膠囊按鈕，一眼看得出來 */
+.mb-act button{width:auto!important;height:44px;display:flex!important;align-items:center;gap:5px;padding:0 15px 0 11px;border:0;border-radius:99px;background:var(--sheet)!important;box-shadow:0 1px 4px rgba(120,80,40,.12);color:var(--red);font:inherit;font-weight:800;font-size:16px;cursor:pointer;white-space:nowrap}.mb-act button span{color:var(--ink)}.mb-act button .ico{width:20px!important;height:20px!important}.mb-act button:active{transform:scale(.96)}
+.tl-rep{display:inline-flex!important;align-items:center;gap:3px;font-weight:700}.tl-rep svg{width:15px;height:15px}
+/* 照片上的刪除鈕：紅底白叉，看得出是「移除這張」 */
+.photos-preview div button{background:var(--red)!important;color:#fff!important;border:2px solid #fff!important;box-shadow:0 2px 6px rgba(120,30,60,.35);font-weight:900;display:grid;place-items:center}
+.mg-body>.card{box-shadow:none!important;border:0!important;background:none!important;padding:0!important;margin-top:0!important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1775,7 +1781,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.7.1';
+const BUILD = 'v5.7.2';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -3130,7 +3136,7 @@ async function renderCase(id){const _n=navId;
   getShareUrl('s',id).then(u=>{if(u===url||location.hash.split('?')[0]!=='#/case/'+id)return;applyShareUrl(u,shareTitle);const t=$('#shareText');if(t)t.value=shareText(c,u)});
   $('#btnReport').onclick=()=>openReport('case',id,c.poster);
   {const bb=$('#btnBlock');if(bb)bb.onclick=()=>blockPoster(c.poster,()=>{location.hash='#/'})}
-  if(_n===navId)setNavAction(`<button type="button" aria-label="分享">${ic('share')}</button>`,()=>{const b=$('#btnShare');if(b)b.click()});
+  if(_n===navId)setNavAction(`<button type="button">${ic('share')}<span>分享</span></button>`,()=>{const b=$('#btnShare');if(b)b.click()});
   $('#btnManage').onclick=async()=>{
     let t=null;try{t=localStorage.getItem('wh_token_'+id)}catch(_){}
     if(t||me()){const {data}=await sb.rpc('can_manage_case',{p_id:id,p_token:t});if(data){location.hash=`#/manage/${id}`;return}}
@@ -3162,7 +3168,7 @@ async function renderCase(id){const _n=navId;
     <div class="where">${ic("pin")} ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
     ${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
     ${p.photo?`<div class="ph" style="background-image:url('${esc(safeU(p.photo))}')" data-lightbox="${esc(safeU(p.photo))}"></div>`:''}
-    ${(p.by||p.verified||p.sid)?`<div class="tl-meta small muted">${p.by||p.verified?`<span>${esc(p.by||'會員')}${p.verified?' · ✓ 會員':''}</span>`:''}${p.sid?`<button type="button" class="linkbtn tl-rep" aria-label="檢舉這筆目擊" data-sid="${esc(p.sid)}" data-poster="${esc(p.poster||'')}">${ic('flag')}</button>`:''}</div>`:''}</div>`).join('');
+    ${(p.by||p.verified||p.sid)?`<div class="tl-meta small muted">${p.by||p.verified?`<span>${esc(p.by||'會員')}${p.verified?' · ✓ 會員':''}</span>`:''}${p.sid?`<button type="button" class="linkbtn tl-rep" aria-label="檢舉這筆目擊" data-sid="${esc(p.sid)}" data-poster="${esc(p.poster||'')}">${ic('flag')}<span>檢舉</span></button>`:''}</div>`:''}</div>`).join('');
 
   // 電腦版時間軸是可以捲動的框：內容比框高時，底部提示還有更早的紀錄
   requestAnimationFrame(()=>{if(!tl.isConnected||tl.scrollHeight<=tl.clientHeight+8)return;const h=document.createElement('div');h.className='tl-hint';h.textContent='往下捲，看更早的紀錄（共 '+pts.length+' 筆）';tl.appendChild(h);
@@ -5249,7 +5255,7 @@ async function renderPetView(id){const _n=navId;
   ${calPrompt?`<div class="calprompt" id="calPrompt"><div class="b"><b>已設定提醒：${esc(calPrompt.title)}</b><br><span class="muted">${calPrompt.next_due}・${dueText(calPrompt.next_due)}，要順便加到手機日曆嗎？</span></div><div class="acts">${calButtons(p.name,calPrompt)}<button type="button" class="btn sm ghost" id="calPromptX">不用</button></div></div>`:''}
   <h2>${ic("pill")} 用藥與保養品 <a class="btn sm ghost" href="#/pet/${id}/med/new" style="margin-left:auto">${ic("plus")} 新增</a></h2>
   ${meds.length?`${medToday.length?`<div class="card med-card"><div class="med-title">今天吃了沒？<span class="muted small">餵完按一下就打勾</span></div>${medToday.join('')}</div>`:''}
-  ${medToday.length?`<details class="mg-sec" style="margin-top:12px"><summary>藥品與保養品清單 <span class="muted small">${meds.length} 項</span></summary><div class="mg-body">`:''}  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<div class="delrow"><a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span>${(x.files||[]).length?` <span class="tag" style="vertical-align:2px">${ic("image")} ${x.files.length}</span>`:''}</b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a><button type="button" class="trash-btn" data-del-med="${x.id}" aria-label="刪除 ${esc(x.name)}">${ic('trash')}</button></div>`).join('')}</div>${medToday.length?'</div></details>':''}`
+  ${medToday.length?`<details class="mg-sec" style="margin-top:12px"><summary>藥品與保養品清單 <span class="muted small">${meds.length} 項</span></summary><div class="mg-body">`:''}  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<div class="delrow"><a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span>${(x.files||[]).length?` <span class="tag" style="vertical-align:2px">${ic("image")} ${x.files.length}</span>`:''}</b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a><button type="button" class="trash-btn" data-del-med="${x.id}" aria-label="刪除 ${esc(x.name)}">${ic('trash')}<span>刪除</span></button></div>`).join('')}</div>${medToday.length?'</div></details>':''}`
   :`<div class="empty-card"><div class="big">${ic("pill")}</div><b>還沒有記錄用藥或保養品</b><p class="small">記下藥名、每次劑量和一天幾次，家人餵藥時就不會搞錯或重複餵。</p><div class="btns"><a class="btn green" href="#/pet/${id}/med/new">新增藥品</a><a class="btn ghost" href="#/pet/${id}/med/new?kind=supplement">新增保養品</a></div></div>`}
   ${medsOff.length?`<details class="med-off"><summary>已停用 ${medsOff.length} 項</summary>${medsOff.map(x=>`<a href="#/pet/${id}/med/${x.id}">${esc(x.name)}・${esc(medLine(x))}${x.end_date?`・到 ${x.end_date}`:''}</a>`).join('')}</details>`:''}
 
@@ -5259,7 +5265,7 @@ async function renderPetView(id){const _n=navId;
 
   <h2>${ic("clipboard")} 健康紀錄</h2>
   <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[e,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${recIc(k)} ${t}</button>`).join('')}</div>
-  ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><button type="button" class="trash-btn tl-del" data-del-rec="${r.id}" aria-label="刪除 ${esc(r.title)}">${ic('trash')}</button><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
+  ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><button type="button" class="trash-btn tl-del" data-del-rec="${r.id}" aria-label="刪除 ${esc(r.title)}">${ic('trash')}<span>刪除</span></button><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
       <a href="#/pet/${id}/record/${r.id}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}</div>
       <div class="where">${esc([(REC_KINDS[r.kind]||[,'其他'])[1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
       ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
@@ -5277,7 +5283,7 @@ async function renderPetView(id){const _n=navId;
     if((r.files||[]).length)sb.storage.from('pet-private').remove(r.files).catch(()=>{});lnSync(true);toast('已刪除「'+r.title+'」');route()});
   document.querySelectorAll('[data-done]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;burst(b,'#16855A');const {error}=await sb.from('pet_records').update({done:true}).eq('id',b.dataset.done);if(error){b.disabled=false;return toast('沒有標記成功：'+error.message)}lnSync(true);rerender(()=>renderPetView(id));const rid=b.dataset.done;showUndo('已標記完成',async()=>{const {error}=await sb.from('pet_records').update({done:false}).eq('id',rid);if(error)return toast('復原失敗：'+error.message);lnSync(true);rerender(()=>renderPetView(id))})});
   bindIcs(calPrompt?[...due,calPrompt]:due,()=>p.name);countUp(app);
-  if(_n===navId)setNavAction(`<button type="button" aria-label="編輯資料">${ic('edit')}</button>`,()=>{location.hash='#/pet/'+id+'/edit'});
+  if(_n===navId)setNavAction(`<button type="button">${ic('edit')}<span>編輯</span></button>`,()=>{location.hash='#/pet/'+id+'/edit'});
   {const mc=document.querySelector('#app .med-card'),ab=document.querySelector('#app .detail-head .actionbar');if(mc&&ab){ab.after(mc);mc.style.marginTop='14px'}}
   bindMedSlots(()=>rerender(()=>renderPetView(id)));
   if($('#calPromptX'))$('#calPromptX').onclick=()=>$('#calPrompt').remove();
