@@ -1964,7 +1964,7 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 @media (prefers-reduced-motion:reduce){.rc-s.on .rc-img,.rc-s.on .rc-cv-t,.rc-s.on .rc-card li{animation:none}.rc-s{transition:none}}
 :root[data-theme=dark] .alb-cell{background-color:#3A2A30}
 /* 首頁：功能介紹卡 */
-.howto{margin-top:6px}
+.howto{margin-top:6px;grid-column:1/-1;min-width:0}
 .ht-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
 .ht-row::-webkit-scrollbar{display:none}
 .ht{flex:none;width:150px;scroll-snap-align:start;text-decoration:none!important;color:var(--ink)!important;display:flex;flex-direction:column;gap:2px}
@@ -1984,7 +1984,7 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .htrem{display:grid;gap:2px;width:100%;background:#fff;border-radius:12px;padding:8px 10px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:left}.htrem b{font-size:12px}.htrem span{font-size:11px;color:#E5484D;font-weight:700;margin-bottom:4px}
 .htalb{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:96px}.htalb i{aspect-ratio:1;border-radius:8px;background:linear-gradient(135deg,#FFC8A8,#F7A1C0)}.htalb i:nth-child(2){background:linear-gradient(135deg,#F9E0A0,#F6B26B)}.htalb i:nth-child(3){background:linear-gradient(135deg,#BFE3D0,#8FCFB0)}.htalb i:nth-child(4){background:linear-gradient(135deg,#D9CCF5,#B7A6EC)}.htalb b{grid-column:span 2;text-align:center;font-size:12px}
 :root[data-theme=dark] .ht-m{filter:brightness(.92)}
-.ht-m.ph{background-size:cover;background-position:center;align-items:flex-end;justify-content:stretch;padding:0}
+.ht-m.ph,.ht.h1 .ht-m.ph,.ht.h6 .ht-m.ph,.ht.h7 .ht-m.ph{background-size:cover;background-position:center 35%;flex-direction:column;align-items:stretch;justify-content:flex-end;padding:0}
 .ht-m.ph::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.55))}
 .htc{position:relative;z-index:1;display:flex;flex-direction:column;gap:2px;padding:10px;color:#fff;width:100%;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.4)}
 .htc b{font-size:16px}.htc span{font-size:11px;opacity:.95}.htc em{align-self:flex-start;font-style:normal;font-size:11px;font-weight:800;background:var(--red);border-radius:999px;padding:1px 8px;text-shadow:none}.htc em.g{background:#7A5BD6}
@@ -2066,7 +2066,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.10.3';
+const BUILD = 'v5.10.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2851,7 +2851,7 @@ function bindEntry(kind,id){const go=()=>{const raw=$('#tk').value,t=extractToke
   $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
 // 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
 // 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
-function howToHTML(){const U=id=>`https://unsplash.com/photos/${id}/download?w=420`,P={shiba:U('c0VTrbsXtFU'),shiba2:U('1Gj9tFSLCmk'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('qO-PIF84Vxg'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
+function howToHTML(){const U=id=>`https://unsplash.com/photos/${id}/download?w=420`,P={shiba:U('c0VTrbsXtFU'),shiba2:U('c0VTrbsXtFU'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('1Gj9tFSLCmk'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
   const bg=u=>`style="background-image:url('${u}')"`;
   const card=(href,cls,mock,t,sub,photo)=>`<a class="ht ${cls}" href="${href}"><span class="ht-m ${photo?'ph':''}" ${photo?bg(photo):''} aria-hidden="true">${mock}</span><b>${t}</b><small>${sub}</small></a>`;
   return `<div class="mp-h"><b>${pawSvg()} 汪喵回家可以這樣幫你</b><a href="#/resources">協尋攻略 ›</a></div>
