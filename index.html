@@ -338,7 +338,7 @@ body[data-space="health"] main a:not(.btn):not(.ccard):not(.crosslink){color:var
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
 @media(min-width:760px){.filters{grid-template-columns:1fr 1fr 2fr auto}}
-select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=number],input[type=datetime-local],input[type=date],textarea{
+select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=password],input[type=number],input[type=datetime-local],input[type=date],textarea{
   width:100%;border:1.5px solid var(--line);border-radius:var(--r-ctl);padding:11px 13px;font-size:16px;font-family:inherit;background:var(--sheet);color:var(--ink);transition:border-color .15s}
 select:focus,input:focus,textarea:focus{outline:none;border-color:var(--ink-2)}
 textarea{min-height:96px;resize:vertical}
@@ -774,7 +774,7 @@ body[data-space="health"] .space a[data-s="health"] .sp-ic{background:var(--gree
 .btn.line,.btn.fb{box-shadow:none}
 .btn:active{transform:translateY(2px);box-shadow:none}
 /* 輸入 */
-select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=number],input[type=datetime-local],input[type=date],textarea{border-color:var(--line);border-radius:14px;background:var(--sheet)}
+select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=password],input[type=number],input[type=datetime-local],input[type=date],textarea{border-color:var(--line);border-radius:14px;background:var(--sheet)}
 select:focus,input:focus,textarea:focus{border-color:var(--red)}
 .card{border-radius:var(--r-card)}
 .notice{border-radius:14px}
@@ -1623,7 +1623,7 @@ body[data-space="health"] .mg-ai{background:linear-gradient(180deg,color-mix(in 
 .fsec{font-family:var(--head);font-size:15px;color:var(--ink-2);margin:22px 0 6px;display:flex;align-items:baseline;gap:8px;letter-spacing:.02em}.fsec:first-child{margin-top:2px}.fsec small{font-weight:500;font-size:12.5px;color:var(--ink-3)}
 .fsec::before{content:"";width:4px;height:14px;border-radius:2px;background:var(--red);align-self:center}body[data-space="health"] .fsec::before{background:var(--green)}
 label.f>span{font-size:14px;font-weight:700;color:var(--ink-2)}
-select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=number],input[type=datetime-local],input[type=date],input[type=time],textarea{background:color-mix(in srgb,var(--paper) 55%,var(--sheet));border-color:color-mix(in srgb,var(--line) 90%,transparent);box-shadow:inset 0 1px 2px rgba(120,40,70,.04)}
+select,input:not([type]),input[type=text],input[type=tel],input[type=email],input[type=password],input[type=number],input[type=datetime-local],input[type=date],input[type=time],textarea{background:color-mix(in srgb,var(--paper) 55%,var(--sheet));border-color:color-mix(in srgb,var(--line) 90%,transparent);box-shadow:inset 0 1px 2px rgba(120,40,70,.04)}
 select:focus,input:focus,textarea:focus{background:var(--sheet)}
 .seg{background:color-mix(in srgb,var(--paper) 60%,var(--sheet));border-radius:16px;padding:4px}.seg button{border-radius:12px}.seg button.on{box-shadow:0 4px 12px -6px rgba(120,40,70,.4)}
 .fchip{background:var(--sheet);box-shadow:0 1px 2px rgba(120,40,70,.05)}
@@ -2014,6 +2014,10 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .lc-b{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px}.lc-b b{font-size:16px}.lc-b small{color:var(--ink-3)}.lc-b .lc-go{margin-top:6px;color:var(--red);font-weight:700}
 .empty-card{grid-column:1/-1}
 @media (min-width:900px){.bigstart>*{grid-column:1/-1}}
+button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visible}
+.pf-av.img img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.pf-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:var(--sheet);color:var(--ink-2);display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.18);font-size:13px}
+.nav-av{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2086,7 +2090,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.11.1';
+const BUILD = 'v5.12.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2948,7 +2952,7 @@ async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
 }
 async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
   if(!me()){el.innerHTML='';return}   // 沒登入：四宮格裡已經有「健康手冊」，不再重複
-  getProfile().then(p=>{const n=(p&&(p.username||p.display_name)||'').trim();const h=$('#hiName');if(n&&h&&_n===navId)h.textContent=' '+n.slice(0,12)}).catch(()=>{});
+  getProfile().then(p=>{const n=(p&&(p.display_name||p.username)||'').trim();const h=$('#hiName');if(n&&h&&_n===navId)h.textContent=' '+n.slice(0,12)}).catch(()=>{});
   const {data,error}=await sb.from('pets').select('id,name,species,photos,birthday').order('created_at').limit(12);
   if(_n!==navId||!el.isConnected)return;
   if(error||!data||!data.length){el.innerHTML='';return}
@@ -4968,7 +4972,8 @@ async function initAuth(){
 function updateAuthUI(){
   const a=$('#navMe');if(!a)return;
   const u=me();
-  a.innerHTML=ic('user')+(u?`<span class="hide-sm"> 我的</span>`:`<span class="hide-sm"> 登入／註冊</span>`);a.setAttribute('aria-label',u?'我的':'登入或註冊');
+  let av='';if(u){try{av=localStorage.getItem('wh_av_'+u.id)||''}catch(_){}}
+  a.innerHTML=(av&&safeU(av)?`<img class="nav-av" src="${esc(safeU(av))}" alt="">`:ic('user'))+(u?`<span class="hide-sm"> 我的</span>`:`<span class="hide-sm"> 登入／註冊</span>`);a.setAttribute('aria-label',u?'我的':'登入或註冊');
   a.title=u?(u.email||'我的'):'登入／註冊';
   const t=document.querySelector('#tabbar a[data-r=me]');if(t)t.innerHTML=tbI('me')+'我的';
 }
@@ -5179,6 +5184,24 @@ async function pwChangeFlow(box){if(!box||!me())return;const had=hasPw(),email=m
 function hasPw(){const u=me();if(!u)return false;if((u.user_metadata||{}).has_pw)return true;
   try{const t=session&&session.access_token;const p=JSON.parse(decodeURIComponent(escape(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));return (p.amr||[]).some(a=>a&&a.method==='password')}catch(_){return false}}
 // strict：讀取失敗就丟出錯誤（存檔前一定要用，避免把「讀不到」當成「全部空白」覆蓋掉設定）
+// ── 暱稱（3 個月改一次）＋大頭貼 ──
+function nickNext(p){if(!p||!p.display_name_changed_at)return '';const t=new Date(p.display_name_changed_at).getTime()+90*864e5;if(Date.now()>=t)return '';const d=new Date(t);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`}
+function textSheet({title,value='',max=40,placeholder='',hint=''}){return new Promise(res=>{const d=document.createElement('div');d.className='lightbox sheet-bg';d.style.zIndex='3100';
+  d.innerHTML=`<div class="sheet ask" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p>${hint?`<p class="muted small" style="margin:-6px 0 12px">${esc(hint)}</p>`:''}<input type="text" id="tsIn" maxlength="${max}" placeholder="${esc(placeholder)}" value="${esc(value)}" style="width:100%"><button type="button" class="btn big block" data-v="1" style="margin-top:12px">儲存</button><button type="button" class="btn big block ghost" data-v="0" style="margin-top:8px">取消</button></div>`;
+  let done=false;const fin=ok=>{if(done)return;done=true;const v=d.querySelector('#tsIn').value;d.remove();res(ok?v:null)};
+  d.onclick=e=>{const b=e.target.closest('[data-v]');if(b)fin(b.dataset.v==='1');else if(e.target===d)fin(false)};document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add('show'));
+  setTimeout(()=>{const i=d.querySelector('#tsIn');i.focus();i.onkeydown=e=>{if(e.key==='Enter')fin(true);if(e.key==='Escape')fin(false)}},120)})}
+function squareJpeg(file,size=400){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const s=Math.min(im.width,im.height),c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,size,size);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error('照片處理失敗')),'image/jpeg',.86)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('讀不到這張照片'))};im.src=u})}
+function avatarRemoveFile(url){try{const pre='/storage/v1/object/public/photos/';const i=String(url||'').indexOf(pre);if(i>=0)sb.storage.from('photos').remove([url.slice(i+pre.length)]).catch(()=>{})}catch(_){}}
+function avatarPick(p){const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.style.display='none';document.body.appendChild(inp);
+  inp.onchange=async()=>{const f=inp.files&&inp.files[0];inp.remove();if(!f)return;const uid=me()?.id;if(!uid)return;toast('正在更新大頭貼…',2000);
+    try{const blob=await squareJpeg(f,400);const path=`pets/${uid}/avatar-${Date.now().toString(36)}.jpg`;
+      const {error:e1}=await sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000'});if(e1)throw e1;
+      const url=sb.storage.from('photos').getPublicUrl(path).data.publicUrl;const {error:e2}=await sb.from('profiles').update({avatar_url:url}).eq('id',uid);
+      if(e2){sb.storage.from('photos').remove([path]).catch(()=>{});throw e2}
+      if(p&&p.avatar_url)avatarRemoveFile(p.avatar_url);try{localStorage.setItem('wh_av_'+uid,url)}catch(_){}toast('✅ 大頭貼已更新');route()}
+    catch(e){toast('大頭貼沒有更新成功：'+friendlyErr(e.message||String(e)),5000)}};
+  inp.click()}
 async function getProfile(strict){
   if(!me())return null;
   const {data,error}=await sb.from('profiles').select('*').eq('id',me().id).maybeSingle();
@@ -6057,7 +6080,7 @@ async function renderMeBody(){const _n=navId;
   if(fl&&fl.length){const {data}=await sb.from('cases_public').select('*').in('id',fl.map(f=>f.case_id));followed=data||[]}
   const p=prof.d||{};
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
-  (_n===navId?app:_void).innerHTML=`<div class="profile"><span class="pf-av" aria-hidden="true">${esc([...(p.username||p.display_name||me().email||'會')][0].toUpperCase())}</span><div class="pf-t"><h1>${esc(p.username||p.display_name||me().email||'會員')}</h1>${(p.username||p.display_name)&&me().email?`<span class="muted small">${esc(me().email)}</span>`:''}</div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}</div></div>
+  (_n===navId?app:_void).innerHTML=`<div class="profile"><button type="button" class="pf-av ${p.avatar_url?'img':''}" id="pfAv" aria-label="更換大頭貼">${p.avatar_url?`<img src="${esc(safeU(p.avatar_url))}" alt="">`:esc([...(p.display_name||p.username||me().email||'會')][0].toUpperCase())}<i class="pf-cam" aria-hidden="true">${ic('camera')}</i></button><div class="pf-t"><h1>${esc(p.display_name||p.username||me().email||'會員')}</h1><span class="muted small">${p.username?'@'+esc(p.username):''}${p.username&&me().email?'・':''}${me().email?esc(me().email):''}</span></div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}</div></div>
 
   <a class="crosslink" href="#/health" style="margin:18px 0 6px"><span class="cl-ic">${ic("steth")}</span><span><b>毛孩健康手冊${(pets||[]).length?`・${pets.length} 隻毛孩`:''}</b>${(dues||[]).length?`有 ${dues.length} 項一個月內到期`:'健康紀錄、到期提醒和日曆同步都在這裡'}</span><em>打開</em></a>
 
@@ -6070,6 +6093,8 @@ async function renderMeBody(){const _n=navId;
 
   <details class="mg-sec" id="acSec" style="margin-top:24px"><summary>${ic("user")} 帳號與密碼 <span class="muted small">${esc(p.username||'')}</span></summary><div class="mg-body">
     <div class="acct-row"><b>使用者名稱</b><span>${'username' in p?(p.username?`${esc(p.username)} <small class="muted">（不能修改）</small>`:`<a href="#/set-username">設定使用者名稱</a>`):esc(p.display_name||'')}</span></div>
+    <div class="acct-row"><b>暱稱</b><span>${esc(p.display_name||p.username||'還沒設定')} ${nickNext(p)?`<small class="muted">（${nickNext(p)} 之後可以再改）</small>`:`<button type="button" class="linkbtn" id="btnNick">修改</button>`}</span></div>
+    <div class="acct-row"><b>大頭貼</b><span><button type="button" class="linkbtn" id="btnAv">${p.avatar_url?'更換照片':'放一張照片'}</button>${p.avatar_url?` ・ <button type="button" class="linkbtn" id="btnAvDel">移除</button>`:''}</span></div>
     <div class="acct-row"><b>Email</b><span>${esc(me().email||'（用 LINE／Apple 登入，沒有 Email）')}</span></div>
     ${me().email?`<div class="acct-row"><b>密碼</b><span>${hasPw()?'已設定':'還沒設定'}</span></div>
       <div id="pwBox" style="margin-top:10px"><button type="button" class="btn block ghost" id="btnPwStart">${hasPw()?'更改密碼':'設定密碼'}</button><p class="small muted" style="margin:6px 2px 0">為了安全，會先寄一組驗證碼到 ${esc(me().email)}。</p></div>`:''}
@@ -6102,6 +6127,11 @@ async function renderMeBody(){const _n=navId;
   {const ub=$('#btnUnblockAll');if(ub)ub.onclick=()=>{try{localStorage.removeItem('wh_hidden');localStorage.removeItem('wh_blocked')}catch(_){}toast('已全部恢復顯示');renderMe()}}
   app.querySelectorAll('#acSec [data-eye]').forEach(b=>b.onclick=()=>{const i=$('#'+b.dataset.eye);const show=i.type==='password';i.type=show?'text':'password';b.classList.toggle('on',show)});
   if($('#btnPwStart'))$('#btnPwStart').onclick=()=>pwChangeFlow($('#pwBox'));
+  try{localStorage.setItem('wh_av_'+me().id,p.avatar_url||'')}catch(_){}updateAuthUI();
+  $('#pfAv').onclick=()=>avatarPick(p);if($('#btnAv'))$('#btnAv').onclick=()=>avatarPick(p);
+  if($('#btnAvDel'))$('#btnAvDel').onclick=async()=>{if(!await askSheet({title:'移除大頭貼？',ok:'移除',danger:true}))return;const old=p.avatar_url;const {error}=await sb.from('profiles').update({avatar_url:null}).eq('id',me().id);if(error)return toast('沒有成功：'+friendlyErr(error.message));avatarRemoveFile(old);toast('已移除');route()};
+  if($('#btnNick'))$('#btnNick').onclick=async()=>{const v=await textSheet({title:'修改暱稱',value:p.display_name||p.username||'',max:20,placeholder:'例：小麥媽媽',hint:'暱稱 3 個月可以改一次。使用者名稱不會改變。'});if(v===null)return;const n=v.trim();if(!n)return toast('請輸入暱稱');if(n===(p.display_name||''))return;
+    if(!await askSheet({title:`把暱稱改成「${n}」？`,body:'改了之後，3 個月內不能再改。',ok:'確定修改'}))return;const {error}=await sb.from('profiles').update({display_name:n}).eq('id',me().id);if(error)return toast(friendlyErr(error.message),5000);toast('✅ 暱稱已更新');route()};
   $('#btnOut').onclick=async()=>{const clearMine=confirm('這是共用的手機嗎？\n按「確定」：登出並清除這支手機記住的管理網址和聯絡資料（共用手機建議這樣）。\n按「取消」：只登出，資料留著下次用（自己的手機）。');
     window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
