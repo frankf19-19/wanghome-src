@@ -1975,7 +1975,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.9.2';
+const BUILD = 'v5.9.3';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -5337,7 +5337,7 @@ function buddyHomeHTML(){
   if(!b)return `<a class="bd-home bd-adopt" href="#/buddy"><div class="bd-stage-mini">${bdSVG({name:'電子毛孩',sp:'dog',coat:'golden',pat:'solid',s:{f:80,m:80,c:90,e:80}},'mood-happy')}</div><div class="bd-hinfo"><b>領養你的電子毛孩</b><span>可以照你家毛孩的樣子做，每天陪牠玩、照顧牠</span><em class="btn sm">去領養</em></div></a>`;
   bdTick(b);const lv=bdLv(b.aff);
   return `<div class="bd-home" id="bdHome"><div class="bd-stage-mini" id="bdMini">${bdSVG(b)}</div><div class="bd-hinfo"><a href="#/buddy" class="bd-hname">${esc(b.name)} <small>Lv.${lv} ${bdTitle(lv)}</small></a><p class="bd-say" id="bdSay">${esc(bdLine(b))}</p>
-    <div class="bd-hbtns"><button type="button" class="btn sm" data-bd="feed">🍚 餵飯</button><a class="btn sm ghost" href="#/buddy">陪牠玩 ›</a></div>${b.art&&b.art.ok?'':'<a class="bd-ai-mini" href="#/buddy?new=1&ai=1">✨ 用 AI 照照片畫得更像</a>'}</div></div>`}
+    <div class="bd-hbtns"><button type="button" class="btn sm" data-bd="feed">🍚 餵飯</button><a class="btn sm ghost" href="#/buddy">陪牠玩 ›</a></div>${(b.art&&b.art.ok)||!BD_AI_ON?'':'<a class="bd-ai-mini" href="#/buddy?new=1&ai=1">✨ 用 AI 照照片畫得更像</a>'}</div></div>`}
 function buddyHomeBind(){const box=$('#bdHome');if(!box)return;const b=bdLoad();if(!b)return;const svg=box.querySelector('.bd-svg');
   bdApply(svg,b);if(bdDaily(b)){bdSave();setTimeout(()=>{toast(`🎁 每日見面禮：${b.name}得到 1 個點心`+(b.streak>1?`（連續 ${b.streak} 天）`:''),3500)},700)}
   if(!__bdGreeted&&!bdAsleep(b)){__bdGreeted=true;setTimeout(()=>{bdJump(svg);bdSay(box,(Date.now()-(b.seen||0)>864e5&&b.seen)?'好想你！你終於回來了！':'你回來了！'+bdSound(b))},500)}
@@ -5404,7 +5404,7 @@ async function renderBuddy(){const _n=navId;setTitle('電子毛孩');
   const draw=()=>{const lv=bdLv(b.aff),pr=Math.round(((b.aff||0)%30)/30*100),days=Math.max(1,lnDiffDays(String(b.born||bdToday()).slice(0,10),bdToday())+1),night=bdNight();
     app.innerHTML=`<div class="bd-room" id="bdRoom">
     <div class="bd-top"><h1>${esc(b.name)}</h1><span class="bd-lv">Lv.${lv}・${bdTitle(lv)}</span></div>
-    ${b.art&&b.art.ok?'':`<a class="bd-ai-cta" href="#/buddy?new=1&ai=1"><b>✨ 讓 AI 照真實照片畫出${esc(b.name)}</b><span>更像、更可愛，還有開心、睡覺、吃飯、走路等 6 種動作</span></a>`}
+    ${(b.art&&b.art.ok)||!BD_AI_ON?'':`<a class="bd-ai-cta" href="#/buddy?new=1&ai=1"><b>✨ 讓 AI 照真實照片畫出${esc(b.name)}</b><span>更像、更可愛，還有開心、睡覺、吃飯、走路等 6 種動作</span></a>`}
     <div class="bd-stage ${night?'night':''} ${b.sl?'lightsoff':''}" id="bdStage">
       <div class="bd-window"><span>${night?'🌙':'☀️'}</span></div><div class="bd-bed"></div><div class="bd-bowl">🥣</div>
       <p class="bd-bubble" id="bdSay">${esc(bdLine(b))}</p>
@@ -5534,6 +5534,7 @@ function bdAnalyze(data,W,H,pts,sp){
   return out}
 
 // ── AI 畫的專屬毛孩（照會員的照片畫成 Q 版，6 個動作） ──
+const BD_AI_ON=false;   // AI 畫圖：開通免費 AI 後改成 true
 const BD_ART_POSES=['ok','happy','sleep','eat','sad','walk'];
 function bdArtSVG(b,cls=''){const a=b.art,mood=cls==='mood-happy'?'happy':'ok';
   const im=k=>{const u=safeU(a[k]||a.ok);return u?`<image class="ai ai-${k}" href="${esc(u)}" x="0" y="2" width="200" height="210" preserveAspectRatio="xMidYMax meet"/>`:''};
@@ -5581,11 +5582,11 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     <div class="bd-prevwrap"><div class="bd-preview" id="bdPrev">${prev()}</div><figure class="bd-ref" id="bdRef" hidden><img alt="參考照片"><figcaption>參考照片</figcaption></figure></div>
     ${(pets||[]).length?`<p class="lbl" style="margin:14px 0 6px">照我家的毛孩做</p><div class="chips bd-src">${pets.map(p=>`<button type="button" class="chip" data-src="${p.id}">${p.species==='cat'?'🐱':'🐶'} ${esc(p.name)}</button>`).join('')}</div>`:''}
     <p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
-    <div class="bd-ai" id="bdAi"><p class="bd-ai-t">✨ AI 照照片畫出牠</p><p class="small muted" style="margin:2px 0 10px">用一張臉清楚的照片，AI 會照牠的毛色、花紋、耳朵和臉型，畫成可愛的 Q 版，還有開心、睡覺、吃飯、撒嬌、走路等動作。</p>
+    <div class="bd-ai" id="bdAi" ${BD_AI_ON?'':'hidden'}><p class="bd-ai-t">✨ AI 照照片畫出牠</p><p class="small muted" style="margin:2px 0 10px">用一張臉清楚的照片，AI 會照牠的毛色、花紋、耳朵和臉型，畫成可愛的 Q 版，還有開心、睡覺、吃飯、撒嬌、走路等動作。</p>
       <div id="bdAiState"></div>
       <div class="row bd-ai-btns" style="gap:8px"><button type="button" class="btn" id="bdAiGo">✨ 用照片畫我的毛孩</button><button type="button" class="btn ghost" id="bdAiUp">上傳別張照片</button><input type="file" id="bdAiFile" accept="image/*" hidden></div>
       <div id="bdAiOut" aria-live="polite"></div></div>
-    <details class="bd-man" id="bdMan"><summary>🎨 不用 AI，自己手動調整外型</summary>
+    <details class="bd-man" id="bdMan" ${BD_AI_ON?'':'open'}><summary>${BD_AI_ON?'🎨 不用 AI，自己手動調整外型':'🎨 調整外型'}</summary>
     <div id="bdRefWrap" hidden><p class="lbl" style="margin:14px 0 6px">用哪張照片對毛色</p><div class="bd-phs" id="bdPhs"></div><p class="small muted" id="bdRefMsg" style="margin:6px 0 0"></p>
       <div id="bdAlignWrap"><button type="button" class="btn block bd-alignbtn" id="bdAlignBtn">📍 對準照片，讓牠更像</button><p class="small muted" style="margin:6px 2px 0">在照片上點牠的左眼、右眼、鼻子，會量出嘴巴長短，並分別取額頭、嘴邊、下巴、耳朵、眼睛和鼻子的顏色。</p></div></div>
     <p class="muted small" id="bdNoPh" hidden style="margin:8px 0 0">到<a id="bdPhLink" href="#/health">健康手冊</a>幫牠加一張照片，就能照照片對毛色。</p>
