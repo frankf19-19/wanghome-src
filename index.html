@@ -1797,6 +1797,15 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .bd-src .chip.on,#bdPat .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bd-say,:root:not([data-theme="light"]) .bd-bubble{background:#3A2E36;color:#F5E9EF}:root:not([data-theme="light"]) .bd-home{background:linear-gradient(120deg,#3D2230,#2E2430 55%,#213E34)}}
 :root[data-theme="dark"] .bd-say,:root[data-theme="dark"] .bd-bubble{background:#3A2E36;color:#F5E9EF}:root[data-theme="dark"] .bd-home{background:linear-gradient(120deg,#3D2230,#2E2430 55%,#213E34)}
+.bd-svg[data-mood=happy] .bd-tongue{transform-box:fill-box;transform-origin:50% 0;animation:bdPant .38s ease-in-out infinite}
+@keyframes bdPant{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.18)}}
+.bd-walker{width:190px}.bd-stage-mini{width:112px}
+/* 照片模式的表情：睡覺變暗、難過降低彩度＋汗滴、開心會多跳 */
+.bd-photo .bd-sweat{display:none}.bd-photo[data-mood=sad] .bd-sweat{display:inline;animation:bdZ 2.2s ease-in-out infinite}
+.bd-photo .bd-img{transition:filter .4s}.bd-photo[data-mood=sleep] .bd-img{filter:brightness(.72) saturate(.85)}.bd-photo[data-mood=sad] .bd-img{filter:saturate(.55)}
+.bd-photo[data-mood=happy] .bd-head{animation:bdHappyTilt 1.4s ease-in-out infinite}
+@keyframes bdHappyTilt{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-3px)}}
+.bd-look{display:flex;gap:8px;flex-wrap:wrap}.bd-phs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.bd-phs button{width:58px;height:58px;border-radius:14px;border:3px solid transparent;background-size:cover;background-position:center;cursor:pointer;padding:0}.bd-phs button.on{border-color:var(--red)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1869,7 +1878,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.8.0';
+const BUILD = 'v5.8.1';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -4941,77 +4950,147 @@ function bdGuess(colour,sp){const c=String(colour||'');
   const coat=/黑/.test(c)?'black':/白/.test(c)?'white':/橘|紅/.test(c)?'orange':/灰|銀|藍/.test(c)?'gray':/棕|咖啡|褐|巧克力/.test(c)?'brown':/米|奶油|淺/.test(c)?'cream':/黃|金/.test(c)?'golden':(sp==='cat'?'gray':'golden');
   return {coat,pat:/花|斑點|大麥町/.test(c)?'spots':'solid'}}
 
-// ── 角色圖（SVG）：每個部位分組，CSS 負責呼吸、眨眼、搖尾巴、動耳朵 ──
-function bdSVG(b,cls=''){
-  const C=BD_COATS[b.coat]||BD_COATS.golden,dk=b.coat==='black',pat=b.pat||'solid';
-  const eyeRing=dk?'#F3E6D6':'none';
-  if(b.sp==='cat'){
-    const main=pat==='calico'?'#F6F1EA':C.m,belly=pat==='tux'?'#FFFFFF':C.l;
-    const stripes=pat==='tabby'?`<path d="M136 104q6 2 9-4M168 104q-6 2-9-4M134 118q7 1 10-4M170 118q-7 1-10-4" fill="none" stroke="${C.d}" stroke-width="3" stroke-linecap="round"/>`:'';
-    const headSt=pat==='tabby'?`<path d="M148 42q7-4 14 0M150 48q5-3 10 0" fill="none" stroke="${C.d}" stroke-width="3" stroke-linecap="round"/>`:'';
-    const spots=pat==='calico'?`<path d="M131 112c2-12 12-16 18-10s-2 18-12 18z" fill="#F0A04B"/><path d="M168 100c8-4 14 4 12 12s-12 6-14 0z" fill="#3E3633"/>`:pat==='spots'?`<ellipse cx="138" cy="112" rx="6" ry="5" fill="${C.d}"/><ellipse cx="170" cy="120" rx="5" ry="4" fill="${C.d}"/>`:'';
-    const headSpots=pat==='calico'?`<path d="M131 50c2-14 14-20 22-16l-6 18c-6 0-12 2-16-2z" fill="#F0A04B"/><path d="M168 38c8 2 14 10 12 18l-12-4z" fill="#3E3633"/>`:'';
-    const muzzle=pat==='tux'?`<path d="M141 66c4 14 24 14 28 0c-4 6-24 6-28 0z" fill="#FFFFFF"/>`:'';
-    return `<svg class="bd-svg sp-cat" data-mood="${cls==='mood-happy'?'happy':'ok'}" viewBox="108 18 104 130" role="img" aria-label="${esc(b.name)}">
-  <ellipse class="bd-shadow" cx="157" cy="141" rx="40" ry="5" fill="#000" opacity=".1"/>
-  <g class="bd-root">
-  <g class="bd-tail" style="transform-origin:184px 128px"><path d="M184 128c10 2 18-6 16-16" fill="none" stroke="${pat==='calico'?'#F0A04B':C.d}" stroke-width="8" stroke-linecap="round"/></g>
-  <g class="bd-body"><path d="M128 138c-4-26 4-50 26-52s32 24 28 52z" fill="${main}"/>${spots}<path d="M143 138c-1-14 3-24 12-24s13 10 12 24z" fill="${belly}"/>${stripes}
-    <ellipse cx="141" cy="138" rx="8" ry="4" fill="${pat==='tux'?'#fff':main}"/><ellipse cx="169" cy="138" rx="8" ry="4" fill="${pat==='tux'?'#fff':main}"/></g>
-  <g class="bd-head">
-    <g class="bd-ear bd-ear-l" style="transform-origin:136px 54px"><path d="M129 32l8 22-12 2z" fill="${main}"/><path d="M131 40l4 11-6 1z" fill="#F4B6B6"/></g>
-    <g class="bd-ear bd-ear-r" style="transform-origin:174px 54px"><path d="M181 32l-8 22 12 2z" fill="${pat==='calico'?'#3E3633':main}"/><path d="M179 40l-4 11 6 1z" fill="#F4B6B6"/></g>
-    <circle cx="155" cy="62" r="26" fill="${main}"/>${headSpots}${headSt}${muzzle}
-    <g class="bd-eyes">
-      <g class="ey-open"><g class="bd-pupils"><circle cx="145" cy="62" r="5.6" fill="${eyeRing}"/><circle cx="165" cy="62" r="5.6" fill="${eyeRing}"/><ellipse cx="145" cy="62" rx="3.6" ry="4.6" fill="#2B2320"/><ellipse cx="165" cy="62" rx="3.6" ry="4.6" fill="#2B2320"/><circle cx="146.2" cy="60.4" r="1.3" fill="#fff"/><circle cx="166.2" cy="60.4" r="1.3" fill="#fff"/></g></g>
-      <g class="ey-happy" fill="none" stroke="#2B2320" stroke-width="2.4" stroke-linecap="round"><path d="M141 63q4-5 8 0M161 63q4-5 8 0"/></g>
-      <g class="ey-sleep" fill="none" stroke="#2B2320" stroke-width="2.2" stroke-linecap="round"><path d="M141 62q4 3 8 0M161 62q4 3 8 0"/></g>
-      <g class="ey-sad" fill="none" stroke="#2B2320" stroke-width="2" stroke-linecap="round"><path d="M140 54l8 3M170 54l-8 3"/></g>
-    </g>
-    <path d="M152 70h6l-3 3.5z" fill="#F07C7C"/>
-    <g class="bd-mouth" fill="none" stroke="#2B2320" stroke-width="1.8" stroke-linecap="round">
-      <path class="mo-smile" d="M155 73.5c-1 3-5 4-7 2M155 73.5c1 3 5 4 7 2"/>
-      <path class="mo-open" d="M150 74.5q5 9 10 0z" fill="#B23A4A" stroke-width="1.4"/>
-      <path class="mo-sad" d="M150 78q5-4 10 0"/>
-    </g>
-    <path d="M138 70l-14-2M138 74l-13 3M172 70l14-2M172 74l13 3" stroke="${dk?'#CFC3B5':'#5E686D'}" stroke-width="1.3" stroke-linecap="round"/>
-    <ellipse class="bd-blush" cx="140" cy="74" rx="4" ry="2.6" fill="#F4B6B6" opacity=".75"/><ellipse class="bd-blush" cx="170" cy="74" rx="4" ry="2.6" fill="#F4B6B6" opacity=".75"/>
-  </g>
- <text class="bd-zzz" x="178" y="34">Z z</text>
-  <g class="bd-dirt" fill="#8A6A4A" opacity="0"><ellipse cx="139" cy="112" rx="6" ry="4"/><ellipse cx="170" cy="96" rx="4" ry="3"/><ellipse cx="166" cy="48" rx="3.5" ry="2.5"/><circle cx="150" cy="126" r="2.5"/></g>
+// ── 角色圖（擬真風）：立體光影、毛茸茸的邊緣、真實比例坐姿；部位分組讓 CSS 做呼吸、眨眼、搖尾巴 ──
+let __bdSeq=0;
+function bdMix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const x=p(a),y=p(b);return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+// 照片模式：用自己毛孩的照片，柔邊橢圓框；一樣會呼吸、歪頭、跳、被摸會蹭
+function bdPhotoSVG(b,cls){const u='p'+(++__bdSeq),mood=cls==='mood-happy'?'happy':'ok';
+  return `<svg class="bd-svg bd-photo sp-${b.sp==='cat'?'cat':'dog'}" data-mood="${mood}" viewBox="0 0 200 220" role="img" aria-label="${esc(b.name)}">
+  <defs><radialGradient id="pf${u}" cx="50%" cy="50%" r="50%"><stop offset=".74" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient><mask id="pm${u}"><ellipse cx="100" cy="112" rx="88" ry="98" fill="url(#pf${u})"/></mask></defs>
+  <ellipse class="bd-shadow" cx="100" cy="212" rx="62" ry="7" fill="#000" opacity=".13"/>
+  <g class="bd-root"><g class="bd-head" style="transform-origin:100px 205px"><g class="bd-body">
+    <image class="bd-img" href="${esc(safeU(b.photo))}" x="8" y="10" width="184" height="204" preserveAspectRatio="xMidYMid slice" mask="url(#pm${u})"/>
+  </g></g>
+  <text class="bd-zzz" x="150" y="40">Z z</text>
+  <path class="bd-sweat" d="M156 52c-5 8-7 12-7 15a7 7 0 0 0 14 0c0-3-2-7-7-15z" fill="#7CC4F2" stroke="#fff" stroke-width="1.5"/>
+  <g class="bd-dirt" fill="#7A5A3C" opacity="0"><ellipse cx="70" cy="160" rx="9" ry="6"/><ellipse cx="134" cy="140" rx="7" ry="5"/><ellipse cx="116" cy="70" rx="5" ry="3.5"/><circle cx="92" cy="190" r="4"/></g>
   </g></svg>`}
-  const main=pat==='calico'?'#F6F1EA':C.m,ear=pat==='tux'?C.m:C.d,belly=pat==='tux'?'#FFFFFF':C.l;
-  const spots=pat==='spots'||pat==='calico'?`<ellipse cx="50" cy="112" rx="7" ry="6" fill="${pat==='calico'?'#F0A04B':C.d}"/><ellipse cx="96" cy="104" rx="6" ry="5" fill="${pat==='calico'?'#3E3633':C.d}"/>`:'';
-  const headSpot=pat==='spots'||pat==='calico'?`<ellipse cx="88" cy="40" rx="8" ry="7" fill="${pat==='calico'?'#3E3633':C.d}"/>`:pat==='tabby'?`<path d="M64 33q8-4 16 0M66 39q6-3 12 0" fill="none" stroke="${C.d}" stroke-width="3" stroke-linecap="round"/>`:'';
-  const stripes=pat==='tabby'?`<path d="M46 108q7 2 10-4M100 108q-7 2-10-4M44 122q8 1 11-4" fill="none" stroke="${C.d}" stroke-width="3.2" stroke-linecap="round"/>`:'';
-  return `<svg class="bd-svg sp-dog" data-mood="${cls==='mood-happy'?'happy':'ok'}" viewBox="22 14 112 136" role="img" aria-label="${esc(b.name)}">
-  <ellipse class="bd-shadow" cx="76" cy="142" rx="44" ry="5" fill="#000" opacity=".1"/>
-  <g class="bd-root">
-  <g class="bd-tail" style="transform-origin:104px 120px"><path d="M104 120c14-2 20-14 18-26" fill="none" stroke="${C.m}" stroke-width="9" stroke-linecap="round"/></g>
-  <g class="bd-body"><path d="M38 138c-6-30 4-58 34-60s42 28 36 60z" fill="${main}"/>${spots}${stripes}<path d="M58 138c-2-18 4-30 16-30s18 12 16 30z" fill="${belly}"/>
-    <ellipse cx="50" cy="138" rx="9" ry="4.5" fill="${pat==='tux'?'#fff':main}"/><ellipse cx="96" cy="138" rx="9" ry="4.5" fill="${pat==='tux'?'#fff':main}"/>
-    <path d="M52 92q20 8 40 0" fill="none" stroke="#D7261E" stroke-width="5" stroke-linecap="round"/><circle class="bd-tag" cx="72" cy="99" r="4.5" fill="#FFD23F"/></g>
-  <g class="bd-head">
-    <g class="bd-ear bd-ear-l" style="transform-origin:52px 38px"><path d="M46 40c-12 4-16 22-10 34 4 8 12 6 14-2l4-24z" fill="${ear}"/></g>
-    <g class="bd-ear bd-ear-r" style="transform-origin:92px 38px"><path d="M98 40c12 4 16 22 10 34-4 8-12 6-14-2l-4-24z" fill="${ear}"/></g>
-    <circle cx="72" cy="58" r="30" fill="${main}"/>${headSpot}
-    <ellipse cx="72" cy="70" rx="16" ry="12" fill="${pat==='tux'?'#FFFFFF':C.l}"/>
-    <g class="bd-eyes">
-      <g class="ey-open"><g class="bd-pupils"><circle cx="61" cy="52" r="5.2" fill="${eyeRing}"/><circle cx="83" cy="52" r="5.2" fill="${eyeRing}"/><circle cx="61" cy="52" r="3.6" fill="#2B2320"/><circle cx="83" cy="52" r="3.6" fill="#2B2320"/><circle cx="62.3" cy="50.7" r="1.2" fill="#fff"/><circle cx="84.3" cy="50.7" r="1.2" fill="#fff"/></g></g>
-      <g class="ey-happy" fill="none" stroke="#2B2320" stroke-width="2.6" stroke-linecap="round"><path d="M57 53q4-5 8 0M79 53q4-5 8 0"/></g>
-      <g class="ey-sleep" fill="none" stroke="#2B2320" stroke-width="2.4" stroke-linecap="round"><path d="M57 52q4 3 8 0M79 52q4 3 8 0"/></g>
-      <g class="ey-sad" fill="none" stroke="#2B2320" stroke-width="2.2" stroke-linecap="round"><path d="M55 44l9 3M89 44l-9 3"/></g>
-    </g>
-    <ellipse cx="72" cy="63" rx="5.5" ry="4" fill="#2B2320"/>
-    <g class="bd-mouth" fill="none" stroke="#2B2320" stroke-width="2" stroke-linecap="round">
-      <g class="mo-smile"><path d="M72 67v5M66 73c3 3 9 3 12 0"/></g>
-      <g class="mo-open"><path d="M72 67v4"/><path d="M65 72q7 12 14 0z" fill="#8E2F3A" stroke-width="1.6"/><path d="M69 77q3 6 6 0z" fill="#F07C7C" stroke="none"/></g>
-      <g class="mo-sad"><path d="M72 67v5M66 77c3-3 9-3 12 0"/></g>
-    </g>
-    <ellipse class="bd-blush" cx="58" cy="64" rx="4" ry="2.6" fill="#F07C7C" opacity=".4"/><ellipse class="bd-blush" cx="86" cy="64" rx="4" ry="2.6" fill="#F07C7C" opacity=".4"/>
+function bdSVG(b,cls=''){
+  if(b.look==='photo'&&b.photo)return bdPhotoSVG(b,cls);
+  const u='b'+(++__bdSeq),C=BD_COATS[b.coat]||BD_COATS.golden,pat=b.pat||'solid',cat=b.sp==='cat',dark=b.coat==='black'||b.coat==='brown';
+  const mood=cls==='mood-happy'?'happy':'ok';
+  let M=C.m,D=C.d,L=C.l;if(pat==='calico'){M='#F7F2EA';D='#DCCFBF';L='#FFFFFF'}if(pat==='tux'){L='#FFFFFF'}
+  const HI=bdMix(M,'#FFFFFF',.38),SH=bdMix(D,'#000000',.18),INK='#24160E';
+  const irisC=cat?({black:'#E3B23C',orange:'#D9A23A',gray:'#86B868',white:'#7DB9E8',brown:'#C9A443',cream:'#9CC07A',golden:'#C9A443'}[b.coat]||'#C9A443'):(dark?'#A4703E':'#7A4A22');
+  const defs=`<defs>
+    <radialGradient id="bg${u}" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="${HI}"/><stop offset=".55" stop-color="${M}"/><stop offset="1" stop-color="${SH}"/></radialGradient>
+    <radialGradient id="hg${u}" cx="50%" cy="32%" r="72%"><stop offset="0" stop-color="${HI}"/><stop offset=".6" stop-color="${M}"/><stop offset="1" stop-color="${D}"/></radialGradient>
+    <linearGradient id="lg${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${L}"/><stop offset="1" stop-color="${bdMix(L,D,.22)}"/></linearGradient>
+    <linearGradient id="dg${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${D}"/><stop offset="1" stop-color="${SH}"/></linearGradient>
+    <radialGradient id="ig${u}" cx="42%" cy="38%" r="70%"><stop offset="0" stop-color="${bdMix(irisC,'#FFFFFF',.35)}"/><stop offset=".55" stop-color="${irisC}"/><stop offset="1" stop-color="${bdMix(irisC,'#000000',.55)}"/></radialGradient>
+    <radialGradient id="ng${u}" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="${cat?'#F4A7AE':'#6A5552'}"/><stop offset="1" stop-color="${cat?'#C96874':'#120C0B'}"/></radialGradient>
+    <radialGradient id="tg${u}" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#FFE45E"/><stop offset="1" stop-color="#C99A12"/></radialGradient>
+    <filter id="fz${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="fs${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+  </defs>`;
+  const eye=(x,y)=>cat
+    ?`<path d="M${x-9} ${y}q9-9.5 18 0q-9 8.5-18 0z" fill="url(#ig${u})" stroke="${INK}" stroke-width="1.5"/><ellipse class="bd-slit" cx="${x}" cy="${y}" rx="1.9" ry="5.6" fill="#0B0706"/><circle cx="${x+3}" cy="${y-2.6}" r="1.7" fill="#fff"/><circle cx="${x-3}" cy="${y+2}" r=".8" fill="#fff" opacity=".7"/>`
+    :`<ellipse cx="${x}" cy="${y}" rx="7.4" ry="6.8" fill="${INK}"/><circle cx="${x}" cy="${y}" r="6" fill="url(#ig${u})"/><circle cx="${x}" cy="${y+.3}" r="3.3" fill="#0B0706"/><circle cx="${x+2.2}" cy="${y-2.4}" r="2" fill="#fff"/><circle cx="${x-2.2}" cy="${y+2.3}" r=".9" fill="#fff" opacity=".75"/>`;
+  const ex=cat?[84,116,84]:[84,116,76];   // 左眼 x、右眼 x、眼睛 y
+  const ey=ex[2];
+  const eyes=`<g class="bd-eyes">
+      <g class="ey-open"><g class="bd-pupils">${eye(ex[0],ey)}${eye(ex[1],ey)}</g>${cat?'':`<path d="M${ex[0]-8} ${ey-5}q8-5 16 0M${ex[1]-8} ${ey-5}q8-5 16 0" fill="none" stroke="${SH}" stroke-width="2" opacity=".55" stroke-linecap="round"/>`}</g>
+      <g class="ey-happy" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"><path d="M${ex[0]-8} ${ey+2}q8-8 16 0M${ex[1]-8} ${ey+2}q8-8 16 0"/></g>
+      <g class="ey-sleep" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"><path d="M${ex[0]-8} ${ey}q8 5 16 0M${ex[1]-8} ${ey}q8 5 16 0"/></g>
+      <g class="ey-sad" fill="none" stroke="${SH}" stroke-width="3" stroke-linecap="round"><path d="M${ex[0]-9} ${ey-11}l12 3.5M${ex[1]+9} ${ey-11}l-12 3.5"/></g>
+    </g>`;
+  const shadow=`<ellipse class="bd-shadow" cx="100" cy="212" rx="64" ry="7" fill="#000" opacity=".13"/>`;
+  const zzz=`<text class="bd-zzz" x="150" y="40">Z z</text>`;
+  if(cat){
+    const body='M100 108c-26 0-40 30-42 60c-2 22 8 38 18 40h48c10-2 20-18 18-40c-2-30-16-60-42-60z';
+    const head='M100 48c-26 0-42 14-42 34c0 10 4 18 10 24c-4 2-4 6 0 7c8 4 20 7 32 7s24-3 32-7c4-1 4-5 0-7c6-6 10-14 10-24c0-20-16-34-42-34z';
+    const stripe=pat==='tabby'?D:null;
+    const bodyPat=pat==='tabby'?`<g fill="none" stroke="${D}" stroke-width="4.5" stroke-linecap="round" opacity=".8"><path d="M64 150q10-2 14 6M62 168q10-2 14 6M136 150q-10-2-14 6M138 168q-10-2-14 6M70 132q8-1 11 5M130 132q-8-1-11 5"/></g>`
+      :pat==='calico'?`<path d="M56 150c4-26 22-34 34-26s0 34-16 40-20 4-18-14z" fill="#E8913A"/><path d="M118 126c18-6 30 10 28 28s-18 14-24 6-10-28-4-34z" fill="#3A302C"/>`
+      :pat==='spots'?`<ellipse cx="72" cy="152" rx="10" ry="8" fill="${D}"/><ellipse cx="128" cy="170" rx="9" ry="7" fill="${D}"/>`:'';
+    const headPat=pat==='tabby'?`<g fill="none" stroke="${D}" stroke-width="3" stroke-linecap="round" opacity=".85"><path d="M86 56l4 9 5-9 5 9 5-9 4 9 5-9"/><path d="M60 86q8 1 12 5M60 94q8 0 11 4M140 86q-8 1-12 5M140 94q-8 0-11 4"/></g>`
+      :pat==='calico'?`<path d="M58 70c2-18 16-26 30-22l-6 26c-10 2-18 4-24-4z" fill="#E8913A"/><path d="M118 50c14 0 26 10 24 26l-22-6z" fill="#3A302C"/>`
+      :pat==='spots'?`<ellipse cx="120" cy="60" rx="9" ry="7" fill="${D}"/>`:'';
+    const legRing=pat==='tabby'?`<path d="M85 170h14M85 182h14M101 170h14M101 182h14" stroke="${D}" stroke-width="3.2" opacity=".75"/>`:'';
+    const wh=dark?'#EDE6DD':'#6A625C';
+    return `<svg class="bd-svg sp-cat" data-mood="${mood}" viewBox="0 0 200 220" role="img" aria-label="${esc(b.name)}">${defs}
+  <clipPath id="cb${u}"><path d="${body}"/></clipPath><clipPath id="ch${u}"><path d="${head}"/></clipPath>
+  ${shadow}<g class="bd-root">
+  <g class="bd-tail" style="transform-origin:128px 198px"><path d="M126 200c28 6 48-6 50-28c1-11-7-15-11-8c-3 14-14 22-38 22z" fill="url(#bg${u})" filter="url(#fs${u})"/>${stripe?`<path d="M150 196l4-8M162 188l6-6M170 176l7-2" stroke="${D}" stroke-width="3.5" stroke-linecap="round"/>`:''}</g>
+  <g class="bd-body">
+    <ellipse cx="70" cy="192" rx="24" ry="17" fill="url(#bg${u})" filter="url(#fs${u})"/><ellipse cx="130" cy="192" rx="24" ry="17" fill="url(#bg${u})" filter="url(#fs${u})"/>
+    <path d="${body}" fill="url(#bg${u})" filter="url(#fz${u})"/>
+    <g clip-path="url(#cb${u})">${bodyPat}</g>
+    <path d="M100 118c-12 0-19 20-19 40c0 20 8 36 19 40c11-4 19-20 19-40c0-20-7-40-19-40z" fill="url(#lg${u})" filter="url(#fz${u})"/>
+    <path d="M86 150c-3 20-3 38-1 54h14c1-16 1-34-1-54z" fill="url(#bg${u})"/><path d="M114 150c3 20 3 38 1 54h-14c-1-16-1-34 1-54z" fill="url(#bg${u})"/>
+    ${legRing}
+    <ellipse cx="92" cy="205" rx="10" ry="6" fill="${pat==='tux'?'#fff':L}"/><ellipse cx="108" cy="205" rx="10" ry="6" fill="${pat==='tux'?'#fff':L}"/>
+    <path d="M88 207v-3M92 208v-3M96 207v-3M104 207v-3M108 208v-3M112 207v-3" stroke="${SH}" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>
   </g>
- <text class="bd-zzz" x="100" y="26">Z z</text>
-  <g class="bd-dirt" fill="#8A6A4A" opacity="0"><ellipse cx="52" cy="118" rx="7" ry="4"/><ellipse cx="94" cy="110" rx="5" ry="3"/><ellipse cx="84" cy="38" rx="4" ry="2.5"/><circle cx="64" cy="128" r="3"/></g>
+  <g class="bd-head" style="transform-origin:100px 112px">
+    <g class="bd-ear bd-ear-l" style="transform-origin:76px 62px"><path d="M66 68l-5-38c0-5 5-7 8-4l27 25z" fill="url(#hg${u})"/><path d="M69 61l-3-25 18 17z" fill="#F0B1B4"/><path d="M68 44l3 8M72 40l2 7" stroke="#fff" stroke-width="1" opacity=".7"/></g>
+    <g class="bd-ear bd-ear-r" style="transform-origin:124px 62px"><path d="M134 68l5-38c0-5-5-7-8-4l-27 25z" fill="${pat==='calico'?'#3A302C':`url(#hg${u})`}"/><path d="M131 61l3-25-18 17z" fill="#F0B1B4"/><path d="M132 44l-3 8M128 40l-2 7" stroke="#fff" stroke-width="1" opacity=".7"/></g>
+    <path d="${head}" fill="url(#hg${u})" filter="url(#fz${u})"/>
+    <g clip-path="url(#ch${u})">${headPat}${pat==='tux'?`<path d="M100 84c-10 0-18 8-18 18c0 8 8 14 18 14s18-6 18-14c0-10-8-18-18-18z" fill="#fff"/>`:''}</g>
+    <ellipse cx="92.5" cy="97" rx="9" ry="6.5" fill="url(#lg${u})"/><ellipse cx="107.5" cy="97" rx="9" ry="6.5" fill="url(#lg${u})"/>
+    ${eyes}
+    <path d="M95.5 90.5h9c1 0 1.4 1.2.7 1.9l-4.5 4c-.4.4-1 .4-1.4 0l-4.5-4c-.7-.7-.3-1.9.7-1.9z" fill="url(#ng${u})"/>
+    <g class="bd-mouth" fill="none" stroke="${INK}" stroke-width="1.7" stroke-linecap="round">
+      <path class="mo-smile" d="M100 96.5v3M100 99.5c-1.5 3-6 4-8.5 1.8M100 99.5c1.5 3 6 4 8.5 1.8"/>
+      <g class="mo-open"><path d="M100 96.5v2.5"/><path d="M94.5 100q5.5 9 11 0z" fill="#9C2F3E" stroke-width="1.3"/><path d="M97.5 103.5q2.5 3.5 5 0z" fill="#F08C97" stroke="none"/></g>
+      <path class="mo-sad" d="M100 96.5v3M94 104q6-4 12 0"/>
+    </g>
+    <g stroke="${wh}" stroke-width="1" stroke-linecap="round" opacity=".85"><path d="M86 96l-28-5M86 99l-28 2M87 102l-24 7M114 96l28-5M114 99l28 2M113 102l24 7"/></g>
+    <ellipse class="bd-blush" cx="76" cy="98" rx="6" ry="3.4" fill="#F28B8B" opacity=".22"/><ellipse class="bd-blush" cx="124" cy="98" rx="6" ry="3.4" fill="#F28B8B" opacity=".22"/>
+  </g>
+  ${zzz}
+  <g class="bd-dirt" fill="#7A5A3C" opacity="0"><ellipse cx="74" cy="160" rx="7" ry="4.5"/><ellipse cx="128" cy="146" rx="5" ry="3.5"/><ellipse cx="116" cy="62" rx="4" ry="3"/><circle cx="96" cy="190" r="3"/></g>
+  </g></svg>`}
+  // ── 狗 ──
+  const prick=b.ear==='prick';
+  const torso='M68 112C56 140 54 176 64 204h72c10-28 8-64-4-92c-10-12-54-12-64 0z';
+  const skull='M100 40c-24 0-40 16-40 38c0 14 6 24 14 30c8 6 18 8 26 8s18-2 26-8c8-6 14-16 14-30c0-22-16-38-40-38z';
+  const bodyPat=pat==='spots'?`<ellipse cx="72" cy="160" rx="11" ry="9" fill="${D}"/><ellipse cx="128" cy="146" rx="9" ry="8" fill="${D}"/><ellipse cx="124" cy="180" rx="6" ry="5" fill="${D}"/>`
+    :pat==='tabby'?`<g fill="none" stroke="${SH}" stroke-width="4" stroke-linecap="round" opacity=".55"><path d="M62 148q8 4 10 12M60 168q8 4 10 12M138 148q-8 4-10 12M140 168q-8 4-10 12"/></g>`
+    :pat==='calico'?`<path d="M58 150c6-22 24-26 32-16s-4 30-18 32-18-2-14-16z" fill="#E8913A"/><path d="M116 128c18-4 26 12 22 26s-18 10-22 2-6-24 0-28z" fill="#3A302C"/>`:'';
+  const headPat=pat==='spots'?`<ellipse cx="118" cy="56" rx="11" ry="9" fill="${D}"/>`:pat==='calico'?`<path d="M60 70c2-20 16-30 32-26l-6 24c-10 4-20 8-26 2z" fill="#E8913A"/>`:'';
+  const earL=prick?`<g class="bd-ear bd-ear-l" style="transform-origin:78px 58px"><path d="M70 62l-9-40c-1-5 4-7 7-4l25 32z" fill="url(#hg${u})" filter="url(#fs${u})"/><path d="M71 55l-6-26 17 22z" fill="#E7A49A" opacity=".75"/></g>`
+    :`<g class="bd-ear bd-ear-l" style="transform-origin:68px 54px"><path d="M68 52c-18 2-27 26-24 50c2 13 15 15 19 4l9-42z" fill="url(#dg${u})" filter="url(#fs${u})"/></g>`;
+  const earR=prick?`<g class="bd-ear bd-ear-r" style="transform-origin:122px 58px"><path d="M130 62l9-40c1-5-4-7-7-4l-25 32z" fill="url(#hg${u})" filter="url(#fs${u})"/><path d="M129 55l6-26-17 22z" fill="#E7A49A" opacity=".75"/></g>`
+    :`<g class="bd-ear bd-ear-r" style="transform-origin:132px 54px"><path d="M132 52c18 2 27 26 24 50c-2 13-15 15-19 4l-9-42z" fill="url(#dg${u})" filter="url(#fs${u})"/></g>`;
+  return `<svg class="bd-svg sp-dog" data-mood="${mood}" viewBox="0 0 200 220" role="img" aria-label="${esc(b.name)}">${defs}
+  <clipPath id="cb${u}"><path d="${torso}"/></clipPath><clipPath id="ch${u}"><path d="${skull}"/></clipPath>
+  ${shadow}<g class="bd-root">
+  <g class="bd-tail" style="transform-origin:136px 190px"><path d="M134 192c24 2 42-14 40-40c-1-10-8-14-12-8c4 14-6 32-28 34z" fill="url(#bg${u})" filter="url(#fz${u})"/></g>
+  <g class="bd-body">
+    <ellipse cx="62" cy="186" rx="30" ry="25" fill="url(#bg${u})" filter="url(#fz${u})"/><ellipse cx="138" cy="186" rx="30" ry="25" fill="url(#bg${u})" filter="url(#fz${u})"/>
+    <ellipse cx="46" cy="207" rx="15" ry="6.5" fill="url(#bg${u})"/><ellipse cx="154" cy="207" rx="15" ry="6.5" fill="url(#bg${u})"/>
+    <path d="${torso}" fill="url(#bg${u})" filter="url(#fz${u})"/>
+    <g clip-path="url(#cb${u})">${bodyPat}</g>
+    <path d="M80 118c-6 22-6 52 2 84h36c8-32 8-62 2-84c-10 8-30 8-40 0z" fill="url(#lg${u})" filter="url(#fz${u})"/>
+    <g fill="none" stroke="${bdMix(L,D,.45)}" stroke-width="1.3" stroke-linecap="round" opacity=".5"><path d="M92 136q2 6 0 11M100 142q2 6 0 11M108 136q2 6 0 11M95 160q2 6 0 11M105 160q2 6 0 11"/></g>
+    <path d="M80 150c-4 18-4 36-2 52h18c2-16 2-34-2-52z" fill="url(#bg${u})"/><path d="M120 150c4 18 4 36 2 52h-18c-2-16-2-34 2-52z" fill="url(#bg${u})"/>
+    <ellipse cx="87" cy="204" rx="13" ry="7" fill="${pat==='tux'?'#fff':`url(#bg${u})`}"/><ellipse cx="113" cy="204" rx="13" ry="7" fill="${pat==='tux'?'#fff':`url(#bg${u})`}"/>
+    <path d="M82 207v-4M87 208v-4M92 207v-4M108 207v-4M113 208v-4M118 207v-4" stroke="${SH}" stroke-width="1.3" opacity=".45" stroke-linecap="round"/>
+    <path d="M70 118q30 15 60 0" fill="none" stroke="#C8262A" stroke-width="7" stroke-linecap="round"/><path d="M70 116.5q30 15 60 0" fill="none" stroke="#E8504F" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+    <circle class="bd-tag" cx="100" cy="131" r="5.5" fill="url(#tg${u})"/>
+  </g>
+  <g class="bd-head" style="transform-origin:100px 114px">
+    ${prick?earL+earR:''}
+    <path d="${skull}" fill="url(#hg${u})" filter="url(#fz${u})"/>
+    <g clip-path="url(#ch${u})">${headPat}</g>
+    <ellipse cx="100" cy="56" rx="15" ry="10" fill="#fff" opacity=".14"/>
+    ${prick?'':earL+earR}
+    <path d="M100 82c-15 0-25 8-25 18c0 10 10 16 25 16s25-6 25-16c0-10-10-18-25-18z" fill="url(#lg${u})" filter="url(#fs${u})"/>
+    <path d="M100 66v16" stroke="${SH}" stroke-width="7" stroke-linecap="round" opacity=".12"/>
+    ${eyes}
+    <path d="M100 87c-8.5 0-12.5 2.2-12.5 6.2c0 4.2 6.4 8.4 12.5 9.3c6.1-.9 12.5-5.1 12.5-9.3c0-4-4-6.2-12.5-6.2z" fill="url(#ng${u})"/>
+    <ellipse cx="96" cy="89.6" rx="3.4" ry="1.7" fill="#fff" opacity=".55"/><path d="M94 95.5q2-1 3 .5M106 95.5q-2-1-3 .5" stroke="#000" stroke-width="1.2" fill="none" opacity=".6"/>
+    <g class="bd-mouth" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round">
+      <g class="mo-smile"><path d="M100 102.5v5M90 108.5c4 4 16 4 20 0"/></g>
+      <g class="mo-open"><path d="M100 102.5v3"/><path d="M88 107c4 13 20 13 24 0c-6 3-18 3-24 0z" fill="#5A1E26" stroke-width="1.8"/><path class="bd-tongue" d="M93.5 110c0 11 13 11 13 0z" fill="#EF7C8A" stroke="none"/><path d="M100 111v6" stroke="#C85666" stroke-width="1"/></g>
+      <g class="mo-sad"><path d="M100 102.5v5M90 112c4-4 16-4 20 0"/></g>
+    </g>
+    <g fill="${SH}" opacity=".45"><circle cx="88" cy="100" r="1"/><circle cx="84" cy="104" r="1"/><circle cx="89" cy="105" r="1"/><circle cx="112" cy="100" r="1"/><circle cx="116" cy="104" r="1"/><circle cx="111" cy="105" r="1"/></g>
+    <ellipse class="bd-blush" cx="77" cy="100" rx="6" ry="3.4" fill="#F28B8B" opacity=".22"/><ellipse class="bd-blush" cx="123" cy="100" rx="6" ry="3.4" fill="#F28B8B" opacity=".22"/>
+  </g>
+  ${zzz}
+  <g class="bd-dirt" fill="#7A5A3C" opacity="0"><ellipse cx="66" cy="168" rx="8" ry="5"/><ellipse cx="132" cy="152" rx="6" ry="4"/><ellipse cx="118" cy="56" rx="4.5" ry="3"/><circle cx="90" cy="196" r="3.4"/></g>
   </g></svg>`}
 
 // ── 狀態：讀取、時間流逝、存檔 ──
@@ -5169,18 +5248,27 @@ function bdWander(_n){const w=$('#bdWalker');if(!w||RM())return;let x=50;
   const step=()=>{if(_n!==navId||!w.isConnected)return;const b=__bd;if(b&&!bdAsleep(b)&&!w.querySelector('.petting')){const nx=Math.max(18,Math.min(82,x+(Math.random()-.5)*50));w.classList.toggle('flip',nx<x);w.classList.add('walking');w.style.left=nx+'%';x=nx;setTimeout(()=>w.classList.remove('walking'),1600)}
     setTimeout(step,3500+Math.random()*4000)};setTimeout(step,2500)}
 
+// 從照片中間取顏色，對應到最接近的毛色（讀不到就算了，用毛色文字猜的結果）
+function bdCoatFromPhoto(url){return new Promise(res=>{try{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=40;const x=c.getContext('2d');
+  const w=im.naturalWidth,h=im.naturalHeight;x.drawImage(im,w*.3,h*.3,w*.4,h*.4,0,0,40,40);const d=x.getImageData(0,0,40,40).data;let r=0,g=0,bl=0,n=0;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];bl+=d[i+2];n++}
+  r/=n;g/=n;bl/=n;let best=null,bd=1e9;for(const [k,v] of Object.entries(BD_COATS)){const q=[1,3,5].map(j=>parseInt(v.m.slice(j,j+2),16));const dist=(q[0]-r)**2+(q[1]-g)**2+(q[2]-bl)**2;if(dist<bd){bd=dist;best=k}}res(best)}catch(_){res(null)}};im.onerror=()=>res(null);im.src=safeU(url);setTimeout(()=>res(null),6000)}catch(_){res(null)}})}
 async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'領養電子毛孩');
-  const {data:pets}=await sb.from('pets').select('id,name,species,colour').order('created_at');if(_n!==navId)return;
-  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',pat:cur?.pat||'solid',name:cur?.name||'',src:cur?.src||null};
+  const {data:pets}=await sb.from('pets').select('id,name,species,colour,photos').order('created_at');if(_n!==navId)return;
+  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',pat:cur?.pat||'solid',ear:cur?.ear||'drop',name:cur?.name||'',src:cur?.src||null,look:cur?.look||'draw',photo:cur?.photo||null};
+  const srcPet=()=>(pets||[]).find(z=>z.id===st.src);const phs=()=>((srcPet()||{}).photos||[]).filter(Boolean).slice(0,6);
   const prev=()=>bdSVG({name:st.name||'電子毛孩',...st,s:{f:80,m:80,c:90,e:80}},'mood-happy');
   app.innerHTML=`<div class="card login-card bd-adopt-card" style="max-width:560px;margin:14px auto">
     <h1>${cur?'換外型':'領養你的電子毛孩'}</h1>
     <p class="muted">${cur?'名字、點心和好感度都會保留。':'每天餵牠、摸摸牠、陪牠玩。照顧你家真毛孩、回報目擊，牠也會得到點心。'}</p>
     <div class="bd-preview" id="bdPrev">${prev()}</div>
     ${(pets||[]).length?`<p class="lbl" style="margin:14px 0 6px">照我家的毛孩做</p><div class="chips bd-src">${pets.map(p=>`<button type="button" class="chip" data-src="${p.id}">${p.species==='cat'?'🐱':'🐶'} ${esc(p.name)}</button>`).join('')}</div>`:''}
-    <p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
+    <div id="bdLookWrap" hidden><p class="lbl" style="margin:14px 0 6px">樣子</p><div class="seg" id="bdLook"><button type="button" data-v="photo">📷 用牠的照片</button><button type="button" data-v="draw">🎨 畫成插圖</button></div><div class="bd-phs" id="bdPhs"></div></div>
+    <p class="muted small" id="bdNoPh" hidden style="margin:8px 0 0">想用照片？先到<a id="bdPhLink" href="#/health">健康手冊</a>幫牠加一張照片。</p>
+    <div id="bdDrawOpts"><p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
+    <div id="bdEarWrap"><p class="lbl" style="margin:14px 0 6px">耳朵</p><div class="seg" id="bdEar"><button type="button" data-v="drop">垂耳</button><button type="button" data-v="prick">立耳</button></div></div>
     <p class="lbl" style="margin:14px 0 6px">毛色</p><div class="bd-coats" id="bdCoat">${Object.entries(BD_COATS).map(([k,c])=>`<button type="button" data-v="${k}" style="--c:${c.m}" aria-label="${c.n}"><span></span>${c.n}</button>`).join('')}</div>
     <p class="lbl" style="margin:14px 0 6px">花紋</p><div class="chips" id="bdPat">${Object.entries(BD_PATS).map(([k,n])=>`<button type="button" class="chip" data-v="${k}">${n}</button>`).join('')}</div>
+    </div>
     <label class="f" style="margin-top:14px"><span><b class="lbl">名字</b></span><input type="text" id="bdNm" maxlength="12" placeholder="例：小麥" value="${esc(st.name)}"></label>
     <button class="btn lg block" id="bdGo" style="margin-top:14px">${cur?'儲存外型':'領養牠'}</button>
     ${cur?`<a class="btn ghost block" href="#/buddy" style="margin-top:8px">取消</a>`:''}
@@ -5189,15 +5277,26 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     app.querySelectorAll('#bdSp button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.sp));
     app.querySelectorAll('#bdCoat button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.coat));
     app.querySelectorAll('#bdPat button').forEach(x=>{x.classList.toggle('on',x.dataset.v===st.pat);x.hidden=x.dataset.v==='calico'&&st.sp!=='cat'});
-    app.querySelectorAll('[data-src]').forEach(x=>x.classList.toggle('on',x.dataset.src===st.src))};
+    app.querySelectorAll('[data-src]').forEach(x=>x.classList.toggle('on',x.dataset.src===st.src));
+    app.querySelectorAll('#bdEar button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.ear));$('#bdEarWrap').hidden=st.sp==='cat';
+    const ps=phs();$('#bdLookWrap').hidden=!ps.length;$('#bdNoPh').hidden=!(st.src&&!ps.length);if(st.src)$('#bdPhLink').href='#/pet/'+st.src;
+    if(!ps.length&&st.look==='photo')st.look='draw';
+    app.querySelectorAll('#bdLook button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.look));
+    $('#bdPhs').innerHTML=st.look==='photo'?ps.map(u=>`<button type="button" data-ph="${esc(u)}" class="${u===st.photo?'on':''}" style="background-image:url('${esc(safeU(u))}')" aria-label="用這張照片"></button>`).join(''):'';
+    app.querySelectorAll('[data-ph]').forEach(x=>x.onclick=()=>{st.photo=x.dataset.ph;sync()});
+    $('#bdDrawOpts').hidden=st.look==='photo'};
+  app.querySelectorAll('#bdLook button').forEach(x=>x.onclick=()=>{st.look=x.dataset.v;if(st.look==='photo'&&!st.photo)st.photo=phs()[0]||null;sync()});
+  app.querySelectorAll('#bdEar button').forEach(x=>x.onclick=()=>{st.ear=x.dataset.v;sync()});
   app.querySelectorAll('#bdSp button').forEach(x=>x.onclick=()=>{st.sp=x.dataset.v;if(st.pat==='calico'&&st.sp!=='cat')st.pat='solid';st.src=null;sync()});
   app.querySelectorAll('#bdCoat button').forEach(x=>x.onclick=()=>{st.coat=x.dataset.v;st.src=null;sync()});
   app.querySelectorAll('#bdPat button').forEach(x=>x.onclick=()=>{st.pat=x.dataset.v;st.src=null;sync()});
-  app.querySelectorAll('[data-src]').forEach(x=>x.onclick=()=>{const p=pets.find(z=>z.id===x.dataset.src);if(!p)return;const g=bdGuess(p.colour,p.species);st.sp=p.species==='cat'?'cat':'dog';st.coat=g.coat;st.pat=g.pat==='calico'&&st.sp!=='cat'?'spots':g.pat;st.src=p.id;if(!$('#bdNm').value.trim()||!cur){$('#bdNm').value=p.name;st.name=p.name}sync()});
+  app.querySelectorAll('[data-src]').forEach(x=>x.onclick=()=>{const p=pets.find(z=>z.id===x.dataset.src);if(!p)return;const g=bdGuess(p.colour,p.species);st.sp=p.species==='cat'?'cat':'dog';st.coat=g.coat;st.pat=g.pat==='calico'&&st.sp!=='cat'?'spots':g.pat;st.src=p.id;if(!$('#bdNm').value.trim()||!cur){$('#bdNm').value=p.name;st.name=p.name}
+    const ps=phs();if(ps.length){st.look='photo';st.photo=ps[0];bdCoatFromPhoto(ps[0]).then(c=>{if(c&&st.src===p.id){st.coat=c;sync()}})}sync()});
   $('#bdNm').oninput=()=>{st.name=$('#bdNm').value.trim()};
   sync();
   $('#bdGo').onclick=()=>{const name=$('#bdNm').value.trim().slice(0,12);if(!name){toast('幫牠取個名字吧');$('#bdNm').focus();return}
-    const now=Date.now();const b=cur?{...cur,name,sp:st.sp,coat:st.coat,pat:st.pat,src:st.src}:{v:1,name,sp:st.sp,coat:st.coat,pat:st.pat,src:st.src,born:bdToday(),s:{f:70,m:80,c:95,e:85},t:now,aff:0,tr:3,dd:bdToday(),ls:bdToday(),streak:1,dc:{},nt:true};
+    const now=Date.now();const look=st.look==='photo'&&st.photo?'photo':'draw';
+    const b=cur?{...cur,name,sp:st.sp,coat:st.coat,pat:st.pat,ear:st.ear,src:st.src,look,photo:look==='photo'?st.photo:null}:{v:1,name,sp:st.sp,coat:st.coat,pat:st.pat,ear:st.ear,src:st.src,look,photo:look==='photo'?st.photo:null,born:bdToday(),s:{f:70,m:80,c:95,e:85},t:now,aff:0,tr:3,dd:bdToday(),ls:bdToday(),streak:1,dc:{},nt:true};
     __bd=b;__bdUid=me().id;bdSave(true);__bdGreeted=false;toast(cur?'✅ 外型已更新':`🎉 ${name}來到你家了！送你 3 個點心`);if((location.hash||'')==='#/buddy')route();else goReplace('#/buddy')}}
 
 // ── 使用者名稱：註冊時設定，之後不能改（資料庫 migration v1.34 也會擋） ──
