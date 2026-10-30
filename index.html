@@ -616,6 +616,13 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
   .stats{gap:16px}
   .stat b{font-size:22px}
 }
+.mapkit a{display:grid!important;place-items:center;color:#333!important}.mapkit a .ico{width:20px;height:20px}.mapkit a.on{background:#1F2A24!important;color:#fff!important}.mapkit a.busy{opacity:.5;animation:pulse 1s infinite}
+.map-hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1001;background:rgba(20,24,22,.82);color:#fff;font-weight:700;font-size:14px;padding:10px 14px;border-radius:12px;max-width:80%;text-align:center;pointer-events:none;opacity:0;transition:opacity .2s}.map-hint.on{opacity:1}
+.sv-cover{position:absolute;inset:0;z-index:999;cursor:crosshair;background:rgba(47,111,228,.08);display:flex;justify-content:center;align-items:flex-end;padding-bottom:28px}.sv-cover span{background:#2F6FE4;color:#fff;font-weight:700;font-size:14px;padding:9px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.2);pointer-events:none}
+.pop-go{display:flex;gap:8px;margin-top:8px}.pop-go a{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:7px 10px;border-radius:10px;background:#F2F4F1;color:#1F2A24!important;font-weight:700;font-size:13px;text-decoration:none!important;white-space:nowrap}
+.leaflet-container.mapfs{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-height:none!important;margin:0!important;border-radius:0!important;z-index:100000!important}
+.mapfs .leaflet-top{top:env(safe-area-inset-top)}.mapfs .leaflet-bottom{bottom:env(safe-area-inset-bottom)}html.mapfs-on,html.mapfs-on body{overflow:hidden!important}
+.is-sat .leaflet-tile-pane{filter:none!important}
 .leaflet-container{font:inherit;background:#EEF0EA}
 :root[data-theme=dark] .leaflet-container{background:#2A2F2C}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .leaflet-container{background:#2A2F2C}}
@@ -2018,6 +2025,15 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 .pf-av.img img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .pf-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:var(--sheet);color:var(--ink-2);display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.18);font-size:13px}
 .nav-av{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle}
+.pi{margin:18px 0 6px;padding:14px 16px;border-radius:22px;background:var(--sheet);box-shadow:var(--lift)}
+.pi-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}.pi-row:first-of-type{border-top:0}
+.pi-ic{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:18px;background:var(--paper)}
+.pi-row.warn .pi-ic{background:#FFE4E4}.pi-row.ok .pi-ic{background:#E3F6EC}
+.pi-row b{display:block;font-size:15.5px}.pi-row p{margin:2px 0 0;color:var(--ink-2);font-size:14px;line-height:1.55}.pi-row.warn b{color:#B42318}
+.season{display:flex;gap:12px;align-items:flex-start;margin:12px 0 0;padding:12px 16px;border-radius:18px;background:#EEF4FF;border:1px solid #D6E2FB}
+.season .se-ic{font-size:24px;line-height:1.2}.season b{display:block}.season p{margin:2px 0 0;font-size:14px;color:var(--ink-2);line-height:1.55}
+:root[data-theme=dark] .season{background:#1F2A3D;border-color:#2E3E5A}:root[data-theme=dark] .pi-row.warn .pi-ic{background:#4A2222}:root[data-theme=dark] .pi-row.ok .pi-ic{background:#1E3A2C}:root[data-theme=dark] .pi-row.warn b{color:#FF9B8F}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .season{background:#1F2A3D;border-color:#2E3E5A}:root:not([data-theme=light]) .pi-row.warn b{color:#FF9B8F}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2090,7 +2106,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.12.2';
+const BUILD = 'v5.13.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2233,7 +2249,7 @@ function spIc(k){return `<svg class="ico sp-i" viewBox="0 0 24 24" fill="none" s
 const PAW_BIG='<svg class="paw-big" viewBox="0 0 512 512" aria-hidden="true"><g fill="currentColor"><ellipse cx="256" cy="330" rx="98" ry="84"/><ellipse cx="150" cy="222" rx="40" ry="52" transform="rotate(-18 150 222)"/><ellipse cx="218" cy="160" rx="40" ry="54" transform="rotate(-6 218 160)"/><ellipse cx="294" cy="160" rx="40" ry="54" transform="rotate(6 294 160)"/><ellipse cx="362" cy="222" rx="40" ry="52" transform="rotate(18 362 222)"/></g></svg>';
 const SPECIES = {dog:{name:'狗',emoji:'🐕',poster:'尋狗啟事',short:'尋狗',unit:'犬',moa:'狗'},cat:{name:'貓',emoji:'🐈',poster:'尋貓啟事',short:'尋貓',unit:'貓',moa:'貓'}};
 function sp(x){return SPECIES[x]||SPECIES.dog}
-const ICONS={"sliders": "<path d=\"M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0\"/><circle cx=\"16\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"18\" cy=\"18\" r=\"2\"/>", "camera": "<path d=\"M4 8h3l2-3h6l2 3h3v11H4z\"/><circle cx=\"12\" cy=\"13\" r=\"3.5\"/>", "map": "<path d=\"M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z\"/><path d=\"M9 4v13.5M15 6.5V20\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "shelter": "<path d=\"M3 11.5 12 4l9 7.5\"/><path d=\"M5.5 10v10h13V10\"/><path d=\"M9.5 20v-4.5h5V20\"/>", "hand": "<path d=\"M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.3 14a1.5 1.5 0 0 1 2.4-1.8L8 15\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.2-4.2\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/>", "scale": "<path d=\"M12 4v16M5 20h14\"/><path d=\"m5 8 7-3 7 3\"/><path d=\"M5 8 2.5 14a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5h6v3H9zM8.5 12h7M8.5 16h5\"/>", "bell": "<path d=\"M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z\"/><path d=\"M10 20.5a2 2 0 0 0 4 0\"/>", "star": "<path d=\"m12 3.8 2.5 5.1 5.6.8-4 4 1 5.6-5.1-2.7-5 2.7.9-5.6-4-4 5.6-.8z\"/>", "image": "<rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"15\" rx=\"2\"/><circle cx=\"9\" cy=\"10\" r=\"1.8\"/><path d=\"m20.5 16-5-5-8.5 8.5\"/>", "key": "<circle cx=\"8\" cy=\"15\" r=\"4\"/><path d=\"m11 12 8.5-8.5M16 7l2.5 2.5M14 9l2 2\"/>", "flag": "<path d=\"M5 21V4.5M5 4.5h11l-2 4 2 4H5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "pin": "<path d=\"M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.4\"/>", "shield": "<path d=\"M12 3.5 19 6v5.5c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6z\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2\"/><path d=\"M3.5 9.5h17M8 3v4M16 3v4\"/>", "siren": "<path d=\"M7 18v-6a5 5 0 0 1 10 0v6\"/><path d=\"M4.5 18h15v2.5h-15zM12 3v1.5M4.4 6.4l1 1M19.6 6.4l-1 1\"/>", "printer": "<path d=\"M7 9V3.5h10V9\"/><rect x=\"3.5\" y=\"9\" width=\"17\" height=\"7.5\" rx=\"1.5\"/><path d=\"M7 14h10v6.5H7z\"/>", "steth": "<path d=\"M6 3.5v5a4 4 0 0 0 8 0v-5\"/><path d=\"M10 12.5v2a5 5 0 0 0 10 0v-1\"/><circle cx=\"20\" cy=\"11.5\" r=\"2\"/>", "download": "<path d=\"M12 4v11M7.5 10.5 12 15l4.5-4.5M4.5 19.5h15\"/>", "paw": "<ellipse cx=\"12\" cy=\"16\" rx=\"4.4\" ry=\"3.6\"/><circle cx=\"6.3\" cy=\"10.6\" r=\"1.9\"/><circle cx=\"9.6\" cy=\"6.7\" r=\"2\"/><circle cx=\"14.4\" cy=\"6.7\" r=\"2\"/><circle cx=\"17.7\" cy=\"10.6\" r=\"1.9\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "share": "<circle cx=\"17.5\" cy=\"5.5\" r=\"2.5\"/><circle cx=\"6.5\" cy=\"12\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"18.5\" r=\"2.5\"/><path d=\"m8.7 10.8 6.6-4M8.7 13.2l6.6 4\"/>"};
+const ICONS={"expand": "<path d=\"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5\"/>", "shrink": "<path d=\"M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5\"/>", "locate": "<circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\" fill=\"currentColor\"/><path d=\"M12 2v3M12 19v3M2 12h3M19 12h3\"/>", "layers": "<path d=\"M12 3 2 8l10 5 10-5-10-5Z\"/><path d=\"m2 13 10 5 10-5\"/>", "sliders": "<path d=\"M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0\"/><circle cx=\"16\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"18\" cy=\"18\" r=\"2\"/>", "camera": "<path d=\"M4 8h3l2-3h6l2 3h3v11H4z\"/><circle cx=\"12\" cy=\"13\" r=\"3.5\"/>", "map": "<path d=\"M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z\"/><path d=\"M9 4v13.5M15 6.5V20\"/>", "megaphone": "<path d=\"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z\"/><path d=\"M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13\"/>", "shelter": "<path d=\"M3 11.5 12 4l9 7.5\"/><path d=\"M5.5 10v10h13V10\"/><path d=\"M9.5 20v-4.5h5V20\"/>", "hand": "<path d=\"M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4.5a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.3 14a1.5 1.5 0 0 1 2.4-1.8L8 15\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m20 20-4.2-4.2\"/>", "eye": "<path d=\"M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/>", "scale": "<path d=\"M12 4v16M5 20h14\"/><path d=\"m5 8 7-3 7 3\"/><path d=\"M5 8 2.5 14a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0z\"/>", "clipboard": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5h6v3H9zM8.5 12h7M8.5 16h5\"/>", "bell": "<path d=\"M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z\"/><path d=\"M10 20.5a2 2 0 0 0 4 0\"/>", "star": "<path d=\"m12 3.8 2.5 5.1 5.6.8-4 4 1 5.6-5.1-2.7-5 2.7.9-5.6-4-4 5.6-.8z\"/>", "image": "<rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"15\" rx=\"2\"/><circle cx=\"9\" cy=\"10\" r=\"1.8\"/><path d=\"m20.5 16-5-5-8.5 8.5\"/>", "key": "<circle cx=\"8\" cy=\"15\" r=\"4\"/><path d=\"m11 12 8.5-8.5M16 7l2.5 2.5M14 9l2 2\"/>", "flag": "<path d=\"M5 21V4.5M5 4.5h11l-2 4 2 4H5\"/>", "link": "<path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/>", "pin": "<path d=\"M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.4\"/>", "shield": "<path d=\"M12 3.5 19 6v5.5c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6z\"/>", "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2\"/><path d=\"M3.5 9.5h17M8 3v4M16 3v4\"/>", "siren": "<path d=\"M7 18v-6a5 5 0 0 1 10 0v6\"/><path d=\"M4.5 18h15v2.5h-15zM12 3v1.5M4.4 6.4l1 1M19.6 6.4l-1 1\"/>", "printer": "<path d=\"M7 9V3.5h10V9\"/><rect x=\"3.5\" y=\"9\" width=\"17\" height=\"7.5\" rx=\"1.5\"/><path d=\"M7 14h10v6.5H7z\"/>", "steth": "<path d=\"M6 3.5v5a4 4 0 0 0 8 0v-5\"/><path d=\"M10 12.5v2a5 5 0 0 0 10 0v-1\"/><circle cx=\"20\" cy=\"11.5\" r=\"2\"/>", "download": "<path d=\"M12 4v11M7.5 10.5 12 15l4.5-4.5M4.5 19.5h15\"/>", "paw": "<ellipse cx=\"12\" cy=\"16\" rx=\"4.4\" ry=\"3.6\"/><circle cx=\"6.3\" cy=\"10.6\" r=\"1.9\"/><circle cx=\"9.6\" cy=\"6.7\" r=\"2\"/><circle cx=\"14.4\" cy=\"6.7\" r=\"2\"/><circle cx=\"17.7\" cy=\"10.6\" r=\"1.9\"/>", "user": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "share": "<circle cx=\"17.5\" cy=\"5.5\" r=\"2.5\"/><circle cx=\"6.5\" cy=\"12\" r=\"2.5\"/><circle cx=\"17.5\" cy=\"18.5\" r=\"2.5\"/><path d=\"m8.7 10.8 6.6-4M8.7 13.2l6.6 4\"/>"};
 ICONS.aid='<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7M12 10.5v6M9 13.5h6"/>';
 ICONS.phone='<path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z"/>';
 function pawSvg(){return '<svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="6.2" cy="10.6" r="2"/><circle cx="9.6" cy="6.6" r="2.1"/><circle cx="14.4" cy="6.6" r="2.1"/><circle cx="17.8" cy="10.6" r="2"/></svg>'}
@@ -2369,7 +2385,36 @@ function waitLeaflet(){if(window.__lfail&&!window.L)leafletGaveUp=true;if(window
   if(!document.getElementById('leafletCss')){const c=document.createElement('link');c.id='leafletCss';c.rel='stylesheet';c.href='vendor/leaflet-1.9.4.css';document.head.insertBefore(c,document.head.querySelector('style'))}
   let e=document.getElementById('leafletJs');if(!e){e=document.createElement('script');e.id='leafletJs';e.src='vendor/leaflet-1.9.4.js';e.async=true;e.onerror=()=>{window.__lfail=1};e.addEventListener('load',()=>{leafletGaveUp=false;_lw=null});document.head.appendChild(e)}
   const done=()=>{if(!window.L)leafletGaveUp=true;ok()};if(!e){done();return}e.addEventListener('load',done);e.addEventListener('error',done);setTimeout(done,8000)}))}
-function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);return m}
+// 地圖操作工具：全螢幕、我的位置、衛星空照、街景；手機用兩指移動（不會卡住整頁捲動），電腦點一下就能用滾輪縮放
+const IS_TOUCH=matchMedia('(pointer:coarse)').matches;
+const svURL=(lat,lng)=>`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${(+lat).toFixed(6)},${(+lng).toFixed(6)}`;
+const navURL=(lat,lng)=>`https://www.google.com/maps/dir/?api=1&destination=${(+lat).toFixed(6)},${(+lng).toFixed(6)}`;
+let __mapFs=null;
+function mapFsExit(){const f=__mapFs;if(!f)return;__mapFs=null;const {m,el,ph}=f;el.classList.remove('mapfs');if(ph.parentNode){ph.parentNode.insertBefore(el,ph);ph.remove()}else{try{m.remove()}catch(_){}el.remove()}document.documentElement.classList.remove('mapfs-on');
+  if(IS_TOUCH)m.dragging.disable();m.scrollWheelZoom.disable();const b=el.querySelector('[data-mk=fs]');if(b){b.innerHTML=ic('expand');b.title=b.ariaLabel='全螢幕'}setTimeout(()=>{try{m.invalidateSize()}catch(_){}},60)}
+addEventListener('hashchange',mapFsExit);addEventListener('keydown',e=>{if(e.key==='Escape'&&__mapFs)mapFsExit()});
+function mapKit(m,base){const el=m.getContainer();
+  const sat=L.tileLayer('https://wmts.nlsc.gov.tw/wmts/PHOTO_MIX/default/GoogleMapsCompatible/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,attribution:'空照 &copy; 內政部國土測繪中心'});
+  let svOn=false,cover=null,hintT=0;
+  const hint=(t,ms=1600)=>{let h=el.querySelector('.map-hint');if(!h){h=document.createElement('div');h.className='map-hint';el.appendChild(h)}h.textContent=t;h.classList.add('on');clearTimeout(hintT);hintT=setTimeout(()=>h.classList.remove('on'),ms)};
+  const svStop=()=>{svOn=false;if(cover){cover.remove();cover=null}const b=el.querySelector('[data-mk=sv]');if(b)b.classList.remove('on')};
+  const C=L.Control.extend({options:{position:'topright'},onAdd(){const d=L.DomUtil.create('div','leaflet-bar mapkit');
+    d.innerHTML=`<a href="#" role="button" data-mk="fs" title="全螢幕" aria-label="全螢幕">${ic('expand')}</a><a href="#" role="button" data-mk="me" title="我的位置" aria-label="我的位置">${ic('locate')}</a><a href="#" role="button" data-mk="sat" title="切換空照圖" aria-label="切換空照圖">${ic('layers')}</a><a href="#" role="button" data-mk="sv" title="看街景" aria-label="看街景">${ic('eye')}</a>`;
+    L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);
+    d.addEventListener('click',e=>{const a=e.target.closest('[data-mk]');if(!a)return;e.preventDefault();const k=a.dataset.mk;
+      if(k==='fs'){if(__mapFs&&__mapFs.m===m)return mapFsExit();mapFsExit();const ph=document.createComment('map');el.parentNode.insertBefore(ph,el);document.body.appendChild(el);el.classList.add('mapfs');document.documentElement.classList.add('mapfs-on');__mapFs={m,el,ph};m.dragging.enable();m.scrollWheelZoom.enable();a.innerHTML=ic('shrink');a.title=a.ariaLabel='離開全螢幕';setTimeout(()=>{try{m.invalidateSize()}catch(_){}},60)}
+      else if(k==='me'){if(!navigator.geolocation)return toast('這台裝置沒辦法定位');a.classList.add('busy');navigator.geolocation.getCurrentPosition(p=>{a.classList.remove('busy');if(!el.isConnected)return;const ll=[p.coords.latitude,p.coords.longitude];if(m.__me)m.__me.remove();m.__me=L.circleMarker(ll,{radius:8,color:'#fff',weight:3,fillColor:'#2F6FE4',fillOpacity:1}).addTo(m).bindPopup('你現在的位置');m.flyTo(ll,Math.max(m.getZoom(),16),{duration:.6})},er=>{a.classList.remove('busy');toast(er&&er.code===1?'沒有定位權限，請到設定開啟位置權限':'定位失敗，請稍後再試')},{enableHighAccuracy:true,timeout:10000,maximumAge:30000})}
+      else if(k==='sat'){if(m.hasLayer(sat)){m.removeLayer(sat);base.addTo(m);a.classList.remove('on');el.classList.remove('is-sat')}else{m.removeLayer(base);sat.addTo(m);a.classList.add('on');el.classList.add('is-sat');hint('空照圖：看得到草叢、空地、停車場，適合找躲起來的毛孩',2600)}}
+      else if(k==='sv'){if(svOn)return svStop();svOn=true;a.classList.add('on');cover=document.createElement('div');cover.className='sv-cover';cover.innerHTML='<span>點地圖上想看的位置，打開 Google 街景</span>';el.appendChild(cover);
+        cover.addEventListener('click',ev=>{ev.stopPropagation();const ll=m.mouseEventToLatLng(ev);svStop();window.open(svURL(ll.lat,ll.lng),'_blank','noopener')})}
+    });return d}});
+  m.addControl(new C());
+  // 標記的說明框加上「看街景」「導航」
+  m.on('popupopen',e=>{const pe=e.popup.getElement&&e.popup.getElement(),ll=e.popup.getLatLng();if(!pe||!ll)return;const c=pe.querySelector('.leaflet-popup-content');if(!c||c.querySelector('.pop-go'))return;const d=document.createElement('div');d.className='pop-go';d.innerHTML=`<a target="_blank" rel="noopener" href="${svURL(ll.lat,ll.lng)}">${ic('eye')} 街景</a><a target="_blank" rel="noopener" href="${navURL(ll.lat,ll.lng)}">${ic('map')} 導航</a>`;c.appendChild(d);try{const q=e.popup;q._updateLayout();q._updatePosition();q._adjustPan&&q._adjustPan()}catch(_){}});
+  if(IS_TOUCH){m.dragging.disable();let one=false;el.addEventListener('touchstart',e=>{one=e.touches.length===1&&!el.classList.contains('mapfs')},{passive:true});el.addEventListener('touchmove',e=>{if(one&&e.touches.length===1&&!svOn)hint('用兩指移動地圖，或按右上角 ⛶ 全螢幕')},{passive:true})}
+  else{el.addEventListener('wheel',()=>{if(!m.scrollWheelZoom.enabled())hint('點一下地圖，就能用滑鼠滾輪縮放',1400)},{passive:true});m.on('click',()=>m.scrollWheelZoom.enable());el.addEventListener('mouseleave',()=>{if(!el.classList.contains('mapfs'))m.scrollWheelZoom.disable()})}
+}
+function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);const base=(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);try{mapKit(m,base)}catch(e){console.warn(e)}return m}
 function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
 // 定位或點地圖後：自動帶入縣市、區、地點描述（只填空的或跟位置不一樣的），並請使用者確認
@@ -2986,6 +3031,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <button type="button" class="tile4 tb" id="bigNear"><span class="te">${ic("pin")}</span><b>附近走失</b><small>離我最近的毛孩</small></button>
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
+    ${(()=>{const t=seasonTip();return t?`<div class="season"><span class="se-ic" aria-hidden="true">${t.ic}</span><div><b>${t.t}</b><p>${t.b}</p></div></div>`:''})()}
     <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div id="lostPrev" class="lostprev"></div>
     <div class="qrow" aria-label="更多服務">
@@ -3215,6 +3261,56 @@ function mgAdvice(c,pendS,ss,go,id){const N=esc(c.name||'牠'),d=daysSince(c.los
   else if(d>=7)out.push([go('share'),'🔁',`已經 ${d} 天了：再分享一次`,'更新海報、每天打給收容所問一次']);
   if(!out.length)return '';
   return `<div class="mg-ai"><div class="sa-head"><span class="sa-spark" aria-hidden="true">✨</span><b>今天建議你做</b></div>${out.slice(0,3).map(([h,i,t,sub])=>`<a class="mg-ai-row" href="${h}" ${h.startsWith('#/')?'':'data-jump'}><span aria-hidden="true">${i}</span><span><b>${t}</b><small>${sub}</small></span><em aria-hidden="true">›</em></a>`).join('')}</div>`}
+// ── 智慧分析：還沒有目擊時的協尋建議（依走失時間、狗／貓、個性推算） ──
+function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const hrs=Math.max(0,(Date.now()-new Date(c.lost_at))/36e5),cat=c.species==='cat';
+  const txt=[c.temperament,c.features,c.notes].filter(Boolean).join(' ');const shy=/怕生|膽小|害怕|怕人|緊張|躲|敏感|怕/.test(txt),friendly=/親人|親近|愛撒嬌|不怕生|會跟人|很乖/.test(txt);
+  const rad=cat?(hrs<72?0.15:hrs<168?0.3:0.5):(hrs<6?0.5:hrs<24?1:hrs<72?2:3);
+  const phase=hrs<48?{k:'黃金 48 小時',d:'最容易找回的時候'}:hrs<168?{k:'第 3～7 天',d:'擴大範圍、問收容所'}:{k:'超過一週',d:'持續曝光，別放棄'};
+  const best=cat?'深夜 11 點～清晨 5 點':shy?'清晨 5～7 點、傍晚':'清晨與傍晚';
+  const N=esc(c.name||'牠'),tips=[];
+  if(cat){tips.push(`貓咪多半躲在家附近 ${fmtKm(rad)} 內：車底、機車坑、樓梯間、冷氣室外機後面。晚上拿手電筒照，眼睛會反光。`);tips.push('把貓砂盆、睡墊放在門口或陽台，熟悉的味道會引牠回來。')}
+  else{tips.push(hrs<6?`先在走失地點附近 ${fmtKm(rad)} 內慢慢走、輕聲叫「${N}」，帶牠愛吃的零食。`:`以走失地點為中心，先找周圍 ${fmtKm(rad)}：公園、學校、市場、河堤、工地這些地方。`)}
+  if(shy)tips.push(`${N}比較怕生：看到牠<b>不要追、不要大聲叫</b>，蹲低、側身，丟零食慢慢等牠靠近。`);
+  else if(friendly&&!cat)tips.push(`${N}親人，可能會跟著路人走：問附近店家、警衛、外送員、早餐店有沒有看到。`);
+  if(hrs>=12)tips.push(`打電話問 ${esc(c.lost_city||'當地')}的收容所和附近動物醫院，${hrs>=48?'每 2～3 天':'明天'}再問一次（照片和晶片號碼準備好）。`);
+  tips.push(hrs<48?'把協尋頁分享到當地 FB 社團、LINE 群組，在走失點附近貼 A4 海報。':'在常有人經過的地方補貼海報，協尋貼文每隔幾天重新分享一次。');
+  return {hrs,rad,phase,best,tips,name:N,ago:hrs<1?'不到 1 小時':hrs<24?Math.floor(hrs)+' 小時':Math.floor(hrs/24)+' 天'}}
+function lostPlanHTML(c){const a=lostPlan(c);if(!a)return '';
+  return `<section class="sa" aria-label="智慧協尋建議"><div class="sa-head"><span class="sa-spark" aria-hidden="true">✨</span><b>智慧協尋建議</b><small>依走失時間、${c.species==='cat'?'貓咪':'狗狗'}習性和個性推算</small></div>
+  <div class="sa-hero ${a.hrs<48?'fresh':''}"><span class="sa-dot" aria-hidden="true"></span><div><small>${a.name}已經走失</small><b>${a.ago}</b><span>${esc(a.phase.k)}：${esc(a.phase.d)}</span></div></div>
+  <div class="sa-stats"><div class="hi"><small>建議先找周圍</small><b>${fmtKm(a.rad)}</b></div><div><small>最容易找到的時段</small><b style="font-size:15px">${esc(a.best)}</b></div></div>
+  <div class="sa-tips"><small>建議下一步</small><ol>${a.tips.slice(0,4).map(t=>`<li>${t}</li>`).join('')}</ol></div>
+  <p class="sa-note">還沒有目擊回報，以上依一般走失狗貓的行為推算，僅供參考。有人回報目擊後，會改用實際目擊位置分析。</p></section>`}
+// ── 智慧分析：健康手冊（體重趨勢、疫苗、驅蟲、年齡階段、花費） ──
+function petInsights(p,rs){const out=[],now=Date.now(),cat=p.species==='cat';
+  const ageM=(()=>{if(!p.birthday)return null;const b=new Date(p.birthday);return (new Date().getFullYear()-b.getFullYear())*12+new Date().getMonth()-b.getMonth()})();
+  const ws=rs.filter(r=>r.weight_kg).map(r=>({d:r.date,w:+r.weight_kg})).sort((a,b)=>a.d.localeCompare(b.d));
+  if(ws.length>=2){const a=ws[ws.length-1],prev=ws.slice().reverse().find(x=>(new Date(a.d)-new Date(x.d))/864e5>=60)||ws[0];const days=Math.max(1,(new Date(a.d)-new Date(prev.d))/864e5),pct=(a.w-prev.w)/prev.w*100;
+    const adult=ageM==null||ageM>=12;
+    if(adult&&Math.abs(pct)>=10)out.push({lv:'warn',ic:'⚖️',t:`體重${pct>0?'增加':'減少'}了 ${Math.abs(pct).toFixed(0)}%`,b:`${Math.round(days/30)||1} 個月內從 ${prev.w} 到 ${a.w} 公斤。成年${cat?'貓':'犬'}短時間變化超過 10%，建議帶給獸醫看看${pct<0?'（突然變瘦要特別注意）':''}。`});
+    else if(adult&&Math.abs(pct)>=5)out.push({lv:'info',ic:'⚖️',t:`體重${pct>0?'微增':'微降'} ${Math.abs(pct).toFixed(0)}%`,b:`從 ${prev.w} 到 ${a.w} 公斤，可以留意飲食份量和運動量。`});
+    else if(adult)out.push({lv:'ok',ic:'⚖️',t:'體重很穩定',b:`最近一次 ${a.w} 公斤，跟之前差不多，繼續保持！`})}
+  else out.push({lv:'info',ic:'⚖️',t:'開始記錄體重',b:'每個月量一次體重，就能看出變胖、變瘦的趨勢，提早發現健康問題。'});
+  const lastOf=k=>rs.filter(r=>r.kind===k).sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const vac=lastOf('vaccine');if(vac){const m=(now-new Date(vac.date))/864e5/30.4;const pending=rs.some(r=>r.kind==='vaccine'&&r.next_due&&!r.done);
+    if(m>=12&&!pending)out.push({lv:'warn',ic:'💉',t:'疫苗可能該補打了',b:`上次打疫苗是 ${Math.floor(m)} 個月前（${vac.date}）。一般每年補強一次，${cat?'貓':'狗'}的狂犬病疫苗也是法規要求。`})}
+  else out.push({lv:'info',ic:'💉',t:'還沒有疫苗紀錄',b:'把打過的疫苗記下來，到期前會提醒你，帶去看醫生時也能直接給醫生看。'});
+  const dw=lastOf('deworm');if(dw){const d=(now-new Date(dw.date))/864e5;if(d>=40&&!rs.some(r=>r.kind==='deworm'&&r.next_due&&!r.done))out.push({lv:'warn',ic:'🛡️',t:'驅蟲已經超過一個月',b:`上次是 ${Math.floor(d)} 天前（${dw.date}）。台灣蚊子多，心絲蟲預防建議每個月一次。`})}
+  if(ageM!=null){if(ageM<12)out.push({lv:'info',ic:'🍼',t:`幼${cat?'貓':'犬'}期（${petAge(p.birthday)}）`,b:'這段時間要完成基礎疫苗（通常每 3～4 週一劑，共 2～3 劑），也是社會化的關鍵期。'});
+    else if(ageM>=(cat?132:96))out.push({lv:'info',ic:'🧓',t:`進入熟齡（${petAge(p.birthday)}）`,b:`建議每半年健康檢查一次，抽血看腎臟、肝臟${cat?'和甲狀腺':''}，及早發現慢性病。`})}
+  const y=new Date().getFullYear(),cy=rs.filter(r=>r.cost&&r.date.startsWith(String(y))).reduce((a,r)=>a+r.cost,0),ly=rs.filter(r=>r.cost&&r.date.startsWith(String(y-1))).reduce((a,r)=>a+r.cost,0);
+  if(cy&&ly){const d=(cy-ly)/ly*100;out.push({lv:'info',ic:'💰',t:`今年花費 $${cy.toLocaleString()}`,b:`比去年同期全年 $${ly.toLocaleString()} ${d>=0?'多':'少'} ${Math.abs(d).toFixed(0)}%。`})}
+  return out}
+function petInsightsHTML(p,rs){const xs=petInsights(p,rs);if(!xs.length)return '';const order={warn:0,info:1,ok:2};xs.sort((a,b)=>order[a.lv]-order[b.lv]);
+  return `<section class="pi" aria-label="智慧健康分析"><div class="sa-head"><span class="sa-spark" aria-hidden="true">✨</span><b>智慧健康分析</b><small>依 ${esc(p.name)} 的紀錄自動整理</small></div>${xs.slice(0,4).map(x=>`<div class="pi-row ${x.lv}"><span class="pi-ic" aria-hidden="true">${x.ic}</span><div><b>${esc(x.t)}</b><p>${esc(x.b)}</p></div></div>`).join('')}<p class="sa-note">依你記錄的資料推算，僅供參考，健康問題請以獸醫判斷為準。</p></section>`}
+// ── 智慧分析：首頁的季節提醒（煙火、颱風、高溫這些容易走失的時候） ──
+function seasonTip(){const d=new Date(Date.now()+8*36e5),m=d.getUTCMonth()+1,day=d.getUTCDate(),md=m*100+day;
+  const LNY={2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3]}[d.getUTCFullYear()];const near=(mm,dd,b,a)=>{const t=Date.UTC(d.getUTCFullYear(),mm-1,dd),x=Date.UTC(d.getUTCFullYear(),m-1,day);return x>=t-b*864e5&&x<=t+a*864e5};
+  if(md>=1228||md<=101)return {ic:'🎆',t:'跨年煙火快到了',b:'煙火聲會讓狗貓受驚跑走，是一年中走失最多的時候。今晚請關好門窗、牽繩牽緊，名牌和晶片資料確認一下。'};
+  if(LNY&&near(LNY[0],LNY[1],5,5))return {ic:'🧨',t:'過年鞭炮多，小心毛孩受驚',b:'鞭炮聲容易讓狗貓驚嚇逃跑。出門拜年記得關好門窗，帶牠回老家要全程牽繩。'};
+  if(m>=7&&m<=10)return {ic:'🌀',t:'颱風季：打雷、強風容易讓毛孩受驚',b:'颱風前把狗貓帶進室內，關好門窗。打雷時牠可能會躲起來或想往外衝，多注意門口。'};
+  if(m>=5&&m<=9)return {ic:'☀️',t:'天氣熱，散步避開中午',b:'柏油路面中午可能超過 60 度，會燙傷腳掌，也容易中暑。清晨或傍晚再出門。'};
+  return null}
 function sightAnaHTML(a){if(!a)return '';
   const arrow=deg=>`<svg class="sa-arrow" viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(${Math.round(deg)}deg)"><path d="M12 3l6 9h-4v9h-4v-9H6z"/></svg>`;
   const fresh=a.hrs<24;
@@ -3557,7 +3653,7 @@ async function renderCase(id){const _n=navId;
   sightings.forEach((s,i)=>pts.push({lat:s.lat,lng:s.lng,label:String(i+1),cls:'',t:s.seen_at,title:`目擊 ${i+1}`,where:s.place_text,dir:s.direction,note:s.note,photo:s.photo_url,by:s.reporter_name,onote:s.owner_note,verified:s.verified,sid:s.id,poster:s.poster}));
   const center=pts.find(p=>p.lat)?[pts.find(p=>p.lat).lat,pts.find(p=>p.lat).lng]:(CITY_CENTER[c.lost_city]||[23.7,121]);
   // 地圖程式還沒下載完也先把案件內容顯示出來，地圖等它好了再畫（分享連結最常開這頁）
-  const ana=sightAnalysis(c,pts);{const sa=$('#sAna');if(sa)sa.innerHTML=sightAnaHTML(ana)}
+  const ana=sightAnalysis(c,pts);{const sa=$('#sAna');if(sa)sa.innerHTML=ana?sightAnaHTML(ana):lostPlanHTML(c)}
   const drawMap=()=>{const map=makeMap('map',center,pts.find(p=>p.lat)?15:10);
   // 依時間把走失點和目擊點連起來，並圈出建議先找的範圍
   if(typeof L!=='undefined'&&map&&map.addLayer){const line=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t)).map(p=>[p.lat,p.lng]);
@@ -6525,6 +6621,7 @@ async function renderPetView(id){const _n=navId;
   </div>
 
   ${calPrompt?`<div class="calprompt" id="calPrompt"><div class="b"><b>已設定提醒：${esc(calPrompt.title)}</b><br><span class="muted">${calPrompt.next_due}・${dueText(calPrompt.next_due)}，要順便加到手機日曆嗎？</span></div><div class="acts">${calButtons(p.name,calPrompt)}<button type="button" class="btn sm ghost" id="calPromptX">不用</button></div></div>`:''}
+  ${petInsightsHTML(p,rs)}
   <h2>${ic("pill")} 用藥與保養品 <a class="btn sm ghost" href="#/pet/${id}/med/new" style="margin-left:auto">${ic("plus")} 新增</a></h2>
   ${meds.length?`${medToday.length?`<div class="card med-card"><div class="med-title">今天吃了沒？<span class="muted small">餵完按一下就打勾</span></div>${medToday.join('')}</div>`:''}
   ${medToday.length?`<details class="mg-sec" style="margin-top:12px"><summary>藥品與保養品清單 <span class="muted small">${meds.length} 項</span></summary><div class="mg-body">`:''}  <div class="card" style="padding:6px 18px;margin-top:12px">${meds.map(x=>`<div class="delrow"><a class="sponsor" href="#/pet/${id}/med/${x.id}" style="color:inherit"><div class="av rk-av med-ic ${x.kind}">${ic(x.kind==='supplement'?'leaf':'pill')}</div><div class="b"><b>${esc(x.name)} <span class="tag ${x.kind==='supplement'?'green':''}" style="vertical-align:2px">${x.kind==='supplement'?'保養品':'藥品'}</span>${(x.files||[]).length?` <span class="tag" style="vertical-align:2px">${ic("image")} ${x.files.length}</span>`:''}</b><div class="msg">${esc(medLine(x)||'未填劑量')}</div><div class="msg">${esc([x.purpose,x.end_date?`吃到 ${x.end_date}`:'持續吃',x.clinic].filter(Boolean).join('・'))}</div></div></a><button type="button" class="trash-btn" data-del-med="${x.id}" aria-label="刪除 ${esc(x.name)}">${ic('trash')}<span>刪除</span></button></div>`).join('')}</div>${medToday.length?'</div></details>':''}`
