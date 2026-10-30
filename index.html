@@ -1784,7 +1784,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.7.3';
+const BUILD = 'v5.7.4';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -1806,7 +1806,7 @@ function wsegText(t){let s=t.data;if(!s||s.length<3||!WSEG_CJK.test(s))return;
   for(const g of WSEG.segment(s)){const x=g.segment;if(cur&&g.isWordLike&&!WSEG_OPEN.test(last)&&(WSEG_CJK.test(x)||WSEG_CJK.test(last)))(parts.push(cur),cur='');cur+=x;last=x}
   parts.push(cur);
   // 最後一段太短（一兩個字）就跟前一段黏在一起，不讓最後一行只剩一個字
-  if(parts.length>=2&&(parts[parts.length-1].match(/[㐀-鿿]/g)||[]).length<=1){const z=parts.pop();parts[parts.length-1]+=z}
+  if(parts.length>=2&&(parts[parts.length-1].match(/[㐀-鿿]/g)||[]).length<=2){const z=parts.pop();parts[parts.length-1]+=z}
   if(parts.length<2)return;
   const f=document.createDocumentFragment();parts.forEach((x,i)=>{if(i)f.appendChild(document.createElement('wbr'));f.appendChild(document.createTextNode(x))});par.replaceChild(f,t)}
 function wsegWalk(root){if(!WSEG||!root)return;if(root.nodeType===3)return wsegText(root);if(root.nodeType!==1||WSEG_SKIP.has(root.nodeName))return;
