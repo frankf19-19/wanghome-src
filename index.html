@@ -1975,7 +1975,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.9.1';
+const BUILD = 'v5.9.2';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -5640,10 +5640,10 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
   const aiFail=e=>{ai.busy=false;if(_n!==navId)return;const m=e&&e.code==='nokey'?'AI 畫圖還在準備中，過幾天再來試試。現在可以先用下面的方式手動調整。':(e&&e.message)||'AI 畫圖失敗，請再試一次';aiMsg(`<p class="bd-ai-err">${esc(m)}</p>`);sync()};
   const aiWait=t=>`<p class="bd-ai-wait"><span class="bd-spin" aria-hidden="true"></span>${esc(t)}</p>`;
   const aiStart=async src=>{if(ai.busy)return;ai.busy=true;sync();
-    try{aiMsg(aiWait('正在讀照片…'));const im=await bdLoadImg(src);ai.photo=bdToB64(im);ai.src=src;
+    try{aiMsg(aiWait('正在讀照片…'));const im=await bdLoadImg(src);ai.photo=bdToB64(im,504);ai.src=src;
       aiMsg(aiWait(`AI 正在照照片畫${st.name||'牠'}…（大約 20～40 秒，先不要離開這頁）`));
       const j=await bdArtCall('ok',st.sp,ai.photo);if(_n!==navId)return;ai.ts=Date.now();
-      const r=await bdArtProcess(j,'ok',ai.ts);if(_n!==navId)return;ai.ok=r.url;ai.ref=bdToB64(r.im,640,.85);ai.busy=false;sync();
+      const r=await bdArtProcess(j,'ok',ai.ts);if(_n!==navId)return;ai.ok=r.url;ai.ref=bdToB64(r.im,504,.88);ai.busy=false;sync();
       $('#bdPrev').innerHTML=`<img class="bd-ai-img" src="${esc(safeU(r.url))}" alt="AI 畫的${esc(st.name||'毛孩')}">`;
       aiMsg(`<p style="margin:10px 0 8px"><b>像不像？</b>像的話，AI 會接著畫開心、睡覺、吃飯、撒嬌、走路 5 個動作（大約 1～2 分鐘）。</p><div class="row" style="gap:8px"><button type="button" class="btn" id="bdAiYes">像！畫其他動作</button><button type="button" class="btn ghost" id="bdAiAgain">不太像，再畫一次</button></div><p class="small muted" style="margin:6px 0 0">今天還能畫 ${+j.left||0} 張</p>`);
       $('#bdAiYes').onclick=aiRest;$('#bdAiAgain').onclick=()=>{bdArtRemoveOld({ok:ai.ok});aiStart(ai.src)}}

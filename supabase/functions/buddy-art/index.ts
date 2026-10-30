@@ -1,10 +1,12 @@
-// 汪喵回家 — 電子毛孩 AI 畫圖 v1.0
+// 汪喵回家 — 電子毛孩 AI 畫圖 v1.1（優先用 Cloudflare 免費 AI；沒設定才用 Google Gemini）
 // 網址：POST https://<project>.supabase.co/functions/v1/buddy-art   （需要登入：保留「Verify JWT」開啟）
 //   {"pose":"ok|happy|sleep|eat|sad|walk","sp":"dog|cat","photo":"<jpeg base64>","ref":"<第一張畫好的圖 base64，可省略>"}
 //   回傳 {"image":"<base64>","mime":"image/png","left":<今天還能畫幾張>}
 // 照會員自己毛孩的照片，用 Google Gemini 畫成可愛的 Q 版毛孩（同一隻毛孩畫 6 個動作）。
 // 費用控制：每位會員 24 小時內最多 BUDDY_ART_PER_USER 張（預設 14 張 ≈ 畫兩次），全站每天最多 BUDDY_ART_DAILY_CAP 張（預設 300）。
-// Secrets（Supabase → Edge Functions → Secrets）：GEMINI_API_KEY（必填）、GEMINI_IMAGE_MODEL（可省略，會自動選）
+// Secrets（Supabase → Edge Functions → Secrets）：
+//   免費方案：CF_ACCOUNT_ID、CF_AI_TOKEN（Cloudflare Workers AI，每天免費額度約可畫 80 張）
+//   付費方案（可省略）：GEMINI_API_KEY、GEMINI_IMAGE_MODEL
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const CORS = {
@@ -68,7 +70,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method" }, 405);
   const key = Deno.env.get("GEMINI_API_KEY") ?? "";
-  if (!key) return json({ error: "AI 畫圖還沒開通（缺少 GEMINI_API_KEY）", code: "nokey" }, 503);
+  const cfAcc = (Deno.env.get("CF_ACCOUNT_ID") ?? "").trim(), cfTok = (Deno.env.get("CF_AI_TOKEN") ?? "").trim();
+  const useCF = !!(cfAcc && cfTok);
+  if (!useCF && !key) return json({ error: "AI 畫圖還沒開通", code: "nokey" }, 503);
 
   const url = Deno.env.get("SUPABASE_URL")!;
   const auth = req.headers.get("Authorization") ?? "";
@@ -86,7 +90,7 @@ Deno.serve(async (req) => {
   const ref = b64ok(body.ref, 2_400_000) ? body.ref : null;
 
   // 次數限制
-  const perUser = Number(Deno.env.get("BUDDY_ART_PER_USER") ?? 14), cap = Number(Deno.env.get("BUDDY_ART_DAILY_CAP") ?? 300);
+  const perUser = Number(Deno.env.get("BUDDY_ART_PER_USER") ?? 14), cap = Number(Deno.env.get("BUDDY_ART_DAILY_CAP") ?? (useCF ? 80 : 300));
   const since = new Date(Date.now() - 864e5).toISOString();
   const [{ count: mine }, { count: all }] = await Promise.all([
     admin.from("buddy_art_log").select("id", { count: "exact", head: true }).eq("user_id", uid).gte("created_at", since),
@@ -96,6 +100,33 @@ Deno.serve(async (req) => {
   if ((all ?? 0) >= cap) return json({ error: "今天全站的 AI 畫圖次數用完了，明天再試試", code: "cap" }, 429);
 
   const animal = sp === "cat" ? "cat" : "dog";
+  if (useCF) {
+    const b2u = (b: string) => Uint8Array.from(atob(b), (c) => c.charCodeAt(0));
+    const fd = new FormData();
+    const prompt = ref
+      ? `Image 0 is a finished cute character design of a ${animal}. Image 1 is a real photo of the same ${animal}. Draw exactly the same character as image 0 (same design, colours, markings, proportions and art style) in a new pose. ${POSES[pose](sp)} ${STYLE}`
+      : `Image 0 is a real photo of my ${animal}. Turn this exact ${animal} into a cute character. ${POSES[pose](sp)} ${STYLE}`;
+    fd.append("prompt", prompt);
+    if (ref) { fd.append("input_image_0", new Blob([b2u(ref)], { type: "image/jpeg" }), "ref.jpg"); fd.append("input_image_1", new Blob([b2u(body.photo)], { type: "image/jpeg" }), "photo.jpg"); }
+    else fd.append("input_image_0", new Blob([b2u(body.photo)], { type: "image/jpeg" }), "photo.jpg");
+    fd.append("width", "768"); fd.append("height", "768");
+    const CFM = Deno.env.get("CF_IMAGE_MODEL") ?? "@cf/black-forest-labs/flux-2-klein-4b";
+    let out = "", why = "", st = 0;
+    for (let attempt = 0; attempt < 2 && !out; attempt++) {
+      const r = await fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAcc}/ai/run/${CFM}`, { method: "POST", headers: { Authorization: `Bearer ${cfTok}` }, body: fd });
+      st = r.status; const t = await r.text();
+      if (!r.ok) { why = `${r.status} ${t.slice(0, 300)}`; console.error("cf", CFM, why); if (r.status !== 500 && r.status !== 502 && r.status !== 503) break; continue; }
+      try { const j = JSON.parse(t); out = j.result?.image ?? j.image ?? ""; if (!out) why = "no image: " + t.slice(0, 200); } catch (e) { why = String(e); }
+    }
+    if (!out) {
+      console.error("buddy-art fail", CFM, why);
+      const quota = st === 429 || /neuron|quota|limit|exceed/i.test(why);
+      return json(quota ? { error: "今天的免費 AI 畫圖次數用完了，明天再來試試", code: "cap" } : { error: "這次沒畫出來，再試一次看看", detail: why.slice(0, 200) }, quota ? 429 : 502);
+    }
+    const mime = out.startsWith("/9j/") ? "image/jpeg" : out.startsWith("UklG") ? "image/webp" : "image/png";
+    await admin.from("buddy_art_log").insert({ user_id: uid, pose, model: CFM });
+    return json({ image: out, mime, left: Math.max(0, perUser - (mine ?? 0) - 1), model: CFM });
+  }
   const parts: any[] = [];
   if (ref) {
     parts.push({ text: `Image 1 is the finished character design of this ${animal}. Image 2 is the real photo of the ${animal} for reference. Draw the SAME character as image 1 (identical design, colours, markings, proportions and art style) in a new pose. ${POSES[pose](sp)} ${STYLE}` });
@@ -129,7 +160,7 @@ Deno.serve(async (req) => {
       if (!img) why = "no image: " + t.slice(0, 300);
     } catch (e) { why = String(e); }
   }
-  if (!img) { console.error("buddy-art fail", model, why); return json({ error: "這次沒畫出來，再試一次看看", detail: why.slice(0, 200) }, 502); }
+  if (!img) { console.error("buddy-art fail", model, why); const quota = /^429/.test(why); return json(quota ? { error: "AI 畫圖的額度不足，請稍後再試", code: "cap" } : { error: "這次沒畫出來，再試一次看看", detail: why.slice(0, 200) }, quota ? 429 : 502); }
 
   await admin.from("buddy_art_log").insert({ user_id: uid, pose, model });
   return json({ image: img.data, mime: img.mime, left: Math.max(0, perUser - (mine ?? 0) - 1), model });
