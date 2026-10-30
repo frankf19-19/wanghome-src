@@ -965,15 +965,13 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* v3.11.0 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
-/* 每行長度平均，最後一行不會只剩一兩個字；超過約 6 行的長段落改用 pretty */
-/* 標題、按鈕：平均分行；一般段落：pretty（避免最後一行只剩一個字，但不會把整段縮窄） */
-body :is(h1,h2,h3,h4,button,.btn,label,.chip){text-wrap:balance}
-body :is(p,li,div,small,span,dd,td,a){text-wrap:pretty}
-.longtext :is(p,li),.legal :is(p,li){text-wrap:pretty}
+/* 中文不用 balance／pretty（iPhone 會提早斷行、留一大片空白）；按鈕、標籤盡量不在詞中間斷開 */
+body :is(h1,h2,h3,h4,p,li,div,small,span,dd,td,a,label){text-wrap:wrap}
+body :is(button,.btn,.chip,.tag){text-wrap:wrap;word-break:keep-all;overflow-wrap:anywhere}
 input,textarea,select{text-wrap:wrap}
 .lbl{font-weight:inherit;white-space:nowrap}
 .hint{font-weight:500;font-size:max(.86em,14px);color:var(--ink-3);margin-left:2px;white-space:normal;display:inline-block}
-.hint.long{white-space:normal;text-wrap:pretty}
+.hint.long{white-space:normal;text-wrap:wrap}
 .hint::before{content:'（'}.hint::after{content:'）'}
 .nw{white-space:nowrap}
 /* v3.11.0 手機上兩欄若有說明小字或 Email，改上下排；其他兩欄底部對齊 */
@@ -1050,7 +1048,7 @@ form.steps[data-wiz] .wstep{counter-increment:none}
 /* 新版本提示 */
 .updbar{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:9999;min-height:52px;border:0;border-radius:16px;background:var(--green-fill);color:#fff;font:700 17px/1.3 inherit;font-family:inherit;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer}
 /* 地點、時間各自成一段，不會從中間斷開 */
-.meta-line{text-wrap:wrap!important}.meta-line .mu{display:inline-block;margin-right:10px;text-wrap:balance}
+.meta-line{text-wrap:wrap!important}.meta-line .mu{display:inline-block;margin-right:10px;text-wrap:wrap}
 /* 底部儲存列：按鈕加大，好按 */
 @media (max-width:640px){.submitbar .btn{min-height:52px;font-size:17px;padding-left:20px;padding-right:20px}.submitbar.row{display:flex;gap:10px}.submitbar.row>.btn:first-child{flex:1}}
 /* 段落裡的連結加底線，跟一般文字分得出來 */
@@ -1696,6 +1694,9 @@ body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green)
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.sl-apple{background:#fff!important;color:#000!important;border-color:#fff}}
 :root[data-theme="dark"] .btn.sl-apple{background:#fff!important;color:#000!important;border-color:#fff}
 .sheet .grab{width:44px;height:5px;cursor:grab}
+label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.f .pw-wrap input{width:100%;box-sizing:border-box;padding-right:52px}.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;border-radius:12px;cursor:pointer}.pw-eye.on{color:var(--red-ink)}.pw-eye svg{width:20px;height:20px}
+.un-msg{min-height:1.3em;margin:4px 2px 0;color:var(--ink-3)}.un-msg.bad{color:var(--red-ink)}.un-msg.ok{color:#18704F}
+.acct-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.acct-row:last-of-type{border-bottom:0}.acct-row b{flex:none}.acct-row span{text-align:right;overflow-wrap:anywhere}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1768,7 +1769,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.6.9';
+const BUILD = 'v5.7.0';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2311,6 +2312,7 @@ function route(){window.__lastRoute=Date.now();
   clearInterval(refreshTimer);refreshTimer=null;
   const h=location.hash||'#/';
   const path=h.split('?')[0];
+  checkUsername(path);   // 登入了但還沒設定使用者名稱：先去設定
   renderChrome(path,h);
   document.body.classList.remove('has-cta');
   document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
@@ -2343,6 +2345,7 @@ function route(){window.__lastRoute=Date.now();
   if(path==='#/adopt')return renderAdopt();
   if((m=path.match(/^#\/adopt\/(\d{1,10})$/)))return renderAdoptOne(m[1]);
   if(path==='#/login')return renderLogin();
+  if(path==='#/set-username')return renderSetUsername();
   if(path==='#/me')return renderMe();
   if(path==='#/admin')return renderAdmin();
   if(path==='#/pet/new')return renderPet('new');
@@ -4762,7 +4765,6 @@ async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disa
       if(!r||!r.idToken)throw new Error('沒有拿到登入憑證');
       const {data,error}=await sb.auth.signInWithIdToken({provider:'custom:line',token:r.idToken,nonce:raw});if(error)throw error;
       if(data&&data.session){session=data.session;updateAuthUI()}
-      try{const nm=r.displayName;if(nm&&data.user&&!(data.user.user_metadata||{}).display_name)sb.from('profiles').update({display_name:String(nm).slice(0,30)}).eq('id',data.user.id).then(()=>{})}catch(_){}
       toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}
       return}
     if(IS_APP&&!SL){   // App 內走瀏覽器授權，授權完用 wangmiaotw://auth 跳回 App
@@ -4776,32 +4778,74 @@ async function socialLogin(provider,btn){if(btn){if(btn.disabled)return;btn.disa
       const token=r&&r.result&&r.result.idToken;if(!token)throw new Error('沒有拿到登入憑證');
       const {data,error}=await sb.auth.signInWithIdToken({provider,token,nonce:raw});if(error)throw error;
       if(data&&data.session){session=data.session;updateAuthUI()}
-      // Apple 只在第一次給名字：順手存成暱稱
-      try{const nm=r.result.profile&&(r.result.profile.givenName||r.result.profile.name);if(nm&&data.user&&!(data.user.user_metadata||{}).display_name)sb.from('profiles').update({display_name:String(nm).slice(0,30)}).eq('id',data.user.id).then(()=>{})}catch(_){}
       toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}
     }else{setReturn(takeReturn()||'#/me');const {error}=await sb.auth.signInWithOAuth({provider:SB_P,options:{redirectTo:CONFIG.SITE_URL}});if(error)throw error;return}
   }catch(e){const m=String(e&&e.message||e);if(!/cancel|取消|1001|user closed|popup_closed|12501/i.test(m))toast('登入沒有成功：'+friendlyErr(m),5000)}
   finally{if(btn&&btn.isConnected)btn.disabled=false}}
+// ── 使用者名稱：註冊時設定，之後不能改（資料庫 migration v1.34 也會擋） ──
+const UN_RE=/^[A-Za-z0-9_一-鿿㐀-䶿]{2,20}$/;
+function unFmtMsg(n){n=String(n||'').trim();if(!n)return '請輸入使用者名稱';if(n.length<2)return '至少 2 個字';if(n.length>20)return '最多 20 個字';if(!UN_RE.test(n))return '只能用中文、英文、數字和底線 _（不能有空白或符號）';return ''}
+async function unAvailable(n){try{const {data,error}=await sb.rpc('username_available',{name:String(n).trim()});if(error)return null;return !!data}catch(_){return null}}
+function bindUnCheck(inp,msg){let t=0,seq=0;const run=async()=>{const v=inp.value.trim(),my=++seq;const f=unFmtMsg(v);if(f){msg.textContent=v?f:'';msg.className='small un-msg'+(v?' bad':'');return false}
+    msg.textContent='檢查中…';msg.className='small un-msg';const ok=await unAvailable(v);if(my!==seq)return null;
+    if(ok===false){msg.textContent='這個名稱已經有人用了，換一個吧';msg.className='small un-msg bad';return false}msg.textContent=ok?'✓ 可以使用':'';msg.className='small un-msg ok';return true};
+  inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,450)});return run}
+// 登入後還沒有使用者名稱（用 LINE／Google／Apple 或舊的驗證碼帳號）：先請他設定
+let __unOk='';
+const UN_EXEMPT=['#/set-username','#/login','#/verify','#/privacy','#/terms','#/delete-account','#/contact'];
+function checkUsername(path){if(!me()||__unOk===me().id||UN_EXEMPT.includes(path))return;const uid=me().id;
+  getProfile().then(p=>{if(!me()||me().id!==uid)return;if(!p||!('username' in p)||p.username){__unOk=uid;return}
+    const cur=(location.hash||'#/').split('?')[0];if(UN_EXEMPT.includes(cur))return;setReturn(location.hash||'#/me');goReplace('#/set-username')}).catch(()=>{})}
+async function renderSetUsername(){
+  if(!me()){goReplace('#/login');return}const _n=navId;setTitle('設定使用者名稱');app.innerHTML=pageSkel?pageSkel('form'):'';
+  const p=await getProfile().catch(()=>null);if(_n!==navId)return;
+  if(p&&p.username){__unOk=me().id;goReplace(takeReturn());return}
+  const m=(me().user_metadata)||{};let sug=String(m.full_name||m.name||m.nickname||'').replace(/[^A-Za-z0-9_一-鿿㐀-䶿]/g,'').slice(0,20);if(sug.length<2)sug='';
+  app.innerHTML=`<div class="card login-card" style="max-width:520px;margin:20px auto">
+    <img class="login-duo" src="duo.svg" alt="" width="150" height="102">
+    <h1>設定使用者名稱</h1>
+    <p class="muted">其他人會看到這個名稱（例如你回報目擊時）。<b>設定後就不能修改</b>，請確認後再送出。</p>
+    <form id="unf" data-nodirty novalidate>
+      <label class="f"><span><b class="lbl">使用者名稱</b><small class="hint">2–20 字，中英文、數字、底線</small></span><input type="text" id="un" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false" enterkeyhint="done" value="${esc(sug)}" required></label>
+      <p class="small un-msg" id="unMsg" aria-live="polite"></p>
+      <button class="btn lg block" id="btnUn" style="margin-top:12px">確定使用這個名稱</button>
+    </form></div>`;
+  const inp=$('#un'),chk=bindUnCheck(inp,$('#unMsg'));if(inp.value)chk();requestAnimationFrame(()=>{try{inp.focus({preventScroll:true})}catch(_){}});
+  $('#unf').onsubmit=async e=>{e.preventDefault();const b=$('#btnUn');if(b.disabled)return;const v=inp.value.trim();const f=unFmtMsg(v);if(f){$('#unMsg').textContent=f;$('#unMsg').className='small un-msg bad';return}
+    if(!await askSheet({title:`使用「${v}」？`,body:'使用者名稱設定後就不能修改。',ok:'確定'}))return;
+    b.disabled=true;b.textContent='設定中…';
+    const {error}=await sb.rpc('set_username',{name:v});
+    if(error){b.disabled=false;b.textContent='確定使用這個名稱';const msg=/有人用|不能用/.test(error.message)?'這個名稱已經有人用了，換一個吧':/不能修改/.test(error.message)?'你已經設定過使用者名稱了':'設定失敗：'+friendlyErr(error.message);$('#unMsg').textContent=msg;$('#unMsg').className='small un-msg bad';return}
+    __unOk=me().id;toast('✅ 使用者名稱設定完成');goReplace(takeReturn())}}
+
 function renderLogin(){
-  if(me()){let back='#/me';back=takeReturn();goReplace(back);return}
+  if(me()){goReplace(takeReturn());return}
   // 預設：這支手機登入過 → 「登入」；沒登入過 → 「免費註冊」。網址 ?mode=signup / ?mode=login 可以指定
   let mode=qs(location.hash).mode;if(mode!=='signup'&&mode!=='login'){let was='';try{was=localStorage.getItem('wh_registered')||''}catch(_){}mode=was?'login':'signup'}
-  let sending=false;
+  let sending=false;const keep={};
+  const pwField=(id,ac,label,hint)=>`<label class="f"><span><b class="lbl">${label}</b>${hint?`<small class="hint">${hint}</small>`:''}</span><span class="pw-wrap"><input type="password" id="${id}" autocomplete="${ac}" minlength="${ac==='new-password'?8:1}" required><button type="button" class="pw-eye" data-eye="${id}" aria-label="顯示密碼">${ic('eye')}</button></span></label>`;
   const draw=()=>{
     const su=mode==='signup';setTitle(su?'免費註冊':'登入');
     app.innerHTML=`<div class="card login-card" style="max-width:520px;margin:20px auto">
     <div class="seg logintabs" role="tablist" aria-label="註冊或登入"><button type="button" role="tab" data-m="signup" aria-selected="${su}" class="${su?'on':''}">免費註冊</button><button type="button" role="tab" data-m="login" aria-selected="${!su}" class="${su?'':'on'}">登入</button></div>
     <img class="login-duo" src="duo.svg" alt="" width="150" height="102">
     <h1>${su?'免費加入會員':'登入'}</h1>
-    <p class="muted" style="text-wrap:pretty">只要 Email，不用密碼。${IS_APP?`我們寄一封信給你，把信裡的 8 位數驗證碼輸入 App，就${su?'完成註冊':'登入'}了。`:`我們寄一封信給你，點信裡的按鈕就${su?'完成註冊':'登入'}了。`}</p>
-    <form onsubmit="return false" id="lf" data-nodirty>
-      <label class="f"><span>Email</span><input type="email" id="em" required autocomplete="email" inputmode="email" placeholder="例：mingmei@gmail.com"></label>
-      <button class="btn lg block" style="margin-top:12px" id="btnSend">${su?'寄確認信給我':'寄登入信給我'}</button>
+    ${su?`<form id="suf" data-nodirty novalidate>
+      <label class="f"><span><b class="lbl">使用者名稱</b><small class="hint">註冊後不能修改</small></span><input type="text" id="un" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="2–20 字，中英文、數字、底線" required></label>
+      <p class="small un-msg" id="unMsg" aria-live="polite"></p>
+      <label class="f"><span><b class="lbl">Email</b></span><input type="email" id="em" required autocomplete="email" inputmode="email" placeholder="例：mingmei@gmail.com"></label>
+      ${pwField('pw','new-password','密碼','至少 8 個字')}
+      <button class="btn lg block" style="margin-top:14px" id="btnSu">註冊</button>
+    </form>`:`<form id="pwf" data-nodirty novalidate>
+      <label class="f"><span><b class="lbl">Email</b></span><input type="email" id="em" required autocomplete="username" inputmode="email" placeholder="例：mingmei@gmail.com"></label>
+      ${pwField('pw','current-password','密碼','')}
+      <button class="btn lg block" style="margin-top:14px" id="btnPw">登入</button>
     </form>
-    <p class="small muted" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
-${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
-      <form id="pwf" data-nodirty><label class="f"><span>Email</span><input type="email" id="pwe" autocomplete="username" required></label><label class="f"><span>密碼</span><input type="password" id="pwp" autocomplete="current-password" required></label><button class="btn block ghost" id="btnPw" style="margin-top:8px">用密碼登入</button></form>
+    <details class="pwmore" id="otpMore"><summary>忘記密碼或沒設過密碼？用 Email 驗證碼登入</summary>
+      <p class="small muted" style="text-align:left;margin:8px 0">我們寄一封信給你，${IS_APP?'把信裡的 8 位數驗證碼輸入 App':'點信裡的按鈕或輸入驗證碼'}就能登入；登入後可到「我的 → 帳號與密碼」設定新密碼。</p>
+      <form id="lf" data-nodirty novalidate><button class="btn block ghost" id="btnSend">寄登入信給我</button></form>
     </details>`}
+    <p class="small muted" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
     ${socialBtnsHTML(su)}
     ${IS_APP?'':`<details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。</p></details>`}
     <ul class="small muted" style="padding-left:20px;margin:16px 0 0;line-height:1.8">
@@ -4809,47 +4853,74 @@ ${su?'':`    <details class="pwmore"><summary>用密碼登入</summary>
       <li>毛孩健康手冊：疫苗、回診到期提醒</li>
     </ul>
   </div>`;
-    app.querySelectorAll('.logintabs button').forEach(b=>b.onclick=()=>{if(sending||b.dataset.m===mode)return;const v=$('#em').value,f=document.activeElement&&document.activeElement.id==='em';mode=b.dataset.m;draw();$('#em').value=v;if(f)$('#em').focus()});
-    $('#lf').onsubmit=async e=>{
-      e.preventDefault();if(sending)return;const email=$('#em').value.trim();const btn=$('#btnSend');const n=navId,sm=mode;sending=true;const label=btn.textContent;btn.disabled=true;btn.textContent='寄送中…';$('#lmsg').textContent='';
-      setReturn(peekReturn());
-      const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:sm==='signup'}});
-      sending=false;if(n!==navId||!btn.isConnected)return;   // 寄信途中已經換頁：不要蓋掉新頁面
-      if(error){btn.disabled=false;btn.textContent=label;
-        // 選「登入」但這個 Email 還沒註冊：直接問要不要註冊
-        if(sm==='login'&&/signup|not allowed|not found|otp_disabled/i.test((error.code||'')+' '+error.message)){
-          $('#lmsg').innerHTML='這個 Email 還沒註冊過。<button type="button" class="btn sm" id="goSu" style="margin-left:6px">改成免費註冊</button>';
-          $('#goSu').onclick=()=>{mode='signup';draw();$('#em').value=email;const f=$('#lf');f.requestSubmit?f.requestSubmit():$('#btnSend').click()};return}
-        const ec=(error.code||'')+' '+error.message;return toast('寄送失敗：'+(/rate|limit|over_email|security purposes|after \d+ seconds/i.test(ec)?'寄得太頻繁了，請等一分鐘再試':/email_address_invalid|invalid/i.test(ec)?'Email 格式不對，請檢查一下（例如 name@gmail.com）':/fetch|network|load failed|timeout/i.test(ec)?'網路不穩，請換個地方或稍後再試':'請稍後再試一次'),5000)}
-      try{localStorage.setItem('wh_registered','1')}catch(_){}
-      const su=sm==='signup';
-      app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div class="done-ic">${ic('mail')}</div><h1>請收信</h1><p>${su?'確認信':'登入信'}已寄到 <b>${esc(email)}</b></p>
-        <form id="otpf" data-nodirty novalidate style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" type="text" maxlength="40" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">用驗證碼登入</button></form>
-        <p class="muted small">${IS_APP?'':`也可以直接按信裡的大按鈕，就會${su?'完成註冊並':''}登入。`}幾分鐘沒收到請看垃圾郵件匣。${su?'（如果這個 Email 之前註冊過，會收到「你的登入連結」，一樣輸入驗證碼就好）':''}</p><button type="button" class="btn ghost" id="btnReLogin">換一個 Email</button></div>`;
-      $('#btnReLogin').onclick=()=>{draw();$('#em').value=email};
-      {const rb=document.createElement('button');rb.type='button';rb.className='btn ghost';rb.id='btnResend';rb.style.marginLeft='8px';$('#btnReLogin').after(rb);let left=60;const tick=()=>{if(!rb.isConnected)return;rb.disabled=left>0;rb.textContent=left>0?`重寄（${left} 秒）`:'重寄一封';if(left-->0)setTimeout(tick,1000)};tick();
-        rb.onclick=async()=>{rb.disabled=true;rb.textContent='寄送中…';const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:su}});if(error){toast('寄送失敗：請等一分鐘再試',4000);left=30}else{toast('已重寄，請看最新的那封信');left=60}tick()}}
-      // 用驗證碼登入（App 裡點信件連結會開到瀏覽器，所以 App 一定要能輸入驗證碼）
-      // 從信裡複製時常會連前後文字、空白、換行一起貼上，或是全形數字：只取出那組數字
-      const otpIn=$('#otp');requestAnimationFrame(()=>{try{otpIn.focus({preventScroll:true})}catch(_){}});
-      otpIn.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text');if(t==null)return;e.preventDefault();otpIn.value=otpDigits(t);if(otpIn.value.length===OTP_LEN)setTimeout(()=>$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click(),150)});
-      // 打字或 iPhone 自動填入：等它填完再整理，湊滿 8 位就自動登入（不在輸入過程中改值，避免跟自動填入打架）
-      let otpT=0;otpIn.addEventListener('input',e=>{if(e.isComposing)return;const v=otpDigits(otpIn.value);if(v!==otpIn.value)otpIn.value=v;clearTimeout(otpT);if(v.length===OTP_LEN)otpT=setTimeout(()=>{if(!$('#btnOtp').disabled&&otpDigits(otpIn.value).length===OTP_LEN)$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click()},300)});
-      $('#otpf').onsubmit=async ev=>{ev.preventDefault();const code=otpDigits($('#otp').value);$('#otp').value=code;if(code.length<6)return toast('請輸入信裡的 8 位數字驗證碼');
-        const b=$('#btnOtp');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
-        let {data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'email'});
-        if(error&&su)({data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'signup'}));
-        if(error||!vd?.session){b.disabled=false;b.textContent='用驗證碼登入';return toast(/expired|invalid/i.test(error?.message||'')?'驗證碼不正確或已過期。如果按過「重寄」，請用最新那封信的驗證碼':'登入失敗：'+(error?.message||'請再試一次'),4500)}
-        session=vd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;   // 登入通知已經帶回原本的頁面
-        toast('✅ 已登入'+(vd.session.user?.email?'：'+vd.session.user.email:''),3500);
-        let back='#/me';back=takeReturn();goReplace(back)};
-    };
-    if($('#pwf'))$('#pwf').onsubmit=async ev=>{ev.preventDefault();const b=$('#btnPw');if(b.disabled)return;b.disabled=true;b.textContent='登入中…';
-      const {data:pd,error}=await sb.auth.signInWithPassword({email:$('#pwe').value.trim(),password:$('#pwp').value});
-      if(error||!pd?.session){b.disabled=false;b.textContent='用密碼登入';return toast('密碼不對。一般會員不用密碼，請改用上面的「寄登入信給我」',4500)}
-      session=pd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 已登入');let back='#/me';back=takeReturn();goReplace(back)};
+    if(keep.em)$('#em').value=keep.em;if(keep.un&&$('#un'))$('#un').value=keep.un;
+    app.querySelectorAll('.logintabs button').forEach(b=>b.onclick=()=>{if(sending||b.dataset.m===mode)return;keep.em=$('#em').value;if($('#un'))keep.un=$('#un').value;mode=b.dataset.m;draw()});
+    app.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{const i=$('#'+b.dataset.eye);const show=i.type==='password';i.type=show?'text':'password';b.classList.toggle('on',show);b.setAttribute('aria-label',show?'隱藏密碼':'顯示密碼')});
+    const msg=(t,bad)=>{const m=$('#lmsg');m.innerHTML=t;m.style.color=bad?'var(--red-ink)':''};
+    const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+    if(su){const unChk=bindUnCheck($('#un'),$('#unMsg'));
+      $('#suf').onsubmit=async e=>{e.preventDefault();if(sending)return;
+        const un=$('#un').value.trim(),email=$('#em').value.trim(),pw=$('#pw').value;
+        const f=unFmtMsg(un);if(f){$('#unMsg').textContent=f;$('#unMsg').className='small un-msg bad';$('#un').focus();return}
+        if(!emailOk(email)){msg('Email 格式不對，請檢查一下（例如 name@gmail.com）',true);$('#em').focus();return}
+        if(pw.length<8){msg('密碼至少要 8 個字',true);$('#pw').focus();return}
+        const b=$('#btnSu'),n=navId;sending=true;b.disabled=true;b.textContent='註冊中…';msg('');
+        if(await unAvailable(un)===false){sending=false;b.disabled=false;b.textContent='註冊';$('#unMsg').textContent='這個名稱已經有人用了，換一個吧';$('#unMsg').className='small un-msg bad';$('#un').focus();return}
+        setReturn(peekReturn());
+        const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:CONFIG.SITE_URL,data:{username:un}}});
+        sending=false;if(n!==navId||!b.isConnected)return;
+        if(error){b.disabled=false;b.textContent='註冊';const ec=(error.code||'')+' '+error.message;
+          if(/already|registered|exists/i.test(ec)){msg('這個 Email 已經註冊過了。<button type="button" class="btn sm" id="goLi" style="margin-left:6px">改成登入</button>');$('#goLi').onclick=()=>{keep.em=email;mode='login';draw()};return}
+          return msg(/weak|password/i.test(ec)?'密碼太簡單了，請換一個（至少 8 個字，混合英文和數字更安全）':/rate|limit|security purposes|after \d+ seconds/i.test(ec)?'太頻繁了，請等一分鐘再試':/fetch|network|load failed|timeout/i.test(ec)?'網路不穩，請稍後再試':'註冊失敗：'+friendlyErr(error.message),true)}
+        try{localStorage.setItem('wh_registered','1')}catch(_){}
+        if(data&&data.session){session=data.session;updateAuthUI();toast('✅ 註冊完成');goReplace(takeReturn());return}
+        // 這個 Email 早就註冊過（Supabase 不會說破，回傳沒有 identities 的使用者）
+        if(data&&data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length){b.disabled=false;b.textContent='註冊';msg('這個 Email 已經註冊過了。<button type="button" class="btn sm" id="goLi" style="margin-left:6px">改成登入</button>');$('#goLi').onclick=()=>{keep.em=email;mode='login';draw()};return}
+        showOtp(email,'signup')}
+    }else{
+      $('#pwf').onsubmit=async ev=>{ev.preventDefault();const b=$('#btnPw');if(b.disabled)return;const email=$('#em').value.trim();
+        if(!emailOk(email)){msg('Email 格式不對，請檢查一下（例如 name@gmail.com）',true);$('#em').focus();return}
+        if(!$('#pw').value){msg('請輸入密碼',true);$('#pw').focus();return}
+        b.disabled=true;b.textContent='登入中…';msg('');
+        const {data:pd,error}=await sb.auth.signInWithPassword({email,password:$('#pw').value});
+        if(error||!pd?.session){b.disabled=false;b.textContent='登入';const ec=(error?.code||'')+' '+(error?.message||'');
+          if(/not.confirmed/i.test(ec)){msg('這個 Email 還沒完成驗證，我們再寄一次驗證信給你。');try{await sb.auth.resend({type:'signup',email})}catch(_){}showOtp(email,'signup');return}
+          return msg(/rate|limit/i.test(ec)?'嘗試太多次了，請等幾分鐘再試':/fetch|network|load failed|timeout/i.test(ec)?'網路不穩，請稍後再試':'Email 或密碼不對。如果你以前是用驗證碼註冊、還沒設過密碼，請按下面「用 Email 驗證碼登入」。',true)}
+        try{localStorage.setItem('wh_registered','1')}catch(_){}
+        session=pd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;toast('✅ 已登入');goReplace(takeReturn())};
+      $('#lf').onsubmit=async e=>{e.preventDefault();if(sending)return;const email=$('#em').value.trim();const btn=$('#btnSend');
+        if(!emailOk(email)){msg('請先在上面填好 Email',true);$('#em').focus();return}
+        const n=navId;sending=true;btn.disabled=true;btn.textContent='寄送中…';msg('');setReturn(peekReturn());
+        const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:false}});
+        sending=false;if(n!==navId||!btn.isConnected)return;
+        if(error){btn.disabled=false;btn.textContent='寄登入信給我';const ec=(error.code||'')+' '+error.message;
+          if(/signup|not allowed|not found|otp_disabled/i.test(ec)){msg('這個 Email 還沒註冊過。<button type="button" class="btn sm" id="goSu" style="margin-left:6px">改成免費註冊</button>');$('#goSu').onclick=()=>{keep.em=email;mode='signup';draw()};return}
+          return toast('寄送失敗：'+(/rate|limit|over_email|security purposes|after \d+ seconds/i.test(ec)?'寄得太頻繁了，請等一分鐘再試':/fetch|network|load failed|timeout/i.test(ec)?'網路不穩，請換個地方或稍後再試':'請稍後再試一次'),5000)}
+        try{localStorage.setItem('wh_registered','1')}catch(_){}
+        showOtp(email,'login')};
+    }
     document.querySelectorAll('[data-social]').forEach(b=>b.onclick=()=>socialLogin(b.dataset.social,b));
   };
+  // 寄出信之後：輸入信裡的驗證碼（App 裡點信件連結會開到瀏覽器，所以 App 一定要能輸入驗證碼）
+  const showOtp=(email,kind)=>{const su=kind==='signup';
+    app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div class="done-ic">${ic('mail')}</div><h1>請收信</h1><p>${su?'驗證信':'登入信'}已寄到 <b>${esc(email)}</b></p>
+      <form id="otpf" data-nodirty novalidate style="margin:14px auto;max-width:320px;text-align:left"><label class="f"><span>${IS_APP?'輸入信裡的數字驗證碼':'或輸入信裡的數字驗證碼'}</span><input id="otp" type="text" maxlength="40" inputmode="numeric" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="12345678" style="font-size:24px;letter-spacing:6px;text-align:center" required></label><button class="btn lg block" id="btnOtp">${su?'完成註冊':'用驗證碼登入'}</button></form>
+      <p class="muted small">${IS_APP?'':`也可以直接按信裡的大按鈕，就會${su?'完成註冊並':''}登入。`}幾分鐘沒收到請看垃圾郵件匣。</p><button type="button" class="btn ghost" id="btnReLogin">換一個 Email</button></div>`;
+    $('#btnReLogin').onclick=()=>{keep.em=email;draw()};
+    {const rb=document.createElement('button');rb.type='button';rb.className='btn ghost';rb.id='btnResend';rb.style.marginLeft='8px';$('#btnReLogin').after(rb);let left=60;const tick=()=>{if(!rb.isConnected)return;rb.disabled=left>0;rb.textContent=left>0?`重寄（${left} 秒）`:'重寄一封';if(left-->0)setTimeout(tick,1000)};tick();
+      rb.onclick=async()=>{rb.disabled=true;rb.textContent='寄送中…';const {error}=su?await sb.auth.resend({type:'signup',email,options:{emailRedirectTo:CONFIG.SITE_URL}}):await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:false}});if(error){toast('寄送失敗：請等一分鐘再試',4000);left=30}else{toast('已重寄，請看最新的那封信');left=60}tick()}}
+    // 從信裡複製時常會連前後文字、空白、換行一起貼上，或是全形數字：只取出那組數字
+    const otpIn=$('#otp');requestAnimationFrame(()=>{try{otpIn.focus({preventScroll:true})}catch(_){}});
+    otpIn.addEventListener('paste',e=>{const t=(e.clipboardData||window.clipboardData)?.getData('text');if(t==null)return;e.preventDefault();otpIn.value=otpDigits(t);if(otpIn.value.length===OTP_LEN)setTimeout(()=>$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click(),150)});
+    // 打字或 iPhone 自動填入：等它填完再整理，湊滿 8 位就自動送出
+    let otpT=0;otpIn.addEventListener('input',e=>{if(e.isComposing)return;const v=otpDigits(otpIn.value);if(v!==otpIn.value)otpIn.value=v;clearTimeout(otpT);if(v.length===OTP_LEN)otpT=setTimeout(()=>{if(!$('#btnOtp').disabled&&otpDigits(otpIn.value).length===OTP_LEN)$('#otpf').requestSubmit?$('#otpf').requestSubmit():$('#btnOtp').click()},300)});
+    $('#otpf').onsubmit=async ev=>{ev.preventDefault();const code=otpDigits($('#otp').value);$('#otp').value=code;if(code.length<6)return toast('請輸入信裡的 8 位數字驗證碼');
+      const b=$('#btnOtp');if(b.disabled)return;const label=b.textContent;b.disabled=true;b.textContent=su?'驗證中…':'登入中…';
+      let {data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:su?'signup':'email'});
+      if(error)({data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:su?'email':'signup'}));
+      if(error||!vd?.session){b.disabled=false;b.textContent=label;return toast(/expired|invalid/i.test(error?.message||'')?'驗證碼不正確或已過期。如果按過「重寄」，請用最新那封信的驗證碼':'失敗：'+(error?.message||'請再試一次'),4500)}
+      session=vd.session;updateAuthUI();if(location.hash.split('?')[0]!=='#/login')return;   // 登入通知已經帶回原本的頁面
+      toast(su?'✅ 註冊完成':'✅ 已登入',3500);goReplace(takeReturn())}};
   draw();
 }
 
@@ -4883,7 +4954,7 @@ async function renderMeBody(){const _n=navId;
   if(fl&&fl.length){const {data}=await sb.from('cases_public').select('*').in('id',fl.map(f=>f.case_id));followed=data||[]}
   const p=prof||{};
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
-  (_n===navId?app:_void).innerHTML=`<div class="profile"><span class="pf-av" aria-hidden="true">${esc([...(p.display_name||me().email||'?')][0].toUpperCase())}</span><div class="pf-t"><h1>${esc(p.display_name||me().email)}</h1>${p.display_name?`<span class="muted small">${esc(me().email||'')}</span>`:''}</div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}</div></div>
+  (_n===navId?app:_void).innerHTML=`<div class="profile"><span class="pf-av" aria-hidden="true">${esc([...(p.username||p.display_name||me().email||'會')][0].toUpperCase())}</span><div class="pf-t"><h1>${esc(p.username||p.display_name||me().email||'會員')}</h1>${(p.username||p.display_name)&&me().email?`<span class="muted small">${esc(me().email)}</span>`:''}</div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}</div></div>
 
   <a class="crosslink" href="#/health" style="margin:18px 0 6px"><span class="cl-ic">${ic("steth")}</span><span><b>毛孩健康手冊${(pets||[]).length?`・${pets.length} 隻毛孩`:''}</b>${(dues||[]).length?`有 ${dues.length} 項一個月內到期`:'健康紀錄、到期提醒和日曆同步都在這裡'}</span><em>打開</em></a>
 
@@ -4894,9 +4965,16 @@ async function renderMeBody(){const _n=navId;
 
   ${followed.length?`<h2>${ic("star")} 追蹤中的案件</h2><div class="grid">${followed.map(cardHTML).join('')}</div>`:''}
 
-  <details class="mg-sec" id="nfSec" style="margin-top:24px"><summary>${ic("bell")} 通知設定 <span class="muted small">${p.notify_enabled?'附近走失通知：開':'附近走失通知：關'}</span></summary><div class="mg-body">
+  <details class="mg-sec" id="acSec" style="margin-top:24px"><summary>${ic("user")} 帳號與密碼 <span class="muted small">${esc(p.username||'')}</span></summary><div class="mg-body">
+    <div class="acct-row"><b>使用者名稱</b><span>${'username' in p?(p.username?`${esc(p.username)} <small class="muted">（不能修改）</small>`:`<a href="#/set-username">設定使用者名稱</a>`):esc(p.display_name||'')}</span></div>
+    <div class="acct-row"><b>Email</b><span>${esc(me().email||'（用 LINE／Apple 登入，沒有 Email）')}</span></div>
+    ${me().email?`<form id="pwSetF" data-nodirty novalidate style="margin-top:10px">
+      <label class="f"><span><b class="lbl">設定新密碼</b><small class="hint">至少 8 個字；設定後可以用 Email＋密碼登入</small></span><span class="pw-wrap"><input type="password" id="npw" autocomplete="new-password" minlength="8"><button type="button" class="pw-eye" data-eye="npw" aria-label="顯示密碼">${ic('eye')}</button></span></label>
+      <button class="btn block ghost" id="btnNpw" style="margin-top:8px">儲存密碼</button></form>`:''}
+  </div></details>
+  <details class="mg-sec" id="nfSec"><summary>${ic("bell")} 通知設定 <span class="muted small">${p.notify_enabled?'附近走失通知：開':'附近走失通知：關'}</span></summary><div class="mg-body">
   <form onsubmit="return false" id="nf">
-    <label class="f"><span><b class="lbl">顯示名稱</b><small class="hint">回報目擊時預設使用</small></span><input type="text" id="dn" maxlength="30" value="${esc(p.display_name||'')}"></label>
+    ${'username' in p?'':`<label class="f"><span><b class="lbl">顯示名稱</b><small class="hint">回報目擊時預設使用</small></span><input type="text" id="dn" maxlength="30" value="${esc(p.display_name||'')}"></label>`}
     <label class="chk"><input type="checkbox" id="nFollow" ${p.notify_follow!==false?'checked':''}> 追蹤的案件有新目擊時，寄 Email 通知我</label>
     <label class="chk"><input type="checkbox" id="nOn" ${p.notify_enabled?'checked':''}> 我家附近有毛孩走失時，寄 Email 通知我</label>
     <div id="nearBox" class="${p.notify_enabled?'':'hidden'}">
@@ -4920,6 +4998,12 @@ async function renderMeBody(){const _n=navId;
     <button type="button" class="btn big danger" id="btnDelAcct">永久刪除我的帳號</button>
   </details>`;
   {const ub=$('#btnUnblockAll');if(ub)ub.onclick=()=>{try{localStorage.removeItem('wh_hidden');localStorage.removeItem('wh_blocked')}catch(_){}toast('已全部恢復顯示');renderMe()}}
+  app.querySelectorAll('#acSec [data-eye]').forEach(b=>b.onclick=()=>{const i=$('#'+b.dataset.eye);const show=i.type==='password';i.type=show?'text':'password';b.classList.toggle('on',show)});
+  if($('#pwSetF'))$('#pwSetF').onsubmit=async e=>{e.preventDefault();const b=$('#btnNpw');if(b.disabled)return;const pw=$('#npw').value;
+    if(pw.length<8)return toast('密碼至少要 8 個字');b.disabled=true;b.textContent='儲存中…';
+    const {error}=await sb.auth.updateUser({password:pw});b.disabled=false;b.textContent='儲存密碼';
+    if(error){const ec=(error.code||'')+' '+error.message;return toast(/same|different/i.test(ec)?'新密碼跟舊密碼一樣':/weak|password/i.test(ec)?'密碼太簡單了，請換一個':/reauth/i.test(ec)?'為了安全，請先登出再用 Email 驗證碼登入一次，再設定密碼':'儲存失敗：'+friendlyErr(error.message),5000)}
+    $('#npw').value='';toast('✅ 密碼已設定，下次可以用 Email＋密碼登入')};
   $('#btnOut').onclick=async()=>{const clearMine=confirm('這是共用的手機嗎？\n按「確定」：登出並清除這支手機記住的管理網址和聯絡資料（共用手機建議這樣）。\n按「取消」：只登出，資料留著下次用（自己的手機）。');
     window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
@@ -4947,7 +5031,7 @@ async function renderMeBody(){const _n=navId;
   $('#nf').onsubmit=once(async e=>{
     e.preventDefault();const loc=picker.get();
     if($('#nOn').checked&&!loc)return toast('請在地圖上點選你家附近的位置');
-    const row={display_name:$('#dn').value.trim()||null,notify_follow:$('#nFollow').checked,notify_enabled:$('#nOn').checked,home_radius_km:+$('#nR').value,notify_species:$('#nSp').value,home_lat:loc?.lat??null,home_lng:loc?.lng??null};
+    const row={notify_follow:$('#nFollow').checked,notify_enabled:$('#nOn').checked,home_radius_km:+$('#nR').value,notify_species:$('#nSp').value,home_lat:loc?.lat??null,home_lng:loc?.lng??null};if($('#dn'))row.display_name=$('#dn').value.trim()||null;
     const {error}=await sb.from('profiles').update(row).eq('id',me().id);
     if(error)return toast('儲存失敗：'+error.message);toast('已儲存');
   });
