@@ -1807,6 +1807,19 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 @keyframes bdHappyTilt{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-3px)}}
 .bd-look{display:flex;gap:8px;flex-wrap:wrap}.bd-phs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.bd-phs button{width:58px;height:58px;border-radius:14px;border:3px solid transparent;background-size:cover;background-position:center;cursor:pointer;padding:0}.bd-phs button.on{border-color:var(--red)}
 .bd-prevwrap{display:flex;align-items:flex-end;justify-content:center;gap:14px}.bd-ref{margin:0 0 18px;text-align:center}.bd-ref img{width:84px;height:84px;object-fit:cover;border-radius:18px;box-shadow:0 6px 16px -8px rgba(80,30,50,.4)}.bd-ref figcaption{font-size:12px;color:var(--ink-3);margin-top:4px}
+/* 自己的小動作 */
+.bd-svg.act-tilt .bd-head{animation:bdTilt 1.8s ease-in-out}
+@keyframes bdTilt{0%,100%{transform:rotate(0)}25%,75%{transform:rotate(-13deg)}}
+.bd-svg.act-sniff .bd-head{animation:bdSniff .2s ease-in-out 8}
+@keyframes bdSniff{0%,100%{transform:translateY(5px) rotate(2deg)}50%{transform:translateY(7px) rotate(-1deg)}}
+.bd-svg.act-shake .bd-root{animation:bdShake .12s linear 8}
+@keyframes bdShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-3px) rotate(-2.5deg)}75%{transform:translateX(3px) rotate(2.5deg)}}
+.bd-svg.act-yawn .ey-open{display:none}.bd-svg.act-yawn .ey-sleep{display:inline}.bd-svg.act-yawn .ey-happy{display:none}
+.bd-svg.act-yawn .mo-smile,.bd-svg.act-yawn .mo-sad{display:none}.bd-svg.act-yawn .mo-open{display:inline}.bd-svg.act-yawn .bd-head{animation:bdYawn 1.7s ease-in-out}
+@keyframes bdYawn{0%,100%{transform:rotate(0)}40%,70%{transform:rotate(3deg) translateY(-3px)}}
+.bd-svg.act-look .bd-pupils{animation:bdLookAround 2.4s ease-in-out}
+@keyframes bdLookAround{0%,100%{transform:translate(0,0)}20%,40%{transform:translate(-2.4px,0)}60%,80%{transform:translate(2.4px,-.5px)}}
+.bd-segrow{display:flex;gap:6px;flex-wrap:wrap}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1879,7 +1892,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.8.2';
+const BUILD = 'v5.8.3';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -4956,13 +4969,14 @@ let __bdSeq=0;
 function bdMix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const x=p(a),y=p(b);return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('')}
 // 一根一根的毛：在形狀裡隨機畫短毛（同一隻每次都一樣），方向沿著毛流
 function bdRng(seed){let h=2166136261;for(const ch of String(seed))h=Math.imul(h^ch.charCodeAt(0),16777619);return ()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return ((h>>>0)%100000)/100000}}
-function bdFur(r,box,n,cols,flow,len=7,w=1.1){let o='';for(let i=0;i<n;i++){const x=box[0]+r()*(box[2]-box[0]),y=box[1]+r()*(box[3]-box[1]);const a=flow(x,y)+(r()-.5)*.6,L=len*(.6+r()*.7);
+let __bdHair=1;   // 長毛：毛更長、更多
+function bdFur(r,box,n,cols,flow,len=7,w=1.1){let o='';n=Math.round(n*(__bdHair>1?1.3:1));len*=__bdHair;for(let i=0;i<n;i++){const x=box[0]+r()*(box[2]-box[0]),y=box[1]+r()*(box[3]-box[1]);const a=flow(x,y)+(r()-.5)*.6,L=len*(.6+r()*.7);
     const dx=Math.cos(a)*L,dy=Math.sin(a)*L,bx=(r()-.5)*2.4;o+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)}q${(dx/2+bx).toFixed(1)} ${(dy/2).toFixed(1)} ${dx.toFixed(1)} ${dy.toFixed(1)}" stroke="${cols[i%cols.length]}" stroke-width="${(w*(.7+r()*.6)).toFixed(2)}" opacity="${(.22+r()*.35).toFixed(2)}"/>`}
   return `<g fill="none" stroke-linecap="round">${o}</g>`}
 function bdSVG(b,cls=''){
   const u='b'+(++__bdSeq),C=(b.coat==='custom'&&b.cc)?b.cc:(BD_COATS[b.coat]||BD_COATS.golden),pat=b.pat||'solid',cat=b.sp==='cat';
   const lum=h=>{const q=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));return .3*q[0]+.59*q[1]+.11*q[2]};const dark=lum(C.m)<100;
-  const R=bdRng((b.name||'')+b.sp+(b.coat||'')+(C.m||''));
+  const R=bdRng((b.name||'')+b.sp+(b.coat||'')+(C.m||''));__bdHair=b.hair==='long'?1.6:1;
   const mood=cls==='mood-happy'?'happy':'ok';
   let M=C.m,D=C.d,L=C.l;if(pat==='calico'){M='#F7F2EA';D='#DCCFBF';L='#FFFFFF'}if(pat==='tux'){L='#FFFFFF'}
   const HI=bdMix(M,'#FFFFFF',.38),SH=bdMix(D,'#000000',.18),INK='#24160E';
@@ -4976,7 +4990,7 @@ function bdSVG(b,cls=''){
     <radialGradient id="ng${u}" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="${cat?'#F4A7AE':'#6A5552'}"/><stop offset="1" stop-color="${cat?'#C96874':'#120C0B'}"/></radialGradient>
     <radialGradient id="mg${u}" cx="50%" cy="78%" r="62%"><stop offset="0" stop-color="${L}"/><stop offset=".55" stop-color="${L}" stop-opacity=".85"/><stop offset="1" stop-color="${L}" stop-opacity="0"/></radialGradient>
     <radialGradient id="tg${u}" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#FFE45E"/><stop offset="1" stop-color="#C99A12"/></radialGradient>
-    <filter id="fz${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="fz${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="${b.hair==='long'?7.5:4.2}" xChannelSelector="R" yChannelSelector="G"/></filter>
     <filter id="fs${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
   </defs>`;
   const eye=(x,y)=>cat
@@ -5008,7 +5022,7 @@ function bdSVG(b,cls=''){
   <clipPath id="cb${u}"><path d="${body}"/></clipPath><clipPath id="ch${u}"><path d="${head}"/></clipPath>
   ${shadow}<g class="bd-root">
   <g class="bd-tail" style="transform-origin:128px 198px"><path d="M126 200c28 6 48-6 50-28c1-11-7-15-11-8c-3 14-14 22-38 22z" fill="url(#bg${u})" filter="url(#fs${u})"/>${stripe?`<path d="M150 196l4-8M162 188l6-6M170 176l7-2" stroke="${D}" stroke-width="3.5" stroke-linecap="round"/>`:''}</g>
-  <g class="bd-body">
+  <g class="bd-body"><g transform="translate(100 0) scale(${b.build==='slim'?.9:b.build==='stocky'?1.12:1} 1) translate(-100 0)">
     <ellipse cx="70" cy="192" rx="24" ry="17" fill="url(#bg${u})" filter="url(#fs${u})"/><ellipse cx="130" cy="192" rx="24" ry="17" fill="url(#bg${u})" filter="url(#fs${u})"/>
     <path d="${body}" fill="url(#bg${u})" filter="url(#fz${u})"/>
     <g clip-path="url(#cb${u})">${bodyPat}${bdFur(R,[56,108,146,210],150,[SH,HI,D,L],(x,y)=>Math.PI/2+(x-100)/90,6.5,1)}</g>
@@ -5017,7 +5031,7 @@ function bdSVG(b,cls=''){
     ${legRing}
     <ellipse cx="92" cy="205" rx="10" ry="6" fill="${pat==='tux'?'#fff':L}"/><ellipse cx="108" cy="205" rx="10" ry="6" fill="${pat==='tux'?'#fff':L}"/>
     <path d="M88 207v-3M92 208v-3M96 207v-3M104 207v-3M108 208v-3M112 207v-3" stroke="${SH}" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>
-  </g>
+  </g></g>
   <g class="bd-head" style="transform-origin:100px 112px">
     <g class="bd-ear bd-ear-l" style="transform-origin:76px 62px"><path d="M66 68l-5-38c0-5 5-7 8-4l27 25z" fill="url(#hg${u})"/><path d="M69 61l-3-25 18 17z" fill="#F0B1B4"/><path d="M68 44l3 8M72 40l2 7" stroke="#fff" stroke-width="1" opacity=".7"/></g>
     <g class="bd-ear bd-ear-r" style="transform-origin:124px 62px"><path d="M134 68l5-38c0-5-5-7-8-4l-27 25z" fill="${pat==='calico'?'#3A302C':`url(#hg${u})`}"/><path d="M131 61l3-25-18 17z" fill="#F0B1B4"/><path d="M132 44l-3 8M128 40l-2 7" stroke="#fff" stroke-width="1" opacity=".7"/></g>
@@ -5056,9 +5070,10 @@ function bdSVG(b,cls=''){
   return `<svg class="bd-svg sp-dog" data-mood="${mood}" viewBox="0 0 200 222" role="img" aria-label="${esc(b.name)}">${defs}
   <clipPath id="cb${u}"><path d="${torso}"/></clipPath><clipPath id="ch${u}"><path d="${skull}"/></clipPath>
   <ellipse class="bd-shadow" cx="100" cy="215" rx="66" ry="7" fill="#000" opacity=".14"/><g class="bd-root">
-  <g class="bd-tail" style="transform-origin:138px 200px"><path d="M136 202c18-2 34-18 30-40c-2-8-10-10-12-4c2 14-6 28-20 30z" fill="url(#bg${u})" filter="url(#fz${u})"/>
-    <path d="M152 186q4-6 4-14M158 176q3-6 1-12" stroke="${SH}" stroke-width="1" fill="none" opacity=".4"/></g>
-  <g class="bd-body">
+  <g class="bd-tail" style="transform-origin:138px 200px">${({sickle:`<path d="M134 198c12-6 22-22 20-44c-1-8 7-10 9-3c4 22-6 42-24 52z" fill="url(#bg${u})" filter="url(#fz${u})"/>`,
+      down:`<path d="M134 198c8 8 18 12 30 12c7 0 7 7 0 8c-14 2-25-4-32-12z" fill="url(#bg${u})" filter="url(#fz${u})"/>`}[b.tail])||`<path d="M136 202c18-2 34-18 30-40c-2-8-10-10-12-4c2 14-6 28-20 30z" fill="url(#bg${u})" filter="url(#fz${u})"/>
+    <path d="M152 186q4-6 4-14M158 176q3-6 1-12" stroke="${SH}" stroke-width="1" fill="none" opacity=".4"/>`}</g>
+  <g class="bd-body"><g transform="translate(100 0) scale(${b.build==='slim'?.88:b.build==='stocky'?1.12:1} 1) translate(-100 0)">
     <ellipse cx="62" cy="194" rx="25" ry="23" fill="url(#bg${u})" filter="url(#fz${u})"/><ellipse cx="138" cy="194" rx="25" ry="23" fill="url(#bg${u})" filter="url(#fz${u})"/>
     <ellipse cx="48" cy="212" rx="14" ry="6" fill="url(#bg${u})"/><ellipse cx="152" cy="212" rx="14" ry="6" fill="url(#bg${u})"/>
     <path d="M78 106c-5 10-7 20-5 30h54c2-10 0-20-5-30z" fill="url(#bg${u})" filter="url(#fz${u})"/>
@@ -5071,7 +5086,7 @@ function bdSVG(b,cls=''){
     <ellipse cx="91" cy="212" rx="10.5" ry="5.5" fill="${pat==='tux'?'#fff':`url(#bg${u})`}"/><ellipse cx="109" cy="212" rx="10.5" ry="5.5" fill="${pat==='tux'?'#fff':`url(#bg${u})`}"/>
     <path d="M87 215v-3.5M91 216v-3.5M95 215v-3.5M105 215v-3.5M109 216v-3.5M113 215v-3.5" stroke="${SH}" stroke-width="1.2" opacity=".5" stroke-linecap="round"/>
     <path d="M77 124q23 12 46 0" fill="none" stroke="#B5222A" stroke-width="5" stroke-linecap="round"/><circle class="bd-tag" cx="100" cy="133" r="4" fill="url(#tg${u})"/>
-  </g>
+  </g></g>
   <g class="bd-head" style="transform-origin:100px 116px">
     ${ear==='drop'?'':earG(0)+earG(1)}
     <path d="${skull}" fill="url(#hg${u})" filter="url(#fz${u})"/>
@@ -5144,7 +5159,7 @@ function bdLine(b){const s=b.s,n=b.name;
   const L=b.sp==='cat'?['喵～今天也最喜歡你了','摸摸我的頭～','呼嚕呼嚕…','陽光好舒服喵']:['汪！今天也最喜歡你了！','摸摸我～','要不要玩球？','尾巴停不下來！'];
   if((b.tr||0)>0&&s.f<85)L.push(`我聞到點心的味道了（還有 ${b.tr} 個）`);
   return L[Math.floor(Date.now()/9e4)%L.length]}
-function bdApply(el,b,extra){if(!el)return;const m=extra||bdMood(b);el.dataset.mood=m;
+function bdApply(el,b,extra){if(!el)return;const base=bdMood(b);const m=extra||(__bdPant>Date.now()&&base!=='sleep'?'happy':base);el.dataset.mood=m;
   const d=el.querySelector('.bd-dirt');if(d)d.setAttribute('opacity',String(Math.max(0,Math.min(.85,(60-b.s.c)/60))))}
 function bdBars(b){const s=b.s;const row=(k,lbl,v,col)=>`<div class="bd-bar"><span>${lbl}</span><i><b style="width:${Math.max(3,v)}%;background:${v<25?'#E5484D':col}"></b></i><em>${Math.round(v)}</em></div>`;
   return row('f','飽足',s.f,'#F0A04B')+row('m','心情',s.m,'#E85B8A')+row('c','乾淨',s.c,'#3FA7D6')+row('e','精神',s.e,'#43B581')}
@@ -5161,7 +5176,7 @@ function buddyHomeBind(){const box=$('#bdHome');if(!box)return;const b=bdLoad();
   bdApply(svg,b);if(bdDaily(b)){bdSave();setTimeout(()=>{toast(`🎁 每日見面禮：${b.name}得到 1 個點心`+(b.streak>1?`（連續 ${b.streak} 天）`:''),3500)},700)}
   if(!__bdGreeted&&!bdAsleep(b)){__bdGreeted=true;setTimeout(()=>{bdJump(svg);bdSay(box,(Date.now()-(b.seen||0)>864e5&&b.seen)?'好想你！你終於回來了！':'你回來了！'+bdSound(b))},500)}
   b.seen=Date.now();
-  bdPetting(svg,b,box);
+  bdPetting(svg,b,box);bdIdle(svg,b,box);
   box.querySelector('[data-bd=feed]').onclick=e=>{bdAct(b,'feed',box);e.currentTarget.blur()}}
 function bdSay(box,t){const s=box&&box.querySelector('#bdSay,.bd-bubble');if(!s)return;s.textContent=t;s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop')}
 function bdJump(svg){if(!svg||RM())return;svg.classList.remove('jump');void svg.getBoundingClientRect();svg.classList.add('jump');setTimeout(()=>svg.classList.remove('jump'),650)}
@@ -5169,6 +5184,17 @@ function bdHearts(svg,n=3,ch='❤️'){if(RM()||!svg)return;const r=svg.getBound
 function bdHaptic(){try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.impact({style:'LIGHT'}).catch(()=>{})}catch(_){}}
 
 // 摸摸：手指在牠身上滑動；點一下會叫一聲跳起來；眼睛會看你碰的地方
+let __bdPant=0;   // 玩完球喘氣到這個時間
+// 沒在照顧牠的時候，牠自己會有小動作：打哈欠、歪頭、聞聞、甩身體、左右張望
+function bdIdle(svg,b,box){if(!svg||RM())return;const n0=navId;
+  const acts=[['look',2400,3],['tilt',1800,2],['sniff',1600,2],['yawn',1700,1],['shake',1000,1]],tot=acts.reduce((a,x)=>a+x[2],0);
+  const tick=()=>{if(navId!==n0||!svg.isConnected)return;
+    if(!bdAsleep(b)&&!svg.classList.contains('petting')&&!svg.classList.contains('jump')&&!svg.className.baseVal.includes('act-')){
+      let r=Math.random()*tot,a=acts[0];for(const x of acts){if((r-=x[2])<0){a=x;break}}
+      svg.classList.add('act-'+a[0]);if(a[0]==='yawn'&&Math.random()<.5)bdSay(box,b.sp==='cat'?'哈～啊（伸懶腰）':'哈～欠');if(a[0]==='shake'&&Math.random()<.4)bdSay(box,'甩甩甩～');
+      setTimeout(()=>svg.classList.remove('act-'+a[0]),a[1])}
+    setTimeout(tick,5500+Math.random()*6500)};
+  setTimeout(tick,4000+Math.random()*3000)}
 function bdPetting(svg,b,box){if(!svg)return;let down=false,dist=0,lx=0,ly=0,strokes=0,lastPet=0;
   const look=(x,y)=>{const p=svg.querySelector('.bd-pupils');if(!p)return;const r=svg.getBoundingClientRect();const dx=Math.max(-1,Math.min(1,(x-(r.left+r.width/2))/(r.width/2))),dy=Math.max(-1,Math.min(1,(y-(r.top+r.height*0.35))/(r.height/2)));p.style.transform=`translate(${dx*1.6}px,${dy*1.4}px)`;clearTimeout(p._t);p._t=setTimeout(()=>p.style.transform='',1800)};
   svg.addEventListener('pointerdown',e=>{down=true;dist=0;lx=e.clientX;ly=e.clientY;look(e.clientX,e.clientY)});
@@ -5188,7 +5214,7 @@ function bdAct(b,a,box){bdTick(b);bdDaily(b);const s=b.s,svg=box.querySelector('
   if(bdAsleep(b)&&a!=='sleep'){if(b.sl){bdSay(box,'牠在午睡，先讓牠睡一下吧（或按「叫醒」）');return}bdSay(box,'晚上了，牠睡著了。點牠一下可以叫醒');return}
   if(a==='feed'){if(s.f>=92){bdSay(box,'吃不下了～肚子圓滾滾');return}s.f=bdClamp(s.f+35);s.m=bdClamp(s.m+3);b.aff=(b.aff||0)+1;bdFx(box,'🍚');bdSay(box,b.sp==='cat'?'好吃！喵嗚～':'好好吃！汪汪！')}
   else if(a==='treat'){if(!(b.tr>0)){bdSay(box,'點心吃完了。照顧真毛孩、回報目擊都能換到點心喔');return}b.tr--;s.f=bdClamp(s.f+10);s.m=bdClamp(s.m+15);b.aff=(b.aff||0)+3;bdFx(box,'🦴');bdHearts(svg,4);bdSay(box,'點心！最愛你了！')}
-  else if(a==='play'){if(s.e<15){bdSay(box,'好累…先讓牠睡一下');return}s.m=bdClamp(s.m+20);s.e=bdClamp(s.e-15);s.f=bdClamp(s.f-5);s.c=bdClamp(s.c-6);b.aff=(b.aff||0)+2;bdBall(box);bdSay(box,b.sp==='cat'?'抓到了！再一次！':'接到了！再丟一次！')}
+  else if(a==='play'){if(s.e<15){bdSay(box,'好累…先讓牠睡一下');return}s.m=bdClamp(s.m+20);s.e=bdClamp(s.e-15);s.f=bdClamp(s.f-5);s.c=bdClamp(s.c-6);b.aff=(b.aff||0)+2;bdBall(box);__bdPant=Date.now()+15000;setTimeout(()=>bdApply(box.querySelector('.bd-svg'),b),15500);bdSay(box,b.sp==='cat'?'抓到了！再一次！':'接到了！再丟一次！')}
   else if(a==='bath'){if(s.c>=90){bdSay(box,'已經很乾淨了，香香的～');return}s.c=100;s.m=bdClamp(s.m-3);b.aff=(b.aff||0)+1;bdFx(box,'🫧',8);bdSay(box,b.sp==='cat'?'喵！不要水…好啦，香香的':'洗香香！甩甩甩～')}
   else if(a==='sleep'){b.sl=!b.sl;if(!b.sl)b.wk=bdNight()?Date.now()+10*6e4:0;bdSay(box,b.sl?'晚安～（精神會慢慢回來）':'睡飽了！')}
   bdApply(svg,b,a==='sleep'?undefined:(a==='bath'?'ok':'happy'));if(a!=='sleep'&&svg){bdJump(svg);bdHaptic()}setTimeout(()=>bdApply(svg,b),1500);
@@ -5240,7 +5266,7 @@ async function renderBuddy(){const _n=navId;setTitle('電子毛孩');
       ${IS_APP?`<label class="chk"><input type="checkbox" id="bdNt" ${b.nt!==false?'checked':''}> 牠肚子餓的時候通知我（只在白天）</label>`:''}
       <div class="row" style="gap:8px;margin-top:10px"><button type="button" class="btn ghost" id="bdSaveSet">儲存</button><a class="btn ghost" href="#/buddy?new=1">換外型</a></div>
     </div></details></div>`;
-    const room=$('#bdRoom'),svg=room.querySelector('.bd-svg');bdApply(svg,b);bdPetting(svg,b,room);
+    const room=$('#bdRoom'),svg=room.querySelector('.bd-svg');bdApply(svg,b);bdPetting(svg,b,room);bdIdle(svg,b,room);
     room.querySelectorAll('[data-a]').forEach(x=>x.onclick=()=>bdAct(b,x.dataset.a,room));
     room.addEventListener('bd-change',()=>{const bars=room.querySelector('.bd-bars');if(bars)bars.innerHTML=bdBars(b);const t=room.querySelector('[data-a=treat] small');if(t)t.textContent=b.tr||0;
       const sl=room.querySelector('[data-a=sleep]');if(sl)sl.innerHTML=`<i>${b.sl?'☀️':'💤'}</i>${b.sl?'叫醒':'睡覺'}`;$('#bdStage').classList.toggle('lightsoff',!!b.sl)});
@@ -5271,7 +5297,7 @@ function bdPaletteFromPhoto(url){return new Promise(res=>{let done=false;const f
   fin({m:pick(fur,.55,.8),d:pick(fur,.08,.25),l:pick(fur,.92,1)})}catch(_){fin(null)}};im.onerror=()=>fin(null);im.src=safeU(url);setTimeout(()=>fin(null),7000)}catch(_){fin(null)}})}
 async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'領養電子毛孩');
   const {data:pets}=await sb.from('pets').select('id,name,species,colour,photos').order('created_at');if(_n!==navId)return;
-  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null};
+  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',build:cur?.build||'mid',tail:cur?.tail||'curl',hair:cur?.hair||'short',name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null};
   if(st.coat==='custom'&&!st.cc)st.coat='golden';
   const srcPet=()=>(pets||[]).find(z=>z.id===st.src);const phs=()=>((srcPet()||{}).photos||[]).filter(Boolean).slice(0,6);
   const prev=()=>bdSVG({name:st.name||'電子毛孩',...st,s:{f:80,m:80,c:90,e:80}},'mood-happy');
@@ -5284,6 +5310,9 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     <p class="muted small" id="bdNoPh" hidden style="margin:8px 0 0">到<a id="bdPhLink" href="#/health">健康手冊</a>幫牠加一張照片，就能照照片對毛色。</p>
     <p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
     <div id="bdEarWrap"><p class="lbl" style="margin:14px 0 6px">耳朵</p><div class="seg" id="bdEar"><button type="button" data-v="drop">垂耳</button><button type="button" data-v="semi">半立耳</button><button type="button" data-v="prick">立耳</button></div></div>
+    <p class="lbl" style="margin:14px 0 6px">體型</p><div class="seg" id="bdBuild"><button type="button" data-v="slim">瘦長</button><button type="button" data-v="mid">適中</button><button type="button" data-v="stocky">壯碩</button></div>
+    <div id="bdTailWrap"><p class="lbl" style="margin:14px 0 6px">尾巴</p><div class="seg" id="bdTail"><button type="button" data-v="curl">捲尾</button><button type="button" data-v="sickle">鐮刀尾</button><button type="button" data-v="down">垂尾</button></div></div>
+    <p class="lbl" style="margin:14px 0 6px">毛長</p><div class="seg" id="bdHair"><button type="button" data-v="short">短毛</button><button type="button" data-v="long">長毛</button></div>
     <p class="lbl" style="margin:14px 0 6px">毛色</p><div class="bd-coats" id="bdCoat"><button type="button" data-v="custom" id="bdCustom" hidden><span></span>照片的毛色</button>${Object.entries(BD_COATS).map(([k,c])=>`<button type="button" data-v="${k}" style="--c:${c.m}" aria-label="${c.n}"><span></span>${c.n}</button>`).join('')}</div>
     <p class="lbl" style="margin:14px 0 6px">花紋</p><div class="chips" id="bdPat">${Object.entries(BD_PATS).map(([k,n])=>`<button type="button" class="chip" data-v="${k}">${n}</button>`).join('')}</div>
     <label class="f" style="margin-top:14px"><span><b class="lbl">名字</b></span><input type="text" id="bdNm" maxlength="12" placeholder="例：小麥" value="${esc(st.name)}"></label>
@@ -5297,6 +5326,7 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     app.querySelectorAll('#bdPat button').forEach(x=>{x.classList.toggle('on',x.dataset.v===st.pat);x.hidden=x.dataset.v==='calico'&&st.sp!=='cat'});
     app.querySelectorAll('[data-src]').forEach(x=>x.classList.toggle('on',x.dataset.src===st.src));
     app.querySelectorAll('#bdEar button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.ear));$('#bdEarWrap').hidden=st.sp==='cat';
+    [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.classList.toggle('on',x.dataset.v===st[k])));$('#bdTailWrap').hidden=st.sp==='cat';
     const ps=phs();$('#bdRefWrap').hidden=!ps.length;$('#bdNoPh').hidden=!(st.src&&!ps.length);if(st.src)$('#bdPhLink').href='#/pet/'+st.src;
     $('#bdPhs').innerHTML=ps.map(u=>`<button type="button" data-ph="${esc(u)}" class="${u===st.ref?'on':''}" style="background-image:url('${esc(safeU(u))}')" aria-label="用這張照片對毛色"></button>`).join('');
     app.querySelectorAll('[data-ph]').forEach(x=>x.onclick=()=>useRef(x.dataset.ph));
@@ -5304,6 +5334,7 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
   const useRef=u=>{st.ref=u;$('#bdRefMsg').textContent='正在從照片調毛色…';sync();const sid=st.src;
     bdPaletteFromPhoto(u).then(c=>{if(st.src!==sid||st.ref!==u)return;if(c){st.cc=c;st.coat='custom';$('#bdRefMsg').textContent='✓ 已照照片調好毛色（深、主、淺三層）'}else $('#bdRefMsg').textContent='這張照片讀不到顏色，已用毛色文字猜一個';sync()})};
   app.querySelectorAll('#bdEar button').forEach(x=>x.onclick=()=>{st.ear=x.dataset.v;sync()});
+  [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.onclick=()=>{st[k]=x.dataset.v;sync()}));
   app.querySelectorAll('#bdSp button').forEach(x=>x.onclick=()=>{st.sp=x.dataset.v;if(st.pat==='calico'&&st.sp!=='cat')st.pat='solid';sync()});
   app.querySelectorAll('#bdCoat button').forEach(x=>x.onclick=()=>{st.coat=x.dataset.v;sync()});
   app.querySelectorAll('#bdPat button').forEach(x=>x.onclick=()=>{st.pat=x.dataset.v;sync()});
@@ -5312,7 +5343,7 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
   $('#bdNm').oninput=()=>{st.name=$('#bdNm').value.trim()};
   sync();
   $('#bdGo').onclick=()=>{const name=$('#bdNm').value.trim().slice(0,12);if(!name){toast('幫牠取個名字吧');$('#bdNm').focus();return}
-    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,src:st.src,ref:st.ref,look:'draw',photo:null};
+    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,build:st.build,tail:st.tail,hair:st.hair,src:st.src,ref:st.ref,look:'draw',photo:null};
     const b=cur?{...cur,...look}:{v:1,...look,born:bdToday(),s:{f:70,m:80,c:95,e:85},t:now,aff:0,tr:3,dd:bdToday(),ls:bdToday(),streak:1,dc:{},nt:true};
     __bd=b;__bdUid=me().id;bdSave(true);__bdGreeted=false;toast(cur?'✅ 外型已更新':`🎉 ${name}來到你家了！送你 3 個點心`);if((location.hash||'')==='#/buddy')route();else goReplace('#/buddy')}}
 
