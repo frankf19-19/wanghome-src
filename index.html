@@ -1781,7 +1781,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.7.2';
+const BUILD = 'v5.7.3';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -2179,7 +2179,7 @@ function spaceOf(path){
 function meLabel(){try{return session?.user?'我的':'註冊／登入'}catch(_){return '註冊／登入'}}
 // 底部選單：固定 5 個（像一般 App），中間「＋」打開新增選單
 const TI_SEARCH='<svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>';
-function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/health','health',tbI('book')+'健康'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/lost','lost',TI_SEARCH+'協尋'],['#/me','me',tbI('me')+'我的']]}
+function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/health','health',tbI('book')+'健康手冊'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/lost','lost',TI_SEARCH+'協尋'],['#/me','me',tbI('me')+'我的']]}
 function openAddSheet(){
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   const r=(h,i,c,t,d)=>`<a class="srow" href="${h}"><span class="sri ${c}">${i}</span><span class="srt"><b>${t}</b><small>${d}</small></span>${ic('chev','mrc')}</a>`;
