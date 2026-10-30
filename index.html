@@ -1820,6 +1820,38 @@ label.f>.pw-wrap{position:relative;display:block;margin:0;font-weight:400}label.
 .bd-svg.act-look .bd-pupils{animation:bdLookAround 2.4s ease-in-out}
 @keyframes bdLookAround{0%,100%{transform:translate(0,0)}20%,40%{transform:translate(-2.4px,0)}60%,80%{transform:translate(2.4px,-.5px)}}
 .bd-segrow{display:flex;gap:6px;flex-wrap:wrap}
+/* 姿勢：睡覺趴下、吃飯低頭 */
+.bd-liepaws,.bd-dish{display:none}
+.bd-svg.pose-lie .bd-legs{display:none}.bd-svg.pose-lie .bd-liepaws{display:inline}
+.bd-svg.pose-lie .bd-body{animation:bdBreathLie 5.5s ease-in-out infinite!important}
+@keyframes bdBreathLie{0%,100%{transform:scale(1.06,.66)}50%{transform:scale(1.06,.68)}}
+.bd-svg.pose-lie .bd-head{animation:none!important;transform:translateY(64px) rotate(-3deg)!important}
+.bd-svg.sp-cat.pose-lie .bd-head{transform:translateY(58px) rotate(-3deg)!important}
+.bd-svg.pose-lie .bd-tail{animation:none!important;transform:translate(-6px,8px) rotate(48deg)}
+.bd-svg.pose-lie .bd-zzz{transform:translateY(54px)}
+.bd-svg.pose-eat .bd-dish{display:inline}
+.bd-svg.pose-eat .bd-head{animation:bdEat .42s ease-in-out infinite!important}
+.bd-svg.sp-dog.pose-eat .bd-head{--eat:78px}.bd-svg.sp-cat.pose-eat .bd-head{--eat:70px}
+@keyframes bdEat{0%,100%{transform:translateY(var(--eat,74px)) rotate(0)}50%{transform:translateY(calc(var(--eat,74px) + 4px)) rotate(2deg)}}
+.bd-svg.pose-eat .mo-smile,.bd-svg.pose-eat .mo-sad{display:none}.bd-svg.pose-eat .mo-open{display:inline}
+.bd-svg.pose-eat .ey-open{display:none}.bd-svg.pose-eat .ey-happy{display:inline}
+/* 側面走路、跑步 */
+.bd-side{display:none;width:118%;margin-left:-9%;height:auto;overflow:visible}
+.bd-walker.moving>.bd-svg{display:none}.bd-walker.moving>.bd-side{display:block}
+.bd-walker.flip>.bd-side{transform:scaleX(-1)}
+.bd-side .sl-f1,.bd-side .sl-b2{transform-box:view-box;animation:bdLegA .5s ease-in-out infinite}
+.bd-side .sl-f2,.bd-side .sl-b1{transform-box:view-box;animation:bdLegB .5s ease-in-out infinite}
+.bd-side .sd-root{animation:bdWalk .25s ease-in-out infinite}
+.bd-side .sd-tail{transform-box:view-box;animation:bdWag .5s ease-in-out infinite}
+.bd-side .sd-head{transform-box:view-box;animation:bdHead 1s ease-in-out infinite}
+.bd-walker.running .sl-f1,.bd-walker.running .sl-b2,.bd-walker.running .sl-f2,.bd-walker.running .sl-b1{animation-duration:.26s}.bd-walker.running .sd-root{animation-duration:.13s}
+@keyframes bdLegA{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-22deg)}}
+@keyframes bdLegB{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}
+.bd-walker.walking .bd-root,.bd-walker.run .bd-root{animation:none}
+.bd-group{margin-top:14px;padding:4px 14px 14px;border-radius:18px;background:var(--red-soft)}.bd-gt{margin:8px 0 0;font-weight:900;color:var(--red-ink)}
+.bd-prevwrap{position:sticky;top:calc(env(safe-area-inset-top) + 56px);z-index:3;background:var(--sheet);margin:0 -8px;padding:4px 8px 0;border-radius:0 0 18px 18px}
+#bdMarks .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.forgot{margin:6px 2px 0;text-align:right}.forgot .linkbtn{font-size:14px;font-weight:700;color:var(--red-ink);min-height:36px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1892,7 +1924,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.8.3';
+const BUILD = 'v5.8.4';
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(/[?&]bare=1/.test(location.search))document.body.classList.add('bare');   // App 裡用內建瀏覽器看條款：只顯示內容
@@ -4883,6 +4915,33 @@ function lnSection(){if(!IS_APP)return '';
   return `<h2>${ic("bell")} 手機通知提醒</h2><div class="card"><p style="margin:0 0 10px">到期前、還有每天的餵藥時間，手機會直接跳通知。時間可以自己設。</p>${lnBtnHTML()}</div>`}
 function bindIcs(list,petNameOf){document.querySelectorAll('[data-ics]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.ics);if(r)downloadIcs(petNameOf(r),r)})}
 
+// 設定／更改密碼：先寄驗證碼到 Email，輸入驗證碼和新密碼才改得了
+async function pwChangeFlow(box){if(!box||!me())return;const had=hasPw(),email=me().email;
+  const btn=box.querySelector('button');if(btn){btn.disabled=true;btn.textContent='寄送驗證碼中…'}
+  const {error:e0}=await sb.auth.reauthenticate();
+  if(e0){if(btn){btn.disabled=false;btn.textContent=had?'更改密碼':'設定密碼'}const ec=(e0.code||'')+' '+e0.message;return toast(/rate|limit|seconds/i.test(ec)?'寄得太頻繁了，請等一分鐘再試':'寄送失敗：'+friendlyErr(e0.message),5000)}
+  box.innerHTML=`<form id="pwChF" data-nodirty novalidate>
+    <p class="small" style="margin:0 2px 8px">驗證碼已寄到 <b>${esc(email)}</b>（幾分鐘沒收到請看垃圾郵件匣）</p>
+    <label class="f"><span><b class="lbl">信裡的驗證碼</b></span><input id="pwCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="12345678" style="letter-spacing:4px"></label>
+    <label class="f"><span><b class="lbl">新密碼</b><small class="hint">至少 8 個字</small></span><span class="pw-wrap"><input type="password" id="npw" autocomplete="new-password" minlength="8"><button type="button" class="pw-eye" data-eye="npw" aria-label="顯示密碼">${ic('eye')}</button></span></label>
+    <div class="row" style="gap:8px;margin-top:10px"><button class="btn" id="btnNpw">${had?'更改密碼':'設定密碼'}</button><button type="button" class="btn ghost" id="btnPwCancel">取消</button></div>
+    <p class="small muted" style="margin:8px 2px 0"><button type="button" class="linkbtn" id="btnPwResend" disabled>重寄驗證碼（60 秒）</button></p></form>`;
+  const eye=box.querySelector('[data-eye]');eye.onclick=()=>{const i=$('#npw');const sh=i.type==='password';i.type=sh?'text':'password';eye.classList.toggle('on',sh)};
+  $('#pwCode').focus();
+  let left=60;const rs=$('#btnPwResend');const tk=()=>{if(!rs.isConnected)return;rs.disabled=left>0;rs.textContent=left>0?`重寄驗證碼（${left} 秒）`:'重寄驗證碼';if(left-->0)setTimeout(tk,1000)};tk();
+  rs.onclick=async()=>{rs.disabled=true;const {error}=await sb.auth.reauthenticate();toast(error?'寄送失敗，請等一分鐘再試':'已重寄，請用最新那封信的驗證碼');left=error?30:60;tk()};
+  $('#btnPwCancel').onclick=()=>{box.innerHTML=`<button type="button" class="btn block ghost" id="btnPwStart">${had?'更改密碼':'設定密碼'}</button>`;$('#btnPwStart').onclick=()=>pwChangeFlow(box)};
+  $('#pwChF').onsubmit=async e=>{e.preventDefault();const b=$('#btnNpw');if(b.disabled)return;const code=otpDigits($('#pwCode').value),pw=$('#npw').value;
+    if(code.length<6)return toast('請輸入信裡的驗證碼');if(pw.length<8)return toast('新密碼至少要 8 個字');
+    b.disabled=true;b.textContent='儲存中…';
+    const {error}=await sb.auth.updateUser({password:pw,nonce:code,data:{has_pw:true}});b.disabled=false;b.textContent=had?'更改密碼':'設定密碼';
+    if(error){const ec=(error.code||'')+' '+error.message;return toast(/nonce|otp|expired|invalid|reauth/i.test(ec)?'驗證碼不正確或已過期，請按「重寄驗證碼」':/same|different/i.test(ec)?'新密碼跟舊密碼一樣':/weak|password/i.test(ec)?'密碼太簡單了，請換一個（混合英文和數字更安全）':'儲存失敗：'+friendlyErr(error.message),5000)}
+    toast(had?'✅ 密碼已更改':'✅ 密碼已設定，下次可以用 Email＋密碼登入',4000);
+    const row=box.previousElementSibling;if(row&&row.classList.contains('acct-row'))row.querySelector('span').textContent='已設定';
+    box.innerHTML=`<button type="button" class="btn block ghost" id="btnPwStart">更改密碼</button><p class="small muted" style="margin:6px 2px 0">為了安全，會先寄一組驗證碼到 ${esc(email)}。</p>`;$('#btnPwStart').onclick=()=>pwChangeFlow(box)}}
+// 這個帳號有沒有設過密碼：設定時會記在帳號資料；或這次是用密碼登入的
+function hasPw(){const u=me();if(!u)return false;if((u.user_metadata||{}).has_pw)return true;
+  try{const t=session&&session.access_token;const p=JSON.parse(decodeURIComponent(escape(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));return (p.amr||[]).some(a=>a&&a.method==='password')}catch(_){return false}}
 // strict：讀取失敗就丟出錯誤（存檔前一定要用，避免把「讀不到」當成「全部空白」覆蓋掉設定）
 async function getProfile(strict){
   if(!me())return null;
@@ -4993,9 +5052,10 @@ function bdSVG(b,cls=''){
     <filter id="fz${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="${b.hair==='long'?7.5:4.2}" xChannelSelector="R" yChannelSelector="G"/></filter>
     <filter id="fs${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
   </defs>`;
-  const eye=(x,y)=>cat
+  const es={small:.82,big:1.18}[b.eyes]||1;
+  const eye=(x,y)=>`<g transform="translate(${x} ${y}) scale(${es}) translate(${-x} ${-y})">`+(cat
     ?`<path d="M${x-9} ${y}q9-9.5 18 0q-9 8.5-18 0z" fill="url(#ig${u})" stroke="${INK}" stroke-width="1.5"/><ellipse class="bd-slit" cx="${x}" cy="${y}" rx="1.9" ry="5.6" fill="#0B0706"/><circle cx="${x+3}" cy="${y-2.6}" r="1.7" fill="#fff"/><circle cx="${x-3}" cy="${y+2}" r=".8" fill="#fff" opacity=".7"/>`
-    :`<path d="M${x-8.5} ${y+.5}q8-8.5 17 -1q-7 7.5-17 1z" fill="${INK}"/><circle cx="${x+.3}" cy="${y-.2}" r="4.9" fill="url(#ig${u})"/><circle cx="${x+.3}" cy="${y}" r="2.6" fill="#0B0706"/><circle cx="${x+2}" cy="${y-2}" r="1.5" fill="#fff"/><circle cx="${x-1.6}" cy="${y+1.6}" r=".7" fill="#fff" opacity=".7"/><path d="M${x-8.5} ${y+.5}q8-8.5 17 -1" fill="none" stroke="${INK}" stroke-width="1.6"/>`;
+    :`<path d="M${x-8.5} ${y+.5}q8-8.5 17 -1q-7 7.5-17 1z" fill="${INK}"/><circle cx="${x+.3}" cy="${y-.2}" r="4.9" fill="url(#ig${u})"/><circle cx="${x+.3}" cy="${y}" r="2.6" fill="#0B0706"/><circle cx="${x+2}" cy="${y-2}" r="1.5" fill="#fff"/><circle cx="${x-1.6}" cy="${y+1.6}" r=".7" fill="#fff" opacity=".7"/><path d="M${x-8.5} ${y+.5}q8-8.5 17 -1" fill="none" stroke="${INK}" stroke-width="1.6"/>`)+'</g>';
   const ex=cat?[84,116,84]:[86,114,64];   // 左眼 x、右眼 x、眼睛 y
   const ey=ex[2];
   const eyes=`<g class="bd-eyes">
@@ -5026,13 +5086,15 @@ function bdSVG(b,cls=''){
     <ellipse cx="70" cy="192" rx="24" ry="17" fill="url(#bg${u})" filter="url(#fs${u})"/><ellipse cx="130" cy="192" rx="24" ry="17" fill="url(#bg${u})" filter="url(#fs${u})"/>
     <path d="${body}" fill="url(#bg${u})" filter="url(#fz${u})"/>
     <g clip-path="url(#cb${u})">${bodyPat}${bdFur(R,[56,108,146,210],150,[SH,HI,D,L],(x,y)=>Math.PI/2+(x-100)/90,6.5,1)}</g>
-    <path d="M100 118c-12 0-19 20-19 40c0 20 8 36 19 40c11-4 19-20 19-40c0-20-7-40-19-40z" fill="url(#lg${u})" filter="url(#fz${u})"/>
-    <path d="M86 150c-3 20-3 38-1 54h14c1-16 1-34-1-54z" fill="url(#bg${u})"/><path d="M114 150c3 20 3 38 1 54h-14c-1-16-1-34 1-54z" fill="url(#bg${u})"/>
-    ${legRing}
-    <ellipse cx="92" cy="205" rx="10" ry="6" fill="${pat==='tux'?'#fff':L}"/><ellipse cx="108" cy="205" rx="10" ry="6" fill="${pat==='tux'?'#fff':L}"/>
-    <path d="M88 207v-3M92 208v-3M96 207v-3M104 207v-3M108 208v-3M112 207v-3" stroke="${SH}" stroke-width="1.2" opacity=".45" stroke-linecap="round"/>
+    <path d="M100 118c-12 0-19 20-19 40c0 20 8 36 19 40c11-4 19-20 19-40c0-20-7-40-19-40z" fill="${b.bib?'#FBF8F3':`url(#lg${u})`}" filter="url(#fz${u})"/>
+    <g class="bd-legs"><path d="M86 150c-3 20-3 38-1 54h14c1-16 1-34-1-54z" fill="url(#bg${u})"/><path d="M114 150c3 20 3 38 1 54h-14c-1-16-1-34 1-54z" fill="url(#bg${u})"/>
+    ${legRing}${b.socks?`<path d="M85.3 188c-.4 6-.4 11-.3 16h14c.2-5 .2-10-.1-16zM114.7 188c.4 6 .4 11 .3 16h-14c-.2-5-.2-10 .1-16z" fill="#FBF8F3" filter="url(#fs${u})"/>`:''}
+    <ellipse cx="92" cy="205" rx="10" ry="6" fill="${pat==='tux'||b.socks?'#fff':L}"/><ellipse cx="108" cy="205" rx="10" ry="6" fill="${pat==='tux'||b.socks?'#fff':L}"/>
+    <path d="M88 207v-3M92 208v-3M96 207v-3M104 207v-3M108 208v-3M112 207v-3" stroke="${SH}" stroke-width="1.2" opacity=".45" stroke-linecap="round"/></g>
   </g></g>
-  <g class="bd-head" style="transform-origin:100px 112px">
+  <g class="bd-liepaws"><ellipse cx="84" cy="204" rx="14" ry="6.5" fill="${pat==='tux'||b.socks?'#fff':`url(#bg${u})`}" filter="url(#fs${u})"/><ellipse cx="116" cy="204" rx="14" ry="6.5" fill="${pat==='tux'||b.socks?'#fff':`url(#bg${u})`}" filter="url(#fs${u})"/></g>
+  <g class="bd-dish"><ellipse cx="100" cy="210" rx="30" ry="7" fill="#3F7FB8"/><ellipse cx="100" cy="206" rx="26" ry="5" fill="#5B9BD5"/><ellipse cx="100" cy="206" rx="21" ry="3.6" fill="#8A5A2E"/><g fill="#C08A50"><circle cx="92" cy="205" r="1.9"/><circle cx="99" cy="207" r="1.9"/><circle cx="106" cy="205" r="1.9"/><circle cx="100" cy="204" r="1.7"/></g></g>
+  <g class="bd-head" style="transform-origin:100px 112px"><g transform="translate(100 0) scale(${({narrow:.93,wide:1.1}[b.face]||1)} 1) translate(-100 0)">
     <g class="bd-ear bd-ear-l" style="transform-origin:76px 62px"><path d="M66 68l-5-38c0-5 5-7 8-4l27 25z" fill="url(#hg${u})"/><path d="M69 61l-3-25 18 17z" fill="#F0B1B4"/><path d="M68 44l3 8M72 40l2 7" stroke="#fff" stroke-width="1" opacity=".7"/></g>
     <g class="bd-ear bd-ear-r" style="transform-origin:124px 62px"><path d="M134 68l5-38c0-5-5-7-8-4l-27 25z" fill="${pat==='calico'?'#3A302C':`url(#hg${u})`}"/><path d="M131 61l3-25-18 17z" fill="#F0B1B4"/><path d="M132 44l-3 8M128 40l-2 7" stroke="#fff" stroke-width="1" opacity=".7"/></g>
     <path d="${head}" fill="url(#hg${u})" filter="url(#fz${u})"/>
@@ -5047,13 +5109,15 @@ function bdSVG(b,cls=''){
     </g>
     <g stroke="${wh}" stroke-width="1" stroke-linecap="round" opacity=".85"><path d="M86 96l-28-5M86 99l-28 2M87 102l-24 7M114 96l28-5M114 99l28 2M113 102l24 7"/></g>
     <ellipse class="bd-blush" cx="76" cy="98" rx="6" ry="3.4" fill="#F28B8B" opacity=".22"/><ellipse class="bd-blush" cx="124" cy="98" rx="6" ry="3.4" fill="#F28B8B" opacity=".22"/>
-  </g>
+  </g></g>
   ${zzz}
   <g class="bd-dirt" fill="#7A5A3C" opacity="0"><ellipse cx="74" cy="160" rx="7" ry="4.5"/><ellipse cx="128" cy="146" rx="5" ry="3.5"/><ellipse cx="116" cy="62" rx="4" ry="3"/><circle cx="96" cy="190" r="3"/></g>
   </g></svg>`}
   // ── 狗（成犬比例，參考台灣米克斯）──
   const ear=b.ear||'drop';
-  const skull='M100 28c-21 0-35 13-37 30c-1 9 1 17 6 24c5 7 9 13 11 21c2 9 10 14 20 14s18-5 20-14c2-8 6-14 11-21c5-7 7-15 6-24c-2-17-16-30-37-30z';
+  const sn={short:-6,long:7}[b.snout]||0,fw={narrow:.92,wide:1.1}[b.face]||1;
+  const skull=`M100 28c-21 0-35 13-37 30c-1 9 1 17 6 24c5 7 9 ${13+sn} 11 ${21+sn}c2 9 10 14 20 14s18-5 20-14c2-8 6-${14+sn} 11-${21+sn}c5-7 7-15 6-24c-2-17-16-30-37-30z`;
+  const white='#FBF8F3';
   const torso='M74 126c-15 22-19 54-13 84h78c6-30 2-62-13-84c-12-6-40-6-52 0z';
   const earD={drop:['M70 38c-14 2-22 20-22 38c0 11 7 15 13 10c6-5 8-14 10-25z','M130 38c14 2 22 20 22 38c0 11-7 15-13 10c-6-5-8-14-10-25z'],
     prick:['M74 42l-10-34c-1-4 3-6 6-3l24 26z','M126 42l10-34c1-4-3-6-6-3l-24 26z'],
@@ -5079,15 +5143,18 @@ function bdSVG(b,cls=''){
     <path d="M78 106c-5 10-7 20-5 30h54c2-10 0-20-5-30z" fill="url(#bg${u})" filter="url(#fz${u})"/>
     <path d="${torso}" fill="url(#bg${u})" filter="url(#fz${u})"/>
     <g clip-path="url(#cb${u})">${bodyPat}${bdFur(R,[58,118,142,212],160,[D,HI,M,SH],(x,y)=>Math.PI/2+(x-100)/110,7,1)}</g>
-    <path d="M88 118c-7 24-7 58 0 92h24c7-34 7-68 0-92c-8 5-16 5-24 0z" fill="url(#lg${u})" filter="url(#fz${u})"/>
+    <path d="M88 118c-7 24-7 58 0 92h24c7-34 7-68 0-92c-8 5-16 5-24 0z" fill="${b.bib?white:`url(#lg${u})`}" filter="url(#fz${u})"/>
     ${bdFur(R,[90,122,110,206],46,[bdMix(L,D,.35),'#FFFFFF'],()=>Math.PI/2,6,.9)}
-    <path d="M86 152c-3 22-3 42-1 58h13c1-16 1-36-2-58z" fill="url(#bg${u})"/><path d="M114 152c3 22 3 42 1 58h-13c-1-16-1-36 2-58z" fill="url(#bg${u})"/>
+    <g class="bd-legs"><path d="M86 152c-3 22-3 42-1 58h13c1-16 1-36-2-58z" fill="url(#bg${u})"/><path d="M114 152c3 22 3 42 1 58h-13c-1-16-1-36 2-58z" fill="url(#bg${u})"/>
     <path d="M88 160v40M112 160v40" stroke="${HI}" stroke-width="2.2" opacity=".35" stroke-linecap="round"/>
-    <ellipse cx="91" cy="212" rx="10.5" ry="5.5" fill="${pat==='tux'?'#fff':`url(#bg${u})`}"/><ellipse cx="109" cy="212" rx="10.5" ry="5.5" fill="${pat==='tux'?'#fff':`url(#bg${u})`}"/>
-    <path d="M87 215v-3.5M91 216v-3.5M95 215v-3.5M105 215v-3.5M109 216v-3.5M113 215v-3.5" stroke="${SH}" stroke-width="1.2" opacity=".5" stroke-linecap="round"/>
+    ${b.socks?`<path d="M85.5 192c-.5 7-.6 13-.5 18h13c.3-5 .3-11-.2-18z" fill="${white}" filter="url(#fs${u})"/><path d="M114.5 192c.5 7 .6 13 .5 18h-13c-.3-5-.3-11 .2-18z" fill="${white}" filter="url(#fs${u})"/>`:''}
+    <ellipse cx="91" cy="212" rx="10.5" ry="5.5" fill="${pat==='tux'||b.socks?white:`url(#bg${u})`}"/><ellipse cx="109" cy="212" rx="10.5" ry="5.5" fill="${pat==='tux'||b.socks?white:`url(#bg${u})`}"/>
+    <path d="M87 215v-3.5M91 216v-3.5M95 215v-3.5M105 215v-3.5M109 216v-3.5M113 215v-3.5" stroke="${SH}" stroke-width="1.2" opacity=".5" stroke-linecap="round"/></g>
     <path d="M77 124q23 12 46 0" fill="none" stroke="#B5222A" stroke-width="5" stroke-linecap="round"/><circle class="bd-tag" cx="100" cy="133" r="4" fill="url(#tg${u})"/>
   </g></g>
-  <g class="bd-head" style="transform-origin:100px 116px">
+  <g class="bd-liepaws"><ellipse cx="80" cy="206" rx="17" ry="7.5" fill="${b.socks?white:`url(#bg${u})`}" filter="url(#fs${u})"/><ellipse cx="120" cy="206" rx="17" ry="7.5" fill="${b.socks?white:`url(#bg${u})`}" filter="url(#fs${u})"/><path d="M90 207v-3M94 207v-3M106 207v-3M110 207v-3" stroke="${SH}" stroke-width="1.1" opacity=".45"/></g>
+  <g class="bd-dish"><ellipse cx="100" cy="210" rx="34" ry="8" fill="#B82F3C"/><ellipse cx="100" cy="205" rx="30" ry="6" fill="#E04E5C"/><ellipse cx="100" cy="205" rx="25" ry="4.2" fill="#8A5A2E"/><g fill="#B9824A"><circle cx="90" cy="204" r="2.2"/><circle cx="97" cy="206" r="2.2"/><circle cx="104" cy="204" r="2.2"/><circle cx="111" cy="206" r="2.2"/><circle cx="100" cy="203" r="2"/></g></g>
+  <g class="bd-head" style="transform-origin:100px 116px"><g transform="translate(100 0) scale(${fw} 1) translate(-100 0)">
     ${ear==='drop'?'':earG(0)+earG(1)}
     <path d="${skull}" fill="url(#hg${u})" filter="url(#fz${u})"/>
     <g clip-path="url(#ch${u})">${headPat}
@@ -5095,11 +5162,12 @@ function bdSVG(b,cls=''){
       <ellipse cx="100" cy="44" rx="13" ry="9" fill="#fff" opacity=".12"/>
       ${bdFur(R,[62,28,138,118],110,[D,HI,M],(x,y)=>Math.atan2(y-74,x-100),4.2,.75)}</g>
     <path d="M100 44v22" stroke="${SH}" stroke-width="3" stroke-linecap="round" opacity=".1"/>
-    <ellipse cx="86" cy="54.5" rx="4.5" ry="2.4" fill="${L}" opacity=".55"/><ellipse cx="114" cy="54.5" rx="4.5" ry="2.4" fill="${L}" opacity=".55"/>
+    ${b.brow?`<ellipse cx="85" cy="53.5" rx="5.6" ry="3.2" fill="${dark?'#D9A066':bdMix(L,'#FFFFFF',.3)}" filter="url(#fs${u})"/><ellipse cx="115" cy="53.5" rx="5.6" ry="3.2" fill="${dark?'#D9A066':bdMix(L,'#FFFFFF',.3)}" filter="url(#fs${u})"/>`:`<ellipse cx="86" cy="54.5" rx="4.5" ry="2.4" fill="${L}" opacity=".55"/><ellipse cx="114" cy="54.5" rx="4.5" ry="2.4" fill="${L}" opacity=".55"/>`}
     ${ear==='drop'?earG(0)+earG(1):''}
-    <path d="M100 66c-12 0-20 9-21 20c-1 12 5 26 21 30c16-4 22-18 21-30c-1-11-9-20-21-20z" fill="url(#mg${u})"/>
+    <g transform="translate(0 ${sn*.6})"><path d="M100 66c-12 0-20 9-21 20c-1 12 5 26 21 30c16-4 22-18 21-30c-1-11-9-20-21-20z" fill="url(#mg${u})"/>
+    ${b.mask?`<path d="M100 80c-9 0-14 7-15 15c-1 9 4 18 15 21c11-3 16-12 15-21c-1-8-6-15-15-15z" fill="${bdMix(D,'#000000',.45)}" opacity=".62" filter="url(#fs${u})"/>`:''}</g>
     ${eyes}
-    <path d="M100 95c-9 0-13 2.3-13 6.5c0 4.4 6.6 8.8 13 9.7c6.4-.9 13-5.3 13-9.7c0-4.2-4-6.5-13-6.5z" fill="url(#ng${u})"/>
+    <g transform="translate(0 ${sn})"><path d="M100 95c-9 0-13 2.3-13 6.5c0 4.4 6.6 8.8 13 9.7c6.4-.9 13-5.3 13-9.7c0-4.2-4-6.5-13-6.5z" fill="url(#ng${u})"/>
     <ellipse cx="96" cy="97.6" rx="3.4" ry="1.6" fill="#fff" opacity=".5"/><path d="M93.5 103.5q2-1 3.2.6M106.5 103.5q-2-1-3.2.6" stroke="#000" stroke-width="1.2" fill="none" opacity=".6"/>
     <g class="bd-mouth" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round">
       <g class="mo-smile"><path d="M100 110.5v4M91 116c4 4 14 4 18 0"/></g>
@@ -5108,11 +5176,58 @@ function bdSVG(b,cls=''){
     </g>
     <g fill="${SH}" opacity=".45"><circle cx="89" cy="108" r=".9"/><circle cx="86" cy="111" r=".9"/><circle cx="90" cy="112" r=".9"/><circle cx="111" cy="108" r=".9"/><circle cx="114" cy="111" r=".9"/><circle cx="110" cy="112" r=".9"/></g>
     <path d="M86 108l-16-3M86 111l-15 2M114 108l16-3M114 111l15 2" stroke="${dark?'#E8DED2':'#5E5048'}" stroke-width=".7" opacity=".55" stroke-linecap="round"/>
-    <ellipse class="bd-blush" cx="80" cy="96" rx="6" ry="3.4" fill="#F28B8B" opacity=".14"/><ellipse class="bd-blush" cx="120" cy="96" rx="6" ry="3.4" fill="#F28B8B" opacity=".14"/>
-  </g>
+    <ellipse class="bd-blush" cx="80" cy="96" rx="6" ry="3.4" fill="#F28B8B" opacity=".14"/><ellipse class="bd-blush" cx="120" cy="96" rx="6" ry="3.4" fill="#F28B8B" opacity=".14"/></g>
+  </g></g>
   ${zzz}
   <g class="bd-dirt" fill="#7A5A3C" opacity="0"><ellipse cx="70" cy="168" rx="8" ry="5"/><ellipse cx="130" cy="156" rx="6" ry="4"/><ellipse cx="116" cy="50" rx="4.5" ry="3"/><circle cx="92" cy="198" r="3.4"/></g>
   </g></svg>`}
+
+// ── 側面（走路、跑步、撿球用）：四隻腳會一前一後擺動 ──
+function bdSideSVG(b){
+  const u='s'+(++__bdSeq),C=(b.coat==='custom'&&b.cc)?b.cc:(BD_COATS[b.coat]||BD_COATS.golden),pat=b.pat||'solid',cat=b.sp==='cat';
+  let M=C.m,D=C.d,L=C.l;if(pat==='calico'){M='#F7F2EA';D='#DCCFBF';L='#FFFFFF'}if(pat==='tux'){L='#FFFFFF'}
+  const HI=bdMix(M,'#FFFFFF',.35),SH=bdMix(D,'#000000',.2),INK='#24160E',W='#FBF8F3';
+  const k={slim:.9,stocky:1.1}[b.build]||1,paw=pat==='tux'||b.socks?W:M;
+  const leg=(x,cls,far)=>`<g class="${cls}" style="transform-origin:${x}px 92px"><path d="M${x-6} 88c-2 22-2 40-1 58h12c1-18 1-36-1-58z" fill="${far?`url(#sd${u})`:`url(#sb${u})`}"/><ellipse cx="${x+2}" cy="148" rx="9" ry="4.2" fill="${far?bdMix(paw,'#000000',.15):paw}"/></g>`;
+  const tail=cat?'M58 80c-20-4-36 6-38 26c-1 8 6 10 8 3c2-14 12-22 30-22z'
+    :({sickle:'M60 74c-10-10-14-26-8-40c3-5 9-3 8 3c-4 12-1 24 6 32z',down:'M60 78c-10 6-16 20-14 34c1 5 7 5 7 0c0-12 4-22 11-28z'}[b.tail]||'M60 76c-14-6-22-22-16-36c3-6 10-4 9 2c-3 10 2 20 12 26z');
+  const ear=b.ear||'drop';
+  const head=cat?`<path d="M176 40c12-10 32-8 40 4c4 6 6 12 4 18c-2 9-13 13-25 13c-14 0-25-6-27-18c-1-7 2-13 8-17z" fill="url(#sh${u})" filter="url(#sf${u})"/>
+      <path d="M181 40l1-24 16 15z" fill="url(#sh${u})"/><path d="M184 36l1-14 9 9z" fill="#F0B1B4"/><path d="M198 33l9-19 7 20z" fill="url(#sh${u})"/>
+      <ellipse cx="212" cy="62" rx="9" ry="6" fill="${L}"/><path d="M219 54l4 1-3 3z" fill="#E7868F"/>
+      <path d="M204 48q5-5 10 0q-5 4-10 0z" fill="#C9A443" stroke="${INK}" stroke-width="1.2"/><ellipse cx="209" cy="48" rx="1.3" ry="3.4" fill="#0B0706"/><circle cx="210.5" cy="46.5" r=".9" fill="#fff"/>
+      <path d="M212 60l22-4M212 63l22 2" stroke="${b.coat==='black'?'#EEE':'#6A625C'}" stroke-width=".8" opacity=".8"/>`
+    :`<path d="M176 30c14-6 32 0 36 14c2 6 12 9 18 14c4 3 3 9-3 11c-10 3-22 2-30 0c-10 6-26 2-30-10c-4-12 0-24 9-29z" fill="url(#sh${u})" filter="url(#sf${u})"/>
+      <path d="M206 58c8 2 16 4 21 8c-6 4-17 4-23 1z" fill="${b.mask?bdMix(D,'#000000',.4):L}" opacity="${b.mask?.8:1}"/>
+      <ellipse cx="229" cy="60" rx="4.8" ry="3.6" fill="#1A1210"/><circle cx="227.5" cy="58.8" r="1.1" fill="#fff" opacity=".6"/>
+      <path d="M208 70c6 2 13 2 19-1" stroke="${INK}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M193 45q6-6 12 0q-6 5-12 0z" fill="${INK}"/><circle cx="199.5" cy="44.6" r="3" fill="#6E4320"/><circle cx="199.5" cy="44.8" r="1.6" fill="#0B0706"/><circle cx="200.6" cy="43.6" r=".9" fill="#fff"/>
+      ${b.brow?`<ellipse cx="198" cy="37" rx="4" ry="2.2" fill="${b.coat==='black'?'#D9A066':L}"/>`:''}
+      ${ear==='drop'?`<path d="M182 30c-10 2-15 16-13 29c6 3 13-3 15-12z" fill="url(#sd${u})" filter="url(#sf${u})"/>`
+        :ear==='semi'?`<path d="M184 34l3-20c3-3 10-2 12 2l2 14z" fill="url(#sh${u})"/><path d="M187 14c3 6 8 9 13 8c-2-5-7-8-13-8z" fill="${D}"/>`
+        :`<path d="M183 34l3-26 15 22z" fill="url(#sh${u})"/><path d="M186 30l2-16 9 13z" fill="#C9958A" opacity=".6"/>`}`;
+  const bodyPat=pat==='tabby'?`<path d="M82 60q4 14 0 26M100 56q4 14 0 30M118 56q4 14 0 30M136 58q4 14 0 28" stroke="${D}" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/>`
+    :pat==='spots'?`<ellipse cx="96" cy="70" rx="10" ry="8" fill="${D}"/><ellipse cx="132" cy="64" rx="8" ry="6" fill="${D}"/>`
+    :pat==='calico'?`<path d="M74 64c8-12 26-12 30 0s-10 20-22 16-12-8-8-16z" fill="#E8913A"/><path d="M118 58c12-6 26 2 24 14s-16 10-22 4-8-14-2-18z" fill="#3A302C"/>`:'';
+  return `<svg class="bd-side" viewBox="0 0 240 170" aria-hidden="true"><defs>
+    <linearGradient id="sb${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${HI}"/><stop offset=".55" stop-color="${M}"/><stop offset="1" stop-color="${SH}"/></linearGradient>
+    <linearGradient id="sd${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${D}"/><stop offset="1" stop-color="${SH}"/></linearGradient>
+    <radialGradient id="sh${u}" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="${HI}"/><stop offset=".6" stop-color="${M}"/><stop offset="1" stop-color="${D}"/></radialGradient>
+    <filter id="sf${u}" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="${b.hair==='long'?6.5:3.6}" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <clipPath id="sc${u}"><path d="M58 82c0-18 22-28 60-28c34 0 56 8 58 26c2 16-10 26-30 28c-26 2-50 2-66 0c-16-2-22-12-22-26z"/></clipPath></defs>
+  <ellipse cx="120" cy="156" rx="80" ry="6" fill="#000" opacity=".13"/>
+  <g class="sd-root"><g transform="translate(120 0) scale(${k} 1) translate(-120 0)">
+    <g class="sd-tail" style="transform-origin:60px 78px"><path d="${tail}" fill="url(#sb${u})" filter="url(#sf${u})"/></g>
+    ${leg(74,'sl-b2',1)}${leg(150,'sl-f2',1)}
+    <path d="M58 82c0-18 22-28 60-28c34 0 56 8 58 26c2 16-10 26-30 28c-26 2-50 2-66 0c-16-2-22-12-22-26z" fill="url(#sb${u})" filter="url(#sf${u})"/>
+    <g clip-path="url(#sc${u})">${bodyPat}</g>
+    <path d="M80 102c20 7 50 7 70 0c-6 7-62 9-70 0z" fill="${b.bib||pat==='tux'?W:L}" opacity=".9"/>
+    ${leg(90,'sl-b1',0)}${leg(164,'sl-f1',0)}
+    <path d="M156 78c4-18 16-30 30-32l14 24c-10 10-24 16-40 16z" fill="url(#sb${u})" filter="url(#sf${u})"/>
+    <path d="M164 84c6 8 8 18 4 26c-6-6-8-16-4-26z" fill="${b.bib||pat==='tux'?W:L}" opacity=".85"/>
+    ${cat?'':`<path d="M163 78c8 7 20 7 30 0" stroke="#B5222A" stroke-width="4" fill="none" stroke-linecap="round"/>`}
+    <g class="sd-head" style="transform-origin:186px 60px">${head}</g>
+  </g></g></svg>`}
 
 // ── 狀態：讀取、時間流逝、存檔 ──
 let __bd=null,__bdUid='',__bdSaveT=0,__bdGreeted=false;
@@ -5159,7 +5274,7 @@ function bdLine(b){const s=b.s,n=b.name;
   const L=b.sp==='cat'?['喵～今天也最喜歡你了','摸摸我的頭～','呼嚕呼嚕…','陽光好舒服喵']:['汪！今天也最喜歡你了！','摸摸我～','要不要玩球？','尾巴停不下來！'];
   if((b.tr||0)>0&&s.f<85)L.push(`我聞到點心的味道了（還有 ${b.tr} 個）`);
   return L[Math.floor(Date.now()/9e4)%L.length]}
-function bdApply(el,b,extra){if(!el)return;const base=bdMood(b);const m=extra||(__bdPant>Date.now()&&base!=='sleep'?'happy':base);el.dataset.mood=m;
+function bdApply(el,b,extra){if(!el)return;const base=bdMood(b);const m=extra||(__bdPant>Date.now()&&base!=='sleep'?'happy':base);el.dataset.mood=m;el.classList.toggle('pose-lie',m==='sleep');
   const d=el.querySelector('.bd-dirt');if(d)d.setAttribute('opacity',String(Math.max(0,Math.min(.85,(60-b.s.c)/60))))}
 function bdBars(b){const s=b.s;const row=(k,lbl,v,col)=>`<div class="bd-bar"><span>${lbl}</span><i><b style="width:${Math.max(3,v)}%;background:${v<25?'#E5484D':col}"></b></i><em>${Math.round(v)}</em></div>`;
   return row('f','飽足',s.f,'#F0A04B')+row('m','心情',s.m,'#E85B8A')+row('c','乾淨',s.c,'#3FA7D6')+row('e','精神',s.e,'#43B581')}
@@ -5189,7 +5304,7 @@ let __bdPant=0;   // 玩完球喘氣到這個時間
 function bdIdle(svg,b,box){if(!svg||RM())return;const n0=navId;
   const acts=[['look',2400,3],['tilt',1800,2],['sniff',1600,2],['yawn',1700,1],['shake',1000,1]],tot=acts.reduce((a,x)=>a+x[2],0);
   const tick=()=>{if(navId!==n0||!svg.isConnected)return;
-    if(!bdAsleep(b)&&!svg.classList.contains('petting')&&!svg.classList.contains('jump')&&!svg.className.baseVal.includes('act-')){
+    if(!bdAsleep(b)&&!svg.classList.contains('petting')&&!svg.classList.contains('jump')&&!svg.classList.contains('pose-eat')&&!svg.className.baseVal.includes('act-')){
       let r=Math.random()*tot,a=acts[0];for(const x of acts){if((r-=x[2])<0){a=x;break}}
       svg.classList.add('act-'+a[0]);if(a[0]==='yawn'&&Math.random()<.5)bdSay(box,b.sp==='cat'?'哈～啊（伸懶腰）':'哈～欠');if(a[0]==='shake'&&Math.random()<.4)bdSay(box,'甩甩甩～');
       setTimeout(()=>svg.classList.remove('act-'+a[0]),a[1])}
@@ -5212,15 +5327,21 @@ function bdPetting(svg,b,box){if(!svg)return;let down=false,dist=0,lx=0,ly=0,str
 // ── 動作：餵飯、點心、玩球、洗澡、睡覺 ──
 function bdAct(b,a,box){bdTick(b);bdDaily(b);const s=b.s,svg=box.querySelector('.bd-svg');
   if(bdAsleep(b)&&a!=='sleep'){if(b.sl){bdSay(box,'牠在午睡，先讓牠睡一下吧（或按「叫醒」）');return}bdSay(box,'晚上了，牠睡著了。點牠一下可以叫醒');return}
-  if(a==='feed'){if(s.f>=92){bdSay(box,'吃不下了～肚子圓滾滾');return}s.f=bdClamp(s.f+35);s.m=bdClamp(s.m+3);b.aff=(b.aff||0)+1;bdFx(box,'🍚');bdSay(box,b.sp==='cat'?'好吃！喵嗚～':'好好吃！汪汪！')}
-  else if(a==='treat'){if(!(b.tr>0)){bdSay(box,'點心吃完了。照顧真毛孩、回報目擊都能換到點心喔');return}b.tr--;s.f=bdClamp(s.f+10);s.m=bdClamp(s.m+15);b.aff=(b.aff||0)+3;bdFx(box,'🦴');bdHearts(svg,4);bdSay(box,'點心！最愛你了！')}
+  const eat=()=>{if(!svg||RM())return;svg.classList.add('pose-eat');setTimeout(()=>svg.classList.remove('pose-eat'),2600)};
+  if(a==='feed'){if(s.f>=92){bdSay(box,'吃不下了～肚子圓滾滾');return}eat();s.f=bdClamp(s.f+35);s.m=bdClamp(s.m+3);b.aff=(b.aff||0)+1;bdFx(box,'🍚');bdSay(box,b.sp==='cat'?'好吃！喵嗚～':'好好吃！汪汪！')}
+  else if(a==='treat'){if(!(b.tr>0)){bdSay(box,'點心吃完了。照顧真毛孩、回報目擊都能換到點心喔');return}b.tr--;eat();s.f=bdClamp(s.f+10);s.m=bdClamp(s.m+15);b.aff=(b.aff||0)+3;bdFx(box,'🦴');bdHearts(svg,4);bdSay(box,'點心！最愛你了！')}
   else if(a==='play'){if(s.e<15){bdSay(box,'好累…先讓牠睡一下');return}s.m=bdClamp(s.m+20);s.e=bdClamp(s.e-15);s.f=bdClamp(s.f-5);s.c=bdClamp(s.c-6);b.aff=(b.aff||0)+2;bdBall(box);__bdPant=Date.now()+15000;setTimeout(()=>bdApply(box.querySelector('.bd-svg'),b),15500);bdSay(box,b.sp==='cat'?'抓到了！再一次！':'接到了！再丟一次！')}
   else if(a==='bath'){if(s.c>=90){bdSay(box,'已經很乾淨了，香香的～');return}s.c=100;s.m=bdClamp(s.m-3);b.aff=(b.aff||0)+1;bdFx(box,'🫧',8);bdSay(box,b.sp==='cat'?'喵！不要水…好啦，香香的':'洗香香！甩甩甩～')}
   else if(a==='sleep'){b.sl=!b.sl;if(!b.sl)b.wk=bdNight()?Date.now()+10*6e4:0;bdSay(box,b.sl?'晚安～（精神會慢慢回來）':'睡飽了！')}
   bdApply(svg,b,a==='sleep'?undefined:(a==='bath'?'ok':'happy'));if(a!=='sleep'&&svg){bdJump(svg);bdHaptic()}setTimeout(()=>bdApply(svg,b),1500);
   bdSave();box.dispatchEvent(new Event('bd-change'))}
 function bdFx(box,ch,n=5){const svg=box.querySelector('.bd-svg');bdHearts(svg,n,ch)}
-function bdBall(box){const st=box.querySelector('.bd-stage');if(!st||RM())return;const ball=document.createElement('span');ball.className='bd-ball';ball.textContent='⚽';st.appendChild(ball);const pet=st.querySelector('.bd-walker');if(pet){pet.classList.add('run');setTimeout(()=>pet.classList.remove('run'),1200)}setTimeout(()=>ball.remove(),1300)}
+// 丟球：球飛出去，牠側身跑過去撿，再跑回來
+function bdBall(box){const st=box.querySelector('.bd-stage');if(!st||RM())return;const ball=document.createElement('span');ball.className='bd-ball';ball.textContent='⚽';st.appendChild(ball);setTimeout(()=>ball.remove(),1300);
+  const w=st.querySelector('.bd-walker');if(!w)return;const from=+(w.dataset.x||50);
+  w.style.transition='left .9s cubic-bezier(.4,0,.3,1)';w.classList.remove('flip');w.classList.add('moving','running');w.style.left='80%';
+  setTimeout(()=>{w.classList.add('flip');w.style.left=from+'%'},1000);
+  setTimeout(()=>{w.classList.remove('moving','running','flip');w.style.transition='';const sv=w.querySelector('.bd-svg');bdJump(sv)},1950)}
 
 // ── 領養頁／寵物房間 ──
 async function renderBuddy(){const _n=navId;setTitle('電子毛孩');
@@ -5235,7 +5356,7 @@ async function renderBuddy(){const _n=navId;setTitle('電子毛孩');
     <div class="bd-stage ${night?'night':''} ${b.sl?'lightsoff':''}" id="bdStage">
       <div class="bd-window"><span>${night?'🌙':'☀️'}</span></div><div class="bd-bed"></div><div class="bd-bowl">🥣</div>
       <p class="bd-bubble" id="bdSay">${esc(bdLine(b))}</p>
-      <div class="bd-walker" id="bdWalker">${bdSVG(b)}</div>
+      <div class="bd-walker" id="bdWalker">${bdSVG(b)}${bdSideSVG(b)}</div>
       <div class="bd-floor"></div>
     </div>
     <div class="bd-panel">
@@ -5277,7 +5398,12 @@ async function renderBuddy(){const _n=navId;setTitle('電子毛孩');
   const iv=setInterval(()=>{if(_n!==navId||!$('#bdRoom')){clearInterval(iv);return}bdTick(b);$('#bdRoom').dispatchEvent(new Event('bd-change'));const s=$('#bdSay');if(s&&!s.classList.contains('pop'))s.textContent=bdLine(b);bdApply($('#bdRoom .bd-svg'),b)},60000)}
 // 牠會在房間裡走來走去（睡覺時不動）
 function bdWander(_n){const w=$('#bdWalker');if(!w||RM())return;let x=50;
-  const step=()=>{if(_n!==navId||!w.isConnected)return;const b=__bd;if(b&&!bdAsleep(b)&&!w.querySelector('.petting')){const nx=Math.max(18,Math.min(82,x+(Math.random()-.5)*50));w.classList.toggle('flip',nx<x);w.classList.add('walking');w.style.left=nx+'%';x=nx;setTimeout(()=>w.classList.remove('walking'),1600)}
+  // 走路中被碰到：停下來轉過來面對你（才摸得到）
+  w.addEventListener('pointerdown',()=>{if(!w.classList.contains('moving')||w.classList.contains('running'))return;const st=w.parentElement.getBoundingClientRect(),r=w.getBoundingClientRect();
+    x=Math.round(((r.left+r.width/2)-st.left)/st.width*100);w.style.transition='none';w.style.left=x+'%';w.dataset.x=x;w.classList.remove('moving','flip');requestAnimationFrame(()=>w.style.transition='')},true);
+  const step=()=>{if(_n!==navId||!w.isConnected)return;const b=__bd;if(b&&!bdAsleep(b)&&!w.querySelector('.petting')){const sv=w.querySelector('.bd-svg');if(sv&&(sv.classList.contains('pose-eat')||w.classList.contains('running'))){setTimeout(step,2500);return}
+      if(Math.random()<.45){setTimeout(step,3500);return}   // 大部分時間坐著，偶爾才走動
+      const nx=Math.max(18,Math.min(82,x+(Math.random()-.5)*50));if(Math.abs(nx-x)<6){setTimeout(step,3000);return}w.classList.toggle('flip',nx<x);w.classList.add('moving');w.style.left=nx+'%';x=nx;w.dataset.x=nx;setTimeout(()=>w.classList.remove('moving','flip'),1650)}
     setTimeout(step,3500+Math.random()*4000)};setTimeout(step,2500)}
 
 // 從照片取毛色：取中間區域，去掉太亮（背景、反光）太暗（鼻子、眼睛）的點，依亮度分成深／主／淺三層
@@ -5297,7 +5423,7 @@ function bdPaletteFromPhoto(url){return new Promise(res=>{let done=false;const f
   fin({m:pick(fur,.55,.8),d:pick(fur,.08,.25),l:pick(fur,.92,1)})}catch(_){fin(null)}};im.onerror=()=>fin(null);im.src=safeU(url);setTimeout(()=>fin(null),7000)}catch(_){fin(null)}})}
 async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'領養電子毛孩');
   const {data:pets}=await sb.from('pets').select('id,name,species,colour,photos').order('created_at');if(_n!==navId)return;
-  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',build:cur?.build||'mid',tail:cur?.tail||'curl',hair:cur?.hair||'short',name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null};
+  const st={sp:cur?.sp||'dog',coat:cur?.coat||'golden',cc:cur?.cc||null,pat:cur?.pat||'solid',ear:cur?.ear||'drop',build:cur?.build||'mid',tail:cur?.tail||'curl',hair:cur?.hair||'short',snout:cur?.snout||'mid',face:cur?.face||'mid',eyes:cur?.eyes||'mid',brow:!!cur?.brow,mask:!!cur?.mask,bib:!!cur?.bib,socks:!!cur?.socks,name:cur?.name||'',src:cur?.src||null,ref:cur?.ref||null};
   if(st.coat==='custom'&&!st.cc)st.coat='golden';
   const srcPet=()=>(pets||[]).find(z=>z.id===st.src);const phs=()=>((srcPet()||{}).photos||[]).filter(Boolean).slice(0,6);
   const prev=()=>bdSVG({name:st.name||'電子毛孩',...st,s:{f:80,m:80,c:90,e:80}},'mood-happy');
@@ -5310,6 +5436,11 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     <p class="muted small" id="bdNoPh" hidden style="margin:8px 0 0">到<a id="bdPhLink" href="#/health">健康手冊</a>幫牠加一張照片，就能照照片對毛色。</p>
     <p class="lbl" style="margin:14px 0 6px">狗還是貓</p><div class="seg" id="bdSp"><button type="button" data-v="dog">🐶 狗</button><button type="button" data-v="cat">🐱 貓</button></div>
     <div id="bdEarWrap"><p class="lbl" style="margin:14px 0 6px">耳朵</p><div class="seg" id="bdEar"><button type="button" data-v="drop">垂耳</button><button type="button" data-v="semi">半立耳</button><button type="button" data-v="prick">立耳</button></div></div>
+    <div class="bd-group"><p class="bd-gt">臉</p>
+    <div id="bdSnoutWrap"><p class="lbl" style="margin:10px 0 6px">嘴巴</p><div class="seg" id="bdSnout"><button type="button" data-v="short">短</button><button type="button" data-v="mid">中</button><button type="button" data-v="long">長</button></div></div>
+    <p class="lbl" style="margin:10px 0 6px">臉型</p><div class="seg" id="bdFace"><button type="button" data-v="narrow">窄</button><button type="button" data-v="mid">中</button><button type="button" data-v="wide">寬</button></div>
+    <p class="lbl" style="margin:10px 0 6px">眼睛</p><div class="seg" id="bdEyes"><button type="button" data-v="small">小</button><button type="button" data-v="mid">中</button><button type="button" data-v="big">大</button></div>
+    <p class="lbl" style="margin:10px 0 6px">特徵（可複選）</p><div class="chips" id="bdMarks"><button type="button" class="chip" data-m="brow">眉點</button><button type="button" class="chip" data-m="mask" id="bdMaskChip">黑嘴</button><button type="button" class="chip" data-m="bib">白胸口</button><button type="button" class="chip" data-m="socks">白襪子</button></div></div>
     <p class="lbl" style="margin:14px 0 6px">體型</p><div class="seg" id="bdBuild"><button type="button" data-v="slim">瘦長</button><button type="button" data-v="mid">適中</button><button type="button" data-v="stocky">壯碩</button></div>
     <div id="bdTailWrap"><p class="lbl" style="margin:14px 0 6px">尾巴</p><div class="seg" id="bdTail"><button type="button" data-v="curl">捲尾</button><button type="button" data-v="sickle">鐮刀尾</button><button type="button" data-v="down">垂尾</button></div></div>
     <p class="lbl" style="margin:14px 0 6px">毛長</p><div class="seg" id="bdHair"><button type="button" data-v="short">短毛</button><button type="button" data-v="long">長毛</button></div>
@@ -5326,7 +5457,8 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
     app.querySelectorAll('#bdPat button').forEach(x=>{x.classList.toggle('on',x.dataset.v===st.pat);x.hidden=x.dataset.v==='calico'&&st.sp!=='cat'});
     app.querySelectorAll('[data-src]').forEach(x=>x.classList.toggle('on',x.dataset.src===st.src));
     app.querySelectorAll('#bdEar button').forEach(x=>x.classList.toggle('on',x.dataset.v===st.ear));$('#bdEarWrap').hidden=st.sp==='cat';
-    [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.classList.toggle('on',x.dataset.v===st[k])));$('#bdTailWrap').hidden=st.sp==='cat';
+    [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair'],['#bdSnout','snout'],['#bdFace','face'],['#bdEyes','eyes']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.classList.toggle('on',x.dataset.v===st[k])));$('#bdTailWrap').hidden=st.sp==='cat';$('#bdSnoutWrap').hidden=st.sp==='cat';$('#bdMaskChip').hidden=st.sp==='cat';
+    app.querySelectorAll('#bdMarks [data-m]').forEach(x=>x.classList.toggle('on',!!st[x.dataset.m]));
     const ps=phs();$('#bdRefWrap').hidden=!ps.length;$('#bdNoPh').hidden=!(st.src&&!ps.length);if(st.src)$('#bdPhLink').href='#/pet/'+st.src;
     $('#bdPhs').innerHTML=ps.map(u=>`<button type="button" data-ph="${esc(u)}" class="${u===st.ref?'on':''}" style="background-image:url('${esc(safeU(u))}')" aria-label="用這張照片對毛色"></button>`).join('');
     app.querySelectorAll('[data-ph]').forEach(x=>x.onclick=()=>useRef(x.dataset.ph));
@@ -5334,7 +5466,8 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
   const useRef=u=>{st.ref=u;$('#bdRefMsg').textContent='正在從照片調毛色…';sync();const sid=st.src;
     bdPaletteFromPhoto(u).then(c=>{if(st.src!==sid||st.ref!==u)return;if(c){st.cc=c;st.coat='custom';$('#bdRefMsg').textContent='✓ 已照照片調好毛色（深、主、淺三層）'}else $('#bdRefMsg').textContent='這張照片讀不到顏色，已用毛色文字猜一個';sync()})};
   app.querySelectorAll('#bdEar button').forEach(x=>x.onclick=()=>{st.ear=x.dataset.v;sync()});
-  [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.onclick=()=>{st[k]=x.dataset.v;sync()}));
+  [['#bdBuild','build'],['#bdTail','tail'],['#bdHair','hair'],['#bdSnout','snout'],['#bdFace','face'],['#bdEyes','eyes']].forEach(([id,k])=>app.querySelectorAll(id+' button').forEach(x=>x.onclick=()=>{st[k]=x.dataset.v;sync()}));
+  app.querySelectorAll('#bdMarks [data-m]').forEach(x=>x.onclick=()=>{st[x.dataset.m]=!st[x.dataset.m];sync()});
   app.querySelectorAll('#bdSp button').forEach(x=>x.onclick=()=>{st.sp=x.dataset.v;if(st.pat==='calico'&&st.sp!=='cat')st.pat='solid';sync()});
   app.querySelectorAll('#bdCoat button').forEach(x=>x.onclick=()=>{st.coat=x.dataset.v;sync()});
   app.querySelectorAll('#bdPat button').forEach(x=>x.onclick=()=>{st.pat=x.dataset.v;sync()});
@@ -5343,7 +5476,7 @@ async function renderBuddyAdopt(cur){const _n=navId;setTitle(cur?'換外型':'�
   $('#bdNm').oninput=()=>{st.name=$('#bdNm').value.trim()};
   sync();
   $('#bdGo').onclick=()=>{const name=$('#bdNm').value.trim().slice(0,12);if(!name){toast('幫牠取個名字吧');$('#bdNm').focus();return}
-    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,build:st.build,tail:st.tail,hair:st.hair,src:st.src,ref:st.ref,look:'draw',photo:null};
+    const now=Date.now(),look={name,sp:st.sp,coat:st.coat,cc:st.coat==='custom'?st.cc:null,pat:st.pat,ear:st.ear,build:st.build,tail:st.tail,hair:st.hair,snout:st.snout,face:st.face,eyes:st.eyes,brow:st.brow,mask:st.sp==='dog'&&st.mask,bib:st.bib,socks:st.socks,src:st.src,ref:st.ref,look:'draw',photo:null};
     const b=cur?{...cur,...look}:{v:1,...look,born:bdToday(),s:{f:70,m:80,c:95,e:85},t:now,aff:0,tr:3,dd:bdToday(),ls:bdToday(),streak:1,dc:{},nt:true};
     __bd=b;__bdUid=me().id;bdSave(true);__bdGreeted=false;toast(cur?'✅ 外型已更新':`🎉 ${name}來到你家了！送你 3 個點心`);if((location.hash||'')==='#/buddy')route();else goReplace('#/buddy')}}
 
@@ -5404,9 +5537,10 @@ function renderLogin(){
     </form>`:`<form id="pwf" data-nodirty novalidate>
       <label class="f"><span><b class="lbl">Email</b></span><input type="email" id="em" required autocomplete="username" inputmode="email" placeholder="例：mingmei@gmail.com"></label>
       ${pwField('pw','current-password','密碼','')}
-      <button class="btn lg block" style="margin-top:14px" id="btnPw">登入</button>
+      <p class="forgot"><button type="button" class="linkbtn" id="btnForgot">忘記密碼？</button></p>
+      <button class="btn lg block" style="margin-top:6px" id="btnPw">登入</button>
     </form>
-    <details class="pwmore" id="otpMore"><summary>忘記密碼或沒設過密碼？用 Email 驗證碼登入</summary>
+    <details class="pwmore" id="otpMore"><summary>沒設過密碼？用 Email 驗證碼登入</summary>
       <p class="small muted" style="text-align:left;margin:8px 0">我們寄一封信給你，${IS_APP?'把信裡的 8 位數驗證碼輸入 App':'點信裡的按鈕或輸入驗證碼'}就能登入；登入後可到「我的 → 帳號與密碼」設定新密碼。</p>
       <form id="lf" data-nodirty novalidate><button class="btn block ghost" id="btnSend">寄登入信給我</button></form>
     </details>`}
@@ -5432,7 +5566,7 @@ function renderLogin(){
         const b=$('#btnSu'),n=navId;sending=true;b.disabled=true;b.textContent='註冊中…';msg('');
         if(await unAvailable(un)===false){sending=false;b.disabled=false;b.textContent='註冊';$('#unMsg').textContent='這個名稱已經有人用了，換一個吧';$('#unMsg').className='small un-msg bad';$('#un').focus();return}
         setReturn(peekReturn());
-        const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:CONFIG.SITE_URL,data:{username:un}}});
+        const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:CONFIG.SITE_URL,data:{username:un,has_pw:true}}});
         sending=false;if(n!==navId||!b.isConnected)return;
         if(error){b.disabled=false;b.textContent='註冊';const ec=(error.code||'')+' '+error.message;
           if(/already|registered|exists/i.test(ec)){msg('這個 Email 已經註冊過了。<button type="button" class="btn sm" id="goLi" style="margin-left:6px">改成登入</button>');$('#goLi').onclick=()=>{keep.em=email;mode='login';draw()};return}
@@ -5464,8 +5598,39 @@ function renderLogin(){
         try{localStorage.setItem('wh_registered','1')}catch(_){}
         showOtp(email,'login')};
     }
+    if($('#btnForgot'))$('#btnForgot').onclick=()=>showForgot($('#em').value.trim());
     document.querySelectorAll('[data-social]').forEach(b=>b.onclick=()=>socialLogin(b.dataset.social,b));
   };
+  // 忘記密碼：寄驗證碼 → 輸入驗證碼和新密碼 → 重設並登入
+  const showForgot=pre=>{setTitle('重設密碼');
+    app.innerHTML=`<div class="card login-card" style="max-width:520px;margin:20px auto"><h1>重設密碼</h1><p class="muted">輸入註冊時的 Email，我們寄一組驗證碼給你，再設定新密碼。</p>
+      <form id="fgf" data-nodirty novalidate><label class="f"><span><b class="lbl">Email</b></span><input type="email" id="fgEm" autocomplete="username" inputmode="email" value="${esc(pre||'')}"></label>
+      <button class="btn lg block" id="fgSend" style="margin-top:12px">寄驗證碼給我</button></form>
+      <form id="fgf2" data-nodirty novalidate hidden><p class="small" id="fgSent" style="margin:4px 2px 8px"></p>
+        <label class="f"><span><b class="lbl">信裡的驗證碼</b></span><input id="fgCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="40" placeholder="12345678" style="letter-spacing:4px"></label>
+        ${pwField('fgPw','new-password','新密碼','至少 8 個字')}
+        <button class="btn lg block" id="fgGo" style="margin-top:12px">重設密碼並登入</button></form>
+      <p class="small muted" id="fgMsg" aria-live="polite" style="margin:8px 0 0"></p>
+      <button type="button" class="btn ghost block" id="fgBack" style="margin-top:12px">回到登入</button></div>`;
+    $('#fgBack').onclick=()=>{keep.em=$('#fgEm').value.trim();draw()};
+    app.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{const i=$('#'+b.dataset.eye);const sh=i.type==='password';i.type=sh?'text':'password';b.classList.toggle('on',sh)});
+    let email='';
+    $('#fgf').onsubmit=async e=>{e.preventDefault();email=$('#fgEm').value.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){$('#fgMsg').textContent='Email 格式不對，請檢查一下';return}
+      const b=$('#fgSend');b.disabled=true;b.textContent='寄送中…';$('#fgMsg').textContent='';setReturn(peekReturn());
+      const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL,shouldCreateUser:false}});b.disabled=false;b.textContent='重寄驗證碼';
+      if(error){const ec=(error.code||'')+' '+error.message;$('#fgMsg').textContent=/signup|not allowed|not found|otp_disabled/i.test(ec)?'這個 Email 還沒註冊過，請改用「免費註冊」':/rate|limit|seconds/i.test(ec)?'寄得太頻繁了，請等一分鐘再試':'寄送失敗，請稍後再試';return}
+      $('#fgSent').innerHTML=`驗證碼已寄到 <b>${esc(email)}</b>（幾分鐘沒收到請看垃圾郵件匣）`;$('#fgf2').hidden=false;$('#fgCode').focus()};
+    $('#fgf2').onsubmit=async e=>{e.preventDefault();const code=otpDigits($('#fgCode').value),pw=$('#fgPw').value;
+      if(code.length<6){$('#fgMsg').textContent='請輸入信裡的驗證碼';return}if(pw.length<8){$('#fgMsg').textContent='新密碼至少要 8 個字';return}
+      const b=$('#fgGo');b.disabled=true;b.textContent='處理中…';
+      let {data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'email'});
+      if(error||!vd?.session){b.disabled=false;b.textContent='重設密碼並登入';$('#fgMsg').textContent='驗證碼不正確或已過期。按過重寄的話，請用最新那封信的驗證碼';return}
+      session=vd.session;updateAuthUI();
+      const {error:e2}=await sb.auth.updateUser({password:pw,data:{has_pw:true}});
+      if(e2){const ec=(e2.code||'')+' '+e2.message;toast(/weak|password/i.test(ec)?'已登入，但密碼太簡單沒有存成功，請到「我的 → 帳號與密碼」重新設定':'已登入，但密碼沒有存成功，請到「我的 → 帳號與密碼」重新設定',6000)}
+      else toast('✅ 密碼已重設，也幫你登入了',4000);
+      try{localStorage.setItem('wh_registered','1')}catch(_){}
+      if(location.hash.split('?')[0]==='#/login')goReplace(takeReturn())}};
   // 寄出信之後：輸入信裡的驗證碼（App 裡點信件連結會開到瀏覽器，所以 App 一定要能輸入驗證碼）
   const showOtp=(email,kind)=>{const su=kind==='signup';
     app.innerHTML=`<div class="card" style="max-width:520px;margin:20px auto;text-align:center"><div class="done-ic">${ic('mail')}</div><h1>請收信</h1><p>${su?'驗證信':'登入信'}已寄到 <b>${esc(email)}</b></p>
@@ -5533,9 +5698,8 @@ async function renderMeBody(){const _n=navId;
   <details class="mg-sec" id="acSec" style="margin-top:24px"><summary>${ic("user")} 帳號與密碼 <span class="muted small">${esc(p.username||'')}</span></summary><div class="mg-body">
     <div class="acct-row"><b>使用者名稱</b><span>${'username' in p?(p.username?`${esc(p.username)} <small class="muted">（不能修改）</small>`:`<a href="#/set-username">設定使用者名稱</a>`):esc(p.display_name||'')}</span></div>
     <div class="acct-row"><b>Email</b><span>${esc(me().email||'（用 LINE／Apple 登入，沒有 Email）')}</span></div>
-    ${me().email?`<form id="pwSetF" data-nodirty novalidate style="margin-top:10px">
-      <label class="f"><span><b class="lbl">設定新密碼</b><small class="hint">至少 8 個字；設定後可以用 Email＋密碼登入</small></span><span class="pw-wrap"><input type="password" id="npw" autocomplete="new-password" minlength="8"><button type="button" class="pw-eye" data-eye="npw" aria-label="顯示密碼">${ic('eye')}</button></span></label>
-      <button class="btn block ghost" id="btnNpw" style="margin-top:8px">儲存密碼</button></form>`:''}
+    ${me().email?`<div class="acct-row"><b>密碼</b><span>${hasPw()?'已設定':'還沒設定'}</span></div>
+      <div id="pwBox" style="margin-top:10px"><button type="button" class="btn block ghost" id="btnPwStart">${hasPw()?'更改密碼':'設定密碼'}</button><p class="small muted" style="margin:6px 2px 0">為了安全，會先寄一組驗證碼到 ${esc(me().email)}。</p></div>`:''}
   </div></details>
   <details class="mg-sec" id="nfSec"><summary>${ic("bell")} 通知設定 <span class="muted small">${p.notify_enabled?'附近走失通知：開':'附近走失通知：關'}</span></summary><div class="mg-body">
   <form onsubmit="return false" id="nf">
@@ -5564,11 +5728,7 @@ async function renderMeBody(){const _n=navId;
   </details>`;
   {const ub=$('#btnUnblockAll');if(ub)ub.onclick=()=>{try{localStorage.removeItem('wh_hidden');localStorage.removeItem('wh_blocked')}catch(_){}toast('已全部恢復顯示');renderMe()}}
   app.querySelectorAll('#acSec [data-eye]').forEach(b=>b.onclick=()=>{const i=$('#'+b.dataset.eye);const show=i.type==='password';i.type=show?'text':'password';b.classList.toggle('on',show)});
-  if($('#pwSetF'))$('#pwSetF').onsubmit=async e=>{e.preventDefault();const b=$('#btnNpw');if(b.disabled)return;const pw=$('#npw').value;
-    if(pw.length<8)return toast('密碼至少要 8 個字');b.disabled=true;b.textContent='儲存中…';
-    const {error}=await sb.auth.updateUser({password:pw});b.disabled=false;b.textContent='儲存密碼';
-    if(error){const ec=(error.code||'')+' '+error.message;return toast(/same|different/i.test(ec)?'新密碼跟舊密碼一樣':/weak|password/i.test(ec)?'密碼太簡單了，請換一個':/reauth/i.test(ec)?'為了安全，請先登出再用 Email 驗證碼登入一次，再設定密碼':'儲存失敗：'+friendlyErr(error.message),5000)}
-    $('#npw').value='';toast('✅ 密碼已設定，下次可以用 Email＋密碼登入')};
+  if($('#btnPwStart'))$('#btnPwStart').onclick=()=>pwChangeFlow($('#pwBox'));
   $('#btnOut').onclick=async()=>{const clearMine=confirm('這是共用的手機嗎？\n按「確定」：登出並清除這支手機記住的管理網址和聯絡資料（共用手機建議這樣）。\n按「取消」：只登出，資料留著下次用（自己的手機）。');
     window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
