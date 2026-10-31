@@ -2285,6 +2285,9 @@ html{-webkit-tap-highlight-color:transparent}
   body[data-route="health"] .health-hero h1,body[data-route="me"] #app>h1,body[data-route="me"] .profile h1{font-family:inherit!important;font-weight:800}
   body[data-route="case"] .tabbar{display:none!important}
   body[data-route="case"] .sticky-cta{bottom:calc(env(safe-area-inset-bottom) + 12px)!important}
+  .xptr{position:fixed;z-index:400;left:50%;top:calc(env(safe-area-inset-top) + 8px);width:36px;height:36px;margin-left:0;border-radius:50%;background:var(--sheet);box-shadow:0 4px 14px rgba(0,0,0,.18);display:grid;place-items:center;pointer-events:none;opacity:0}
+  .xptr i{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--brand)}
+  .xptr.go i{border-color:var(--brand)}
   /* 下方分頁：浮起來的膠囊 */
   .tabbar{left:0!important;right:0!important;bottom:0!important;height:calc(64px + env(safe-area-inset-bottom))!important;padding:0 6px env(safe-area-inset-bottom)!important;border-radius:22px 22px 0 0!important;border:0!important;align-items:center;background:color-mix(in srgb,var(--sheet) 90%,transparent)!important;backdrop-filter:blur(24px) saturate(1.6)!important;-webkit-backdrop-filter:blur(24px) saturate(1.6)!important;box-shadow:0 -6px 24px -12px rgba(40,20,10,.25),inset 0 .5px 0 rgba(0,0,0,.06)!important}
   .tabbar a{font-size:10.5px!important;font-weight:700!important;color:var(--ink-3)!important;gap:3px!important}
@@ -2499,7 +2502,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.3.3';
+const BUILD = 'v6.4.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2733,7 +2736,7 @@ async function uploadPhoto_(file,folder){
 }
 // 清單用縮圖網址：本站上傳的照片才有 _t 縮圖；舊照片載入失敗時自動改用原圖
 function thumbUrl(u){u=u||'';return /\/storage\/v1\/object\/public\/photos\/.+\.jpg$/.test(u)&&!/_t\.jpg$/.test(u)?u.replace(/\.jpg$/,'_t.jpg'):u}
-function thumbImg(u,alt='',attrs=''){u=safeU(u);if(!u)return '';const t=thumbUrl(u);return `<img loading="lazy" decoding="async" src="${esc(t)}" ${t!==u?`data-full="${esc(u)}" onerror="if(this.dataset.full){this.src=this.dataset.full;this.removeAttribute('data-full')}"`:''} alt="${esc(alt)}" ${attrs}>`}
+function thumbImg(u,alt='',attrs='',sizes=''){u=safeU(u);if(!u)return '';const t=thumbUrl(u);return `<img loading="lazy" decoding="async" src="${esc(t)}" ${t!==u&&sizes?`srcset="${esc(t)} 360w, ${esc(u)} 1080w" sizes="${sizes}"`:''} ${t!==u?`data-full="${esc(u)}" onerror="if(this.dataset.full){this.removeAttribute('srcset');this.src=this.dataset.full;this.removeAttribute('data-full')}"`:''} alt="${esc(alt)}" ${attrs}>`}
 
 /* 從照片讀拍攝時間與 GPS（手機相簿常會移除位置，讀不到就略過） */
 const _scripts={};
@@ -3728,6 +3731,11 @@ async function renderHomeMob(){const _n=navId;
   setTitle2();loadList();loadStats();inboxMaybe();
   if(qs(location.hash).s){const q=$('#fQ');if(q)try{q.focus({preventScroll:true})}catch(_){}}
 }
+// 下拉重新整理（手機首頁、領養）：在最上面往下拉超過一段距離就重新載入
+(function(){let y0=null,dy=0,el=null;const ok=()=>isMobV()&&scrollY<=0&&/^(home|lost|adopt)$/.test(document.body.dataset.route||'')&&!document.querySelector('.lightbox')&&!document.body.classList.contains('xas-open');
+  addEventListener('touchstart',e=>{if(!ok()){y0=null;return}y0=e.touches[0].clientY;dy=0},{passive:true});
+  addEventListener('touchmove',e=>{if(y0==null)return;dy=e.touches[0].clientY-y0;if(dy>10){if(!el){el=document.createElement('div');el.className='xptr';el.innerHTML='<i></i>';document.body.appendChild(el)}const p=Math.min(dy,120);el.style.transform=`translate(-50%,${p*0.6}px) rotate(${p*3}deg)`;el.style.opacity=Math.min(1,p/70);el.classList.toggle('go',dy>90)}},{passive:true});
+  addEventListener('touchend',()=>{if(y0==null)return;const go=dy>90;y0=null;if(el){const e2=el;el=null;e2.style.transition='opacity .25s,transform .25s';e2.style.opacity='0';setTimeout(()=>e2.remove(),300)}if(go){try{if(navigator.vibrate)navigator.vibrate(8)}catch(_){}const r=document.body.dataset.route;if(r==='adopt'){const sel=$('#aCity');if(sel)sel.dispatchEvent(new Event('change'))}else{homeState.limit=24;try{loadList()}catch(_){}}toast('已更新',1200)}},{passive:true})})();
 // 底部選單：單選（地區、排序共用）
 function xPick(title,opts,cur,cb,grid){const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet xpick" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p><div class="${grid?'xpgrid':'xplist'}">${opts.map(([v,l])=>`<button type="button" data-v="${esc(v)}" class="${v===cur?'on':''}">${esc(l)}${v===cur&&!grid?ic('check'):''}</button>`).join('')}</div></div>`;
@@ -4084,7 +4092,8 @@ async function govListHTML(){let rows;try{rows=await fetchGovLost()}catch(_){ret
   return govHead(list.length)+list.slice(0,60).map(govCard).join('')+(list.length>60?`<div class="more-row"><a class="btn ghost big" href="#/gov-lost">看全部 ${list.length} 筆遺失申報</a></div>`:'')}
 // 清單一次 60 筆，滿了就顯示「顯示更多」
 function moreBtn(n,lim){return !homeState.near&&n>=lim?`<div class="more-row"><button type="button" class="btn ghost big" id="btnMore">顯示更多（目前 ${n} 筆）</button></div>`:''}
-function bindMore(el){const b=el.querySelector('#btnMore');if(b)b.onclick=()=>{homeState.limit=(homeState.limit||24)+24;homeState._more=true;b.disabled=true;b.textContent='載入中…';const y=scrollY;const r=loadList();if(r&&r.then)r.then(()=>window.scrollTo(0,y))}}
+function bindMore(el){const b=el.querySelector('#btnMore');if(b&&isMobV()&&'IntersectionObserver' in window&&el.closest('.xfeed')){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&b.isConnected&&!b.disabled){io.disconnect();b.click()}},{rootMargin:'600px'});setTimeout(()=>io.observe(b),300)}
+  if(b)b.onclick=()=>{homeState.limit=(homeState.limit||24)+24;homeState._more=true;b.disabled=true;b.textContent='載入中…';const y=scrollY;const r=loadList();if(r&&r.then)r.then(()=>window.scrollTo(0,y))}}
 async function loadFoundList(el,more){
   const my=listSeq;
   const lim=homeState.near?200:(homeState.limit||24);
@@ -4140,7 +4149,7 @@ function cardHTML(c){
   const fresh=c.last_seen_at&&hoursAgo(c.last_seen_at)<24;
   const band=(c.source==='moa'?'<span class="gov-tag">農業部申報</span>':'')+(c.status==='searching'?`<span class="band">走失第 ${daysSince(c.lost_at)} 天</span>`:c.status==='found'?'<span class="band found">已回家</span>':'<span class="band closed">已結案</span>');
   return `<a class="ccard lost-card" href="#/case/${c.id}">
-    <div class="ph ${ph?'':'noimg'} ${c.species==='cat'?'cat':''}">${ph?thumbImg(ph,c.name+'的照片'):''}${band}${c.reward>0?`<span class="reward">獎金 ${c.reward.toLocaleString()}</span>`:''}</div>
+    <div class="ph ${ph?'':'noimg'} ${c.species==='cat'?'cat':''}">${ph?thumbImg(ph,c.name+'的照片','',isMobV()?'(max-width:760px) 92vw, 300px':''):''}${band}${c.reward>0?`<span class="reward">獎金 ${c.reward.toLocaleString()}</span>`:''}</div>
     <div class="b">
       <div class="t">${esc(c.name)}</div>
       <div class="m">${esc([sp(c.species).name,c.breed,SEX[c.sex],c.colour].filter(Boolean).join('、'))}</div>
