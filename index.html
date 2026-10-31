@@ -2080,6 +2080,23 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .tile4.ta{background:#FFD9C2}.tile4.ta .te{color:#C2581E}:root[data-theme="dark"] .tile4.ta{background:#4A3022}:root[data-theme="dark"] .tile4.ta .te{color:#FFB27F}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4.ta{background:#4A3022}:root:not([data-theme="light"]) .tile4.ta .te{color:#FFB27F}}
 @media (max-width:760px){.tiles4{gap:6px!important}.tile4{padding:10px 0 9px!important;border-radius:18px!important}.tile4 .te{width:38px!important;height:38px!important}.tile4 .te .ico,.tile4 .te svg{width:20px!important;height:20px!important}.tile4 b{font-size:12.5px!important;letter-spacing:-.02em}.tile4::before,.tile4::after{width:14px;height:14px;top:-5px}.tile4::before{left:7px}.tile4::after{right:7px}}
+@media (max-width:760px){
+  /* 手機首頁：上面兩個主要按鈕（走失、看到）做大一點，下面三個小按鈕，留多一點空間 */
+  .bigstart{gap:16px!important}
+  .tiles4{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:14px 10px!important;padding-top:8px!important}
+  .tile4.tp,.tile4.tm{grid-column:span 3;display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:10px;align-items:center;justify-items:start;text-align:left;padding:16px 12px 14px!important;border-radius:24px!important}
+  .tile4.tp .te,.tile4.tm .te{grid-row:1/3;width:44px!important;height:44px!important;margin:0!important}
+  .tile4.tp .te .ico,.tile4.tm .te .ico{width:22px!important;height:22px!important}
+  .tile4.tp b,.tile4.tm b{font-size:16px!important;margin:0!important;align-self:end;letter-spacing:0}
+  .tile4.tp small,.tile4.tm small{display:block!important;font-size:11.5px;align-self:start;white-space:nowrap}
+  .tile4.tp::before,.tile4.tm::before{left:16px}.tile4.tp::after,.tile4.tm::after{right:16px}
+  .tile4.tb,.tile4.ta,.tile4.tl{grid-column:span 2;padding:12px 4px 11px!important;border-radius:20px!important;flex-direction:row!important;gap:6px!important;background-image:none!important;box-shadow:none!important}
+  .tile4.tb::before,.tile4.tb::after,.tile4.ta::before,.tile4.ta::after,.tile4.tl::before,.tile4.tl::after{display:none}
+  .tile4.tb .te,.tile4.ta .te,.tile4.tl .te{width:30px!important;height:30px!important;margin:0!important;box-shadow:none!important}
+  .tile4.tb .te .ico,.tile4.ta .te .ico,.tile4.tl .te .ico{width:17px!important;height:17px!important}
+  .tile4.tb b,.tile4.ta b,.tile4.tl b{font-size:13.5px!important;margin:0!important;letter-spacing:0}
+  .lostprev{margin-top:6px}.lostprev .mp-h{margin-bottom:10px}
+}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2152,7 +2169,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.17.0';
+const BUILD = 'v5.17.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
