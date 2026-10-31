@@ -2049,6 +2049,7 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 .lostprev .sk{display:block;background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 55%,var(--sheet)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px}.lostprev .lp-ph.sk{border-radius:22px}
 button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor:pointer}button.ccard.gov-card{font:inherit;text-align:left;border:0;padding:0;cursor:pointer;width:100%}
 .gov-big{width:100%;max-height:52vh;object-fit:cover;border-radius:20px;margin:6px 0 10px;background:var(--beige)}.gov-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:6px 0 0;font-size:15px}.gov-dl dt{color:var(--ink-3);font-weight:700}.gov-dl dd{margin:0}
+.gov-ph>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.gov-ph>svg{width:44px;height:44px;opacity:.5}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -4995,7 +4996,7 @@ async function renderGovLost(){setTitle('全台遺失申報');const st=govState;
 async function loadGovPrev(_n){const el=$('#govPrev');if(!el)return;let rows;try{rows=await fetchGovLost()}catch(_){el.innerHTML='';return}
   if(_n!==navId||!el.isConnected)return;const list=rows.filter(r=>r.photo&&govAgo(r)<=30).slice(0,10);if(!list.length){el.innerHTML='';return}
   el.innerHTML=`<div class="mp-h"><b>${ic('flag')} 全台遺失申報 <span class="lp-n">${rows.filter(r=>govAgo(r)<=30).length}</span></b><a href="#/gov-lost">看全部 ›</a></div>
-  <div class="lp-row">${list.map(r=>`<button type="button" class="lp" data-gov="${esc(r.id)}"><span class="lp-ph ${r.sp==='cat'?'cat':''}"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}" onerror="this.closest('.lp').remove()"><em>第 ${govAgo(r)} 天</em></span><b>${esc(govTitle(r).slice(0,8))}</b><small>${esc(r.city+r.dist)}</small></button>`).join('')}<a class="lp lp-all" href="#/gov-lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>農業部資料</small></a></div>`;
+  <div class="lp-row">${list.map(r=>`<button type="button" class="lp" data-gov="${esc(r.id)}"><span class="lp-ph gov-ph ${r.sp==='cat'?'cat':''}">${spIc(r.sp)}<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}" onerror="this.remove()"><em>第 ${govAgo(r)} 天</em></span><b>${esc(govTitle(r).slice(0,8))}</b><small>${esc(r.city+r.dist)}</small></button>`).join('')}<a class="lp lp-all" href="#/gov-lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>農業部資料</small></a></div>`;
   bindGov(el,list)}
 // 首頁：收容所最近 7 天新收的毛孩（有選過縣市才下載資料，沒選過只顯示入口）
 async function loadIntakePrev(_n){const el=$('#intakePrev');if(!el)return;const st=adoptState;
