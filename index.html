@@ -2041,6 +2041,8 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 
 .empty-slim{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:18px;background:var(--sheet);box-shadow:var(--lift)}.empty-slim>div{flex:1;min-width:0}.empty-slim b{display:block;font-size:15.5px}.empty-slim small{color:var(--ink-3);font-size:13.5px;line-height:1.5}.empty-slim .btn{flex:none;white-space:nowrap}.empty-slim .es-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#E3F6EC;color:#1E7F5A;flex:none}
 @media (max-width:560px){.empty-slim{flex-wrap:wrap}.empty-slim img,.empty-slim .es-ic{display:none}.empty-slim .btn{width:100%}}
+.htmap[style]{background-size:cover!important;background-position:center!important}.htmap[style]::before{content:"";position:absolute;inset:0;background:rgba(255,255,255,.12)}
+.hmk{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--red-fill,#C0365B);color:#fff;font-style:normal;font-weight:900;font-size:11.5px;display:grid;place-items:center;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}.hmk.s{background:#1F2A24;left:66%;top:22%}.htmap .hmk.a{left:24%;top:26%}.htmap .hmk.b{left:44%;top:44%}.htmap.n .hmk{font-size:12px}.htmap.n .hmk.a{left:22%;top:24%}.htmap.n .hmk.b{left:66%;top:56%;background:#E08A2E}.htmap.n .hmk.c{left:34%;top:68%}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -3013,15 +3015,15 @@ function renderLook(key){const _n=navId;const c=LOOK[key];if(!c){goReplace('#/')
     <div class="where">${ic('pin')} ${esc(p.where)}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.by?`<div class="tl-meta small muted"><span>${esc(p.by)}</span></div>`:''}</div>`).join('')}
 // 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
 function howToHTML(){const U=id=>unsU(id,420),P={shiba:U('c0VTrbsXtFU'),shiba2:U('c0VTrbsXtFU'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('1Gj9tFSLCmk'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
-  const bg=u=>`style="background-image:url('${u}')"`;
+  const bg=u=>`style="background-image:url('${u}')"`;const MAPBG=`style="background-image:url('${CONFIG.SITE_URL}api/tile/16/54892/28056.png')"`;
   const card=(href,cls,mock,t,sub,photo)=>`<a class="ht ${cls}" href="${href}"><span class="ht-m ${photo?'ph':''}" ${photo?bg(photo):''} aria-hidden="true">${mock}</span><b>${t}</b><small>${sub}</small></a>`;
   return `<div class="mp-h"><b>${pawSvg()} 汪喵回家可以這樣幫你</b><a href="#/resources">協尋攻略 ›</a></div>
   <div class="ht-row">
   ${card('#/look/xiaomai','h1',`<span class="htc"><b>小麥</b><em>走失第 1 天</em><span>大安區・紅色項圈</span></span>`,'走失協尋頁','照片、特徵、地點一次看清楚',P.shiba)}
   ${card('#/new','h2',`<span class="hta4"><b>協尋</b><i ${bg(P.shiba)}></i><span>請勿追趕　拍照回報</span><u></u><u></u></span>`,'A4 協尋海報','自動排版，下載就能印')}
   ${card('#/new','h3',`<span class="htsq"><i ${bg(P.shiba2)}></i><b>幫忙分享</b><span>LINE・FB</span></span>`,'分享圖卡','一鍵傳到群組')}
-  ${card('#/seen','h4',`<span class="htmap"><i class="pin a"></i><i class="pin b"></i><span class="htbub"><i ${bg(P.shiba)}></i>在公園看到疑似小麥</span></span>`,'目擊回報','拍照標地點，馬上通知飼主')}
-  ${card('#/lost','h5',`<span class="htmap n"><i class="pin a"></i><i class="pin b"></i><i class="pin c"></i><i class="me"></i></span>`,'附近走失','看看你家附近有誰在找')}
+  ${card('#/seen','h4',`<span class="htmap" ${MAPBG}><i class="hmk s">走</i><i class="hmk a">1</i><i class="hmk b">2</i><span class="htbub"><i ${bg(P.shiba)}></i>在公園看到疑似小麥</span></span>`,'目擊回報','拍照標地點，馬上通知飼主')}
+  ${card('#/lost','h5',`<span class="htmap n" ${MAPBG}><i class="hmk a">🐕</i><i class="hmk b">🐈</i><i class="hmk c">🐕</i><i class="me"></i></span>`,'附近走失','看看你家附近有誰在找')}
   ${card('#/look/mimi','h6',`<span class="htc"><b>咪咪</b><em>走失第 2 天</em><span>橘貓・很怕生</span></span>`,'貓咪也可以','狗狗貓咪都能登記',P.cat)}
   ${card('#/look/black','h7',`<span class="htc"><b>撿到了</b><em class="g">拾獲</em><span>黑色米克斯・很親人</span></span>`,'拾獲登記','撿到狗貓，幫牠找家',P.black)}
   ${card('#/look/doudou','h8',`<span class="htc ok"><b>豆豆回家了！</b><span>謝謝每一位幫忙的人</span></span>`,'找到了','標記回家，分享好消息',P.pup)}
