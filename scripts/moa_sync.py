@@ -116,11 +116,25 @@ def main():
     def chk(r):
         u = r.pop("_pic", None)
         if not u: return
+        r["photos"] = []
         try:
-            st, b, h = http(u, timeout=15)
-            r["photos"] = [u] if st == 200 and len(b) > 500 else []
-        except Exception:
-            r["photos"] = []
+            st, b, h = http(u, timeout=20)
+            if st != 200 or len(b) < 500: return
+            from PIL import Image, ImageOps
+            import io
+            im = ImageOps.exif_transpose(Image.open(io.BytesIO(b))).convert("RGB")
+            fn = u.rsplit("/", 1)[1].replace(".jpg", "")
+            base = f"moa/{fn}"
+            for suffix, size, q in (("", 1280, 82), ("_t", 420, 78)):
+                c = im.copy(); c.thumbnail((size, size))
+                buf = io.BytesIO(); c.save(buf, "JPEG", quality=q, optimize=True)
+                hh = {"apikey": KEY, "Content-Type": "image/jpeg", "x-upsert": "true", "Cache-Control": "max-age=31536000"}
+                if KEY.startswith("eyJ"): hh["Authorization"] = "Bearer " + KEY
+                req = urllib.request.Request(f"{SB}/storage/v1/object/photos/{base}{suffix}.jpg", data=buf.getvalue(), headers=hh, method="POST")
+                urllib.request.urlopen(req, timeout=30).read()
+            r["photos"] = [f"{SB}/storage/v1/object/public/photos/{base}.jpg"]
+        except Exception as e:
+            print("照片處理失敗", u, str(e)[:120], flush=True)
     with ThreadPoolExecutor(8) as ex: list(ex.map(chk, out))
     print(f"::notice::新增 {n_new} 筆，更新 {len(out) - n_new} 筆，新查地點 {n_geo} 個（{time.time()-t0:.1f} 秒）", flush=True)
     res = []
