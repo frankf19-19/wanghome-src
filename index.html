@@ -2147,6 +2147,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xwhere>.ico{width:20px;height:20px;color:var(--brand);stroke-width:2.6}
   body[data-route="adopt"] .xwhere{text-decoration-color:color-mix(in srgb,var(--ok) 55%,transparent)}body[data-route="adopt"] .xwhere>.ico{color:var(--ok)}
   .xt{margin-bottom:14px!important}
+  .xwhere{min-height:44px}
   /* 搜尋、篩選、快速篩選、排序與顯示方式（往下捲時固定在上面） */
   .xsticky{display:block;position:sticky;top:env(safe-area-inset-top);z-index:30;margin:0 -16px;padding:10px 16px 10px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4)}
   .xsrow{display:flex;gap:10px}
@@ -2168,9 +2169,10 @@ html{-webkit-tap-highlight-color:transparent}
   .xtools{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
   .xtools-a{margin:14px 0 4px}
   .xsort{display:inline-flex;align-items:center;gap:3px;border:0;background:none;font:inherit;font-size:14.5px;font-weight:600;color:var(--ink-2);padding:6px 2px;cursor:pointer}
+  .xsort{min-height:42px}
   .xsort b{color:var(--ink)}.xsort .ico{width:15px;height:15px;color:var(--ink-3)}
   .xseg{display:flex;background:var(--fill);border-radius:12px;padding:3px}
-  .xseg button{width:36px;height:30px;border-radius:9px;border:0;background:none;display:grid;place-items:center;color:var(--ink-3);cursor:pointer}
+  .xseg button{width:40px;height:36px;border-radius:10px;border:0;background:none;display:grid;place-items:center;color:var(--ink-3);cursor:pointer}
   .xseg button .ico{width:18px;height:18px}
   .xseg button.on{background:var(--sheet);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
   .xactive{display:flex;gap:6px;flex-wrap:wrap}.xactive:empty{display:none}.xactive{margin-top:8px}
@@ -2502,7 +2504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.4.0';
+const BUILD = 'v6.4.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
