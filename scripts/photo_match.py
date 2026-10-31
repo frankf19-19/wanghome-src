@@ -211,11 +211,14 @@ def photo_sim():
 
 def main():
     if os.environ.get("DEBUG"):
-        for u in [f"{SITE}api/shelterpic/AAAIG1151023001.jpg?d=1&x={time.time()}", "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx"]:
+        ms = sb("GET", "shelter_matches?photo_url=like.*pet.gov.tw*&select=photo_url&limit=6") or []
+        for m in ms:
+            u = f"{SITE}api/petimg?r=9&u=" + urllib.parse.quote(m["photo_url"].replace("http://", "https://"), safe="")
+            t = time.time()
             try:
-                st, b, h = http(u, timeout=40); note(f"DEBUG {u[:60]} {st} {b[:300]!r}")
+                st, b, h = http(u, timeout=90); note(f"DEBUG petimg {st} {len(b)} {time.time()-t:.1f}s")
             except Exception as e:
-                note(f"DEBUG {u[:60]} ERR {e}")
+                note(f"DEBUG petimg ERR {str(e)[:80]} {time.time()-t:.1f}s")
         return
     cases = sb_all("cases?status=eq.searching&hidden=eq.false&select=id,species,lost_city,lost_district,lost_at,colour,size,sex")
     matching(cases)
