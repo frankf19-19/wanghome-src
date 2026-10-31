@@ -6,7 +6,7 @@ export async function onRequestGet({ params, waitUntil, request }) {
   const sub = String(params.id || "").replace(/\.jpg$/, "");
   const cors = { "Access-Control-Allow-Origin": "*" };
   if (!/^[A-Z]{5}[0-9]{6,20}$/.test(sub)) return new Response("Not found", { status: 404, headers: cors });
-  const key = new Request(`https://wangmiaotw.com/api/shelterpic/${sub}.jpg`);
+  const key = new Request(`https://wangmiaotw.com/api/shelterpic/v2/${sub}.jpg`);
   const cache = caches.default;
   const hit = await cache.match(key);
   if (hit && !dbg) return new Response(hit.body, { status: hit.status, headers: hit.headers });
