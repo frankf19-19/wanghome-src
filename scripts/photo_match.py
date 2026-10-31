@@ -165,16 +165,21 @@ def photo_sim():
     note(f"照片比對：待比對 {len(todo)} 筆")
     if not todo: return
     urls = set()
+    STORE = f"{SB}/storage/v1/object/public/photos/shelter/"
+    ready = []
     for m in todo:
-        ph = (cases[m["case_id"]].get("photos") or [None])[0]
-        m["_cu"] = ph
-        sub = (m.get("animal_subid") or "").strip()
+        m["_cu"] = (cases[m["case_id"]].get("photos") or [None])[0]
         su = moa_pic(m.get("photo_url"))
-        if su and re.match(r"^https://(www\.pet\.gov\.tw|asms\.(moa|coa)\.gov\.tw)/", su, re.I):
-            su = f"{SITE}api/petimg?u=" + urllib.parse.quote(su, safe="")   # 寵物登記網不接受國外直接連線，經本站轉接
-        m["_su"] = su or (f"{SITE}api/shelterpic/{sub}.jpg?v=3" if re.match(r"^[A-Z]{5}[0-9]{6,}$", sub) else None)
-        if m["_cu"] and m["_su"]:
-            urls.add(m["_cu"]); urls.add(m["_su"])
+        # 寵物登記網的照片國外抓不到：等台灣的訪客打開協尋頁時存到網站（photos/shelter/），再來比對
+        m["_su"] = su if su and (su.startswith(STORE) or not re.match(r"^https://(www\.pet\.gov\.tw|asms\.(moa|coa)\.gov\.tw)/", su, re.I)) else None
+        if not m["_cu"]:
+            sb("PATCH", f"shelter_matches?id=eq.{m['id']}", {"photo_sim": -1, "photo_checked_at": now.isoformat()}, "return=minimal"); continue
+        if not m["_su"]:
+            if m["photo_sim"] == -1: sb("PATCH", f"shelter_matches?id=eq.{m['id']}", {"photo_sim": None, "photo_checked_at": None}, "return=minimal")
+            continue
+        urls.add(m["_cu"]); urls.add(m["_su"]); ready.append(m)
+    todo = ready
+    note(f"可以比對的 {len(todo)} 筆（其他等收容所照片存到網站）")
     cu = [u for u in urls if "supabase.co" in u]; su = [u for u in urls if "supabase.co" not in u]
     with ThreadPoolExecutor(8) as ex: imgs = dict(zip(cu, ex.map(fetch_img, cu)))
     with ThreadPoolExecutor(4) as ex: imgs.update(dict(zip(su, ex.map(fetch_img, su))))   # 收容所照片慢慢抓，避免被擋
@@ -186,13 +191,13 @@ def photo_sim():
         ci, si = imgs.get(m["_cu"]) if m["_cu"] else None, imgs.get(m["_su"]) if m["_su"] else None
         patch = {"photo_checked_at": now.isoformat()}
         if ci is None or si is None:
+            if si is None and m["_su"] and not m["_su"].startswith(STORE): continue   # 暫時抓不到，下次再試
             patch["photo_sim"] = -1
         else:
             cos = float((embed(m["_cu"], ci) * embed(m["_su"], si)).sum())
             sims.append(cos)
             # 換算成 0～100（0.30 以下＝不像，0.80 以上＝非常像；之後依實際分布再調）
             patch["photo_sim"] = int(round(max(0, min(1, (cos - 0.30) / 0.50)) * 100))
-            if not moa_pic(m.get("photo_url")) and m["_su"]: patch["photo_url"] = m["_su"]
         sb("PATCH", f"shelter_matches?id=eq.{m['id']}", patch, "return=minimal")
         done += 1
     if sims:

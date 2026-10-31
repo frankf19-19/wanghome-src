@@ -2175,7 +2175,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.19.0';
+const BUILD = 'v5.19.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3892,7 +3892,7 @@ async function renderCase(id){const _n=navId;
 function telClean(t){return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)||[''])[0].replace(/[^\d#+]/g,'')}
 function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String(m.animal_id)]||''};
   return `<div class="match">
-    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span></button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg?v=3')}" onerror="shNoPhoto(this)"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
+    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span>${String(m.photo_url).startsWith(SH_STORE)||!m.animal_subid?'':`<img hidden alt="" src="${esc(safeU(m.photo_url))}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)">`}</button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg?v=3')}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)" onerror="shNoPhoto(this)"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
     <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> ${m.photo_sim!=null&&+m.photo_sim>=0?`<span class="score ${+m.photo_sim>=70?'hi':''}">照片相似 ${+m.photo_sim}%</span>`:`<span class="score">條件相符</span>`}
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
@@ -3900,6 +3900,18 @@ function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String
       <div class="small" style="display:flex;flex-wrap:wrap;gap:4px 14px">${shelterLink(m.animal_subid)?`<a target="_blank" rel="noopener" href="${esc(shelterLink(m.animal_subid))}">看收容所公告（照片、電話、地址）↗</a>`:''}<a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">打不開？到全國收容公告查收容編號 ↗</a></div>
     </div></div>`;
 }
+// 收容所照片存一份小圖到網站（寵物登記網不接受國外連線，排程的 AI 照片比對要從這裡拿照片）
+const SH_STORE='https://nopyhfpaykkiieudvoko.supabase.co/storage/v1/object/public/photos/shelter/';
+async function shelterStore(subid,src){subid=String(subid||'').trim();if(!/^[A-Z]{5}[0-9]{6,20}$/.test(subid)||!src||String(src).startsWith(SH_STORE))return false;
+  const k='wh_shs_'+subid;try{if(sessionStorage.getItem(k))return false;sessionStorage.setItem(k,'1')}catch(_){}
+  if(/^https:\/\/(www\.pet\.gov\.tw|asms\.(moa|coa)\.gov\.tw)\//i.test(src))src=CONFIG.SITE_URL+'api/petimg?u='+encodeURIComponent(src);
+  try{const r=await fetch(src,{mode:'cors'});if(!r.ok)return false;const bl=await r.blob();if(bl.size<800)return false;
+    const bmp=await createImageBitmap(bl);const mk=async n=>{const sc=Math.min(1,n/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return await new Promise(res=>c.toBlob(res,'image/jpeg',.82))};
+    const big=await mk(720),sm=await mk(360);
+    const up=async(n,b)=>{const {error}=await sb.storage.from('photos').upload('shelter/'+subid+n+'.jpg',b,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'});return !error||/exists|Duplicate/i.test(error.message||'')};
+    if(!(await up('',big)))return false;await up('_t',sm);
+    const {data}=await sb.rpc('set_match_photo',{p_subid:subid});return (data||0)>0}catch(_){return false}}
+function shPhotoOk(img){const sub=img.dataset.sub;if(sub)setTimeout(()=>shelterStore(sub,img.src),800)}
 // 收容所照片載入失敗（公告頁也沒照片）：移到「還沒放照片」那一區
 function shNoPhoto(img){const card=img.closest('.match'),box=img.closest('#shelterBox');const ph=img.parentNode;ph.classList.add('ph-none');ph.innerHTML=ph.dataset.none||'';
   if(!card||!box)return;const d=box.querySelector('.sm-none');if(!d)return;d.querySelector('.sm-np-list').appendChild(card);d.hidden=false;d.querySelector('.sm-np-n').textContent=d.querySelectorAll('.match').length;
@@ -5191,7 +5203,7 @@ async function renderAdmin(){const _n=navId;
   if(_n!==navId)return;
   if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const q=qs(location.hash),TABS=[['reports','檢舉'],['moa','農業部目擊'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
@@ -5203,6 +5215,7 @@ async function renderAdmin(){const _n=navId;
   const box=$('#adm');
   if(tab==='reports')return admReports(box,q.all==='1');
   if(tab==='moa')return admMoa(box,q.all==='1');
+  if(tab==='shpic')return admShPic(box);
   if(tab==='members')return admMembers(box,q.q||'');
   if(tab==='bans')return admBans(box);
   return admList(box,tab,q.q||'',q.f||'all');
@@ -5221,6 +5234,18 @@ function admContact(r){const rows=[];
   if(em)rows.push(`Email：${admMail(em,title)}${r.email_verified===false?'（未確認）':''}`);
   if(r.member_email&&r.member_email!==em)rows.push(`會員帳號：${admMail(r.member_email,title)}`);
   return rows.length?`<div class="adm-ct small">${rows.join('<br>')}</div>`:'<div class="adm-ct small muted">沒有留聯絡方式</div>'}
+// 收容所照片：用站長自己（在台灣）的瀏覽器，把比對結果的收容所照片存到網站，排程才能做 AI 照片比對
+async function admShPic(box){const _n=navId;box.innerHTML='<div class="empty">讀取中…</div>';
+  const {data,error}=await sb.from('shelter_matches').select('animal_subid,photo_url').eq('dismissed',false).limit(3000);if(_n!==navId)return;
+  if(error){box.innerHTML=`<div class="empty-card"><b>讀取失敗</b><p class="small">${esc(error.message)}</p></div>`;return}
+  const subs=[...new Map((data||[]).filter(m=>m.animal_subid&&!String(m.photo_url||'').startsWith(SH_STORE)).map(m=>[m.animal_subid.trim(),m.photo_url])).entries()];
+  box.innerHTML=`<p class="small muted">寵物登記網不接受國外主機連線，AI 照片比對要先把收容所照片存到網站。打開協尋頁時會自動存；這裡可以一次補齊（請用台灣的網路）。</p>
+  <p>還沒存的收容所動物：<b>${subs.length}</b> 隻</p><button type="button" class="btn" id="shGo" ${subs.length?'':'disabled'}>開始補照片</button><p class="small muted" id="shSt"></p>`;
+  $('#shGo').onclick=async()=>{const b=$('#shGo');b.disabled=true;let ok=0,none=0,i=0;const st=$('#shSt');
+    const one=async([sub,u])=>{let src=moaPic(u);if(!src)src=CONFIG.SITE_URL+'api/shelterpic/'+sub+'.jpg?v=3';try{sessionStorage.removeItem('wh_shs_'+sub)}catch(_){}
+      const r=await shelterStore(sub,src);if(r)ok++;else none++;i++;if(st)st.textContent=`進度 ${i}/${subs.length}：存好 ${ok}、沒有照片或略過 ${none}`};
+    for(let k=0;k<subs.length;k+=3){if(_n!==navId)return;await Promise.all(subs.slice(k,k+3).map(one))}
+    if(st)st.textContent+=`。完成！下一次排程（每 6 小時）會用這些照片做 AI 比對。`}}
 // 農業部申報案件的目擊：飼主沒有使用本站，由站長打電話轉告飼主後標記
 async function admMoa(box,showAll){const _n=navId;box.innerHTML='<div class="empty">讀取中…</div>';
   const {data:rs,error}=await sb.rpc('admin_moa_sightings',{p_include_done:showAll});if(_n!==navId)return;
