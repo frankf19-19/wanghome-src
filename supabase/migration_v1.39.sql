@@ -17,6 +17,7 @@ create table if not exists public.geo_cache (
 );
 alter table public.geo_cache enable row level security;
 revoke all on public.geo_cache from anon, authenticated;
+grant all on public.geo_cache to service_role;
 
 -- 新增案件的頻率限制：排程匯入時略過
 create or replace function public.limit_cases() returns trigger
@@ -83,5 +84,6 @@ begin
   return jsonb_build_object('new', n_new, 'updated', n_upd, 'closed', n_closed);
 end $$;
 revoke all on function public.moa_upsert(jsonb, text[]) from public, anon, authenticated;
+grant execute on function public.moa_upsert(jsonb, text[]) to service_role;
 
 select 'WangHome migration v1.39 installed' as result;
