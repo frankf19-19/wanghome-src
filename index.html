@@ -2175,7 +2175,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.19.3';
+const BUILD = 'v5.19.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3893,7 +3893,7 @@ function telClean(t){return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)||[''])[0
 function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String(m.animal_id)]||''};
   return `<div class="match">
     ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span>${String(m.photo_url).startsWith(SH_STORE)||!m.animal_subid?'':`<img hidden alt="" src="${esc(safeU(m.photo_url))}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)">`}</button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg?v=3')}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)" onerror="shNoPhoto(this)"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
-    <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> ${m.photo_sim!=null&&+m.photo_sim>=0?`<span class="score ${+m.photo_sim>=70?'hi':''}">照片相似 ${+m.photo_sim}%</span>`:`<span class="score">條件相符</span>`}
+    <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> ${m.photo_sim!=null&&+m.photo_sim>=0?`<span class="score ${+m.photo_sim>=80?'hi':''}">照片相似 ${+m.photo_sim}%</span>`:`<span class="score">條件相符</span>`}
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
       <div class="small">${m.shelter_tel?`${ic('phone')} <a href="tel:${esc(telClean(m.shelter_tel))}">${esc(m.shelter_tel)}</a> · `:''}${esc(m.shelter_address||'')}</div>
@@ -3920,7 +3920,7 @@ function shelterBoxHTML(matches,loading){
   const list=(matches||[]).filter(m=>!m.dismissed).sort((a,b)=>b.score-a.score);
   if(!list.length)return loading?`<h2>${ic('shelter')} 收容所比對</h2><p class="muted small" id="shelterStatus">正在比對全台收容所資料…</p>`:'';
   // 只有 AI 比對過照片、而且照片也像的才列在上面；其他依原因收在下面
-  const SIM_HI=70,SIM_MID=50,pic=m=>moaPic(m.photo_url)||__shelterPic[String(m.animal_id)],can=m=>pic(m)||shelterLink(m.animal_subid);
+  const SIM_HI=80,SIM_MID=70,pic=m=>moaPic(m.photo_url)||__shelterPic[String(m.animal_id)],can=m=>pic(m)||shelterLink(m.animal_subid);
   const sim=m=>m.photo_sim==null?null:+m.photo_sim;
   const top=list.filter(m=>sim(m)!=null&&sim(m)>=SIM_MID).sort((a,b)=>sim(b)-sim(a)),
     low=list.filter(m=>sim(m)!=null&&sim(m)>=0&&sim(m)<SIM_MID).sort((a,b)=>sim(b)-sim(a)),
