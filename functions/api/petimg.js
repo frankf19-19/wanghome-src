@@ -20,7 +20,7 @@ export async function onRequestGet({ request, waitUntil }) {
   if (!r || r.status >= 500) return new Response("upstream", { status: 502, headers: cors });
   const ct = r.headers.get("Content-Type") || "";
   if (dbg) return new Response(JSON.stringify({ st: r.status, ct, len: (await r.arrayBuffer()).byteLength }), { headers: cors });
-  if (!r.ok || !/^(image\/|application\/octet-stream)/.test(ct)) return new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=3600" } });
+  if (!r.ok || !/^(image\/|application\/octet-stream)/.test(ct)) return new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "no-store" } });
   const body = await r.arrayBuffer();
   const out = new Response(body, { status: 200, headers: { ...cors, "Content-Type": ct.startsWith("image/") ? ct : "image/jpeg", "Cache-Control": "public, max-age=604800" } });
   waitUntil(cache.put(key, out.clone()));
