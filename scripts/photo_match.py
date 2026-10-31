@@ -17,7 +17,7 @@ SB = os.environ["SUPABASE_URL"].rstrip("/")
 KEY = os.environ["SUPABASE_SERVICE_KEY"].strip()
 SITE = "https://wangmiaotw.com/"
 UA = "WangMiaoHome/1.0 (https://wangmiaotw.com; service@wangmiaotw.com)"
-MAX_CMP = int(os.environ.get("MAX_CMP", "600"))
+MAX_CMP = int(os.environ.get("MAX_CMP", "1500"))
 AREA = {"臺北市":2,"新北市":3,"基隆市":4,"宜蘭縣":5,"桃園市":6,"新竹縣":7,"新竹市":8,"苗栗縣":9,"臺中市":10,"彰化縣":11,"南投縣":12,"雲林縣":13,"嘉義縣":14,"嘉義市":15,"臺南市":16,"高雄市":17,"屏東縣":18,"花蓮縣":19,"臺東縣":20,"澎湖縣":21,"金門縣":22,"連江縣":23}
 GROUPS = {'黑':['黑'],'白':['白'],'黃':['黃','米','淺棕','卡其','金'],'棕':['棕','咖啡','褐','茶'],'虎斑':['虎斑','斑'],'灰':['灰','銀'],'花':['花','三色','黑白','黃白','雙色'],'紅':['紅','橘']}
 SIZE = {"small": "SMALL", "medium": "MEDIUM", "large": "BIG"}
@@ -160,7 +160,9 @@ def photo_sim():
             # 2026-10-31 05:30 前那幾次照片都下載失敗（程式問題），一律重比
             if not tt or now - tt > dt.timedelta(hours=12) or tt < dt.datetime(2026, 10, 31, 5, 30, tzinfo=dt.timezone.utc): todo.append(m)
     hasph = lambda m: bool((cases[m["case_id"]].get("photos") or [None])[0])
-    todo.sort(key=lambda m: (not hasph(m), m["photo_sim"] is not None))
+    STORE0 = f"{SB}/storage/v1/object/public/photos/shelter/"
+    # 兩邊都有照片、可以馬上比的排最前面（收容所照片已存到網站的）
+    todo.sort(key=lambda m: (not hasph(m), not str(m.get("photo_url") or "").startswith(STORE0), m["photo_sim"] is not None))
     todo = todo[:MAX_CMP]
     note(f"照片比對：待比對 {len(todo)} 筆")
     if not todo: return
