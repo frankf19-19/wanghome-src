@@ -2175,7 +2175,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.19.1';
+const BUILD = 'v5.19.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3902,7 +3902,7 @@ function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String
 }
 // 收容所照片存一份小圖到網站（寵物登記網不接受國外連線，排程的 AI 照片比對要從這裡拿照片）
 const SH_STORE='https://nopyhfpaykkiieudvoko.supabase.co/storage/v1/object/public/photos/shelter/';
-async function shelterStore(subid,src){subid=String(subid||'').trim();if(!/^[A-Z]{5}[0-9]{6,20}$/.test(subid)||!src||String(src).startsWith(SH_STORE))return false;
+async function shelterStore(subid,src){subid=String(subid||'').trim();if(!/^[A-Za-z0-9-]{4,30}$/.test(subid)||!src||String(src).startsWith(SH_STORE))return false;
   const k='wh_shs_'+subid;try{if(sessionStorage.getItem(k))return false;sessionStorage.setItem(k,'1')}catch(_){}
   if(/^https:\/\/(www\.pet\.gov\.tw|asms\.(moa|coa)\.gov\.tw)\//i.test(src))src=CONFIG.SITE_URL+'api/petimg?u='+encodeURIComponent(src);
   try{const r=await fetch(src,{mode:'cors'});if(!r.ok)return false;const bl=await r.blob();if(bl.size<800)return false;
