@@ -2143,7 +2143,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.16.0';
+const BUILD = 'v5.16.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3046,7 +3046,7 @@ function renderLook(key){const _n=navId;const c=LOOK[key];if(!c){goReplace('#/')
     const bounds=[];pts.forEach(p=>{marker([p.lat,p.lng],p.label,ana&&p===ana.last?(p.cls+' last'):p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])});
     if(typeof L!=='undefined'&&map.fitBounds){if(map.__anaCircle){const bb=L.latLngBounds(bounds);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})}};
   if(window.L||leafletGaveUp)drawMap();else waitLeaflet().then(drawMap);
-  $('#tl').innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div><div class="when">${esc(p.title)} · ${fmtDT(p.t)}</div>
+  $('#tl').innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div><div class="when">${esc(p.title)} · ${p.dOnly?fmtDate(p.t):fmtDT(p.t)}</div>
     <div class="where">${ic('pin')} ${esc(p.where)}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.by?`<div class="tl-meta small muted"><span>${esc(p.by)}</span></div>`:''}</div>`).join('')}
 // 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
 function howToHTML(){const U=id=>unsU(id,420),P={shiba:U('c0VTrbsXtFU'),shiba2:U('c0VTrbsXtFU'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('1Gj9tFSLCmk'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
@@ -3096,10 +3096,10 @@ function renderHow(k){const h=HOW[k];if(!h){goReplace('#/');return}setTitle(h.t)
   <div class="how-cta"><a class="btn big block" href="${h.cta[0]}">${esc(h.cta[1])}</a></div>`}
 // 首頁：正在協尋的毛孩（左右滑的預覽），點「看全部」到協尋名單
 async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
-  const [{data,error},{count}]=await Promise.all([sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,lost_at,status,poster').eq('status','searching').order('lost_at',{ascending:false}).limit(12),
+  const [{data,error},{count}]=await Promise.all([sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,lost_at,status,poster').eq('status','searching').order('lost_at',{ascending:false}).limit(40),
     sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching')]);
   if(_n!==navId||!el.isConnected||error||!data)return;
-  const list=data.filter(c=>!userHidden(c));
+  const vis=data.filter(c=>!userHidden(c)),list=[...vis.filter(c=>c.photos&&c.photos.length),...vis.filter(c=>!(c.photos&&c.photos.length))].slice(0,12);
   if(!list.length){el.innerHTML='';return}
   const tot=count||0;
   el.innerHTML=`<div class="mp-h"><b>${ic('search')} 正在協尋的毛孩${tot?` <span class="lp-n">${tot}</span>`:''}</b><a href="#/lost">看全部 ›</a></div>
@@ -3360,10 +3360,10 @@ function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const
   else if(friendly&&!cat)tips.push(`${N}親人，可能會跟著路人走：問附近店家、警衛、外送員、早餐店有沒有看到。`);
   if(hrs>=12)tips.push(`打電話問 ${esc(c.lost_city||'當地')}的收容所和附近動物醫院，${hrs>=48?'每 2～3 天':'明天'}再問一次（照片和晶片號碼準備好）。`);
   tips.push(hrs<48?'把協尋頁分享到當地 FB 社團、LINE 群組，在走失點附近貼 A4 海報。':'在常有人經過的地方補貼海報，協尋貼文每隔幾天重新分享一次。');
-  return {hrs,rad,phase,best,tips,name:N,ago:hrs<1?'不到 1 小時':hrs<24?Math.floor(hrs)+' 小時':Math.floor(hrs/24)+' 天'}}
+  return {hrs,rad,phase,best,tips,name:N,ago:hrs<1?'不到 1 小時':hrs<24?Math.floor(hrs)+' 小時':'第 '+daysSince(c.lost_at)+' 天'}}
 function lostPlanHTML(c){const a=lostPlan(c);if(!a)return '';
   return `<section class="sa" aria-label="智慧協尋建議"><div class="sa-head"><span class="sa-spark" aria-hidden="true">✨</span><b>智慧協尋建議</b><small>依走失時間、${c.species==='cat'?'貓咪':'狗狗'}習性和個性推算</small></div>
-  <div class="sa-hero ${a.hrs<48?'fresh':''}"><span class="sa-dot" aria-hidden="true"></span><div><small>${a.name}已經走失</small><b>${a.ago}</b><span>${esc(a.phase.k)}：${esc(a.phase.d)}</span></div></div>
+  <div class="sa-hero ${a.hrs<48?'fresh':''}"><span class="sa-dot" aria-hidden="true"></span><div><small>${a.name}${a.hrs<24?'已經走失':'走失'}</small><b>${a.ago}</b><span>${esc(a.phase.k)}：${esc(a.phase.d)}</span></div></div>
   <div class="sa-stats"><div class="hi"><small>建議先找周圍</small><b>${fmtKm(a.rad)}</b></div><div><small>最容易找到的時段</small><b style="font-size:15px">${esc(a.best)}</b></div></div>
   <div class="sa-tips"><small>建議下一步</small><ol>${a.tips.slice(0,4).map(t=>`<li>${t}</li>`).join('')}</ol></div>
   <p class="sa-note">還沒有目擊回報，以上依一般走失狗貓的行為推算，僅供參考。有人回報目擊後，會改用實際目擊位置分析。</p></section>`}
@@ -3456,7 +3456,8 @@ async function loadList(){
     if(filtered){el.innerHTML=`<div class="empty-card"><div class="big">${ic("search")}</div><b>找不到符合條件的案件</b><p class="small">試試別的關鍵字，或清除篩選看全部。</p><button type="button" class="btn" id="btnClearF">清除篩選</button></div>`;
       $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
     el.innerHTML=emptyCard('lost');return}
-  el.innerHTML=sortNear(data,'lost_lat','lost_lng').map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
+  const hp=c=>!!(c.photos&&c.photos.length);const ord=homeState.near?sortNear(data,'lost_lat','lost_lng'):[...data.filter(hp),...data.filter(c=>!hp(c))];   // 有照片的排前面
+  el.innerHTML=ord.map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
 }
 let __govShown=[];
 // 背景檢查哪些申報有照片，有照片的移到前面（沒有照片的放後面）
@@ -3744,7 +3745,7 @@ async function renderCase(id){const _n=navId;
 
   // 地圖 + 時間軸
   const pts=[];
-  if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,label:'走',cls:'start',t:c.lost_at,title:'走失地點',where:c.lost_place});
+  if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,label:'走',cls:'start',t:c.lost_at,title:c.source==='moa'?'走失地區（大概位置）':'走失地點',where:c.lost_place||(c.source==='moa'?c.lost_city+(c.lost_district||''):''),dOnly:c.source==='moa'});
   sightings.forEach((s,i)=>pts.push({lat:s.lat,lng:s.lng,label:String(i+1),cls:'',t:s.seen_at,title:`目擊 ${i+1}`,where:s.place_text,dir:s.direction,note:s.note,photo:s.photo_url,by:s.reporter_name,onote:s.owner_note,verified:s.verified,sid:s.id,poster:s.poster}));
   const center=pts.find(p=>p.lat)?[pts.find(p=>p.lat).lat,pts.find(p=>p.lat).lng]:(CITY_CENTER[c.lost_city]||[23.7,121]);
   // 地圖程式還沒下載完也先把案件內容顯示出來，地圖等它好了再畫（分享連結最常開這頁）
@@ -3755,13 +3756,13 @@ async function renderCase(id){const _n=navId;
     if(line.length>=2){L.polyline(line,{color:'#fff',weight:6,opacity:.8}).addTo(map);L.polyline(line,{color:'#B8325E',weight:3,opacity:.9,dashArray:'6 8',lineCap:'round'}).addTo(map)}
     if(ana)map.__anaCircle=L.circle([ana.last.lat,ana.last.lng],{radius:ana.rad*1000,color:'#B8325E',weight:2,dashArray:'4 6',fillColor:'#B8325E',fillOpacity:.07}).addTo(map)}
   const bounds=[];
-  pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,ana&&p===ana.last?(p.cls+' last'):p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
+  pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,ana&&p===ana.last?(p.cls+' last'):p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${p.dOnly?fmtDate(p.t):fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
   if(map.__anaCircle&&typeof L!=='undefined'){const bb=L.latLngBounds(bounds.length?bounds:[[ana.last.lat,ana.last.lng]]);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})};
   if(window.L||leafletGaveUp)drawMap();else waitLeaflet().then(()=>{if(_n===navId&&$('#map')&&!$('#map').classList.contains('leaflet-container'))drawMap()});
   const tl=$('#tl');
   if(!pts.length){tl.innerHTML=c.pending_count>0?'<p class="muted">目前還沒有飼主確認過的目擊。</p>':'<p class="muted">還沒有目擊回報。</p>'}
   else tl.innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div>
-    <div class="when">${esc(p.title)} · ${fmtDT(p.t)}</div>
+    <div class="when">${esc(p.title)} · ${p.dOnly?fmtDate(p.t):fmtDT(p.t)}</div>
     <div class="where">${ic("pin")} ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
     ${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
     ${p.photo?`<div class="ph" style="background-image:url('${esc(safeU(p.photo))}')" data-lightbox="${esc(safeU(p.photo))}"></div>`:''}
