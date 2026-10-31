@@ -203,6 +203,13 @@ def photo_sim():
         note(f"照片比對完成 {done} 筆（都沒有照片）")
 
 def main():
+    if os.environ.get("DEBUG"):
+        for u in [f"{SITE}api/shelterpic/AAAIG1151023001.jpg?d=1&x={time.time()}", "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx"]:
+            try:
+                st, b, h = http(u, timeout=40); note(f"DEBUG {u[:60]} {st} {b[:300]!r}")
+            except Exception as e:
+                note(f"DEBUG {u[:60]} ERR {e}")
+        return
     cases = sb_all("cases?status=eq.searching&hidden=eq.false&select=id,species,lost_city,lost_district,lost_at,colour,size,sex")
     matching(cases)
     photo_sim()
