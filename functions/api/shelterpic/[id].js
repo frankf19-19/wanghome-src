@@ -6,7 +6,7 @@ export async function onRequestGet({ params, waitUntil, request }) {
   const sub = String(params.id || "").replace(/\.jpg$/, "");
   const cors = { "Access-Control-Allow-Origin": "*" };
   if (!/^[A-Z]{5}[0-9]{6,20}$/.test(sub)) return new Response("Not found", { status: 404, headers: cors });
-  const key = new Request(`https://wangmiaotw.com/api/shelterpic/v2/${sub}.jpg`);
+  const key = new Request(`https://wangmiaotw.com/api/shelterpic/v3/${sub}.jpg`);
   const cache = caches.default;
   const hit = await cache.match(key);
   if (hit && !dbg) return new Response(hit.body, { status: hit.status, headers: hit.headers });
@@ -24,12 +24,12 @@ export async function onRequestGet({ params, waitUntil, request }) {
       if (m) { pic = m[1]; break; }
     }
   } catch (_) { return new Response("upstream", { status: 502, headers: cors }); }
-  if (dbg) return new Response(JSON.stringify({ pic, dl }), { headers: { ...cors, "Content-Type": "application/json" } });
-  if (!pic) return nf();
+  if (!pic) return dbg ? new Response(JSON.stringify({ pic, dl })) : nf();
   let r;
-  try { r = await fetch(pic, { headers: ua }); } catch (_) { return new Response("upstream", { status: 502, headers: cors }); }
+  try { r = await fetch(pic, { headers: { ...ua, "Referer": "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx", "Accept": "image/*" } }); } catch (e) { return new Response("upstream " + (dbg ? String(e) : ""), { status: 502, headers: cors }); }
   const ct = r.headers.get("Content-Type") || "image/jpeg";
-  if (!r.ok || !/^image\//.test(ct)) return nf();
+  if (dbg) { const b = await r.arrayBuffer(); return new Response(JSON.stringify({ pic, dl, img: [r.status, ct, b.byteLength] }), { headers: { ...cors, "Content-Type": "application/json" } }); }
+  if (!r.ok || !/^(image\/|application\/octet-stream)/.test(ct)) return nf();
   const body = await r.arrayBuffer();
   if (body.byteLength < 500) return nf();
   const out = new Response(body, { status: 200, headers: { ...cors, "Content-Type": ct, "Cache-Control": "public, max-age=604800" } });
