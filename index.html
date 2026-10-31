@@ -2039,6 +2039,8 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 :root[data-theme=dark] .season{background:#1F2A3D;border-color:#2E3E5A}:root[data-theme=dark] .pi-row.warn .pi-ic{background:#4A2222}:root[data-theme=dark] .pi-row.ok .pi-ic{background:#1E3A2C}:root[data-theme=dark] .pi-row.warn b{color:#FF9B8F}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .season{background:#1F2A3D;border-color:#2E3E5A}:root:not([data-theme=light]) .pi-row.warn b{color:#FF9B8F}}
 
+.empty-slim{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:18px;background:var(--sheet);box-shadow:var(--lift)}.empty-slim>div{flex:1;min-width:0}.empty-slim b{display:block;font-size:15.5px}.empty-slim small{color:var(--ink-3);font-size:13.5px;line-height:1.5}.empty-slim .btn{flex:none;white-space:nowrap}.empty-slim .es-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#E3F6EC;color:#1E7F5A;flex:none}
+@media (max-width:560px){.empty-slim{flex-wrap:wrap}.empty-slim img,.empty-slim .es-ic{display:none}.empty-slim .btn{width:100%}}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2056,7 +2058,7 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 .injstrip{margin:0!important;padding:10px 14px!important;min-height:0!important;font-size:14.5px!important;border-radius:14px!important}
 .homemore{display:grid;gap:18px;margin:22px 0 8px}.homemore>*{min-width:0}.homemore .howto{margin-top:0}
 .lostprev .lp-row .lp{width:132px}.lostprev .lp-ph{width:132px;height:132px}
-@media (min-width:900px){.bigstart>.season{grid-column:span 2!important;align-self:start}.bigstart>.injstrip{align-self:start}.bigstart>.injstrip{grid-column:span 1!important}}
+@media (min-width:900px){.bigstart>.season{grid-column:span 2!important;align-self:start}.bigstart>.injstrip{align-self:start}.bigstart>.season+.injstrip{grid-column:span 1!important}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3386,7 +3388,7 @@ async function loadList(){
     const filtered=homeState.q||homeState.chip||fCount()>0;
     if(filtered){el.innerHTML=`<div class="empty-card"><div class="big">${ic("search")}</div><b>找不到符合條件的案件</b><p class="small">試試別的關鍵字，或清除篩選看全部。</p><button type="button" class="btn" id="btnClearF">清除篩選</button></div>`;
       $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
-    el.innerHTML=emptyCard('lost')+(homeState.city.length?'':lookGridHTML('lost'));return}
+    el.innerHTML=emptyCard('lost');return}
   el.innerHTML=sortNear(data,'lost_lat','lost_lng').map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
 }
 // 清單一次 60 筆，滿了就顯示「顯示更多」
@@ -3401,14 +3403,14 @@ async function loadFoundList(el,more){
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
   if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(60,(homeState.limit||120)-60);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
   if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
-  if(!data.length){if(homeState.near){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有拾獲／目擊通報</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}el.innerHTML=emptyCard('found')+(homeState.q||homeState.city.length?'':lookGridHTML('found'));return}
+  if(!data.length){if(homeState.near){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有拾獲／目擊通報</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}el.innerHTML=emptyCard('found');return}
   el.innerHTML=sortNear(data,'lat','lng').map(foundCardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
 }
 function emptyCard(kind){
   const where=homeState.city.length?`${esc(homeState.city.join('、'))}`:'目前';
   return kind==='lost'
-   ?`<div class="empty-card"><div class="big"><img src="duo.svg" alt="" width="120" height="82"></div><b>${where}沒有協尋中的走失案件</b><p class="small">這是好消息！如果你的毛孩走失了，越早登記越好，黃金時間是前 48 小時。</p><div class="btns"><a class="btn" href="#/new">登記走失</a><a class="btn ghost" href="#/resources">先看協尋攻略</a></div></div>`
-   :`<div class="empty-card"><div class="big">${ic("hand")}</div><b>${where}沒有拾獲通報</b><p class="small">撿到或看到疑似走失的狗貓？登記後系統會自動比對附近的走失案件，通知飼主。</p><div class="btns"><a class="btn green" href="#/found/new">我看到／撿到毛孩</a></div></div>`;
+   ?`<div class="empty-slim"><img src="duo.svg" alt="" width="64" height="44"><div><b>${where}沒有協尋中的走失毛孩</b><small>這是好消息！毛孩走失的話，前 48 小時最關鍵，越早登記越好。</small></div><a class="btn sm" href="#/new">登記走失</a></div>`
+   :`<div class="empty-slim"><span class="es-ic">${ic("hand")}</span><div><b>${where}沒有拾獲／目擊通報</b><small>看到疑似走失的狗貓？登記後會自動比對附近的走失案件。</small></div><a class="btn green sm" href="#/found/new">我看到／撿到</a></div>`;
 }
 // 清單是空的時候：下面放「登記後會長這樣」的畫面介紹（點進去是介紹頁，不是案件）
 function lookGridHTML(kind){const ks=kind==='lost'?['xiaomai','mimi','doudou']:['black','doudou'];
