@@ -52,7 +52,7 @@ def parse_area(addr):
 def main():
     t0 = time.time()
     st, raw, _ = http(SITE + "api/moa/lost", timeout=60)
-    print(f"讀到農業部資料 {len(raw)} bytes（{time.time()-t0:.1f} 秒）", flush=True)
+    print(f"::notice::讀到農業部資料 {len(raw)} bytes（{time.time()-t0:.1f} 秒）", flush=True)
     data = json.loads(raw)
     if not isinstance(data, list) or len(data) < 20:
         raise SystemExit(f"農業部資料不正常（{type(data).__name__} {len(data) if isinstance(data, list) else ''}），這次不同步")
@@ -77,7 +77,7 @@ def main():
             "breed": str(a.get("品種") or "").strip()[:40], "sex": {"公": "male", "母": "female"}.get(a.get("性別"), "unknown"),
             "colour": str(a.get("毛色") or "").strip()[:40], "features": feat, "chip_last4": chip[-4:] if len(chip) >= 10 else "",
             "lost_at": d.replace("/", "-") + "T12:00:00+08:00", "lost_city": city, "lost_district": dist, "contact_phone": tel})
-    print(f"農業部申報 {len(data)} 筆，最近 {DAYS} 天有縣市的 {len(rows)} 筆", flush=True)
+    print(f"::notice::農業部申報 {len(data)} 筆，最近 {DAYS} 天有縣市的 {len(rows)} 筆", flush=True)
 
     have = {r["source_id"]: r for r in sb("GET", "cases?source=eq.moa&select=source_id,lost_lat,photos&limit=5000") or []}
     geo = {g["name"]: (g["lat"], g["lng"]) for g in sb("GET", "geo_cache?select=name,lat,lng&limit=5000") or []}
@@ -122,14 +122,22 @@ def main():
         except Exception:
             r["photos"] = []
     with ThreadPoolExecutor(8) as ex: list(ex.map(chk, out))
-    print(f"新增 {n_new} 筆，更新 {len(out) - n_new} 筆，新查地點 {n_geo} 個（{time.time()-t0:.1f} 秒）", flush=True)
+    print(f"::notice::新增 {n_new} 筆，更新 {len(out) - n_new} 筆，新查地點 {n_geo} 個（{time.time()-t0:.1f} 秒）", flush=True)
     res = []
     for i in range(0, len(out), 100):
         last = i + 100 >= len(out)
         res.append(sb("POST", "rpc/moa_upsert", {"p_rows": out[i:i + 100], "p_all_ids": all_ids if last else None}))
     if not out:
         res.append(sb("POST", "rpc/moa_upsert", {"p_rows": [], "p_all_ids": all_ids}))
-    print("結果", res, flush=True)
+    print("::notice::結果", json.dumps(res, ensure_ascii=False), flush=True)
 
 if __name__ == "__main__":
-    main()
+    import traceback, urllib.error
+    try:
+        main()
+    except urllib.error.HTTPError as e:
+        body = e.read()[:400].decode("utf-8", "replace").replace("\n", " ")
+        print(f"::error::HTTP {e.code} {e.url[:120]} {body}", flush=True); raise SystemExit(1)
+    except Exception as e:
+        tb = traceback.format_exc().replace("\n", " | ")[-900:]
+        print(f"::error::{tb}", flush=True); raise SystemExit(1)
