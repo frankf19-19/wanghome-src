@@ -144,6 +144,14 @@ def main():
             print("照片處理失敗", u, str(e)[:120], flush=True)
     with ThreadPoolExecutor(8) as ex: list(ex.map(chk, out))
     print(f"::notice::新增 {n_new} 筆，更新 {len(out) - n_new} 筆，新查地點 {n_geo} 個（{time.time()-t0:.1f} 秒）", flush=True)
+    # 安全檢查：農業部這次回傳的筆數明顯變少（可能資料不完整），就不要把「不在名單裡」的案件結案
+    try:
+        cur = sb("GET", "cases?select=source_id&source=eq.moa&status=eq.searching&limit=5000") or []
+        if cur and len(set(all_ids)) < 0.8 * len(cur):
+            print(f"::warning::農業部名單只有 {len(set(all_ids))} 筆，少於目前協尋中的 {len(cur)} 筆的 8 成，這次不做結案", flush=True)
+            all_ids = None
+    except Exception as e:
+        print("::warning::檢查筆數失敗，這次不做結案", str(e)[:120], flush=True); all_ids = None
     res = []
     for i in range(0, len(out), 100):
         last = i + 100 >= len(out)

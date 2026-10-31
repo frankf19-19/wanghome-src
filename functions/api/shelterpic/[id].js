@@ -2,7 +2,7 @@
 // 讀公告頁找出照片網址，再把照片轉給網站（加跨網域標頭、快取 7 天；找不到快取 6 小時，等收容所補照片）。
 // GET /api/shelterpic/AAAIG1151029003.jpg
 export async function onRequestGet({ params, waitUntil, request }) {
-  const dbg = new URL(request.url).searchParams.has("d"), dl = [];
+  const dbg = false, dl = [];
   const sub = String(params.id || "").replace(/\.jpg$/, "");
   const cors = { "Access-Control-Allow-Origin": "*" };
   if (!/^[A-Z]{5}[0-9]{6,20}$/.test(sub)) return new Response("Not found", { status: 404, headers: cors });
@@ -29,10 +29,10 @@ export async function onRequestGet({ params, waitUntil, request }) {
   try { r = await fetch(pic, { headers: { ...ua, "Referer": "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx", "Accept": "image/*" } }); } catch (e) { return new Response("upstream " + (dbg ? String(e) : ""), { status: 502, headers: cors }); }
   const ct = r.headers.get("Content-Type") || "image/jpeg";
   if (dbg) { const b = await r.arrayBuffer(); return new Response(JSON.stringify({ pic, dl, img: [r.status, ct, b.byteLength] }), { headers: { ...cors, "Content-Type": "application/json" } }); }
-  if (!r.ok || !/^(image\/|application\/octet-stream)/.test(ct)) return nf();
+  if (!r.ok || !/^(image\/(jpeg|png|webp|gif)|application\/octet-stream)/i.test(ct)) return nf();
   const body = await r.arrayBuffer();
   if (body.byteLength < 500) return nf();
-  const out = new Response(body, { status: 200, headers: { ...cors, "Content-Type": ct, "Cache-Control": "public, max-age=604800" } });
+  const out = new Response(body, { status: 200, headers: { ...cors, "Content-Type": /^image\/(jpeg|png|webp|gif)/i.test(ct) ? ct : "image/jpeg", "Cache-Control": "public, max-age=604800", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'; sandbox" } });
   waitUntil(cache.put(key, out.clone()));
   return out;
 }

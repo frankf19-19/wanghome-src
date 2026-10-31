@@ -13,14 +13,16 @@ export async function onRequestGet({ params, waitUntil }) {
     r = await fetch(`https://www.pet.gov.tw/XMLRequest/PET_PIC.ashx?File_No=${id}`, { headers: { "User-Agent": "WangMiaoHome/1.0 (https://wangmiaotw.com)" } });
   } catch (_) { return new Response("upstream", { status: 502, headers: cors }); }
   const ct = r.headers.get("Content-Type") || "";
-  if (!r.ok || !/^image\//.test(ct)) {
-    const nf = new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=86400" } });
-    waitUntil(cache.put(key, nf.clone()));
+  if (!r.ok || !/^image\/(jpeg|png|webp|gif)/i.test(ct)) {
+    // 真的沒有照片才記住一天；對方伺服器暫時出錯時不要記，下次再試
+    const real404 = r.status === 404 || (r.ok && !/^image\//.test(ct));
+    const nf = new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": real404 ? "public, max-age=86400" : "no-store" } });
+    if (real404) waitUntil(cache.put(key, nf.clone()));
     return nf;
   }
   const body = await r.arrayBuffer();
   if (body.byteLength < 500) return new Response("Not found", { status: 404, headers: cors });
-  const out = new Response(body, { status: 200, headers: { ...cors, "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=604800" } });
+  const out = new Response(body, { status: 200, headers: { ...cors, "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=604800", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'; sandbox" } });
   waitUntil(cache.put(key, out.clone()));
   return out;
 }
