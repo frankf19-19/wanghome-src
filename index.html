@@ -2075,6 +2075,10 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .homemore{display:grid;gap:18px;margin:22px 0 8px}.homemore>*{min-width:0}.homemore .howto{margin-top:0}
 .lostprev .lp-row .lp{width:132px}.lostprev .lp-ph{width:132px;height:132px}
 @media (min-width:900px){.bigstart>.season{grid-column:span 2!important;align-self:start}.bigstart>.injstrip{align-self:start}.bigstart>.season+.injstrip{grid-column:span 1!important}}
+.tiles4{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+.tile4.ta{background:#FFD9C2}.tile4.ta .te{color:#C2581E}:root[data-theme="dark"] .tile4.ta{background:#4A3022}:root[data-theme="dark"] .tile4.ta .te{color:#FFB27F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4.ta{background:#4A3022}:root:not([data-theme="light"]) .tile4.ta .te{color:#FFB27F}}
+@media (max-width:760px){.tiles4{gap:6px!important}.tile4{padding:10px 0 9px!important;border-radius:18px!important}.tile4 .te{width:38px!important;height:38px!important}.tile4 .te .ico,.tile4 .te svg{width:20px!important;height:20px!important}.tile4 b{font-size:12.5px!important;letter-spacing:-.02em}.tile4::before,.tile4::after{width:14px;height:14px;top:-5px}.tile4::before{left:7px}.tile4::after{right:7px}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2147,7 +2151,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.16.3';
+const BUILD = 'v5.16.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3126,6 +3130,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <a href="#/new" class="tile4 tp"><span class="te">${ic("megaphone")}</span><b>毛孩走失了</b><small>登記・做協尋海報</small></a>
       <a href="#/seen" class="tile4 tm"><span class="te">${ic("eye")}</span><b>看到／撿到</b><small>拍照回報給飼主</small></a>
       <button type="button" class="tile4 tb" id="bigNear"><span class="te">${ic("pin")}</span><b>附近走失</b><small>離我最近的毛孩</small></button>
+      <a href="#/adopt" class="tile4 ta"><span class="te">${ic("shelter")}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
     <div id="lostPrev" class="lostprev"><div class="mp-h"><b>${ic('search')} 正在協尋的毛孩</b></div><div class="lp-row">${'<span class="lp"><span class="lp-ph sk"></span><span class="sk" style="width:60%;height:14px;margin-top:6px"></span></span>'.repeat(4)}</div></div>
