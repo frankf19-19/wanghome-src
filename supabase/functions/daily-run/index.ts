@@ -527,10 +527,11 @@ async function runMemberNotifications(nearby = true) {
       lines.push(`・${SP_NAME[r.species] ?? ""} ${r.case_name}（距離約 ${Number(r.distance_km).toFixed(1)} 公里）${r.lost_city}${r.lost_district || ""} ${r.lost_place || ""}`);
       lines.push(`  ${SITE_URL}#/case/${r.case_id}`);
     }
+    if (lst.length > 10) lines.push("", `還有 ${lst.length - 10} 隻，到網站看全部：${SITE_URL}#/lost?near=1`);
     lines.push("", `不想再收到？到「我的 → 通知設定」關閉：${SITE_URL}#/me`, `— ${SITE_NAME}`);
     try {
       if (!(await sendMail(email, `【${SITE_NAME}】你家附近有毛孩走失`, lines.join("\n"), "nearby", MAIL_CAP_LOW))) break;
-      await sb("POST", "notify_log", lst.slice(0, 10).map((r) => ({ user_id: uid, kind: "nearby", ref_id: r.case_id })), undefined, "return=minimal,resolution=ignore-duplicates");
+      await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: "nearby", ref_id: r.case_id })), undefined, "return=minimal,resolution=ignore-duplicates");   // 全部記下來，超過 10 隻的隔天不會再寄
       log(`附近通知：${lst.length} 筆 → 1 位會員`);
     } catch (e) { log("附近通知寄送失敗：", errName(e)); }
   }
