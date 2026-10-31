@@ -2103,6 +2103,41 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
   .tile4.tb b,.tile4.ta b,.tile4.tl b{font-size:13.5px!important;margin:0!important;letter-spacing:0}
   .lostprev{margin-top:6px}.lostprev .mp-h{margin-bottom:10px}
 }
+
+/* ===== 首頁 2.0：分區清楚、留白多、主要按鈕有份量、次要的安靜 ===== */
+.bigstart{gap:0!important}
+.bigstart>*+*{margin-top:14px}
+.bs-hero{background:none!important;box-shadow:none!important;padding:2px 0 0!important;margin:0!important;border-radius:0!important}
+.bs-hero::after{display:none!important}
+.bs-hero .bs-hello{font-size:22px!important}.bs-hero .bs-duo{width:92px!important}
+.tiles4{margin-top:10px!important}
+/* 主要：走失、看到 → 實心色塊 */
+.tile4.tp,.tile4.tm{color:#fff!important;background-image:none!important;box-shadow:0 10px 22px -14px rgba(60,20,30,.55)!important}
+.tile4.tp{background:#C8345F!important}.tile4.tm{background:#1E7F5A!important}
+.tile4.tp small,.tile4.tm small{color:rgba(255,255,255,.86)!important;opacity:1!important}
+.tile4.tp .te,.tile4.tm .te{background:rgba(255,255,255,.18)!important;color:#fff!important;box-shadow:none!important}
+/* 次要：白底細框 */
+.tile4.tb,.tile4.ta,.tile4.tl{background:var(--sheet)!important;border:1px solid var(--line)!important;box-shadow:none!important;color:var(--ink)!important}
+.tile4.tb .te{background:#FFF3D1!important}.tile4.ta .te{background:#FFE6D6!important}.tile4.tl .te{background:#ECE8FF!important}
+/* 區塊之間拉開 */
+.bigstart>.lostprev{margin-top:30px}
+.lostprev .mp-h,.homemore .mp-h,.homelist>h2{margin-bottom:12px}
+.mp-h b{font-size:19px}
+#nearCta:empty{display:none}
+#nearCta{margin-top:18px}
+.near-cta{background:transparent!important;box-shadow:none!important;border:1px dashed var(--line);padding:10px 12px!important}
+.near-cta small{font-size:12.5px}
+/* 提醒類：同一組、白底細框 */
+.bigstart>.season,.bigstart>.injstrip{margin-top:10px}
+.bigstart>.season:first-of-type,.bigstart>#nearCta+.season,.bigstart>#nearCta+.injstrip{margin-top:28px}
+.injstrip{background:var(--sheet)!important;border:1px solid var(--line);color:var(--ink)!important}.injstrip .ico{color:var(--red)}.injstrip b{color:var(--red-ink)}
+.season{background:var(--sheet)!important;border:1px solid var(--line)!important}
+.homemore{gap:34px!important;margin-top:34px!important}
+:root[data-theme=dark] .tile4.tb .te,:root[data-theme=dark] .tile4.ta .te,:root[data-theme=dark] .tile4.tl .te{background:rgba(255,255,255,.08)!important}
+@media (min-width:761px){.bigstart>.lostprev{margin-top:0}.bs-hero .bs-hello{font-size:24px!important}}
+.tile4.tb::before,.tile4.tb::after,.tile4.ta::before,.tile4.ta::after,.tile4.tl::before,.tile4.tl::after{display:none!important}
+#nearCta+.injstrip,#nearCta+.season{margin-top:12px!important}#nearCta:empty+.injstrip,#nearCta:empty+.season{margin-top:28px!important}
+.intake-cta{background:var(--sheet)!important;border:1px solid var(--line);box-shadow:none!important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2175,7 +2210,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.19.4';
+const BUILD = 'v5.20.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
