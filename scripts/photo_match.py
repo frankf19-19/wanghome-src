@@ -156,7 +156,9 @@ def photo_sim():
         if m["photo_sim"] is None: todo.append(m); continue
         if m["photo_sim"] == -1:   # 沒照片：每 12 小時再試（收容所可能補照片）
             t = m.get("photo_checked_at")
-            if not t or now - dt.datetime.fromisoformat(t.replace("Z", "+00:00")) > dt.timedelta(hours=12): todo.append(m)
+            tt = dt.datetime.fromisoformat(t.replace("Z", "+00:00")) if t else None
+            # 2026-10-31 04:30 前那次照片都下載失敗（程式問題），一律重比
+            if not tt or now - tt > dt.timedelta(hours=12) or tt < dt.datetime(2026, 10, 31, 4, 30, tzinfo=dt.timezone.utc): todo.append(m)
     hasph = lambda m: bool((cases[m["case_id"]].get("photos") or [None])[0])
     todo.sort(key=lambda m: (not hasph(m), m["photo_sim"] is not None))
     todo = todo[:MAX_CMP]
