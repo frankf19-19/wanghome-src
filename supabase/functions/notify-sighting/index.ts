@@ -80,8 +80,9 @@ async function pushToUser(userId: string, title: string, body: string, url = "#/
       if (r.ok) n++;
       else if (r.status === 410 || r.status === 400) {   // 手機已經刪掉 App 或代碼失效：不再推
         const why = await r.text().catch(() => "");
-        if (r.status === 410 || /BadDeviceToken|Unregistered|DeviceTokenNotForTopic/.test(why))
+        if (r.status === 410 || /Unregistered/.test(why))
           await fetch(`${base}/rest/v1/push_tokens?token=eq.${encodeURIComponent(t.token)}`, { method: "DELETE", headers: h }).catch(() => {});
+        else console.error("APNs", r.status, why.slice(0, 200));
       }
     } catch (_) { /* 推播失敗不影響寄信 */ }
   }

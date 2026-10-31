@@ -30,7 +30,7 @@ self.addEventListener('fetch', e => {
   }
   if (isShell) {
     // 網頁（不是打開頁面的請求，例如檢查新版）：先拿最新版，失敗才用快取；只快取正常回應
-    e.respondWith(fetch(req).then(r => { if (r.ok && r.type === 'basic' && !r.redirected) { const c = r.clone(); caches.open(CACHE).then(x => x.put('./', c)); return r; }
+    e.respondWith(fetch(req).then(r => { if (r.ok && r.type === 'basic' && !r.redirected) { const c = r.clone(); return caches.open(CACHE).then(x => x.put('./', c)).then(() => r, () => r); }
       // 主機暫時出錯（5xx）：有快取就先用快取版本
       if (r.status >= 500) return caches.match('./').then(c => c || r); return r; })
       .catch(() => caches.match('./')));

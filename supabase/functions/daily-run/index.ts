@@ -299,7 +299,7 @@ async function apnsAuth(): Promise<string> {
 // 推給某位會員的所有 iPhone；回傳成功幾支
 async function pushToUser(userId: string, title: string, body: string, url = "#/inbox"): Promise<number> {
   if (!APNS_P8 || !APNS_KEY_ID || !APNS_TEAM_ID || !userId) return 0;
-  const base = Deno.env.get("SUPABASE_URL")!, key = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
+  const base = Deno.env.get("SUPABASE_URL")!, key = serviceKey();
   const h = { apikey: key, ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}) };
   let toks: { token: string; platform: string }[] = [];
   try { const r = await fetch(`${base}/rest/v1/push_tokens?select=token,platform&user_id=eq.${userId}`, { headers: h }); if (r.ok) toks = await r.json(); } catch (_) { return 0; }
@@ -312,8 +312,9 @@ async function pushToUser(userId: string, title: string, body: string, url = "#/
       if (r.ok) n++;
       else if (r.status === 410 || r.status === 400) {   // 手機已經刪掉 App 或代碼失效：不再推
         const why = await r.text().catch(() => "");
-        if (r.status === 410 || /BadDeviceToken|Unregistered|DeviceTokenNotForTopic/.test(why))
+        if (r.status === 410 || /Unregistered/.test(why))
           await fetch(`${base}/rest/v1/push_tokens?token=eq.${encodeURIComponent(t.token)}`, { method: "DELETE", headers: h }).catch(() => {});
+        else console.error("APNs", r.status, why.slice(0, 200));
       }
     } catch (_) { /* 推播失敗不影響寄信 */ }
   }

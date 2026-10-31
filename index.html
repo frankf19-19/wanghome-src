@@ -2504,7 +2504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.8.1';
+const BUILD = 'v6.8.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2923,6 +2923,7 @@ async function init(){
     try{route()}catch(e){console.warn('route',e)}
     splashHide();
     try{await initAuth()}catch(e){console.warn('auth init',e)}
+    if(was&&!me()){setReturn(location.hash||'#/me');toast('登入已過期，請重新登入',6000);pushDrop()}
     if(((me()&&me().id)||null)!==(was||null)&&!(__dirty||__wiz)){try{route()}catch(_){}}   // 實際登入狀態和記住的不同（例如已過期）：重畫一次
     return;
   }
@@ -3667,7 +3668,7 @@ async function pushInit(ask){if(!pushOK()||!me())return;pushBind();const P=capPl
       if(!ok)return;st=await P.requestPermissions()}
     if(st.receive==='granted')await P.register();
     else if(ask)toast('通知被關掉了，可以到手機「設定」→ 汪喵回家 → 通知 打開',6000)}catch(_){}}
-async function pushDrop(){try{const t=__pushToken||localStorage.getItem('wh_push_tok');if(t&&me())await sb.rpc('drop_push_token',{p_token:t})}catch(_){}}
+async function pushDrop(){if(!IS_APP)return;try{const t=__pushToken||localStorage.getItem('wh_push_tok');if(t)await sb.rpc('drop_push_token',{p_token:t})}catch(_){}}
 function inboxSeen(){try{return +localStorage.getItem('wh_inbox_seen')||0}catch(_){return 0}}
 function inboxUnread(){try{return +localStorage.getItem('wh_inbox_n')||0}catch(_){return 0}}
 async function inboxItems(){if(!me())return [];const out=[];const since=new Date(Date.now()-14*864e5).toISOString();
@@ -4230,7 +4231,7 @@ async function checkUpdate(){
     const v=await fetch('version.json?u='+now,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>j&&/^v[\d.]+$/.test(j.v)?j.v:'').catch(()=>'');
     if(!v||v===BUILD)return;
     const busy=__wiz||__dirty||document.body.classList.contains('formpage')||!!document.querySelector('.lightbox form,.lightbox textarea');
-    try{await fetch('./?fresh='+now,{cache:'no-store'})}catch(_){}   // 先把新版存進手機（離線殼），重新整理才會拿到新版
+    try{await fetch('./?fresh='+now,{cache:'no-store'}).then(r=>r.text())}catch(_){}   // 先把新版存進手機（離線殼），重新整理才會拿到新版
     if(!busy){let done='';try{done=sessionStorage.getItem('wh_upd')||''}catch(_){}if(done!==v){try{sessionStorage.setItem('wh_upd',v)}catch(_){}location.reload();return}}
     if(!$('#updBar')){const d=document.createElement('button');d.id='updBar';d.type='button';d.className='updbar';d.textContent='網站有新版本，點這裡更新';d.onclick=()=>location.reload();document.body.appendChild(d)}
   }catch(_){}
@@ -6073,7 +6074,7 @@ async function initAuth(){
   sb.auth.onAuthStateChange((ev,s)=>{
     const was=!!session;session=s;updateAuthUI();
     if(ev==='SIGNED_IN'&&!was){toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}}
-    if(ev==='SIGNED_OUT'){if(window.__userSignOut){window.__userSignOut=false;toast('已登出')}else{setReturn(location.hash||'#/me');toast('登入已過期，請重新登入',6000);if(!(__dirty||__wiz))setTimeout(()=>{try{route()}catch(_){}},50)}if(IS_APP)lnClear()}   // 不是自己按登出：多半是登入過期
+    if(ev==='SIGNED_OUT'){if(window.__userSignOut){window.__userSignOut=false;toast('已登出')}else{setReturn(location.hash||'#/me');toast('登入已過期，請重新登入',6000);if(!(__dirty||__wiz))setTimeout(()=>{try{route()}catch(_){}},50)}if(IS_APP){lnClear();pushDrop()}}   // 不是自己按登出：多半是登入過期
     if(ev==='SIGNED_IN'&&IS_APP)setTimeout(()=>lnSync(),1500);
   });
   updateAuthUI();
