@@ -2055,6 +2055,8 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .notice.moa{background:#EEF4FF;border-color:#D6E2FB;margin-top:10px}.notice.moa b{display:block;margin-bottom:2px}:root[data-theme=dark] .notice.moa{background:#1F2A3D;border-color:#2E3E5A}
 .mkc{width:40px;height:40px;border-radius:50%;background:var(--red-fill,#C0365B);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;border:3px solid #fff;box-shadow:0 0 0 5px rgba(192,54,91,.25),0 3px 8px rgba(0,0,0,.25)}
 .pop-ph{display:block;margin:-4px -4px 8px;border-radius:10px;overflow:hidden}.pop-ph img{display:block;width:180px;height:130px;object-fit:cover}
+.ccard .ph.noimg{aspect-ratio:auto;height:78px;background:#F4EFF1}.ccard .ph.noimg::after{background-size:26px!important;background-position:calc(100% - 14px) calc(100% - 12px)!important;opacity:.7}.ccard .ph.noimg::before{content:'飼主沒有提供照片';position:absolute;left:12px;bottom:10px;font-size:12.5px;color:var(--ink-3)}
+:root[data-theme=dark] .ccard .ph.noimg{background:#24302F}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2145,7 +2147,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.16.2';
+const BUILD = 'v5.16.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2934,7 +2936,7 @@ function renderSetup(){
 /* ============================================================
    首頁 v1.1：走失 / 拾獲 / 地圖 三個分頁、我附近、最新目擊
    ============================================================ */
-const homeState={tab:'lost',species:[],city:[],status:['searching'],reward:false,q:'',chip:'',near:null,limit:60};
+const homeState={tab:'lost',species:[],city:[],status:['searching'],reward:false,q:'',chip:'',near:null,limit:24};
 // 多選篩選：一個就用 eq，多個用 in；狗＋貓都選＝不限
 function fIn(q,col,arr){return !arr||!arr.length?q:arr.length===1?q.eq(col,arr[0]):q.in(col,arr)}
 function fSp(q){return homeState.species.length===1?q.eq('species',homeState.species[0]):q}
@@ -2951,7 +2953,7 @@ function openFilterSheet(after){const st={species:[...homeState.species],city:[.
   el.onclick=e=>{const c=e.target.closest('.fchip[data-k]');if(c){const a=st[c.dataset.k],v=c.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);c.classList.toggle('on',i<0);c.setAttribute('aria-pressed',i<0);return}
     const r=e.target.closest('[data-rw]');if(r){st.reward=!st.reward;r.classList.toggle('on',st.reward);r.setAttribute('aria-pressed',st.reward);return}
     if(e.target.closest('[data-clear]')){st.species=[];st.city=[];st.status=['searching'];st.reward=false;el.querySelectorAll('.fchip').forEach(x=>{const on=x.dataset.k==='status'&&x.dataset.v==='searching';x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});return}
-    if(e.target.closest('[data-apply]')){if(!st.status.length)st.status=['searching'];Object.assign(homeState,st,{limit:60});closeOverlay(el);after&&after();return}
+    if(e.target.closest('[data-apply]')){if(!st.status.length)st.status=['searching'];Object.assign(homeState,st,{limit:24});closeOverlay(el);after&&after();return}
     if(e.target===el)closeOverlay(el)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
 function fActiveHTML(){const a=[];homeState.species.length===1&&a.push(['sp',homeState.species[0]==='dog'?'狗':'貓']);homeState.city.forEach(c=>a.push(['city',c,c]));
@@ -3098,7 +3100,7 @@ function renderHow(k){const h=HOW[k];if(!h){goReplace('#/');return}setTitle(h.t)
   <div class="how-cta"><a class="btn big block" href="${h.cta[0]}">${esc(h.cta[1])}</a></div>`}
 // 首頁：正在協尋的毛孩（左右滑的預覽），點「看全部」到協尋名單
 async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
-  const [{data,error},{count}]=await Promise.all([sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,lost_at,status,poster').eq('status','searching').order('lost_at',{ascending:false}).limit(40),
+  const [{data,error},{count}]=await Promise.all([sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,lost_at,status,poster').eq('status','searching').not('photos','eq','{}').order('lost_at',{ascending:false}).limit(12),
     sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching')]);
   if(_n!==navId||!el.isConnected||error||!data)return;
   const vis=data.filter(c=>!userHidden(c)),list=[...vis.filter(c=>c.photos&&c.photos.length),...vis.filter(c=>!(c.photos&&c.photos.length))].slice(0,12);
@@ -3162,9 +3164,9 @@ ${bigStartHTML()}
   `;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c)c.textContent=n?` ${n}`:'';const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
   $('#btnFilter').onclick=()=>openFilterSheet(()=>{showF();loadList()});
-  $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;homeState.limit=60;showF();loadList()};
-  document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;homeState.limit=60;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));setHomeTab(homeState.tab);loadList()}});
-  const run=()=>{const qv=$('#fQ').value.trim();homeState.chip='';homeState.q=qv;homeState.limit=60;loadList()};
+  $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;homeState.limit=24;showF();loadList()};
+  document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;homeState.limit=24;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));setHomeTab(homeState.tab);loadList()}});
+  const run=()=>{const qv=$('#fQ').value.trim();homeState.chip='';homeState.q=qv;homeState.limit=24;loadList()};
   let t;['fQ'].forEach(id=>$('#'+id).addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,400)}));
   $('#btnNear').onclick=()=>{
     if(homeState.near){homeState.near=null;$('#btnNear').innerHTML=ic('pin')+' 我附近';$('#btnNear').classList.remove('on');$('#nearInfo').textContent='';
@@ -3437,8 +3439,8 @@ async function loadList(){
   if(homeState.tab==='map')return loadMapAll(el);
   el.className='grid';const more=!!homeState._more;homeState._more=false;if(!more)el.innerHTML=skel();   // 「顯示更多」時保留原本的卡片，不閃空
   if(homeState.tab==='found')return loadFoundList(el,more);
-  const lim=homeState.near?200:(homeState.limit||60);
-  let q=sb.from('cases_public').select('*').order('last_activity',{ascending:false}).limit(lim);
+  const lim=homeState.near?200:(homeState.limit||24);
+  const build=()=>{let q=sb.from('cases_public').select('*').order('last_activity',{ascending:false});
   q=fIn(q,'status',homeState.status);q=fSp(q);q=fIn(q,'lost_city',homeState.city);
   // 我附近：先限定在附近約 60 公里內，再依距離排序（全台案件很多時，附近較舊的案件也不會被漏掉）
   if(homeState.near){const {lat,lng}=homeState.near;q=q.gte('lost_lat',lat-.55).lte('lost_lat',lat+.55).gte('lost_lng',lng-.6).lte('lost_lng',lng+.6)}
@@ -3449,8 +3451,14 @@ async function loadList(){
     vs.forEach(v=>{const k=`%${v}%`;ors.push(`name.ilike.${k}`,`breed.ilike.${k}`,`colour.ilike.${k}`,`lost_place.ilike.${k}`,`lost_district.ilike.${k}`,`lost_city.ilike.${k}`,`features.ilike.${k}`)});
     if(/^\d{4}$/.test(kw))ors.push(`chip_last4.eq.${kw}`);
     q=q.or(ors.join(','))}
-  const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
-  if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(60,(homeState.limit||120)-60);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
+  return q};
+  // 有照片的先列（依最新動態），不夠再接沒有照片的；「我附近」照距離排
+  let data,error;
+  if(homeState.near)({data,error}=await build().limit(lim));
+  else{const r1=await build().not('photos','eq','{}').not('photos','is',null).limit(lim);({data,error}=r1);
+    if(!error&&data.length<lim){const r2=await build().or('photos.is.null,photos.eq.{}').limit(lim-data.length);if(!r2.error)data=data.concat(r2.data||[])}}
+  if(my!==listSeq||!el.isConnected)return;
+  if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(24,(homeState.limit||48)-24);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
   if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
   if(!data.length){
     if(homeState.near&&!(homeState.q||homeState.chip||fCount()>0)){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有協尋中的案件</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}
@@ -3458,7 +3466,7 @@ async function loadList(){
     if(filtered){el.innerHTML=`<div class="empty-card"><div class="big">${ic("search")}</div><b>找不到符合條件的案件</b><p class="small">試試別的關鍵字，或清除篩選看全部。</p><button type="button" class="btn" id="btnClearF">清除篩選</button></div>`;
       $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
     el.innerHTML=emptyCard('lost');return}
-  const hp=c=>!!(c.photos&&c.photos.length);const ord=homeState.near?sortNear(data,'lost_lat','lost_lng'):[...data.filter(hp),...data.filter(c=>!hp(c))];   // 有照片的排前面
+  const ord=homeState.near?sortNear(data,'lost_lat','lost_lng'):data;
   el.innerHTML=ord.map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
 }
 let __govShown=[];
@@ -3471,15 +3479,15 @@ async function govListHTML(){let rows;try{rows=await fetchGovLost()}catch(_){ret
   return govHead(list.length)+list.slice(0,60).map(govCard).join('')+(list.length>60?`<div class="more-row"><a class="btn ghost big" href="#/gov-lost">看全部 ${list.length} 筆遺失申報</a></div>`:'')}
 // 清單一次 60 筆，滿了就顯示「顯示更多」
 function moreBtn(n,lim){return !homeState.near&&n>=lim?`<div class="more-row"><button type="button" class="btn ghost big" id="btnMore">顯示更多（目前 ${n} 筆）</button></div>`:''}
-function bindMore(el){const b=el.querySelector('#btnMore');if(b)b.onclick=()=>{homeState.limit=(homeState.limit||60)+60;homeState._more=true;b.disabled=true;b.textContent='載入中…';const y=scrollY;const r=loadList();if(r&&r.then)r.then(()=>window.scrollTo(0,y))}}
+function bindMore(el){const b=el.querySelector('#btnMore');if(b)b.onclick=()=>{homeState.limit=(homeState.limit||24)+24;homeState._more=true;b.disabled=true;b.textContent='載入中…';const y=scrollY;const r=loadList();if(r&&r.then)r.then(()=>window.scrollTo(0,y))}}
 async function loadFoundList(el,more){
   const my=listSeq;
-  const lim=homeState.near?200:(homeState.limit||60);
+  const lim=homeState.near?200:(homeState.limit||24);
   let q=sb.from('found_public').select('*').eq('status','open').order('seen_at',{ascending:false}).limit(lim);
   q=fIn(q,'city',homeState.city);q=fSp(q);
   if(homeState.near){const {lat,lng}=homeState.near;q=q.gte('lat',lat-.55).lte('lat',lat+.55).gte('lng',lng-.6).lte('lng',lng+.6)}
   const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
-  if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(60,(homeState.limit||120)-60);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
+  if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(24,(homeState.limit||48)-24);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
   if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
   if(!data.length){if(homeState.near){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有拾獲／目擊通報</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}el.innerHTML=emptyCard('found');return}
   el.innerHTML=sortNear(data,'lat','lng').map(foundCardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
