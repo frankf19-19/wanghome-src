@@ -1457,7 +1457,7 @@ body.has-cta .toast{bottom:calc(var(--tabbar-h) + 76px + env(safe-area-inset-bot
 @media (max-width:760px){
   #app:not(.listonly) .homelist{display:none}
 }
-#app.listonly .bigstart,#app.listonly .apphome,#app.listonly .ah-sec,#app.listonly .ah-more,#app.listonly .homemore,#app.listonly #recentWrap,#app.listonly #homeWrap,#app.listonly .crosslink,#app.listonly .install{display:none!important}
+#app.listonly .bigstart,#app.listonly .apphome,#app.listonly .ah-feed,#app.listonly .homemore,#app.listonly #recentWrap,#app.listonly #homeWrap,#app.listonly .crosslink,#app.listonly .install{display:none!important}
 #app.listonly .homelist>h2:first-child{margin-top:4px;font-size:26px}
 #app.listonly .homelist>h2:first-child .ico{display:none}
 .lostprev:empty{display:none}
@@ -2104,59 +2104,39 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
   .lostprev{margin-top:6px}.lostprev .mp-h{margin-bottom:10px}
 }
 
-/* ===== 手機首頁（像 App）：只在手機寬度，電腦版維持原樣 ===== */
+/* ===== 手機首頁（App）：只有搜尋、兩個按鈕、最新走失清單。電腦版維持原樣 ===== */
 html{-webkit-tap-highlight-color:transparent}
-.apphome,.ah-sec,.ah-more{display:none}
+.apphome,.ah-feed{display:none}
 @media (max-width:760px){
-  .apphome{display:block;padding-top:2px}
-  .ah-sec,.ah-more{display:block}
-  .apphome>.mine,.apphome>#albBanner:not(:empty){margin-bottom:14px}
-  .ah-hello{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 12px}
-  .ah-hi{margin:0;font-size:15px;color:var(--ink-3);font-weight:600}
-  .ah-q{margin:0;font-size:25px;line-height:1.25;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
-  .ah-hello img{width:82px;height:auto;flex:none;margin-right:-2px}
-  .ah-search{display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:999px;background:var(--sheet);border:1px solid var(--line);color:var(--ink-3)!important;text-decoration:none!important;font-size:15px;box-shadow:0 1px 2px rgba(80,30,40,.05)}
-  .ah-search .ico{width:20px;height:20px;color:var(--ink-2);flex:none}
-  .ah-main{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-  .ah-big{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px 14px 13px;border-radius:22px;color:#fff!important;text-decoration:none!important;box-shadow:0 10px 20px -14px rgba(60,20,30,.6)}
-  .ah-big.red{background:#C8345F}.ah-big.green{background:#1E7F5A}
-  .ah-big .te{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.18);margin-bottom:8px}
-  .ah-big .te .ico{width:22px;height:22px}
-  .ah-big b{font-size:17px;line-height:1.3}
-  .ah-big small{font-size:12.5px;color:rgba(255,255,255,.85);white-space:nowrap}
-  .ah-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:18px 0 4px}
-  .ah-grid a{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-2)!important;text-decoration:none!important;white-space:nowrap;letter-spacing:-.02em;padding:2px 0}
-  .ah-grid span{display:grid;place-items:center;width:52px;height:52px;border-radius:17px;--c:#E86A92;background:color-mix(in srgb,var(--c) 15%,var(--sheet));color:var(--c)}
-  .ah-grid span .ico{width:24px;height:24px}
-  .ah-grid .g1{--c:#D9466F}.ah-grid .g2{--c:#E07A3F}.ah-grid .g3{--c:#2E9C72}.ah-grid .g4{--c:#6A55D0}.ah-grid .g5{--c:#D23C3C}
-  .ah-tip{margin-top:16px;background:var(--sheet);border-radius:16px;box-shadow:var(--lift)}
-  .ah-tip summary{display:flex;align-items:center;gap:10px;padding:12px 14px;list-style:none;cursor:pointer;font-size:14.5px}
-  .ah-tip summary::-webkit-details-marker{display:none}
-  .ah-tip summary b{flex:1;font-weight:700}.ah-tip summary .mrc{transition:transform .2s}.ah-tip[open] summary .mrc{transform:rotate(90deg)}
-  .ah-tip p{margin:0;padding:0 14px 14px;font-size:14px;color:var(--ink-2)}
-  .ah-sec{margin-top:16px;background:var(--sheet);border-radius:22px;box-shadow:var(--lift);padding:16px 0 10px 16px;overflow:hidden}
-  .ah-sec .mp-h{margin:0 16px 12px 0!important}
-  .ah-sec .mp-h b{font-size:18px;font-weight:800}
-  .ah-sec .mp-h b .ico,.ah-sec .mp-h b svg{display:none}
-  .ah-sec .mp-h a{font-size:14.5px;color:var(--red)!important;font-weight:600}
-  .ah-sec .lostprev{margin:0!important}
-  .ah-sec .lp-row,.ah-sec .mp-row,.ah-sec .reunite,.ah-sec .ht-row{padding-right:16px;scroll-padding-left:0;scroll-snap-type:x mandatory}
-  .ah-sec .lp,.ah-sec .mp,.ah-sec .reunite>a,.ah-sec .ht{scroll-snap-align:start}
-  .ah-sec .lostprev .lp-row .lp{width:124px}.ah-sec .lostprev .lp-ph{width:124px;height:124px;border-radius:18px}
-  .ah-sec .lp b{font-size:15px}.ah-sec .lp small{font-size:12.5px}
-  .ah-sec .reunite{gap:14px}.ah-sec .reunite>a{flex:none;width:96px}.ah-sec .reunite .ph{width:96px!important;height:96px!important}
-  .ah-sec .reunite b{font-size:14px}
-  .ah-sec .ht{width:136px}
-  .ah-sec .howto{margin:0}
-  .ah-opt:has(>.mypets:empty),.ah-opt:has(>.lostprev:empty),.ah-opt:has(>#homeWrap.hidden){display:none}
-  .ah-more .mlh{margin:22px 6px 8px}
-  .ah-big:active,.ah-grid a:active,.ah-search:active,.lp:active,.reunite>a:active,.ht:active,.ah-tip summary:active{transform:scale(.96);transition:transform .1s}
-  .ah-big,.ah-grid a,.ah-search,.lp,.reunite>a,.ht{transition:transform .15s;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-  #app:not(.listonly) .ah-how{margin-bottom:8px}
+  .apphome{display:block;padding-top:6px}.ah-feed{display:block}
+  .apphome>.mine{margin-bottom:14px}
   header{position:sticky!important;top:0}
   body.scrolled header{background:color-mix(in srgb,var(--paper) 82%,transparent)!important;backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px)}
+  .ah-search{display:flex;align-items:center;gap:10px;height:50px;padding:0 18px;border-radius:999px;background:var(--sheet);border:1px solid var(--line);color:var(--ink-3)!important;text-decoration:none!important;font-size:16px}
+  .ah-search .ico{width:20px;height:20px;color:var(--ink-2);flex:none}
+  .ah-main{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .ah-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:118px;padding:16px 8px;border-radius:24px;color:#fff!important;text-decoration:none!important;text-align:center}
+  .ah-big.red{background:#C8345F}.ah-big.green{background:#1E7F5A}
+  .ah-big .te{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.2)}
+  .ah-big .te .ico{width:24px;height:24px}
+  .ah-big b{font-size:17px;line-height:1.3}
+  .ah-feed{margin-top:26px}
+  .af-h{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 10px}
+  .af-h b{font-size:20px;font-weight:800}.af-h a{font-size:15px;color:var(--red)!important;font-weight:600;text-decoration:none!important}
+  .af-list{background:var(--sheet);border-radius:20px;box-shadow:var(--lift);overflow:hidden}
+  .af-row{display:flex;align-items:center;gap:14px;padding:12px 14px;color:var(--ink)!important;text-decoration:none!important}
+  .af-row+.af-row{box-shadow:0 -1px 0 var(--line)}
+  .af-ph{flex:none;width:64px;height:64px;border-radius:14px;overflow:hidden;background:var(--line);display:grid;place-items:center;color:var(--ink-3)}
+  .af-ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .af-t{flex:1;min-width:0;display:flex;flex-direction:column}
+  .af-t b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .af-t small{font-size:14px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .af-row em{flex:none;font-style:normal;font-size:13px;font-weight:700;color:var(--red-ink,#A02248);background:var(--red-soft,#FBE3DA);padding:4px 10px;border-radius:999px}
+  .ah-feed .sk{display:block;background:var(--line);border-radius:8px}
+  .af-all{display:block;margin:14px 0 6px;padding:14px;text-align:center;border-radius:16px;background:var(--sheet);border:1px solid var(--line);font-size:16px;font-weight:700;color:var(--ink)!important;text-decoration:none!important}
+  .ah-big:active,.ah-search:active,.af-row:active,.af-all:active{opacity:.75}
+  .ah-big,.ah-search,.af-row,.af-all{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 }
-@media (prefers-reduced-motion:reduce){.ah-big:active,.ah-grid a:active,.ah-search:active,.lp:active{transform:none}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -2229,7 +2209,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.22.0';
+const BUILD = 'v5.23.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3214,6 +3194,9 @@ async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
   const vis=data.filter(c=>!userHidden(c)),list=[...vis.filter(c=>c.photos&&c.photos.length),...vis.filter(c=>!(c.photos&&c.photos.length))].slice(0,12);
   if(!list.length){el.innerHTML='';return}
   const tot=count||0;
+  if(el.classList.contains('feed')){el.innerHTML=`<div class="af-h"><b>最新走失</b><a href="#/lost">全部 ›</a></div>
+  <div class="af-list">${list.slice(0,6).map(c=>{const ph=c.photos?.[0];return `<a class="af-row" href="#/case/${c.id}"><span class="af-ph ${ph?'':'noimg'}">${ph?thumbImg(ph,c.name):spIc(c.species)}</span><span class="af-t"><b>${esc(c.name)}</b><small>${esc((c.lost_city||'')+(c.lost_district||''))}</small></span><em>第 ${daysSince(c.lost_at)} 天</em></a>`}).join('')}</div>
+  <a class="af-all" href="#/lost">看全部${tot?` ${tot} 隻`:''}走失毛孩</a>`;return}
   el.innerHTML=`<div class="mp-h"><b>${ic('search')} 正在協尋的毛孩${tot?` <span class="lp-n">${tot}</span>`:''}</b><a href="#/lost">看全部 ›</a></div>
   <div class="lp-row">${list.map(c=>{const ph=c.photos?.[0];return `<a class="lp" href="#/case/${c.id}"><span class="lp-ph ${ph?'':'noimg'} ${c.species==='cat'?'cat':''}">${ph?thumbImg(ph,c.name):spIc(c.species)}<em>第 ${daysSince(c.lost_at)} 天</em></span><b>${esc(c.name)}</b><small>${esc((c.lost_city||'')+(c.lost_district||''))}</small></a>`}).join('')}
   <a class="lp lp-all" href="#/lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>&nbsp;</small></a></div>`;
@@ -3254,34 +3237,19 @@ function deskStartHTML(){return `  <section class="bigstart" aria-label="你需�
 `}
 // 手機首頁（像 App）：搜尋列、兩個主要按鈕、一排常用功能，下面每一區一張白卡
 const isMobV=()=>matchMedia('(max-width:760px)').matches;
-function bigStartHTML(){if(!isMobV())return deskStartHTML();const t=seasonTip();
-  return `  <section class="apphome" aria-label="你需要什麼幫忙">
+function bigStartHTML(){if(!isMobV())return deskStartHTML();
+  return `  <section class="apphome" aria-label="汪喵回家">
     ${mineHTML()}
-    ${me()?'<div id="albBanner"></div>':''}
-    <div class="ah-hello"><div><p class="ah-hi">嗨<span id="hiName"></span>！</p><p class="ah-q">今天要幫什麼忙？</p></div><img src="duo.svg" alt="" width="220" height="150" aria-hidden="true"></div>
-    <a class="ah-search" href="#/lost?s=1">${ic('search')}<span>搜尋走失毛孩：名字、品種、地區</span></a>
+    <a class="ah-search" href="#/lost?s=1">${ic('search')}<span>搜尋走失的毛孩</span></a>
     <div class="ah-main">
-      <a href="#/new" class="ah-big red"><span class="te">${ic('megaphone')}</span><b>毛孩走失了</b><small>登記・做協尋海報</small></a>
-      <a href="#/seen" class="ah-big green"><span class="te">${ic('eye')}</span><b>看到／撿到</b><small>拍照回報給飼主</small></a>
+      <a href="#/new" class="ah-big red"><span class="te">${ic('megaphone')}</span><b>我的毛孩走失了</b></a>
+      <a href="#/seen" class="ah-big green"><span class="te">${ic('eye')}</span><b>我看到／撿到</b></a>
     </div>
-    <nav class="ah-grid" aria-label="常用功能">
-      <a href="#/lost?near=1"><span class="g1">${ic('pin')}</span>附近走失</a>
-      <a href="#/intake"><span class="g2">${ic('shelter')}</span>收容所新收</a>
-      <a href="#/adopt"><span class="g3">${ic('heart')}</span>領養毛孩</a>
-      <a href="#/health"><span class="g4">${ic('steth')}</span>健康手冊</a>
-      <a href="#/injured"><span class="g5">${ic('aid')}</span>受傷求助</a>
-    </nav>
-    ${t?`<details class="ah-tip"><summary><span aria-hidden="true">${t.ic}</span><b>${t.t}</b>${ic('chev','mrc')}</summary><p>${t.b}</p></details>`:''}
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   </section>
-  <section class="ah-sec" aria-label="正在協尋的毛孩"><div id="lostPrev" class="lostprev"><div class="mp-h"><b>正在協尋的毛孩</b></div><div class="lp-row">${'<span class="lp"><span class="lp-ph sk"></span><span class="sk" style="width:60%;height:14px;margin-top:6px"></span></span>'.repeat(4)}</div></div></section>
+  <section class="ah-feed" aria-label="最新走失"><div id="lostPrev" class="feed"><div class="af-h"><b>最新走失</b></div><div class="af-list">${'<div class="af-row"><span class="af-ph sk"></span><span class="af-t"><span class="sk" style="width:40%;height:16px"></span><span class="sk" style="width:65%;height:13px;margin-top:8px"></span></span></div>'.repeat(5)}</div></div></section>
 `}
-function appMoreHTML(){const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
-  return `<section class="ah-sec ah-opt"><div id="myPets" class="mypets"></div></section>
-  <section class="ah-sec ah-opt"><div id="intakePrev" class="lostprev intakeprev"></div></section>
-  <section class="ah-more"><p class="mlh">更多幫助</p><div class="mgroup"><span id="nearCta" hidden></span>${row('#/lost?tab=map','map','走失地圖','c4')}${row('#/learn','star','毛孩小學堂','c3')}</div></section>
-  <section class="ah-sec ah-opt"><div id="homeWrap" class="hidden"><div class="mp-h"><b>最近回家的毛孩</b></div><div class="reunite" id="reunite"></div></div></section>
-  <section class="ah-sec ah-how"><div class="howto">${howToHTML()}</div></section>`}
+function appMoreHTML(){return ''}
 // 「協尋」分頁（#/lost）＝只看名單；首頁（#/）＝四宮格＋協尋預覽。帶 ?tab= 的舊連結也直接進名單
 function isListOnly(){const h=location.hash||'#/';return h.split('?')[0]==='#/lost'||!!qs(h).tab}
 async function renderHome(){const _n=navId;
@@ -6635,7 +6603,7 @@ function renderLogin(){
 function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
-  <p class="mlh">協尋資源</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}${row('#/injured','siren','受傷毛孩通報','c2')}${row('#/adopt','shelter','領養毛孩','c3')}${row('#/?tab=map','map','走失地圖','c4')}</div>
+  <p class="mlh">協尋資源</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}${row('#/injured','siren','受傷毛孩通報','c2')}${row('#/intake','search','收容所最近新收','c2')}${row('#/adopt','shelter','領養毛孩','c3')}${row('#/?tab=map','map','走失地圖','c4')}</div>
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${IS_APP?'':row('#/thanks','heart','贊助感謝牆','c1')}${row('#/contact','mail','聯絡我們','c3')}${row('#/terms','doc','使用條款','c5')}${row('#/privacy','shield','隱私權政策','c5')}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
   <p class="mver">汪喵回家 ${BUILD}${IS_APP?'':'・全台走失狗貓協尋平台'}</p></div>`}
