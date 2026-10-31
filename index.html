@@ -2043,6 +2043,9 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 @media (max-width:560px){.empty-slim{flex-wrap:wrap}.empty-slim img,.empty-slim .es-ic{display:none}.empty-slim .btn{width:100%}}
 .htmap[style]{background-size:cover!important;background-position:center!important}.htmap[style]::before{content:"";position:absolute;inset:0;background:rgba(255,255,255,.12)}
 .hmk{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--red-fill,#C0365B);color:#fff;font-style:normal;font-weight:900;font-size:11.5px;display:grid;place-items:center;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}.hmk.s{background:#1F2A24;left:66%;top:22%}.htmap .hmk.a{left:24%;top:26%}.htmap .hmk.b{left:44%;top:44%}.htmap.n .hmk{font-size:12px}.htmap.n .hmk.a{left:22%;top:24%}.htmap.n .hmk.b{left:66%;top:56%;background:#E08A2E}.htmap.n .hmk.c{left:34%;top:68%}
+.how-hero{display:grid;place-items:center;height:290px;margin:10px 0 18px;border-radius:28px;background:linear-gradient(135deg,#FDE7EE,#E6EEFB);overflow:hidden}.how-hero .ht{transform:scale(1.7);pointer-events:none}.how-hero .ht>b,.how-hero .ht>small{display:none}.how-hero .ht-m{margin:0}
+.how-t{margin:0 0 6px}.how-steps{list-style:none;counter-reset:hs;padding:0;margin:18px 0}.how-steps li{counter-increment:hs;position:relative;padding:12px 0 12px 48px;border-top:1px solid var(--line)}.how-steps li:first-child{border-top:0}.how-steps li::before{content:counter(hs);position:absolute;left:0;top:12px;width:32px;height:32px;border-radius:50%;background:var(--red-soft);color:var(--red);font-weight:900;display:grid;place-items:center}.how-steps b{display:block;font-size:16.5px}.how-steps span{color:var(--ink-2);font-size:15px}
+.how-cta{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 10px}.how-cta .btn{flex:1;min-width:160px}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2648,7 +2651,13 @@ function askSheet({title,body,ok='確定',danger=false,cancel='取消'}){return 
   let done=false;const fin=v=>{if(done)return;done=true;if(v&&danger)__submitting=true;const back=overlayOpen===el;closeOverlay(el);if(!back)return res(v);let t;const ok=()=>{clearTimeout(t);removeEventListener('popstate',ok);res(v)};addEventListener('popstate',ok);t=setTimeout(ok,500)};
   el.onclick=e=>{if(e.target.closest('[data-ok]'))fin(true);else if(e.target===el||e.target.closest('.sh-x'))fin(false)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'));if(danger)setTimeout(()=>{if(el.isConnected){const x=el.querySelector('.sh-x');if(x)x.focus({preventScroll:true})}},280)})}
-function restoreScroll(y){const id=navId;let n=0;const t=()=>{if(id!==navId)return;const busy=app.querySelector('.skel,.empty.loading,.pskel');if((!busy&&document.documentElement.scrollHeight>=y+innerHeight*0.5)||n>60){window.scrollTo(0,y);return}n++;setTimeout(t,50)};setTimeout(t,0)}
+function restoreScroll(y){const id=navId;let n=0,user=false,done=false,ro=null;
+  // 回到上一頁：等頁面畫好再捲回原位置；之後 3 秒內內容還在長（照片、名單、地圖慢慢載入）就持續對準，使用者自己一動就停
+  const stopUser=()=>{user=true};const evs=['wheel','touchstart','keydown','mousedown'];evs.forEach(e=>addEventListener(e,stopUser,{passive:true,once:true}));
+  const fin=()=>{if(done)return;done=true;evs.forEach(e=>removeEventListener(e,stopUser));if(ro)try{ro.disconnect()}catch(_){}};
+  const go=()=>{if(id!==navId||user)return fin();if(Math.abs(scrollY-y)>2)window.scrollTo(0,Math.min(y,document.documentElement.scrollHeight-innerHeight))};
+  const t=()=>{if(id!==navId||user)return fin();const busy=app.querySelector('.skel,.empty.loading,.pskel');if((!busy&&document.documentElement.scrollHeight>=y+innerHeight*0.5)||n>60){go();
+      try{ro=new ResizeObserver(go);ro.observe(app)}catch(_){}setTimeout(fin,3000);return}n++;setTimeout(t,50)};setTimeout(t,0)}
 window.addEventListener('scroll',()=>{scrollMem[curHash]=scrollY},{passive:true});
 // ===== 手機「返回」：記住在網站裡走了幾步；有上一頁就退回，直接打開內頁時回到合理的上一層 =====
 let navDepth=0,__replacing=false,__firstRoute=true;
@@ -2740,7 +2749,7 @@ function route(){window.__lastRoute=Date.now();
   curHash=newHash;
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else if(!samePage)window.scrollTo(0,0);
-  app.classList.toggle('narrow',/^#\/(new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
+  app.classList.toggle('narrow',/^#\/(how\/|new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
   let m;
   if(!window.L&&!leafletGaveUp&&/^#\/(new$|report\/|found\/new|injured$|found\/[0-9a-f-]{36}$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
   if(path==='#/'||path==='#'||path==='#/lost')return renderHome();
@@ -2763,6 +2772,7 @@ function route(){window.__lastRoute=Date.now();
   if(path==='#/login')return renderLogin();
   if(path==='#/set-username')return renderSetUsername();
   if((m=path.match(/^#\/look\/([a-z]{2,12})$/)))return renderLook(m[1]);
+  if((m=path.match(/^#\/how\/([a-z]{2,12})$/)))return renderHow(m[1]);
   if(path==='#/buddy'){if(!BD_ON){goReplace('#/');return}return renderBuddy()}
   if(path==='#/me')return renderMe();
   if(path==='#/admin')return renderAdmin();
@@ -3020,16 +3030,45 @@ function howToHTML(){const U=id=>unsU(id,420),P={shiba:U('c0VTrbsXtFU'),shiba2:U
   return `<div class="mp-h"><b>${pawSvg()} 汪喵回家可以這樣幫你</b><a href="#/resources">協尋攻略 ›</a></div>
   <div class="ht-row">
   ${card('#/look/xiaomai','h1',`<span class="htc"><b>小麥</b><em>走失第 1 天</em><span>大安區・紅色項圈</span></span>`,'走失協尋頁','照片、特徵、地點一次看清楚',P.shiba)}
-  ${card('#/new','h2',`<span class="hta4"><b>協尋</b><i ${bg(P.shiba)}></i><span>請勿追趕　拍照回報</span><u></u><u></u></span>`,'A4 協尋海報','自動排版，下載就能印')}
-  ${card('#/new','h3',`<span class="htsq"><i ${bg(P.shiba2)}></i><b>幫忙分享</b><span>LINE・FB</span></span>`,'分享圖卡','一鍵傳到群組')}
-  ${card('#/seen','h4',`<span class="htmap" ${MAPBG}><i class="hmk s">走</i><i class="hmk a">1</i><i class="hmk b">2</i><span class="htbub"><i ${bg(P.shiba)}></i>在公園看到疑似小麥</span></span>`,'目擊回報','拍照標地點，馬上通知飼主')}
-  ${card('#/lost','h5',`<span class="htmap n" ${MAPBG}><i class="hmk a">🐕</i><i class="hmk b">🐈</i><i class="hmk c">🐕</i><i class="me"></i></span>`,'附近走失','看看你家附近有誰在找')}
+  ${card('#/how/poster','h2',`<span class="hta4"><b>協尋</b><i ${bg(P.shiba)}></i><span>請勿追趕　拍照回報</span><u></u><u></u></span>`,'A4 協尋海報','自動排版，下載就能印')}
+  ${card('#/how/share','h3',`<span class="htsq"><i ${bg(P.shiba2)}></i><b>幫忙分享</b><span>LINE・群組</span></span>`,'分享圖卡','一鍵傳到群組')}
+  ${card('#/how/seen','h4',`<span class="htmap" ${MAPBG}><i class="hmk s">走</i><i class="hmk a">1</i><i class="hmk b">2</i><span class="htbub"><i ${bg(P.shiba)}></i>在公園看到疑似小麥</span></span>`,'目擊回報','拍照標地點，馬上通知飼主')}
+  ${card('#/how/near','h5',`<span class="htmap n" ${MAPBG}><i class="hmk a">🐕</i><i class="hmk b">🐈</i><i class="hmk c">🐕</i><i class="me"></i></span>`,'附近走失','看看你家附近有誰在找')}
   ${card('#/look/mimi','h6',`<span class="htc"><b>咪咪</b><em>走失第 2 天</em><span>橘貓・很怕生</span></span>`,'貓咪也可以','狗狗貓咪都能登記',P.cat)}
   ${card('#/look/black','h7',`<span class="htc"><b>撿到了</b><em class="g">拾獲</em><span>黑色米克斯・很親人</span></span>`,'拾獲登記','撿到狗貓，幫牠找家',P.black)}
   ${card('#/look/doudou','h8',`<span class="htc ok"><b>豆豆回家了！</b><span>謝謝每一位幫忙的人</span></span>`,'找到了','標記回家，分享好消息',P.pup)}
-  ${card('#/health','h9',`<span class="htrem"><b>💉 狂犬病疫苗</b><span>3 天後到期</span></span>`,'健康手冊','疫苗、用藥到期提醒',P.a3)}
-  ${card('#/health','h10',`<span class="htalb"><i ${bg(P.pup)}></i><i ${bg(P.a2)}></i><i ${bg(P.a3)}></i><i ${bg(P.a4)}></i><b>夏天回顧</b></span>`,'毛孩相簿','每三個月一本回顧相簿')}
+  ${card('#/how/health','h9',`<span class="htrem"><b>💉 狂犬病疫苗</b><span>3 天後到期</span></span>`,'健康手冊','疫苗、用藥到期提醒',P.a3)}
+  ${card('#/how/album','h10',`<span class="htalb"><i ${bg(P.pup)}></i><i ${bg(P.a2)}></i><i ${bg(P.a3)}></i><i ${bg(P.a4)}></i><b>夏天回顧</b></span>`,'毛孩相簿','每三個月一本回顧相簿')}
   </div>`}
+// 首頁「可以這樣幫你」的功能說明頁：先看懂能做什麼，再決定要不要用
+const HOW={
+  poster:{t:'A4 協尋海報',lead:'登記走失後，系統自動把照片、特徵、走失地點和 QR Code 排成一張 A4 海報，下載就能拿去印。',
+    steps:[['登記走失','填照片、特徵、走失時間和地點，大約 3 分鐘。'],['打開協尋海報','在你的協尋頁按「做協尋海報」，版面已經自動排好，可以列印也可以存成圖片。'],['下載、列印、張貼','到便利商店列印，貼在走失地點 2 公里內：便利商店、動物醫院、公園、公車站。']],
+    tip:'路人用手機掃海報上的 QR Code，就能直接回報看到的位置，不用抄電話。',cta:['#/new','登記走失，產生海報']},
+  share:{t:'分享圖卡',lead:'一張適合手機看的正方形圖卡，有照片、名字和走失地點，傳到 LINE 群組或社區群組，大家一眼就看懂。',
+    steps:[['登記走失','填好資料後，協尋頁就會產生圖卡。'],['按「分享」','選 LINE 直接傳，或把圖存到手機。'],['傳到附近的群組','社區、大樓、里民群組最有用，附上的連結點開就能回報目擊。']],
+    tip:'找走失地點附近的群組，比只傳全台大群組更容易被看到。',cta:['#/new','登記走失，產生圖卡']},
+  seen:{t:'目擊回報',lead:'在路上看到疑似走失的狗貓，拍張照、在地圖上點一下位置，飼主會馬上收到通知。',
+    steps:[['拍照','不要追、不要叫，遠遠拍一張就好。'],['標出位置和方向','在地圖上點看到的地方，選牠往哪個方向走。'],['送出','飼主確認是牠之後，會出現在協尋地圖上，幫忙推算牠可能去哪裡。']],
+    tip:'不用註冊。你的聯絡方式只有飼主看得到，不會公開。',cta:['#/seen','我看到／撿到毛孩']},
+  near:{t:'附近走失',lead:'打開定位，就能看到你家附近有哪些毛孩正在找家，依距離由近到遠排列。',
+    steps:[['允許定位','只用來排距離，不會儲存你的位置。'],['看看附近的毛孩','每一隻都有照片、走失地點和走失幾天。'],['出門時留意','散步、上班路上看到像的，用「目擊回報」告訴飼主。']],
+    tip:'走失的狗貓大多還在走失地點幾公里內，附近的人最有機會看到牠。',cta:['#/lost?near=1','看我家附近']},
+  health:{t:'健康手冊',lead:'把疫苗、驅蟲、看診、體重都記在同一個地方，到期前提醒你，還會自動整理健康分析。',
+    steps:[['建立毛孩檔案','填名字、生日、晶片號碼，放一張照片。'],['記錄疫苗和看診','可以拍收據或病歷存起來，設定下次的日期。'],['到期前收到提醒','疫苗、驅蟲快到期時提醒你，也會提醒體重變化太大。']],
+    tip:'毛孩走失時，檔案裡的照片和晶片號碼可以一鍵帶進協尋登記。',cta:['#/health','打開健康手冊']},
+  album:{t:'毛孩相簿',lead:'只有你自己看得到的私人相簿，每三個月自動整理成一本回顧相簿，記錄牠長大的樣子。',
+    steps:[['建立毛孩檔案','在健康手冊新增你的毛孩。'],['放進照片','可以一次選很多張，寫一句話記下當天的事。'],['每季回顧','每三個月自動做成回顧相簿，可以做成拼貼圖分享給家人。']],
+    tip:'相簿是私人的，不會出現在網站的任何公開頁面。',cta:['#/health','開始建立相簿']}
+};
+function renderHow(k){const h=HOW[k];if(!h){goReplace('#/');return}setTitle(h.t);
+  const m=howToHTML().match(new RegExp(`<a class="ht (h\\d+)" href="#/how/${k}">([\\s\\S]*?)</a>`));
+  app.innerHTML=`<a class="backlink small" href="#/">‹ 回首頁</a>
+  <div class="how-hero">${m?`<div class="ht ${m[1]}">${m[2]}</div>`:''}</div>
+  <h1 class="how-t">${esc(h.t)}</h1><p class="lede">${esc(h.lead)}</p>
+  <ol class="how-steps">${h.steps.map(([a,b])=>`<li><b>${esc(a)}</b><span>${esc(b)}</span></li>`).join('')}</ol>
+  <p class="tipbox">💡 ${esc(h.tip)}</p>
+  <div class="how-cta"><a class="btn big block" href="${h.cta[0]}">${esc(h.cta[1])}</a></div>`}
 // 首頁：正在協尋的毛孩（左右滑的預覽），點「看全部」到協尋名單
 async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
   const [{data,error},{count}]=await Promise.all([sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,lost_at,status,poster').eq('status','searching').order('lost_at',{ascending:false}).limit(10),
