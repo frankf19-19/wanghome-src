@@ -3465,7 +3465,6 @@ async function loadList(){
 }
 let __govShown=[];
 async function govListHTML(){let rows;try{rows=await fetchGovLost()}catch(_){return ''}
-  try{await govWithPhotos(rows,24)}catch(_){}
   const list=govFilter(rows);__govShown=list;if(!list.length)return '';
   return govHead(list.length)+list.slice(0,60).map(govCard).join('')+(list.length>60?`<div class="more-row"><a class="btn ghost big" href="#/gov-lost">看全部 ${list.length} 筆遺失申報</a></div>`:'')}
 // 清單一次 60 筆，滿了就顯示「顯示更多」
