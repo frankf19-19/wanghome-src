@@ -2247,6 +2247,8 @@ html{-webkit-tap-highlight-color:transparent}
   /* 領養篩選：手機上變成下方拉出的面板 */
   body[data-route="adopt"] .adopt-f{display:none}
   body.xas-open[data-route="adopt"] .adopt-f{display:block;position:fixed;left:0;right:0;bottom:0;z-index:200;max-height:82vh;overflow:auto;margin:0!important;border-radius:28px 28px 0 0!important;padding:22px 18px calc(18px + env(safe-area-inset-bottom))!important;animation:xup .28s cubic-bezier(.2,.8,.2,1)}
+  body[data-route="adopt"] .adopt-f>#aKind,body[data-route="adopt"] .adopt-f>.row2,body[data-route="adopt"] .adopt-f>.seg{display:none!important}
+  body.xas-open[data-route="adopt"] .adopt-f::before{content:"篩選";display:block;font-size:22px;font-weight:800;margin:0 2px 6px}
   .xas-bg{display:none}
   body.xas-open .xas-bg{display:block;position:fixed;inset:0;z-index:199;background:rgba(10,8,6,.4)}
   body.xas-open .tabbar{display:none!important}
@@ -2340,6 +2342,7 @@ html{-webkit-tap-highlight-color:transparent}
 .xtheme i{width:100%;height:56px;border-radius:12px;margin-bottom:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
 .xtheme b{font-size:16px}.xtheme small{font-size:12.5px;color:var(--ink-3)}
 .dtheme{background:none;border:0;cursor:pointer;font:inherit;color:inherit;display:inline-grid;place-items:center}
+@media (max-width:760px){.dtheme{display:none!important}}
 
 /* 電腦版：排序、顯示方式（卡片／大圖／清單） */
 .dtools{display:none}
@@ -2494,7 +2497,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.3.1';
+const BUILD = 'v6.3.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
