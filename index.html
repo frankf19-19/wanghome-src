@@ -2061,6 +2061,7 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .moa-rel{margin:8px 0 0;text-align:center;font-size:14px}.moa-rel a{color:var(--ink-2);text-decoration:underline}
 .near-cta{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--sheet);box-shadow:var(--lift);color:var(--ink)!important;text-decoration:none!important;font-size:14.5px}.near-cta .ico{color:var(--red);flex:none}.near-cta span{flex:1}.near-cta b{display:block}.near-cta small{color:var(--ink-3)}
 .match .ph-none{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;color:var(--ink-3);font-size:11.5px;line-height:1.35}.match .ph-none .ico{width:26px;height:26px;opacity:.6}
+.match .ph-try img{width:100%;height:100%;object-fit:cover;display:block}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2172,7 +2173,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.18.1';
+const BUILD = 'v5.18.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3889,7 +3890,7 @@ async function renderCase(id){const _n=navId;
 function telClean(t){return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)||[''])[0].replace(/[^\d#+]/g,'')}
 function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String(m.animal_id)]||''};
   return `<div class="match">
-    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span></button>`:`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`}
+    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span></button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg')}" onerror="this.parentNode.classList.add('ph-none');this.parentNode.innerHTML=this.parentNode.dataset.none" data-x="1"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
     <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> <span class="score">${simLabel(m.score)}</span>
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
