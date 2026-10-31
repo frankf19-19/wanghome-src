@@ -2053,6 +2053,8 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .gov-head{grid-column:1/-1;margin:14px 0 2px;padding-top:14px;border-top:1px dashed var(--line)}.gov-head b{display:flex;align-items:center;gap:6px;font-size:17px}.gov-head small{display:block;color:var(--ink-3);margin-top:2px}.gov-head:first-child{border-top:0;padding-top:0;margin-top:0}
 .gov-tag{position:absolute;right:8px;top:8px;background:rgba(255,255,255,.92);color:#1F2A24;font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:99px}
 .notice.moa{background:#EEF4FF;border-color:#D6E2FB;margin-top:10px}.notice.moa b{display:block;margin-bottom:2px}:root[data-theme=dark] .notice.moa{background:#1F2A3D;border-color:#2E3E5A}
+.mkc{width:40px;height:40px;border-radius:50%;background:var(--red-fill,#C0365B);color:#fff;font-weight:900;font-size:14px;display:grid;place-items:center;border:3px solid #fff;box-shadow:0 0 0 5px rgba(192,54,91,.25),0 3px 8px rgba(0,0,0,.25)}
+.pop-ph{display:block;margin:-4px -4px 8px;border-radius:10px;overflow:hidden}.pop-ph img{display:block;width:180px;height:130px;object-fit:cover}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2143,7 +2145,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.16.1';
+const BUILD = 'v5.16.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3492,13 +3494,19 @@ function emptyCard(kind){
 function lookGridHTML(kind){const ks=kind==='lost'?['xiaomai','mimi','doudou']:['black','doudou'];
   return `<div class="look-grid-wrap"><p class="look-grid-h">${kind==='lost'?'登記走失後，協尋頁會長這樣':'登記拾獲後，頁面會長這樣'}</p><div class="look-grid">${ks.map(k=>{const c=LOOK[k],fr=c.status==='found_report',f=c.status==='found';
     return `<a class="look-card" href="#/look/${k}"><span class="lc-ph" style="background-image:url('${unsU(c.photos[0],480)}')"><em class="${f?'ok':fr?'fr':''}">${f?'已回家':fr?'拾獲':'走失第 '+c.days+' 天'}</em></span><span class="lc-b"><b>${esc(f||fr?c.name:c.name+'・'+c.traits.split(' · ')[0])}</b><small>${esc(c.city+c.dist)}・${esc(c.spot)}</small><small class="lc-go">看看協尋頁長怎樣 ›</small></span></a>`}).join('')}</div></div>`}
+// 地圖群組（很多點疊在一起時合併成一個數字，點了自動放大）：只有全台地圖用到，用到才載入
+let __mcP=null;function loadCluster(){if(window.L&&L.markerClusterGroup)return Promise.resolve(true);if(__mcP)return __mcP;
+  if(!document.getElementById('mcCss')){const c=document.createElement('link');c.id='mcCss';c.rel='stylesheet';c.href='vendor/markercluster-1.5.3.css';document.head.appendChild(c)}
+  return __mcP=new Promise(res=>{const e=document.createElement('script');e.src='vendor/leaflet.markercluster-1.5.3.js';e.onload=()=>res(!!(window.L&&L.markerClusterGroup));e.onerror=()=>{__mcP=null;res(false)};document.head.appendChild(e);setTimeout(()=>res(!!(window.L&&L.markerClusterGroup)),8000)})}
 async function loadMapAll(el){const my=listSeq;
   if(!window.L&&!leafletGaveUp){el.innerHTML='<div class="empty">地圖載入中…</div>';await waitLeaflet();if(my!==listSeq||!el.isConnected)return}
   el.className='';
-  el.innerHTML='<div id="mapAll" class="map-all"></div><p class="muted small">紅點＝走失案件（最後目擊位置），綠點＝拾獲／目擊流浪通報。點標記看詳情。</p>';
+  el.innerHTML='<div id="mapAll" class="map-all"></div><p class="muted small">紅點＝走失案件（最後目擊位置；農業部申報為走失地區的大概位置），綠點＝拾獲／目擊流浪通報。圓圈數字是好幾隻在附近，點了會放大。</p>';
   const center=homeState.near?[homeState.near.lat,homeState.near.lng]:(homeState.city.length===1&&CITY_CENTER[homeState.city[0]])||[23.7,120.95];
   pruneMaps();
   const map=makeMap('mapAll',center,homeState.near?13:homeState.city.length===1?11:7);
+  const hasMC=await loadCluster();if(my!==listSeq||!el.isConnected)return;
+  const grp=hasMC&&!map.__stub?L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:48,spiderfyOnMaxZoom:true,iconCreateFunction:cl=>L.divIcon({className:'',html:`<div class="mkc">${cl.getChildCount()}</div>`,iconSize:[40,40],iconAnchor:[20,20]})}).addTo(map):map;
   let qc=sb.from('cases_public').select('id,species,name,lost_lat,lost_lng,lost_city,lost_district,photos,last_seen_at,poster').eq('status','searching').order('last_activity',{ascending:false}).limit(500);   // 案件很多時，先顯示最近有動靜的
   let qf=sb.from('found_public').select('id,species,kind,lat,lng,city,district,colour,size,photos,seen_at,poster').eq('status','open').order('seen_at',{ascending:false}).limit(500);
   qc=fIn(qc,'lost_city',homeState.city);qf=fIn(qf,'city',homeState.city);qc=fSp(qc);qf=fSp(qf);
@@ -3506,8 +3514,8 @@ async function loadMapAll(el){const my=listSeq;
   if(e1&&e2){el.insertAdjacentHTML('afterbegin',netErrHTML());return}
   const last={};(ls||[]).forEach(s=>{if(!last[s.case_id]&&s.lat)last[s.case_id]=s});
   const pts=[];
-  (cs||[]).filter(c=>!userHidden(c)).forEach(c=>{const p=last[c.id]||(c.lost_lat?{lat:c.lost_lat,lng:c.lost_lng}:null);if(!p)return;pts.push([p.lat,p.lng]);marker([p.lat,p.lng],c.species==='cat'?'貓':'狗','').addTo(map).bindPopup(`<a href="#/case/${c.id}"><b>${esc(c.name)}</b></a><br>${esc(c.lost_city)}${esc(c.lost_district||'')}<br>${last[c.id]?'最後目擊 '+fmtDT(last[c.id].seen_at):'走失地點'}`)});
-  (fs||[]).filter(f=>!userHidden(f)).forEach(f=>{if(!f.lat)return;pts.push([f.lat,f.lng]);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(map).bindPopup(`<a href="#/found/${f.id}"><b>${f.kind==='injured'?'受傷':f.kind==='found'?'拾獲':'目擊'}：${esc([SIZE[f.size],f.colour].filter(Boolean).join('')+sp(f.species).name)}</b></a><br>${esc(f.city)}${esc(f.district||'')}<br>${fmtDT(f.seen_at)}`)});
+  (cs||[]).filter(c=>!userHidden(c)).forEach(c=>{const p=last[c.id]||(c.lost_lat?{lat:c.lost_lat,lng:c.lost_lng}:null);if(!p)return;pts.push([p.lat,p.lng]);marker([p.lat,p.lng],c.species==='cat'?'貓':'狗','').addTo(grp).bindPopup(`${c.photos&&c.photos[0]?`<a href="#/case/${c.id}" class="pop-ph">${thumbImg(c.photos[0],c.name)}</a>`:''}<a href="#/case/${c.id}"><b>${esc(c.name)}</b></a><br>${esc(c.lost_city)}${esc(c.lost_district||'')}<br>${last[c.id]?'最後目擊 '+fmtDT(last[c.id].seen_at):'走失地點'}`)});
+  (fs||[]).filter(f=>!userHidden(f)).forEach(f=>{if(!f.lat)return;pts.push([f.lat,f.lng]);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(grp).bindPopup(`<a href="#/found/${f.id}"><b>${f.kind==='injured'?'受傷':f.kind==='found'?'拾獲':'目擊'}：${esc([SIZE[f.size],f.colour].filter(Boolean).join('')+sp(f.species).name)}</b></a><br>${esc(f.city)}${esc(f.district||'')}<br>${fmtDT(f.seen_at)}`)});
   if(homeState.near)marker([homeState.near.lat,homeState.near.lng],'我','me').addTo(map);
   if(pts.length&&!homeState.near&&homeState.city.length!==1)map.fitBounds(pts,{padding:[30,30],maxZoom:13});
   if(!pts.length)toast('目前地圖上沒有資料');
