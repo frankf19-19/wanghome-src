@@ -4949,21 +4949,21 @@ const GOV_LOST_URL='https://data.moa.gov.tw/Service/OpenData/TransService.aspx?U
 let __govLost=null,__govPend=null;const __govTel={};
 let govState={sp:'',city:'',days:60};
 function govRow(a){const addr=String(a['遺失地點']||'').replace(/^\d{3,6}/,'').replace(/^台/,'臺').trim();const m=addr.match(/^(..[市縣])(.{1,3}?[區鄉鎮市])?/);
-  const pic=String(a.PICTURE||''),id=(pic.match(/File_No=([A-Za-z0-9]+)/)||[])[1]||'';
+  const raw=addr.slice(0,12),loose=!m&&raw&&!/\d|住家|家裡|附近$/.test(raw)?raw:'';const pic=String(a.PICTURE||''),id=(pic.match(/File_No=([A-Za-z0-9]+)/)||[])[1]||'';
   if(id&&a['連絡電話'])__govTel[id]=String(a['連絡電話']).replace(/[^\d#+-]/g,'').slice(0,20);
   return {id,name:String(a['寵物名']||'').trim().slice(0,20),sp:a['寵物別']==='貓'?'cat':'dog',sex:a['性別']||'',breed:String(a['品種']||'').trim(),colour:String(a['毛色']||'').trim(),coat:String(a['外觀']||'').trim(),feat:String(a['特徵']||'').trim().slice(0,200),
-    date:String(a['遺失時間']||'').replace(/\//g,'-').slice(0,10),city:m?m[1]:'',dist:m&&m[2]?m[2]:'',photo:/^https:\/\/www\.pet\.gov\.tw\//.test(pic)?pic:''}}
+    date:String(a['遺失時間']||'').replace(/\//g,'-').slice(0,10),city:m?m[1]:loose,dist:m&&m[2]?m[2]:'',photo:/^https:\/\/www\.pet\.gov\.tw\//.test(pic)?pic:''}}
 function fetchGovLost(){if(__govLost)return Promise.resolve(__govLost);
   return __govPend||(__govPend=moaJsonUrl(GOV_LOST_URL).then(j=>{const cut=new Date(Date.now()+8*36e5-180*864e5).toISOString().slice(0,10);
     return __govLost=j.map(govRow).filter(r=>r.id&&r.date>=cut).sort((a,b)=>b.date.localeCompare(a.date))}).finally(()=>{__govPend=null}))}
 async function moaJsonUrl(u){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),20000);try{const r=await fetch(u,{signal:ac.signal});if(!r.ok)throw 0;const j=await r.json();if(!Array.isArray(j))throw 0;return j}catch(_){throw new Error('讀不到農業部的資料。可能是網路不穩，或你目前不在台灣（農業部的資料只開放台灣的網路）。')}finally{clearTimeout(t)}}
 const govAgo=r=>{const d=daysSince(r.date+'T12:00:00+08:00');return d};
 const govTitle=r=>r.name||(r.breed||(r.sp==='cat'?'貓咪':'狗狗'));
-function govCard(r){return `<button type="button" class="ccard gov-card" data-gov="${esc(r.id)}"><div class="ph ${r.photo?'':'noimg'} ${r.sp==='cat'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}">`:''}<span class="band">走失第 ${govAgo(r)} 天</span></div>
+function govCard(r){return `<button type="button" class="ccard gov-card" data-gov="${esc(r.id)}"><div class="ph ${r.photo?'':'noimg'} ${r.sp==='cat'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}" onerror="this.parentNode.classList.add('noimg');this.remove()">`:''}<span class="band">走失第 ${govAgo(r)} 天</span></div>
   <div class="b"><div class="t">${esc(govTitle(r))} <span class="sexm">${esc(r.sex)}</span></div><div class="small muted">${esc([r.name?r.breed:'',r.colour].filter(Boolean).join('・').slice(0,40))}</div><div class="small">${ic('pin')} ${esc(r.city+r.dist)}</div></div></button>`}
 function govSheet(r){const el=document.createElement('div');el.className='lightbox sheet-bg';const tel=__govTel[r.id];
   el.innerHTML=`<div class="sheet gov-sheet" role="dialog" aria-label="${esc(govTitle(r))}"><div class="grab" aria-hidden="true"></div>
-  ${r.photo?`<img class="gov-big" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}">`:''}
+  ${r.photo?`<img class="gov-big" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}" onerror="this.remove()">`:''}
   <p class="sh-t">${esc(govTitle(r))} <span class="sexm">${esc(r.sex)}</span></p>
   <dl class="gov-dl"><dt>走失</dt><dd>${esc(r.date.replace(/-/g,'/'))}（第 ${govAgo(r)} 天）</dd><dt>地區</dt><dd>${esc(r.city+r.dist)||'未提供'}</dd>${r.breed?`<dt>品種</dt><dd>${esc(r.breed)}</dd>`:''}${r.colour||r.coat?`<dt>外觀</dt><dd>${esc([r.colour,r.coat].filter(Boolean).join('・'))}</dd>`:''}${r.feat?`<dt>特徵</dt><dd>${esc(r.feat)}</dd>`:''}</dl>
   <p class="tipbox" style="margin:12px 0">看到牠：不要追、不要大聲叫，先拍照記下地點和時間，再聯絡飼主。</p>
@@ -4995,7 +4995,7 @@ async function renderGovLost(){setTitle('全台遺失申報');const st=govState;
 async function loadGovPrev(_n){const el=$('#govPrev');if(!el)return;let rows;try{rows=await fetchGovLost()}catch(_){el.innerHTML='';return}
   if(_n!==navId||!el.isConnected)return;const list=rows.filter(r=>r.photo&&govAgo(r)<=30).slice(0,10);if(!list.length){el.innerHTML='';return}
   el.innerHTML=`<div class="mp-h"><b>${ic('flag')} 全台遺失申報 <span class="lp-n">${rows.filter(r=>govAgo(r)<=30).length}</span></b><a href="#/gov-lost">看全部 ›</a></div>
-  <div class="lp-row">${list.map(r=>`<button type="button" class="lp" data-gov="${esc(r.id)}"><span class="lp-ph ${r.sp==='cat'?'cat':''}"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}"><em>第 ${govAgo(r)} 天</em></span><b>${esc(govTitle(r).slice(0,8))}</b><small>${esc(r.city+r.dist)}</small></button>`).join('')}<a class="lp lp-all" href="#/gov-lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>農業部資料</small></a></div>`;
+  <div class="lp-row">${list.map(r=>`<button type="button" class="lp" data-gov="${esc(r.id)}"><span class="lp-ph ${r.sp==='cat'?'cat':''}"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}" onerror="this.closest('.lp').remove()"><em>第 ${govAgo(r)} 天</em></span><b>${esc(govTitle(r).slice(0,8))}</b><small>${esc(r.city+r.dist)}</small></button>`).join('')}<a class="lp lp-all" href="#/gov-lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>農業部資料</small></a></div>`;
   bindGov(el,list)}
 // 首頁：收容所最近 7 天新收的毛孩（有選過縣市才下載資料，沒選過只顯示入口）
 async function loadIntakePrev(_n){const el=$('#intakePrev');if(!el)return;const st=adoptState;
