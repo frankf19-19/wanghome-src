@@ -2056,7 +2056,7 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 .injstrip{margin:0!important;padding:10px 14px!important;min-height:0!important;font-size:14.5px!important;border-radius:14px!important}
 .homemore{display:grid;gap:18px;margin:22px 0 8px}.homemore>*{min-width:0}.homemore .howto{margin-top:0}
 .lostprev .lp-row .lp{width:132px}.lostprev .lp-ph{width:132px;height:132px}
-@media (min-width:900px){.bigstart>.season{grid-column:span 2!important}.bigstart>.injstrip{grid-column:span 1!important}.bigstart>.injstrip b{display:block}}
+@media (min-width:900px){.bigstart>.season{grid-column:span 2!important;align-self:start}.bigstart>.injstrip{align-self:start}.bigstart>.injstrip{grid-column:span 1!important}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3325,8 +3325,9 @@ function seasonTip(){const d=new Date(Date.now()+8*36e5),m=d.getUTCMonth()+1,day
   const LNY={2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3]}[d.getUTCFullYear()];const near=(mm,dd,b,a)=>{const t=Date.UTC(d.getUTCFullYear(),mm-1,dd),x=Date.UTC(d.getUTCFullYear(),m-1,day);return x>=t-b*864e5&&x<=t+a*864e5};
   if(md>=1228||md<=101)return {ic:'🎆',t:'跨年煙火快到了',b:'煙火聲會讓狗貓受驚跑走，是一年中走失最多的時候。今晚請關好門窗、牽繩牽緊，名牌和晶片資料確認一下。'};
   if(LNY&&near(LNY[0],LNY[1],5,5))return {ic:'🧨',t:'過年鞭炮多，小心毛孩受驚',b:'鞭炮聲容易讓狗貓驚嚇逃跑。出門拜年記得關好門窗，帶牠回老家要全程牽繩。'};
-  if(m>=7&&m<=10)return {ic:'🌀',t:'颱風季：打雷、強風容易讓毛孩受驚',b:'颱風前把狗貓帶進室內，關好門窗。打雷時牠可能會躲起來或想往外衝，多注意門口。'};
+  if(m>=7&&m<=9)return {ic:'🌀',t:'颱風季：打雷、強風容易讓毛孩受驚',b:'颱風前把狗貓帶進室內，關好門窗。打雷時牠可能會躲起來或想往外衝，多注意門口。'};
   if(m>=5&&m<=9)return {ic:'☀️',t:'天氣熱，散步避開中午',b:'柏油路面中午可能超過 60 度，會燙傷腳掌，也容易中暑。清晨或傍晚再出門。'};
+  if(md>=1115||md<=228)return {ic:'🧥',t:'天氣冷，貓咪會躲進汽機車引擎',b:'冬天流浪貓、走失貓常鑽進引擎室取暖。發動前先拍拍引擎蓋、按一下喇叭。毛孩走失時也記得看看附近的車底。'};
   return null}
 function sightAnaHTML(a){if(!a)return '';
   const arrow=deg=>`<svg class="sa-arrow" viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(${Math.round(deg)}deg)"><path d="M12 3l6 9h-4v9h-4v-9H6z"/></svg>`;
