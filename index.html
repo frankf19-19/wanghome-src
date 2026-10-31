@@ -2047,6 +2047,8 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 .how-t{margin:0 0 6px}.how-steps{list-style:none;counter-reset:hs;padding:0;margin:18px 0}.how-steps li{counter-increment:hs;position:relative;padding:12px 0 12px 48px;border-top:1px solid var(--line)}.how-steps li:first-child{border-top:0}.how-steps li::before{content:counter(hs);position:absolute;left:0;top:12px;width:32px;height:32px;border-radius:50%;background:var(--red-soft);color:var(--red);font-weight:900;display:grid;place-items:center}.how-steps b{display:block;font-size:16.5px}.how-steps span{color:var(--ink-2);font-size:15px}
 .how-cta{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 10px}.how-cta .btn{flex:1;min-width:160px}
 .lostprev .sk{display:block;background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 55%,var(--sheet)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px}.lostprev .lp-ph.sk{border-radius:22px}
+button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor:pointer}button.ccard.gov-card{font:inherit;text-align:left;border:0;padding:0;cursor:pointer;width:100%}
+.gov-big{width:100%;max-height:52vh;object-fit:cover;border-radius:20px;margin:6px 0 10px;background:var(--beige)}.gov-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:6px 0 0;font-size:15px}.gov-dl dt{color:var(--ink-3);font-weight:700}.gov-dl dd{margin:0}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2722,7 +2724,7 @@ window.addEventListener('scroll',updScrolled,{passive:true});
 try{new MutationObserver(()=>updScrolled()).observe(document.getElementById('app'),{childList:true})}catch(_){}
 // ===== 回上一頁不重畫：名單類頁面離開時把畫面整個收起來，按上一頁直接放回去（不重新載入、不跳動、位置不變）=====
 let __navMax=0;const __pc=new Map();
-const PC_OK=/^#\/?(\?.*)?$|^#\/(lost|adopt|intake|resources|learn)(\?.*)?$|^#\/(look|how)\/[a-z]+$/;
+const PC_OK=/^#\/?(\?.*)?$|^#\/(lost|adopt|intake|gov-lost|resources|learn)(\?.*)?$|^#\/(look|how)\/[a-z]+$/;
 function pcDrop(h){const e=__pc.get(h);if(!e)return;__pc.delete(h);e.maps.forEach(m=>{try{m.remove()}catch(_){}})}
 function pcSave(){const h=curHash;pcDrop(h);
   if(!PC_OK.test(h)||!app.firstChild||app.querySelector('.pskel,.empty.loading')||__dirty)return;
@@ -2786,6 +2788,7 @@ function route(){window.__lastRoute=Date.now();
   if(path==='#/verify-email')return renderVerifyEmail(qs(h));
   if(path==='#/adopt')return renderAdopt();
   if(path==='#/intake')return renderIntake();
+  if(path==='#/gov-lost')return renderGovLost();
   if((m=path.match(/^#\/adopt\/(\d{1,10})$/)))return renderAdoptOne(m[1]);
   if(path==='#/login')return renderLogin();
   if(path==='#/set-username')return renderSetUsername();
@@ -3117,6 +3120,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
     <div id="lostPrev" class="lostprev"><div class="mp-h"><b>${ic('search')} 正在協尋的毛孩</b></div><div class="lp-row">${'<span class="lp"><span class="lp-ph sk"></span><span class="sk" style="width:60%;height:14px;margin-top:6px"></span></span>'.repeat(4)}</div></div>
+    <div id="govPrev" class="lostprev intakeprev"></div>
     ${(()=>{const t=seasonTip();return t?`<details class="season"><summary><span class="se-ic" aria-hidden="true">${t.ic}</span><b>${t.t}</b></summary><p>${t.b}</p></details>`:''})()}
     <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
@@ -3170,7 +3174,7 @@ ${bigStartHTML()}
   if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   // 手機首頁看不到完整名單（在「協尋」分頁），不用先下載；電腦版和協尋分頁才載入
-  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO){loadLostPrev(_n);loadIntakePrev(_n)}
+  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO){loadLostPrev(_n);loadGovPrev(_n);loadIntakePrev(_n)}
 }
 function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" aria-labelledby="promoT">
   <div class="promo-txt">
@@ -4890,6 +4894,7 @@ function channelsHTML(city){const short=String(city||'').replace(/[市縣]$/,'')
   <div class="chan-g"><b>${ic('shield')} 官方</b><ul>
     <li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">寵物登記網：遺失申報</a><small>有植晶片一定要做，醫院、收容所掃晶片就會看到</small></li>
     <li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">全國收容所收容公告</a><small>農業部官方公告頁</small></li>
+    <li><a href="#/gov-lost">全台遺失申報</a><small>飼主在農業部寵物登記網申報的走失狗貓</small></li>
     ${ag?ag.t.map(e=>`<li><a href="${agTel(e)}">${esc(ag.n)} ${esc(agNum(e))}</a><small>${esc(agHours(e.h))}</small></li>`).join(''):`<li><a href="tel:1959">1959 動保專線</a><small>會自動轉到${city?esc(city):'你所在縣市'}的動保單位</small></li>`}
   </ul></div>
   <div class="chan-g"><b>${ic('megaphone')} 臉書協尋社團</b><ul>
@@ -4935,6 +4940,63 @@ async function renderIntake(){const _n=navId;setTitle('收容所新收的毛孩'
   $('#iDays').onchange=e=>{intakeState.days=+e.target.value;load()};
   load();
 }
+/* ============================================================
+   農業部「寵物遺失啟事」開放資料：飼主在寵物登記網做的遺失申報（政府公開資料，每天更新）
+   只顯示找狗需要的：照片、特徵、遺失日期、縣市區。不顯示門牌、晶片號碼、Email、飼主姓名；
+   電話是飼主登記給拾獲者聯絡用的，按了才顯示。
+   ============================================================ */
+const GOV_LOST_URL='https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=IFJomqVzyB0i';
+let __govLost=null,__govPend=null;const __govTel={};
+let govState={sp:'',city:'',days:60};
+function govRow(a){const addr=String(a['遺失地點']||'').replace(/^\d{3,6}/,'').replace(/^台/,'臺').trim();const m=addr.match(/^(..[市縣])(.{1,3}?[區鄉鎮市])?/);
+  const pic=String(a.PICTURE||''),id=(pic.match(/File_No=([A-Za-z0-9]+)/)||[])[1]||'';
+  if(id&&a['連絡電話'])__govTel[id]=String(a['連絡電話']).replace(/[^\d#+-]/g,'').slice(0,20);
+  return {id,name:String(a['寵物名']||'').trim().slice(0,20),sp:a['寵物別']==='貓'?'cat':'dog',sex:a['性別']||'',breed:String(a['品種']||'').trim(),colour:String(a['毛色']||'').trim(),coat:String(a['外觀']||'').trim(),feat:String(a['特徵']||'').trim().slice(0,200),
+    date:String(a['遺失時間']||'').replace(/\//g,'-').slice(0,10),city:m?m[1]:'',dist:m&&m[2]?m[2]:'',photo:/^https:\/\/www\.pet\.gov\.tw\//.test(pic)?pic:''}}
+function fetchGovLost(){if(__govLost)return Promise.resolve(__govLost);
+  return __govPend||(__govPend=moaJsonUrl(GOV_LOST_URL).then(j=>{const cut=new Date(Date.now()+8*36e5-180*864e5).toISOString().slice(0,10);
+    return __govLost=j.map(govRow).filter(r=>r.id&&r.date>=cut).sort((a,b)=>b.date.localeCompare(a.date))}).finally(()=>{__govPend=null}))}
+async function moaJsonUrl(u){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),20000);try{const r=await fetch(u,{signal:ac.signal});if(!r.ok)throw 0;const j=await r.json();if(!Array.isArray(j))throw 0;return j}catch(_){throw new Error('讀不到農業部的資料。可能是網路不穩，或你目前不在台灣（農業部的資料只開放台灣的網路）。')}finally{clearTimeout(t)}}
+const govAgo=r=>{const d=daysSince(r.date+'T12:00:00+08:00');return d};
+const govTitle=r=>r.name||(r.breed||(r.sp==='cat'?'貓咪':'狗狗'));
+function govCard(r){return `<button type="button" class="ccard gov-card" data-gov="${esc(r.id)}"><div class="ph ${r.photo?'':'noimg'} ${r.sp==='cat'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}">`:''}<span class="band">走失第 ${govAgo(r)} 天</span></div>
+  <div class="b"><div class="t">${esc(govTitle(r))} <span class="sexm">${esc(r.sex)}</span></div><div class="small muted">${esc([r.name?r.breed:'',r.colour].filter(Boolean).join('・').slice(0,40))}</div><div class="small">${ic('pin')} ${esc(r.city+r.dist)}</div></div></button>`}
+function govSheet(r){const el=document.createElement('div');el.className='lightbox sheet-bg';const tel=__govTel[r.id];
+  el.innerHTML=`<div class="sheet gov-sheet" role="dialog" aria-label="${esc(govTitle(r))}"><div class="grab" aria-hidden="true"></div>
+  ${r.photo?`<img class="gov-big" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}">`:''}
+  <p class="sh-t">${esc(govTitle(r))} <span class="sexm">${esc(r.sex)}</span></p>
+  <dl class="gov-dl"><dt>走失</dt><dd>${esc(r.date.replace(/-/g,'/'))}（第 ${govAgo(r)} 天）</dd><dt>地區</dt><dd>${esc(r.city+r.dist)||'未提供'}</dd>${r.breed?`<dt>品種</dt><dd>${esc(r.breed)}</dd>`:''}${r.colour||r.coat?`<dt>外觀</dt><dd>${esc([r.colour,r.coat].filter(Boolean).join('・'))}</dd>`:''}${r.feat?`<dt>特徵</dt><dd>${esc(r.feat)}</dd>`:''}</dl>
+  <p class="tipbox" style="margin:12px 0">看到牠：不要追、不要大聲叫，先拍照記下地點和時間，再聯絡飼主。</p>
+  ${tel?`<button type="button" class="btn big block" id="govTel">${ic('phone')} 看到牠了，聯絡飼主</button>`:'<p class="small muted">飼主沒有留電話，可以到農業部寵物登記網查看。</p>'}
+  <p class="small muted" style="margin:12px 0 0">資料來源：農業部寵物登記管理資訊網「遺失啟事」開放資料，由飼主自行申報。可能已經找到，以飼主說明為準。</p></div>`;
+  el.onclick=e=>{if(e.target===el)closeOverlay(el)};
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'));
+  const b=el.querySelector('#govTel');if(b)b.onclick=()=>{b.outerHTML=`<a class="btn big block green" href="tel:${esc(tel.replace(/[^\d#+]/g,''))}">${ic('phone')} 撥打 ${esc(tel)}</a><p class="small muted" style="margin:6px 2px 0">請只在看到牠或有牠的消息時聯絡飼主。</p>`}}
+function bindGov(root,list){root.querySelectorAll('[data-gov]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.gov);if(r)govSheet(r)})}
+async function renderGovLost(){setTitle('全台遺失申報');const st=govState;
+  app.innerHTML=`<h1>全台遺失申報</h1>
+  <p class="lede">飼主在農業部寵物登記網申報走失的狗貓，資料每天更新。看到像的，點進去可以聯絡飼主。</p>
+  <div class="card adopt-f"><div class="seg" id="gSp" role="group" aria-label="狗或貓">${[['','全部'],['dog',spIc('dog')+' 狗'],['cat',spIc('cat')+' 貓']].map(([v,t])=>`<button type="button" data-v="${v}" class="${st.sp===v?'on':''}" aria-pressed="${st.sp===v}">${t}</button>`).join('')}</div>
+  <div class="row2" style="margin-top:10px"><label class="f" style="margin:0"><span>縣市</span><select id="gCity"><option value="">全台</option>${Object.keys(MOA_AREA).map(c=>`<option ${c===st.city?'selected':''}>${c}</option>`).join('')}</select></label>
+  <label class="f" style="margin:0"><span>走失時間</span><select id="gDays">${[[14,'最近 2 週'],[30,'最近 1 個月'],[60,'最近 2 個月'],[180,'最近半年']].map(([v,t])=>`<option value="${v}" ${v===st.days?'selected':''}>${t}</option>`).join('')}</select></label></div></div>
+  <div id="gList" style="margin-top:14px" aria-live="polite"><div class="empty">讀取農業部資料中…</div></div>
+  <p class="small muted" style="margin-top:14px">資料來源：農業部寵物登記管理資訊網「遺失啟事」開放資料。為保護飼主隱私，本站不顯示門牌地址、晶片號碼和 Email。</p>`;
+  const load=async()=>{const el=$('#gList');if(!el)return;const my=navId;let rows;
+    try{rows=await fetchGovLost()}catch(e){if(my!==navId||!el.isConnected)return;el.innerHTML=`<div class="empty-card"><b>${esc(e.message)}</b><p><button type="button" class="btn" id="gRetry">再試一次</button></p></div>`;$('#gRetry').onclick=load;return}
+    if(my!==navId||!el.isConnected)return;
+    const list=rows.filter(r=>(!st.sp||r.sp===st.sp)&&(!st.city||r.city===st.city)&&govAgo(r)<=st.days);
+    el.innerHTML=list.length?`<p class="small muted" style="margin:0 0 8px">${esc(st.city||'全台')}共 <b>${list.length}</b> 筆遺失申報</p><div class="grid">${list.slice(0,90).map(govCard).join('')}</div>${list.length>90?'<p class="small muted">只列出最新 90 筆，可以選縣市縮小範圍。</p>':''}`
+      :`<div class="empty-card"><div class="big">${ic('search')}</div><b>${esc(st.city||'全台')}這段時間沒有遺失申報</b><p class="small">可以把時間拉長，或換個縣市。</p></div>`;
+    bindGov(el,list)};
+  $('#gSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.sp=b.dataset.v;$('#gSp').querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});load()});
+  $('#gCity').onchange=e=>{st.city=e.target.value;load()};$('#gDays').onchange=e=>{st.days=+e.target.value;load()};
+  load()}
+// 首頁：全台最近的遺失申報（有照片的前 10 筆）
+async function loadGovPrev(_n){const el=$('#govPrev');if(!el)return;let rows;try{rows=await fetchGovLost()}catch(_){el.innerHTML='';return}
+  if(_n!==navId||!el.isConnected)return;const list=rows.filter(r=>r.photo&&govAgo(r)<=30).slice(0,10);if(!list.length){el.innerHTML='';return}
+  el.innerHTML=`<div class="mp-h"><b>${ic('flag')} 全台遺失申報 <span class="lp-n">${rows.filter(r=>govAgo(r)<=30).length}</span></b><a href="#/gov-lost">看全部 ›</a></div>
+  <div class="lp-row">${list.map(r=>`<button type="button" class="lp" data-gov="${esc(r.id)}"><span class="lp-ph ${r.sp==='cat'?'cat':''}"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}"><em>第 ${govAgo(r)} 天</em></span><b>${esc(govTitle(r).slice(0,8))}</b><small>${esc(r.city+r.dist)}</small></button>`).join('')}<a class="lp lp-all" href="#/gov-lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>農業部資料</small></a></div>`;
+  bindGov(el,list)}
 // 首頁：收容所最近 7 天新收的毛孩（有選過縣市才下載資料，沒選過只顯示入口）
 async function loadIntakePrev(_n){const el=$('#intakePrev');if(!el)return;const st=adoptState;
   const head=n=>`<div class="mp-h"><b>${ic('shelter')} 收容所最近新收${n?` <span class="lp-n">${n}</span>`:''}</b><a href="#/intake">${st.city?esc(st.city)+' ›':'看全部 ›'}</a></div>`;
