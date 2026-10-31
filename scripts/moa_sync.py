@@ -11,7 +11,7 @@
 
 環境變數：SUPABASE_URL、SUPABASE_SERVICE_KEY
 """
-import os, re, json, time, urllib.request, urllib.parse, datetime as dt
+import os, re, json, time, random, urllib.request, urllib.parse, datetime as dt
 from concurrent.futures import ThreadPoolExecutor
 
 SB = os.environ["SUPABASE_URL"].rstrip("/")
@@ -41,7 +41,7 @@ def sb(method, path, body=None, prefer=None):
 def norm_city(s):
     return s.replace("台", "臺", 1) if s.startswith("台") else s
 
-ADDR = re.compile(r"^(..[市縣])(.{1,3}?[區鄉鎮市])?")
+ADDR = re.compile(r"^(..[市縣])(.{1,3}[區鄉鎮市](?=[^區鄉鎮市]|$)|.{1,3}?[區鄉鎮市])?")
 def parse_area(addr):
     a = re.sub(r"^\d{3,6}", "", str(addr or "")).strip()
     a = norm_city(a)
@@ -79,12 +79,19 @@ def main():
             "lost_at": d.replace("/", "-") + "T12:00:00+08:00", "lost_city": city, "lost_district": dist, "contact_phone": tel})
     print(f"::notice::農業部申報 {len(data)} 筆，最近 {DAYS} 天有縣市的 {len(rows)} 筆", flush=True)
 
-    have = {r["source_id"]: r for r in sb("GET", "cases?source=eq.moa&select=source_id,lost_lat,photos&limit=5000") or []}
+    have = {}
+    for off in range(0, 20000, 1000):                  # 分頁讀（資料庫一次最多回 1000 筆）
+        part = sb("GET", f"cases?source=eq.moa&select=source_id,lost_lat,photos&order=source_id&limit=1000&offset={off}") or []
+        for r in part: have[r["source_id"]] = r
+        if len(part) < 1000: break
     geo = {g["name"]: (g["lat"], g["lng"]) for g in sb("GET", "geo_cache?select=name,lat,lng&limit=5000") or []}
-    out, n_new, n_geo = [], 0, 0
+    out, n_new, n_geo, n_retry = [], 0, 0, 0
     for r in rows:
         fn = r.pop("file_no")
         if r["source_id"] in have:
+            # 上次照片沒抓到（網路不穩）：再試一次
+            if not (have[r["source_id"]].get("photos") or []) and n_retry < 40 and random.random() < 0.3:
+                r["_pic"] = f"{SITE}api/petpic/{fn}.jpg"; n_retry += 1
             out.append(r); continue
         if n_new >= MAX_NEW: continue
         # 地點：區的中心點（查不到就用縣市）
