@@ -15,7 +15,7 @@ create or replace function public.save_push_token(p_token text, p_platform text)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception '請先登入'; end if;
-  if coalesce(p_token,'') !~ '^[A-Za-z0-9:_\-]{20,300}$' or p_platform not in ('ios','android') then raise exception 'bad token'; end if;
+  if (coalesce(p_token,'') !~ '^[A-Za-z0-9:_\-]+$' or length(p_token) not between 20 and 300) or p_platform not in ('ios','android') then raise exception 'bad token'; end if;
   insert into public.push_tokens(token, user_id, platform, updated_at) values (p_token, auth.uid(), p_platform, now())
   on conflict (token) do update set user_id = excluded.user_id, platform = excluded.platform, updated_at = now();
   -- 一個帳號最多記 10 支手機
