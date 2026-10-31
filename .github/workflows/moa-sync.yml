@@ -1,0 +1,22 @@
+name: 農業部遺失申報同步
+# 每 6 小時把農業部「寵物遺失啟事」同步成本站的協尋案件（scripts/moa_sync.py）
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: moa-sync
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 同步
+        env:
+          SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python3 scripts/moa_sync.py
