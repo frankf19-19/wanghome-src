@@ -123,7 +123,7 @@ ERR = {}
 def fetch_img(url):
     from PIL import Image, ImageOps
     try:
-        st, b, h = http(url, timeout=30)
+        st, b, h = http(url, timeout=60)
         if st != 200 or len(b) < 800: ERR.setdefault("small", url); return None
         im = ImageOps.exif_transpose(Image.open(io.BytesIO(b))).convert("RGB")
         im.thumbnail((640, 640))
@@ -157,8 +157,8 @@ def photo_sim():
         if m["photo_sim"] == -1:   # 沒照片：每 12 小時再試（收容所可能補照片）
             t = m.get("photo_checked_at")
             tt = dt.datetime.fromisoformat(t.replace("Z", "+00:00")) if t else None
-            # 2026-10-31 04:30 前那次照片都下載失敗（程式問題），一律重比
-            if not tt or now - tt > dt.timedelta(hours=12) or tt < dt.datetime(2026, 10, 31, 4, 30, tzinfo=dt.timezone.utc): todo.append(m)
+            # 2026-10-31 05:30 前那幾次照片都下載失敗（程式問題），一律重比
+            if not tt or now - tt > dt.timedelta(hours=12) or tt < dt.datetime(2026, 10, 31, 5, 30, tzinfo=dt.timezone.utc): todo.append(m)
     hasph = lambda m: bool((cases[m["case_id"]].get("photos") or [None])[0])
     todo.sort(key=lambda m: (not hasph(m), m["photo_sim"] is not None))
     todo = todo[:MAX_CMP]
@@ -169,11 +169,15 @@ def photo_sim():
         ph = (cases[m["case_id"]].get("photos") or [None])[0]
         m["_cu"] = ph
         sub = (m.get("animal_subid") or "").strip()
-        m["_su"] = moa_pic(m.get("photo_url")) or (f"{SITE}api/shelterpic/{sub}.jpg?v=3" if re.match(r"^[A-Z]{5}[0-9]{6,}$", sub) else None)
+        su = moa_pic(m.get("photo_url"))
+        if su and re.match(r"^https://(www\.pet\.gov\.tw|asms\.(moa|coa)\.gov\.tw)/", su, re.I):
+            su = f"{SITE}api/petimg?u=" + urllib.parse.quote(su, safe="")   # 寵物登記網不接受國外直接連線，經本站轉接
+        m["_su"] = su or (f"{SITE}api/shelterpic/{sub}.jpg?v=3" if re.match(r"^[A-Z]{5}[0-9]{6,}$", sub) else None)
         if m["_cu"] and m["_su"]:
             urls.add(m["_cu"]); urls.add(m["_su"])
-    with ThreadPoolExecutor(12) as ex:
-        imgs = dict(zip(urls, ex.map(fetch_img, urls)))
+    cu = [u for u in urls if "supabase.co" in u]; su = [u for u in urls if "supabase.co" not in u]
+    with ThreadPoolExecutor(8) as ex: imgs = dict(zip(cu, ex.map(fetch_img, cu)))
+    with ThreadPoolExecutor(4) as ex: imgs.update(dict(zip(su, ex.map(fetch_img, su))))   # 收容所照片慢慢抓，避免被擋
     ok_c = sum(1 for u, v in imgs.items() if v is not None and "supabase.co" in u)
     ok_s = sum(1 for u, v in imgs.items() if v is not None and "supabase.co" not in u)
     note(f"下載照片：{len(urls)} 張，走失毛孩照片成功 {ok_c}，收容所照片成功 {ok_s}；錯誤範例 {json.dumps(ERR, ensure_ascii=False)[:400]}")
