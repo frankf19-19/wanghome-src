@@ -1462,10 +1462,14 @@ body.has-cta .toast{bottom:calc(var(--tabbar-h) + 76px + env(safe-area-inset-bot
 #app.listonly .homelist>h2:first-child .ico{display:none}
 .lostprev:empty{display:none}
 @media (min-width:761px){.lostprev{display:none!important}}   /* 電腦版下面就有完整名單 */
-.lostprev{min-width:0}
+.lostprev{min-width:0}@media (min-width:761px){.lostprev.intakeprev{display:block!important}.lostprev.intakeprev:empty{display:none!important}}
 .lp-n{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 7px;border-radius:99px;background:var(--red-fill);color:#fff;font:700 13px var(--body);margin-left:4px}
 .lostprev .mp-h b .ico{color:var(--red)}
 .lostprev .mp-h a{color:var(--red)}
+.intake-cta{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:18px;background:var(--beige);color:var(--ink)!important;text-decoration:none!important;margin:4px 0 10px;box-shadow:var(--lift)}.intake-cta>span{width:42px;height:42px;flex:none;border-radius:14px;display:grid;place-items:center;background:var(--red-soft);color:var(--red)}.intake-cta b{display:block;font-size:15px}.intake-cta small{color:var(--ink-3)}
+.intake-card .band.new{background:#1E7A55!important;color:#fff!important}.found-at{color:var(--ink);font-weight:700;margin:3px 0}.lp-ph em.nw{background:#1E7A55}
+.chan{display:grid;gap:12px}@media(min-width:760px){.chan{grid-template-columns:repeat(3,1fr)}}.chan-g{background:var(--sheet);border-radius:18px;padding:14px 16px;box-shadow:var(--lift)}.chan-g>b{display:flex;align-items:center;gap:6px;font-size:15px}.chan-g ul{list-style:none;padding:0;margin:8px 0 0}.chan-g li{padding:7px 0;border-top:1px solid var(--line,#eee)}.chan-g li:first-child{border-top:0}.chan-g li a{font-weight:700}.chan-g li small{display:block;color:var(--ink-3);font-size:12.5px}
+.shel{list-style:none;padding:0;margin:8px 0}.shel li{padding:8px 0;border-top:1px solid var(--line,#eee)}.shel small{display:block;color:var(--ink-3)}
 .lp-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}.lp-row::-webkit-scrollbar{display:none}
 .lp{flex:none;width:118px;scroll-snap-align:start;text-decoration:none!important;color:var(--ink)!important;display:flex;flex-direction:column;gap:1px}
 .lp-ph{position:relative;width:118px;height:118px;border-radius:22px;overflow:hidden;background:var(--beige);display:grid;place-items:center;box-shadow:var(--lift);color:var(--ink-3)}
@@ -2731,6 +2735,7 @@ function route(){window.__lastRoute=Date.now();
   if(path==='#/verify'){if(verifying)return;if(!/^#\/verify\?/.test(h)){goReplace('#/login');return}handleVerify().then(()=>route());return}
   if(path==='#/verify-email')return renderVerifyEmail(qs(h));
   if(path==='#/adopt')return renderAdopt();
+  if(path==='#/intake')return renderIntake();
   if((m=path.match(/^#\/adopt\/(\d{1,10})$/)))return renderAdoptOne(m[1]);
   if(path==='#/login')return renderLogin();
   if(path==='#/set-username')return renderSetUsername();
@@ -3034,6 +3039,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
     ${(()=>{const t=seasonTip();return t?`<div class="season"><span class="se-ic" aria-hidden="true">${t.ic}</span><div><b>${t.t}</b><p>${t.b}</p></div></div>`:''})()}
     <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div id="lostPrev" class="lostprev"></div>
+    <div id="intakePrev" class="lostprev intakeprev"></div>
     <div class="qrow" aria-label="更多服務">
       <a href="#/adopt" class="qk"><span class="qi q1">${ic('shelter')}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
       <a href="#/resources" class="qk"><span class="qi q3">${ic('clipboard')}</span><b>協尋攻略</b><small>黃金 48 小時</small></a>
@@ -3092,7 +3098,7 @@ ${bigStartHTML()}
   if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   // 手機首頁看不到完整名單（在「協尋」分頁），不用先下載；電腦版和協尋分頁才載入
-  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO)loadLostPrev(_n);
+  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO){loadLostPrev(_n);loadIntakePrev(_n)}
 }
 function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" aria-labelledby="promoT">
   <div class="promo-txt">
@@ -4736,6 +4742,7 @@ async function renderAdopt(){const _n=navId;
   app.innerHTML=`<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
   <p class="tipbox">📞 想領養？先打電話給收容所，確認牠還在、問清楚流程（通常要帶身分證）。</p>
+  <a class="intake-cta" href="#/intake"><span>${ic('search')}</span><div><b>在找走失的毛孩？</b><small>看收容所最近新收的狗貓和被發現的地點</small></div></a>
   <div class="card adopt-f">
     <div class="seg" id="aKind" role="group" aria-label="狗或貓"><button type="button" data-v="狗" aria-pressed="${st.kind==='狗'}" class="${st.kind==='狗'?'on':''}">${spIc('dog')} 狗</button><button type="button" data-v="貓" aria-pressed="${st.kind==='貓'}" class="${st.kind==='貓'?'on':''}">${spIc('cat')} 貓</button></div>
     <div class="row2" style="margin-top:10px">
@@ -4793,6 +4800,78 @@ async function renderAdopt(){const _n=navId;
   $('#aSort').onchange=e=>{st.sort=e.target.value;st.limit=30;load()};
   $('#aPhoto').onchange=e=>{st.photo=e.target.checked;st.limit=30;load()};
   load();
+}
+/* ============================================================
+   收容所新收的毛孩：農業部開放資料，最近 N 天入所的狗貓（走失的毛孩常被好心人送到收容所）
+   ＋ 其他協尋管道（只放連結，不轉貼別人的內容）
+   ============================================================ */
+let intakeState={days:7};
+const agoD=r=>{const d=waitDays(r);return d==null?null:d-1};const inDays=(r,n)=>{const d=agoD(r);return d!=null&&d<n};
+function intakeCard(r){const d=agoD(r);return `<a class="ccard adopt-card intake-card" href="#/adopt/${esc(r.id)}">
+  <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}<span class="band new">${d===0?'今天入所':d+' 天前入所'}</span></div>
+  <div class="b"><div class="t">${esc(r.variety||'混種')} <span class="sexm">${r.sex==='M'?'公':r.sex==='F'?'母':''}</span></div><div class="small muted">${esc([ADOPT_SIZE[r.size],r.colour].filter(Boolean).join('・'))}</div>
+  ${r.found?`<div class="small found-at">${ic('pin')} 在 ${esc(r.found)} 被發現</div>`:''}<div class="small muted">${ic('shelter')} ${esc(shortShelter(r,adoptState.city))}・${esc((r.created||'').slice(5).replace('-','/'))}</div></div></a>`}
+function channelsHTML(city){const short=String(city||'').replace(/[市縣]$/,'').replace(/^臺/,'台');const ag=AGENCY[city];
+  const fb=q=>`https://www.facebook.com/search/groups/?q=${encodeURIComponent(q)}`;
+  return `<div class="chan">
+  <div class="chan-g"><b>${ic('shield')} 官方</b><ul>
+    <li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">寵物登記網：遺失申報</a><small>有植晶片一定要做，醫院、收容所掃晶片就會看到</small></li>
+    <li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">全國收容所收容公告</a><small>農業部官方公告頁</small></li>
+    ${ag?ag.t.map(e=>`<li><a href="${agTel(e)}">${esc(ag.n)} ${esc(agNum(e))}</a><small>${esc(agHours(e.h))}</small></li>`).join(''):`<li><a href="tel:1959">1959 動保專線</a><small>會自動轉到${city?esc(city):'你所在縣市'}的動保單位</small></li>`}
+  </ul></div>
+  <div class="chan-g"><b>${ic('megaphone')} 臉書協尋社團</b><ul>
+    <li><a target="_blank" rel="noopener" href="${fb((short||'')+' 寵物協尋')}">搜尋「${esc((short?short+' ':'')+'寵物協尋')}」社團</a><small>走失地點那一區的社團最有用，用協尋頁的「複製協尋貼文」貼上</small></li>
+    <li><a target="_blank" rel="noopener" href="${fb((short||'')+' 走失 狗 貓')}">搜尋「${esc((short?short+' ':'')+'走失 狗 貓')}」社團</a></li>
+    <li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各地區協尋社團清單</a></li>
+  </ul></div>
+  <div class="chan-g"><b>${ic('link')} 其他協尋平台</b><small class="muted">多貼一處，多一分機會</small><ul>
+    <li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li>
+    <li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li>
+    <li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li>
+    <li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li>
+  </ul></div></div>`}
+async function renderIntake(){const _n=navId;setTitle('收容所新收的毛孩');const st=adoptState;
+  app.innerHTML=`<h1>收容所新收的毛孩</h1>
+  <p class="lede">毛孩走失後，常被好心人送到收容所。這裡列出最近入所的狗貓和<b>被發現的地點</b>，資料來自農業部，每天更新。</p>
+  <p class="tipbox">📞 看到像的，馬上打電話給收容所，帶照片和晶片號碼去認領。收容所通常只公告 7～12 天，過了就可能開放領養。</p>
+  <div class="card adopt-f">
+    <div class="seg" id="iKind" role="group" aria-label="狗或貓"><button type="button" data-v="狗" aria-pressed="${st.kind==='狗'}" class="${st.kind==='狗'?'on':''}">${spIc('dog')} 狗</button><button type="button" data-v="貓" aria-pressed="${st.kind==='貓'}" class="${st.kind==='貓'?'on':''}">${spIc('cat')} 貓</button></div>
+    <div class="row2" style="margin-top:10px"><label class="f" style="margin:0"><span>縣市</span><select id="iCity">${cityOptions(st.city)}</select></label>
+    <label class="f" style="margin:0"><span>入所時間</span><select id="iDays">${[[3,'最近 3 天'],[7,'最近 7 天'],[14,'最近 14 天'],[30,'最近 30 天']].map(([v,t])=>`<option value="${v}" ${v===intakeState.days?'selected':''}>${t}</option>`).join('')}</select></label></div>
+  </div>
+  <div id="iList" style="margin-top:14px" aria-live="polite"></div>
+  <h2 id="channels">其他協尋管道</h2><div id="iChan">${channelsHTML(st.city)}</div>`;
+  const load=async()=>{const el=$('#iList');if(!el)return;try{localStorage.setItem('wh_adopt',JSON.stringify({city:st.city,dist:st.dist,kind:st.kind}))}catch(_){}
+    $('#iChan').innerHTML=channelsHTML(st.city);
+    if(!st.city){el.innerHTML=`<div class="empty-card"><div class="big">${ic('pin')}</div><b>先選走失的縣市</b><div class="citygrid">${Object.keys(MOA_AREA).map(c=>`<button type="button" class="btn ghost" data-city="${c}">${c}</button>`).join('')}</div></div>`;
+      el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;st.dist=[];$('#iCity').value=st.city;load()});return}
+    const my=navId,ck=st.city+st.kind+intakeState.days;el.dataset.k=ck;const stale=()=>my!==navId||!el.isConnected||el.dataset.k!==ck;
+    if(!adoptCache[adoptKey(MOA_AREA[st.city],st.kind)])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
+    let rows;try{rows=await fetchAdopt(st.city,st.kind)}catch(e){if(stale())return;el.innerHTML=`<div class="empty-card"><b>${esc(e.message)}</b><p><button type="button" class="btn" id="iRetry">再試一次</button></p></div>`;$('#iRetry').onclick=load;return}
+    if(stale())return;
+    const list=rows.filter(r=>inDays(r,intakeState.days)).sort((a,b)=>(b.created||'').localeCompare(a.created||''));
+    const sh={};rows.forEach(r=>{if(r.shelter&&!sh[r.shelter])sh[r.shelter]=r});
+    const shelters=Object.values(sh).map(r=>`<li><b>${esc(r.shelter)}</b>${adoptTel(r)?` <a href="tel:${esc(adoptTel(r))}">${esc(r.tel)}</a>`:''}${r.addr?`<small>${esc(r.addr)}</small>`:''}</li>`).join('');
+    adoptOrder=list.map(r=>r.id);
+    el.innerHTML=(list.length?`<p class="small muted" style="margin:0 0 8px">${esc(st.city)}最近 ${intakeState.days} 天新收了 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}</p><div class="grid">${list.slice(0,60).map(intakeCard).join('')}</div>`
+      :`<div class="empty-card"><div class="big">${ic('search')}</div><b>${esc(st.city)}最近 ${intakeState.days} 天沒有新收的${st.kind==='貓'?'貓':'狗'}</b><p class="small">可以把時間拉長，或打電話問收容所（有些還沒上傳到系統）。</p></div>`)
+      +(shelters?`<details class="more" style="margin-top:14px"><summary>${esc(st.city)}的收容所電話</summary><ul class="shel">${shelters}</ul></details>`:'')
+      +`<p class="small muted" style="margin-top:12px">資料來源：農業部「動物認領養」開放資料。實際狀況以收容所為準。</p>`};
+  $('#iKind').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.kind=b.dataset.v;st.variety=[];st.colour=[];$('#iKind').querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});load()});
+  $('#iCity').onchange=e=>{st.city=e.target.value;st.dist=[];st.variety=[];st.colour=[];load()};
+  $('#iDays').onchange=e=>{intakeState.days=+e.target.value;load()};
+  load();
+}
+// 首頁：收容所最近 7 天新收的毛孩（有選過縣市才下載資料，沒選過只顯示入口）
+async function loadIntakePrev(_n){const el=$('#intakePrev');if(!el)return;const st=adoptState;
+  const head=n=>`<div class="mp-h"><b>${ic('shelter')} 收容所最近新收${n?` <span class="lp-n">${n}</span>`:''}</b><a href="#/intake">${st.city?esc(st.city)+' ›':'看全部 ›'}</a></div>`;
+  if(!st.city){el.innerHTML=head(0)+`<a class="intake-cta" href="#/intake"><span>${ic('search')}</span><div><b>毛孩走失了？看看是不是被送到收容所</b><small>選縣市，列出最近入所的狗貓和被發現的地點</small></div></a>`;return}
+  await new Promise(r=>setTimeout(r,900));if(_n!==navId||!el.isConnected)return;
+  let rows;try{rows=await fetchAdopt(st.city,st.kind)}catch(_){el.innerHTML='';return}
+  if(_n!==navId||!el.isConnected)return;
+  const list=rows.filter(r=>inDays(r,7)&&r.photo).sort((a,b)=>(b.created||'').localeCompare(a.created||''));
+  if(!list.length){el.innerHTML='';return}
+  el.innerHTML=head(list.length)+`<div class="lp-row">${list.slice(0,10).map(r=>{const d=agoD(r);return `<a class="lp" href="#/adopt/${esc(r.id)}"><span class="lp-ph ${r.kind==='貓'?'cat':''}"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}"><em class="nw">${d===0?'今天':d+' 天前'}</em></span><b>${esc(r.variety||'混種')}</b><small>${esc(r.found?r.found.slice(0,12):shortShelter(r,st.city))}</small></a>`}).join('')}<a class="lp lp-all" href="#/intake"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>&nbsp;</small></a></div>`;
 }
 async function renderAdoptOne(id){const _n=navId;
   setTitle('領養毛孩');
@@ -7214,10 +7293,11 @@ function renderResources(){
     <div class="res"><b>農業部 寵物登記管理資訊網</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/Web/O205.aspx">遺失申報</a>（有晶片一定要做）</li><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/">晶片查詢 / 遺失啟事</a></li></ul></div>
     <div class="res"><b>全國動物收容管理系統</b><ul><li><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx">查看各收容所收容公告</a></li><li>本站每日自動比對來源</li></ul></div>
     <div class="res"><b>各縣市動保處</b><ul><li>受傷動物先撥 1959 動保專線，或選縣市看直撥電話</li><li>也可以打 1999 轉動保處，或搜尋「<span id="cityDB">縣市名</span> 動物保護處」</li></ul><select id="selCity" aria-label="選擇縣市" style="margin-top:8px">${cityOptions('')}</select><div id="cityLinks" style="margin-top:8px"></div></div>
-    <div class="res"><b>民間協尋平台（多貼一處多一分機會）</b><ul><li><a target="_blank" rel="noopener" href="https://noramichi.app/stray">浪途</a></li><li><a target="_blank" rel="noopener" href="https://wepet.tw/">Wepet</a></li><li><a target="_blank" rel="noopener" href="https://langlanglove.com/">浪浪甘巴爹</a></li><li><a target="_blank" rel="noopener" href="https://www.netpage.com.tw/lost/">寵物協尋聯網</a></li><li><a target="_blank" rel="noopener" href="https://thetailproject.com/resources/lost-pet-fb-groups">拾尾計畫：各地區 FB 協尋社團清單</a></li></ul></div>
+    <div class="res"><b>收容所新收的毛孩</b><ul><li><a href="#/intake">最近入所的狗貓＋被發現的地點</a></li><li>走失的毛孩常被送到收容所，每天看一次</li></ul></div>
   </div>
+  <h2>其他協尋管道</h2><div id="resChan">${channelsHTML('')}</div>
   <div id="statsWrap"><h2>找回統計</h2><div class="card" id="foundStats"><p class="muted">載入中…</p></div></div>`;
-  $('#selCity').onchange=()=>{const c=$('#selCity').value;$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?(AGENCY[c]?`<p class="small" style="margin:0 0 8px"><b>${esc(AGENCY[c].n)}</b>：${AGENCY[c].t.map(e=>`<a href="${agTel(e)}">${esc(agNum(e))}</a>${e.h?'（'+agHours(e.h)+'）':''}`).join('、')}</p>`:'')+`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
+  $('#selCity').onchange=()=>{const c=$('#selCity').value;{const rc=$('#resChan');if(rc)rc.innerHTML=channelsHTML(c)}$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?(AGENCY[c]?`<p class="small" style="margin:0 0 8px"><b>${esc(AGENCY[c].n)}</b>：${AGENCY[c].t.map(e=>`<a href="${agTel(e)}">${esc(agNum(e))}</a>${e.h?'（'+agHours(e.h)+'）':''}`).join('、')}</p>`:'')+`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
   sb.from('found_stats').select('*').then(({data,error})=>{const el=$('#foundStats');if(!el)return;const hideSt=()=>{const w=$('#statsWrap');if(w)w.remove()};if(error)return hideSt();data=(data||[]).filter(d=>d.n>0);if(!data.length)return hideSt();const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:var(--line);border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red-fill);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
 }
 function renderAbout(){
