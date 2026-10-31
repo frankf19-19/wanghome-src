@@ -3458,12 +3458,15 @@ async function loadList(){
     const filtered=homeState.q||homeState.chip||fCount()>0;
     if(filtered){el.innerHTML=`<div class="empty-card"><div class="big">${ic("search")}</div><b>找不到符合條件的案件</b><p class="small">試試別的關鍵字，或清除篩選看全部。</p><button type="button" class="btn" id="btnClearF">清除篩選</button></div>`;
       $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
-    if(!homeState.near){const gl=await govListHTML();if(my!==listSeq||!el.isConnected)return;if(gl){el.innerHTML=`<div class="empty-slim"><img src="duo.svg" alt="" width="64" height="44"><div><b>毛孩走失了？在這裡登記</b><small>會產生協尋頁和海報，有人回報目擊會直接通知你。</small></div><a class="btn sm" href="#/new">登記走失</a></div>`+gl;bindGov(el,__govShown);return}}
+    if(!homeState.near){const gl=await govListHTML();if(my!==listSeq||!el.isConnected)return;if(gl){el.innerHTML=`<div class="empty-slim"><img src="duo.svg" alt="" width="64" height="44"><div><b>毛孩走失了？在這裡登記</b><small>會產生協尋頁和海報，有人回報目擊會直接通知你。</small></div><a class="btn sm" href="#/new">登記走失</a></div>`+gl;bindGov(el,__govShown);govReorder(el,my);return}}
     el.innerHTML=emptyCard('lost');return}
   el.innerHTML=sortNear(data,'lost_lat','lost_lng').map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
-  if(!homeState.near&&!moreBtn(data.length,lim)){const gl=await govListHTML();if(my!==listSeq||!el.isConnected||!gl)return;el.insertAdjacentHTML('beforeend',gl);bindGov(el,__govShown)}
+  if(!homeState.near&&!moreBtn(data.length,lim)){const gl=await govListHTML();if(my!==listSeq||!el.isConnected||!gl)return;el.insertAdjacentHTML('beforeend',gl);bindGov(el,__govShown);govReorder(el,my)}
 }
 let __govShown=[];
+// 背景檢查哪些申報有照片，有照片的移到前面（沒有照片的放後面）
+function govReorder(el,my){fetchGovLost().then(rows=>govWithPhotos(rows,30)).then(()=>{if(my!==listSeq||!el.isConnected)return;const cs=[...el.querySelectorAll('.gov-card')];if(!cs.length)return;
+  const y=scrollY,head=el.querySelector('.gov-head');const ok=cs.filter(c=>__govPic[c.dataset.gov]===true),rest=cs.filter(c=>__govPic[c.dataset.gov]!==true);let at=head;[...ok,...rest].forEach(c=>{at.after(c);at=c});window.scrollTo(0,y)}).catch(()=>{})}
 async function govListHTML(){let rows;try{rows=await fetchGovLost()}catch(_){return ''}
   const list=govFilter(rows);__govShown=list;if(!list.length)return '';
   return govHead(list.length)+list.slice(0,60).map(govCard).join('')+(list.length>60?`<div class="more-row"><a class="btn ghost big" href="#/gov-lost">看全部 ${list.length} 筆遺失申報</a></div>`:'')}
