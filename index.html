@@ -2139,12 +2139,13 @@ html{-webkit-tap-highlight-color:transparent}
   .xmode .thumb{position:absolute;top:5px;bottom:5px;left:5px;width:calc(50% - 5px);border-radius:15px;background:linear-gradient(160deg,var(--brand),var(--brand-d));box-shadow:0 6px 14px -6px rgba(217,74,38,.7);transition:transform .32s cubic-bezier(.3,.9,.3,1),background .32s}
   .xmode.adopt .thumb{transform:translateX(100%);background:linear-gradient(160deg,#2BB583,#1A8A5F);box-shadow:0 6px 14px -6px rgba(26,138,95,.7)}
   .xmode.small{height:46px;border-radius:16px;margin-top:12px}.xmode.small>button{font-size:15px}.xmode.small .thumb{border-radius:12px}
-  .xt{font-size:25px!important;font-weight:800;letter-spacing:-.01em;line-height:1.3;margin:20px 2px 0!important;font-family:inherit!important}
+  .xt{font-size:23.5px!important;white-space:nowrap;font-weight:800;letter-spacing:-.01em;line-height:1.3;margin:20px 2px 0!important;font-family:inherit!important}
   .xt em{font-style:normal;color:var(--brand);font-variant-numeric:tabular-nums}
   body[data-route="adopt"] .xt em{color:var(--ok)}
-  .xwhere{display:inline-flex;align-items:center;gap:5px;margin:10px 0 0;height:36px;padding:0 12px 0 10px;border-radius:999px;border:0;background:var(--sheet);font:inherit;font-size:14.5px;font-weight:600;color:var(--ink);box-shadow:var(--lift);cursor:pointer}
-  .xwhere>.ico:first-child{color:var(--brand);width:17px;height:17px}.xwhere>.ico:last-child{width:14px;height:14px;color:var(--ink-3)}
-  body[data-route="adopt"] .xwhere>.ico:first-child{color:var(--ok)}
+  .xwhere{display:inline-flex;align-items:center;gap:2px;margin:0 6px 0 0;padding:0 2px;border:0;background:none;font:inherit;font-weight:800;color:var(--ink);cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--brand) 55%,transparent);text-decoration-thickness:3px;text-underline-offset:6px}
+  .xwhere>.ico{width:20px;height:20px;color:var(--brand);stroke-width:2.6}
+  body[data-route="adopt"] .xwhere{text-decoration-color:color-mix(in srgb,var(--ok) 55%,transparent)}body[data-route="adopt"] .xwhere>.ico{color:var(--ok)}
+  .xt{margin-bottom:14px!important}
   /* 搜尋、篩選、快速篩選、排序與顯示方式（往下捲時固定在上面） */
   .xsticky{display:block;position:sticky;top:env(safe-area-inset-top);z-index:30;margin:0 -16px;padding:10px 16px 10px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4)}
   .xsrow{display:flex;gap:10px}
@@ -2493,7 +2494,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.3.0';
+const BUILD = 'v6.3.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3672,10 +3673,9 @@ function xBellHTML(){const n=inboxUnread();return `<a class="xbell" href="#/inbo
 function xHeadHTML(mode,title,where){return `<section class="xh">
   <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><button type="button" class="xtbtn" data-theme-pick aria-label="外觀（深淺色）">${ic('moon')}</button><span id="xBell">${xBellHTML()}</span></div>
   <nav class="xmode ${mode==='adopt'?'adopt':''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失毛孩</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養毛孩</a></nav>
-  <h1 class="xt" id="xTitle">${title}</h1>
-  <button type="button" class="xwhere" id="xWhere">${ic('pin')}<span id="xWhereT">${esc(where)}</span>${XI.down}</button>
+  <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
-function xWhereText(){const h=homeState;return h.near?'我附近（約 60 公里內）':h.city.length?h.city.join('、'):'全台'}
+function xWhereText(){const h=homeState;return h.near?'我附近':h.city.length===1?h.city[0]:h.city.length?h.city.length+' 個縣市':'全台'}
 const XQK=[['all','全部'],['dog','狗狗'],['cat','貓咪'],['d3','3 天內'],['rw','有懸賞'],['found','有人撿到'],['intake','收容所新收','sp']];
 const XSORT=[['act','最新動態'],['new','最新走失'],['near','離我最近'],['rw','懸賞最高']];
 async function renderHomeMob(){const _n=navId;
@@ -3684,7 +3684,7 @@ async function renderHomeMob(){const _n=navId;
   const V=xView();
   (_n===navId?app:_void).innerHTML=`<h1 class="sr-only">汪喵回家：全台走失狗貓協尋平台</h1>
   ${mineHTML()}
-  ${xHeadHTML('lost',`${homeState.near?'你附近':esc(homeState.city.length===1?homeState.city[0]:homeState.city.length?'這些縣市':'全台')}有 <em id="xN">…</em> 隻毛孩走失中`,xWhereText())}
+  ${xHeadHTML('lost',`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`,xWhereText())}
   <div class="xsticky">
     <div class="xsrow"><label class="xsearch" id="lostFilters">${ic('search')}<input type="search" id="fQ" aria-label="搜尋走失的毛孩" enterkeyhint="search" placeholder="搜尋走失的毛孩" value="${esc(homeState.chip||homeState.q)}"></label><button type="button" class="xfbtn" id="btnFilter" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="fCnt"></i></button></div>
     <div class="xchips" id="xChips">${XQK.map(([k,l,c])=>`<button type="button" class="xchip ${c||''} ${homeState.qk===k?'on':''}" data-q="${k}">${l}</button>`).join('')}</div>
@@ -3696,7 +3696,7 @@ async function renderHomeMob(){const _n=navId;
   <div class="xfeed" id="xFeed" data-v="${V}"><div id="list" class="grid">${skel(4)}</div></div>
   <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>`;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c){c.textContent=n||'';c.classList.toggle('on',!!n)}const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
-  const setTitle2=()=>{const t=$('#xTitle');if(t)t.innerHTML=`${homeState.tab==='found'?'':''}${homeState.near?'你附近':esc(homeState.city.length===1?homeState.city[0]:homeState.city.length?'這些縣市':'全台')}有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`;const w=$('#xWhereT');if(w)w.textContent=xWhereText();xCountQ()};
+  const setTitle2=()=>{const t=$('#xTitle');if(t)t.innerHTML=`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`;const w=$('#xWhereT');if(w)w.textContent=xWhereText();xCountQ()};
   const xCountQ=async()=>{if(homeState.near)return;const f=homeState.tab==='found';let q=f?sb.from('found_public').select('id',{count:'exact',head:true}).eq('status','open'):sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching');q=fIn(q,f?'city':'lost_city',homeState.city);q=fSp(q);const {count}=await q;if(!$('#xFeed'))return;const e=$('#xN');if(e&&count!=null)e.textContent=count.toLocaleString()};
   window.xListDone=(n,lim)=>{if(!$('#xFeed'))return;const c=$('#xCnt');if(c)c.textContent=n>=lim?`${n}+ 隻・`:`${n} ${homeState.tab==='found'?'則':'隻'}・`;if(homeState.near){const e=$('#xN');if(e)e.textContent=n>=lim?n+'+':n}};
   const reload=()=>{homeState.limit=24;showF();setTitle2();loadList()};
@@ -5479,7 +5479,7 @@ async function renderAdopt(){const _n=navId;
   const chips=(k,arr)=>arr.map(([v,t,n])=>`<button type="button" class="fchip ${st[k].includes(v)?'on':''}" data-k="${k}" data-v="${esc(v)}" aria-pressed="${st[k].includes(v)}">${esc(t)}${n!=null?` <i>${n}</i>`:''}</button>`).join('');
   const nMore=()=>st.size.length+st.sex.length+st.age.length+(st.photo?0:1);
   const MV=isMobV();
-  app.innerHTML=`${MV?xHeadHTML('adopt','<em id="xN">…</em> 隻毛孩在等一個家',st.city||'選擇縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div>
+  app.innerHTML=`${MV?xHeadHTML('adopt','有 <em id="xN">…</em> 隻在等一個家',st.city||'選縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div>
     <div class="xtools"><button type="button" class="xsort" id="xaSort"><b id="xCnt"></b><span id="xaSortT">${st.sort==='old'?'等最久的':'最新入所'}</span>${XI.down}</button><div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid','list'].map(v=>`<button type="button" data-v="${v}" class="${(xView()==='map'?'big':xView())===v?'on':''}" aria-label="${{big:'大圖',grid:'格狀',list:'清單'}[v]}">${XI[v]}</button>`).join('')}</div></div></div><div class="xas-bg" id="xasBg"></div>`:''}<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
   <p class="tipbox">📞 想領養？先打電話給收容所，確認牠還在、問清楚流程（通常要帶身分證）。</p>
