@@ -2058,6 +2058,8 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .lost-card .ph.noimg{aspect-ratio:auto;height:84px;background:#F4EFF1}.lost-card .ph.noimg::after{display:none}.lost-card .ph.noimg::before{content:'飼主沒有提供照片';position:absolute;right:12px;bottom:10px;font-size:12.5px;color:var(--ink-3)}
 :root[data-theme=dark] .lost-card .ph.noimg{background:#24302F}
 .notice.moa summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.notice.moa summary::-webkit-details-marker{display:none}.notice.moa summary b{display:inline;margin:0}.notice.moa[open] summary{margin-bottom:6px}
+.moa-rel{margin:8px 0 0;text-align:center;font-size:14px}.moa-rel a{color:var(--ink-2);text-decoration:underline}
+.near-cta{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--sheet);box-shadow:var(--lift);color:var(--ink)!important;text-decoration:none!important;font-size:14.5px}.near-cta .ico{color:var(--red);flex:none}.near-cta span{flex:1}.near-cta b{display:block}.near-cta small{color:var(--ink-3)}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2139,7 +2141,7 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/learn">毛孩小學堂</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="https://wangmiaotw.com/l/" class="app-hide">各縣市走失毛孩</a><a href="#/learn">毛孩小學堂</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
   <p class="health-note small">毛孩健康手冊的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷。用藥與治療請依獸醫師指示。</p>
   <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><button type="button" class="linkbtn" id="themeBtn">🌓 外觀：自動</button><span>© 2026 汪喵回家 版權所有</span><span id="buildV"></span></div>
 </footer>
@@ -2169,7 +2171,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.17.2';
+const BUILD = 'v5.18.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3156,6 +3158,12 @@ async function loadLostPrev(_n){const el=$('#lostPrev');if(!el)return;
   <div class="lp-row">${list.map(c=>{const ph=c.photos?.[0];return `<a class="lp" href="#/case/${c.id}"><span class="lp-ph ${ph?'':'noimg'} ${c.species==='cat'?'cat':''}">${ph?thumbImg(ph,c.name):spIc(c.species)}<em>第 ${daysSince(c.lost_at)} 天</em></span><b>${esc(c.name)}</b><small>${esc((c.lost_city||'')+(c.lost_district||''))}</small></a>`}).join('')}
   <a class="lp lp-all" href="#/lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>&nbsp;</small></a></div>`;
 }
+// 首頁：還沒開「附近走失通知」的人，提醒一下（關掉就不再出現）
+async function loadNearCta(_n){const el=$('#nearCta');if(!el)return;try{if(localStorage.getItem('wh_nearcta_x'))return}catch(_){}
+  let on=false;if(me()){try{const p=await getProfile();on=!!(p&&p.notify_enabled&&p.home_lat)}catch(_){}}
+  if(_n!==navId||!el.isConnected||on)return;
+  el.innerHTML=`<div class="near-cta">${ic('bell')}<a href="${me()?'#/me?nf=1':'#/me'}" style="flex:1;color:inherit;text-decoration:none"><b>家附近有毛孩走失時通知我</b><small>${me()?'設定你家的位置，有新的走失毛孩（含農業部申報）會寄信通知你':'免費註冊會員，設定家附近，有毛孩走失就通知你'}</small></a><button type="button" class="linkbtn" aria-label="不要再顯示" style="font-size:18px;color:var(--ink-3)">✕</button></div>`;
+  el.querySelector('button').onclick=()=>{try{localStorage.setItem('wh_nearcta_x','1')}catch(_){}el.innerHTML=''}}
 async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
   if(!me()){el.innerHTML='';return}   // 沒登入：四宮格裡已經有「健康手冊」，不再重複
   getProfile().then(p=>{const n=(p&&(p.display_name||p.username)||'').trim();const h=$('#hiName');if(n&&h&&_n===navId)h.textContent=' '+n.slice(0,12)}).catch(()=>{});
@@ -3176,6 +3184,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
     <div id="lostPrev" class="lostprev"><div class="mp-h"><b>${ic('search')} 正在協尋的毛孩</b></div><div class="lp-row">${'<span class="lp"><span class="lp-ph sk"></span><span class="sk" style="width:60%;height:14px;margin-top:6px"></span></span>'.repeat(4)}</div></div>
+    <div id="nearCta"></div>
     ${(()=>{const t=seasonTip();return t?`<details class="season"><summary><span class="se-ic" aria-hidden="true">${t.ic}</span><b>${t.t}</b></summary><p>${t.b}</p></details>`:''})()}
     <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
@@ -3229,7 +3238,7 @@ ${bigStartHTML()}
   if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   // 手機首頁看不到完整名單（在「協尋」分頁），不用先下載；電腦版和協尋分頁才載入
-  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO){loadLostPrev(_n);loadIntakePrev(_n)}
+  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO){loadLostPrev(_n);loadIntakePrev(_n);loadNearCta(_n)}
 }
 function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" aria-labelledby="promoT">
   <div class="promo-txt">
@@ -3722,7 +3731,7 @@ async function renderCase(id){const _n=navId;
   </div>
   <h1>${sp(c.species).poster}｜${esc(c.name)}</h1>
   <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}</span></p>
-  ${c.source==='moa'?`<details class="notice moa"><summary><b>農業部遺失申報</b>看到牠請直接打給飼主 ›</summary>飼主在農業部寵物登記網申報走失，沒有使用汪喵回家，所以這裡不能回報目擊，請直接打電話給飼主。地圖上標的是走失地區的大概位置。</details>`:''}
+  ${c.source==='moa'?`<details class="notice moa"><summary><b>農業部遺失申報</b>看到牠請直接打給飼主 ›</summary>飼主在農業部寵物登記網申報走失，沒有使用汪喵回家。看到牠最快的方式是直接打電話給飼主；不方便打電話的話，也可以回報目擊位置，由汪喵回家確認後打電話轉告飼主。地圖上標的是走失地區的大概位置。</details>`:''}
   ${c.status==='found'?`<div class="notice green"><b>🎉 ${esc(c.name)} 已經找到了！</b>${c.found_note?esc(c.found_note):'謝謝所有幫忙的人。'}${c.found_method?`<div class="small muted">找回方式：${esc(c.found_method)}</div>`:''}</div>`:''}
   <div class="detail-head" style="margin-top:12px">
     <div class="gallery">
@@ -3745,6 +3754,7 @@ async function renderCase(id){const _n=navId;
         ${c.source==='moa'?'':`<a class="btn big cact-main" href="#/report/${id}">${ic("eye")} 我看到${esc(c.name||"牠")}了，回報</a>`}
         ${c.contact_phone?`<a class="btn big call" href="tel:${esc(String(c.contact_phone).replace(/[^\d+#]/g,''))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(c.contact_phone)}</span></a>`:''}
       </div>
+      ${c.source==='moa'?`<p class="moa-rel"><a href="#/report/${id}">${ic("eye")} 不方便打電話？回報目擊位置，由汪喵回家轉告飼主 ›</a></p>`:''}
       ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}按上面按鈕回報，飼主會收到通知。</p>`}
       <p class="tipbox ic-tip"><span class="tb-ic">${ic('paw')}</span><span>看到${esc(c.name||"牠")}：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</span></p>`:''}
       <div class="cact-sub">
@@ -4086,7 +4096,7 @@ function renderCreated(id,token,email,petName){const PN=esc(petName||'牠');
    ============================================================ */
 async function renderReport(id){const _n=navId;
   if(_n===navId)app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
-  const {data:c,error:ce}=await sb.from('cases_public').select('id,name,lost_city,lost_district,lost_lat,lost_lng,photos,status,contact_name,contact_phone,contact_line').eq('id',id).single();
+  const {data:c,error:ce}=await sb.from('cases_public').select('id,name,lost_city,lost_district,lost_lat,lost_lng,photos,status,contact_name,contact_phone,contact_line,source').eq('id',id).single();
   if(_n!==navId)return;
   if(!c){(_n===navId?app:_void).innerHTML=isNetErr(ce)?netErrHTML():'<div class="empty">找不到案件</div>';return}
   if(c.status!=='searching'){setTitle(c.name);(_n===navId?app:_void).innerHTML=`<div class="empty-card"><div class="big">${c.status==='found'?'🏠':ic('flag')}</div><b>${esc(c.name)} ${c.status==='found'?'已經找到了，謝謝你的關心！':'的協尋已結束'}</b><p class="small">這個案件不再接受目擊回報。</p><a class="btn" href="#/case/${esc(c.id)}">看案件頁</a> <a class="btn ghost" href="#/">看其他走失毛孩</a></div>`;return}
@@ -4094,6 +4104,7 @@ async function renderReport(id){const _n=navId;
   (_n===navId?app:_void).innerHTML=`<h1>回報目擊：${esc(c.name)}</h1>
   <div style="display:flex;gap:10px;align-items:center;margin:8px 0 12px">${c.photos?.[0]?thumbImg(c.photos[0],'','style="width:70px;height:70px;border-radius:10px;object-fit:cover"'):''}<div class="small muted"><b>${esc(c.lost_city)}${esc(c.lost_district||'')}</b><br>不確定是不是牠也請回報，飼主會自行判斷。</div></div>
   <div class="notice red"><b>請勿呼喊、追趕或包圍</b>保持距離觀察，先拍照、記下位置與方向，再填這個表單。</div>
+  ${c.source==='moa'?`<div class="notice moa" style="margin-top:10px"><b>這位飼主沒有使用汪喵回家</b>你的回報會由汪喵回家確認後，打電話轉告飼主（農業部登記的電話），請留下聯絡方式方便飼主找你。${c.contact_phone?`<br>想更快的話，也可以直接打給飼主：<a href="tel:${esc(String(c.contact_phone).replace(/[^\d+#]/g,''))}">${esc(c.contact_phone)}</a>`:''}</div>`:''}
   <form onsubmit="return false" class="card steps" id="f" style="margin-top:12px">
     <h3>有拍到照片嗎？</h3>
     <label class="uploadbtn" id="phLabel">${ic("image")} <span><b class="lbl">先選照片</b><small class="hint">建議</small></span><input type="file" name="photo" accept="image/*"></label>
@@ -5159,7 +5170,7 @@ async function renderAdmin(){const _n=navId;
   if(_n!==navId)return;
   if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const q=qs(location.hash),TABS=[['reports','檢舉'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['moa','農業部目擊'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
@@ -5170,6 +5181,7 @@ async function renderAdmin(){const _n=navId;
   app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>goReplace('#/admin?tab='+b.dataset.tab));
   const box=$('#adm');
   if(tab==='reports')return admReports(box,q.all==='1');
+  if(tab==='moa')return admMoa(box,q.all==='1');
   if(tab==='members')return admMembers(box,q.q||'');
   if(tab==='bans')return admBans(box);
   return admList(box,tab,q.q||'',q.f||'all');
@@ -5188,6 +5200,23 @@ function admContact(r){const rows=[];
   if(em)rows.push(`Email：${admMail(em,title)}${r.email_verified===false?'（未確認）':''}`);
   if(r.member_email&&r.member_email!==em)rows.push(`會員帳號：${admMail(r.member_email,title)}`);
   return rows.length?`<div class="adm-ct small">${rows.join('<br>')}</div>`:'<div class="adm-ct small muted">沒有留聯絡方式</div>'}
+// 農業部申報案件的目擊：飼主沒有使用本站，由站長打電話轉告飼主後標記
+async function admMoa(box,showAll){const _n=navId;box.innerHTML='<div class="empty">讀取中…</div>';
+  const {data:rs,error}=await sb.rpc('admin_moa_sightings',{p_include_done:showAll});if(_n!==navId)return;
+  if(error){box.innerHTML=`<div class="empty-card"><b>讀取失敗</b><p class="small">${esc(error.message)}</p></div>`;return}
+  const ST={pending:'待轉告',confirmed:'已轉告（公開到地圖）',rejected:'不像／無效'};
+  box.innerHTML=`<p class="small muted">農業部遺失申報的飼主沒有使用汪喵回家。收到目擊回報時，請打電話告訴飼主，再按「已轉告」（目擊會公開到協尋頁地圖）。</p>
+  <p><a class="small" href="#/admin?tab=moa${showAll?'':'&all=1'}">${showAll?'只看待轉告':'也顯示已處理的'}</a></p>
+  ${(rs||[]).length?rs.map(r=>`<div class="card adm-row" style="margin-bottom:10px">
+    <div style="display:flex;gap:12px">${r.photo_url?thumbImg(r.photo_url,'','style="width:84px;height:84px;object-fit:cover;border-radius:12px"'):''}<div style="flex:1;min-width:0">
+    <b><a href="#/case/${r.case_id}">${esc(r.case_name)}</a></b> <span class="tag">${esc(ST[r.status]||r.status)}</span>
+    <div class="small">${esc(r.lost_city||'')}${esc(r.lost_district||'')}・飼主電話：${r.owner_phone?`<a href="tel:${esc(telClean(r.owner_phone))}">${esc(r.owner_phone)}</a>`:'未提供'}</div>
+    <div class="small">目擊：${fmtDT(r.seen_at)}・${esc(r.place_text||'（見地圖）')}${r.direction?'・往'+esc(r.direction):''}</div>
+    ${r.note?`<div class="small">備註：${esc(r.note)}</div>`:''}
+    <div class="small muted">回報者：${esc(r.reporter_name||'未留名')}${r.reporter_contact?'・'+esc(r.reporter_contact):''}${r.lat!=null?`・<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${r.lat},${r.lng}">地圖</a>`:''}</div></div></div>
+    ${r.status==='pending'?`<div class="row" style="margin-top:8px;gap:8px"><button type="button" class="btn sm green" data-ms="${r.id}|confirmed">已轉告飼主</button><button type="button" class="btn sm ghost" data-ms="${r.id}|rejected">不像／無效</button></div>`:''}
+  </div>`).join(''):'<div class="empty">目前沒有待轉告的目擊</div>'}`;
+  box.querySelectorAll('[data-ms]').forEach(b=>b.onclick=async()=>{const [id,stt]=b.dataset.ms.split('|');b.disabled=true;const {error}=await sb.rpc('admin_sighting_status',{p_id:id,p_status:stt});if(error){b.disabled=false;return toast(error.message)}toast(stt==='confirmed'?'已標記轉告，目擊已公開':'已標記');admMoa(box,showAll)})}
 async function admReports(box,showAll){const _n=navId;
   const {data:rs,error}=await sb.rpc('admin_reports',{p_include_resolved:showAll});
   if(_n!==navId)return;
@@ -6571,6 +6600,7 @@ async function renderMeBody(){const _n=navId;
   if(p.home_lat)picker.set(p.home_lat,p.home_lng);else picker.map.setZoom(7);
   $('#btnHome').onclick=picker.locate;
   $('#nfSec').ontoggle=()=>{if($('#nfSec').open)setTimeout(()=>picker.map.invalidateSize(),50)};
+  if(qs(location.hash).nf){const d=$('#nfSec');d.open=true;setTimeout(()=>{try{d.scrollIntoView({block:'start',behavior:'smooth'})}catch(_){}},300)}
   $('#nOn').onchange=()=>{$('#nearBox').classList.toggle('hidden',!$('#nOn').checked);setTimeout(()=>picker.map.invalidateSize(),50)};
   document.querySelectorAll('[data-lost]').forEach(b=>b.onclick=e=>{e.preventDefault();location.hash='#/new?pet='+b.dataset.lost});
   $('#nf').onsubmit=once(async e=>{
