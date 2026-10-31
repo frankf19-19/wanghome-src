@@ -3,6 +3,7 @@
 // POST /api/shelterstore  {"sub":"AAAIG1151029003","src":"https://www.pet.gov.tw/Upload/pic/xxx.jpg"}
 // 需要在 Cloudflare Pages 設定環境變數 SB_SERVICE_KEY（加密）。
 const SB = "https://nopyhfpaykkiieudvoko.supabase.co";
+const auth = (key) => (key.startsWith("eyJ") ? { Authorization: `Bearer ${key}`, apikey: key } : { apikey: key });
 const SRC_OK = /^https:\/\/(www\.pet\.gov\.tw|asms\.moa\.gov\.tw|asms\.coa\.gov\.tw)\/[^\s'"<>\\]+$/i;
 const J = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const isImg = (b) => { const u = new Uint8Array(b.slice(0, 12));
@@ -26,11 +27,11 @@ export async function onRequestPost({ request, env, params }) {
   if (body.byteLength < 800 || body.byteLength > 1500000 || !isImg(body)) return J({ ok: false, why: "bad image" }, 422);
   const ct = (r.headers.get("Content-Type") || "image/jpeg").split(";")[0];
   const up = await fetch(`${SB}/storage/v1/object/photos/shelter/${sub}.jpg`, { method: "POST", body,
-    headers: { Authorization: `Bearer ${key}`, apikey: key, "Content-Type": /^image\/(jpeg|png|webp)$/.test(ct) ? ct : "image/jpeg", "x-upsert": "false", "Cache-Control": "max-age=31536000" } });
+    headers: { ...auth(key), "Content-Type": /^image\/(jpeg|png|webp)$/.test(ct) ? ct : "image/jpeg", "x-upsert": "false", "Cache-Control": "max-age=31536000" } });
   if (!up.ok && up.status !== 409) { const t = await up.text(); if (!/exists|Duplicate/i.test(t)) return J({ ok: false, why: "store" }, 502); }
   return J({ ok: true, n: await setPhoto(key, sub) });
 }
 async function setPhoto(key, sub) {
-  try { const r = await fetch(`${SB}/rest/v1/rpc/set_match_photo`, { method: "POST", headers: { Authorization: `Bearer ${key}`, apikey: key, "Content-Type": "application/json" }, body: JSON.stringify({ p_subid: sub }) });
+  try { const r = await fetch(`${SB}/rest/v1/rpc/set_match_photo`, { method: "POST", headers: { ...auth(key), "Content-Type": "application/json" }, body: JSON.stringify({ p_subid: sub }) });
     return r.ok ? await r.json() : 0; } catch (_) { return 0; }
 }
