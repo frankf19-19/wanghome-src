@@ -2504,7 +2504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.7.0';
+const BUILD = 'v6.8.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3635,6 +3635,25 @@ async function renderFav(){const _n=navId;setTitle('收藏');
   draw()}
 
 /* ===== 通知：右上角鈴鐺。把「我的案件、追蹤、家附近、健康提醒」的新消息整理在一起 ===== */
+
+/* ===== 手機推播（App，iPhone 先開）：有人看到你的毛孩、家附近有毛孩走失時，手機直接跳通知 ===== */
+let __pushBound=false,__pushToken='';
+function pushOK(){try{return IS_APP&&window.Capacitor.getPlatform()==='ios'&&!!capPlugin('PushNotifications')}catch(_){return false}}
+function pushBind(){if(__pushBound||!pushOK())return;__pushBound=true;const P=capPlugin('PushNotifications');
+  P.addListener('registration',t=>{__pushToken=t&&t.value||'';try{localStorage.setItem('wh_push_tok',__pushToken)}catch(_){}if(me()&&__pushToken)sb.rpc('save_push_token',{p_token:__pushToken,p_platform:'ios'}).then(()=>{},()=>{})});
+  P.addListener('registrationError',()=>{});
+  P.addListener('pushNotificationActionPerformed',a=>{const u=a&&a.notification&&a.notification.data&&a.notification.data.url;if(u&&/^#\/[\w\/?=&.%-]*$/.test(u))location.hash=u});
+  P.addListener('pushNotificationReceived',()=>{try{__inboxAt=0;inboxMaybe()}catch(_){}})}
+async function pushInit(ask){if(!pushOK()||!me())return;pushBind();const P=capPlugin('PushNotifications');
+  try{let st=await P.checkPermissions();
+    if(st.receive==='prompt'||st.receive==='prompt-with-rationale'){
+      let asked=false;try{asked=!!localStorage.getItem('wh_push_asked')}catch(_){}
+      if(!ask&&asked)return;try{localStorage.setItem('wh_push_asked','1')}catch(_){}
+      const ok=await askSheet({title:'開啟手機通知？',body:'有人看到你的毛孩、收容所比對到很像的、家附近有毛孩走失時，手機會直接跳通知，不會漏掉。',ok:'開啟通知',cancel:'以後再說'});
+      if(!ok)return;st=await P.requestPermissions()}
+    if(st.receive==='granted')await P.register();
+    else if(ask)toast('通知被關掉了，可以到手機「設定」→ 汪喵回家 → 通知 打開',6000)}catch(_){}}
+async function pushDrop(){try{const t=__pushToken||localStorage.getItem('wh_push_tok');if(t&&me())await sb.rpc('drop_push_token',{p_token:t})}catch(_){}}
 function inboxSeen(){try{return +localStorage.getItem('wh_inbox_seen')||0}catch(_){return 0}}
 function inboxUnread(){try{return +localStorage.getItem('wh_inbox_n')||0}catch(_){return 0}}
 async function inboxItems(){if(!me())return [];const out=[];const since=new Date(Date.now()-14*864e5).toISOString();
@@ -3658,7 +3677,9 @@ async function renderInbox(){const _n=navId;setTitle('通知');
   const K=[['all','全部'],['mine','我的協尋'],['follow','追蹤的'],['near','家附近'],['pet','我的毛孩']];
   app.innerHTML=`<div class="xpage"><div class="xpt-row"><h1 class="xpt">通知</h1>${me()?`<a class="xgear" href="#/me?nf=1" aria-label="通知設定">${ic('sliders')}</a>`:''}</div>
   ${me()?`<div class="xchips" id="ibK">${K.map(([k,l])=>`<button type="button" class="xchip ${inboxK===k?'on':''}" data-k="${k}">${l}</button>`).join('')}</div>`:''}
+  ${pushOK()&&me()?'<button type="button" class="btn ghost block" id="ibPush" style="margin:6px 0 4px">'+ic('bell')+' 開啟手機通知</button>':''}
   <div id="ibList" class="xib">${me()?'<div class="pskel"><div class="sk" style="height:70px"></div><div class="sk" style="height:70px"></div></div>':''}</div></div>`;
+  {const b=$('#ibPush');if(b){b.onclick=()=>pushInit(true);try{capPlugin('PushNotifications').checkPermissions().then(s=>{if(s.receive==='granted')b.remove()})}catch(_){}}}
   if(!me()){$('#ibList').innerHTML=`<div class="xempty">${ic('bell')}<b>登入後，新消息都會出現在這裡</b><p>有人看到你的毛孩、收容所比對到很像的、家附近有毛孩走失、疫苗快到期，都會通知你。</p><a class="btn" href="#/login">登入／註冊（免費）</a></div>`;return}
   const seen=inboxSeen();let items=[];
   try{items=await inboxItems()}catch(_){}
@@ -6043,6 +6064,7 @@ async function initAuth(){
   updateAuthUI();
 }
 function updateAuthUI(){
+  if(me())setTimeout(()=>pushInit(false),2500);
   const a=$('#navMe');if(!a)return;
   const u=me();
   let av='';if(u){try{av=localStorage.getItem('wh_av_'+u.id)||''}catch(_){}}
@@ -7206,7 +7228,7 @@ async function renderMeBody(){const _n=navId;
   if($('#btnNick'))$('#btnNick').onclick=async()=>{const v=await textSheet({title:'修改暱稱',value:p.display_name||p.username||'',max:20,placeholder:'例：小麥媽媽',hint:'暱稱 3 個月可以改一次。使用者名稱不會改變。'});if(v===null)return;const n=v.trim();if(!n)return toast('請輸入暱稱');if(n===(p.display_name||''))return;
     if(!await askSheet({title:`把暱稱改成「${n}」？`,body:'改了之後，3 個月內不能再改。',ok:'確定修改'}))return;const {error}=await sb.from('profiles').update({display_name:n}).eq('id',me().id);if(error)return toast(friendlyErr(error.message),5000);toast('✅ 暱稱已更新');route()};
   $('#btnOut').onclick=async()=>{const clearMine=confirm('這是共用的手機嗎？\n按「確定」：登出並清除這支手機記住的管理網址和聯絡資料（共用手機建議這樣）。\n按「取消」：只登出，資料留著下次用（自己的手機）。');
-    window.__userSignOut=true;await sb.auth.signOut();try{localStorage.removeItem('wh_inbox_n');localStorage.removeItem('wh_inbox_seen')}catch(_){}try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
+    window.__userSignOut=true;await pushDrop();await sb.auth.signOut();try{localStorage.removeItem('wh_inbox_n');localStorage.removeItem('wh_inbox_seen')}catch(_){}try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
     if(!await askSheet({title:'永久刪除你的帳號？',body:'毛孩檔案、健康紀錄、照片都會一起刪除，無法復原。',ok:'刪除帳號',danger:true}))return;
     const b=$('#btnDelAcct');b.disabled=true;b.textContent='刪除中…';

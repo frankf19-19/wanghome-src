@@ -277,6 +277,49 @@ async function resendSend(to: string, subject: string, text: string, html?: stri
   throw new HttpError(r.status, `resend ${t}`);
 }
 
+
+// ===== 手機推播（iPhone／APNs）=====
+// 需要的 Secrets：APNS_P8（Apple 推播金鑰 .p8 的內容）、APNS_KEY_ID、APNS_TEAM_ID；沒設定就不推
+const APNS_P8 = (Deno.env.get("APNS_P8") ?? "").trim();
+const APNS_KEY_ID = (Deno.env.get("APNS_KEY_ID") ?? "").trim();
+const APNS_TEAM_ID = (Deno.env.get("APNS_TEAM_ID") ?? "").trim();
+const APNS_TOPIC = (Deno.env.get("APNS_TOPIC") ?? "com.wangmiaotw.app").trim();
+let apnsJwt = { t: 0, v: "" };
+const b64u = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+async function apnsAuth(): Promise<string> {
+  if (apnsJwt.v && Date.now() - apnsJwt.t < 40 * 60e3) return apnsJwt.v;
+  const der = Uint8Array.from(atob(APNS_P8.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", der, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const enc = (o: unknown) => b64u(new TextEncoder().encode(JSON.stringify(o)));
+  const data = enc({ alg: "ES256", kid: APNS_KEY_ID }) + "." + enc({ iss: APNS_TEAM_ID, iat: Math.floor(Date.now() / 1000) });
+  const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(data));
+  apnsJwt = { t: Date.now(), v: data + "." + b64u(sig) };
+  return apnsJwt.v;
+}
+// 推給某位會員的所有 iPhone；回傳成功幾支
+async function pushToUser(userId: string, title: string, body: string, url = "#/inbox"): Promise<number> {
+  if (!APNS_P8 || !APNS_KEY_ID || !APNS_TEAM_ID || !userId) return 0;
+  const base = Deno.env.get("SUPABASE_URL")!, key = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
+  const h = { apikey: key, ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}) };
+  let toks: { token: string; platform: string }[] = [];
+  try { const r = await fetch(`${base}/rest/v1/push_tokens?select=token,platform&user_id=eq.${userId}`, { headers: h }); if (r.ok) toks = await r.json(); } catch (_) { return 0; }
+  let n = 0;
+  for (const t of toks.filter((x) => x.platform === "ios")) {
+    try {
+      const r = await fetch(`https://api.push.apple.com/3/device/${t.token}`, { method: "POST",
+        headers: { authorization: `bearer ${await apnsAuth()}`, "apns-topic": APNS_TOPIC, "apns-push-type": "alert", "apns-priority": "10", "content-type": "application/json" },
+        body: JSON.stringify({ aps: { alert: { title, body }, sound: "default" }, url }) });
+      if (r.ok) n++;
+      else if (r.status === 410 || r.status === 400) {   // 手機已經刪掉 App 或代碼失效：不再推
+        const why = await r.text().catch(() => "");
+        if (r.status === 410 || /BadDeviceToken|Unregistered|DeviceTokenNotForTopic/.test(why))
+          await fetch(`${base}/rest/v1/push_tokens?token=eq.${encodeURIComponent(t.token)}`, { method: "DELETE", headers: h }).catch(() => {});
+      }
+    } catch (_) { /* 推播失敗不影響寄信 */ }
+  }
+  return n;
+}
+
 async function sendMail(to: string, subject: string, body: string, kind = "notify", cap = MAIL_CAP_HIGH, html?: string): Promise<boolean> {
   if (!(MAIL_OK && to) || STOP_MAIL) return false;
   if (!(await mailBudget(kind, cap))) { log(`今天的寄信額度已用完（${kind}），留到明天再寄`); return false; }
@@ -533,6 +576,7 @@ async function runMemberNotifications(nearby = true) {
       if (!(await sendMail(email, `【${SITE_NAME}】你家附近有毛孩走失`, lines.join("\n"), "nearby", MAIL_CAP_LOW))) break;
       await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: "nearby", ref_id: r.case_id })), undefined, "return=minimal,resolution=ignore-duplicates");   // 全部記下來，超過 10 隻的隔天不會再寄
       log(`附近通知：${lst.length} 筆 → 1 位會員`);
+      await pushToUser(uid, `你家附近有 ${lst.length} 隻毛孩走失`, `${lst[0].case_name}（約 ${Number(lst[0].distance_km).toFixed(1)} 公里）${lst.length > 1 ? "等" : ""}，出門時幫忙留意`, lst.length === 1 ? `#/case/${lst[0].case_id}` : "#/inbox");
     } catch (e) { log("附近通知寄送失敗：", errName(e)); }
   }
   // 追蹤案件新目擊
@@ -549,6 +593,7 @@ async function runMemberNotifications(nearby = true) {
       if (!(await sendMail(email, `【${SITE_NAME}】追蹤的案件有新目擊`, lines.join("\n"), "follow", MAIL_CAP_LOW))) break;
       await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: "follow", ref_id: r.sighting_id })), undefined, "return=minimal,resolution=ignore-duplicates");
       log(`追蹤通知：${lst.length} 筆 → 1 位會員`);
+      await pushToUser(uid, `你追蹤的${lst[0].case_name}有新目擊`, `${lst[0].place_text || "點開看位置"}`, `#/case/${lst[0].case_id}`);
     } catch (e) { log("追蹤通知寄送失敗：", errName(e)); }
   }
 }

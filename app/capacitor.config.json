@@ -31,6 +31,13 @@
     "LocalNotifications": {
       "smallIcon": "ic_stat_paw",
       "iconColor": "#CC3F1E"
+    },
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
     }
   }
 }

@@ -45,6 +45,49 @@ async function sha256hex(s: string) {
 
 const resendKey = (Deno.env.get("RESEND_API_KEY") ?? "").trim();
 const gUser = Deno.env.get("GMAIL_USER") ?? "", gPass = (Deno.env.get("GMAIL_APP_PASSWORD") ?? "").replace(/\s/g, "");
+
+// ===== 手機推播（iPhone／APNs）=====
+// 需要的 Secrets：APNS_P8（Apple 推播金鑰 .p8 的內容）、APNS_KEY_ID、APNS_TEAM_ID；沒設定就不推
+const APNS_P8 = (Deno.env.get("APNS_P8") ?? "").trim();
+const APNS_KEY_ID = (Deno.env.get("APNS_KEY_ID") ?? "").trim();
+const APNS_TEAM_ID = (Deno.env.get("APNS_TEAM_ID") ?? "").trim();
+const APNS_TOPIC = (Deno.env.get("APNS_TOPIC") ?? "com.wangmiaotw.app").trim();
+let apnsJwt = { t: 0, v: "" };
+const b64u = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+async function apnsAuth(): Promise<string> {
+  if (apnsJwt.v && Date.now() - apnsJwt.t < 40 * 60e3) return apnsJwt.v;
+  const der = Uint8Array.from(atob(APNS_P8.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", der, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const enc = (o: unknown) => b64u(new TextEncoder().encode(JSON.stringify(o)));
+  const data = enc({ alg: "ES256", kid: APNS_KEY_ID }) + "." + enc({ iss: APNS_TEAM_ID, iat: Math.floor(Date.now() / 1000) });
+  const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(data));
+  apnsJwt = { t: Date.now(), v: data + "." + b64u(sig) };
+  return apnsJwt.v;
+}
+// 推給某位會員的所有 iPhone；回傳成功幾支
+async function pushToUser(userId: string, title: string, body: string, url = "#/inbox"): Promise<number> {
+  if (!APNS_P8 || !APNS_KEY_ID || !APNS_TEAM_ID || !userId) return 0;
+  const base = Deno.env.get("SUPABASE_URL")!, key = serviceKey();
+  const h = { apikey: key, ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}) };
+  let toks: { token: string; platform: string }[] = [];
+  try { const r = await fetch(`${base}/rest/v1/push_tokens?select=token,platform&user_id=eq.${userId}`, { headers: h }); if (r.ok) toks = await r.json(); } catch (_) { return 0; }
+  let n = 0;
+  for (const t of toks.filter((x) => x.platform === "ios")) {
+    try {
+      const r = await fetch(`https://api.push.apple.com/3/device/${t.token}`, { method: "POST",
+        headers: { authorization: `bearer ${await apnsAuth()}`, "apns-topic": APNS_TOPIC, "apns-push-type": "alert", "apns-priority": "10", "content-type": "application/json" },
+        body: JSON.stringify({ aps: { alert: { title, body }, sound: "default" }, url }) });
+      if (r.ok) n++;
+      else if (r.status === 410 || r.status === 400) {   // 手機已經刪掉 App 或代碼失效：不再推
+        const why = await r.text().catch(() => "");
+        if (r.status === 410 || /BadDeviceToken|Unregistered|DeviceTokenNotForTopic/.test(why))
+          await fetch(`${base}/rest/v1/push_tokens?token=eq.${encodeURIComponent(t.token)}`, { method: "DELETE", headers: h }).catch(() => {});
+      }
+    } catch (_) { /* 推播失敗不影響寄信 */ }
+  }
+  return n;
+}
+
 async function sendMail(to: string, subject: string, text: string, html?: string) {
   if (resendKey) {
     const r = await fetch("https://api.resend.com/emails", {
@@ -95,8 +138,22 @@ Deno.serve(async (req) => {
     }
   }
   const { data: c, error: ce } = await sb.from("cases")
-    .select("id,name,status,contact_email,hidden,email_verified,email_verify_sent_at,email_verify_hash").eq("id", caseId).maybeSingle();
+    .select("id,name,status,contact_email,hidden,email_verified,email_verify_sent_at,email_verify_hash,owner_id").eq("id", caseId).maybeSingle();
   if (ce) return json({ error: "lookup" }, 500);
+  // 會員登記的案件：手機推播給飼主（不需要確認信箱）
+  // 只有 15 分鐘內真的有新目擊才推；同一案件 10 分鐘最多推一次（避免被人拿來洗推播）
+  if (!isVerify && c && !c.hidden && c.owner_id && c.status === "searching") {
+    try {
+      const { count: fresh } = await sb.from("sightings").select("id", { count: "exact", head: true })
+        .eq("case_id", caseId).neq("status", "rejected").gte("created_at", new Date(Date.now() - 15 * 60e3).toISOString());
+      const { count: recent } = await sb.from("case_mail_log").select("case_id", { count: "exact", head: true })
+        .eq("case_id", caseId).eq("kind", "push").gte("sent_at", new Date(Date.now() - 10 * 60e3).toISOString());
+      if ((fresh ?? 0) > 0 && (recent ?? 0) === 0) {
+        await sb.from("case_mail_log").insert({ case_id: caseId, to_email: "push", kind: "push" });
+        await pushToUser(c.owner_id, `有人看到${c.name}了！`, "點開看目擊的時間和位置，確認是不是牠", `#/manage/${caseId}`);
+      }
+    } catch (_) { /* 推播失敗不影響寄信 */ }
+  }
   if (!c || c.hidden || !c.contact_email) return json({ sent: false, reason: "no_email" });
   const to = String(c.contact_email).trim().toLowerCase();
 
@@ -191,7 +248,7 @@ Deno.serve(async (req) => {
   // 目擊通知全站每小時最多 150 封（和確認信分開計算）
   if (await count((x) => x.eq("kind", "notify").gte("sent_at", hourAgo)) >= 150) return json({ sent: false, reason: "throttled" });
   // 同一案件、同一信箱一小時最多 6 封；超過就先不寄，目擊留著下次一起寄
-  if (await count((x) => x.eq("case_id", caseId).gte("sent_at", hourAgo)) >= 6) return json({ sent: false, reason: "throttled" });
+  if (await count((x) => x.eq("case_id", caseId).neq("kind", "push").gte("sent_at", hourAgo)) >= 6) return json({ sent: false, reason: "throttled" });
   if (await count((x) => x.eq("to_email", toKey).gte("sent_at", hourAgo)) >= 6) return json({ sent: false, reason: "throttled" });
 
   // 先「搶」下尚未通知的目擊（原子更新），避免同時兩次呼叫重複寄
