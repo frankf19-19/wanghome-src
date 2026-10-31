@@ -2504,7 +2504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.4.2';
+const BUILD = 'v6.5.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4594,7 +4594,7 @@ function renderNew(){
   // 草稿：自動存、自動帶回（照片無法存）
   const DKEY='wh_draft_new',form=$('#f');
   let sent=false;const saveDraft=()=>{if(sent)return;try{const o={species};[...form.elements].forEach(el=>{if(!el.name||el.type==='file'||el.name==='website')return;o[el.name]=el.type==='checkbox'?el.checked:el.value});localStorage.setItem(DKEY,JSON.stringify(o))}catch(_){}};
-  let dT;form.addEventListener('input',()=>{clearTimeout(dT);dT=setTimeout(saveDraft,400)});
+  let dT;const dLater=()=>{clearTimeout(dT);dT=setTimeout(saveDraft,400)};form.addEventListener('input',dLater);form.addEventListener('change',dLater);form.addEventListener('click',()=>dLater());
   if(!petId){try{const d=JSON.parse(localStorage.getItem(DKEY)||'null');if(d&&d.name){Object.entries(d).forEach(([k,v])=>{const el=form.elements[k];if(!el||k==='species')return;if(el.type==='checkbox')el.checked=!!v;else el.value=v});if(d.species)setSp(d.species);if(d.lost_city)$('#dist').innerHTML=distOptions(d.lost_city,d.lost_district);
     const n=document.createElement('div');n.className='notice';n.style.margin='0 0 12px';n.innerHTML='<b>已帶回你上次沒送出的內容</b>照片需要重新選。 <a href="javascript:void 0" id="clrDraft">清空重填</a>';form.prepend(n);
     $('#clrDraft').onclick=()=>{try{localStorage.removeItem(DKEY)}catch(_){};renderNew()}}}catch(_){}}
@@ -4690,6 +4690,13 @@ function renderCreated(id,token,email,petName){const PN=esc(petName||'牠');
 /* ============================================================
    回報目擊
    ============================================================ */
+// 表單草稿：填到一半被打斷（App 被系統關掉、不小心離開），回來時自動帶回文字內容（照片要重選）
+function formDraft(form,key){if(!form)return;const save=()=>{try{const o={};[...form.elements].forEach(el=>{if(!el.name||el.type==='file'||el.name==='website'||el.type==='hidden')return;if(el.type==='radio'){if(el.checked)o[el.name]=el.value;return}o[el.name]=el.type==='checkbox'?el.checked:el.value});o._t=Date.now();localStorage.setItem(key,JSON.stringify(o))}catch(_){}};
+  let t;const later=()=>{clearTimeout(t);t=setTimeout(save,400)};form.addEventListener('input',later);form.addEventListener('change',later);
+  form.addEventListener('submit',()=>{clearTimeout(t);try{localStorage.removeItem(key)}catch(_){}},true);
+  try{const d=JSON.parse(localStorage.getItem(key)||'null');if(!d||Date.now()-(d._t||0)>3*864e5)return;let n=0;
+    Object.entries(d).forEach(([k,v])=>{if(k==='_t')return;form.querySelectorAll(`[name="${CSS.escape(k)}"]`).forEach(el=>{if(el.type==='radio'){el.checked=el.value===v;if(el.checked){n++;el.dispatchEvent(new Event('change',{bubbles:true}))}}else if(el.type==='checkbox')el.checked=!!v;else if(v&&el.tagName!=='SELECT'||v&&[...el.options].some(o=>o.value===v)){el.value=v;n++}})});
+    if(n)setTimeout(()=>{if(!form.isConnected)return;const b=document.createElement('div');b.className='notice';b.style.margin='0 0 12px';b.innerHTML='<b>已帶回你上次沒送出的內容</b>照片需要重新選。 <a href="javascript:void 0" class="clrD">清空重填</a>';form.prepend(b);b.querySelector('.clrD').onclick=()=>{try{localStorage.removeItem(key)}catch(_){}location.reload()}},0)}catch(_){}}
 async function renderReport(id){const _n=navId;
   if(_n===navId)app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
   const {data:c,error:ce}=await sb.from('cases_public').select('id,name,lost_city,lost_district,lost_lat,lost_lng,photos,status,contact_name,contact_phone,contact_line,source').eq('id',id).single();
@@ -4742,6 +4749,7 @@ async function renderReport(id){const _n=navId;
     $('#phLabel').querySelector('span').textContent='換一張照片';
     applyPhotoMeta(await readPhotoMeta(file),{dateInput:$('#f').elements['seen_at'],picker,hintEl:$('#exifHint')});
   };
+  formDraft($('#f'),'wh_draft_rep_'+id.slice(0,8));
   $('#f').onsubmit=async e=>{
     e.preventDefault();const fd=new FormData(e.target);if(fd.get('website'))return;
     const loc=picker.get();if(!loc&&!String(fd.get('place_text')||'').trim()){toast('請在地圖上點選看到的位置，或寫下地點描述');return}
@@ -5255,6 +5263,7 @@ function renderFoundNew(){
   const picker=pickerMap('pmap',[23.9,121]);picker.map.setZoom(7);
   $('#city').onchange=()=>{$('#dist').innerHTML=distOptions($('#city').value);const c=CITY_CENTER[$('#city').value];if(c)picker.map.setView(c,12)};
   $('#btnLoc').onclick=picker.locate;
+  formDraft($('#f'),'wh_draft_found');
   $('#f').onsubmit=async e=>{const _n=navId;
     e.preventDefault();const fd=new FormData(e.target);if(fd.get('website'))return;
     if(!species){toast('請先選「狗」或「貓」');return}
