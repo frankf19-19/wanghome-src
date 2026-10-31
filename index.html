@@ -2057,6 +2057,7 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .pop-ph{display:block;margin:-4px -4px 8px;border-radius:10px;overflow:hidden}.pop-ph img{display:block;width:180px;height:130px;object-fit:cover}
 .ccard .ph.noimg{aspect-ratio:auto;height:78px;background:#F4EFF1}.ccard .ph.noimg::after{background-size:26px!important;background-position:calc(100% - 14px) calc(100% - 12px)!important;opacity:.7}.ccard .ph.noimg::before{content:'飼主沒有提供照片';position:absolute;left:12px;bottom:10px;font-size:12.5px;color:var(--ink-3)}
 :root[data-theme=dark] .ccard .ph.noimg{background:#24302F}
+.notice.moa summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.notice.moa summary::-webkit-details-marker{display:none}.notice.moa summary b{display:inline;margin:0}.notice.moa[open] summary{margin-bottom:6px}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2151,7 +2152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.16.5';
+const BUILD = 'v5.17.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3700,7 +3701,7 @@ async function renderCase(id){const _n=navId;
   </div>
   <h1>${sp(c.species).poster}｜${esc(c.name)}</h1>
   <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}</span></p>
-  ${c.source==='moa'?`<div class="notice moa"><b>飼主在農業部寵物登記網申報的走失毛孩</b>飼主不一定有使用汪喵回家。看到牠請直接打電話給飼主，也可以在這裡回報目擊位置，幫大家縮小找的範圍。地圖上標的是走失地區的大概位置。</div>`:''}
+  ${c.source==='moa'?`<details class="notice moa"><summary><b>農業部遺失申報</b>看到牠請直接打給飼主 ›</summary>飼主在農業部寵物登記網申報走失，不一定有使用汪喵回家。也可以在這裡回報目擊位置，幫大家縮小找的範圍。地圖上標的是走失地區的大概位置。</details>`:''}
   ${c.status==='found'?`<div class="notice green"><b>🎉 ${esc(c.name)} 已經找到了！</b>${c.found_note?esc(c.found_note):'謝謝所有幫忙的人。'}${c.found_method?`<div class="small muted">找回方式：${esc(c.found_method)}</div>`:''}</div>`:''}
   <div class="detail-head" style="margin-top:12px">
     <div class="gallery">
