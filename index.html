@@ -8,7 +8,7 @@
    安全：只接受從舊網址轉過來的（referrer 檢查）、只收指定的鍵、內容逐筆檢查；舊網址只帶一次。 */
 (function(){var H='wangmiaotw.com',OLD='frankf19-19.github.io',MOVE=true,SBK='sb-nopyhfpaykkiieudvoko-auth-token',
 UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-KEEP=function(k){return k==='wh_mine'||k==='wh_theme'||/^wh_(token|ftoken)_[0-9a-f-]{36}$/.test(k)||/^wh_draft[a-z_]{0,20}$/.test(k)};
+KEEP=function(k){return k==='wh_mine'||k==='wh_theme'||k==='wh_afav'||k==='wh_xv'||k==='wh_dv'||/^wh_(token|ftoken)_[0-9a-f-]{36}$/.test(k)||/^wh_draft[a-z_]{0,20}$/.test(k)};
 try{var h=location.hash;
 if(h.indexOf('#mig=')===0){
   var p=h.slice(5),i=p.indexOf('&h='),d=i<0?p:p.slice(0,i),back=i<0?'':decodeURIComponent(p.slice(i+3));
@@ -2108,6 +2108,7 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 html{-webkit-tap-highlight-color:transparent}
 .xh,.xsticky,.xfeed>.xmore{display:none}
 .xheart{display:none}
+.xstats{display:none}
 @media (max-width:760px){
   :root,:root:not([data-theme="dark"]){--paper:#F7F6F4;--sheet:#FFFFFF;--ink:#1A1A1A;--ink-2:#55524E;--ink-3:#8A857F;--line:#ECE9E5;--red:#E8502E;--red-ink:#C2401F;--red-fill:#EE5A35;--red-soft:#FFEFE8;--green:#1A8F63;--green-fill:#1F9D6E;--green-soft:#E4F5EE;--brand:#F2643D;--brand-d:#D94A26;--ok:#1F9D6E;--fill:#EFEDEA;
     --lift:0 1px 0 rgba(0,0,0,.03),0 10px 24px -18px rgba(60,40,20,.4);--display:system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;--r-card:22px}
@@ -2149,7 +2150,7 @@ html{-webkit-tap-highlight-color:transparent}
   /* 搜尋、篩選、快速篩選、排序與顯示方式（往下捲時固定在上面） */
   .xsticky{display:block;position:sticky;top:env(safe-area-inset-top);z-index:30;margin:0 -16px;padding:10px 16px 10px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4)}
   .xsrow{display:flex;gap:10px}
-  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"]):not(.inner)::before{content:"";display:block!important;position:fixed;z-index:31;left:0;right:0;top:0;height:env(safe-area-inset-top);background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="health"],[data-route="me"]):not(.inner)::before{content:"";display:block!important;position:fixed;z-index:31;left:0;right:0;top:0;height:env(safe-area-inset-top);background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
   .xactive [data-rm="city"]{display:none}
   .xsearch{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;padding:0 18px;border-radius:999px;background:var(--sheet);box-shadow:var(--lift);color:var(--ink-2);margin:0}
   .xsearch .ico{width:19px;height:19px;flex:none}
@@ -2204,7 +2205,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xfeed[data-v="big"] .ccard.found-card{box-shadow:0 18px 30px -22px rgba(40,20,10,.6)!important}
   .xfeed[data-v="big"] .ccard.skel{aspect-ratio:4/5}
   .xfeed[data-v="big"] .ccard.skel .b{display:none}
-  .xfeed[data-v="big"] .ccard .ph.noimg{background:linear-gradient(160deg,#F3E9DF,#E8DCD0)}
+  .xfeed[data-v="big"] .ccard .ph.noimg{background:var(--fill)}
   /* 格狀 */
   .xfeed[data-v="grid"] .grid{grid-template-columns:1fr 1fr!important;gap:12px!important}
   .xfeed[data-v="grid"] .ccard{border-radius:22px!important;aspect-ratio:3/4;display:block}
@@ -2325,7 +2326,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xpick .xpgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;max-height:60vh;overflow:auto}
   .xpick .xpgrid button{height:46px;border-radius:14px;border:1.5px solid transparent;background:var(--paper);font:inherit;font-size:15px;font-weight:600;color:var(--ink-2);cursor:pointer}
   .xpick .xpgrid button.on{background:var(--red-soft);border-color:var(--brand);color:var(--brand-d)}
-  .xpick .xpgrid button:first-child{grid-column:1/-1}
+  .xpick .xpgrid button[data-v="near"]{grid-column:1/-1}
   /* 新增選單 */
   .sri.s5{background:#FFDCDC;color:#D23C3C}
   .xbell:active,.xwhere:active,.xchip:active,.xfbtn:active,.xnt:active,.xfc:active{opacity:.7}
@@ -2341,6 +2342,7 @@ html{-webkit-tap-highlight-color:transparent}
 .xtheme button.on{border-color:var(--brand)}
 .xtheme i{width:100%;height:56px;border-radius:12px;margin-bottom:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
 .xtheme b{font-size:16px}.xtheme small{font-size:12.5px;color:var(--ink-3)}
+.afav-btn{margin:0 0 12px}.afav-btn.on{color:#FF4D67!important;border-color:#FF4D67!important}.afav-btn.on .ico{fill:currentColor}
 .dtheme{background:none;border:0;cursor:pointer;font:inherit;color:inherit;display:inline-grid;place-items:center}
 @media (max-width:760px){.dtheme{display:none!important}}
 
@@ -2497,7 +2499,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.3.2';
+const BUILD = 'v6.3.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2644,7 +2646,7 @@ const ICONS={"expand": "<path d=\"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5\"/>", "
 ICONS.aid='<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7M12 10.5v6M9 13.5h6"/>';
 ICONS.phone='<path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z"/>';
 function pawSvg(){return '<svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="6.2" cy="10.6" r="2"/><circle cx="9.6" cy="6.6" r="2.1"/><circle cx="14.4" cy="6.6" r="2.1"/><circle cx="17.8" cy="10.6" r="2"/></svg>'}
-Object.assign(ICONS,{info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>',doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',chev:'<path d="m9 6 6 6-6 6"/>',phone:'<path d="M6.5 3.5h3l1.5 4-2 1.3a11 11 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z"/>'});
+Object.assign(ICONS,{mark:'<path d="M6.5 4h11v16.5L12 16.8l-5.5 3.7z"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>',doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',chev:'<path d="m9 6 6 6-6 6"/>',phone:'<path d="M6.5 3.5h3l1.5 4-2 1.3a11 11 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z"/>'});
 function ic(n,cls=''){return `<svg class="ico ${cls}" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`}
 
 const SIZE = {small:'小型',medium:'中型',large:'大型'};
@@ -3109,6 +3111,7 @@ function pcRestore(h){const e=__pc.get(h);if(!e)return false;__pc.delete(h);
   if(Date.now()-e.t>15*60e3){e.maps.forEach(m=>{try{m.remove()}catch(_){}});return false}
   app.replaceChildren(e.frag);app.className=e.cls.replace(/\b(enter|push|pop)\b/g,'').trim();document.title=e.title;{const m=document.getElementById('mTitle');if(m)m.textContent=e.mt}
   if(e.st){Object.assign(homeState,e.st.hs);Object.assign(adoptState,e.st.as);adoptOrder=e.st.ao;Object.assign(intakeState,e.st.is)}   // 篩選、分頁等狀態也回到離開時的樣子
+  document.body.classList.remove('xas-open');{const b=document.getElementById('xBell');if(b&&typeof xBellHTML==='function')b.innerHTML=xBellHTML()}
   navId=e.nid;__maps.push(...e.maps);e.maps.forEach(m=>{try{m.invalidateSize()}catch(_){}});
   const y=scrollMem[h]!=null?scrollMem[h]:e.y;window.scrollTo(0,y);requestAnimationFrame(()=>window.scrollTo(0,y));return true}
 function route(){window.__lastRoute=Date.now();
@@ -3130,7 +3133,7 @@ function route(){window.__lastRoute=Date.now();
   const path=h.split('?')[0];
   checkUsername(path);   // 登入了但還沒設定使用者名稱：先去設定
   renderChrome(path,h);
-  document.body.classList.remove('has-cta');
+  document.body.classList.remove('has-cta','xas-open');
   document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
@@ -3382,7 +3385,7 @@ function bindEntry(kind,id){const go=()=>{const raw=$('#tk').value,t=extractToke
   const claim=async()=>{const {data,error}=await sb.rpc('claim_by_email');if(error){toast('暫時無法接手，請稍後再試',4000);return false}
     const n=kind==='case'?(data&&data.cases):(data&&data.found);
     const {data:ok}=kind==='case'?await sb.rpc('can_manage_case',{p_id:id,p_token:null}):{data:true};
-    if(ok||n){toast('✅ 已經可以管理了',3000);location.hash=target;setTimeout(()=>{if(location.hash===target)route()},50);return true}
+    if(ok||n){toast('✅ 已經可以管理了',3000);if(location.hash===target)route();else location.hash=target;return true}
     toast('這個 Email 跟登記時填的不一樣。試試另一個 Email，或用管理網址',6000);return false};
   const cl=$('#emClaim');if(cl)cl.onclick=async()=>{cl.disabled=true;cl.textContent='處理中…';await claim();cl.disabled=false;cl.textContent='用我的帳號接手管理'};
   const send=$('#emSend');if(!send)return;let email='';
@@ -3603,7 +3606,7 @@ function afavList(){try{return JSON.parse(localStorage.getItem('wh_afav')||'[]')
 function afavHas(id){return afavList().some(x=>x.id===String(id))}
 function afavToggle(r){let l=afavList();const id=String(r.id);if(l.some(x=>x.id===id))l=l.filter(x=>x.id!==id);else l.unshift({id,name:r.variety||'混種',photo:r.photo||'',shelter:r.shelter||'',kind:r.kind||'',sex:r.sex||'',t:Date.now()});try{localStorage.setItem('wh_afav',JSON.stringify(l.slice(0,100)))}catch(_){}return l.some(x=>x.id===id)}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-afav]');if(!b)return;e.preventDefault();e.stopPropagation();
-  const r=(Object.values(adoptCache).flat().find(x=>x.id===b.dataset.afav))||{id:b.dataset.afav};const on=afavToggle(r);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);toast(on?'已加到收藏':'已從收藏移除')},true);
+  const r=(Object.values(adoptCache).flat().find(x=>x.id===b.dataset.afav))||(()=>{const o=afavList().find(x=>x.id===b.dataset.afav)||(window.__afavGone||{})[b.dataset.afav];return o?{id:o.id,variety:o.name,photo:o.photo,shelter:o.shelter,kind:o.kind,sex:o.sex}:{id:b.dataset.afav}})();{const o=afavList().find(x=>x.id===b.dataset.afav);if(o){window.__afavGone=window.__afavGone||{};window.__afavGone[o.id]=o}}const on=afavToggle(r);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);toast(on?'已加到收藏':'已從收藏移除')},true);
 let favTab='lost';
 async function renderFav(){const _n=navId;setTitle('收藏');
   app.innerHTML=`<div class="xpage"><h1 class="xpt">收藏</h1>
@@ -3633,7 +3636,7 @@ async function inboxItems(){if(!me())return [];const out=[];const since=new Date
   const fid=(fl||[]).map(f=>f.case_id).filter(id=>!byId[id]);
   const jobs=[];
   if(mid.length){mid.slice(0,5).forEach(id=>jobs.push(sb.rpc('owner_sightings',{p_id:id,p_token:null}).then(({data})=>(data||[]).filter(x=>(x.created_at||x.seen_at)>since).slice(0,10).forEach(x=>{if(x.status==='rejected')return;const c=byId[x.case_id];out.push({t:x.created_at||x.seen_at,k:'mine',ic:'eye',col:'#F2643D',img:x.photo_url||(c.photos||[])[0],href:'#/manage/'+x.case_id,h:`<b>有人看到 ${esc(c.name)}</b>${x.place_text?'：'+esc(x.place_text):''}${x.status==='pending'?'（等你確認）':''}`})})).catch(()=>{})));
-    jobs.push(sb.from('shelter_matches').select('*').in('case_id',mid).eq('dismissed',false).gte('photo_sim',70).order('photo_sim',{ascending:false}).limit(10).then(({data})=>(data||[]).forEach(x=>{const c=byId[x.case_id];out.push({t:x.created_at||new Date().toISOString(),k:'mine',ic:'shelter',col:'#2F6FE0',img:(c.photos||[])[0],href:'#/case/'+x.case_id+'#shelterBox',h:`<b>收容所有一隻很像 ${esc(c.name)}</b>，照片相似度 ${Math.round(x.photo_sim)}%`})})).catch(()=>{}))}
+    jobs.push(sb.from('shelter_matches').select('*').in('case_id',mid).eq('dismissed',false).gte('photo_sim',70).order('photo_sim',{ascending:false}).limit(10).then(({data})=>(data||[]).forEach(x=>{const c=byId[x.case_id];out.push({t:x.matched_at||x.created_at||'2000-01-01T00:00:00Z',k:'mine',ic:'shelter',col:'#2F6FE0',img:(c.photos||[])[0],href:'#/case/'+x.case_id+'#shelterBox',h:`<b>收容所有一隻很像 ${esc(c.name)}</b>，照片相似度 ${Math.round(x.photo_sim)}%`})})).catch(()=>{}))}
   if(fid.length){jobs.push(sb.from('cases_public').select('id,name,photos,status,found_at,last_seen_at').in('id',fid).then(({data})=>(data||[]).forEach(c=>{if(c.status==='found'&&c.found_at&&c.found_at>since)out.push({t:c.found_at,k:'follow',ic:'heart',col:'#1F9D6E',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`🎉 你追蹤的 <b>${esc(c.name)}</b> 回家了！`});else if(c.status==='searching'&&c.last_seen_at&&c.last_seen_at>since)out.push({t:c.last_seen_at,k:'follow',ic:'eye',col:'#F2643D',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`你追蹤的 <b>${esc(c.name)}</b> 有新的目擊`})})).catch(()=>{}))}
   const p=prof||{};
   if(p.home_lat&&p.home_lng){const r=(p.home_radius_km||3)/111;jobs.push(sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,created_at,lost_lat,lost_lng').eq('status','searching').gte('created_at',new Date(Date.now()-7*864e5).toISOString()).gte('lost_lat',p.home_lat-r).lte('lost_lat',p.home_lat+r).gte('lost_lng',p.home_lng-r*1.1).lte('lost_lng',p.home_lng+r*1.1).order('created_at',{ascending:false}).limit(10).then(({data})=>(data||[]).filter(c=>!byId[c.id]).forEach(c=>out.push({t:c.created_at,k:'near',ic:'pin',col:'#F2643D',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`<b>你家附近</b>有${c.species==='cat'?'貓咪':'狗狗'}走失：${esc(c.name)}（${esc((c.lost_city||'')+(c.lost_district||''))}）`}))).catch(()=>{}))}
@@ -3672,7 +3675,7 @@ const XI={bell:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="current
   adopt:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M12 17s-3-1.8-3-4a1.6 1.6 0 0 1 3-1 1.6 1.6 0 0 1 3 1c0 2.2-3 4-3 4z"/></svg>'};
 function dView(){try{return localStorage.getItem('wh_dv')||'card'}catch(_){return 'card'}}
 function xView(){try{return localStorage.getItem('wh_xv')||'big'}catch(_){return 'big'}}
-function xBellHTML(){const n=inboxUnread();return `<a class="xbell" href="#/inbox" aria-label="通知${n?'，'+n+' 則未讀':''}">${XI.bell}${n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}</a>`}
+function xBellHTML(){const n=me()?inboxUnread():0;return `<a class="xbell" href="#/inbox" aria-label="通知${n?'，'+n+' 則未讀':''}">${XI.bell}${n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}</a>`}
 function xHeadHTML(mode,title,where){return `<section class="xh">
   <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><button type="button" class="xtbtn" data-theme-pick aria-label="外觀（深淺色）">${ic('moon')}</button><span id="xBell">${xBellHTML()}</span></div>
   <nav class="xmode ${mode==='adopt'?'adopt':''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失毛孩</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養毛孩</a></nav>
@@ -3689,22 +3692,22 @@ async function renderHomeMob(){const _n=navId;
   ${mineHTML()}
   ${xHeadHTML('lost',`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`,xWhereText())}
   <div class="xsticky">
-    <div class="xsrow"><label class="xsearch" id="lostFilters">${ic('search')}<input type="search" id="fQ" aria-label="搜尋走失的毛孩" enterkeyhint="search" placeholder="搜尋走失的毛孩" value="${esc(homeState.chip||homeState.q)}"></label><button type="button" class="xfbtn" id="btnFilter" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="fCnt"></i></button></div>
+    <div class="xsrow"><label class="xsearch">${ic('search')}<input type="search" id="fQ" aria-label="搜尋走失的毛孩" enterkeyhint="search" placeholder="搜尋走失的毛孩" value="${esc(homeState.chip||homeState.q)}"></label><button type="button" class="xfbtn" id="btnFilter" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="fCnt"></i></button></div>
     <div class="xchips" id="xChips">${XQK.map(([k,l,c])=>`<button type="button" class="xchip ${c||''} ${homeState.qk===k?'on':''}" data-q="${k}">${l}</button>`).join('')}</div>
     <div class="xtools"><button type="button" class="xsort" id="xSort"><b id="xCnt">　</b><span id="xSortT">${(XSORT.find(x=>x[0]===(homeState.near?'near':homeState.sort))||XSORT[0])[1]}</span>${XI.down}</button>
       <div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid','list','map'].map(v=>`<button type="button" data-v="${v}" class="${V===v?'on':''}" aria-label="${{big:'大圖',grid:'格狀',list:'清單',map:'地圖'}[v]}" aria-pressed="${V===v}">${XI[v]}</button>`).join('')}</div></div>
     <div id="fActive" class="xactive"></div>
   </div>
-  <div class="hidden" aria-hidden="true"><div id="tabs"><button data-t="lost"></button><button data-t="found"></button><button data-t="map"></button></div><button id="btnNear"></button><p id="nearInfo"></p><span id="cLost"></span><span id="cFound"></span></div>
+  <div class="hidden" aria-hidden="true"><div id="lostFilters"></div><div id="tabs"><button data-t="lost"></button><button data-t="found"></button><button data-t="map"></button></div><button id="btnNear"></button><p id="nearInfo"></p><span id="cLost"></span><span id="cFound"></span></div>
   <div class="xfeed" id="xFeed" data-v="${V}"><div id="list" class="grid">${skel(4)}</div></div>
   <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>`;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c){c.textContent=n||'';c.classList.toggle('on',!!n)}const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
   const setTitle2=()=>{const t=$('#xTitle');if(t)t.innerHTML=`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`;const w=$('#xWhereT');if(w)w.textContent=xWhereText();xCountQ()};
-  const xCountQ=async()=>{if(homeState.near)return;const f=homeState.tab==='found';let q=f?sb.from('found_public').select('id',{count:'exact',head:true}).eq('status','open'):sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching');q=fIn(q,f?'city':'lost_city',homeState.city);q=fSp(q);const {count}=await q;if(!$('#xFeed'))return;const e=$('#xN');if(e&&count!=null)e.textContent=count.toLocaleString()};
+  const xCountQ=async()=>{if(homeState.near)return;const f=homeState.tab==='found';let q=f?sb.from('found_public').select('id',{count:'exact',head:true}).eq('status','open'):sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching');q=fIn(q,f?'city':'lost_city',homeState.city);q=fSp(q);const {count}=await q;if(_n!==navId||!$('#xFeed'))return;const e=$('#xN');if(e&&count!=null)e.textContent=count.toLocaleString()};
   window.xListDone=(n,lim)=>{if(!$('#xFeed'))return;const c=$('#xCnt');if(c)c.textContent=n>=lim?`${n}+ 隻・`:`${n} ${homeState.tab==='found'?'則':'隻'}・`;if(homeState.near){const e=$('#xN');if(e)e.textContent=n>=lim?n+'+':n}};
   const reload=()=>{homeState.limit=24;showF();setTitle2();loadList()};
   $('#btnFilter').onclick=()=>openFilterSheet(()=>{reload()});
-  $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;if(['sex','colour','breed'].includes(k))homeState[k]=homeState[k].filter(x=>x!==b.dataset.v);if(k==='days')homeState.days=0;if(k==='photo')homeState.photo=false;if(k==='src')homeState.src=[];homeState.qk='all';document.querySelectorAll('#xChips .xchip').forEach(x=>x.classList.toggle('on',x.dataset.q==='all'));reload()};
+  $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;if(['sex','colour','breed'].includes(k))homeState[k]=homeState[k].filter(x=>x!==b.dataset.v);if(k==='days')homeState.days=0;if(k==='photo')homeState.photo=false;if(k==='src')homeState.src=[];{const q=homeState.qk;if((k==='sp'&&(q==='dog'||q==='cat'))||(k==='days'&&q==='d3')||(k==='rw'&&q==='rw')){homeState.qk='all';document.querySelectorAll('#xChips .xchip').forEach(x=>x.classList.toggle('on',x.dataset.q==='all'))}}reload()};
   let t;$('#fQ').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{homeState.chip='';homeState.q=$('#fQ').value.trim();reload()},400)});
   $('#xChips').onclick=e=>{const b=e.target.closest('.xchip');if(!b)return;const k=b.dataset.q;if(k==='intake'){location.hash='#/intake';return}
     homeState.qk=k;Object.assign(homeState,{species:k==='dog'?['dog']:k==='cat'?['cat']:[],days:k==='d3'?3:0,reward:k==='rw'});
@@ -3761,7 +3764,7 @@ ${bigStartHTML()}
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c)c.textContent=n?` ${n}`:'';const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
   $('#btnFilter').onclick=()=>openFilterSheet(()=>{showF();loadList()});
   if($('#dView')){$('#dView').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{localStorage.setItem('wh_dv',b.dataset.v)}catch(_){}document.querySelectorAll('#dView button').forEach(x=>x.classList.toggle('on',x===b));$('#dFeed').dataset.v=b.dataset.v};
-    $('#dSort').onclick=()=>xPick('排序',XSORT,homeState.near?'near':homeState.sort,v=>{$('#dSortT').textContent=XSORT.find(x=>x[0]===v)[1];if(v==='near'){if(!homeState.near)$('#btnNear').click();return}homeState.sort=v;homeState.limit=24;loadList()})}
+    $('#dSort').onclick=()=>xPick('排序',XSORT,homeState.near?'near':homeState.sort,v=>{$('#dSortT').textContent=XSORT.find(x=>x[0]===v)[1];if(v==='near'){if(!homeState.near)$('#btnNear').click();return}homeState.sort=v;homeState.limit=24;if(homeState.near)$('#btnNear').click();else loadList()})}
   $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;if(['sex','colour','breed'].includes(k))homeState[k]=homeState[k].filter(x=>x!==b.dataset.v);if(k==='days')homeState.days=0;if(k==='photo')homeState.photo=false;if(k==='src')homeState.src=[];homeState.limit=24;showF();loadList()};
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;homeState.limit=24;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));setHomeTab(homeState.tab);loadList()}});
   const run=()=>{const qv=$('#fQ').value.trim();homeState.chip='';homeState.q=qv;homeState.limit=24;loadList()};
@@ -3832,7 +3835,7 @@ async function renderHealth(){const _n=navId;
   ${IS_APP?`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("bell")} 手機通知 <span class="muted small" id="lnSum">${lnPrefText()}提醒你</span></summary><div class="mg-body">${lnSection().replace(/<h2>[\s\S]*?<\/h2>/g,'')}
     <details class="calhelp calmore" style="margin-top:14px"><summary>也想加到手機日曆？（可以不用）</summary>${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</details></div></details>`
   :`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("calendar")} 加到手機日曆 <span class="muted small">到期前提醒你</span></summary><div class="mg-body">${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</div></details>`}`;
-  if(me())sb.rpc('my_cases').then(({data})=>{const el=$('#xLostBar');if(!el||_n!==navId)return;const l=(data||[]).filter(c=>c.status==='searching');el.innerHTML=l.map(c=>`<a class="xlostbar" href="#/manage/${c.id}"><span class="xlb-ph">${c.photos&&c.photos[0]?thumbImg(c.photos[0],''):spIc(c.species)}</span><span class="xlb-t"><b>${esc(c.name)} 走失中・第 ${daysSince(c.lost_at)} 天</b><small>${c.sighting_count?c.sighting_count+' 則目擊・':''}點這裡管理協尋</small></span><span class="xlb-go">管理</span></a>`).join('')}).catch(()=>{});
+  if(me()&&isMobV())sb.rpc('my_cases').then(({data})=>{const el=$('#xLostBar');if(!el||_n!==navId)return;const l=(data||[]).filter(c=>c.status==='searching');el.innerHTML=l.map(c=>`<a class="xlostbar" href="#/manage/${c.id}"><span class="xlb-ph">${c.photos&&c.photos[0]?thumbImg(c.photos[0],''):spIc(c.species)}</span><span class="xlb-t"><b>${esc(c.name)} 走失中・第 ${daysSince(c.lost_at)} 天</b><small>${c.sighting_count?c.sighting_count+' 則目擊・':''}點這裡管理協尋</small></span><span class="xlb-go">管理</span></a>`).join('')}).catch(()=>{});
   app.querySelectorAll('.due[data-go]').forEach(d=>d.onclick=e=>{if(e.target.closest('button,details,a,select,input'))return;location.hash=d.dataset.go});
   {const d=$('#calSec');if(d){d.ontoggle=()=>{window.__calOpen=d.open};if(IS_APP&&qs(location.hash).cal){const c=d.querySelector('.calmore');if(c)c.open=true}}}
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));
@@ -5483,7 +5486,7 @@ async function renderAdopt(){const _n=navId;
   const nMore=()=>st.size.length+st.sex.length+st.age.length+(st.photo?0:1);
   const MV=isMobV();
   app.innerHTML=`${MV?xHeadHTML('adopt','有 <em id="xN">…</em> 隻在等一個家',st.city||'選縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div>
-    <div class="xtools"><button type="button" class="xsort" id="xaSort"><b id="xCnt"></b><span id="xaSortT">${st.sort==='old'?'等最久的':'最新入所'}</span>${XI.down}</button><div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid','list'].map(v=>`<button type="button" data-v="${v}" class="${(xView()==='map'?'big':xView())===v?'on':''}" aria-label="${{big:'大圖',grid:'格狀',list:'清單'}[v]}">${XI[v]}</button>`).join('')}</div></div></div><div class="xas-bg" id="xasBg"></div>`:''}<h1>領養毛孩</h1>
+    <div class="xtools"><button type="button" class="xsort" id="xaSort"><b id="xCnt"></b><span id="xaSortT">${st.sort==='old'?'等最久的':'最新入所'}</span>${XI.down}</button><div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid','list'].map(v=>`<button type="button" data-v="${v}" class="${(xView()==='map'?'big':xView())===v?'on':''}" aria-pressed="${(xView()==='map'?'big':xView())===v}" aria-label="${{big:'大圖',grid:'格狀',list:'清單'}[v]}">${XI[v]}</button>`).join('')}</div></div></div><div class="xas-bg" id="xasBg"></div>`:''}<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
   <p class="tipbox">📞 想領養？先打電話給收容所，確認牠還在、問清楚流程（通常要帶身分證）。</p>
   <a class="intake-cta" href="#/intake"><span>${ic('search')}</span><div><b>在找走失的毛孩？</b><small>看收容所最近新收的狗貓和被發現的地點</small></div></a>
@@ -5508,7 +5511,8 @@ async function renderAdopt(){const _n=navId;
     $('#xView').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{localStorage.setItem('wh_xv',b.dataset.v)}catch(_){}document.querySelectorAll('#xView button').forEach(x=>x.classList.toggle('on',x===b));$('#xFeed').dataset.v=b.dataset.v}
     $('#xaK').onclick=e=>{const b=e.target.closest('.xchip');if(!b)return;const k=$('#aKind').querySelector(`[data-v="${b.dataset.k}"]`);if(k)k.click();document.querySelectorAll('#xaK .xchip').forEach(x=>x.classList.toggle('on',x===b))};
     const shut=()=>document.body.classList.remove('xas-open');
-    $('#xaF').onclick=()=>{document.body.classList.add('xas-open');const f=$('.adopt-f');if(f)f.scrollTop=0};$('#xasBg').onclick=shut;
+    $('#xaF').onclick=()=>{document.body.classList.add('xas-open');const f=$('.adopt-f');if(f){f.scrollTop=0;f.setAttribute('role','dialog');f.setAttribute('aria-label','篩選');f.tabIndex=-1;try{f.focus()}catch(_){}}};
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('xas-open'))shut()});$('#xasBg').onclick=shut;
     $('.adopt-f').insertAdjacentHTML('beforeend','<button type="button" class="btn block xas-done" id="xasDone">看結果</button>');$('#xasDone').onclick=shut;
     $('#xaSort').onclick=()=>xPick('排序',[['new','最新入所'],['old','等最久的']],st.sort,v=>{const sel=$('#aSort');if(sel){sel.value=v;sel.dispatchEvent(new Event('change'))}$('#xaSortT').textContent=v==='old'?'等最久的':'最新入所'})}
   const save=()=>{try{localStorage.setItem('wh_adopt',JSON.stringify({city:st.city,dist:st.dist,kind:st.kind}))}catch(_){}};
@@ -5539,7 +5543,7 @@ async function renderAdopt(){const _n=navId;
     {const xn=$('#xN');if(xn)xn.textContent=list.length.toLocaleString();const w=$('#xWhereT');if(w)w.textContent=st.city;const xc=$('#xCnt');if(xc)xc.textContent=list.length+' 隻・';const fc=$('#xaFc');if(fc){const n=st.dist.length+st.variety.length+st.colour.length+st.ster.length+st.size.length+st.sex.length+st.age.length;fc.textContent=n||'';fc.classList.toggle('on',!!n)}}
     const shown=list.slice(0,st.limit);
     el.innerHTML=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist.length?st.dist.join('、')+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
-      <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}<button type="button" class="xheart ${afavHas(r.id)?'on':''}" data-afav="${esc(r.id)}" aria-label="收藏" aria-pressed="${afavHas(r.id)}">${ic('heart')}</button>${d?`<span class="band xwait">等家 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}${d&&d>=180?`<span class="band">等了 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}</div>
+      <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}<button type="button" class="xheart ${afavHas(r.id)?'on':''}" data-afav="${esc(r.id)}" aria-label="收藏" aria-pressed="${afavHas(r.id)}">${ic('heart')}</button>${d&&isMobV()?`<span class="band xwait">等家 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}${d&&d>=180&&!isMobV()?`<span class="band">等了 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}</div>
       <div class="b"><div class="t">${esc(r.variety||'混種')} <span class="sexm">${r.sex==='M'?'公':r.sex==='F'?'母':''}</span></div><div class="small muted">${esc([ADOPT_SIZE[r.size],ADOPT_AGE[r.age],r.colour,r.ster==='T'?'已結紮':r.ster==='F'?'未結紮':''].filter(Boolean).join('・'))}</div><div class="small">${ic('pin')} ${esc(shortShelter(r,st.city))}</div></div></a>`}).join('')}</div>
       ${list.length>shown.length?`<div class="more-row"><button type="button" class="btn ghost big" id="aMore">顯示更多（還有 ${list.length-shown.length} 隻）</button></div>`:''}
       <p class="small muted" style="margin-top:12px">資料來源：農業部「動物認領養」開放資料。實際狀況以收容所為準，可能已被領養。</p>`;
@@ -7180,7 +7184,7 @@ async function renderMeBody(){const _n=navId;
   if($('#btnNick'))$('#btnNick').onclick=async()=>{const v=await textSheet({title:'修改暱稱',value:p.display_name||p.username||'',max:20,placeholder:'例：小麥媽媽',hint:'暱稱 3 個月可以改一次。使用者名稱不會改變。'});if(v===null)return;const n=v.trim();if(!n)return toast('請輸入暱稱');if(n===(p.display_name||''))return;
     if(!await askSheet({title:`把暱稱改成「${n}」？`,body:'改了之後，3 個月內不能再改。',ok:'確定修改'}))return;const {error}=await sb.from('profiles').update({display_name:n}).eq('id',me().id);if(error)return toast(friendlyErr(error.message),5000);toast('✅ 暱稱已更新');route()};
   $('#btnOut').onclick=async()=>{const clearMine=confirm('這是共用的手機嗎？\n按「確定」：登出並清除這支手機記住的管理網址和聯絡資料（共用手機建議這樣）。\n按「取消」：只登出，資料留著下次用（自己的手機）。');
-    window.__userSignOut=true;await sb.auth.signOut();try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
+    window.__userSignOut=true;await sb.auth.signOut();try{localStorage.removeItem('wh_inbox_n');localStorage.removeItem('wh_inbox_seen')}catch(_){}try{Object.keys(localStorage).filter(k=>/^wh_(draft_|return$|agree$)/.test(k)||(clearMine&&/^wh_(token|ftoken)_|^wh_mine$|^wh_contact$/.test(k))).forEach(k=>localStorage.removeItem(k))}catch(_){}goReplace('#/')};
   $('#btnDelAcct').onclick=async()=>{
     if(!await askSheet({title:'永久刪除你的帳號？',body:'毛孩檔案、健康紀錄、照片都會一起刪除，無法復原。',ok:'刪除帳號',danger:true}))return;
     const b=$('#btnDelAcct');b.disabled=true;b.textContent='刪除中…';
