@@ -10,7 +10,7 @@ export async function onRequestGet({ params, waitUntil, request }) {
   const cache = caches.default;
   const hit = await cache.match(key);
   if (hit && !dbg) return new Response(hit.body, { status: hit.status, headers: hit.headers });
-  const nf = () => { const r = new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=21600" } }); waitUntil(cache.put(key, r.clone())); return r; };
+  const nf = () => { const r = new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=3600" } }); waitUntil(cache.put(key, r.clone())); return r; };
   const ua = { "User-Agent": "Mozilla/5.0 (compatible; WangMiaoHome/1.0; +https://wangmiaotw.com)" };
   let pic = "";
   try {

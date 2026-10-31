@@ -2173,7 +2173,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.18.2';
+const BUILD = 'v5.18.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3890,7 +3890,7 @@ async function renderCase(id){const _n=navId;
 function telClean(t){return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)||[''])[0].replace(/[^\d#+]/g,'')}
 function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String(m.animal_id)]||''};
   return `<div class="match">
-    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span></button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg')}" onerror="this.parentNode.classList.add('ph-none');this.parentNode.innerHTML=this.parentNode.dataset.none" data-x="1"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
+    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span></button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg?v=3')}" onerror="this.parentNode.classList.add('ph-none');this.parentNode.innerHTML=this.parentNode.dataset.none" data-x="1"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
     <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> <span class="score">${simLabel(m.score)}</span>
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
