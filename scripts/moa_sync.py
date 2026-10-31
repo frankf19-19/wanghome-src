@@ -12,13 +12,14 @@
 環境變數：SUPABASE_URL、SUPABASE_SERVICE_KEY
 """
 import os, re, json, time, urllib.request, urllib.parse, datetime as dt
+from concurrent.futures import ThreadPoolExecutor
 
 SB = os.environ["SUPABASE_URL"].rstrip("/")
 KEY = os.environ["SUPABASE_SERVICE_KEY"].strip()
 SITE = "https://wangmiaotw.com/"
 UA = "WangMiaoHome/1.0 (https://wangmiaotw.com; service@wangmiaotw.com)"
 MAX_NEW = int(os.environ.get("MAX_NEW", "120"))      # 每次最多新增幾筆（照片檢查、地點查詢要時間）
-MAX_GEO = int(os.environ.get("MAX_GEO", "60"))       # 每次最多查幾個新地區（Nominatim 每秒 1 次）
+MAX_GEO = int(os.environ.get("MAX_GEO", "50"))       # 每次最多查幾個新地區（Nominatim 每秒 1 次）
 DAYS = 180
 
 def http(url, method="GET", body=None, headers=None, timeout=40):
@@ -49,7 +50,9 @@ def parse_area(addr):
     return m.group(1), (m.group(2) or "")
 
 def main():
+    t0 = time.time()
     st, raw, _ = http(SITE + "api/moa/lost", timeout=60)
+    print(f"讀到農業部資料 {len(raw)} bytes（{time.time()-t0:.1f} 秒）", flush=True)
     data = json.loads(raw)
     if not isinstance(data, list) or len(data) < 20:
         raise SystemExit(f"農業部資料不正常（{type(data).__name__} {len(data) if isinstance(data, list) else ''}），這次不同步")
@@ -74,7 +77,7 @@ def main():
             "breed": str(a.get("品種") or "").strip()[:40], "sex": {"公": "male", "母": "female"}.get(a.get("性別"), "unknown"),
             "colour": str(a.get("毛色") or "").strip()[:40], "features": feat, "chip_last4": chip[-4:] if len(chip) >= 10 else "",
             "lost_at": d.replace("/", "-") + "T12:00:00+08:00", "lost_city": city, "lost_district": dist, "contact_phone": tel})
-    print(f"農業部申報 {len(data)} 筆，最近 {DAYS} 天有縣市的 {len(rows)} 筆")
+    print(f"農業部申報 {len(data)} 筆，最近 {DAYS} 天有縣市的 {len(rows)} 筆", flush=True)
 
     have = {r["source_id"]: r for r in sb("GET", "cases?source=eq.moa&select=source_id,lost_lat,photos&limit=5000") or []}
     geo = {g["name"]: (g["lat"], g["lng"]) for g in sb("GET", "geo_cache?select=name,lat,lng&limit=5000") or []}
@@ -98,7 +101,7 @@ def main():
                 j = json.loads(b)
                 v = (float(j[0]["lat"]), float(j[0]["lon"])) if j else (None, None)
             except Exception as e:
-                print("查地點失敗", key, e); v = None
+                print("查地點失敗", key, e, flush=True); v = None
             time.sleep(1.2)
             if v is None: break
             geo[key] = v
@@ -106,22 +109,27 @@ def main():
             if v[0] is not None: ll = v; break
         if not ll: continue                           # 下次再查
         r["lost_lat"], r["lost_lng"] = ll
-        # 照片：有照片才放（經由本站轉接，海報、分享圖卡才能用）
-        purl = f"{SITE}api/petpic/{fn}.jpg"
+        r["_pic"] = f"{SITE}api/petpic/{fn}.jpg"
+        out.append(r); n_new += 1
+    print(f"地點查好了（{time.time()-t0:.1f} 秒），檢查 {n_new} 張照片…", flush=True)
+    # 照片：有照片才放（經由本站轉接，海報、分享圖卡才能用）
+    def chk(r):
+        u = r.pop("_pic", None)
+        if not u: return
         try:
-            st, b, h = http(purl, timeout=25)
-            r["photos"] = [purl] if st == 200 and len(b) > 500 else []
+            st, b, h = http(u, timeout=15)
+            r["photos"] = [u] if st == 200 and len(b) > 500 else []
         except Exception:
             r["photos"] = []
-        out.append(r); n_new += 1
-    print(f"新增 {n_new} 筆，更新 {len(out) - n_new} 筆，新查地點 {n_geo} 個")
+    with ThreadPoolExecutor(8) as ex: list(ex.map(chk, out))
+    print(f"新增 {n_new} 筆，更新 {len(out) - n_new} 筆，新查地點 {n_geo} 個（{time.time()-t0:.1f} 秒）", flush=True)
     res = []
     for i in range(0, len(out), 100):
         last = i + 100 >= len(out)
         res.append(sb("POST", "rpc/moa_upsert", {"p_rows": out[i:i + 100], "p_all_ids": all_ids if last else None}))
     if not out:
         res.append(sb("POST", "rpc/moa_upsert", {"p_rows": [], "p_all_ids": all_ids}))
-    print("結果", res)
+    print("結果", res, flush=True)
 
 if __name__ == "__main__":
     main()

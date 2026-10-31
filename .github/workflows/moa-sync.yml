@@ -19,4 +19,4 @@ jobs:
         env:
           SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: python3 scripts/moa_sync.py
+        run: python3 -u scripts/moa_sync.py
