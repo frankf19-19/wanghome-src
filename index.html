@@ -2060,6 +2060,7 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .notice.moa summary{list-style:none;cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.notice.moa summary::-webkit-details-marker{display:none}.notice.moa summary b{display:inline;margin:0}.notice.moa[open] summary{margin-bottom:6px}
 .moa-rel{margin:8px 0 0;text-align:center;font-size:14px}.moa-rel a{color:var(--ink-2);text-decoration:underline}
 .near-cta{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--sheet);box-shadow:var(--lift);color:var(--ink)!important;text-decoration:none!important;font-size:14.5px}.near-cta .ico{color:var(--red);flex:none}.near-cta span{flex:1}.near-cta b{display:block}.near-cta small{color:var(--ink-3)}
+.match .ph-none{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;color:var(--ink-3);font-size:11.5px;line-height:1.35}.match .ph-none .ico{width:26px;height:26px;opacity:.6}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2171,7 +2172,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.18.0';
+const BUILD = 'v5.18.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3665,15 +3666,19 @@ const MOA_URL='https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId
 const MOA_AREA={"臺北市":2,"新北市":3,"基隆市":4,"宜蘭縣":5,"桃園市":6,"新竹縣":7,"新竹市":8,"苗栗縣":9,"臺中市":10,"彰化縣":11,"南投縣":12,"雲林縣":13,"嘉義縣":14,"嘉義市":15,"臺南市":16,"高雄市":17,"屏東縣":18,"花蓮縣":19,"臺東縣":20,"澎湖縣":21,"金門縣":22,"連江縣":23};
 const MOA_SIZE={small:'SMALL',medium:'MEDIUM',large:'BIG'};
 const shelterCache={};
+// 收容所照片：有些是 http:// 開頭（App 和 https 網頁會擋），一律改成 https://
+function moaPic(u){u=String(u||'').trim();if(/^http:\/\//i.test(u))u='https://'+u.slice(7);return /^https:\/\/[^\s'"()<>\\]+$/.test(u)?u:''}
+const __shelterPic={};   // 收容編號 → 最新照片（比對結果存下來時收容所可能還沒放照片）
 async function fetchShelterDogs(city,species){
   const area=MOA_AREA[city];if(!area)return [];
   const kind=sp(species).moa,ck=area+'_'+kind;
   if(shelterCache[ck])return shelterCache[ck];
   const key='wh_moa_'+ck,today=todayStr();
-  try{const c=JSON.parse(sessionStorage.getItem(key)||'null');if(c&&c.d===today)return shelterCache[ck]=c.v}catch(_){}
+  try{const c=JSON.parse(sessionStorage.getItem(key)||'null');if(c&&c.d===today){c.v.forEach(a=>{a.photo_url=moaPic(a.photo_url);if(a.photo_url)__shelterPic[a.animal_id]=a.photo_url});return shelterCache[ck]=c.v}}catch(_){}
   const all=await moaJson(`&animal_kind=${encodeURIComponent(kind)}&animal_area_pkid=${area}`);   // 有逾時、格式檢查
-  const v=all.map(a=>({animal_id:String(a.animal_id),animal_subid:a.animal_subid,shelter_name:a.shelter_name,shelter_tel:a.shelter_tel,shelter_address:a.shelter_address,found_place:a.animal_foundplace,colour:a.animal_colour,bodytype:a.animal_bodytype,sex:a.animal_sex,age:a.animal_age,variety:(a.animal_Variety||'').trim(),photo_url:a.album_file,created:(a.animal_createtime||'').replace(/\//g,'-'),open_date:a.animal_opendate,status:a.animal_status}));
+  const v=all.map(a=>({animal_id:String(a.animal_id),animal_subid:a.animal_subid,shelter_name:a.shelter_name,shelter_tel:a.shelter_tel,shelter_address:a.shelter_address,found_place:a.animal_foundplace,colour:a.animal_colour,bodytype:a.animal_bodytype,sex:a.animal_sex,age:a.animal_age,variety:(a.animal_Variety||'').trim(),photo_url:moaPic(a.album_file),created:(a.animal_createtime||'').replace(/\//g,'-'),open_date:a.animal_opendate,status:a.animal_status}));
   try{sessionStorage.setItem(key,JSON.stringify({d:today,v}))}catch(_){}
+  v.forEach(a=>{if(a.photo_url)__shelterPic[a.animal_id]=a.photo_url});
   return shelterCache[ck]=v;
 }
 function shelterScore(c,a){
@@ -3882,9 +3887,9 @@ async function renderCase(id){const _n=navId;
   clearInterval(refreshTimer);refreshTimer=tm;
 }
 function telClean(t){return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)||[''])[0].replace(/[^\d#+]/g,'')}
-function matchHTML(m){
+function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String(m.animal_id)]||''};
   return `<div class="match">
-    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span></button>`:'<div class="ph"></div>'}
+    ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span></button>`:`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`}
     <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> <span class="score">${simLabel(m.score)}</span>
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
@@ -4869,7 +4874,7 @@ function openReport(type,id,poster,after){
    ============================================================ */
 const ADOPT_SIZE={SMALL:'小型',MEDIUM:'中型',BIG:'大型'},ADOPT_AGE={CHILD:'幼年',ADULT:'成年'};
 const adoptCache={};const adoptKey=(area,kind)=>area+'_'+kind+'_'+todayStr();   // 每天換新，網頁開著好幾天也不會一直看到舊名單
-function adoptRow(a){return {id:String(a.animal_id),subid:String(a.animal_subid||''),pk:a.animal_shelter_pkid,kind:a.animal_kind,variety:(a.animal_Variety||'').trim(),sex:a.animal_sex,size:a.animal_bodytype,colour:(a.animal_colour||'').trim(),age:a.animal_age,ster:a.animal_sterilization,bac:a.animal_bacterin,found:(a.animal_foundplace||'').trim(),remark:(a.animal_remark||'').trim(),photo:/^https:\/\//.test(a.album_file||'')?a.album_file:'',created:(a.animal_createtime||'').replace(/\//g,'-'),open:a.animal_opendate,shelter:a.shelter_name||a.animal_place||'',tel:(a.shelter_tel||'').trim(),addr:(a.shelter_address||'').trim(),status:a.animal_status}}
+function adoptRow(a){return {id:String(a.animal_id),subid:String(a.animal_subid||''),pk:a.animal_shelter_pkid,kind:a.animal_kind,variety:(a.animal_Variety||'').trim(),sex:a.animal_sex,size:a.animal_bodytype,colour:(a.animal_colour||'').trim(),age:a.animal_age,ster:a.animal_sterilization,bac:a.animal_bacterin,found:(a.animal_foundplace||'').trim(),remark:(a.animal_remark||'').trim(),photo:moaPic(a.album_file),created:(a.animal_createtime||'').replace(/\//g,'-'),open:a.animal_opendate,shelter:a.shelter_name||a.animal_place||'',tel:(a.shelter_tel||'').trim(),addr:(a.shelter_address||'').trim(),status:a.animal_status}}
 const adoptPending={};
 const ADOPT_ERR='讀不到收容所資料。可能是網路不穩，或你目前不在台灣（農業部的資料只開放台灣的網路）。';
 async function moaJson(qs){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),20000);
