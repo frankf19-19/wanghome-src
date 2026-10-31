@@ -119,15 +119,17 @@ def model():
         _model = (torch, proc, m)
     return _model
 
+ERR = {}
 def fetch_img(url):
     from PIL import Image, ImageOps
     try:
         st, b, h = http(url, timeout=30)
-        if st != 200 or len(b) < 800: return None
+        if st != 200 or len(b) < 800: ERR.setdefault("small", url); return None
         im = ImageOps.exif_transpose(Image.open(io.BytesIO(b))).convert("RGB")
         im.thumbnail((640, 640))
         return im
-    except Exception:
+    except Exception as e:
+        ERR.setdefault(type(e).__name__, f"{url[:90]} {str(e)[:120]}")
         return None
 
 _emb = {}
@@ -155,6 +157,8 @@ def photo_sim():
         if m["photo_sim"] == -1:   # 沒照片：每 12 小時再試（收容所可能補照片）
             t = m.get("photo_checked_at")
             if not t or now - dt.datetime.fromisoformat(t.replace("Z", "+00:00")) > dt.timedelta(hours=12): todo.append(m)
+    hasph = lambda m: bool((cases[m["case_id"]].get("photos") or [None])[0])
+    todo.sort(key=lambda m: (not hasph(m), m["photo_sim"] is not None))
     todo = todo[:MAX_CMP]
     note(f"照片比對：待比對 {len(todo)} 筆")
     if not todo: return
@@ -164,10 +168,13 @@ def photo_sim():
         m["_cu"] = ph
         sub = (m.get("animal_subid") or "").strip()
         m["_su"] = moa_pic(m.get("photo_url")) or (f"{SITE}api/shelterpic/{sub}.jpg?v=3" if re.match(r"^[A-Z]{5}[0-9]{6,}$", sub) else None)
-        for u in (m["_cu"], m["_su"]):
-            if u: urls.add(u)
-    with ThreadPoolExecutor(8) as ex:
+        if m["_cu"] and m["_su"]:
+            urls.add(m["_cu"]); urls.add(m["_su"])
+    with ThreadPoolExecutor(12) as ex:
         imgs = dict(zip(urls, ex.map(fetch_img, urls)))
+    ok_c = sum(1 for u, v in imgs.items() if v is not None and "supabase.co" in u)
+    ok_s = sum(1 for u, v in imgs.items() if v is not None and "supabase.co" not in u)
+    note(f"下載照片：{len(urls)} 張，走失毛孩照片成功 {ok_c}，收容所照片成功 {ok_s}；錯誤範例 {json.dumps(ERR, ensure_ascii=False)[:400]}")
     sims, done = [], 0
     for m in todo:
         ci, si = imgs.get(m["_cu"]) if m["_cu"] else None, imgs.get(m["_su"]) if m["_su"] else None
