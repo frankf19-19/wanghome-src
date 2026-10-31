@@ -2504,7 +2504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.6.1';
+const BUILD = 'v6.7.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4053,7 +4053,8 @@ async function loadList(){
   const el=$('#list');if(!el)return;
   $('#lostFilters').classList.toggle('hidden',homeState.tab!=='lost');document.querySelectorAll('.lost-f').forEach(x=>x.classList.toggle('hidden',homeState.tab!=='lost'));
   if(homeState.tab==='map')return loadMapAll(el);
-  el.className='grid';const more=!!homeState._more;homeState._more=false;if(!more)el.innerHTML=skel();   // 「顯示更多」時保留原本的卡片，不閃空
+  el.className='grid';const more=!!homeState._more;homeState._more=false;const dflt=homeState.tab==='lost'&&!homeState.q&&!homeState.chip&&!homeState.near&&fCount()===0&&(homeState.sort||'act')==='act'&&!homeState.species.length&&!homeState.days&&!homeState.reward;
+  if(!more){let c=null;if(dflt)try{c=JSON.parse(localStorage.getItem('wh_hc')||'null')}catch(_){}el.innerHTML=c&&c.r&&c.r.length&&Date.now()-c.t<864e5?c.r.map(cardHTML).join(''):skel()}   // 先顯示上次的名單（秒開），新資料到了再換掉   // 「顯示更多」時保留原本的卡片，不閃空
   if(homeState.tab==='found')return loadFoundList(el,more);
   const lim=homeState.near?200:(homeState.limit||24);
   const build=()=>{let q=sb.from('cases_public').select('*').order(homeState.sort==='new'?'lost_at':homeState.sort==='rw'?'reward':'last_activity',{ascending:false,nullsFirst:false});
@@ -4083,6 +4084,7 @@ async function loadList(){
       $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[],sex:[],colour:[],breed:[],days:0,photo:false,src:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
     el.innerHTML=emptyCard('lost');return}
   const ord=homeState.near?sortNear(data,'lost_lat','lost_lng'):data;
+  if(dflt&&!more)try{localStorage.setItem('wh_hc',JSON.stringify({t:Date.now(),r:data.slice(0,12)}))}catch(_){}
   el.innerHTML=ord.map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
   if(window.xListDone)xListDone(data.length,lim);
 }
