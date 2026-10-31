@@ -2046,6 +2046,7 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 .how-hero{display:grid;place-items:center;height:290px;margin:10px 0 18px;border-radius:28px;background:linear-gradient(135deg,#FDE7EE,#E6EEFB);overflow:hidden}.how-hero .ht{transform:scale(1.7);pointer-events:none}.how-hero .ht>b,.how-hero .ht>small{display:none}.how-hero .ht-m{margin:0}
 .how-t{margin:0 0 6px}.how-steps{list-style:none;counter-reset:hs;padding:0;margin:18px 0}.how-steps li{counter-increment:hs;position:relative;padding:12px 0 12px 48px;border-top:1px solid var(--line)}.how-steps li:first-child{border-top:0}.how-steps li::before{content:counter(hs);position:absolute;left:0;top:12px;width:32px;height:32px;border-radius:50%;background:var(--red-soft);color:var(--red);font-weight:900;display:grid;place-items:center}.how-steps b{display:block;font-size:16.5px}.how-steps span{color:var(--ink-2);font-size:15px}
 .how-cta{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 10px}.how-cta .btn{flex:1;min-width:160px}
+.lostprev .sk{display:block;background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 55%,var(--sheet)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px}.lostprev .lp-ph.sk{border-radius:22px}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -2719,6 +2720,21 @@ new MutationObserver(()=>qpEnhance(document.getElementById('app'))).observe(docu
 function updScrolled(){const h=document.querySelector('#app h1');const busy=app.querySelector('.pskel,.empty.loading');const b=h?h.getBoundingClientRect().bottom:0;document.body.classList.toggle('scrolled',!busy&&(!h||b<60))}
 window.addEventListener('scroll',updScrolled,{passive:true});
 try{new MutationObserver(()=>updScrolled()).observe(document.getElementById('app'),{childList:true})}catch(_){}
+// ===== 回上一頁不重畫：名單類頁面離開時把畫面整個收起來，按上一頁直接放回去（不重新載入、不跳動、位置不變）=====
+let __navMax=0;const __pc=new Map();
+const PC_OK=/^#\/?(\?.*)?$|^#\/(lost|adopt|intake|resources|learn)(\?.*)?$|^#\/(look|how)\/[a-z]+$/;
+function pcDrop(h){const e=__pc.get(h);if(!e)return;__pc.delete(h);e.maps.forEach(m=>{try{m.remove()}catch(_){}})}
+function pcSave(){const h=curHash;pcDrop(h);
+  if(!PC_OK.test(h)||!app.firstChild||app.querySelector('.pskel,.empty.loading')||__dirty)return;
+  const frag=document.createDocumentFragment();while(app.firstChild)frag.appendChild(app.firstChild);
+  const maps=__maps.filter(m=>{try{return frag.contains(m.getContainer())}catch(_){return false}});__maps=__maps.filter(m=>!maps.includes(m));
+  __pc.set(h,{frag,maps,cls:app.className,title:document.title,nid:navId,t:Date.now(),y:scrollMem[h]||0,mt:(document.getElementById('mTitle')||{}).textContent||''});
+  while(__pc.size>4)pcDrop(__pc.keys().next().value)}
+function pcRestore(h){const e=__pc.get(h);if(!e)return false;__pc.delete(h);
+  if(Date.now()-e.t>15*60e3){e.maps.forEach(m=>{try{m.remove()}catch(_){}});return false}
+  app.replaceChildren(e.frag);app.className=e.cls.replace(/\b(enter|push|pop)\b/g,'').trim();document.title=e.title;{const m=document.getElementById('mTitle');if(m)m.textContent=e.mt}
+  navId=e.nid;__maps.push(...e.maps);e.maps.forEach(m=>{try{m.invalidateSize()}catch(_){}});
+  const y=scrollMem[h]!=null?scrollMem[h]:e.y;window.scrollTo(0,y);requestAnimationFrame(()=>window.scrollTo(0,y));return true}
 function route(){window.__lastRoute=Date.now();
   if(!sb)return;
   if(__skipRoute){__skipRoute=false;navByPop=false;return}   // 取消離開後退回原頁，不重畫
@@ -2731,7 +2747,7 @@ function route(){window.__lastRoute=Date.now();
       return}
   }
   __submitting=false;
-  navId++;delete app.dataset.case;__wiz=null;__dirty=false;__dirtyMsg='';document.querySelectorAll('.undobar').forEach(x=>x.remove());
+  pcSave();navId=++__navMax;delete app.dataset.case;__wiz=null;__dirty=false;__dirtyMsg='';document.querySelectorAll('.undobar').forEach(x=>x.remove());
   __maps.forEach(m=>{try{m.remove()}catch(_){}});__maps=[];__pv.forEach(u=>URL.revokeObjectURL(u));__pv.clear();
   clearInterval(refreshTimer);refreshTimer=null;
   const h=location.hash||'#/';
@@ -2748,6 +2764,8 @@ function route(){window.__lastRoute=Date.now();
   app.classList.remove('enter','push','pop');if(!samePage){void app.offsetWidth;app.classList.add('enter')}clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!samePage&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
   curHash=newHash;
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
+  if(trav&&!samePage&&pcRestore(newHash))return;
+  pcDrop(newHash);
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else if(!samePage)window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(how\/|new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
   let m;
@@ -3098,7 +3116,7 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <button type="button" class="tile4 tb" id="bigNear"><span class="te">${ic("pin")}</span><b>附近走失</b><small>離我最近的毛孩</small></button>
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
-    <div id="lostPrev" class="lostprev"></div>
+    <div id="lostPrev" class="lostprev"><div class="mp-h"><b>${ic('search')} 正在協尋的毛孩</b></div><div class="lp-row">${'<span class="lp"><span class="lp-ph sk"></span><span class="sk" style="width:60%;height:14px;margin-top:6px"></span></span>'.repeat(4)}</div></div>
     ${(()=>{const t=seasonTip();return t?`<details class="season"><summary><span class="se-ic" aria-hidden="true">${t.ic}</span><b>${t.t}</b></summary><p>${t.b}</p></details>`:''})()}
     <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
