@@ -2151,7 +2151,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.16.4';
+const BUILD = 'v5.16.5';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2940,28 +2940,48 @@ function renderSetup(){
 /* ============================================================
    首頁 v1.1：走失 / 拾獲 / 地圖 三個分頁、我附近、最新目擊
    ============================================================ */
-const homeState={tab:'lost',species:[],city:[],status:['searching'],reward:false,q:'',chip:'',near:null,limit:24};
+const homeState={tab:'lost',species:[],city:[],status:['searching'],reward:false,q:'',chip:'',near:null,limit:24,sex:[],colour:[],breed:[],days:0,photo:false,src:[]};
 // 多選篩選：一個就用 eq，多個用 in；狗＋貓都選＝不限
 function fIn(q,col,arr){return !arr||!arr.length?q:arr.length===1?q.eq(col,arr[0]):q.in(col,arr)}
 function fSp(q){return homeState.species.length===1?q.eq('species',homeState.species[0]):q}
-function fCount(){const f=homeState.tab==='found';return (homeState.species.length===1?1:0)+homeState.city.length+(f||(homeState.status.length===1&&homeState.status[0]==='searching')?0:1)+(!f&&homeState.reward?1:0)}
-function openFilterSheet(after){const st={species:[...homeState.species],city:[...homeState.city],status:[...homeState.status],reward:homeState.reward};
+function fCount(){const f=homeState.tab==='found',h=homeState;return (h.species.length===1?1:0)+h.city.length+(f||(h.status.length===1&&h.status[0]==='searching')?0:1)+(!f&&h.reward?1:0)+(f?0:h.sex.length+h.colour.length+h.breed.length+(h.days?1:0)+(h.photo?1:0)+(h.src.length===1?1:0))}
+function openFilterSheet(after){const H=homeState,st={species:[...H.species],city:[...H.city],status:[...H.status],reward:H.reward,sex:[...H.sex],colour:[...H.colour],breed:[...H.breed],days:[H.days?String(H.days):''].filter(Boolean),photo:H.photo,src:[...H.src]};
   const ch=(k,v,t)=>`<button type="button" class="fchip ${st[k].includes(v)?'on':''}" data-k="${k}" data-v="${v}" aria-pressed="${st[k].includes(v)}">${t}</button>`;
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet fsheet" role="dialog" aria-label="篩選"><div class="grab" aria-hidden="true"></div><p class="sh-t">篩選（可以多選）</p>
    <div class="fgrp"><b>種類</b><div class="fchips">${ch('species','dog','狗')}${ch('species','cat','貓')}</div></div>
    ${homeState.tab==='found'?'':`<div class="fgrp"><b>狀態</b><div class="fchips">${ch('status','searching','協尋中')}${ch('status','found','已回家')}${ch('status','closed','已結案')}</div></div>`}
    <div class="fgrp"><b>縣市</b><div class="fchips">${Object.keys(CITY_CENTER).map(c=>ch('city',c,c)).join('')}</div></div>
-   ${homeState.tab==='found'?'':`<div class="fgrp"><b>其他</b><div class="fchips"><button type="button" class="fchip ${st.reward?'on':''}" data-rw="1" aria-pressed="${st.reward}">有獎金</button></div></div>`}
+   ${homeState.tab==='found'?'':`<div class="fgrp"><b>性別</b><div class="fchips">${ch('sex','male','公')}${ch('sex','female','母')}</div></div>
+   <div class="fgrp"><b>走失時間</b><div class="fchips">${F_DAYS.map(([v,t])=>ch('days',String(v),t)).join('')}</div></div>
+   <div class="fgrp"><b>毛色</b><div class="fchips">${F_COL.map(x=>ch('colour',x,x)).join('')}</div></div>
+   <div class="fgrp"><b>品種</b><div class="fchips" id="fBreed"></div></div>
+   <div class="fgrp"><b>其他</b><div class="fchips"><button type="button" class="fchip ${st.photo?'on':''}" data-pf="1" aria-pressed="${st.photo}">有照片</button><button type="button" class="fchip ${st.reward?'on':''}" data-rw="1" aria-pressed="${st.reward}">有獎金</button>${ch('src','site','本站登記')}${ch('src','moa','農業部申報')}</div></div>`}
    <div class="fs-acts"><button type="button" class="btn ghost" data-clear>全部清除</button><button type="button" class="btn" data-apply>套用</button></div></div>`;
-  el.onclick=e=>{const c=e.target.closest('.fchip[data-k]');if(c){const a=st[c.dataset.k],v=c.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);c.classList.toggle('on',i<0);c.setAttribute('aria-pressed',i<0);return}
+  // 品種：依選的種類列出常見的（沒選就狗貓都列）
+  const brd=()=>{const b=el.querySelector('#fBreed');if(!b)return;const sps=st.species.length===1?st.species:['dog','cat'];const list=[...new Set(sps.flatMap(x=>F_BREED[x]))];st.breed=st.breed.filter(x=>list.includes(x));b.innerHTML=list.map(x=>ch('breed',x,x)).join('')};
+  const one=new Set(['days']);
+  el.onclick=e=>{const c=e.target.closest('.fchip[data-k]');if(c){const k=c.dataset.k,a=st[k],v=c.dataset.v,i=a.indexOf(v);if(one.has(k)&&i<0){a.length=0;el.querySelectorAll(`.fchip[data-k="${k}"]`).forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed',false)})}if(i>=0)a.splice(i,1);else a.push(v);c.classList.toggle('on',i<0);c.setAttribute('aria-pressed',i<0);if(k==='species')brd();return}
+    const pf=e.target.closest('[data-pf]');if(pf){st.photo=!st.photo;pf.classList.toggle('on',st.photo);pf.setAttribute('aria-pressed',st.photo);return}
     const r=e.target.closest('[data-rw]');if(r){st.reward=!st.reward;r.classList.toggle('on',st.reward);r.setAttribute('aria-pressed',st.reward);return}
-    if(e.target.closest('[data-clear]')){st.species=[];st.city=[];st.status=['searching'];st.reward=false;el.querySelectorAll('.fchip').forEach(x=>{const on=x.dataset.k==='status'&&x.dataset.v==='searching';x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});return}
-    if(e.target.closest('[data-apply]')){if(!st.status.length)st.status=['searching'];Object.assign(homeState,st,{limit:24});closeOverlay(el);after&&after();return}
+    if(e.target.closest('[data-clear]')){st.species=[];st.city=[];st.status=['searching'];st.reward=false;st.sex=[];st.colour=[];st.breed=[];st.days=[];st.photo=false;st.src=[];brd();el.querySelectorAll('.fchip').forEach(x=>{const on=x.dataset.k==='status'&&x.dataset.v==='searching';x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});return}
+    if(e.target.closest('[data-apply]')){if(!st.status.length)st.status=['searching'];Object.assign(homeState,st,{days:+(st.days[0]||0),limit:24});closeOverlay(el);after&&after();return}
     if(e.target===el)closeOverlay(el)};
-  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
+  openOverlay(el);brd();requestAnimationFrame(()=>el.classList.add('show'))}
+const F_COL=['黑','白','黃','咖啡','灰','橘','虎斑','三花','花'],F_DAYS=[[3,'3 天內'],[7,'1 週內'],[30,'1 個月內'],[90,'3 個月內']];
+const F_BREED={dog:['米克斯','柴犬','貴賓','臘腸','博美','柯基','吉娃娃','法鬥','黃金','拉布拉多','哈士奇','雪納瑞','西施','馬爾濟斯','台灣犬'],cat:['米克斯','英國短毛','美國短毛','波斯','布偶','暹羅','橘貓','虎斑']};
+// 走失清單和地圖共用：性別、毛色、品種、走失時間、有照片、來源
+function fExtra(q,pre=''){const h=homeState,c=k=>pre+k;
+  if(h.sex.length)q=fIn(q,c('sex'),h.sex);
+  if(h.src.length===1)q=q.eq(c('source'),h.src[0]);
+  if(h.days)q=q.gte(c('lost_at'),new Date(Date.now()-h.days*864e5).toISOString());
+  if(h.photo)q=q.not(c('photos'),'eq','{}');
+  if(h.colour.length)q=q.or(h.colour.flatMap(x=>[`colour.ilike.%${x}%`,`breed.ilike.%${x}%`]).join(','));
+  if(h.breed.length)q=q.or(h.breed.flatMap(x=>x==='米克斯'?['breed.ilike.%米克斯%','breed.ilike.%混種%','breed.ilike.%米克斯%']:[`breed.ilike.%${x.replace(/短毛$/,'')}%`]).join(','));
+  return q}
 function fActiveHTML(){const a=[];homeState.species.length===1&&a.push(['sp',homeState.species[0]==='dog'?'狗':'貓']);homeState.city.forEach(c=>a.push(['city',c,c]));
   const f=homeState.tab==='found';if(!f&&!(homeState.status.length===1&&homeState.status[0]==='searching'))a.push(['st',homeState.status.map(x=>({searching:'協尋中',found:'已回家',closed:'已結案'})[x]).join('＋')]);!f&&homeState.reward&&a.push(['rw','有獎金']);
+  if(!f){const h=homeState;h.sex.forEach(x=>a.push(['sex',x==='male'?'公':'母',x]));h.colour.forEach(x=>a.push(['colour',x,x]));h.breed.forEach(x=>a.push(['breed',x,x]));h.days&&a.push(['days',(F_DAYS.find(d=>d[0]===h.days)||[0,''])[1]]);h.photo&&a.push(['photo','有照片']);h.src.length===1&&a.push(['src',h.src[0]==='moa'?'農業部申報':'本站登記'])}
   return a.map(([k,t,v])=>`<button type="button" class="pill fact" data-rm="${k}" data-v="${esc(v||'')}" aria-label="取消 ${esc(t)}">${esc(t)} ✕</button>`).join('')}
 function setHomeTab(t){const base=(location.hash||'#/').split('?')[0]==='#/lost'?'#/lost':'#/';const h=t==='lost'?base:base+'?tab='+t;if(location.hash===h)return;try{history.replaceState(Object.assign({},history.state||{},{h}),'',location.pathname+location.search+h)}catch(_){}curHash=location.hash;scrollMem[curHash]=scrollY;renderChrome(base,location.hash)}
 
@@ -3169,7 +3189,7 @@ ${bigStartHTML()}
   `;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c)c.textContent=n?` ${n}`:'';const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
   $('#btnFilter').onclick=()=>openFilterSheet(()=>{showF();loadList()});
-  $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;homeState.limit=24;showF();loadList()};
+  $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;if(['sex','colour','breed'].includes(k))homeState[k]=homeState[k].filter(x=>x!==b.dataset.v);if(k==='days')homeState.days=0;if(k==='photo')homeState.photo=false;if(k==='src')homeState.src=[];homeState.limit=24;showF();loadList()};
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.t===homeState.tab);b.onclick=()=>{homeState.tab=b.dataset.t;homeState.limit=24;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));setHomeTab(homeState.tab);loadList()}});
   const run=()=>{const qv=$('#fQ').value.trim();homeState.chip='';homeState.q=qv;homeState.limit=24;loadList()};
   let t;['fQ'].forEach(id=>$('#'+id).addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,400)}));
@@ -3446,7 +3466,7 @@ async function loadList(){
   if(homeState.tab==='found')return loadFoundList(el,more);
   const lim=homeState.near?200:(homeState.limit||24);
   const build=()=>{let q=sb.from('cases_public').select('*').order('last_activity',{ascending:false});
-  q=fIn(q,'status',homeState.status);q=fSp(q);q=fIn(q,'lost_city',homeState.city);
+  q=fIn(q,'status',homeState.status);q=fSp(q);q=fIn(q,'lost_city',homeState.city);q=fExtra(q);
   // 我附近：先限定在附近約 60 公里內，再依距離排序（全台案件很多時，附近較舊的案件也不會被漏掉）
   if(homeState.near){const {lat,lng}=homeState.near;q=q.gte('lost_lat',lat-.55).lte('lost_lat',lat+.55).gte('lost_lng',lng-.6).lte('lost_lng',lng+.6)}
   if(homeState.reward)q=q.gt('reward',0);
@@ -3469,7 +3489,7 @@ async function loadList(){
     if(homeState.near&&!(homeState.q||homeState.chip||fCount()>0)){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有協尋中的案件</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}
     const filtered=homeState.q||homeState.chip||fCount()>0;
     if(filtered){el.innerHTML=`<div class="empty-card"><div class="big">${ic("search")}</div><b>找不到符合條件的案件</b><p class="small">試試別的關鍵字，或清除篩選看全部。</p><button type="button" class="btn" id="btnClearF">清除篩選</button></div>`;
-      $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
+      $('#btnClearF').onclick=()=>{Object.assign(homeState,{q:'',chip:'',reward:false,status:['searching'],species:[],city:[],sex:[],colour:[],breed:[],days:0,photo:false,src:[]});$('#fQ').value='';{const c=$('#fCnt');if(c)c.textContent='';const a=$('#fActive');if(a)a.innerHTML=''}loadList()};return}
     el.innerHTML=emptyCard('lost');return}
   const ord=homeState.near?sortNear(data,'lost_lat','lost_lng'):data;
   el.innerHTML=ord.map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
@@ -3522,7 +3542,7 @@ async function loadMapAll(el){const my=listSeq;
   const grp=hasMC&&!map.__stub?L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:48,spiderfyOnMaxZoom:true,iconCreateFunction:cl=>L.divIcon({className:'',html:`<div class="mkc">${cl.getChildCount()}</div>`,iconSize:[40,40],iconAnchor:[20,20]})}).addTo(map):map;
   let qc=sb.from('cases_public').select('id,species,name,lost_lat,lost_lng,lost_city,lost_district,photos,last_seen_at,poster').eq('status','searching').order('last_activity',{ascending:false}).limit(500);   // 案件很多時，先顯示最近有動靜的
   let qf=sb.from('found_public').select('id,species,kind,lat,lng,city,district,colour,size,photos,seen_at,poster').eq('status','open').order('seen_at',{ascending:false}).limit(500);
-  qc=fIn(qc,'lost_city',homeState.city);qf=fIn(qf,'city',homeState.city);qc=fSp(qc);qf=fSp(qf);
+  qc=fIn(qc,'lost_city',homeState.city);qf=fIn(qf,'city',homeState.city);qc=fSp(qc);qc=fExtra(qc);qf=fSp(qf);
   const [{data:cs,error:e1},{data:fs,error:e2},{data:ls}]=await Promise.all([qc,qf,sb.from('sightings_public').select('case_id,lat,lng,seen_at').order('seen_at',{ascending:false}).limit(1000)]);if(my!==listSeq||!el.isConnected)return;
   if(e1&&e2){el.insertAdjacentHTML('afterbegin',netErrHTML());return}
   const last={};(ls||[]).forEach(s=>{if(!last[s.case_id]&&s.lat)last[s.case_id]=s});
