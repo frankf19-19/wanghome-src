@@ -10,8 +10,14 @@ export async function onRequestGet({ request, waitUntil }) {
   const hit = await cache.match(key);
   if (hit && !dbg) return new Response(hit.body, { status: hit.status, headers: hit.headers });
   let r;
-  try { r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0 (compatible; WangMiaoHome/1.0; +https://wangmiaotw.com)", "Referer": "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx", "Accept": "image/*" } }); }
-  catch (_) { return new Response("upstream", { status: 502, headers: cors }); }
+  // 寵物登記網偶爾連不上（522）：最多試 3 次
+  for (let i = 0; i < 3; i++) {
+    try { r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0 (compatible; WangMiaoHome/1.0; +https://wangmiaotw.com)", "Referer": "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx", "Accept": "image/*" } }); }
+    catch (_) { r = null; }
+    if (r && r.status < 500) break;
+    await new Promise((res) => setTimeout(res, 800 * (i + 1)));
+  }
+  if (!r || r.status >= 500) return new Response("upstream", { status: 502, headers: cors });
   const ct = r.headers.get("Content-Type") || "";
   if (dbg) return new Response(JSON.stringify({ st: r.status, ct, len: (await r.arrayBuffer()).byteLength }), { headers: cors });
   if (!r.ok || !/^(image\/|application\/octet-stream)/.test(ct)) return new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=3600" } });
