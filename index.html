@@ -2914,6 +2914,7 @@ async function init(){
     const c=new AbortController();const t=setTimeout(()=>c.abort(new DOMException('等太久沒有回應','TimeoutError')),ms);if(o.signal){if(o.signal.aborted)c.abort(o.signal.reason);else o.signal.addEventListener('abort',()=>c.abort(o.signal.reason),{once:true})}
     return fetch(u,{...o,signal:c.signal}).catch(e=>{if(c.signal.aborted&&!(o.signal&&o.signal.aborted))throw new DOMException('等太久沒有回應，網路可能不穩，請再試一次','AbortError');throw e}).finally(()=>clearTimeout(t))};
   sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',persistSession:true,detectSessionInUrl:true,autoRefreshToken:true},global:{fetch:tfetch}});
+  if(pushOK())pushBind();   // 先接好「點推播通知」的處理，從通知直接開 App 時才會跳到對的頁面
   // 秒開：一般開啟時不等登入狀態確認（登入過期時要連網換新，會卡住第一個畫面），先用手機裡記住的登入資料畫出畫面
   const slow=/^#\/verify\?/.test(location.hash||'')||/[?&](code|error)=/.test(location.search);
   if(!slow){
