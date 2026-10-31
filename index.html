@@ -2146,8 +2146,10 @@ html{-webkit-tap-highlight-color:transparent}
   .xwhere>.ico:first-child{color:var(--brand);width:17px;height:17px}.xwhere>.ico:last-child{width:14px;height:14px;color:var(--ink-3)}
   body[data-route="adopt"] .xwhere>.ico:first-child{color:var(--ok)}
   /* 搜尋、篩選、快速篩選、排序與顯示方式（往下捲時固定在上面） */
-  .xsticky{display:block;position:sticky;top:0;z-index:30;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4)}
+  .xsticky{display:block;position:sticky;top:env(safe-area-inset-top);z-index:30;margin:0 -16px;padding:10px 16px 10px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4)}
   .xsrow{display:flex;gap:10px}
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"]):not(.inner)::before{content:"";display:block!important;position:fixed;z-index:31;left:0;right:0;top:0;height:env(safe-area-inset-top);background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .xactive [data-rm="city"]{display:none}
   .xsearch{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;padding:0 18px;border-radius:999px;background:var(--sheet);box-shadow:var(--lift);color:var(--ink-2);margin:0}
   .xsearch .ico{width:19px;height:19px;flex:none}
   .xsearch input{flex:1;min-width:0;border:0!important;background:none!important;box-shadow:none!important;outline:none;font:inherit;font-size:16px;color:var(--ink);padding:0!important;height:100%}
@@ -2247,7 +2249,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xas-bg{display:none}
   body.xas-open .xas-bg{display:block;position:fixed;inset:0;z-index:199;background:rgba(10,8,6,.4)}
   body.xas-open .tabbar{display:none!important}
-  .xas-done{margin-top:16px;position:sticky;bottom:0}
+  .xas-done{margin-top:16px;position:sticky;bottom:0;box-shadow:0 -14px 18px 4px var(--sheet)!important}
   @keyframes xup{from{transform:translateY(100%)}}
   .xa-k{margin:0!important;padding:0!important;flex:1;overflow:visible}
   .xa-k .xchip{height:48px;padding:0 18px;display:inline-flex;align-items:center;gap:6px;background:var(--sheet);border-color:transparent;box-shadow:var(--lift)}
@@ -2491,7 +2493,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.2.0';
+const BUILD = 'v6.3.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3353,21 +3355,47 @@ const OTP_LEN=8;
 function otpDigits(s){s=String(s||'').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));{const e=s.match(/(?<!\d)\d{8}(?!\d)/);if(e)return e[0]}const m=s.match(/\d[\d\s-]{4,30}\d/g);if(m){const c=m.map(x=>x.replace(/\D/g,'')).find(x=>x.length>=6);if(c)return c.slice(0,OTP_LEN)}return s.replace(/\D/g,'').slice(0,OTP_LEN)}
 function extractToken(v){v=String(v||'').trim();const m=v.match(/[?&]t=([^&\s]+)/);if(!m)return v;try{return decodeURIComponent(m[1])}catch(_){return m[1]}}
 
-// 飼主／通報者管理入口（取代瀏覽器的輸入框）
+// 飼主／通報者管理入口：最簡單的方式是用登記時填的 Email 收驗證碼；有管理網址的也可以貼
 function entryHTML(kind,id){const what=kind==='case'?'走失案件':'通報';
   return `<div class="card entry"><h1>管理我的${what}</h1>
-  <p class="lede">要從你的「專屬管理網址」進來。</p>
-  <ol class="entry-steps"><li><b>打開 LINE</b>，找你登記後傳給自己的訊息（開頭是「汪喵回家｜…管理網址」），<b>直接點那個網址</b>就能進來。</li>
-  <li>或把那串網址整段貼在下面，按「進入管理」。</li></ol>
-  <label class="f"><span>管理網址或管理密碼</span><input type="text" id="tk" autocomplete="off" placeholder="貼上網址"></label>
-  <button type="button" class="btn big" id="tkGo">進入管理</button>
-  <p class="small muted" style="margin-top:14px">${kind==='case'?'如果登記時有登入會員，<a href="#/login">登入</a>後就能直接管理，不需要網址。':'找不到也沒關係，通報 60 天後會自動結案，不再公開你的聯絡方式。'}</p>
-  <a class="btn ghost" href="#/${kind==='case'?'case':'found'}/${id}">回上一頁</a></div>`}
+  ${me()?`<p class="lede">這個${what}不是用你目前登入的帳號登記的。如果登記時填的 Email 就是這個帳號的 Email，按下面就能接手管理。</p>
+  <button type="button" class="btn big block" id="emClaim">用我的帳號接手管理</button>`
+  :`<p class="lede">輸入登記時填的 Email，收一組驗證碼就能進來，不用找網址。</p>
+  <div id="emStep1"><label class="f"><span>登記時填的 Email</span><input type="email" id="emIn" inputmode="email" autocomplete="email" placeholder="例如 abc@gmail.com"></label>
+  <button type="button" class="btn big block" id="emSend">寄驗證碼給我</button></div>
+  <div id="emStep2" hidden><p class="small" id="emTo"></p><label class="f"><span>信裡的 ${OTP_LEN} 位數驗證碼</span><input type="text" id="emCode" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="貼上或輸入驗證碼"></label>
+  <button type="button" class="btn big block" id="emGo">進入管理</button><p class="small muted" style="margin-top:8px">沒收到？看看垃圾信件匣，或 <button type="button" class="linkbtn" id="emBack">換一個 Email</button></p></div>
+  <p class="small muted" style="margin-top:12px">驗證後會同時幫你建立免費會員，下次登入就能直接管理。</p>`}
+  <details class="entry-more" style="margin-top:16px"><summary>我有管理網址（LINE 裡那則訊息）</summary>
+  <label class="f" style="margin-top:10px"><span>管理網址</span><input type="text" id="tk" autocomplete="off" placeholder="貼上網址"></label>
+  <button type="button" class="btn ghost block" id="tkGo">用網址進入</button></details>
+  <a class="btn ghost" style="margin-top:16px" href="#/${kind==='case'?'case':'found'}/${id}">回上一頁</a></div>`}
 function bindEntry(kind,id){const go=()=>{const raw=$('#tk').value,t=extractToken(raw);if(!t)return toast('請先貼上管理網址');
-  // 貼的是完整管理網址：照網址裡的案件／通報開（可能是另一個案件，或拾獲通報的網址）
   const m=String(raw).match(/#\/(manage|found-manage)\/([0-9a-f-]{36})/i);const k=m?m[1]:(kind==='case'?'manage':'found-manage'),tid=m?m[2]:id;
   location.hash=`#/${k}/${tid}?t=${encodeURIComponent(t)}`};
-  $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()}}
+  $('#tkGo').onclick=go;$('#tk').onkeydown=e=>{if(e.key==='Enter')go()};
+  const target=`#/${kind==='case'?'manage':'found-manage'}/${id}`;
+  const claim=async()=>{const {data,error}=await sb.rpc('claim_by_email');if(error){toast('暫時無法接手，請稍後再試',4000);return false}
+    const n=kind==='case'?(data&&data.cases):(data&&data.found);
+    const {data:ok}=kind==='case'?await sb.rpc('can_manage_case',{p_id:id,p_token:null}):{data:true};
+    if(ok||n){toast('✅ 已經可以管理了',3000);location.hash=target;setTimeout(()=>{if(location.hash===target)route()},50);return true}
+    toast('這個 Email 跟登記時填的不一樣。試試另一個 Email，或用管理網址',6000);return false};
+  const cl=$('#emClaim');if(cl)cl.onclick=async()=>{cl.disabled=true;cl.textContent='處理中…';await claim();cl.disabled=false;cl.textContent='用我的帳號接手管理'};
+  const send=$('#emSend');if(!send)return;let email='';
+  send.onclick=async()=>{email=($('#emIn').value||'').trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return toast('請輸入正確的 Email');
+    send.disabled=true;send.textContent='寄送中…';
+    const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:CONFIG.SITE_URL+target.replace('#','#'),shouldCreateUser:true}});
+    send.disabled=false;send.textContent='寄驗證碼給我';
+    if(error){toast(/rate|seconds|頻繁/i.test(error.message||'')?'寄太多次了，請等一分鐘再試':'寄送失敗：'+(error.message||'請再試一次'),5000);return}
+    $('#emStep1').hidden=true;$('#emStep2').hidden=false;$('#emTo').innerHTML=`驗證碼已寄到 <b>${esc(email)}</b>`;try{$('#emCode').focus()}catch(_){}};
+  $('#emIn').onkeydown=e=>{if(e.key==='Enter')send.click()};
+  $('#emBack').onclick=()=>{$('#emStep1').hidden=false;$('#emStep2').hidden=true};
+  const verify=async()=>{const code=otpDigits($('#emCode').value);if(!code||code.length<6)return toast('請輸入信裡的驗證碼');const b=$('#emGo');b.disabled=true;b.textContent='確認中…';
+    const {data:vd,error}=await sb.auth.verifyOtp({email,token:code,type:'email'});
+    if(error||!vd?.session){b.disabled=false;b.textContent='進入管理';return toast(/expired|invalid/i.test(error?.message||'')?'驗證碼不正確或已過期，請重寄一次':'失敗：'+(error?.message||'請再試一次'),4500)}
+    session=vd.session;try{updateAuthUI()}catch(_){}
+    const ok=await claim();if(!ok){b.disabled=false;b.textContent='進入管理'}};
+  $('#emGo').onclick=verify;$('#emCode').onkeydown=e=>{if(e.key==='Enter')verify()}}
 // 首頁「我的毛孩」：登入後直接點進毛孩頁（年齡、生日倒數）；沒登入時邀請建立毛孩檔案
 const UNS={"c0VTrbsXtFU": "1509119993276-d691aff73209", "1Gj9tFSLCmk": "1746738771391-33d44630f5f8", "kPJSB1D_HzI": "1530153892876-56d69b38e5c1", "7ALrGfHusf4": "1583120513418-c078286682f4", "lyC6JP6tSXg": "1511377465862-2579b9c87623", "t6mHvgZHTeI": "1636500363634-80e552f1b94f", "ngqyo2AYYnE": "1507146426996-ef05306b995a", "YsWrfgEO1cM": "1535320730793-87242ae1f53d", "TL5U0zXhcEQ": "1519204247300-95d343acce1d"};const unsU=(id,w)=>`https://images.unsplash.com/photo-${UNS[id]}?w=${w}&q=75&fm=jpg&fit=crop`;
 // 「登記後會長這樣」：完整的協尋頁畫面介紹（固定內容，不是資料庫裡的案件；不進名單、地圖、統計，也不能回報或聯絡）
@@ -5498,7 +5526,7 @@ async function renderAdopt(){const _n=navId;
     st.variety=st.variety.filter(v=>vars.some(x=>x[0]===v));st.colour=st.colour.filter(v=>cols.some(x=>x[0]===v));
     const grp=(k,t,arr,max)=>{if(!arr.length)return '';const showAll=st['_all_'+k];const sh=showAll?arr:arr.slice(0,max);const sel=arr.filter(x=>st[k].includes(x[0])&&!sh.includes(x));
       return `<div class="fgrp"><b>${t}</b><div class="fchips">${chips(k,[...sh,...sel].map(([v,n])=>[v,v,n]))}${arr.length>max&&!showAll?`<button type="button" class="fchip more" data-all="${k}">更多 ${arr.length-max} 種…</button>`:''}</div></div>`};
-    $('#aDyn').innerHTML=(dists.length>1?grp('dist','地區',dists,8):'')+grp('variety',st.kind==='貓'?'貓種':'犬種',vars,8)+grp('colour','毛色',cols,8);
+    $('#aDyn').innerHTML=(dists.length?grp('dist',isMobV()?'收容所在哪一區':'地區',dists,8):'')+grp('variety',st.kind==='貓'?'貓種':'犬種',vars,8)+grp('colour','毛色',cols,8);
     $('#aDyn').querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{st['_all_'+b.dataset.all]=true;load()});
     sum();
     let list=rows.filter(r=>inD(r)&&(!st.size.length||st.size.includes(r.size))&&(!st.sex.length||st.sex.includes(r.sex))&&(!st.age.length||st.age.includes(r.age))&&(!st.photo||r.photo)&&(!st.variety.length||st.variety.includes(r.variety||'混種'))&&(!st.colour.length||st.colour.includes(r.colour))&&(!st.ster.length||st.ster.includes(r.ster)));
@@ -6905,7 +6933,7 @@ let __unOk='';
 const UN_EXEMPT=['#/set-username','#/login','#/verify','#/privacy','#/terms','#/delete-account','#/contact'];
 function checkUsername(path){if(!me()||__unOk===me().id||UN_EXEMPT.includes(path))return;const uid=me().id;
   getProfile(true).then(p=>{if(!me()||me().id!==uid)return;if(p&&(!('username' in p)||p.username)){__unOk=uid;return}
-    const cur=(location.hash||'#/').split('?')[0];if(UN_EXEMPT.includes(cur))return;setReturn(location.hash||'#/me');goReplace('#/set-username')}).catch(()=>{})}
+    const cur=(location.hash||'#/').split('?')[0];if(UN_EXEMPT.includes(cur)||/^#\/(manage|found-manage)\//.test(cur))return;setReturn(location.hash||'#/me');goReplace('#/set-username')}).catch(()=>{})}
 async function renderSetUsername(){
   if(!me()){goReplace('#/login');return}const _n=navId;setTitle('設定使用者名稱');app.innerHTML=pageSkel?pageSkel('form'):'';
   const p=await getProfile().catch(()=>null);if(_n!==navId)return;
