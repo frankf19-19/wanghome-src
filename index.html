@@ -2504,7 +2504,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.8.0';
+const BUILD = 'v6.8.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2914,9 +2914,22 @@ async function init(){
     const c=new AbortController();const t=setTimeout(()=>c.abort(new DOMException('等太久沒有回應','TimeoutError')),ms);if(o.signal){if(o.signal.aborted)c.abort(o.signal.reason);else o.signal.addEventListener('abort',()=>c.abort(o.signal.reason),{once:true})}
     return fetch(u,{...o,signal:c.signal}).catch(e=>{if(c.signal.aborted&&!(o.signal&&o.signal.aborted))throw new DOMException('等太久沒有回應，網路可能不穩，請再試一次','AbortError');throw e}).finally(()=>clearTimeout(t))};
   sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY,{auth:{flowType:'pkce',persistSession:true,detectSessionInUrl:true,autoRefreshToken:true},global:{fetch:tfetch}});
+  // 秒開：一般開啟時不等登入狀態確認（登入過期時要連網換新，會卡住第一個畫面），先用手機裡記住的登入資料畫出畫面
+  const slow=/^#\/verify\?/.test(location.hash||'')||/[?&](code|error)=/.test(location.search);
+  if(!slow){
+    try{const raw=localStorage.getItem('sb-'+new URL(CONFIG.SUPABASE_URL).hostname.split('.')[0]+'-auth-token');const s=raw&&JSON.parse(raw);if(s&&s.user&&s.user.id&&s.access_token)session=s}catch(_){}
+    const was=me()&&me().id;
+    try{route()}catch(e){console.warn('route',e)}
+    splashHide();
+    try{await initAuth()}catch(e){console.warn('auth init',e)}
+    if(((me()&&me().id)||null)!==(was||null)&&!(__dirty||__wiz)){try{route()}catch(_){}}   // 實際登入狀態和記住的不同（例如已過期）：重畫一次
+    return;
+  }
   try{await initAuth()}catch(e){console.warn('auth init',e)}
-  route();
+  route();splashHide();
 }
+// App 啟動畫面：第一個畫面畫好就收起來（不用固定等 1.2 秒）
+function splashHide(){if(!IS_APP)return;requestAnimationFrame(()=>setTimeout(()=>{try{const S=capPlugin('SplashScreen');S&&S.hide({fadeOutDuration:180})}catch(_){}},30))}
 let refreshTimer=null;
 
 const TI={
@@ -4216,6 +4229,7 @@ async function checkUpdate(){
     const v=await fetch('version.json?u='+now,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>j&&/^v[\d.]+$/.test(j.v)?j.v:'').catch(()=>'');
     if(!v||v===BUILD)return;
     const busy=__wiz||__dirty||document.body.classList.contains('formpage')||!!document.querySelector('.lightbox form,.lightbox textarea');
+    try{await fetch('./?fresh='+now,{cache:'no-store'})}catch(_){}   // 先把新版存進手機（離線殼），重新整理才會拿到新版
     if(!busy){let done='';try{done=sessionStorage.getItem('wh_upd')||''}catch(_){}if(done!==v){try{sessionStorage.setItem('wh_upd',v)}catch(_){}location.reload();return}}
     if(!$('#updBar')){const d=document.createElement('button');d.id='updBar';d.type='button';d.className='updbar';d.textContent='網站有新版本，點這裡更新';d.onclick=()=>location.reload();document.body.appendChild(d)}
   }catch(_){}
@@ -6063,8 +6077,10 @@ async function initAuth(){
   });
   updateAuthUI();
 }
+let __pushAuto=false;
 function updateAuthUI(){
-  if(me())setTimeout(()=>pushInit(false),2500);
+  if(!me())__pushAuto=false;
+  if(me()&&!__pushAuto){__pushAuto=true;setTimeout(()=>pushInit(false),2500)}
   const a=$('#navMe');if(!a)return;
   const u=me();
   let av='';if(u){try{av=localStorage.getItem('wh_av_'+u.id)||''}catch(_){}}

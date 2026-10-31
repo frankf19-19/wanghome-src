@@ -20,8 +20,16 @@ self.addEventListener('fetch', e => {
   const scope = new URL(self.registration.scope).pathname;
   const isShell = url.pathname === scope || url.pathname === scope + 'index.html';
   if (req.mode === 'navigate' && !isShell) return;      // 分享頁（/s/、/f/）等直接走網路，不覆蓋快取
+  if (isShell && req.mode === 'navigate') {
+    // 打開網站：有存過就先用手機裡的版本（秒開），同時在背景下載最新版存起來；
+    // 有新版時網頁會自己發現（version.json）並重新整理，所以不會一直停在舊版
+    const net = fetch(req).then(r => { if (r.ok && r.type === 'basic' && !r.redirected) { const c = r.clone(); return caches.open(CACHE).then(x => x.put('./', c)).then(() => r); } return r; });
+    e.waitUntil(net.catch(() => {}));
+    e.respondWith(caches.match('./').then(c => c || net).catch(() => net));
+    return;
+  }
   if (isShell) {
-    // 網頁：先拿最新版，失敗才用快取；只快取正常回應
+    // 網頁（不是打開頁面的請求，例如檢查新版）：先拿最新版，失敗才用快取；只快取正常回應
     e.respondWith(fetch(req).then(r => { if (r.ok && r.type === 'basic' && !r.redirected) { const c = r.clone(); caches.open(CACHE).then(x => x.put('./', c)); return r; }
       // 主機暫時出錯（5xx）：有快取就先用快取版本
       if (r.status >= 500) return caches.match('./').then(c => c || r); return r; })
