@@ -4947,7 +4947,7 @@ async function renderIntake(){const _n=navId;setTitle('收容所新收的毛孩'
    電話是飼主登記給拾獲者聯絡用的，按了才顯示。
    ============================================================ */
 const GOV_LOST_URL='https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=IFJomqVzyB0i';
-let __govLost=null,__govPend=null;const __govTel={};
+let __govLost=null,__govPend=null;const __govTel={},__govPic={};
 let govState={sp:'',city:'',days:60};
 function govRow(a){const addr=String(a['遺失地點']||'').replace(/^\d{3,6}/,'').replace(/^台/,'臺').trim();const m=addr.match(/^(..[市縣])(.{1,3}?[區鄉鎮市])?/);
   const raw=addr.slice(0,12),loose=!m&&raw&&!/\d|住家|家裡|附近$/.test(raw)?raw:'';const pic=String(a.PICTURE||''),id=(pic.match(/File_No=([A-Za-z0-9]+)/)||[])[1]||'';
@@ -4994,7 +4994,12 @@ async function renderGovLost(){setTitle('全台遺失申報');const st=govState;
   load()}
 // 首頁：全台最近的遺失申報（有照片的前 10 筆）
 async function loadGovPrev(_n){const el=$('#govPrev');if(!el)return;let rows;try{rows=await fetchGovLost()}catch(_){el.innerHTML='';return}
-  if(_n!==navId||!el.isConnected)return;const list=rows.filter(r=>r.photo&&govAgo(r)<=30).slice(0,10);if(!list.length){el.innerHTML='';return}
+  if(_n!==navId||!el.isConnected)return;
+  // 很多申報沒有附照片：先在背景試載入，挑有照片的最多 10 筆放在首頁
+  const cand=rows.filter(r=>r.photo&&govAgo(r)<=30).slice(0,48),ok=new Set();let k=0;
+  const probe=r=>new Promise(res=>{if(__govPic[r.id]!=null)return res(__govPic[r.id]);const i=new Image();i.referrerPolicy='no-referrer';const t=setTimeout(()=>{i.src='';res(__govPic[r.id]=false)},8000);i.onload=()=>{clearTimeout(t);res(__govPic[r.id]=i.naturalWidth>0)};i.onerror=()=>{clearTimeout(t);res(__govPic[r.id]=false)};i.src=r.photo});
+  await Promise.all([0,1,2,3].map(async()=>{while(k<cand.length&&ok.size<10){const r=cand[k++];if(await probe(r))ok.add(r.id)}}));
+  if(_n!==navId||!el.isConnected)return;const list=cand.filter(r=>ok.has(r.id)).slice(0,10);if(!list.length){el.innerHTML='';return}
   el.innerHTML=`<div class="mp-h"><b>${ic('flag')} 全台遺失申報 <span class="lp-n">${rows.filter(r=>govAgo(r)<=30).length}</span></b><a href="#/gov-lost">看全部 ›</a></div>
   <div class="lp-row">${list.map(r=>`<button type="button" class="lp" data-gov="${esc(r.id)}"><span class="lp-ph gov-ph ${r.sp==='cat'?'cat':''}">${spIc(r.sp)}<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(govTitle(r))}" onerror="this.remove()"><em>第 ${govAgo(r)} 天</em></span><b>${esc(govTitle(r).slice(0,8))}</b><small>${esc(r.city+r.dist)}</small></button>`).join('')}<a class="lp lp-all" href="#/gov-lost"><span class="lp-ph">${ic('chev')}</span><b>看全部</b><small>農業部資料</small></a></div>`;
   bindGov(el,list)}
