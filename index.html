@@ -2104,38 +2104,42 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
   .lostprev{margin-top:6px}.lostprev .mp-h{margin-bottom:10px}
 }
 
-/* ===== 手機首頁（App）：只有搜尋、兩個按鈕、最新走失清單。電腦版維持原樣 ===== */
+/* ===== 手機首頁（App）：像 Instagram，一隻一張大照片往下滑。電腦版維持原樣 ===== */
 html{-webkit-tap-highlight-color:transparent}
-.apphome,.ah-feed{display:none}
+.apphome,.ah-feed,.hd-srch{display:none}
 @media (max-width:760px){
-  .apphome{display:block;padding-top:6px}.ah-feed{display:block}
-  .apphome>.mine{margin-bottom:14px}
+  .apphome{display:block}.ah-feed{display:block}
+  .apphome>.mine{margin:4px 0 14px}
   header{position:sticky!important;top:0}
   body.scrolled header{background:color-mix(in srgb,var(--paper) 82%,transparent)!important;backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px)}
-  .ah-search{display:flex;align-items:center;gap:10px;height:50px;padding:0 18px;border-radius:999px;background:var(--sheet);border:1px solid var(--line);color:var(--ink-3)!important;text-decoration:none!important;font-size:16px}
-  .ah-search .ico{width:20px;height:20px;color:var(--ink-2);flex:none}
-  .ah-main{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-  .ah-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:118px;padding:16px 8px;border-radius:24px;color:#fff!important;text-decoration:none!important;text-align:center}
-  .ah-big.red{background:#C8345F}.ah-big.green{background:#1E7F5A}
-  .ah-big .te{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.2)}
-  .ah-big .te .ico{width:24px;height:24px}
-  .ah-big b{font-size:17px;line-height:1.3}
-  .ah-feed{margin-top:26px}
-  .af-h{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 10px}
-  .af-h b{font-size:20px;font-weight:800}.af-h a{font-size:15px;color:var(--red)!important;font-weight:600;text-decoration:none!important}
-  .af-list{background:var(--sheet);border-radius:20px;box-shadow:var(--lift);overflow:hidden}
-  .af-row{display:flex;align-items:center;gap:14px;padding:12px 14px;color:var(--ink)!important;text-decoration:none!important}
-  .af-row+.af-row{box-shadow:0 -1px 0 var(--line)}
-  .af-ph{flex:none;width:64px;height:64px;border-radius:14px;overflow:hidden;background:var(--line);display:grid;place-items:center;color:var(--ink-3)}
-  .af-ph img{width:100%;height:100%;object-fit:cover;display:block}
-  .af-t{flex:1;min-width:0;display:flex;flex-direction:column}
-  .af-t b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .af-t small{font-size:14px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .af-row em{flex:none;font-style:normal;font-size:13px;font-weight:700;color:var(--red-ink,#A02248);background:var(--red-soft,#FBE3DA);padding:4px 10px;border-radius:999px}
-  .ah-feed .sk{display:block;background:var(--line);border-radius:8px}
-  .af-all{display:block;margin:14px 0 6px;padding:14px;text-align:center;border-radius:16px;background:var(--sheet);border:1px solid var(--line);font-size:16px;font-weight:700;color:var(--ink)!important;text-decoration:none!important}
-  .ah-big:active,.ah-search:active,.af-row:active,.af-all:active{opacity:.75}
-  .ah-big,.ah-search,.af-row,.af-all{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .hd-srch{display:grid;place-items:center;width:42px;height:42px;margin-left:auto;border-radius:50%;color:var(--ink)!important}
+  .hd-srch+.hd-av{margin-left:4px}
+  #app:has(.ah-feed){padding-left:0!important;padding-right:0!important}
+  #app:has(.ah-feed)>.apphome{padding:0 16px}
+  .fp{margin:0 0 22px}
+  .fp-h{display:flex;align-items:center;gap:10px;padding:6px 16px 10px;color:var(--ink)!important;text-decoration:none!important}
+  .fp-av{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--red) 14%,var(--sheet));color:var(--red)}
+  .fp-av.cat{background:color-mix(in srgb,#6A55D0 14%,var(--sheet));color:#6A55D0}.fp-av svg{width:20px;height:20px}
+  .fp-ht{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+  .fp-ht b{font-size:16px}.fp-ht small{font-size:13px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fp-ht small .ico{width:13px;height:13px;vertical-align:-2px}
+  .fp-src{flex:none;font-style:normal;font-size:12px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  .fp-ph{position:relative;display:block;aspect-ratio:1/1;background:var(--line);overflow:hidden}
+  .fp-ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .fp-noimg{display:grid;place-items:center;height:100%;color:var(--ink-3)}.fp-noimg svg{width:64px;height:64px}
+  .fp-d{position:absolute;left:12px;top:12px;background:#C8345F;color:#fff;font-size:13.5px;font-weight:700;padding:5px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .fp-act{display:flex;align-items:center;gap:10px;padding:12px 16px 4px}
+  .fp-seen{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 18px;border-radius:999px;background:#1E7F5A;color:#fff!important;font-weight:700;font-size:15px;text-decoration:none!important}
+  .fp-seen .ico{width:18px;height:18px}
+  .fp-share{margin-left:auto;display:grid;place-items:center;width:42px;height:42px;border:0;border-radius:50%;background:none;color:var(--ink);cursor:pointer}
+  .fp-share .ico{width:24px;height:24px}
+  .fp-b{display:block;padding:4px 16px 0;font-size:15px;line-height:1.5;color:var(--ink)!important;text-decoration:none!important}
+  .fp-b>span{display:block;color:var(--ink-2)}.fp-b small{display:block;color:var(--ink-3);font-size:13px;margin-top:2px}
+  .ah-feed .sk{display:block;background:var(--line);border-radius:8px}.fp-ph.sk{border-radius:0}
+  .feed-more{height:40px}
+  #feedMore .af-all{display:block;margin:4px 16px 10px;padding:14px;text-align:center;border-radius:16px;background:var(--sheet);border:1px solid var(--line);font-size:15.5px;font-weight:700;color:var(--ink)!important;text-decoration:none!important}
+  .fp-seen:active,.fp-share:active,.fp-ph:active,.af-all:active{opacity:.75}
+  .fp-seen,.fp-share,.fp-ph,.fp-h{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+}
 }
 </style>
 <link rel="manifest" href="manifest.webmanifest">
@@ -2165,6 +2169,7 @@ html{-webkit-tap-highlight-color:transparent}
       <a href="#/health?cal=1" class="link hide-sm">加到手機日曆</a>
       <a href="#/health/add" class="btn sm green hide-sm">＋ 新增紀錄</a>
     </span>
+    <a href="#/lost?s=1" class="hd-srch" aria-label="搜尋走失的毛孩"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></a>
     <a href="#/me" class="hd-av app-hide" aria-label="我的"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg></a>
     <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg><span class="hide-sm"> 登入</span></a>
   </div>
@@ -2209,7 +2214,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v5.23.0';
+const BUILD = 'v5.24.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3238,17 +3243,35 @@ function deskStartHTML(){return `  <section class="bigstart" aria-label="你需�
 // 手機首頁（像 App）：搜尋列、兩個主要按鈕、一排常用功能，下面每一區一張白卡
 const isMobV=()=>matchMedia('(max-width:760px)').matches;
 function bigStartHTML(){if(!isMobV())return deskStartHTML();
-  return `  <section class="apphome" aria-label="汪喵回家">
-    ${mineHTML()}
-    <a class="ah-search" href="#/lost?s=1">${ic('search')}<span>搜尋走失的毛孩</span></a>
-    <div class="ah-main">
-      <a href="#/new" class="ah-big red"><span class="te">${ic('megaphone')}</span><b>我的毛孩走失了</b></a>
-      <a href="#/seen" class="ah-big green"><span class="te">${ic('eye')}</span><b>我看到／撿到</b></a>
-    </div>
-    <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
-  </section>
-  <section class="ah-feed" aria-label="最新走失"><div id="lostPrev" class="feed"><div class="af-h"><b>最新走失</b></div><div class="af-list">${'<div class="af-row"><span class="af-ph sk"></span><span class="af-t"><span class="sk" style="width:40%;height:16px"></span><span class="sk" style="width:65%;height:13px;margin-top:8px"></span></span></div>'.repeat(5)}</div></div></section>
+  return `  <section class="apphome" aria-label="汪喵回家">${mineHTML()}<div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a></section>
+  <section class="ah-feed" aria-label="正在協尋的毛孩"><div id="feed">${'<div class="fp"><div class="fp-h"><span class="sk" style="width:46%;height:16px"></span></div><div class="fp-ph sk"></div><div class="fp-b"><span class="sk" style="width:60%;height:14px"></span></div></div>'.repeat(2)}</div><div id="feedMore"></div></section>
 `}
+// 手機首頁：像 Instagram 一樣，一隻一張大照片往下滑
+const feedSt={n:0,busy:false,done:false,tot:0};
+function feedPostHTML(c){const ph=c.photos?.[0];const d=daysSince(c.lost_at);const where=esc((c.lost_city||'')+(c.lost_district||''));
+  const meta=[c.species==='cat'?'貓':'狗',c.breed,c.sex==='male'?'公':c.sex==='female'?'母':'',c.colour].filter(Boolean).map(esc).join('・');
+  const seen=c.source==='moa'?(c.contact_phone?`tel:${esc(String(c.contact_phone).replace(/[^\d+#]/g,''))}`:`#/report/${c.id}`):`#/report/${c.id}`;
+  return `<article class="fp">
+  <a class="fp-h" href="#/case/${c.id}"><span class="fp-av ${c.species==='cat'?'cat':''}">${spIc(c.species)}</span><span class="fp-ht"><b>${esc(c.name||'')}</b><small>${ic('pin')} ${where}</small></span>${c.source==='moa'?'<em class="fp-src">農業部申報</em>':''}</a>
+  <a class="fp-ph" href="#/case/${c.id}">${ph?`<img loading="lazy" decoding="async" src="${esc(safeU(ph))}" alt="${esc(c.name||'')}">`:`<span class="fp-noimg">${spIc(c.species)}</span>`}<span class="fp-d">走失第 ${d} 天</span></a>
+  <div class="fp-act"><a class="fp-seen" href="${seen}">${ic('eye')} 我看到牠</a><button type="button" class="fp-share" data-share="${c.id}" data-name="${esc(c.name||'')}" aria-label="分享">${ic('share')}</button></div>
+  <a class="fp-b" href="#/case/${c.id}"><b>${esc(c.name||'')}</b>${meta?` ${meta}`:''}${c.features?`<span>${esc(String(c.features).slice(0,60))}</span>`:''}<small>${c.lost_at?esc(fmtDT(c.lost_at))+' 走失':''}</small></a>
+  </article>`}
+async function loadFeed(_n,reset){const el=$('#feed');if(!el)return;if(reset){feedSt.n=0;feedSt.done=false}
+  if(feedSt.busy||feedSt.done)return;feedSt.busy=true;const PG=8;
+  try{const q=sb.from('cases_public').select('id,name,species,breed,sex,colour,features,photos,lost_city,lost_district,lost_at,status,source,contact_phone,poster',feedSt.n?{}:{count:'exact'}).eq('status','searching').not('photos','eq','{}').order('lost_at',{ascending:false}).range(feedSt.n,feedSt.n+PG-1);
+    const {data,error,count}=await q;if(_n!==navId||!el.isConnected)return;
+    if(error||!data){if(!feedSt.n)el.innerHTML='<p class="empty">讀取失敗，請下拉重新整理</p>';return}
+    if(count!=null)feedSt.tot=count;
+    const html=data.filter(c=>!userHidden(c)).map(feedPostHTML).join('');
+    if(!feedSt.n)el.innerHTML=html;else el.insertAdjacentHTML('beforeend',html);
+    feedSt.n+=data.length;if(data.length<PG)feedSt.done=true;
+    const m=$('#feedMore');if(m)m.innerHTML=feedSt.done?`<a class="af-all" href="#/lost">看全部正在協尋的毛孩（含沒有照片的）</a>`:'<div class="feed-more" aria-hidden="true"></div>';
+    if(!feedSt.done){const t=m&&m.firstChild;if(t&&'IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();loadFeed(_n)}},{rootMargin:'800px'});io.observe(t)}}
+  }finally{feedSt.busy=false}}
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('.fp-share');if(!b)return;const u=caseUrl(b.dataset.share),t=`請幫忙找「${b.dataset.name}」`;
+  if(navigator.share){try{await navigator.share({title:t,text:t,url:u})}catch(_){}return}
+  try{await navigator.clipboard.writeText(u);toast('已複製連結，可以貼到 LINE 群組')}catch(_){prompt('複製這個連結',u)}});
 function appMoreHTML(){return ''}
 // 「協尋」分頁（#/lost）＝只看名單；首頁（#/）＝四宮格＋協尋預覽。帶 ?tab= 的舊連結也直接進名單
 function isListOnly(){const h=location.hash||'#/';return h.split('?')[0]==='#/lost'||!!qs(h).tab}
@@ -3298,7 +3321,7 @@ ${bigStartHTML()}
   if($('#bigNear'))$('#bigNear').onclick=()=>{if(innerWidth<=760){location.hash='#/lost?near=1';return}homeState.tab='lost';setHomeTab('lost');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==='lost'));$('#listTitle').scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'});loadList();if(!homeState.near)$('#btnNear').click()};
   setupInstall();
   // 手機首頁看不到完整名單（在「協尋」分頁），不用先下載；電腦版和協尋分頁才載入
-  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO){loadLostPrev(_n);loadIntakePrev(_n);loadNearCta(_n)}
+  loadStats();loadReunited();if(LO||innerWidth>760)loadList();loadMyPets(_n);if(!LO){loadLostPrev(_n);loadIntakePrev(_n);loadNearCta(_n);loadFeed(_n,true)}
   if(LO&&qs(location.hash).s){const q=$('#fQ');if(q)try{q.focus({preventScroll:true})}catch(_){}}
 }
 function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" aria-labelledby="promoT">
