@@ -2,17 +2,18 @@
 // GET /api/petimg?u=https://www.pet.gov.tw/upload/pic/xxx.png
 const OK = /^https:\/\/(www\.pet\.gov\.tw|asms\.moa\.gov\.tw|asms\.coa\.gov\.tw)\/[^\s'"<>\\]+$/i;
 export async function onRequestGet({ request, waitUntil }) {
-  const u = new URL(request.url).searchParams.get("u") || "";
+  const U = new URL(request.url), u = U.searchParams.get("u") || "", dbg = U.searchParams.has("d");
   const cors = { "Access-Control-Allow-Origin": "*" };
   if (!OK.test(u)) return new Response("bad", { status: 400, headers: cors });
-  const key = new Request("https://wangmiaotw.com/api/petimg/" + encodeURIComponent(u));
+  const key = new Request("https://wangmiaotw.com/api/petimg/v2/" + encodeURIComponent(u));
   const cache = caches.default;
   const hit = await cache.match(key);
-  if (hit) return new Response(hit.body, { status: hit.status, headers: hit.headers });
+  if (hit && !dbg) return new Response(hit.body, { status: hit.status, headers: hit.headers });
   let r;
-  try { r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0 (compatible; WangMiaoHome/1.0; +https://wangmiaotw.com)", "Referer": "https://www.pet.gov.tw/" } }); }
+  try { r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0 (compatible; WangMiaoHome/1.0; +https://wangmiaotw.com)", "Referer": "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx", "Accept": "image/*" } }); }
   catch (_) { return new Response("upstream", { status: 502, headers: cors }); }
   const ct = r.headers.get("Content-Type") || "";
+  if (dbg) return new Response(JSON.stringify({ st: r.status, ct, len: (await r.arrayBuffer()).byteLength }), { headers: cors });
   if (!r.ok || !/^(image\/|application\/octet-stream)/.test(ct)) return new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=3600" } });
   const body = await r.arrayBuffer();
   const out = new Response(body, { status: 200, headers: { ...cors, "Content-Type": ct.startsWith("image/") ? ct : "image/jpeg", "Cache-Control": "public, max-age=604800" } });
