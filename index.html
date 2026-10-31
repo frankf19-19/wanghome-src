@@ -1457,7 +1457,7 @@ body.has-cta .toast{bottom:calc(var(--tabbar-h) + 76px + env(safe-area-inset-bot
 @media (max-width:760px){
   #app:not(.listonly) .homelist{display:none}
 }
-#app.listonly .bigstart,#app.listonly #recentWrap,#app.listonly #homeWrap,#app.listonly .crosslink,#app.listonly .install{display:none!important}
+#app.listonly .bigstart,#app.listonly .homemore,#app.listonly #recentWrap,#app.listonly #homeWrap,#app.listonly .crosslink,#app.listonly .install{display:none!important}
 #app.listonly .homelist>h2:first-child{margin-top:4px;font-size:26px}
 #app.listonly .homelist>h2:first-child .ico{display:none}
 .lostprev:empty{display:none}
@@ -2038,6 +2038,25 @@ button.pf-av{position:relative;border:0;padding:0;cursor:pointer;overflow:visibl
 .season .se-ic{font-size:24px;line-height:1.2}.season b{display:block}.season p{margin:2px 0 0;font-size:14px;color:var(--ink-2);line-height:1.55}
 :root[data-theme=dark] .season{background:#1F2A3D;border-color:#2E3E5A}:root[data-theme=dark] .pi-row.warn .pi-ic{background:#4A2222}:root[data-theme=dark] .pi-row.ok .pi-ic{background:#1E3A2C}:root[data-theme=dark] .pi-row.warn b{color:#FF9B8F}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .season{background:#1F2A3D;border-color:#2E3E5A}:root:not([data-theme=light]) .pi-row.warn b{color:#FF9B8F}}
+
+/* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
+.bigstart{gap:10px;margin-bottom:14px}
+.bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
+.tiles4{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;padding-top:8px!important;grid-auto-rows:auto!important}
+.tile4{min-height:0!important;padding:12px 2px 10px!important;border-radius:20px!important;gap:2px!important}
+.tile4::before,.tile4::after{width:18px;height:18px;top:-6px}.tile4::before{left:10px}.tile4::after{right:10px}
+.tile4 .te{width:42px!important;height:42px!important;margin-bottom:2px!important}.tile4 .te .ico,.tile4 .te svg{width:22px!important;height:22px!important}
+.tile4 b{font-size:14px!important;margin-top:2px!important;white-space:nowrap}.tile4 small{display:none}
+@media (min-width:761px){.tile4{padding:16px 8px 14px!important}.tile4 b{font-size:17px!important}.tile4 small{display:block;font-size:12.5px}.bs-hero .bs-sub{display:block}}
+@media (max-width:760px){.bs-hero .bs-sub{display:none}.bs-hero .bs-duo{width:104px!important}}
+.season{margin:0!important;padding:0!important;border-radius:14px!important;align-items:stretch!important;display:block!important}
+.season summary{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;list-style:none;font-size:14.5px}.season summary::-webkit-details-marker{display:none}
+.season summary::after{content:'›';margin-left:auto;font-size:20px;color:var(--ink-3);transition:transform .2s}.season[open] summary::after{transform:rotate(90deg)}
+.season .se-ic{font-size:18px!important}.season summary b{display:inline!important;font-weight:700}.season p{padding:0 14px 12px;margin:0!important}
+.injstrip{margin:0!important;padding:10px 14px!important;min-height:0!important;font-size:14.5px!important;border-radius:14px!important}
+.homemore{display:grid;gap:18px;margin:22px 0 8px}.homemore>*{min-width:0}.homemore .howto{margin-top:0}
+.lostprev .lp-row .lp{width:132px}.lostprev .lp-ph{width:132px;height:132px}
+@media (min-width:900px){.bigstart>.season{grid-column:span 2!important}.bigstart>.injstrip{grid-column:span 1!important}.bigstart>.injstrip b{display:block}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3036,18 +3055,9 @@ function bigStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <button type="button" class="tile4 tb" id="bigNear"><span class="te">${ic("pin")}</span><b>附近走失</b><small>離我最近的毛孩</small></button>
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
     </div>
-    ${(()=>{const t=seasonTip();return t?`<div class="season"><span class="se-ic" aria-hidden="true">${t.ic}</span><div><b>${t.t}</b><p>${t.b}</p></div></div>`:''})()}
-    <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div id="lostPrev" class="lostprev"></div>
-    <div id="intakePrev" class="lostprev intakeprev"></div>
-    <div class="qrow" aria-label="更多服務">
-      <a href="#/adopt" class="qk"><span class="qi q1">${ic('shelter')}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
-      <a href="#/resources" class="qk"><span class="qi q3">${ic('clipboard')}</span><b>協尋攻略</b><small>黃金 48 小時</small></a>
-      <a href="#/learn" class="qk"><span class="qi q4" aria-hidden="true">${ic('star')}</span><b>毛孩小學堂</b><small>狗狗貓咪照顧知識</small></a>
-    </div>
-    <div id="myPets" class="mypets"></div>
-    <div class="howto">${howToHTML()}</div>
-    <p class="bs-rule"><span class="bs-paw">${pawSvg()}</span><span><b>看到走失的狗貓：</b>先別追，拍照回報就好。</span></p>
+    ${(()=>{const t=seasonTip();return t?`<details class="season"><summary><span class="se-ic" aria-hidden="true">${t.ic}</span><b>${t.t}</b></summary><p>${t.b}</p></details>`:''})()}
+    <a class="injstrip" href="#/injured">${ic("aid")}<span><b>看到受傷的狗貓？</b>一鍵找當地動保電話</span><span aria-hidden="true">›</span></a>
     <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   </section>
 `}
@@ -3076,6 +3086,7 @@ ${bigStartHTML()}
   <p class="muted small" id="nearInfo" style="margin:6px 2px 0">${homeState.near?'依離你的距離排序（不會儲存你的位置）':''}</p>
   <div id="list" class="grid" style="margin-top:14px">${skel()}</div>
   </div>
+  <section class="homemore"><div id="myPets" class="mypets"></div><div id="intakePrev" class="lostprev intakeprev"></div><div class="howto">${howToHTML()}</div></section>
   <div id="homeWrap" class="hidden"><h2>${ic("paw")} 最近回家的毛孩</h2><div class="reunite" id="reunite"></div></div>
   `;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c)c.textContent=n?` ${n}`:'';const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
