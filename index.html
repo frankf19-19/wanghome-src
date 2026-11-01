@@ -2131,7 +2131,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xlogo img{width:30px;height:30px;border-radius:9px}
   .xtbtn{margin-left:auto;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet);color:var(--ink);box-shadow:var(--lift);cursor:pointer}
   .xtbtn .ico{width:20px;height:20px}
-  #xBell{margin-left:8px}
+  #xBell,#xChat{margin-left:8px}
   .xbell{position:relative;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--sheet);color:var(--ink)!important;box-shadow:var(--lift)}
   .xbell .ico{width:22px;height:22px}
   .xbadge{position:absolute;top:1px;right:-2px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--brand);color:#fff;font-style:normal;font-size:11.5px;font-weight:800;line-height:19px;text-align:center;box-shadow:0 0 0 2px var(--paper)}
@@ -2444,6 +2444,55 @@ html{-webkit-tap-highlight-color:transparent}
 <meta name="theme-color" content="#1E171C" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="汪喵回家">
+<style>
+/* ── 私訊 ── */
+.cav{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--brand-soft,#FFE7DE);color:var(--brand-d,#D94A26);font-weight:800;font-size:18px}
+.cav img{width:100%;height:100%;object-fit:cover}.cav.big{width:92px;height:92px;font-size:36px;margin:0 auto}
+.chl{display:flex;flex-direction:column;gap:8px}
+.chi{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:20px;background:var(--sheet);color:var(--ink)!important;text-decoration:none!important;box-shadow:var(--lift)}
+.chi.new{box-shadow:inset 3px 0 0 var(--brand,#F2643D),var(--lift)}
+.chb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.cht{display:flex;justify-content:space-between;gap:8px}.cht b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cht small{flex:none;color:var(--ink-3);font-size:12.5px}
+.chc{color:var(--ink-3);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chm{color:var(--ink-2);font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chn{flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--brand,#F2643D);color:#fff;font-style:normal;font-size:12px;font-weight:800;display:grid;place-items:center}
+.chat{display:flex;flex-direction:column;max-width:760px;margin:0 auto;min-height:calc(100dvh - 140px)}
+.chhead{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 4px;background:var(--paper)}
+@media (max-width:760px){.chhead{position:static;padding:4px 0 8px}.chback{display:none}}
+.chback{font-size:30px;line-height:1;padding:0 8px;color:var(--ink)!important;text-decoration:none!important}
+.chwho{flex:1;min-width:0;display:flex;align-items:center;gap:10px;color:var(--ink)!important;text-decoration:none!important}
+.chwho .cav{width:40px;height:40px;font-size:16px}.chwho b{display:block;font-size:17px}.chwho small{color:var(--ink-3);font-size:12.5px}
+.chmenu{border:0;background:var(--sheet);width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--ink);box-shadow:var(--lift);cursor:pointer}
+.chctx{display:flex;align-items:center;gap:12px;margin:4px 0 8px;padding:10px 12px;border-radius:18px;background:var(--sheet);color:var(--ink)!important;text-decoration:none!important;box-shadow:var(--lift)}
+.chctx img,.chctx>svg{width:46px;height:46px;border-radius:12px;object-fit:cover;flex:none}.chctx span{flex:1;min-width:0}.chctx b{display:block}.chctx small{color:var(--ink-3)}.chctx i{font-style:normal;color:var(--ink-3);font-size:22px}
+.chsafe{display:flex;gap:8px;align-items:flex-start;margin:0 0 8px;padding:9px 12px;border-radius:14px;background:#FFF6DA;color:#6B5200;font-size:13px;line-height:1.5}
+.chsafe .ico{flex:none;margin-top:2px}
+:root[data-theme=dark] .chsafe{background:#3A3216;color:#F3DE9A}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .chsafe{background:#3A3216;color:#F3DE9A}}
+.chtip{margin:0 0 8px;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.chlog{flex:1;display:flex;flex-direction:column;gap:6px;padding:8px 0 12px;overflow-y:auto;max-height:calc(100dvh - 300px);min-height:220px}
+@media (max-width:760px){.chlog{max-height:none;overflow:visible}}
+.cday{align-self:center;margin:10px 0 4px;font-size:12px;color:var(--ink-3);background:var(--fill,rgba(0,0,0,.05));padding:3px 10px;border-radius:999px}
+.cfirst{align-self:center;text-align:center;max-width:300px;margin:30px 0;color:var(--ink-3);font-size:14px;line-height:1.6}
+.cm{display:flex;align-items:flex-end;gap:6px;max-width:82%}
+.cm.me{align-self:flex-end;flex-direction:row-reverse}
+.cm time{flex:none;font-size:11px;color:var(--ink-3);margin-bottom:2px}
+.cmb{padding:9px 13px;border-radius:20px 20px 20px 6px;background:var(--sheet);color:var(--ink);box-shadow:var(--lift);font-size:15.5px;line-height:1.5;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:6px}
+.cm.me .cmb{border-radius:20px 20px 6px 20px;background:var(--brand,#F2643D);color:#fff}
+.cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
+.cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
+.cmph{all:unset;cursor:zoom-in;display:block;width:220px;max-width:100%;border-radius:14px;overflow:hidden;margin:-3px -7px 0}
+.cmph img{display:block;width:100%;height:auto;max-height:320px;object-fit:cover}.cmph .sk{display:block;height:180px;background:rgba(0,0,0,.08)}
+.chbar{position:sticky;bottom:0;display:flex;align-items:flex-end;gap:8px;padding:10px 0 calc(10px + env(safe-area-inset-bottom));background:var(--paper)}
+@media (max-width:760px){.chbar{margin:0 -16px;padding-left:12px;padding-right:12px}}
+.chbar textarea{flex:1;min-height:44px;max-height:140px;resize:none;border-radius:22px;padding:11px 16px;font:inherit;font-size:16px;line-height:1.35;border:1.5px solid var(--line);background:var(--sheet);color:var(--ink)}
+.chbtn{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:0;background:var(--sheet);color:var(--ink-2);box-shadow:var(--lift);cursor:pointer}
+.chsend{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:0;background:var(--brand,#F2643D);color:#fff;cursor:pointer}.chsend:disabled{opacity:.5}
+.chblk{padding:16px;text-align:center;color:var(--ink-2);background:var(--sheet);border-radius:18px;margin:8px 0}
+.chat-ctaw{margin:10px 0 0}.chat-cta{display:flex;flex-direction:column;gap:2px;align-items:center;line-height:1.3}.chat-cta small{font-weight:600;font-size:12.5px;color:var(--ink-3)}
+.mcard{text-align:center;padding:28px 18px;background:var(--sheet);border-radius:26px;box-shadow:var(--lift);max-width:460px;margin:20px auto}
+.mcard h1{margin:12px 0 2px;font-size:26px}
+</style>
 <script>
 /* 開啟時不閃：深色主題在第一個畫面前就套上；手機在第一頁畫好前先不顯示電腦版的頂欄和「載入中」 */
 (function(){var d=document.documentElement,t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
@@ -2479,6 +2528,7 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
     </span>
     <a href="#/me" class="hd-av app-hide" aria-label="我的"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg></a>
     <button type="button" class="link hide-sm dtheme" data-theme-pick aria-label="外觀（深淺色）" title="外觀"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+    <a href="#/chats" class="link hide-sm dtheme dbell" id="dChat" aria-label="訊息" title="訊息"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 5.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17.5h-1A1.5 1.5 0 0 1 3 16V7a1.5 1.5 0 0 1 1.5-1.5z"/></svg><i class="dbadge" hidden></i></a>
     <a href="#/inbox" class="link hide-sm dtheme dbell" id="dBell" aria-label="通知" title="通知"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><i class="dbadge" hidden></i></a>
     <a href="#/me" class="btn sm ghost" id="navMe" title="登入／註冊"><svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg><span class="hide-sm"> 登入</span></a>
   </div>
@@ -2523,7 +2573,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.10.3';
+const BUILD = 'v6.11.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3047,7 +3097,7 @@ function closeOverlay(el){const t=el._trigger;if(overlayOpen===el){overlayOpen=n
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue))return;closeOverlay(overlayOpen)}});
 function closeOverlays(){document.querySelectorAll('.lightbox').forEach(x=>x.remove());overlayOpen=null}
 
-function showUndo(msg,onUndo){document.querySelectorAll('.undobar,#newSightBar').forEach(x=>x.remove());{const t=$('#toast');if(t){t.classList.remove('show');clearTimeout(t._t)}}const d=document.createElement('div');d.className='undobar';d.innerHTML=`<span>${esc(msg)}</span><button type="button">復原</button>`;
+function showUndo(msg,onUndo){document.querySelectorAll('.undobar,#newSightBar').forEach(x=>x.remove());chatStop();{const t=$('#toast');if(t){t.classList.remove('show');clearTimeout(t._t)}}const d=document.createElement('div');d.className='undobar';d.innerHTML=`<span>${esc(msg)}</span><button type="button">復原</button>`;
   document.body.appendChild(d);const t=setTimeout(()=>d.remove(),7000);const h0=location.hash;d.querySelector('button').onclick=async()=>{clearTimeout(t);d.remove();if(location.hash!==h0)return;await onUndo()}}
 function sightOps(id,st){id=esc(id);return (st!=='confirmed'?`<button class="btn sm green" data-s="${id}" data-v="confirmed">✓ 是牠（公開到地圖）</button>`:'')+(st!=='rejected'?`<button class="btn sm ghost" data-s="${id}" data-v="rejected">× 不是牠（不公開）</button>`:'')+(st==='rejected'?`<button class="btn sm ghost" data-s="${id}" data-v="pending">改回待確認</button>`:'')}
 // 連線失敗 ≠ 找不到：只有資料庫回答「沒有這筆」(PGRST116) 才說找不到，其他錯誤請使用者再試一次
@@ -3183,7 +3233,7 @@ function route(){window.__lastRoute=Date.now();
   checkUsername(path);   // 登入了但還沒設定使用者名稱：先去設定
   renderChrome(path,h);
   document.body.classList.remove('has-cta','xas-open');
-  document.body.classList.toggle('formpage',/^#\/(new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
+  document.body.classList.toggle('formpage',/^#\/(chat\/|new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
   const trav=trackDepth(wasPop);
@@ -3224,6 +3274,9 @@ function route(){window.__lastRoute=Date.now();
   if(path==='#/me')return renderMe();
   if(path==='#/fav')return renderFav();
   if(path==='#/inbox')return renderInbox();
+  if(path==='#/chats')return renderChats();
+  if((m=path.match(/^#\/chat\/([0-9a-f-]{36})$/)))return renderChat(m[1]);
+  if((m=path.match(/^#\/u\/([^\/?#]{2,40})$/))){let n='';try{n=decodeURIComponent(m[1])}catch(_){}if(n)return renderMember(n)}
   if(path==='#/admin')return renderAdmin();
   if(path==='#/pet/new')return renderPet('new');
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})$/)))return renderPetView(m[1]);
@@ -3698,6 +3751,118 @@ async function pushInit(ask){if(!pushOK()||!me())return;pushBind();const P=capPl
     if(st.receive==='granted')await P.register();
     else if(ask)toast('通知被關掉了，可以到手機「設定」→ 汪喵回家 → 通知 打開',6000)}catch(_){}}
 async function pushDrop(){if(!IS_APP)return;try{const t=__pushToken||localStorage.getItem('wh_push_tok');if(t)await sb.rpc('drop_push_token',{p_token:t})}catch(_){}}
+/* ============================================================
+   私訊（會員之間）：#/chats 對話清單、#/chat/<id> 對話、#/u/<使用者名稱> 會員頁
+   ============================================================ */
+ICONS.chat='<path d="M4.5 5.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17.5h-1A1.5 1.5 0 0 1 3 16V7a1.5 1.5 0 0 1 1.5-1.5z"/>';
+ICONS.send='<path d="M4 12 20 4l-6 16-3-7z"/><path d="m11 13 9-9"/>';
+ICONS.dots='<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>';
+let __chatN=0,__chatCh=null,__chatPoll=null;
+function chatBadge(n){return n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}
+function chatIconHTML(){const n=me()?__chatN:0;return `<a class="xbell" href="#/chats" aria-label="訊息${n?'，'+n+' 則未讀':''}">${ic('chat')}${chatBadge(n)}</a>`}
+async function chatUnreadCheck(){if(!me()){__chatN=0}else{try{const {data,error}=await sb.rpc('chat_unread');if(!error)__chatN=+data||0}catch(_){}}
+  const a=$('#xChat');if(a)a.innerHTML=chatIconHTML();const d=$('#dChat .dbadge');if(d){d.hidden=!__chatN;d.textContent=__chatN>9?'9+':__chatN}
+  const t=document.querySelector('#tabbar a[data-r=me] .tbn');if(t){t.hidden=!__chatN;t.textContent=__chatN>9?'9+':__chatN}}
+function chatStop(){try{if(__chatCh)sb.removeChannel(__chatCh)}catch(_){}__chatCh=null;clearInterval(__chatPoll);__chatPoll=null}
+function chatAva(name,url,cls=''){const u=safeU(url);return `<span class="cav ${cls}">${u?`<img src="${esc(u)}" alt="" loading="lazy">`:esc((name||'?').slice(0,1).toUpperCase())}</span>`}
+function chatTime(t){const d=tw(t),n=tw(Date.now());const hm=`${String(d.h).padStart(2,'0')}:${String(d.mi).padStart(2,'0')}`;return d.y===n.y&&d.m===n.m&&d.d===n.d?hm:`${d.m}/${d.d} ${hm}`}
+// 開始對話（案件、通報、會員）：沒登入先登入，回來後自動接著開
+async function chatStart(kind,ref){
+  if(!me()){setReturn(location.hash);requireLogin('傳訊息需要登入（免費註冊）');return}
+  const {data,error}=await sb.rpc('chat_open',{p_kind:kind,p_ref:ref});
+  if(error)return toast(error.message.replace(/^.*?:\s*/,''),4500);
+  location.hash='#/chat/'+data}
+// 案件頁、通報頁上的「傳訊息」按鈕：有綁定會員（而且不是自己）才顯示
+function chatCta(kind,ref,label){const box=$('#chatCta');if(!box)return;const n0=navId;
+  sb.rpc('chat_can',{p_kind:kind,p_ref:ref}).then(({data})=>{if(n0!==navId||!data||!box.isConnected)return;
+    box.innerHTML=`<button type="button" class="btn ghost block chat-cta"><span>${ic('chat')} ${esc(label)}</span><small>不用留電話，可以傳照片</small></button>`;box.hidden=false;
+    box.querySelector('button').onclick=()=>chatStart(kind,ref)}).catch(()=>{})}
+async function renderChats(){const _n=navId;setTitle('訊息');
+  if(!requireLogin('看訊息需要登入'))return;
+  app.innerHTML=`<div class="xpage chats"><div class="xpt-row"><h1 class="xpt">訊息</h1></div><div id="chList" class="chl"><div class="pskel"><div class="sk" style="height:68px"></div><div class="sk" style="height:68px"></div></div></div></div>`;
+  const {data,error}=await sb.rpc('chat_list');if(_n!==navId)return;const el=$('#chList');if(!el)return;
+  if(error){el.innerHTML=netErrHTML();return}
+  if(!data||!data.length){el.innerHTML=`<div class="xempty">${ic('chat')}<b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或在撿到通報按「傳訊息給通報者」，就能直接聊、傳照片，不用互留電話。</p><a class="btn" href="#/">去看走失的毛孩</a></div>`;chatUnreadCheck();return}
+  el.innerHTML=data.map(r=>{const name=r.other_name||'會員';const ctx=r.kind==='case'?`走失協尋・${r.title||''}`:r.kind==='found'?(r.title||'通報'):'私訊';
+    return `<a class="chi ${r.unread?'new':''}" href="#/chat/${r.chat_id}">${chatAva(name,r.other_avatar)}<span class="chb"><span class="cht"><b>${esc(name)}</b><small>${esc(chatTime(r.last_at))}</small></span><small class="chc">${esc(ctx)}</small><span class="chm">${r.last_sender===me().id?'你：':''}${esc(r.last_text||'')}</span></span>${r.unread?`<i class="chn">${r.unread>99?'99+':r.unread}</i>`:''}</a>`}).join('');
+  chatUnreadCheck()}
+const CHAT_ASKS=['請說出牠晶片號碼的末四碼','請描述牠身上一個照片看不出來的特徵（疤痕、胎記、牙齒…）','請傳一張你以前和牠的合照','請說出牠的項圈、衣服或名牌的樣子'];
+async function renderChat(id){const _n=navId;setTitle('訊息');
+  if(!requireLogin('看訊息需要登入'))return;
+  app.innerHTML=`<div class="chat"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></div>`;
+  const [{data:ppl,error:pe},{data:ch},{data:msgs,error:me2}]=await Promise.all([sb.rpc('chat_people',{p_chat:id}),sb.from('chats').select('id,kind,case_id,found_id').eq('id',id).maybeSingle(),sb.from('chat_messages').select('*').eq('chat_id',id).order('id',{ascending:false}).limit(80)]);
+  if(_n!==navId)return;
+  if(pe||me2){app.innerHTML=netErrHTML();return}
+  if(!ch||!ppl||!ppl.length){app.innerHTML=`<div class="empty-card"><b>找不到這個對話</b><p class="small">可能已經刪除了。</p><a class="btn" href="#/chats">回訊息列表</a></div>`;return}
+  const mine=ppl.find(p=>p.user_id===me().id)||{},other=ppl.find(p=>p.user_id!==me().id)||{};
+  const oname=other.username||'會員';setTitle(oname);let ctxHTML='';
+  if(ch.kind==='case'&&ch.case_id){const {data:c}=await sb.from('cases_public').select('id,name,photos,status').eq('id',ch.case_id).maybeSingle();if(_n!==navId)return;
+    if(c)ctxHTML=`<a class="chctx" href="#/case/${c.id}">${c.photos&&c.photos[0]?thumbImg(c.photos[0],''):spIc('dog')}<span><b>${esc(c.name||'走失協尋')}</b><small>${c.status==='searching'?'協尋中':'已結案'}・${mine.role==='owner'?'你的協尋案件':'對方的協尋案件'}</small></span><i>›</i></a>`}
+  if(ch.kind==='found'&&ch.found_id){const {data:f}=await sb.from('found_public').select('id,kind,photos,city,district').eq('id',ch.found_id).maybeSingle();if(_n!==navId)return;
+    if(f)ctxHTML=`<a class="chctx" href="#/found/${f.id}">${f.photos&&f.photos[0]?thumbImg(f.photos[0],''):spIc('dog')}<span><b>${f.kind==='injured'?'受傷通報':f.kind==='found'?'撿到通報':'目擊通報'}</b><small>${esc((f.city||'')+(f.district||''))}・${mine.role==='owner'?'你的通報':'對方的通報'}</small></span><i>›</i></a>`}
+  const helper=mine.role==='helper',ownerSide=mine.role==='owner';
+  app.innerHTML=`<div class="chat">
+    <div class="chhead"><a class="chback" href="#/chats" aria-label="回訊息列表">‹</a>${other.username?`<a class="chwho" href="#/u/${encodeURIComponent(other.username)}">`:'<span class="chwho">'}${chatAva(oname,other.avatar_url)}<span><b>${esc(oname)}</b><small>${other.joined?'加入 '+esc(fmtDate(other.joined)):''}</small></span>${other.username?'</a>':'</span>'}<button type="button" class="chmenu" id="chMenu" aria-label="更多">${ic('dots')}</button></div>
+    ${ctxHTML}
+    <p class="chsafe">${ic('shield')}<span>${ch.kind==='dm'?'不要給對方密碼、驗證碼或匯款；見面約在人多的公共場所。':'見面約在派出所、動物醫院等公共場所。<b>要你先匯款、給驗證碼的都是詐騙。</b>'}</span></p>
+    ${ownerSide&&ch.kind!=='dm'?`<p class="chtip">對方說看到或撿到你的毛孩？可以請他傳照片確認；你也要準備好晶片號碼、以前的照片，證明你是飼主。</p>`:''}
+    <div class="chlog" id="chLog" aria-live="polite"></div>
+    ${other.blocked?`<div class="chblk">你已經封鎖這位會員。<button type="button" class="linkbtn" id="chUnblk">解除封鎖</button></div>`:`<form class="chbar" id="chForm" autocomplete="off">
+      ${helper&&ch.kind!=='dm'?`<button type="button" class="chbtn" id="chAsk" aria-label="請對方證明是飼主" title="請對方證明是飼主">${ic('shield')}</button>`:''}
+      <label class="chbtn" aria-label="傳照片" title="傳照片">${ic('image')}<input type="file" accept="image/*" id="chPh" hidden></label>
+      <textarea id="chIn" rows="1" maxlength="2000" placeholder="輸入訊息…" aria-label="輸入訊息"></textarea>
+      <button type="submit" class="chsend" id="chSend" aria-label="送出">${ic('send')}</button></form>`}
+  </div>`;
+  const log=$('#chLog');let lastId=0;const seen=new Set();const urlCache={};
+  const signed=async paths=>{const need=paths.filter(p=>p&&!urlCache[p]);if(need.length){try{const {data}=await sb.storage.from('chat').createSignedUrls(need,3600);(data||[]).forEach(x=>{if(x.signedUrl)urlCache[x.path]=x.signedUrl})}catch(_){}}};
+  const bubble=m=>{const mineM=m.sender_id===me().id;const t=chatTime(m.created_at);
+    if(m.kind==='ask')return `<div class="cm ask ${mineM?'me':''}" data-id="${m.id}"><div class="cmb"><b>${ic('shield')} ${mineM?'你請對方證明是飼主':'對方請你證明是飼主'}</b><span>${esc(m.body||'')}</span>${mineM?'':'<small>直接回覆訊息或傳照片就可以</small>'}</div><time>${t}</time></div>`;
+    const ph=m.photo?`<button type="button" class="cmph" data-full="${esc(m.photo)}">${urlCache[m.photo]?`<img src="${esc(urlCache[m.photo])}" alt="照片">`:'<span class="sk"></span>'}</button>`:'';
+    return `<div class="cm ${mineM?'me':''}" data-id="${m.id}"><div class="cmb">${ph}${m.body?`<span>${esc(m.body).replace(/\n/g,'<br>')}</span>`:''}</div><time>${t}</time></div>`};
+  const day=t=>{const d=tw(t);return `${d.y}/${d.m}/${d.d}`};let lastDay='';
+  const add=async(list,scroll=true)=>{list=list.filter(m=>!seen.has(m.id));if(!list.length)return;await signed(list.map(m=>m.photo));if(_n!==navId||!log.isConnected)return;
+    const near=log.scrollHeight-log.scrollTop-log.clientHeight<120||scroll===true;
+    let h='';list.forEach(m=>{seen.add(m.id);lastId=Math.max(lastId,m.id);const dd=day(m.created_at);if(dd!==lastDay){lastDay=dd;h+=`<p class="cday">${esc(dd)}</p>`}h+=bubble(m)});
+    log.insertAdjacentHTML('beforeend',h);if(near)requestAnimationFrame(()=>{log.scrollTop=log.scrollHeight});
+    if(document.visibilityState==='visible')sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})};
+  if(!msgs.length)log.innerHTML=`<p class="cfirst">${ch.kind==='dm'?`跟 ${esc(oname)} 打聲招呼吧。對方回覆前，你最多可以傳 3 則訊息。`:helper?`說說你在哪裡、什麼時候看到牠，可以直接傳照片給對方。`:'還沒有訊息。'}</p>`;
+  await add(msgs.slice().reverse(),true);
+  log.addEventListener('click',e=>{const b=e.target.closest('.cmph');if(b&&urlCache[b.dataset.full])lightbox(urlCache[b.dataset.full])});
+  // 新訊息：即時（Realtime）＋每 8 秒補抓一次（網路不穩時也收得到）
+  chatStop();
+  const pull=async()=>{if(_n!==navId)return chatStop();const {data}=await sb.from('chat_messages').select('*').eq('chat_id',id).gt('id',lastId).order('id').limit(50);if(data&&data.length){const f=log.querySelector('.cfirst');if(f)f.remove();add(data,false)}};
+  try{__chatCh=sb.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},()=>pull()).subscribe()}catch(_){}
+  __chatPoll=setInterval(pull,8000);
+  const ping=()=>{try{sb.auth.getSession().then(({data})=>{const t=data&&data.session&&data.session.access_token;if(!t)return;fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-message',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:'Bearer '+t},body:JSON.stringify({chat_id:id})}).catch(()=>{})})}catch(_){}};
+  const send=async(kind,body,photo)=>{const {error}=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null});if(error){toast(error.message.replace(/^.*?:\s*/,''),4500);return false}const f=log.querySelector('.cfirst');if(f)f.remove();await pull();ping();return true};
+  const form=$('#chForm');
+  if(form){const inp=$('#chIn');const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();form.requestSubmit()}});
+    form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v)return;const b=$('#chSend');b.disabled=true;if(await send('text',v)){inp.value='';grow()}b.disabled=false;inp.focus()};
+    $('#chPh').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;toast('照片上傳中…',8000);
+      try{const blob=await compressImage(f,1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
+        const cap=inp.value.trim();if(await send('photo',cap,path)){inp.value='';grow();toast('已傳送',1200)}}catch(err){toast('照片沒有傳成功：'+(err.message||'網路不穩'),4500)}};
+    const ask=$('#chAsk');if(ask)ask.onclick=()=>xPick('請對方證明是飼主',CHAT_ASKS.map(t=>[t,t]).concat([['__own','自己寫一個問題…']]),'',async v=>{let q=v;if(v==='__own'){q=await textSheet({title:'想請對方回答什麼？',max:200,placeholder:'例：牠最喜歡的玩具是什麼？'});if(!q||!q.trim())return}send('ask',q.trim())})}
+  {const ub=$('#chUnblk');if(ub)ub.onclick=async()=>{await sb.rpc('user_block',{p_user:other.user_id,p_on:false});toast('已解除封鎖');rerender(()=>renderChat(id))}}
+  $('#chMenu').onclick=()=>xPick('對話',[...(other.username?[['profile','看 '+oname+' 的會員頁']]:[]),['report','檢舉這位會員'],[other.blocked?'unblock':'block',other.blocked?'解除封鎖':'封鎖這位會員'],['hide','刪除這個對話']],'',async v=>{
+    if(v==='profile')location.hash='#/u/'+encodeURIComponent(other.username);
+    if(v==='block'){if(!await askSheet({title:`封鎖 ${oname}？`,body:'封鎖後雙方都不能再傳訊息。可以隨時解除。',ok:'封鎖',danger:true}))return;await sb.rpc('user_block',{p_user:other.user_id,p_on:true});toast('已封鎖');rerender(()=>renderChat(id))}
+    if(v==='unblock'){await sb.rpc('user_block',{p_user:other.user_id,p_on:false});toast('已解除封鎖');rerender(()=>renderChat(id))}
+    if(v==='hide'){if(!await askSheet({title:'刪除這個對話？',body:'只會從你的訊息列表移除；對方再傳訊息時會重新出現。',ok:'刪除',danger:true}))return;await sb.rpc('chat_hide',{p_chat:id});goReplace('#/chats')}
+    if(v==='report'){const r=await new Promise(res=>xPick('檢舉原因',[['fake','詐騙（要求匯款、驗證碼）'],['inappropriate','騷擾或不當言論、照片'],['spam','廣告'],['other','其他']],'',res));if(!r)return;
+      const {error}=await sb.rpc('chat_report',{p_chat:id,p_reason:r,p_note:null});if(error)return toast('送出失敗：'+error.message);
+      if(await askSheet({title:'謝謝，已收到檢舉',body:`站長會盡快處理。要不要順便封鎖 ${oname}？`,ok:'封鎖',cancel:'先不要'})){await sb.rpc('user_block',{p_user:other.user_id,p_on:true});rerender(()=>renderChat(id))}}})}
+async function renderMember(name){const _n=navId;setTitle(name);
+  app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  if(!me()){app.innerHTML=`<div class="empty-card"><b>登入後才能看會員頁</b><a class="btn" href="#/login">登入／註冊（免費）</a></div>`;setReturn(location.hash);return}
+  const {data,error}=await sb.rpc('member_card',{p_username:name});if(_n!==navId)return;
+  const u=data&&data[0];if(error||!u){app.innerHTML=error?netErrHTML():`<div class="empty-card"><b>找不到這位會員</b><a class="btn" href="#/">回首頁</a></div>`;return}
+  const self=u.user_id===me().id;
+  app.innerHTML=`<div class="xpage member"><div class="mcard">${chatAva(u.username,u.avatar_url,'big')}<h1>${esc(u.username)}</h1><p class="muted small">${esc(fmtDate(u.joined))} 加入汪喵回家</p>
+    ${self?`<a class="btn ghost" href="#/me">編輯我的資料</a>`:u.dm_open?`<button type="button" class="btn" id="mDm">${ic('chat')} 傳訊息</button>`:'<p class="muted small">這位會員目前不接受私訊。</p>'}
+    ${self?'':`<p style="margin-top:14px"><button type="button" class="linkbtn" id="mBlk" style="color:var(--ink-3)">封鎖這位會員</button></p>`}</div></div>`;
+  const b=$('#mDm');if(b)b.onclick=()=>chatStart('dm',u.user_id);
+  const k=$('#mBlk');if(k)k.onclick=async()=>{if(!await askSheet({title:`封鎖 ${u.username}？`,body:'封鎖後雙方都不能再傳訊息。可以在對話裡解除。',ok:'封鎖',danger:true}))return;const {error}=await sb.rpc('user_block',{p_user:u.user_id,p_on:true});toast(error?'沒有成功，請再試一次':'已封鎖')}}
 function inboxSeen(){try{return +localStorage.getItem('wh_inbox_seen')||0}catch(_){return 0}}
 function inboxUnread(){try{return +localStorage.getItem('wh_inbox_n')||0}catch(_){return 0}}
 async function inboxItems(){if(!me())return [];const out=[];const since=new Date(Date.now()-14*864e5).toISOString();
@@ -3717,7 +3882,7 @@ async function inboxItems(){if(!me())return [];const out=[];const since=new Date
   return out.sort((a,b)=>(b.t||'').localeCompare(a.t||''))}
 async function inboxCheck(){if(!me())return;try{const l=await inboxItems();const s=inboxSeen();const n=l.filter(x=>!x.due&&Date.parse(x.t)>s).length;localStorage.setItem('wh_inbox_n',n);const b=$('#xBell');if(b)b.innerHTML=xBellHTML();dBellSet()}catch(_){}}
 function dBellSet(){const d=$('#dBell .dbadge');if(!d)return;const n=me()?inboxUnread():0;d.hidden=!n;d.textContent=n>9?'9+':n;$('#dBell').setAttribute('aria-label','通知'+(n?'，'+n+' 則未讀':''))}
-let __inboxAt=0;function inboxMaybe(){if(Date.now()-__inboxAt>5*60e3){__inboxAt=Date.now();inboxCheck()}}
+let __inboxAt=0;function inboxMaybe(){chatUnreadCheck();if(Date.now()-__inboxAt>5*60e3){__inboxAt=Date.now();inboxCheck()}}
 let inboxK='all';
 async function renderInbox(){const _n=navId;setTitle('通知');
   const K=[['all','全部'],['mine','我的協尋'],['follow','追蹤的'],['near','家附近'],['pet','我的毛孩']];
@@ -3753,7 +3918,7 @@ function dView(){try{return localStorage.getItem('wh_dv')||'card'}catch(_){retur
 function xView(){try{return localStorage.getItem('wh_xv')||'big'}catch(_){return 'big'}}
 function xBellHTML(){const n=me()?inboxUnread():0;return `<a class="xbell" href="#/inbox" aria-label="通知${n?'，'+n+' 則未讀':''}">${XI.bell}${n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}</a>`}
 function xHeadHTML(mode,title,where){return `<section class="xh">
-  <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><button type="button" class="xtbtn" data-theme-pick aria-label="外觀（深淺色）">${ic('moon')}</button><span id="xBell">${xBellHTML()}</span></div>
+  <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><button type="button" class="xtbtn" data-theme-pick aria-label="外觀（深淺色）">${ic('moon')}</button><span id="xChat">${chatIconHTML()}</span><span id="xBell">${xBellHTML()}</span></div>
   <nav class="xmode ${mode==='adopt'?'adopt':''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失毛孩</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養毛孩</a></nav>
   <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
@@ -4408,6 +4573,7 @@ async function renderCase(id){const _n=navId;
         ${c.source==='moa'?'':`<a class="btn big cact-main" href="#/report/${id}">${ic("eye")} 我看到${esc(c.name||"牠")}了，回報</a>`}
         ${c.contact_phone?`<a class="btn big call" href="tel:${esc(telNum(c.contact_phone))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(c.contact_phone)}</span></a>`:''}
       </div>
+      <div class="chat-ctaw" id="chatCta" hidden></div>
       ${c.source==='moa'?`<p class="moa-rel"><a href="#/report/${id}">${ic("eye")} 不方便打電話？回報目擊位置，由汪喵回家轉告飼主 ›</a></p>`:''}
       ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}按上面按鈕回報，飼主會收到通知。</p>`}
       <p class="tipbox ic-tip"><span class="tb-ic">${ic('paw')}</span><span>看到${esc(c.name||"牠")}：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</span></p>`:''}
@@ -4468,6 +4634,7 @@ async function renderCase(id){const _n=navId;
     if(t||me()){const {data}=await sb.rpc('can_manage_case',{p_id:id,p_token:t});if(data){location.hash=`#/manage/${id}`;return}}
     location.hash=`#/manage/${id}`};
   if($('#btnFollow'))$('#btnFollow').onclick=()=>toggleFollow(id,$('#btnFollow'));
+  if(active&&c.source!=='moa')chatCta('case',id,'傳訊息給'+(c.contact_name||'飼主'));
   if(me())sb.from('follows').select('case_id').eq('case_id',id).maybeSingle().then(({data})=>{if(data&&$('#btnFollow')){$('#btnFollow').dataset.on='1';$('#btnFollow').innerHTML=ic('star')+' 追蹤中'}});
   $('#btnCopyText').onclick=()=>copy($('#shareText').value);
 
@@ -5409,6 +5576,7 @@ async function renderFound(id){const _n=navId;
       ${f.reporter_line?`<a class="btn big line" target="_blank" rel="noopener" href="https://line.me/R/ti/p/${String(f.reporter_line).startsWith('@')?'@'+encodeURIComponent(String(f.reporter_line).slice(1)):'~'+encodeURIComponent(f.reporter_line)}">用 LINE 聯絡（${esc(f.reporter_line)}）</a>`:''}
       ${!f.reporter_phone&&!f.reporter_line?`<p class="tipbox" style="margin:0">通報者沒有留電話。${f.current_place?`牠目前在：<b>${esc(f.current_place)}</b>，可以直接去詢問。`:''}如果是你的毛孩，<a href="#/new">登記走失</a>，系統會自動比對、通知你。</p>`:''}
     </div>
+    <div class="chat-ctaw" id="chatCta" hidden></div>
     <p class="muted small" style="text-align:center;margin:8px 0 0">聯絡時請準備照片或晶片號碼，證明是你的毛孩。</p>`:(f.reporter_phone?`<div class="phone"><a href="tel:${esc(telNum(f.reporter_phone))}">${ic('phone')} ${esc(f.reporter_phone)}</a></div>`:'')}
     <div class="sharebar"><a class="btn sm line" data-share="line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}">LINE 分享</a><a class="btn sm fb" data-share="fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}">FB 分享</a><button class="btn sm ghost" data-share="copy">複製連結</button></div>
     <p class="small" style="text-align:right;margin:4px 0 0"><button type="button" class="linkbtn" id="btnFM" style="color:var(--ink-3)">${ic("key")} 我是通報者</button>　<button type="button" class="linkbtn" id="btnReportF" style="color:var(--ink-3)">${ic("flag")} 檢舉</button>　<button type="button" class="linkbtn" id="btnBlockF" style="color:var(--ink-3)">封鎖發布者</button></p>
@@ -5421,6 +5589,7 @@ async function renderFound(id){const _n=navId;
   applyShareUrl(url,title);getShareUrl('f',id).then(u=>{if(u!==url&&_n===navId)applyShareUrl(u,title)});
   $('#btnReportF').onclick=()=>openReport('found',id,f.poster);
   $('#btnBlockF').onclick=()=>blockPoster(f.poster,()=>{location.hash='#/'});
+  if(f.status==='open')chatCta('found',id,'傳訊息給'+(f.reporter_name||'通報者'));
   $('#btnFM').onclick=async()=>{
     let t=null;try{t=localStorage.getItem('wh_ftoken_'+id)}catch(_){}
     if(t||me()){const {data}=await sb.rpc('can_manage_found',{p_id:id,p_token:t});if(data){location.hash=`#/found-manage/${id}`;return}}
@@ -5894,7 +6063,7 @@ async function renderAdmin(){const _n=navId;
   if(tab==='bans')return admBans(box);
   return admList(box,tab,q.q||'',q.f||'all');
 }
-const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊'};
+const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊',user:'私訊會員'};
 const ADM_MAX={name:30,lost_place:200,place_text:200,current_place:200,contact_phone:30,reporter_phone:30,contact_line:60,reporter_line:60,direction:20};
 const FSTATUS_T={open:'等飼主中',reunited:'已回到主人身邊',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
 const admUrl=(t,id,caseId)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:`#/case/${caseId}`;
@@ -5945,12 +6114,12 @@ async function admReports(box,showAll){const _n=navId;
   const link=(t,id)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:null;
   box.innerHTML=`<p class="adm-bar"><a class="small" href="#/admin?tab=reports${showAll?'':'&all=1'}">${showAll?'只看待處理':'顯示已處理'}</a></p>
   ${Object.values(groups).length?Object.values(groups).map(g=>`<div class="card adm-card">
-    <div class="adm-h"><span class="tag ${g.target_type==='case'?'red':g.target_type==='found'?'green':'blue'}">${ADM_T[g.target_type]||g.target_type}</span><b>${esc(g.target_title||'(已刪除)')}</b>${g.target_hidden?'<span class="tag">已隱藏</span>':''}${g.resolved?'<span class="tag green">已處理</span>':''}</div>
-    <ul class="small" style="margin:8px 0 0 18px;padding:0">${g.items.map(r=>`<li>${fmtDT(r.created_at)}　${esc(REASON_TEXT[r.reason]||r.reason)}${r.note?'：'+esc(r.note):''}</li>`).join('')}</ul>
+    <div class="adm-h"><span class="tag ${g.target_type==='case'?'red':g.target_type==='found'?'green':'blue'}">${ADM_T[g.target_type]||g.target_type}</span><b>${esc(g.target_title||(g.target_type==='user'?'被檢舉的會員（下方附對方最近的訊息）':'(已刪除)'))}</b>${g.target_hidden?'<span class="tag">已隱藏</span>':''}${g.resolved?'<span class="tag green">已處理</span>':''}</div>
+    <ul class="small" style="margin:8px 0 0 18px;padding:0;white-space:pre-line">${g.items.map(r=>`<li>${fmtDT(r.created_at)}　${esc(REASON_TEXT[r.reason]||r.reason)}${r.note?'：'+esc(r.note):''}</li>`).join('')}</ul>
     <div class="adm-acts">
       ${link(g.target_type,g.target_id)?`<a class="btn sm ghost" href="${link(g.target_type,g.target_id)}">查看</a>`:''}
-      <a class="btn sm ghost" href="#/admin?tab=${g.target_type}&q=${g.target_id}">聯絡／編輯</a>
-      <button class="btn sm" data-hide="${g.target_type}|${g.target_id}|${g.target_hidden?0:1}">${g.target_hidden?'恢復顯示':(g.target_type==='sighting'?'退回目擊':'隱藏')}</button>
+      ${g.target_type==='user'?'':`<a class="btn sm ghost" href="#/admin?tab=${g.target_type}&q=${g.target_id}">聯絡／編輯</a>`}
+      ${g.target_type==='user'?'':`<button class="btn sm" data-hide="${g.target_type}|${g.target_id}|${g.target_hidden?0:1}">${g.target_hidden?'恢復顯示':(g.target_type==='sighting'?'退回目擊':'隱藏')}</button>`}
       ${g.resolved?'':`<button class="btn sm green" data-res="${g.target_id}">標記已處理</button>`}
       ${g.resolved?'':`<button class="btn sm danger" data-ban="${g.target_type}|${g.target_id}">停權發布者</button>`}
     </div></div>`).join(''):'<p class="muted">目前沒有待處理的檢舉 🎉</p>'}`;
@@ -5965,6 +6134,7 @@ function admBind(box,reload,rows){
   box.querySelectorAll('[data-ban]').forEach(b=>b.onclick=async()=>{const [t,id]=b.dataset.ban.split('|');
     const why=prompt('停權原因（會記錄在後台，不會告訴對方）：','詐騙／濫用');if(why===null)return;
     const days=admAskDays();if(days===undefined)return;
+    if(t==='user'){const {error}=await sb.rpc('admin_ban_member',{p_user:id,p_reason:why,p_days:days});if(error)return toast(error.message);toast('已停權這位會員');return reload()}
     const {data,error}=await sb.rpc('admin_ban',{p_type:t,p_id:id,p_reason:why,p_days:days});if(error)return toast(error.message);
     toast(data&&data.banned?`已停權${days?' '+days+' 天':'（永久）'}並隱藏內容`:(data&&data.note)||'已隱藏內容',4000);reload()});
   box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const [t,id]=b.dataset.del.split('|');
@@ -7275,6 +7445,7 @@ async function renderMeBody(){const _n=navId;
   <form onsubmit="return false" id="nf">
     ${'username' in p?'':`<label class="f"><span><b class="lbl">顯示名稱</b><small class="hint">回報目擊時預設使用</small></span><input type="text" id="dn" maxlength="30" value="${esc(p.display_name||'')}"></label>`}
     <label class="chk"><input type="checkbox" id="nFollow" ${p.notify_follow!==false?'checked':''}> 追蹤的案件有新目擊時，寄 Email 通知我</label>
+    <label class="chk"><input type="checkbox" id="nDm" ${p.dm_open!==false?'checked':''}> 讓其他會員傳私訊給我（走失案件、通報相關的訊息不受影響）</label>
     <label class="chk"><input type="checkbox" id="nOn" ${p.notify_enabled?'checked':''}> 我家附近有毛孩走失時，寄 Email 通知我</label>
     <div id="nearBox" class="${p.notify_enabled?'':'hidden'}">
       <div class="row2">
@@ -7333,7 +7504,7 @@ async function renderMeBody(){const _n=navId;
   $('#nf').onsubmit=once(async e=>{
     e.preventDefault();const loc=picker.get();
     if($('#nOn').checked&&!loc)return toast('請在地圖上點選你家附近的位置');
-    const row={notify_follow:$('#nFollow').checked,notify_enabled:$('#nOn').checked,home_radius_km:+$('#nR').value,notify_species:$('#nSp').value,home_lat:loc?.lat??null,home_lng:loc?.lng??null};if($('#dn'))row.display_name=$('#dn').value.trim()||null;
+    const row={notify_follow:$('#nFollow').checked,...($('#nDm')?{dm_open:$('#nDm').checked}:{}),notify_enabled:$('#nOn').checked,home_radius_km:+$('#nR').value,notify_species:$('#nSp').value,home_lat:loc?.lat??null,home_lng:loc?.lng??null};if($('#dn'))row.display_name=$('#dn').value.trim()||null;
     const {error}=await sb.from('profiles').update(row).eq('id',me().id);
     if(error)return toast('儲存失敗：'+error.message);toast('已儲存');
   });
