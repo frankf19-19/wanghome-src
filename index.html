@@ -2630,6 +2630,13 @@ html{-webkit-tap-highlight-color:transparent}
 .chnew{position:fixed;left:50%;bottom:calc(92px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom)));transform:translateX(-50%);z-index:30;border:0;border-radius:999px;padding:10px 18px;background:var(--ink);color:var(--paper);font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);cursor:pointer}.chnew[hidden]{display:none}
 .chold{align-self:center;margin:4px 0 8px;border:0;border-radius:999px;padding:8px 16px;background:var(--fill);color:var(--ink-2);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
 @media (min-width:761px){body[data-route=chat] .chat{height:calc(100dvh - 48px);min-height:0}body[data-route=chat] .chlog{flex:1 1 auto;min-height:0;max-height:none}body[data-route=chat] .chbar{position:static}}
+.cm.sys{align-self:center;max-width:none;justify-content:center}.cm.sys span{font-size:12.5px;color:var(--ink-3);background:var(--fill);padding:4px 12px;border-radius:999px}
+.cq{display:flex;flex-direction:column;gap:1px;margin:-2px -4px 2px;padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.06);border-left:3px solid currentColor;font-size:13px;line-height:1.35;cursor:pointer;opacity:.9}.cq b{font-size:12px}.cq span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.cm.me .cq{background:rgba(255,255,255,.18)}
+.cm.flash .cmb,.cm.flash .cstk{animation:cflash 1.2s}@keyframes cflash{0%,60%{box-shadow:0 0 0 4px rgba(242,100,61,.5)}100%{box-shadow:none}}
+.chreply{display:flex;align-items:center;gap:10px;margin:0 0 -4px;padding:8px 12px;border-radius:14px 14px 0 0;background:var(--sheet);border-left:3px solid var(--brand,#F2643D);box-shadow:var(--lift);font-size:13.5px}.chreply[hidden]{display:none}.chreply span{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--ink-2)}.chreply b{color:var(--ink);font-size:13px}.chreply button{flex:none;border:0;background:var(--fill);width:32px;height:32px;border-radius:50%;cursor:pointer;color:var(--ink)}
+.chtyping{display:flex;align-items:center;gap:8px;padding:2px 4px 6px;font-size:13px;color:var(--ink-3)}.chtyping[hidden]{display:none}
+.chtyping .dots{display:inline-flex;gap:3px;padding:7px 9px;border-radius:12px;background:var(--sheet);box-shadow:var(--lift)}.chtyping .dots i{width:5px;height:5px;border-radius:50%;background:var(--ink-3);animation:tdot 1.2s infinite}.chtyping .dots i:nth-child(2){animation-delay:.2s}.chtyping .dots i:nth-child(3){animation-delay:.4s}@keyframes tdot{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-2px)}}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2788,7 +2795,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.4.0';
+const BUILD = 'v7.5.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4244,15 +4251,19 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   if(other.user_id&&other.username&&!other.blocked)sb.rpc('friend_rel',{p_user:other.user_id}).then(({data})=>drawFrBar(data||'none'),()=>{});
   const signed=async paths=>{const need=paths.filter(p=>p&&!urlCache[p]);if(need.length){try{const {data}=await sb.storage.from('chat').createSignedUrls(need,3600);(data||[]).forEach(x=>{if(x.signedUrl){urlCache[x.path]=x.signedUrl;urlCache['_t'+x.path]=Date.now()}})}catch(_){}}};
   const oAva=`<a class="cmav" ${other.username?`href="#/u/${encodeURIComponent(other.username)}"`:''} aria-hidden="true" tabindex="-1">${chatAva(oname,other.avatar_url)}</a>`;
-  const bubble=m=>{const mineM=m.sender_id===me().id;const t=chatTime(m.created_at).replace(/^\d+\/\d+ /,'');
+  const byId={};const isStk=m=>m.kind==='sticker'||(m.kind==='text'&&/^\[stk:[a-z0-9_]+\]$/.test(m.body||''));
+  const snip=m=>!m?'一則較早的訊息':m.deleted?'已收回的訊息':m.kind==='photo'?'［照片］'+(m.body?' '+m.body:''):isStk(m)?'［貼圖］':m.kind==='ask'?'［請你證明是飼主］':(m.body||'');
+  const quote=m=>{if(!m.reply_to)return '';const q=byId[m.reply_to];const who=q?(q.sender_id===me().id?'你':oname):'';return `<span class="cq" data-jump="${m.reply_to}">${who?`<b>${esc(who)}</b>`:''}<span>${esc(snip(q).slice(0,60))}</span></span>`};
+  const bubble=m=>{byId[m.id]=m;const mineM=m.sender_id===me().id;const t=chatTime(m.created_at).replace(/^\d+\/\d+ /,'');
+    if(m.deleted)return `<div class="cm sys" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}"><span>${mineM?'你':esc(oname)} 收回了一則訊息</span></div>`;
     if(m.kind==='ask')return `<div class="cm ask ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}">${mineM?'':oAva}<div class="cmb"><b>${ic('shield')} ${mineM?'你請對方證明是飼主':'對方請你證明是飼主'}</b><span>${esc(m.body||'')}</span>${mineM?'':'<small>直接回覆訊息或傳照片就可以</small>'}</div><time>${t}</time></div>`;
     {const sm=m.kind==='text'&&/^\[stk:([a-z0-9_]{1,24})\]$/.exec(m.body||'');if(sm)m={...m,kind:'sticker',body:sm[1]}}
     if(m.kind==='sticker'){const sv=stkSVG(m.body);return `<div class="cm stk ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}">${mineM?'':oAva}<div class="cstk">${sv||'<span class="cmb">［貼圖］</span>'}</div><time>${t}</time></div>`}
     const ph=m.photo?`<button type="button" class="cmph" data-full="${esc(m.photo)}">${urlCache[m.photo]?`<img src="${esc(urlCache[m.photo])}" alt="照片" onerror="this.outerHTML='<span class=cmph-x>照片載入失敗，點一下重試</span>'">`:'<span class="cmph-x">點一下看照片</span>'}</button>`:'';
-    return `<div class="cm ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}">${mineM?'':oAva}<div class="cmb">${ph}${m.body?`<span class="cmt">${chatLinkify(m.body)}</span>`:''}</div><time>${t}</time></div>`};
+    return `<div class="cm ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}">${mineM?'':oAva}<div class="cmb">${quote(m)}${ph}${m.body?`<span class="cmt">${chatLinkify(m.body)}</span>`:''}</div><time>${t}</time></div>`};
   const day=t=>{const d=tw(t),n=tw(Date.now()),y=tw(Date.now()-864e5);if(d.y===n.y&&d.m===n.m&&d.d===n.d)return '今天';if(d.y===y.y&&d.m===y.m&&d.d===y.d)return '昨天';const wd='日一二三四五六'[new Date(Date.parse(t)).getDay()];return `${d.y===n.y?'':d.y+'/'}${d.m}/${d.d}（${wd}）`};let lastDay='';let firstId=0;
   // 同一個人連續傳：只在第一則顯示大頭貼；同一分鐘內只在最後一則顯示時間
-  const regroup=()=>{const L=[...log.children];for(let i=0;i<L.length;i++){const x=L[i];if(!x.classList.contains('cm'))continue;const p=L[i-1],nx=L[i+1];const same=(a,b)=>a&&b&&a.classList.contains('cm')&&b.classList.contains('cm')&&a.classList.contains('me')===b.classList.contains('me');
+  const regroup=()=>{const L=[...log.children];for(let i=0;i<L.length;i++){const x=L[i];if(!x.classList.contains('cm'))continue;const p=L[i-1],nx=L[i+1];const same=(a,b)=>a&&b&&a.classList.contains('cm')&&b.classList.contains('cm')&&!a.classList.contains('sys')&&!b.classList.contains('sys')&&a.classList.contains('me')===b.classList.contains('me');
     x.classList.toggle('cont',!!(same(p,x)&&Math.abs((+x.dataset.ts||0)-(+p.dataset.ts||0))<5*60e3));
     x.classList.toggle('hidet',!!(same(x,nx)&&!nx.classList.contains('pend')&&Math.floor((+x.dataset.ts||0)/60e3)===Math.floor((+nx.dataset.ts||0)/60e3)))}};
   const add=async(list,scroll=true)=>{list=list.filter(m=>!seen.has(m.id));if(!list.length||!me())return;list.forEach(m=>seen.add(m.id));await signed(list.map(m=>m.photo));if(_n!==navId||!log.isConnected)return;
@@ -4282,25 +4293,44 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
     if(old.length===80)olderBtn()}};
   if(msgs.length===80)olderBtn();
   // 長按訊息：複製（電腦按右鍵）
-  {let lp=null;const menu=x=>{const t=x.querySelector('.cmt');if(!t)return;if(navigator.vibrate)try{navigator.vibrate(20)}catch(_){}xPick('訊息',[['copy','複製文字']],'',v=>{if(v==='copy')copy(t.innerText)})};
+  {let lp=null;const menu=x=>{if(x.classList.contains('pend')||x.classList.contains('sys'))return;const m=byId[x.dataset.id];if(!m)return;const t=x.querySelector('.cmt');const mine=m.sender_id===me().id;
+      const opts=[['reply','回覆']];if(t)opts.push(['copy','複製文字']);if(mine&&Date.now()-Date.parse(m.created_at)<24*36e5)opts.push(['unsend','收回']);
+      if(navigator.vibrate)try{navigator.vibrate(20)}catch(_){}
+      xPick('訊息',opts,'',async v=>{if(v==='copy')copy(t.innerText);if(v==='reply')setReply(m.id);
+        if(v==='unsend'){if(!await askSheet({title:'收回這則訊息？',body:'對方那邊也會一起消失，只會顯示「收回了一則訊息」。',ok:'收回',danger:true}))return;const {error}=await sb.rpc('chat_unsend',{p_id:m.id});if(error)return toast(/function|schema/i.test(error.message)?'收回功能還在更新中，請稍後再試':error.message.replace(/^.*?:\s*/,''),4000);markDeleted(m.id)}})};
     log.addEventListener('touchstart',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a,button'))return;lp=setTimeout(()=>{lp=null;menu(x)},520)},{passive:true});
     ['touchend','touchmove','touchcancel'].forEach(ev=>log.addEventListener(ev,()=>{if(lp){clearTimeout(lp);lp=null}},{passive:true}));
-    log.addEventListener('contextmenu',e=>{const x=e.target.closest('.cm');if(!x||!x.querySelector('.cmt')||e.target.closest('a'))return;e.preventDefault();menu(x)})}
+    log.addEventListener('contextmenu',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a'))return;e.preventDefault();menu(x)})}
+  // 點引用的那一句：跳到原本的訊息
+  log.addEventListener('click',e=>{const q=e.target.closest('.cq');if(!q)return;const el=log.querySelector(`.cm[data-id="${q.dataset.jump}"]`);if(!el)return toast('那則訊息在更早之前，請先按「看更早的訊息」');el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1200)});
   log.addEventListener('click',async e=>{const b=e.target.closest('.cmph');if(!b)return;const p=b.dataset.full;if(!urlCache[p]||Date.now()-(urlCache['_t'+p]||0)>50*60e3){delete urlCache[p];await signed([p])}if(urlCache[p]){const x=b.querySelector('.cmph-x');if(x)x.outerHTML=`<img src="${esc(urlCache[p])}" alt="照片">`;else lightbox(urlCache[p],{save:true,name:'聊天照片'})}else toast('照片載入失敗，請稍後再試')});
   // 新訊息：即時（Realtime）＋每 8 秒補抓一次（網路不穩時也收得到）
   chatStop();
   // 已讀：對方最後讀到的時間之前、我傳的訊息都標「已讀」
+  let pullN=0;
+  function markDeleted(mid){const m=byId[mid];if(!m||m.deleted)return;m.deleted=true;m.body=null;m.photo=null;const el=log.querySelector(`.cm[data-id="${mid}"]`);if(el){el.outerHTML=bubble(m);regroup()}}
+  // 對方正在輸入
+  const typ=document.createElement('div');typ.className='chtyping';typ.hidden=true;typ.innerHTML=`<span class="dots"><i></i><i></i><i></i></span>${esc(oname)} 正在輸入…`;log.after(typ);let typT=0;
+  function showTyping(){typ.hidden=false;clearTimeout(typT);typT=setTimeout(hideTyping,4500)}function hideTyping(){typ.hidden=true;clearTimeout(typT)}
   let otherRead=0;const markRead=()=>{log.querySelectorAll('.cm.me:not(.pend)').forEach(x=>{x.classList.toggle('rd',+x.dataset.ts<=otherRead)})};
   const readPull=async()=>{if(!other.user_id||_n!==navId)return;try{const {data:rm}=await sb.from('chat_members').select('last_read_at').eq('chat_id',id).eq('user_id',other.user_id).maybeSingle();if(rm&&rm.last_read_at){const t=Date.parse(rm.last_read_at);if(t!==otherRead){otherRead=t;markRead()}}}catch(_){}};
-  const pull=async()=>{if(_n!==navId)return chatStop();const {data}=await sb.from('chat_messages').select('*').eq('chat_id',id).gt('id',lastId).order('id').limit(50);if(data&&data.length){const f=log.querySelector('.cfirst');if(f)f.remove();await add(data,false)}markRead();readPull()};
+  const pull=async()=>{if(_n!==navId)return chatStop();const {data}=await sb.from('chat_messages').select('*').eq('chat_id',id).gt('id',lastId).order('id').limit(50);if(data&&data.length){const f=log.querySelector('.cfirst');if(f)f.remove();await add(data,false)}markRead();readPull();
+    if(firstId&&++pullN%2===0)sb.from('chat_messages').select('id').eq('chat_id',id).eq('deleted',true).gte('id',firstId).then(({data:dl})=>{(dl||[]).forEach(x=>markDeleted(x.id))},()=>{})};
   readPull();
-  try{__chatCh=sb.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},()=>pull()).subscribe()}catch(_){}
+  try{__chatCh=sb.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},()=>{hideTyping();pull()})
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},({new:nm})=>{if(nm&&nm.deleted)markDeleted(nm.id)})
+    .on('broadcast',{event:'typing'},({payload})=>{if(payload&&payload.u&&payload.u!==me().id)showTyping()}).subscribe()}catch(_){}
   __chatPoll=setInterval(pull,8000);
   const onVis=()=>{if(_n!==navId)return document.removeEventListener('visibilitychange',onVis);if(document.visibilityState==='visible'){pull();sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})}};document.addEventListener('visibilitychange',onVis);
   const ping=()=>{try{sb.auth.getSession().then(({data})=>{const t=data&&data.session&&data.session.access_token;if(!t)return;fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-message',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:'Bearer '+t},body:JSON.stringify({chat_id:id})}).catch(()=>{})})}catch(_){}};
-  const send=async(kind,body,photo)=>{const {error}=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null});if(error){toast(error.message.replace(/^.*?:\s*/,''),4500);return false}const f=log.querySelector('.cfirst');if(f)f.remove();await pull();ping();return true};
+  const sendRPC=async(kind,body,photo)=>{const rp=replyTo;let r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null,...(rp?{p_reply:rp}:{})});
+    if(r.error&&rp&&/p_reply|function|schema cache/i.test(r.error.message))r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null});   // 資料庫還沒更新：先不帶回覆
+    if(!r.error)setReply(null);return r};
+  const send=async(kind,body,photo)=>{const {error}=await sendRPC(kind,body,photo);if(error){toast(error.message.replace(/^.*?:\s*/,''),4500);return false}const f=log.querySelector('.cfirst');if(f)f.remove();await pull();ping();return true};
   const form=$('#chForm');
-  if(form){const inp=$('#chIn');const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);inp.addEventListener('focus',()=>{if(!isMobV())return;setTimeout(()=>toBottom(true),350)});
+  let replyTo=null;const rb=document.createElement('div');rb.className='chreply';rb.hidden=true;if(form)form.before(rb);
+  function setReply(mid){replyTo=mid||null;if(!mid){rb.hidden=true;rb.innerHTML='';return}const q=byId[mid];rb.innerHTML=`<span><b>回覆 ${esc(q&&q.sender_id===me().id?'自己':oname)}</b>${esc(snip(q).slice(0,50))}</span><button type="button" aria-label="取消回覆">✕</button>`;rb.hidden=false;rb.querySelector('button').onclick=()=>setReply(null);const i=$('#chIn');if(i)i.focus()}
+  if(form){const inp=$('#chIn');{let lastT=0;inp.addEventListener('input',()=>{const n=Date.now();if(n-lastT>2500&&inp.value.trim()&&__chatCh){lastT=n;try{__chatCh.send({type:'broadcast',event:'typing',payload:{u:me().id}})}catch(_){}}})}const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);inp.addEventListener('focus',()=>{if(!isMobV())return;setTimeout(()=>toBottom(true),350)});
     inp.addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();form.requestSubmit()}});
     let busy=false;form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v||busy)return;busy=true;const b=$('#chSend');b.disabled=true;inp.value='';grow();
       const f0=log.querySelector('.cfirst');if(f0)f0.remove();log.insertAdjacentHTML('beforeend',`<div class="cm me pend" data-tmp><div class="cmb"><span>${esc(v).replace(/\n/g,'<br>')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;regroup();requestAnimationFrame(()=>toBottom(false));
@@ -4309,8 +4339,8 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
       {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend" data-tmp><div class="cmb"><span class="cmph"><img src="${pv}" alt=""></span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
       try{const blob=await compressImage(f,1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
         urlCache[path]=pv;urlCache['_t'+path]=Date.now();const cap=inp.value.trim();if(await send('photo',cap,path)){inp.value='';grow()}}catch(err){toast('照片沒有傳成功：'+(err.message||'網路不穩'),4500)}tmp.remove();regroup()};
-    $('#chStk').onclick=()=>stkSheet(async sid=>{if(busy)return;busy=true;{const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm stk me pend" data-tmp><div class="cstk">${stkSVG(sid)}</div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));let {error}=await sb.rpc('chat_send',{p_chat:id,p_kind:'sticker',p_body:sid,p_photo:null});
-      if(error&&/格式錯誤/.test(error.message))({error}=await sb.rpc('chat_send',{p_chat:id,p_kind:'text',p_body:'[stk:'+sid+']',p_photo:null}));   // 資料庫還沒更新時的備用格式
+    $('#chStk').onclick=()=>stkSheet(async sid=>{if(busy)return;busy=true;{const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm stk me pend" data-tmp><div class="cstk">${stkSVG(sid)}</div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));let {error}=await sendRPC('sticker',sid,null);
+      if(error&&/格式錯誤/.test(error.message))({error}=await sendRPC('text','[stk:'+sid+']',null));   // 資料庫還沒更新時的備用格式
       if(error)toast(error.message.replace(/^.*?:\s*/,''),4500);else{await pull();ping()}tmp.remove();regroup();busy=false});
     const ask=$('#chAsk');if(ask)ask.onclick=()=>busy?null:xPick('請對方證明是飼主',CHAT_ASKS.map(t=>[t,t]).concat([['__own','自己寫一個問題…']]),'',async v=>{let q=v;if(v==='__own'){q=await textSheet({title:'想請對方回答什麼？',max:200,placeholder:'例：牠最喜歡的玩具是什麼？'});if(!q||!q.trim())return}send('ask',q.trim())})}
   {const ub=$('#chUnblk');if(ub)ub.onclick=async()=>{await sb.rpc('user_block',{p_user:other.user_id,p_on:false});toast('已解除封鎖');rerender(()=>renderChat(id))}}
@@ -4457,7 +4487,8 @@ async function renderHomeMob(){const _n=navId;
 // 底部選單：單選（地區、排序共用）
 function xPick(title,opts,cur,cb,grid){const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet xpick" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p><div class="${grid?'xpgrid':'xplist'}">${opts.map(([v,l])=>`<button type="button" data-v="${esc(v)}" class="${v===cur?'on':''}">${esc(l)}${v===cur&&!grid?ic('check'):''}</button>`).join('')}</div></div>`;
-  el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){closeOverlay(el);cb(b.dataset.v);return}if(e.target===el)closeOverlay(el)};
+  // 選好之後，等「上一頁」處理完才繼續（接著再開確認視窗時，才不會把整頁退回去）
+  el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){const v=b.dataset.v,back=overlayOpen===el;closeOverlay(el);if(!back)return cb(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);cb(v)};addEventListener('popstate',ok);t=setTimeout(ok,450);return}if(e.target===el)closeOverlay(el)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
 async function renderHome(){const _n=navId;
   return renderHomeMob();   // 手機、電腦都用同一套新版首頁
