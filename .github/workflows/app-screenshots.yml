@@ -1,0 +1,13 @@
+name: App Store 截圖上傳
+on: workflow_dispatch
+jobs:
+  up:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY: ${{ secrets.ASC_API_KEY_P8 }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyjwt cryptography requests
+      - run: python .github/scripts/asc_screens.py
