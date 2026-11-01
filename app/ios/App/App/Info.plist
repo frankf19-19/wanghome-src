@@ -63,6 +63,8 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>拍下毛孩、藥袋或病歷的照片，放進協尋案件、通報或健康手冊；也用來掃描好友的 QR Code 加好友。</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>錄語音訊息，在聊天室傳給飼主或好友。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>從相簿選擇毛孩照片，放進協尋案件、通報或健康紀錄。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
