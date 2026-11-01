@@ -1518,7 +1518,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 .fbtn .fcnt{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:99px;background:var(--red-fill);color:#fff;font-size:12px;margin-left:4px}.fbtn .fcnt:empty{display:none}
 .pill.fact{background:var(--red-soft);color:var(--red);border-color:transparent!important;font-weight:700}
 .fsheet{max-height:86vh;overflow-y:auto}
-.fs-acts{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:var(--paper);padding-top:8px}.fs-acts .btn{flex:1;min-height:50px}
+.fs-acts{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:-22px;background:var(--paper);padding:8px 0 22px;margin-bottom:-22px;box-shadow:0 -10px 14px -6px var(--paper)}.fs-acts .btn{flex:1;min-height:50px}
 
 /* 毛孩小學堂 */
 .lgroup{background:var(--sheet);border-radius:22px;box-shadow:var(--lift);overflow:hidden;margin-top:12px}
@@ -2123,7 +2123,6 @@ html{-webkit-tap-highlight-color:transparent}
   body::before,body::after{display:none!important}
   /* 主要分頁不顯示網站頂列，改用每頁自己的大標題 */
   body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="me"]):not(.inner) header{display:none!important}
-  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="me"]):not(.inner) #app{padding-top:calc(var(--safe-area-inset-top,env(safe-area-inset-top)) + 6px)!important}
   /* 頂端：Logo、鈴鐺 */
   .xh{display:block;padding:4px 2px 0}
   .xbar{display:flex;align-items:center;gap:10px;height:44px}
@@ -2260,6 +2259,8 @@ html{-webkit-tap-highlight-color:transparent}
   body[data-route="adopt"] .adopt-f>#aKind,body[data-route="adopt"] .adopt-f>.row2,body[data-route="adopt"] .adopt-f>.seg{display:none!important}
   body.xas-open[data-route="adopt"] .adopt-f::before{content:"篩選";display:block;font-size:22px;font-weight:800;margin:0 2px 6px}
   .xas-bg{display:none}
+  .xas-x{display:none}
+  body.xas-open .xas-x{display:grid;place-items:center;position:sticky;top:0;float:right;width:40px;height:40px;border-radius:50%;border:0;background:var(--fill);color:var(--ink);font-size:16px;cursor:pointer;z-index:2}
   body.xas-open .xas-bg{display:block;position:fixed;inset:0;z-index:199;background:rgba(10,8,6,.4)}
   .xas-done{margin-top:16px;position:sticky;bottom:0;box-shadow:0 -14px 18px 4px var(--sheet)!important}
   @keyframes xup{from{transform:translateY(100%)}}
@@ -2327,6 +2328,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xbell:active,.xwhere:active,.xchip:active,.xfbtn:active,.xnt:active,.xfc:active{opacity:.7}
 }
 @media (max-width:760px){   /* 只有手機：下方分頁、底部留白、詳細頁滿版照片 */
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="me"]):not(.inner) #app{padding-top:calc(var(--safe-area-inset-top,env(safe-area-inset-top)) + 6px)!important}
   body.xas-open .tabbar{display:none!important}
   body[data-route="case"] .xhero{margin:-10px -16px 0}
   body[data-route="case"] .xhero .main{border-radius:0 0 30px 30px!important;aspect-ratio:1/1;height:auto!important;max-height:62vh;box-shadow:none!important}
@@ -2469,6 +2471,7 @@ html{-webkit-tap-highlight-color:transparent}
   .ds-menu a:hover{background:var(--fill)}
   .ds-menu a.on{background:var(--sheet);color:var(--ink)!important;font-weight:800;box-shadow:var(--lift)}
   .ds-menu a.on .ico{color:var(--brand)}
+  .dside :focus-visible{outline:3px solid var(--brand)!important;outline-offset:2px}
   .ds-n[hidden]{display:none!important}
   .ds-n{margin-left:auto;font-style:normal;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--brand);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
   .ds-cta{display:flex;flex-direction:column;gap:10px;margin-top:20px}
@@ -2484,13 +2487,15 @@ html{-webkit-tap-highlight-color:transparent}
   .ds-foot a{color:var(--ink-3)!important;padding:0 2px}
   /* 內容寬度 */
   #app{max-width:1180px!important;margin:0 auto!important;padding:20px 36px 64px!important}
-  #app.withrail{display:grid;grid-template-columns:minmax(0,1fr) 290px;column-gap:32px;max-width:1440px!important;align-items:start}
+  @media (min-width:1280px){#app.withrail{display:grid;grid-template-columns:minmax(0,1fr) 290px;column-gap:32px;max-width:1440px!important;align-items:start}
   #app.withrail>*{grid-column:1}
-  #app.withrail>.drail{grid-column:2;grid-row:1 / span 40;display:flex;flex-direction:column;gap:12px;position:sticky;top:20px}
+  #app.withrail>.drail{grid-column:2;grid-row:1 / span 40;display:flex;flex-direction:column;gap:12px;position:sticky;top:20px}}
   .mbar,.tabbar{display:none!important}
-  body>footer{background:none!important;border-top:1px solid var(--line)!important;max-width:1180px!important;margin:24px auto 0!important;padding:24px 36px 40px!important}
+  #themeBtn{display:none!important}
+  body[data-route="chat"]>footer{display:none!important}
+  body>footer{border-radius:0!important;background:none!important;border-top:1px solid var(--line)!important;max-width:1180px!important;margin:24px auto 0!important;padding:24px 36px 40px!important}
   /* 首頁、領養：用新版元件 */
-  .xbar,.xmode{display:none!important}
+  .xbar,.xh .xmode{display:none!important}
   .xh{padding-top:0}
   .xt{font-size:34px!important;white-space:normal;margin:6px 2px 14px!important}
   .xwhere>.ico{width:24px;height:24px}
@@ -2531,6 +2536,8 @@ html{-webkit-tap-highlight-color:transparent}
   /* 詳細頁：右邊的行動區跟著捲動 */
   body[data-route="case"] .detail-head{align-items:start}
   body[data-route="case"] .detail-head>div:last-child{position:sticky;top:20px}
+  .chat{min-height:calc(100vh - 60px)}
+  .chlog{flex:1}
   /* 其他頁面標題 */
   .xpt{font-size:34px!important}
   body[data-route="case"] #app h1{font-size:38px!important}
@@ -2687,7 +2694,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.0.2';
+const BUILD = 'v7.0.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3875,6 +3882,7 @@ async function pushDrop(){if(!IS_APP)return;try{const t=__pushToken||localStorag
 
 
 /* 電腦版右側欄（首頁、領養）：螢幕夠寬才出現 */
+try{matchMedia('(min-width:1280px)').addEventListener('change',e=>{const r=document.body.dataset.route;if(e.matches&&/^(home|lost|adopt)$/.test(r||'home'))drailAttach(r==='adopt'?'adopt':'lost')})}catch(_){}
 function drailAttach(kind){if(!matchMedia('(min-width:1280px)').matches||document.querySelector('#app>.drail'))return;
   const r=document.createElement('aside');r.className='drail';r.setAttribute('aria-label','更多');
   r.innerHTML=`${kind==='adopt'?`<div class="dr-card dr-ok"><b>想領養之前</b><p>先打電話給收容所確認牠還在，說出收容編號；帶身分證去，現場會有簡單的評估。</p><a href="#/learn">看毛孩小學堂</a></div>`
@@ -3886,12 +3894,12 @@ function drailAttach(kind){if(!matchMedia('(min-width:1280px)').matches||documen
     <p class="dr-foot"><a href="#/resources">協尋攻略</a>・<a href="#/learn">毛孩小學堂</a>・<a href="#/about">關於本站</a></p>`;
   app.classList.add('withrail');app.appendChild(r)}
 /* ===== 電腦版左側選單（手機版不顯示） ===== */
-const DSIDE=[['#/','search','找走失毛孩',/^(home|lost|case|report|found|gov-lost|map)$/],['#/adopt','shelter','領養毛孩',/^adopt$/],['#/fav','mark','收藏',/^fav$/],['#/health','paw','我的毛孩',/^(health|pet)$/],['#/chats','chat','訊息',/^(chats|chat|u)$/],['#/inbox','bell','通知',/^inbox$/],['#/me','user','我的',/^(me|login|set-username)$/]];
+const DSIDE=[['#/','search','找走失毛孩',/^(home|lost|case|report|found|gov-lost|map|seen|injured|intake|new|found-manage|manage|poster)$/],['#/adopt','shelter','領養毛孩',/^adopt$/],['#/fav','mark','收藏',/^fav$/],['#/health','paw','我的毛孩',/^(health|pet)$/],['#/chats','chat','訊息',/^(chats|chat)$/],['#/inbox','bell','通知',/^inbox$/],['#/me','user','我的',/^(me|login|set-username|admin|delete-account)$/]];
 function dsideHTML(){return `<a class="ds-brand" href="#/"><img src="icon.svg" alt="" width="36" height="36"><b>汪喵回家</b></a>
-  <nav class="ds-menu" aria-label="主選單">${DSIDE.map(([h,i,t])=>`<a href="${h}" data-ds="${h}"${h==='#/chats'?' id="dsChat"':''}>${ic(i)}<span>${t}</span><i class="ds-n" hidden></i></a>`).join('')}</nav>
-  <div class="ds-cta"><a class="ds-b1" href="#/new">${ic('plus')}<span>登記走失</span></a><a class="ds-b2" href="#/seen">${ic('eye')}<span>我看到／撿到一隻</span></a></div>
-  <div class="ds-foot"><button type="button" data-theme-pick>${ic('moon')}<span>外觀</span></button><a href="#/resources">協尋攻略</a><a href="#/about">關於本站</a><a href="#/privacy">隱私權</a></div>`}
-function dsideSync(){let el=document.getElementById('dside');if(!el){el=document.createElement('aside');el.id='dside';el.className='dside';el.innerHTML=dsideHTML();document.body.prepend(el)}
+  <nav class="ds-menu" aria-label="主選單">${DSIDE.map(([h,i,t])=>`<a href="${h}" data-ds="${h}" title="${t}" aria-label="${t}"${h==='#/chats'?' id="dsChat"':''}>${ic(i)}<span>${t}</span><i class="ds-n" hidden></i></a>`).join('')}</nav>
+  <div class="ds-cta"><a class="ds-b1" href="#/new" title="登記走失" aria-label="登記走失">${ic('plus')}<span>登記走失</span></a><a class="ds-b2" href="#/seen" title="我看到／撿到一隻" aria-label="我看到／撿到一隻">${ic('eye')}<span>我看到／撿到一隻</span></a></div>
+  <div class="ds-foot"><button type="button" data-theme-pick title="外觀（深淺色）" aria-label="外觀（深淺色）">${ic('moon')}<span>外觀</span></button><a href="#/resources">協尋攻略</a><a href="#/about">關於本站</a><a href="#/privacy">隱私權</a></div>`}
+function dsideSync(){let el=document.getElementById('dside');if(!el){el=document.createElement('aside');el.id='dside';el.className='dside';el.innerHTML=dsideHTML();const sk=document.querySelector('body>.skip');if(sk)sk.after(el);else document.body.prepend(el)}
   const r=document.body.dataset.route||'home';el.querySelectorAll('[data-ds]').forEach(a=>{const d=DSIDE.find(x=>x[0]===a.dataset.ds);const on=!!d&&d[3].test(r);a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   const c=$('#dsChat');if(c){c.hidden=!me();const n=c.querySelector('.ds-n');n.hidden=!__chatN;n.textContent=__chatN>99?'99+':__chatN}
   const b=el.querySelector('[data-ds="#/inbox"] .ds-n');if(b){const n=me()?inboxUnread():0;b.hidden=!n;b.textContent=n>99?'99+':n}}
@@ -5956,10 +5964,10 @@ async function renderAdopt(){const _n=navId;
   if(MV){$('#xWhere').onclick=()=>xPick('縣市',Object.keys(MOA_AREA).map(c=>[c,c]),st.city,v=>{const sel=$('#aCity');if(sel){sel.value=v;sel.dispatchEvent(new Event('change'))}const w=$('#xWhereT');if(w)w.textContent=v},true);
     $('#xView').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{localStorage.setItem('wh_xv',b.dataset.v)}catch(_){}document.querySelectorAll('#xView button').forEach(x=>x.classList.toggle('on',x===b));$('#xFeed').dataset.v=b.dataset.v}
     $('#xaK').onclick=e=>{const b=e.target.closest('.xchip');if(!b)return;const k=$('#aKind').querySelector(`[data-v="${b.dataset.k}"]`);if(k)k.click();document.querySelectorAll('#xaK .xchip').forEach(x=>x.classList.toggle('on',x===b))};
-    const shut=()=>document.body.classList.remove('xas-open');
+    const shut=()=>{const was=document.body.classList.contains('xas-open');document.body.classList.remove('xas-open');if(was){const b=$('#xaF');if(b)try{b.focus({preventScroll:true})}catch(_){}}};
     $('#xaF').onclick=()=>{document.body.classList.add('xas-open');const f=$('.adopt-f');if(f){f.scrollTop=0;f.setAttribute('role','dialog');f.setAttribute('aria-label','篩選');f.tabIndex=-1;try{f.focus()}catch(_){}}};
     if(!window.__xasEsc){window.__xasEsc=true;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('xas-open'))(window.__xasShut||(()=>{}))()})}window.__xasShut=shut;$('#xasBg').onclick=shut;
-    $('.adopt-f').insertAdjacentHTML('beforeend','<button type="button" class="btn block xas-done" id="xasDone">看結果</button>');$('#xasDone').onclick=shut;
+    $('.adopt-f').insertAdjacentHTML('beforeend','<button type="button" class="btn block xas-done" id="xasDone">看結果</button>');$('#xasDone').onclick=shut;$('.adopt-f').insertAdjacentHTML('afterbegin','<button type="button" class="xas-x" id="xasX" aria-label="關閉">✕</button>');$('#xasX').onclick=shut;
     $('#xaSort').onclick=()=>xPick('排序',[['new','最新入所'],['old','等最久的']],st.sort,v=>{const sel=$('#aSort');if(sel){sel.value=v;sel.dispatchEvent(new Event('change'))}$('#xaSortT').textContent=v==='old'?'等最久的':'最新入所'})}
   const save=()=>{try{localStorage.setItem('wh_adopt',JSON.stringify({city:st.city,dist:st.dist,kind:st.kind}))}catch(_){}};
   const sum=()=>{const n=st.dist.length+st.variety.length+st.colour.length+st.ster.length+nMore();const e=$('#aSum');if(e)e.innerHTML=n?`已選 ${n} 個條件 <button type="button" class="linkbtn" id="aClear">全部清除</button>`:'';const c=$('#aClear');if(c)c.onclick=()=>{['dist','variety','colour','ster','size','sex','age'].forEach(k=>st[k]=[]);st.photo=true;st.limit=30;renderAdopt()}};
