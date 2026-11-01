@@ -2662,6 +2662,7 @@ html{-webkit-tap-highlight-color:transparent}
 .frok{display:inline-flex;align-items:center;gap:6px;font-weight:800;color:var(--green,#1F8A5B)}
 .mbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
 .grid.pets1{grid-template-columns:1fr!important}.grid.pets1>.ccard{flex-direction:row;align-items:stretch}.grid.pets1>.ccard>.ph{flex:none;width:42%;max-width:220px;aspect-ratio:auto;min-height:170px}.grid.pets1>.ccard>.b{flex:1;min-width:0;justify-content:center}.grid.pets1 .bd-chip{align-self:flex-start}
+body[data-route=me] #app .grid>.ccard:only-child{grid-column:1/-1;flex-direction:row;align-items:stretch}body[data-route=me] #app .grid>.ccard:only-child>.ph{flex:none;width:42%;max-width:220px;aspect-ratio:auto;min-height:150px}body[data-route=me] #app .grid>.ccard:only-child>.ph.noimg{height:auto}body[data-route=me] #app .grid>.ccard:only-child>.b{flex:1;min-width:0;justify-content:center}
 .mcard{text-align:center;padding:28px 18px;background:var(--sheet);border-radius:26px;box-shadow:var(--lift);max-width:460px;margin:20px auto}
 .mcard h1{margin:12px 0 2px;font-size:26px}
 </style>
@@ -2745,7 +2746,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.4';
+const BUILD = 'v7.2.5';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -7731,7 +7732,7 @@ async function renderMeBody(){const _n=navId;
 
   ${(()=>{const L=cs||[],F=fs||[],M=mineHTML(new Set([...L,...F].map(x=>x.id)));
     if(!L.length&&!F.length)return `<h2>${ic("clipboard")} 我的案件</h2>${M||`<div class="card me-empty"><p style="margin:0 0 10px">還沒有登記任何案件。</p><div class="me-acts"><a class="btn" href="#/new">${ic("siren")} 我的毛孩走失了</a><a class="btn ghost" href="#/seen">${ic("hand")} 我撿到／看到一隻</a></div><p class="small muted" style="margin:10px 0 0">以前沒登入就登記過？打開管理頁按「存到我的帳號」就會出現在這裡。</p></div>`}`;
-    return (L.length?`<h2>${ic("clipboard")} 我登記的走失案件</h2><div class="grid">${L.map(c=>cardHTML(c).replace('<a class="ccard lost-card" href="#/case/','<a class="ccard lost-card" href="#/manage/').replace('<div class="t">',`<div class="t">${pendMap[c.id]?`<span class="tag amber">${pendMap[c.id]} 筆目擊待確認</span>`:''}`)).join('')}</div>`:'')
+    return (L.length?`<h2>${ic("clipboard")} 我登記的走失案件</h2><div class="grid">${L.map(c=>cardHTML(c).replace('href="#/case/','href="#/manage/').replace('<div class="t">',`<div class="t">${pendMap[c.id]?`<span class="tag amber">${pendMap[c.id]} 筆目擊待確認</span>`:''}`)).join('')}</div>`:'')
       +(F.length?`<h2>${ic("hand")} 我的看到／撿到通報</h2><div class="grid">${F.map(f=>foundCardHTML(f).replace('href="#/found/','href="#/found-manage/')).join('')}</div>`:'')+M})()}
 
   ${followed.length?`<h2>${ic("star")} 追蹤中的案件</h2><div class="grid">${followed.map(cardHTML).join('')}</div>`:''}
