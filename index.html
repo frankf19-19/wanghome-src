@@ -2731,6 +2731,21 @@ body[data-route=chat] .chsend{transition:transform .15s,opacity .15s}body[data-r
 .lb-n{position:absolute;top:calc(22px + var(--safe-area-inset-top,env(safe-area-inset-top)));left:50%;transform:translateX(-50%);color:#fff;font-weight:800;font-size:14px;background:rgba(0,0,0,.45);padding:4px 12px;border-radius:999px}
 @media (max-width:760px){.lb-nav{display:none}}
 .chat.drop{outline:3px dashed var(--brand,#F2643D);outline-offset:-8px}.chat.drop::after{content:'放開就傳送照片';position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sheet);padding:14px 22px;border-radius:16px;font-weight:800;box-shadow:var(--lift);z-index:50}
+/* 泡泡小尾巴：每一串的第一則 */
+body[data-route=chat] .cm:not(.cont):not(.stk):not(.sys) .cmb::before{content:"";position:absolute;top:0;width:12px;height:14px;background:inherit}
+body[data-route=chat] .cm:not(.cont):not(.me):not(.stk):not(.sys) .cmb{border-top-left-radius:4px}
+body[data-route=chat] .cm:not(.cont):not(.me):not(.stk):not(.sys) .cmb::before{left:-6px;clip-path:polygon(100% 0,0 0,100% 100%);background:var(--cother)}
+body[data-route=chat] .cm.me:not(.cont):not(.stk):not(.sys) .cmb{border-top-right-radius:4px}
+body[data-route=chat] .cm.me:not(.cont):not(.stk):not(.sys) .cmb::before{right:-6px;clip-path:polygon(0 0,100% 0,0 100%);background:var(--cmine1)}
+body[data-route=chat] .cm.ask:not(.cont) .cmb::before,body[data-route=chat] .cmb.cloc::before{display:none}
+/* 傳送失敗 */
+.cm.fail{opacity:1}.cm.fail .cmb{filter:saturate(.4);opacity:.75}.cretry{border:0;background:#FDE3DE;color:#C23A22;font:inherit;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
+/* 列表沒有對話 */
+.chel-stk{display:flex;justify-content:center;gap:4px;margin-bottom:8px}.chel-stk svg{width:96px;height:92px}
+/* 深色模式泡泡 */
+:root[data-theme=dark] body[data-route=chat]{--cmine1:#E86A42;--cmine2:#C9462A}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) body[data-route=chat]{--cmine1:#E86A42;--cmine2:#C9462A}}
+:root[data-theme=dark] body[data-route=chat] .cm.ask .cmb{background:#1F2A3D;color:#CFE0FF;box-shadow:inset 0 0 0 1.5px #34486B}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2889,7 +2904,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.12.0';
+const BUILD = 'v7.13.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4173,7 +4188,7 @@ async function renderChats(){const _n=navId;setTitle('訊息');
       el.addEventListener('click',e=>{if(e.target.closest('.chi')&&lp==='done'){e.preventDefault();lp=null}},true);
       el.addEventListener('contextmenu',e=>{const a=e.target.closest('.chi');if(!a)return;e.preventDefault();menu(a)})}
     $('#chQ').addEventListener('input',()=>{const q=$('#chQ').value.trim().toLowerCase();el.querySelectorAll('.chi').forEach(a=>{a.hidden=!!q&&!a.textContent.toLowerCase().includes(q)})})}
-  const draw=data=>{if(!data||!data.length){el.innerHTML=`<div class="xempty">${ic('chat')}<b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或加好友後直接聊天、傳照片，不用互留電話。</p><button type="button" class="btn" id="chAddF">${ic('userPlus')} 加好友</button></div>`;$('#chAddF').onclick=()=>friendAddSheet();return}
+  const draw=data=>{if(!data||!data.length){el.innerHTML=`<div class="xempty chempty-l"><span class="chel-stk">${stkSVG('hi')}${stkSVG('love')}</span><b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或加好友後直接聊天、傳照片，不用互留電話。</p><button type="button" class="btn" id="chAddF">${ic('userPlus')} 加好友</button></div>`;$('#chAddF').onclick=()=>friendAddSheet();return}
     patchHTML(el,data.map(chatRowHTML).join(''));};
   if(__chCache[ck])draw(__chCache[ck]);
   const {data,error}=await sb.rpc('chat_list');if(_n!==navId||!el.isConnected)return;
@@ -4475,7 +4490,8 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   const sendRPC=async(kind,body,photo)=>{const rp=replyTo;let r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null,...(rp?{p_reply:rp}:{})});
     if(r.error&&rp&&/p_reply|function|schema cache/i.test(r.error.message))r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null});   // 資料庫還沒更新：先不帶回覆
     if(!r.error)setReply(null);return r};
-  const send=async(kind,body,photo)=>{try{const HP=capPlugin('Haptics');if(HP&&HP.impact)HP.impact({style:'LIGHT'}).catch(()=>{})}catch(_){}const {error}=await sendRPC(kind,body,photo);if(error){toast(error.message.replace(/^.*?:\s*/,''),4500);return false}const f=log.querySelector('.cfirst');if(f)f.remove();{const q=$('.chquick');if(q)q.remove()}await pull();ping();return true};
+  let lastNet=false;
+  const send=async(kind,body,photo)=>{try{const HP=capPlugin('Haptics');if(HP&&HP.impact)HP.impact({style:'LIGHT'}).catch(()=>{})}catch(_){}const {error}=await sendRPC(kind,body,photo);lastNet=false;if(error){lastNet=isFetchErr(error)||/fetch|network|Load failed/i.test(error.message||'');if(!lastNet)toast(error.message.replace(/^.*?:\s*/,''),4500);return false}const f=log.querySelector('.cfirst');if(f)f.remove();{const q=$('.chquick');if(q)q.remove()}await pull();ping();return true};
   const form=$('#chForm');
   let replyTo=null;const rb=document.createElement('div');rb.className='chreply';rb.hidden=true;if(form)form.before(rb);
   function setReply(mid){replyTo=mid||null;if(!mid){rb.hidden=true;rb.innerHTML='';return}const q=byId[mid];rb.innerHTML=`<span><b>回覆 ${esc(q&&q.sender_id===me().id?'自己':oname)}</b>${esc(snip(q).slice(0,50))}</span><button type="button" aria-label="取消回覆">✕</button>`;rb.hidden=false;rb.querySelector('button').onclick=()=>setReply(null);const i=$('#chIn');if(i)i.focus()}
@@ -4483,7 +4499,9 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
     inp.addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();form.requestSubmit()}});
     let busy=false;form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v||busy)return;busy=true;const b=$('#chSend');b.disabled=true;inp.value='';grow();
       const f0=log.querySelector('.cfirst');if(f0)f0.remove();log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span>${esc(v).replace(/\n/g,'<br>')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;regroup();requestAnimationFrame(()=>toBottom(false));
-      const ok=await send('text',v);tmp.remove();regroup();if(!ok){inp.value=v;grow()}busy=false;b.disabled=false;inp.focus()};
+      const ok=await send('text',v);
+      if(!ok&&lastNet){const fail=()=>{tmp.classList.add('fail');tmp.querySelector('time').innerHTML='<button type="button" class="cretry">沒傳出去・點一下重試</button>';tmp.querySelector('.cretry').onclick=async ev=>{ev.stopPropagation();tmp.classList.remove('fail');tmp.querySelector('time').textContent='傳送中…';if(await send('text',v)){tmp.remove();regroup()}else if(lastNet)fail();else{tmp.remove();regroup()}}};fail()}
+      else{tmp.remove();regroup();if(!ok){inp.value=v;grow()}}busy=false;b.disabled=false;inp.focus()};
     const sendPhoto=async f=>{const pv=URL.createObjectURL(f);
       {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span class="cmph"><img src="${pv}" alt=""></span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
       try{const blob=await compressImage(f,1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
