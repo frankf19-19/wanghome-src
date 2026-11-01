@@ -2245,6 +2245,20 @@ html{-webkit-tap-highlight-color:transparent}
   .xfeed[data-v="list"] .ccard .m,.xfeed[data-v="list"] .ccard .loc,.xfeed[data-v="list"] .ccard .small{font-size:13.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .xfeed[data-v="list"] .ccard .chips,.xfeed[data-v="list"] .ccard .reward,.xfeed[data-v="list"] .ccard .gov-tag,.xfeed[data-v="list"] .xheart{display:none}
   .xfeed[data-v="list"] .more-row{padding:12px}
+  /* 沒有照片的卡片：用暖色底＋大圖示，白字才看得清楚 */
+  @media (max-width:760px){.xfeed[data-v="big"] .ccard.nopic{aspect-ratio:5/4}}
+  .xfeed[data-v="big"] .ccard.nopic .ph.noimg,.xfeed[data-v="grid"] .ccard.nopic .ph.noimg{height:auto;inset:0;background:linear-gradient(165deg,#C48A60 0%,#7A4A32 62%,#4A2C1F 100%)}
+  .xfeed[data-v="big"] .ccard.nopic .ph.noimg.cat,.xfeed[data-v="grid"] .ccard.nopic .ph.noimg.cat{background:linear-gradient(165deg,#9C88B4 0%,#5E4C74 62%,#3A2E49 100%)}
+  .xfeed[data-v="big"] .ccard.nopic .ph.noimg::after,.xfeed[data-v="grid"] .ccard.nopic .ph.noimg::after{display:block;inset:0 0 34%;background-size:88px;filter:brightness(0) invert(1);opacity:.5}
+  .xfeed[data-v="grid"] .ccard.nopic .ph.noimg::after{inset:0 0 30%;background-size:60px}
+  .xfeed[data-v="big"] .ccard.nopic .ph.noimg::before,.xfeed[data-v="grid"] .ccard.nopic .ph.noimg::before{content:'飼主沒有提供照片';inset:auto 0 auto 0;top:58%;text-align:center;background:none;color:rgba(255,255,255,.78);font-size:13px;font-weight:600}
+  .xfeed[data-v="big"] .ccard.nopic .ph.noimg::before{top:calc(33% + 50px)}
+  .xfeed[data-v="grid"] .ccard.nopic .ph.noimg::before{top:calc(35% + 36px);font-size:11.5px}
+  .xfeed[data-v="list"] .ccard.nopic .ph.noimg{position:static;background:var(--fill) center/40px no-repeat}
+  .xfeed[data-v="list"] .ccard.nopic .ph.noimg::before{display:none}
+  .xfeed[data-v="list"] .ccard.nopic .ph.noimg::after{display:block;position:static;width:80px;height:80px;background-size:40px}
+  .xfeed[data-v="list"] .ccard.nopic{position:relative}
+  .xfeed .ccard.adopt-card.nopic .ph.noimg::before{content:'收容所還沒放照片'}
   /* 地圖 */
   .xfeed[data-v="map"] .map-all{height:calc(100vh - 330px);min-height:420px;border-radius:24px;overflow:hidden}
   .xfeed .more-row{grid-column:1/-1}
@@ -2696,7 +2710,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.1.0';
+const BUILD = 'v7.1.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3269,7 +3283,7 @@ function trackDepth(wasPop){const st=history.state,h=location.hash||'#/';
   if(st&&typeof st.d==='number'&&st.h===h){const trav=!__firstRoute;navDepth=st.d;__firstRoute=false;__replacing=false;return trav}
   if(__firstRoute)navDepth=0;else if(!__replacing)navDepth=navDepth+1;__firstRoute=false;   // 新的一頁（瀏覽器在換 #網址時也會發 popstate，所以不能靠它判斷是不是上一頁）
   __replacing=false;try{history.replaceState(Object.assign({},st||{},{d:navDepth,h}),'')}catch(_){}return false}
-const TOP_PAGES=IS_APP?/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt)(\?.*)?$/:/^#\/?(\?.*)?$|^#\/(health|me|login|seen|lost|fav|adopt)(\?.*)?$/;
+const TOP_PAGES=IS_APP?/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt)(\?.*)?$/:/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt)(\?.*)?$/;
 function parentOf(h){const p=h.split('?')[0];let m;
   if((m=p.match(/^#\/(report|manage|poster)\/([0-9a-f-]{36})/)))return '#/case/'+m[2];
   if((m=p.match(/^#\/found-manage\/([0-9a-f-]{36})/)))return '#/found/'+m[1];
@@ -4573,7 +4587,7 @@ function cardHTML(c){
   const ph=c.photos?.[0];
   const fresh=c.last_seen_at&&hoursAgo(c.last_seen_at)<24;
   const band=(c.source==='moa'?'<span class="gov-tag">農業部申報</span>':'')+(c.status==='searching'?`<span class="band">走失第 ${daysSince(c.lost_at)} 天</span>`:c.status==='found'?'<span class="band found">已回家</span>':'<span class="band closed">已結案</span>');
-  return `<a class="ccard lost-card" href="#/case/${c.id}">
+  return `<a class="ccard lost-card${ph?'':' nopic'}" href="#/case/${c.id}">
     <div class="ph ${ph?'':'noimg'} ${c.species==='cat'?'cat':''}">${ph?thumbImg(ph,c.name+'的照片','','(max-width:760px) 92vw, 320px'):''}${band}${c.reward>0?`<span class="reward">獎金 ${c.reward.toLocaleString()}</span>`:''}</div>
     <div class="b">
       <div class="t">${esc(c.name)}</div>
@@ -4586,7 +4600,7 @@ function foundCardHTML(f){
   if(userHidden(f))return '';
   const ph=f.photos?.[0];
   const band=f.status!=='open'?'<span class="band closed">已結案</span>':f.kind==='injured'?'<span class="band injured">受傷</span>':f.kind==='found'?'<span class="band found">已收留</span>':'<span class="band seen">有人看到</span>';
-  return `<a class="ccard found-card" href="#/found/${f.id}">
+  return `<a class="ccard found-card${ph?'':' nopic'}" href="#/found/${f.id}">
     <div class="ph ${ph?'':'noimg'} ${f.species==='cat'?'cat':''}">${ph?thumbImg(ph,''):''}${band}</div>
     <div class="b">
       <div class="t">${esc([SIZE[f.size],f.colour].filter(Boolean).join('')+sp(f.species).name)}</div>
@@ -6004,7 +6018,7 @@ async function renderAdopt(){const _n=navId;
     adoptOrder=list.map(r=>r.id);
     {const xn=$('#xN');if(xn)xn.textContent=list.length.toLocaleString();const w=$('#xWhereT');if(w)w.textContent=st.city;const xc=$('#xCnt');if(xc)xc.textContent=list.length+' 隻・';const fc=$('#xaFc');if(fc){const n=st.dist.length+st.variety.length+st.colour.length+st.ster.length+st.size.length+st.sex.length+st.age.length;fc.textContent=n||'';fc.classList.toggle('on',!!n)}}
     const shown=list.slice(0,st.limit);
-    const H=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist.length?st.dist.join('、')+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
+    const H=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist.length?st.dist.join('、')+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card${r.photo?'':' nopic'}" href="#/adopt/${esc(r.id)}">
       <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}<button type="button" class="xheart ${afavHas(r.id)?'on':''}" data-afav="${esc(r.id)}" aria-label="收藏" aria-pressed="${afavHas(r.id)}">${ic('heart')}</button>${d&&isMobV()?`<span class="band xwait">等家 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}${d&&d>=180&&!isMobV()?`<span class="band">等了 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}</div>
       <div class="b"><div class="t">${esc(r.variety||'混種')} <span class="sexm">${r.sex==='M'?'公':r.sex==='F'?'母':''}</span></div><div class="small muted">${esc([ADOPT_SIZE[r.size],ADOPT_AGE[r.age],r.colour,r.ster==='T'?'已結紮':r.ster==='F'?'未結紮':''].filter(Boolean).join('・'))}</div><div class="small">${ic('pin')} ${esc(shortShelter(r,st.city))}</div></div></a>`}).join('')}</div>
       ${list.length>shown.length?`<div class="more-row"><button type="button" class="btn ghost big" id="aMore">顯示更多（還有 ${list.length-shown.length} 隻）</button></div>`:''}
@@ -6029,7 +6043,7 @@ async function renderAdopt(){const _n=navId;
    ============================================================ */
 let intakeState={days:7};
 const agoD=r=>{const d=waitDays(r);return d==null?null:d-1};const inDays=(r,n)=>{const d=agoD(r);return d!=null&&d<n};
-function intakeCard(r){const d=agoD(r);return `<a class="ccard adopt-card intake-card" href="#/adopt/${esc(r.id)}">
+function intakeCard(r){const d=agoD(r);return `<a class="ccard adopt-card intake-card${r.photo?'':' nopic'}" href="#/adopt/${esc(r.id)}">
   <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}<span class="band new">${d===0?'今天入所':d+' 天前入所'}</span></div>
   <div class="b"><div class="t">${esc(r.variety||'混種')} <span class="sexm">${r.sex==='M'?'公':r.sex==='F'?'母':''}</span></div><div class="small muted">${esc([ADOPT_SIZE[r.size],r.colour].filter(Boolean).join('・'))}</div>
   ${r.found?`<div class="small found-at">${ic('pin')} 在 ${esc(r.found)} 被發現</div>`:''}<div class="small muted">${ic('shelter')} ${esc(shortShelter(r,adoptState.city))}・${esc((r.created||'').slice(5).replace('-','/'))}</div></div></a>`}
