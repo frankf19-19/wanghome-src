@@ -2621,6 +2621,8 @@ html{-webkit-tap-highlight-color:transparent}
 .cm time{flex:none;font-size:11px;color:var(--ink-3);margin-bottom:2px}
 .cmb{padding:9px 13px;border-radius:20px 20px 20px 6px;background:var(--sheet);color:var(--ink);box-shadow:var(--lift);font-size:15.5px;line-height:1.5;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:6px}
 .cm.me .cmb{border-radius:20px 20px 6px 20px;background:#D9502B;color:#fff}
+.cm.me.rd time::before{content:'已讀';display:block;font-size:11px;color:var(--ink-3);text-align:right}
+.cm.me time{text-align:right}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2669,7 +2671,7 @@ body[data-route=me] #app .grid>.ccard:only-child{grid-column:1/-1;flex-direction
 .chintro{margin-top:12px;padding:26px 20px;border-radius:26px;background:var(--sheet);box-shadow:var(--lift);text-align:center}.chintro-ic{width:72px;height:72px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;background:var(--brand-soft,#FFE7DE);color:var(--brand-d,#D94A26)}.chintro-ic .ico{width:36px;height:36px}.chintro>b{display:block;font-size:20px;margin-bottom:12px}.chintro ul{list-style:none;margin:0 0 18px;padding:0;text-align:left;display:flex;flex-direction:column;gap:10px}.chintro li{display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.5;color:var(--ink-2)}.chintro li .ico{flex:none;margin-top:3px;color:var(--brand-d,#D94A26)}.chintro .small{margin:10px 0 0}
 .lb-save{position:absolute;left:50%;bottom:calc(24px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom)));transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border:0;border-radius:999px;background:#fff;color:#1A1A1A;font:inherit;font-size:16px;font-weight:800;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer;z-index:2}.lb-save:disabled{opacity:.6}
 .cm.stk .cstk{width:120px;height:120px}.cm.stk .cstk svg{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.12))}
-.stkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.stkgrid button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:16px;display:grid;place-items:center;padding:4px}.stkgrid button:hover,.stkgrid button:focus-visible{background:var(--fill)}.stkgrid svg{width:100%;height:100%}
+.stkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:min(60vh,520px);overflow-y:auto;overscroll-behavior:contain}.stkgrid button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:16px;display:grid;place-items:center;padding:4px}.stkgrid button:hover,.stkgrid button:focus-visible{background:var(--fill)}.stkgrid svg{width:100%;height:100%}
 .qrscan{background:#000;padding:0}.qrscan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .qs-frame{position:absolute;left:50%;top:45%;width:min(64vw,280px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:24px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);outline:3px solid #fff;outline-offset:-3px}
 .qs-tip{position:absolute;left:0;right:0;top:calc(45% + min(32vw,140px) + 22px);text-align:center;color:#fff;font-weight:800;font-size:16px;margin:0;text-shadow:0 1px 4px rgba(0,0,0,.6)}
@@ -2759,7 +2761,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.3.0';
+const BUILD = 'v7.3.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4128,12 +4130,17 @@ async function renderAddFriend(code){const _n=navId;setTitle('加好友');
 ICONS.smile='<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9 9.5v.5M15 9.5v.5"/>';
 const STK=[['thanks','謝謝','dog','happy','blush'],['ok','好的','cat','happy','check'],['fight','加油','dog','open','spark'],['please','拜託','cat','big','sweat'],
   ['found','找到了','dog','star','spark'],['hug','抱抱','cat','happy','hearts'],['cry','哭哭','dog','cry',''],['love','愛你','cat','love','blush'],
-  ['night','晚安','dog','sleep','zzz'],['got','收到','cat','wink','blush'],['hi','嗨～','dog','open','paw'],['sorry','抱歉','cat','sad','sweat']];
-function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label,an,ex,fx]=s;const dog=an==='dog';
-  const face=dog?'#EBA862':'#B7BEC8',dark=dog?'#B9733A':'#7D8794',light=dog?'#FFF2E0':'#F4F5F7',ink='#3A2A20';let g='';
+  ['night','晚安','dog','sleep','zzz'],['got','收到','cat','wink','blush'],['hi','嗨～','dog','open','paw'],['sorry','抱歉','cat','sad','sweat'],
+  ['shy','害羞','dog2','happy','blush2'],['omg','嚇到','cat2','shock','bang'],['angry','生氣','cat','angry','steam'],['yum','好吃','dog2','happy','tongue'],
+  ['home','回家了','dog','star','house'],['miss','想你','cat2','love','hearts'],['bye','掰掰','dog2','wink','paw'],['yay','太好了','cat2','happy','spark'],
+  ['search','找找看','dog','open','mag'],['wait','等我','cat','open','clock'],['no','不要','dog2','angry','x'],['sleepy','想睡','cat2','sleep','zzz']];
+function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label,an,ex,fx]=s;const dog=an.startsWith('dog');
+  const PAL={dog:['#EBA862','#B9733A','#FFF2E0'],dog2:['#FFFFFF','#E6D8CB','#FFF7EF'],cat:['#B7BEC8','#7D8794','#F4F5F7'],cat2:['#F4B061','#D9822F','#FFF3E2']}[an];
+  const face=PAL[0],dark=PAL[1],light=PAL[2],ink='#3A2A20';let g='';
   g+=dog?`<ellipse cx="27" cy="50" rx="13" ry="22" transform="rotate(18 27 50)" fill="${dark}"/><ellipse cx="93" cy="50" rx="13" ry="22" transform="rotate(-18 93 50)" fill="${dark}"/>`
         :`<path d="M28 44 33 14 52 32z" fill="${face}"/><path d="M92 44 87 14 68 32z" fill="${face}"/><path d="M33 36 35 22 45 32z" fill="#F4B3B8"/><path d="M87 36 85 22 75 32z" fill="#F4B3B8"/>`;
-  g+=`<circle cx="60" cy="56" r="36" fill="${face}"/>`;
+  g+=`<circle cx="60" cy="56" r="36" fill="${face}"${an==='dog2'?' stroke="#E6D8CB" stroke-width="2"':''}/>`;
+  if(an==='cat2')g+=`<path d="M52 22q8 6 16 0M50 30q10 5 20 0" fill="none" stroke="${dark}" stroke-width="3" stroke-linecap="round"/>`;
   g+=dog?`<ellipse cx="60" cy="70" rx="20" ry="15" fill="${light}"/><ellipse cx="60" cy="62" rx="6" ry="4.5" fill="${ink}"/>`:`<ellipse cx="60" cy="68" rx="17" ry="12" fill="${light}"/><path d="M57 63h6l-3 3.5z" fill="#E88A94"/><path d="M30 64h-14M31 70l-13 3M90 64h14M89 70l13 3" stroke="${ink}" stroke-width="2" stroke-linecap="round"/>`;
   const E=(x)=>{switch(ex){case 'happy':return `<path d="M${x-7} 52q7-8 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
     case 'big':return `<circle cx="${x}" cy="50" r="8" fill="${ink}"/><circle cx="${x+2.5}" cy="47" r="3" fill="#fff"/>`;
@@ -4142,12 +4149,21 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
     case 'sleep':return `<path d="M${x-7} 50q7 6 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
     case 'wink':return x<60?`<path d="M${x-7} 52q7-8 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`:`<circle cx="${x}" cy="49" r="5.5" fill="${ink}"/>`;
     case 'sad':return `<path d="M${x-7} 46q7 4 14 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/><circle cx="${x}" cy="52" r="4" fill="${ink}"/>`;
+    case 'shock':return `<circle cx="${x}" cy="49" r="9" fill="#fff" stroke="${ink}" stroke-width="2.5"/><circle cx="${x}" cy="49" r="3.5" fill="${ink}"/>`;
+    case 'angry':return `<path d="M${x-8} ${x<60?42:46}l16 ${x<60?4:-4}" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/><circle cx="${x}" cy="52" r="4.5" fill="${ink}"/>`;
     case 'cry':return `<path d="M${x-7} 49q7-5 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/><path d="M${x-3} 54q-4 10 0 14q4-4 0-14z" fill="#5BB8F0"/>`;
     default:return `<circle cx="${x}" cy="49" r="5.5" fill="${ink}"/><circle cx="${x+1.8}" cy="47" r="1.8" fill="#fff"/>`}};
   g+=E(45)+E(75);
-  const M=ex==='cry'||ex==='sad'?`<path d="M53 80q7-6 14 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`
+  const M=ex==='shock'?`<ellipse cx="60" cy="80" rx="5" ry="6" fill="#C2414F"/>`:ex==='angry'?`<path d="M52 81q8-6 16 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`:fx==='tongue'?`<path d="M52 76q4 5 8 0q4 5 8 0" fill="none" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M57 79q3 9 6 0" fill="#F07D8C"/>`:ex==='cry'||ex==='sad'?`<path d="M53 80q7-6 14 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`
     :ex==='big'||ex==='star'||ex==='open'?`<path d="M51 76q9 12 18 0z" fill="#C2414F"/>`:`<path d="M52 76q4 5 8 0q4 5 8 0" fill="none" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/>`;
   g+=M;
+  if(fx==='blush2')g+=`<ellipse cx="36" cy="66" rx="9" ry="5" fill="#F47A8A" opacity=".75"/><ellipse cx="84" cy="66" rx="9" ry="5" fill="#F47A8A" opacity=".75"/><path d="M30 64l4-3M36 64l4-3M80 64l4-3M86 64l4-3" stroke="#E2566C" stroke-width="1.5"/>`;
+  if(fx==='bang')g+=`<path d="M100 14v16" stroke="#F0506E" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="37" r="3" fill="#F0506E"/><path d="M110 18l-4 10" stroke="#F0506E" stroke-width="4" stroke-linecap="round"/>`;
+  if(fx==='steam')g+=`<path d="M96 22q-4-5 0-10M104 26q-4-5 0-10" fill="none" stroke="#9AA3AE" stroke-width="3" stroke-linecap="round"/><path d="M88 34l6-4M90 40l7 0" stroke="#F0506E" stroke-width="3" stroke-linecap="round"/>`;
+  if(fx==='house')g+=`<g transform="translate(88 12)"><path d="M2 14 13 4l11 10v12H2z" fill="#F2643D"/><path d="M10 26v-7h6v7" fill="#fff"/><path d="M0 14 13 2l13 12" fill="none" stroke="#B9452A" stroke-width="2.5" stroke-linecap="round"/></g>`;
+  if(fx==='mag')g+=`<circle cx="100" cy="26" r="9" fill="#DFF1FF" stroke="${ink}" stroke-width="3"/><path d="m107 33 7 7" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
+  if(fx==='clock')g+=`<circle cx="100" cy="26" r="11" fill="#fff" stroke="${ink}" stroke-width="2.5"/><path d="M100 19v7l5 3" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`;
+  if(fx==='x')g+=`<circle cx="100" cy="26" r="11" fill="#F0506E"/><path d="m95 21 10 10m0-10-10 10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`;
   if(fx==='blush'||ex==='happy')g+=`<ellipse cx="36" cy="66" rx="6" ry="3.5" fill="#F48A8A" opacity=".55"/><ellipse cx="84" cy="66" rx="6" ry="3.5" fill="#F48A8A" opacity=".55"/>`;
   if(fx==='spark')g+=`<path d="M103 22l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM15 28l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#FFC531"/>`;
   if(fx==='hearts')g+=`<path d="M100 30c-7-5-7-11-2.5-11 1.6 0 2.3 1 2.5 2 .2-1 .9-2 2.5-2 4.5 0 4.5 6-2.5 11zM18 34c-5-3.5-5-8-1.8-8 1.1 0 1.6.7 1.8 1.4.2-.7.7-1.4 1.8-1.4 3.2 0 3.2 4.5-1.8 8z" fill="#F0506E"/>`;
@@ -4198,11 +4214,11 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   if(other.user_id&&other.username&&!other.blocked)sb.rpc('friend_rel',{p_user:other.user_id}).then(({data})=>drawFrBar(data||'none'),()=>{});
   const signed=async paths=>{const need=paths.filter(p=>p&&!urlCache[p]);if(need.length){try{const {data}=await sb.storage.from('chat').createSignedUrls(need,3600);(data||[]).forEach(x=>{if(x.signedUrl){urlCache[x.path]=x.signedUrl;urlCache['_t'+x.path]=Date.now()}})}catch(_){}}};
   const bubble=m=>{const mineM=m.sender_id===me().id;const t=chatTime(m.created_at);
-    if(m.kind==='ask')return `<div class="cm ask ${mineM?'me':''}" data-id="${m.id}"><div class="cmb"><b>${ic('shield')} ${mineM?'你請對方證明是飼主':'對方請你證明是飼主'}</b><span>${esc(m.body||'')}</span>${mineM?'':'<small>直接回覆訊息或傳照片就可以</small>'}</div><time>${t}</time></div>`;
+    if(m.kind==='ask')return `<div class="cm ask ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}"><div class="cmb"><b>${ic('shield')} ${mineM?'你請對方證明是飼主':'對方請你證明是飼主'}</b><span>${esc(m.body||'')}</span>${mineM?'':'<small>直接回覆訊息或傳照片就可以</small>'}</div><time>${t}</time></div>`;
     {const sm=m.kind==='text'&&/^\[stk:([a-z0-9_]{1,24})\]$/.exec(m.body||'');if(sm)m={...m,kind:'sticker',body:sm[1]}}
-    if(m.kind==='sticker'){const sv=stkSVG(m.body);return `<div class="cm stk ${mineM?'me':''}" data-id="${m.id}"><div class="cstk">${sv||'<span class="cmb">［貼圖］</span>'}</div><time>${t}</time></div>`}
+    if(m.kind==='sticker'){const sv=stkSVG(m.body);return `<div class="cm stk ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}"><div class="cstk">${sv||'<span class="cmb">［貼圖］</span>'}</div><time>${t}</time></div>`}
     const ph=m.photo?`<button type="button" class="cmph" data-full="${esc(m.photo)}">${urlCache[m.photo]?`<img src="${esc(urlCache[m.photo])}" alt="照片" onerror="this.outerHTML='<span class=cmph-x>照片載入失敗，點一下重試</span>'">`:'<span class="cmph-x">點一下看照片</span>'}</button>`:'';
-    return `<div class="cm ${mineM?'me':''}" data-id="${m.id}"><div class="cmb">${ph}${m.body?`<span>${esc(m.body).replace(/\n/g,'<br>')}</span>`:''}</div><time>${t}</time></div>`};
+    return `<div class="cm ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}"><div class="cmb">${ph}${m.body?`<span>${esc(m.body).replace(/\n/g,'<br>')}</span>`:''}</div><time>${t}</time></div>`};
   const day=t=>{const d=tw(t);return `${d.y}/${d.m}/${d.d}`};let lastDay='';
   const add=async(list,scroll=true)=>{list=list.filter(m=>!seen.has(m.id));if(!list.length||!me())return;list.forEach(m=>seen.add(m.id));await signed(list.map(m=>m.photo));if(_n!==navId||!log.isConnected)return;
     const near=scroll===true||(isMobV()?(document.documentElement.scrollHeight-scrollY-innerHeight<200):(log.scrollHeight-log.scrollTop-log.clientHeight<120));
@@ -4215,7 +4231,11 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   log.addEventListener('click',async e=>{const b=e.target.closest('.cmph');if(!b)return;const p=b.dataset.full;if(!urlCache[p]||Date.now()-(urlCache['_t'+p]||0)>50*60e3){delete urlCache[p];await signed([p])}if(urlCache[p]){const x=b.querySelector('.cmph-x');if(x)x.outerHTML=`<img src="${esc(urlCache[p])}" alt="照片">`;else lightbox(urlCache[p],{save:true,name:'聊天照片'})}else toast('照片載入失敗，請稍後再試')});
   // 新訊息：即時（Realtime）＋每 8 秒補抓一次（網路不穩時也收得到）
   chatStop();
-  const pull=async()=>{if(_n!==navId)return chatStop();const {data}=await sb.from('chat_messages').select('*').eq('chat_id',id).gt('id',lastId).order('id').limit(50);if(data&&data.length){const f=log.querySelector('.cfirst');if(f)f.remove();add(data,false)}};
+  // 已讀：對方最後讀到的時間之前、我傳的訊息都標「已讀」
+  let otherRead=0;const markRead=()=>{log.querySelectorAll('.cm.me:not(.pend)').forEach(x=>{x.classList.toggle('rd',+x.dataset.ts<=otherRead)})};
+  const readPull=async()=>{if(!other.user_id||_n!==navId)return;try{const {data:rm}=await sb.from('chat_members').select('last_read_at').eq('chat_id',id).eq('user_id',other.user_id).maybeSingle();if(rm&&rm.last_read_at){const t=Date.parse(rm.last_read_at);if(t!==otherRead){otherRead=t;markRead()}}}catch(_){}};
+  const pull=async()=>{if(_n!==navId)return chatStop();const {data}=await sb.from('chat_messages').select('*').eq('chat_id',id).gt('id',lastId).order('id').limit(50);if(data&&data.length){const f=log.querySelector('.cfirst');if(f)f.remove();await add(data,false)}markRead();readPull()};
+  readPull();
   try{__chatCh=sb.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},()=>pull()).subscribe()}catch(_){}
   __chatPoll=setInterval(pull,8000);
   const onVis=()=>{if(_n!==navId)return document.removeEventListener('visibilitychange',onVis);if(document.visibilityState==='visible'){pull();sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})}};document.addEventListener('visibilitychange',onVis);
