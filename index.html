@@ -2266,6 +2266,7 @@ html{-webkit-tap-highlight-color:transparent}
   body[data-route="case"] .xhero{margin:-10px -16px 0}
   body[data-route="case"] .xhero .main{border-radius:0 0 30px 30px!important;aspect-ratio:1/1;height:auto!important;max-height:62vh;box-shadow:none!important}
   body[data-route="case"] .xhero .thumbs{padding:10px 16px 0}
+  body[data-route="case"] .xhero .main.noimg{aspect-ratio:auto;height:190px!important;min-height:0}   /* 沒照片：不要佔掉半個畫面 */
   body[data-route="case"] .poster-head{margin-top:18px}
   body[data-route="case"] #app h1{font-size:28px!important;font-weight:800;line-height:1.25;margin:8px 0 4px;font-family:inherit!important}
   body[data-route="case"] .xstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 6px}
@@ -2506,7 +2507,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.9.1';
+const BUILD = 'v6.9.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4349,7 +4350,7 @@ async function renderCase(id){const _n=navId;
   </div>
   <h1>${sp(c.species).poster}｜${esc(c.name)}</h1>
   <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}</span></p>
-  <div class="xstats"><div><small>${c.status==='searching'?'走失':'走失了'}</small><b>${daysSince(c.lost_at)}<span>天</span></b></div><div><small>目擊</small><b>${c.sighting_count||0}<span>次</span></b></div><div class="${c.reward>0?'rw':''}"><small>${c.reward>0?'懸賞':'晶片'}</small><b>${c.reward>0?'$'+c.reward.toLocaleString():c.has_chip?'有':'不確定'}</b></div></div>
+  <div class="xstats"><div><small>走失</small><b>${c.status==='searching'?'第 ':''}${daysSince(c.lost_at)}<span>天</span></b></div><div><small>目擊</small><b>${c.sighting_count||0}<span>次</span></b></div><div class="${c.reward>0?'rw':''}"><small>${c.reward>0?'懸賞':'晶片'}</small><b>${c.reward>0?'$'+c.reward.toLocaleString():c.has_chip?'有':'不確定'}</b></div></div>
   ${c.source==='moa'?`<details class="notice moa"><summary><b>農業部遺失申報</b>看到牠請直接打給飼主 ›</summary>飼主在農業部寵物登記網申報走失，沒有使用汪喵回家。看到牠最快的方式是直接打電話給飼主；不方便打電話的話，也可以回報目擊位置，由汪喵回家確認後打電話轉告飼主。地圖上標的是走失地區的大概位置。</details>`:''}
   ${c.status==='found'?`<div class="notice green"><b>🎉 ${esc(c.name)} 已經找到了！</b>${c.found_note?esc(c.found_note):'謝謝所有幫忙的人。'}${c.found_method?`<div class="small muted">找回方式：${esc(c.found_method)}</div>`:''}</div>`:''}
   <div class="detail-head" style="margin-top:12px">
@@ -4540,7 +4541,7 @@ function shelterBoxHTML(matches,loading){
   <p class="muted small" id="shelterStatus">先用農業部收容所資料找出條件相符的動物（走失後才收容、同縣市、毛色、體型、性別），再由 AI 比對照片。<b>照片也相似的才列在這裡</b>；AI 只是參考，像的話請打電話給收容所，提供晶片號碼或親自去確認。</p>
   <div class="sm-list">${top.length?top.map(matchHTML).join(''):`<p class="muted small sm-empty">目前沒有照片相似的收容動物。${wait.length?'還有幾隻照片正在比對中，每 6 小時更新一次。':''}</p>`}</div>
   ${grp('sm-wait','照片比對中，每 6 小時更新',wait,false)}${grp('sm-low','條件相符，但 AI 判斷照片不太像',low,false)}
-  <details class="sm-np sm-none" ${none.length?'':'hidden'}><summary>還沒有照片，無法比對（<span class="sm-np-n">${none.length}</span>）</summary><div class="sm-np-list">${none.map(matchHTML).join('')}</div></details>`;
+  <details class="sm-np sm-none" ${none.length?'':'hidden'}><summary>條件相符、但收容所沒有放照片的（<span class="sm-np-n">${none.length}</span> 隻）</summary><div class="sm-np-list">${none.map(matchHTML).join('')}</div></details>`;
 }
 function shareText(c,url){
   if(c.status==='found')return `🎉 ${c.name} 已經找到了！（${c.lost_city}${c.lost_district||''}）\n謝謝所有幫忙分享、留意的朋友。\n${url}`;
@@ -5557,7 +5558,7 @@ async function renderAdopt(){const _n=navId;
   const chips=(k,arr)=>arr.map(([v,t,n])=>`<button type="button" class="fchip ${st[k].includes(v)?'on':''}" data-k="${k}" data-v="${esc(v)}" aria-pressed="${st[k].includes(v)}">${esc(t)}${n!=null?` <i>${n}</i>`:''}</button>`).join('');
   const nMore=()=>st.size.length+st.sex.length+st.age.length+(st.photo?0:1);
   const MV=isMobV();
-  app.innerHTML=`${MV?xHeadHTML('adopt','有 <em id="xN">…</em> 隻在等一個家',st.city||'選縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div>
+  app.innerHTML=`${MV?xHeadHTML('adopt',st.city?'有 <em id="xN">…</em> 隻在等一個家':'<span id="xNt">的毛孩在等一個家</span>',st.city||'選縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div>
     <div class="xtools"><button type="button" class="xsort" id="xaSort"><b id="xCnt"></b><span id="xaSortT">${st.sort==='old'?'等最久的':'最新入所'}</span>${XI.down}</button><div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid','list'].map(v=>`<button type="button" data-v="${v}" class="${(xView()==='map'?'big':xView())===v?'on':''}" aria-pressed="${(xView()==='map'?'big':xView())===v}" aria-label="${{big:'大圖',grid:'格狀',list:'清單'}[v]}">${XI[v]}</button>`).join('')}</div></div></div><div class="xas-bg" id="xasBg"></div>`:''}<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
   <p class="tipbox">📞 想領養？先打電話給收容所，確認牠還在、問清楚流程（通常要帶身分證）。</p>
@@ -5597,6 +5598,7 @@ async function renderAdopt(){const _n=navId;
     if(!adoptCache[adoptKey(MOA_AREA[st.city],st.kind)])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
     try{rows=await pr}catch(e){if(stale())return;{const xn=$('#xN');if(xn)xn.textContent='–'}el.innerHTML=`<div class="empty-card"><b>${esc(e.message)}</b><p><button type="button" class="btn" id="aRetry">再試一次</button></p><p class="small"><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent.aspx?PageType=Adopt">改到農業部全國認領養網站看 ↗</a></p></div>`;$('#aRetry').onclick=load;return}
     if(stale())return;
+    {const t=$('#xNt');if(t)t.outerHTML='有 <em id="xN">…</em> 隻在等一個家'}
     // 地區、犬種／貓種、毛色：依這個縣市實際有的資料列出（旁邊是幾隻），都可以多選
     const inD=r=>!st.dist.length||st.dist.includes(adoptDist(r));
     const cnt=(rs,f)=>{const m={};rs.forEach(r=>{const v=(f(r)||'').trim();if(v)m[v]=(m[v]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
