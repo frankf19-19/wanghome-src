@@ -963,6 +963,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .slot .ico{width:15px;height:15px}
 .slot{white-space:nowrap}.med-slots{flex-wrap:wrap}
 .leaflet-control-attribution a{color:inherit!important;text-decoration:underline!important}
+.leaflet-container .leaflet-control-attribution{background:rgba(255,255,255,.8)!important;color:#333!important;font-size:11px!important}
 .entry-more{border-top:1px solid var(--line);padding-top:6px}.entry-more>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;font-size:15px;font-weight:700;color:var(--ink-2)}.entry-more>summary::-webkit-details-marker{display:none}.entry-more>summary::after{content:"";width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-3px);transition:transform .2s;opacity:.6;flex:none}.entry-more[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
 .entry-back{display:inline-block;margin-top:14px;font-size:14px;color:var(--ink-3);text-decoration:none;padding:8px 0}
 .med-off{margin-top:10px;font-size:14px}.med-off summary{cursor:pointer;color:var(--ink-3);font-weight:700}
@@ -2115,7 +2116,7 @@ html{-webkit-tap-highlight-color:transparent}
 .xheart{display:none}
 .xstats{display:none}
 @media all{   /* 設計系統顏色：手機、電腦一起用 */
-  :root,:root:not([data-theme="dark"]){--paper:#F7F6F4;--sheet:#FFFFFF;--ink:#1A1A1A;--ink-2:#55524E;--ink-3:#8A857F;--line:#ECE9E5;--red:#E8502E;--red-ink:#C2401F;--red-fill:#EE5A35;--red-soft:#FFEFE8;--green:#1A8F63;--green-fill:#1F9D6E;--green-soft:#E4F5EE;--brand:#F2643D;--brand-d:#D94A26;--ok:#1F9D6E;--fill:#EFEDEA;
+  :root,:root:not([data-theme="dark"]){--paper:#F7F6F4;--sheet:#FFFFFF;--ink:#1A1A1A;--ink-2:#55524E;--ink-3:#6F6A64;--line:#ECE9E5;--red:#E8502E;--red-ink:#C2401F;--red-fill:#EE5A35;--red-soft:#FFEFE8;--green:#1A8F63;--green-fill:#1F9D6E;--green-soft:#E4F5EE;--brand:#F2643D;--brand-d:#D94A26;--ok:#1F9D6E;--fill:#EFEDEA;
     --lift:0 1px 0 rgba(0,0,0,.03),0 10px 24px -18px rgba(60,40,20,.4);--display:system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;--r-card:22px}
   :root[data-theme="dark"]{--paper:#0F0F10;--sheet:#1B1B1D;--ink:#F5F4F2;--ink-2:#C9C6C1;--ink-3:#8E8A85;--line:#2A2A2C;--red:#FF6A45;--red-ink:#FF8A6A;--red-fill:#EE5A35;--red-soft:#3A1E14;--green:#3CC28E;--green-fill:#1F9D6E;--green-soft:#10291F;--fill:#262628;--lift:0 1px 0 rgba(0,0,0,.4)}
 }
@@ -2135,7 +2136,7 @@ html{-webkit-tap-highlight-color:transparent}
   #xBell,#xChat{margin-left:8px}#xChat:empty{display:none}
   .xbell{position:relative;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--sheet);color:var(--ink)!important;box-shadow:var(--lift)}
   .xbell .ico{width:22px;height:22px}
-  .xbadge{position:absolute;top:1px;right:-2px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--brand);color:#fff;font-style:normal;font-size:11.5px;font-weight:800;line-height:19px;text-align:center;box-shadow:0 0 0 2px var(--paper)}
+  .xbadge{position:absolute;top:1px;right:-2px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#D9502B;color:#fff;font-style:normal;font-size:11.5px;font-weight:800;line-height:19px;text-align:center;box-shadow:0 0 0 2px var(--paper)}
   /* 走失／領養切換 */
   .xmode{position:relative;display:grid;grid-template-columns:1fr 1fr;margin-top:14px;padding:5px;border-radius:20px;background:var(--sheet);height:58px;box-shadow:var(--lift)}
   .xmode>a,.xmode>button{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:7px;font-size:16.5px;font-weight:800;color:var(--ink-2)!important;text-decoration:none!important;background:none;border:0;font-family:inherit;cursor:pointer;transition:color .25s}
@@ -2594,7 +2595,7 @@ html{-webkit-tap-highlight-color:transparent}
 .cht{display:flex;justify-content:space-between;gap:8px}.cht b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cht small{flex:none;color:var(--ink-3);font-size:12.5px}
 .chc{color:var(--ink-3);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chm{color:var(--ink-2);font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chn{flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--brand,#F2643D);color:#fff;font-style:normal;font-size:12px;font-weight:800;display:grid;place-items:center}
+.chn{flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#D9502B;color:#fff;font-style:normal;font-size:12px;font-weight:800;display:grid;place-items:center}
 .chat{display:flex;flex-direction:column;max-width:760px;margin:0 auto;min-height:calc(100dvh - 140px)}
 .chhead{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 4px;background:var(--paper)}
 @media (max-width:760px){.chhead{display:none}}
@@ -2617,7 +2618,7 @@ html{-webkit-tap-highlight-color:transparent}
 .cm.me{align-self:flex-end;flex-direction:row-reverse}
 .cm time{flex:none;font-size:11px;color:var(--ink-3);margin-bottom:2px}
 .cmb{padding:9px 13px;border-radius:20px 20px 20px 6px;background:var(--sheet);color:var(--ink);box-shadow:var(--lift);font-size:15.5px;line-height:1.5;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:6px}
-.cm.me .cmb{border-radius:20px 20px 6px 20px;background:var(--brand,#F2643D);color:#fff}
+.cm.me .cmb{border-radius:20px 20px 6px 20px;background:#D9502B;color:#fff}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
 .cmph-x{display:grid;place-items:center;height:140px;padding:0 14px;text-align:center;font-size:13.5px;font-weight:700;background:rgba(0,0,0,.08);border-radius:14px}
@@ -2742,7 +2743,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.1';
+const BUILD = 'v7.2.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
