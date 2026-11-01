@@ -29,6 +29,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="wangmiaotw.com" android:pathPrefix="/s/" />
                 <data android:scheme="https" android:host="wangmiaotw.com" android:pathPrefix="/f/" />
+                <data android:scheme="https" android:host="wangmiaotw.com" android:pathPrefix="/p/" />
             </intent-filter>
             <!-- 第三方登入授權完跳回 App：wangmiaotw://auth -->
             <intent-filter>

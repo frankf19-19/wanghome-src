@@ -2578,7 +2578,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.11.7';
+const BUILD = 'v6.11.8';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2632,8 +2632,8 @@ if(IS_APP){
       if(/^wangmiaotw:/.test(u.protocol)&&/auth/.test(u.host+u.pathname)){const code=u.searchParams.get('code');const err=u.searchParams.get('error_description')||u.searchParams.get('error');try{const B=capPlugin('Browser');if(B)B.close().catch(()=>{})}catch(_){}
         if(err){toast('登入沒有成功：'+err,5000);return}
         if(code&&sb)sb.auth.exchangeCodeForSession(code).then(({data,error})=>{if(error)return toast('登入沒有成功：'+friendlyErr(error.message),5000);if(data&&data.session){session=data.session;updateAuthUI()}toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}});return}
-      const m=u.pathname.match(/^\/(s|f)\/([0-9a-f-]{36})/);
-      if(m)location.hash=(m[1]==='s'?'#/case/':'#/found/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
+      const m=u.pathname.match(/^\/(s|p|f)\/([0-9a-f-]{36})/);
+      if(m)location.hash=(m[1]==='f'?'#/found/':'#/case/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
     A.addListener('pause',()=>{window.__pausedAt=Date.now();try{document.dispatchEvent(new Event('app-pause'))}catch(_){}});
     A.addListener('resume',()=>{try{lnSync()}catch(_){}try{if($('#btnLnWrap'))bindLnBtn()}catch(_){}
       // 離開超過 5 分鐘再回來：自動重新整理目前這頁（填表中不動）
@@ -5712,6 +5712,7 @@ const shareCache={};
 async function getShareUrl(kind,id){
   const k=kind+id;if(shareCache[k])return shareCache[k];
   const pretty=`${CONFIG.SITE_URL}${kind}/${id}`;   // Cloudflare 會把 .html 轉址掉，直接用沒有 .html 的網址
+  if(IS_APP)return shareCache[k]=pretty;   // App 裡不能跨網域檢查（會失敗而退回 # 網址），分享頁一定存在，直接用
   const fallback=CONFIG.SITE_URL+(kind==='s'?'#/case/':'#/found/')+id;
   try{const r=await fetch(pretty,{method:'HEAD',cache:'no-store'});shareCache[k]=r.ok?pretty:fallback}catch(_){shareCache[k]=fallback}
   return shareCache[k];
