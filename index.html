@@ -2745,7 +2745,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.3';
+const BUILD = 'v7.2.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3542,7 +3542,7 @@ function wizard(form,checks={}){
     for(const x of steps[k].querySelectorAll('input[type=datetime-local]')){if(x.value&&twParse(x.value).getTime()>Date.now()+15*60e3){fieldErr(x,'時間不能是未來，請再確認一次');return false}}
     if(msg){stepErr(steps[k],msg);return false}return true};
   // 步驟級的錯誤（沒選狗貓、沒留聯絡方式…）：直接顯示在該區塊下面，不用 toast
-  const stepErr=(st,msg)=>{document.querySelectorAll('.ferr').forEach(x=>x.remove());const tgt=st.querySelector('.seg,.tipbox,.map.pick,label.f,input,select,textarea')||st.querySelector('h3');
+  const stepErr=(st,msg)=>{document.querySelectorAll('.ferr').forEach(x=>x.remove());const tgt=(/地圖|位置|地點/.test(msg)&&st.querySelector('.map.pick'))||st.querySelector('.seg,.tipbox,.map.pick,label.f,input,select,textarea')||st.querySelector('h3');
     const p=document.createElement('p');p.className='ferr';p.setAttribute('role','alert');p.textContent=msg;tgt.insertAdjacentElement('afterend',p);tgt.classList.add('seg-bad');
     const clr=()=>{p.remove();tgt.classList.remove('seg-bad')};st.addEventListener('click',clr,{once:true});st.addEventListener('input',clr,{once:true});
     window.scrollTo({top:Math.max(0,tgt.getBoundingClientRect().top+scrollY-120),behavior:RM()?'auto':'smooth'});
