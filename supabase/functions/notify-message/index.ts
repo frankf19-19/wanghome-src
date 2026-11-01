@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
     .eq("chat_id", chatId).eq("sender_id", me).gte("created_at", since).order("id", { ascending: false }).limit(1).maybeSingle();
   if (!msg) return json({ sent: 0, reason: "no message" });
   const [{ data: others }, { data: prof }, { data: chat }] = await Promise.all([
-    sb.from("chat_members").select("user_id,last_read_at,pushed_at").eq("chat_id", chatId).neq("user_id", me),
+    sb.from("chat_members").select("user_id,last_read_at,pushed_at,muted").eq("chat_id", chatId).neq("user_id", me),
     sb.from("profiles").select("username").eq("id", me).maybeSingle(),
     sb.from("chats").select("kind,case_id").eq("id", chatId).maybeSingle(),
   ]);
@@ -111,6 +111,7 @@ Deno.serve(async (req) => {
   const text = msg.kind === "photo" ? "傳了一張照片" : msg.kind === "sticker" || /^\[stk:[a-z0-9_]+\]$/.test(String(msg.body ?? "")) ? "傳了一張貼圖" : /^\[loc:/.test(String(msg.body ?? "")) ? "傳了一個位置給你" : msg.kind === "ask" ? "請你證明是飼主" : String(msg.body ?? "").slice(0, 120);
   let sent = 0;
   for (const o of others ?? []) {
+    if ((o as any).muted) continue;                                                       // 對方把這個對話靜音了
     if (o.last_read_at && new Date(o.last_read_at) >= new Date(msg.created_at)) continue;   // 已經讀了
     if (o.pushed_at && Date.now() - new Date(o.pushed_at).getTime() < 20e3) continue;         // 剛推過
     if (o.pushed_at && new Date(o.pushed_at) >= new Date(msg.created_at)) continue;          // 這則已經推過了

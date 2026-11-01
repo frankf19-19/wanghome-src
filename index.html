@@ -2640,9 +2640,17 @@ html{-webkit-tap-highlight-color:transparent}
 .chplus .ico{width:26px;height:26px}
 .plusgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.plusgrid button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;padding:14px;border-radius:18px;background:var(--fill)}.plusgrid button span{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--sheet);color:var(--brand-d,#D94A26);margin-bottom:4px}.plusgrid button span .ico{width:24px;height:24px}.plusgrid b{font-size:16px}.plusgrid small{font-size:12.5px;color:var(--ink-3)}
 .cmb.cloc{padding:4px;background:var(--sheet)!important;color:var(--ink)!important}.locard{display:block;width:220px;color:var(--ink)!important;text-decoration:none!important}.locmap{position:relative;display:block;height:140px;border-radius:14px;overflow:hidden;background:#E8E4DC}.locmap img{position:absolute;width:256px;height:256px;max-width:none}.locpin{position:absolute;left:110px;top:70px;transform:translate(-50%,-100%);color:#E5482B;font-style:normal}.locpin .ico{width:34px;height:34px;fill:#F2643D;stroke:#fff;stroke-width:1.5;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.locard{position:relative}.locattr{position:absolute;right:8px;top:118px;font-size:9.5px;background:rgba(255,255,255,.8);color:#333;padding:0 4px;border-radius:4px}
 .loct{display:flex;flex-direction:column;padding:8px 8px 4px}.loct b{display:flex;align-items:center;gap:4px;font-size:15px}.loct small{color:var(--ink-3);font-size:12.5px}
 .chquick{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}.chquick::-webkit-scrollbar{display:none}.chquick button{flex:none;border:1.5px solid var(--brand,#F2643D);background:var(--sheet);color:var(--brand-d,#D94A26);border-radius:999px;padding:9px 14px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer;white-space:nowrap}
 .chsearch{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:0 14px;min-height:46px;border-radius:16px;background:var(--sheet);box-shadow:var(--lift)}.chsearch input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:16px;color:var(--ink);outline:none}.chsearch .ico{color:var(--ink-3)}
+.cm.hasrx{margin-bottom:14px}.cm .cmb,.cm .cstk{position:relative}
+.crx{position:absolute;bottom:-14px;display:flex;gap:3px;z-index:1}.cm:not(.me) .crx{left:44px}.cm.me .crx{right:4px}.cm.me.stk .crx{right:8px}
+.cm{position:relative}.cm.hasrx .crx{bottom:-16px}
+.crx button{display:inline-flex;align-items:center;gap:2px;border:1.5px solid var(--sheet);background:var(--sheet);border-radius:999px;padding:1px 6px;font-size:13px;line-height:20px;box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer;color:var(--ink)}.crx button.on{border-color:var(--brand,#F2643D);background:var(--brand-soft,#FFE7DE)}.crx i{font-style:normal;font-size:11.5px;font-weight:800}
+.rxrow{display:flex;justify-content:space-between;gap:4px;margin:0 0 12px;padding:8px;border-radius:999px;background:var(--fill)}.rxrow button{all:unset;cursor:pointer;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:28px;transition:transform .12s}.rxrow button:active{transform:scale(1.25)}.rxrow button.on{background:var(--brand-soft,#FFE7DE)}
+.msgsheet .xplist button.danger{color:#D23B2A}
+body[data-route=chat] .chat{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23D9A07A' fill-opacity='.10'%3E%3Cg transform='translate(24 28) rotate(-18)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3Cg transform='translate(86 84) rotate(20)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2801,7 +2809,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.6.0';
+const BUILD = 'v7.7.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4215,6 +4223,10 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
   if(fx==='paw')g+=`<g fill="${dark}"><ellipse cx="102" cy="34" rx="7" ry="6"/><circle cx="95" cy="25" r="3"/><circle cx="101" cy="22" r="3"/><circle cx="107" cy="23" r="3"/><circle cx="111" cy="29" r="3"/></g>`;
   g+=`<text x="60" y="113" text-anchor="middle" font-size="19" font-weight="900" font-family="'PingFang TC','Noto Sans TC',system-ui,sans-serif" fill="#fff" stroke="${ink}" stroke-width="5" paint-order="stroke" stroke-linejoin="round">${esc(label)}</text>`;
   return `<svg viewBox="0 6 120 114" role="img" aria-label="${esc(label)}">${g}</svg>`}
+function msgSheet(opts,cur,onPick){const el=document.createElement('div');el.className='lightbox sheet-bg';
+  el.innerHTML=`<div class="sheet xpick msgsheet" role="dialog" aria-label="訊息"><div class="grab" aria-hidden="true"></div><div class="rxrow">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="xplist">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}">${esc(l)}</button>`).join('')}</div></div>`;
+  el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){const v=b.dataset.v,back=overlayOpen===el;closeOverlay(el);if(!back)return onPick(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);onPick(v)};addEventListener('popstate',ok);t=setTimeout(ok,450);return}if(e.target===el)closeOverlay(el)};
+  openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
 function chatPlusSheet(items,onPick){const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet plussheet" role="dialog" aria-label="傳送"><div class="grab" aria-hidden="true"></div><div class="plusgrid">${items.map(([v,i,t,sub])=>`<button type="button" data-p="${v}"><span>${ic(i)}</span><b>${esc(t)}</b>${sub?`<small>${esc(sub)}</small>`:''}</button>`).join('')}</div></div>`;
   el.onclick=e=>{const b=e.target.closest('[data-p]');if(b){const v=b.dataset.p;closeOverlay(el);setTimeout(()=>onPick(v),v==='photo'||v==='cam'?0:450);return}if(e.target===el)closeOverlay(el)};
@@ -4226,7 +4238,10 @@ function stkSheet(onPick){const el=document.createElement('div');el.className='l
 // 位置訊息：用地圖圖磚當小地圖，點了開 Google 地圖（手機會開地圖 App 導航）
 function chatLocCard(lat,lng,label='位置'){const z=16,n=2**z,xf=(lng+180)/360*n,yr=lat*Math.PI/180,yf=(1-Math.log(Math.tan(yr)+1/Math.cos(yr))/Math.PI)/2*n;const tx=Math.floor(xf),ty=Math.floor(yf),px=Math.round((xf-tx)*256),py=Math.round((yf-ty)*256);
   const tiles=[[0,0],[1,0],[0,1],[1,1]].map(([dx,dy])=>{const ox=px>128?0:-1,oy=py>128?0:-1;return `<img src="https://tile.openstreetmap.org/${z}/${tx+ox+dx}/${ty+oy+dy}.png" alt="" loading="lazy" style="left:${(ox+dx)*256-px+110}px;top:${(oy+dy)*256-py+70}px">`}).join('');
-  return `<a class="locard" href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" rel="noopener"><span class="locmap">${tiles}<i class="locpin">${ic('pin')}</i></span><span class="loct"><b>${ic('pin')} ${esc(label)}</b><small>點一下用地圖導航・© OpenStreetMap</small></span></a>`}
+  return `<a class="locard" href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" rel="noopener"><span class="locmap">${tiles}<i class="locpin">${ic('pin')}</i></span><span class="loct"><b>${ic('pin')} ${esc(label)}</b><small>點一下用地圖導航</small></span><span class="locattr">© OpenStreetMap</span></a>`}
+const RX=['❤️','😂','👍','😮','😢','🙏'];
+function chatRxHTML(m){const r=m.reactions||{};const ks=Object.keys(r);if(!ks.length||m.deleted)return '';const cnt={};ks.forEach(k=>{cnt[r[k]]=(cnt[r[k]]||0)+1});const mine=me()&&r[me().id];
+  return `<span class="crx">${Object.entries(cnt).map(([e,n])=>`<button type="button" class="${e===mine?'on':''}" data-rx="${e}">${e}${n>1?`<i>${n}</i>`:''}</button>`).join('')}</span>`}
 function chatLinkify(t){const parts=String(t||'').split(/(https?:\/\/[^\s<>"]+)/g);return parts.map((p,i)=>{if(i%2)return `<a href="${esc(p)}" target="_blank" rel="noopener nofollow">${esc(p.length>48?p.slice(0,45)+'…':p)}</a>`;
   return esc(p).replace(/(^|[^\d])(09\d{2}[- ]?\d{3}[- ]?\d{3}|0\d{1,2}[- ]?\d{3,4}[- ]?\d{4})(?!\d)/g,(m,a,n)=>`${a}<a href="tel:${n.replace(/[- ]/g,'')}">${n}</a>`)}).join('').replace(/\n/g,'<br>')}
 const CHAT_ASKS=['請說出牠晶片號碼的末四碼','請描述牠身上一個照片看不出來的特徵（疤痕、胎記、牙齒…）','請傳一張你以前和牠的合照','請說出牠的項圈、衣服或名牌的樣子'];
@@ -4269,7 +4284,8 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   const byId={};const isStk=m=>m.kind==='sticker'||(m.kind==='text'&&/^\[stk:[a-z0-9_]+\]$/.test(m.body||''));
   const snip=m=>!m?'一則較早的訊息':m.deleted?'已收回的訊息':/^\[loc:/.test(m.body||'')?'［位置］':m.kind==='photo'?'［照片］'+(m.body?' '+m.body:''):isStk(m)?'［貼圖］':m.kind==='ask'?'［請你證明是飼主］':(m.body||'');
   const quote=m=>{if(!m.reply_to)return '';const q=byId[m.reply_to];const who=q?(q.sender_id===me().id?'你':oname):'';return `<span class="cq" data-jump="${m.reply_to}">${who?`<b>${esc(who)}</b>`:''}<span>${esc(snip(q).slice(0,60))}</span></span>`};
-  const bubble=m=>{byId[m.id]=m;const mineM=m.sender_id===me().id;const t=chatTime(m.created_at).replace(/^\d+\/\d+ /,'');
+  const bubble=m=>{const h=bubble0(m);const rx=chatRxHTML(m);return rx?h.replace(/<time>/,rx+'<time>').replace('class="cm ','class="cm hasrx '):h};
+  const bubble0=m=>{byId[m.id]=m;const mineM=m.sender_id===me().id;const t=chatTime(m.created_at).replace(/^\d+\/\d+ /,'');
     if(m.deleted)return `<div class="cm sys" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}"><span>${mineM?'你':esc(oname)} 收回了一則訊息</span></div>`;
     if(m.kind==='ask')return `<div class="cm ask ${mineM?'me':''}" data-id="${m.id}" data-ts="${Date.parse(m.created_at)||0}">${mineM?'':oAva}<div class="cmb"><b>${ic('shield')} ${mineM?'你請對方證明是飼主':'對方請你證明是飼主'}</b><span>${esc(m.body||'')}</span>${mineM?'':'<small>直接回覆訊息或傳照片就可以</small>'}</div><time>${t}</time></div>`;
     {const sm=m.kind==='text'&&/^\[stk:([a-z0-9_]{1,24})\]$/.exec(m.body||'');if(sm)m={...m,kind:'sticker',body:sm[1]}}
@@ -4312,7 +4328,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   {let lp=null;const menu=x=>{if(x.classList.contains('pend')||x.classList.contains('sys'))return;const m=byId[x.dataset.id];if(!m)return;const t=x.querySelector('.cmt');const mine=m.sender_id===me().id;
       const opts=[['reply','回覆']];if(t)opts.push(['copy','複製文字']);if(mine&&Date.now()-Date.parse(m.created_at)<24*36e5)opts.push(['unsend','收回']);
       if(navigator.vibrate)try{navigator.vibrate(20)}catch(_){}
-      xPick('訊息',opts,'',async v=>{if(v==='copy')copy(t.innerText);if(v==='reply')setReply(m.id);
+      msgSheet(opts,(m.reactions||{})[me().id],async v=>{if(RX.includes(v))return react(m.id,v);if(v==='copy')copy(t.innerText);if(v==='reply')setReply(m.id);
         if(v==='unsend'){if(!await askSheet({title:'收回這則訊息？',body:'對方那邊也會一起消失，只會顯示「收回了一則訊息」。',ok:'收回',danger:true}))return;const {error}=await sb.rpc('chat_unsend',{p_id:m.id});if(error)return toast(/function|schema/i.test(error.message)?'收回功能還在更新中，請稍後再試':error.message.replace(/^.*?:\s*/,''),4000);markDeleted(m.id)}})};
     log.addEventListener('touchstart',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a,button'))return;lp=setTimeout(()=>{lp=null;menu(x)},520)},{passive:true});
     ['touchend','touchmove','touchcancel'].forEach(ev=>log.addEventListener(ev,()=>{if(lp){clearTimeout(lp);lp=null}},{passive:true}));
@@ -4324,6 +4340,11 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   chatStop();
   // 已讀：對方最後讀到的時間之前、我傳的訊息都標「已讀」
   let pullN=0;
+  function setRx(mid,rx){const m=byId[mid];if(!m)return;const a=JSON.stringify(m.reactions||{}),b=JSON.stringify(rx||{});if(a===b)return;m.reactions=rx||{};const el=log.querySelector(`.cm[data-id="${mid}"]`);if(el){const keep=el.className.match(/\b(cont|hidet|rd)\b/g)||[];el.outerHTML=bubble(m);const n=log.querySelector(`.cm[data-id="${mid}"]`);if(n)keep.forEach(c=>n.classList.add(c))}}
+  const react=async(mid,e)=>{const m=byId[mid];if(!m||m.deleted)return;const old=m.reactions||{};const nx={...old};if(nx[me().id]===e)delete nx[me().id];else nx[me().id]=e;setRx(mid,nx);if(navigator.vibrate)try{navigator.vibrate(15)}catch(_){}
+    const {data,error}=await sb.rpc('chat_react',{p_id:mid,p_emoji:e});if(error){setRx(mid,old);toast(/function|schema/i.test(error.message)?'表情回應還在更新中，請稍後再試':error.message.replace(/^.*?:\s*/,''),3500);return}if(data)setRx(mid,data)};
+  log.addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;const x=b.closest('.cm');if(x)react(+x.dataset.id,b.dataset.rx)});
+  {let lastTap=0,lastEl=null;log.addEventListener('click',e=>{if(e.target.closest('a,button,.cq'))return;const x=e.target.closest('.cm');if(!x||x.classList.contains('pend')||x.classList.contains('sys'))return;const n=Date.now();if(lastEl===x&&n-lastTap<320){lastTap=0;react(+x.dataset.id,'❤️');return}lastTap=n;lastEl=x})}
   function markDeleted(mid){const m=byId[mid];if(!m||m.deleted)return;m.deleted=true;m.body=null;m.photo=null;const el=log.querySelector(`.cm[data-id="${mid}"]`);if(el){el.outerHTML=bubble(m);regroup()}}
   // 對方正在輸入
   const typ=document.createElement('div');typ.className='chtyping';typ.hidden=true;typ.innerHTML=`<span class="dots"><i></i><i></i><i></i></span>${esc(oname)} 正在輸入…`;log.after(typ);let typT=0;
@@ -4331,10 +4352,10 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   let otherRead=0;const markRead=()=>{log.querySelectorAll('.cm.me:not(.pend)').forEach(x=>{x.classList.toggle('rd',+x.dataset.ts<=otherRead)})};
   const readPull=async()=>{if(!other.user_id||_n!==navId)return;try{const {data:rm}=await sb.from('chat_members').select('last_read_at').eq('chat_id',id).eq('user_id',other.user_id).maybeSingle();if(rm&&rm.last_read_at){const t=Date.parse(rm.last_read_at);if(t!==otherRead){otherRead=t;markRead()}}}catch(_){}};
   const pull=async()=>{if(_n!==navId)return chatStop();const {data}=await sb.from('chat_messages').select('*').eq('chat_id',id).gt('id',lastId).order('id').limit(50);if(data&&data.length){const f=log.querySelector('.cfirst');if(f)f.remove();await add(data,false)}markRead();readPull();
-    if(firstId&&++pullN%2===0)sb.from('chat_messages').select('id').eq('chat_id',id).eq('deleted',true).gte('id',firstId).then(({data:dl})=>{(dl||[]).forEach(x=>markDeleted(x.id))},()=>{})};
+    if(firstId&&++pullN%2===0)sb.from('chat_messages').select('id,deleted,reactions').eq('chat_id',id).gte('id',firstId).or('deleted.eq.true,reactions.neq.{}').limit(300).then(({data:dl,error:de})=>{if(de)return sb.from('chat_messages').select('id').eq('chat_id',id).eq('deleted',true).gte('id',firstId).then(({data:d2})=>{(d2||[]).forEach(x=>markDeleted(x.id))},()=>{});const seenRx=new Set();(dl||[]).forEach(x=>{if(x.deleted)markDeleted(x.id);else{seenRx.add(x.id);setRx(x.id,x.reactions)}});Object.values(byId).forEach(m=>{if(m.reactions&&Object.keys(m.reactions).length&&!seenRx.has(m.id)&&!m.deleted&&m.id>=firstId)setRx(m.id,{})})},()=>{})};
   readPull();
   try{__chatCh=sb.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},()=>{hideTyping();pull()})
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},({new:nm})=>{if(nm&&nm.deleted)markDeleted(nm.id)})
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},({new:nm})=>{if(!nm)return;if(nm.deleted)markDeleted(nm.id);else if(nm.reactions)setRx(nm.id,nm.reactions)})
     .on('broadcast',{event:'typing'},({payload})=>{if(payload&&payload.u&&payload.u!==me().id)showTyping()}).subscribe()}catch(_){}
   __chatPoll=setInterval(pull,8000);
   const onVis=()=>{if(_n!==navId)return document.removeEventListener('visibilitychange',onVis);if(document.visibilityState==='visible'){pull();sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})}};document.addEventListener('visibilitychange',onVis);
@@ -4370,8 +4391,10 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
     {const QR=ch.kind==='dm'?[]:helper?['我在附近看到很像牠的毛孩','牠現在在我這裡，很安全','可以多傳幾張牠的照片嗎？','方便接電話嗎？']:['謝謝你！請問在哪裡看到的？','可以傳照片給我確認嗎？','牠現在還在那附近嗎？','方便接電話嗎？'];
       if(QR.length&&!msgs.some(m=>m.sender_id===me().id)){const qb=document.createElement('div');qb.className='chquick';qb.innerHTML=QR.map(q=>`<button type="button">${esc(q)}</button>`).join('');form.before(qb);qb.onclick=async e=>{const b=e.target.closest('button');if(!b||busy)return;qb.remove();inp.value=b.textContent;form.requestSubmit()}}}}
   {const ub=$('#chUnblk');if(ub)ub.onclick=async()=>{await sb.rpc('user_block',{p_user:other.user_id,p_on:false});toast('已解除封鎖');rerender(()=>renderChat(id))}}
-  $('#chMenu').onclick=()=>xPick('對話',[...(other.username?[['profile','看 '+oname+' 的會員頁']]:[]),...(other.username&&!other.blocked&&relNow==='none'?[['friend','加 '+oname+' 為好友']]:[]),['report','檢舉這位會員'],[other.blocked?'unblock':'block',other.blocked?'解除封鎖':'封鎖這位會員'],['hide','刪除這個對話']],'',async v=>{
+  let muted=false;sb.from('chat_members').select('muted').eq('chat_id',id).eq('user_id',me().id).maybeSingle().then(({data})=>{muted=!!(data&&data.muted)},()=>{});
+  $('#chMenu').onclick=()=>xPick('對話',[...(other.username?[['profile','看 '+oname+' 的會員頁']]:[]),[muted?'unmute':'mute',muted?'打開這個對話的通知':'關閉這個對話的通知（靜音）'],...(other.username&&!other.blocked&&relNow==='none'?[['friend','加 '+oname+' 為好友']]:[]),['report','檢舉這位會員'],[other.blocked?'unblock':'block',other.blocked?'解除封鎖':'封鎖這位會員'],['hide','刪除這個對話']],'',async v=>{
     if(v==='profile')location.hash='#/u/'+encodeURIComponent(other.username);
+    if(v==='mute'||v==='unmute'){const on=v==='mute';const {error}=await sb.rpc('chat_mute',{p_chat:id,p_on:on});if(error)return toast('沒有成功，請稍後再試');muted=on;toast(on?'已靜音：這個對話不會再推播通知':'已打開這個對話的通知',2500)}
     if(v==='friend'){const r=await friendAdd(other.user_id,oname);if(r)drawFrBar(r)}
     if(v==='block'){if(!await askSheet({title:`封鎖 ${oname}？`,body:'封鎖後雙方都不能再傳訊息。可以隨時解除。',ok:'封鎖',danger:true}))return;await sb.rpc('user_block',{p_user:other.user_id,p_on:true});toast('已封鎖');rerender(()=>renderChat(id))}
     if(v==='unblock'){await sb.rpc('user_block',{p_user:other.user_id,p_on:false});toast('已解除封鎖');rerender(()=>renderChat(id))}
