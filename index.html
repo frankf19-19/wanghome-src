@@ -2731,13 +2731,9 @@ body[data-route=chat] .chsend{transition:transform .15s,opacity .15s}body[data-r
 .lb-n{position:absolute;top:calc(22px + var(--safe-area-inset-top,env(safe-area-inset-top)));left:50%;transform:translateX(-50%);color:#fff;font-weight:800;font-size:14px;background:rgba(0,0,0,.45);padding:4px 12px;border-radius:999px}
 @media (max-width:760px){.lb-nav{display:none}}
 .chat.drop{outline:3px dashed var(--brand,#F2643D);outline-offset:-8px}.chat.drop::after{content:'放開就傳送照片';position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sheet);padding:14px 22px;border-radius:16px;font-weight:800;box-shadow:var(--lift);z-index:50}
-/* 泡泡小尾巴：每一串的第一則 */
-body[data-route=chat] .cm:not(.cont):not(.stk):not(.sys) .cmb::before{content:"";position:absolute;top:0;width:12px;height:14px;background:inherit}
-body[data-route=chat] .cm:not(.cont):not(.me):not(.stk):not(.sys) .cmb{border-top-left-radius:4px}
-body[data-route=chat] .cm:not(.cont):not(.me):not(.stk):not(.sys) .cmb::before{left:-6px;clip-path:polygon(100% 0,0 0,100% 100%);background:var(--cother)}
-body[data-route=chat] .cm.me:not(.cont):not(.stk):not(.sys) .cmb{border-top-right-radius:4px}
-body[data-route=chat] .cm.me:not(.cont):not(.stk):not(.sys) .cmb::before{right:-6px;clip-path:polygon(0 0,100% 0,0 100%);background:var(--cmine1)}
-body[data-route=chat] .cm.ask:not(.cont) .cmb::before,body[data-route=chat] .cmb.cloc::before{display:none}
+/* 每一串的第一則：靠頭像那一角收尖一點（取代小尾巴） */
+body[data-route=chat] .cm:not(.cont):not(.me):not(.stk):not(.sys) .cmb{border-top-left-radius:6px}
+body[data-route=chat] .cm.me:not(.cont):not(.stk):not(.sys) .cmb{border-top-right-radius:6px}
 /* 傳送失敗 */
 .cm.fail{opacity:1}.cm.fail .cmb{filter:saturate(.4);opacity:.75}.cretry{border:0;background:#FDE3DE;color:#C23A22;font:inherit;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
 /* 列表沒有對話 */
@@ -2746,6 +2742,19 @@ body[data-route=chat] .cm.ask:not(.cont) .cmb::before,body[data-route=chat] .cmb
 :root[data-theme=dark] body[data-route=chat]{--cmine1:#E86A42;--cmine2:#C9462A}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) body[data-route=chat]{--cmine1:#E86A42;--cmine2:#C9462A}}
 :root[data-theme=dark] body[data-route=chat] .cm.ask .cmb{background:#1F2A3D;color:#CFE0FF;box-shadow:inset 0 0 0 1.5px #34486B}
+/* 精修：標頭、返回鍵、細節 */
+body[data-route=chat] #mTitle{overflow:visible;height:auto;line-height:normal}
+.mtc .cav{display:grid!important;place-items:center;line-height:1}
+@media (max-width:760px){body[data-route=chat] .mb-back{font-size:0!important;gap:0;width:46px;height:46px;min-height:46px;padding:0!important;justify-content:center;border-radius:50%}body[data-route=chat] .mb-back svg{width:26px;height:26px;margin:0}}
+body[data-route=chat] .mbar{border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);box-shadow:none!important}
+body[data-route=chat] .cm time{margin-bottom:3px;letter-spacing:.01em}
+body[data-route=chat] .cnote{font-size:11.5px;opacity:.85}
+body[data-route=chat] .cday{font-size:11.5px;padding:3px 11px;margin:14px 0 8px}
+body[data-route=chat] .chctx{background:var(--sheet)}
+body[data-route=chat] .chsend:active,body[data-route=chat] .chbtn:active,.chstk:active{transform:scale(.92)}
+body[data-route=chat] .cm:active .cmb{filter:brightness(.97)}
+.chside-l .chi.on{box-shadow:inset 3px 0 0 var(--brand,#F2643D)}
+body.chsplit-on .chhead{border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);margin:0 -14px 6px;padding:12px 18px 10px}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2904,7 +2913,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.14.0';
+const BUILD = 'v7.15.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
