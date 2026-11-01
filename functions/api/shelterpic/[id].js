@@ -10,9 +10,9 @@ export async function onRequestGet({ params, waitUntil, request }) {
   const cache = caches.default;
   const hit = await cache.match(key);
   if (hit && !dbg) return new Response(hit.body, { status: hit.status, headers: hit.headers });
-  const nf = () => { const r = new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=3600" } }); waitUntil(cache.put(key, r.clone())); return r; };
+  const nf = () => { const r = new Response("Not found", { status: 404, headers: { ...cors, "Cache-Control": "public, max-age=21600" } }); waitUntil(cache.put(key, r.clone())); return r; };
   const ua = { "User-Agent": "Mozilla/5.0 (compatible; WangMiaoHome/1.0; +https://wangmiaotw.com)" };
-  let pic = "";
+  let pic = "", loaded = false;
   try {
     for (const pt of ["Announce", "Adopt"]) {
       const u = `https://www.pet.gov.tw/AnimalApp/AnnounceSingle.aspx?PageType=${pt}&AcNum=${encodeURIComponent(btoa(sub))}&UT=${encodeURIComponent(btoa(sub.slice(0, 5)))}`;
@@ -20,10 +20,12 @@ export async function onRequestGet({ params, waitUntil, request }) {
       const html = await r.text();
       if (dbg) dl.push([pt, r.status, html.length, html.slice(0, 120)]);
       if (!r.ok) continue;
+      loaded = true;
       const m = html.match(/og:image"\s+content="(https:\/\/www\.pet\.gov\.tw\/Upload\/pic\/[A-Za-z0-9_\-]+\.(?:png|jpe?g|gif|webp))"/i);
       if (m) { pic = m[1]; break; }
     }
   } catch (_) { return new Response("upstream", { status: 502, headers: cors }); }
+  if (!pic && !loaded) return new Response("upstream", { status: 502, headers: { ...cors, "Cache-Control": "no-store" } });   // 公告頁暫時打不開：不要記成「沒照片」
   if (!pic) return dbg ? new Response(JSON.stringify({ pic, dl })) : nf();
   let r;
   try { r = await fetch(pic, { headers: { ...ua, "Referer": "https://www.pet.gov.tw/AnimalApp/AnnounceMent_Announce.aspx", "Accept": "image/*" } }); } catch (e) { return new Response("upstream " + (dbg ? String(e) : ""), { status: 502, headers: cors }); }

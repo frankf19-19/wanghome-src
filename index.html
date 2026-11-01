@@ -2493,6 +2493,7 @@ html{-webkit-tap-highlight-color:transparent}
 .chbtn{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:0;background:var(--sheet);color:var(--ink-2);box-shadow:var(--lift);cursor:pointer}
 .chsend{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:0;background:var(--brand,#F2643D);color:#fff;cursor:pointer}.chsend:disabled{opacity:.5}
 .chblk{padding:16px;text-align:center;color:var(--ink-2);background:var(--sheet);border-radius:18px;margin:8px 0}
+.res li a{display:inline-block;padding:7px 0;min-height:32px}   /* 官方資源連結：手指比較好點 */
 .chat-ctaw{margin:10px 0 0}.chat-cta{display:flex;flex-direction:column;gap:2px;align-items:center;line-height:1.3}.chat-cta small{font-weight:600;font-size:12.5px;color:var(--ink-3)}
 .mcard{text-align:center;padding:28px 18px;background:var(--sheet);border-radius:26px;box-shadow:var(--lift);max-width:460px;margin:20px auto}
 .mcard h1{margin:12px 0 2px;font-size:26px}
@@ -2577,7 +2578,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.11.5';
+const BUILD = 'v6.11.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -8492,7 +8493,7 @@ function renderAbout(){
   ${CONFIG.CONTACT_EMAIL?`<p>聯絡站長：<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a></p>`:''}
   </div>`;
 }
-const LEGAL_DATE='2026 年 10 月 27 日';
+const LEGAL_DATE='2026 年 11 月 1 日';
 function contactLine(){return CONFIG.CONTACT_EMAIL?`<a href="mailto:${esc(CONFIG.CONTACT_EMAIL)}">${esc(CONFIG.CONTACT_EMAIL)}</a>`:'網站客服信箱（設定中，暫時請用各頁面的「檢舉」按鈕聯絡站長）'}
 function renderPrivacy(){
   setTitle('隱私權政策');
@@ -8503,16 +8504,17 @@ function renderPrivacy(){
   <ul>
     <li><b>登記走失：</b>毛孩名字、種類、外觀特徵、照片、走失時間與地點；飼主稱呼、電話、Email（可不填）、LINE ID（可不填）。</li>
     <li><b>目擊／拾獲／受傷通報：</b>時間、地點（你點選或同意定位的位置）、照片、狀況說明、通報者稱呼與聯絡方式（可不填）。</li>
-    <li><b>會員（可不註冊）：</b>Email、顯示名稱、通知設定與「家附近」中心點、毛孩檔案、健康紀錄、用藥紀錄、收據與病歷照片、追蹤的案件。</li>
+    <li><b>會員（可不註冊）：</b>Email、使用者名稱、大頭貼、通知設定與「家附近」中心點、毛孩檔案、健康紀錄、用藥紀錄、收據與病歷照片、追蹤的案件。用 LINE、Google、Apple 登入時，我們只會收到對方提供的帳號識別碼、Email 與名稱，不會拿到你在那些服務的密碼。</li>
+    <li><b>會員私訊：</b>你和其他會員之間的訊息與照片。只有對話雙方看得到（照片存在私密空間）；站長平常看不到內容，只有在你或對方按「檢舉」時，站長會收到被檢舉者最近 10 則訊息，用來判斷是否違規。封鎖名單也會保存，讓被封鎖的人不能再傳訊息給你。</li>
     <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址、還沒送出的草稿、領養篩選條件、你檢舉或封鎖而不想再看到的內容、外觀設定，只存在你的手機裡，不會上傳。</li>
     <li><b>定位與相機：</b>只有在你按下「用我目前位置」或選擇照片時才會使用，並會先徵求你的同意。照片的拍攝時間與地點只用來幫你自動填表。</li>
-    <li><b>手機通知（App）：</b>你在 App 開啟通知後，回診、疫苗、用藥提醒會排在你的手機上，由手機自己跳出，不經過我們的伺服器；關閉或登出就會全部取消。</li>
+    <li><b>手機通知（App）：</b>回診、疫苗、用藥提醒排在你的手機上，由手機自己跳出。有人看到你的毛孩、收到新私訊、家附近有毛孩走失時的推播，會由本站伺服器透過 Apple 推播服務送出；為此我們會保存你這支手機的推播代碼，登出或刪除帳號時一起刪除。可以隨時在手機「設定」關閉。</li>
     <li><b>技術紀錄：</b>為了防止濫用，本站會記錄送出登記、通報、目擊、檢舉時的 IP 位址：登記、通報、目擊的 IP 跟著內容最多保存 30 天（用來停權濫用的人），之後自動刪除；次數限制用的紀錄約 2 天後刪除；檢舉的 IP 與檢舉一起保存，用來避免重複檢舉。主機服務商也會保存一般連線紀錄。</li>
   </ul>
   <h2>二、哪些會公開、哪些不會</h2>
   <ul>
     <li><b>會公開：</b>走失案件與通報的內容與照片、飼主稱呼；飼主勾選公開時的電話；有填寫的 LINE ID。這些是協尋需要，可能被分享到 LINE、Facebook 等社群。</li>
-    <li><b>不會公開：</b>飼主的 Email、選擇不公開的電話、目擊回報者的聯絡方式（只有該案件飼主看得到）、會員的毛孩檔案與健康紀錄（只有你自己看得到）、家附近中心點。</li>
+    <li><b>不會公開：</b>飼主的 Email、選擇不公開的電話、目擊回報者的聯絡方式（只有該案件飼主看得到）、會員的毛孩檔案與健康紀錄（只有你自己看得到）、家附近中心點、私訊內容（只有對話雙方看得到）。會員頁只顯示使用者名稱、大頭貼和加入日期。</li>
   </ul>
   <h2>三、使用目的</h2>
   <p>協尋走失毛孩、比對收容所與拾獲通報、通知飼主有新的目擊、寄送健康到期提醒、統計找回方式、防止詐騙與濫用。我們<b>不販售資料、不放廣告、不做廣告追蹤</b>。</p>
@@ -8521,7 +8523,9 @@ function renderPrivacy(){
     <li>Supabase：資料庫、會員登入與寄信程式主機。</li>
     <li>Cloudflare：網站主機與網域、客服信箱轉寄；Cloudflare Web Analytics 統計匿名的瀏覽次數（不使用 Cookie、不追蹤個人）。</li>
     <li>Resend：寄送通知信、登入信與確認信。</li>
-    <li>OpenStreetMap／Nominatim：地圖與地址查詢（會傳送你選的座標；App 內的地址查詢經由本站 Cloudflare 主機轉送）。App 內的地圖圖片由 CARTO 提供。</li>
+    <li>Apple 推播服務（APNs）：送出 iPhone 上的推播通知（只傳送通知文字與手機推播代碼）。</li>
+    <li>LINE、Google、Apple 登入：你選擇用這些帳號登入時才會使用。</li>
+    <li>OpenStreetMap／Nominatim：地圖與地址查詢（會傳送你選的座標；App 內的地址查詢經由本站 Cloudflare 主機轉送）。App 內的地圖圖片同樣來自 OpenStreetMap，經由本站 Cloudflare 主機轉送。</li>
     <li>農業部「動物認領養」開放資料：收容所比對，由你的手機直接查詢。</li>
     <li>Google Fonts：網頁字型，開啟網頁時你的瀏覽器會向它下載（它會看到你的 IP）。</li>
     <li>GitHub：每日收容所比對、通知信與提醒信的排程主機。</li>
@@ -8533,6 +8537,7 @@ function renderPrivacy(){
     <li>走失案件：保存到你刪除、或站方因違規下架為止；結案後仍保留，作為找回方式的統計。</li>
     <li>拾獲／目擊通報：登記 60 天後自動結案，結案後不再公開通報者的聯絡方式；你也可以隨時用管理網址刪除。</li>
     <li>會員資料、毛孩檔案與健康紀錄：保存到你刪除帳號為止。</li>
+    <li>私訊：保存在對話裡，讓雙方都能回頭查看。刪除帳號時，你的對話成員資格、推播代碼與封鎖名單會一起刪除，你傳過的訊息改為不顯示傳送者；你在對話裡按「刪除這個對話」只會從你的列表移除，對方仍看得到。</li>
     <li>通知寄送紀錄：用來避免重複寄信，約 60 天後自動刪除。</li>
   </ul>
   <h2>六、你的權利（個人資料保護法第 3 條）</h2>
@@ -8566,6 +8571,7 @@ function renderTerms(){
     <li>買賣動物、廣告、垃圾訊息、大量灌資料或干擾網站運作。</li>
   </ul>
   <h2>四、檢舉與站方處理</h2>
+  <p>私訊對話右上角也可以檢舉、封鎖對方：封鎖後雙方都不能再傳訊息；檢舉時站長會收到被檢舉者最近 10 則訊息，用來判斷是否違規。</p>
   <p>每個案件、通報、目擊回報都有「檢舉」按鈕，檢舉後該內容會立刻從你的畫面隱藏；你也可以按「封鎖發布者」，不再看到這位發布者的任何內容（可在「我的」頁恢復）。</p>
   <p>站方收到檢舉後原則上 24 小時內處理，會隱藏或刪除違規內容，並停權違規者（停權後該帳號與網路無法再發布）。含詐騙、賭博、色情等可疑字眼的內容會被系統自動先隱藏，由站方確認。飼主也可以在管理頁直接退回不正確的目擊回報。</p>
   <h2>五、防詐提醒</h2>
@@ -8578,7 +8584,7 @@ function renderTerms(){
   <p>你可以隨時停止使用，並在「我的」頁刪除帳號。站方得因維護、違規處理或營運考量，暫停或終止部分或全部服務，並會盡量事先在網站上公告。</p>
   <h2>八、條款修改與適用法律</h2>
   <p>條款修改會更新在本頁。本條款以中華民國法律為準據法；如有爭議，以臺灣臺北地方法院為第一審管轄法院。</p>
-  <h2>八、聯絡我們</h2>
+  <h2>九、聯絡我們</h2>
   <p>${contactLine()}</p>
   </div>`;
 }
