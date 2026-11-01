@@ -2885,6 +2885,26 @@ body[data-route=chat] .chlog .cm,body.chsplit-on .chlog .cm,.lightbox .sheet{-we
 .msgacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-top:12px}
 .msgacts button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:0;border-radius:16px;background:var(--fill,#F2ECE5);color:var(--ink);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
 .msgacts button .ico{width:22px;height:22px}.msgacts button.danger{color:#D93A3F;background:color-mix(in srgb,#E5484D 12%,var(--sheet))}.msgacts button:active{transform:scale(.95)}
+/* 長按訊息浮起來的選單 */
+.msgpop{position:fixed;inset:0;z-index:300;background:none!important;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.msgpop .mp-dim{position:absolute;inset:0;background:rgba(30,20,14,.32);-webkit-backdrop-filter:blur(10px) saturate(1.1);backdrop-filter:blur(10px) saturate(1.1);opacity:0;transition:opacity .2s}
+.msgpop.show .mp-dim{opacity:1}
+.mp-box{position:absolute;display:flex;flex-direction:column;align-items:flex-start;gap:10px;max-width:calc(100vw - 20px)}.mp-box.me{align-items:flex-end}
+.mp-rx{display:flex;gap:2px;padding:6px 8px;border-radius:999px;background:var(--sheet);box-shadow:0 12px 30px -10px rgba(40,25,15,.45);transform:translateY(10px) scale(.6);opacity:0;transform-origin:20% 100%;transition:transform .32s cubic-bezier(.2,1.4,.4,1),opacity .18s}
+.mp-box.me .mp-rx{transform-origin:80% 100%}
+.mp-rx button{all:unset;cursor:pointer;width:42px;height:42px;display:grid;place-items:center;font-size:27px;border-radius:50%;transition:transform .15s}.mp-rx button:active{transform:scale(1.35)}.mp-rx button.on{background:var(--fill,#F2ECE5)}
+.mp-msg{overflow:hidden;transform:translateY(var(--dy,0)) scale(1);transition:transform .3s cubic-bezier(.2,1.2,.4,1);pointer-events:none;border-radius:20px}
+.msgpop.show .mp-msg{transform:translateY(0) scale(1.03);filter:drop-shadow(0 14px 22px rgba(40,25,15,.28))}
+.mp-msg>.cmb{margin:0!important;max-width:none}.mp-msg>.cstk svg{display:block}
+.mp-acts{min-width:200px;border-radius:16px;background:var(--sheet);box-shadow:0 16px 40px -12px rgba(40,25,15,.5);overflow:hidden;transform:translateY(-8px) scale(.85);opacity:0;transform-origin:20% 0%;transition:transform .3s cubic-bezier(.2,1.2,.4,1),opacity .18s}
+.mp-box.me .mp-acts{transform-origin:80% 0%}
+.msgpop.show .mp-rx,.msgpop.show .mp-acts{transform:none;opacity:1}
+.mp-acts button{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px;font-size:16px;font-weight:600;color:var(--ink);cursor:pointer}
+.mp-acts button+button{border-top:1px solid var(--line)}.mp-acts button .ico{width:20px;height:20px;color:var(--ink-2)}.mp-acts button:active{background:var(--fill,#F2ECE5)}
+.mp-acts button.danger,.mp-acts button.danger .ico{color:#E5484D}
+@media (prefers-reduced-motion:reduce){.msgpop *{transition:none!important}}
+.chlog .cm{position:relative}.cswr{position:absolute;right:-40px;top:50%;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--sheet);color:var(--ink-3);box-shadow:0 2px 8px rgba(40,25,15,.18);opacity:0;transform:translateY(-50%) scale(.5);pointer-events:none}
+.cswr .ico{width:18px;height:18px}.cswr.on{background:var(--cmine2,#E2552E);color:#fff}
 .cloc-wait{flex-direction:row!important;align-items:center;gap:10px!important}.cspin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:cspin .8s linear infinite;flex:none}@keyframes cspin{to{transform:rotate(360deg)}}.cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -3043,7 +3063,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.12';
+const BUILD = 'v7.17.13';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4541,6 +4561,24 @@ function msgSheet(opts,cur,onPick,pv){const el=document.createElement('div');el.
   el.innerHTML=`<div class="sheet xpick msgsheet" role="dialog" aria-label="訊息"><div class="grab" aria-hidden="true"></div>${pv?`<div class="msgpv">${pv}</div>`:''}<div class="rxrow">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="msgacts">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}">${IC[v]?ic(IC[v]):''}<span>${esc(l)}</span></button>`).join('')}</div></div>`;
   el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){const v=b.dataset.v,back=overlayOpen===el;closeOverlay(el);if(!back)return onPick(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);onPick(v)};addEventListener('popstate',ok);t=setTimeout(ok,450);return}if(e.target===el)closeOverlay(el)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
+// 長按訊息（像 LINE / iMessage）：訊息浮起來、背景變暗，表情列在訊息上方、功能選單在下方
+function msgPop(x,opts,cur,onPick){const tgt=x.querySelector('.cstk')||x.querySelector('.cmb')||x;const r0=tgt.getBoundingClientRect(),w0=tgt.offsetWidth,h0=tgt.offsetHeight;   // 按住時訊息有縮小，用原本大小
+  const r={left:r0.left-(w0-r0.width)/2,top:r0.top-(h0-r0.height)/2,width:w0,height:h0};r.right=r.left+w0;r.bottom=r.top+h0;const mine=x.classList.contains('me');
+  const IC={reply:'reply',copy:'copy',unsend:'undo',save:'download'};const el=document.createElement('div');el.className='lightbox msgpop';
+  el.innerHTML=`<div class="mp-dim"></div><div class="mp-box ${mine?'me':''}"><div class="mp-rx">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="mp-msg"></div><div class="mp-acts">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}"><span>${esc(l)}</span>${IC[v]?ic(IC[v]):''}</button>`).join('')}</div></div>`;
+  const cl=tgt.cloneNode(true);cl.querySelectorAll('svg.stk-a').forEach(v=>v.classList.remove('stk-a'));cl.style.boxSizing='border-box';cl.style.width=Math.ceil(r.width)+1+'px';cl.style.minHeight=r.height+'px';el.querySelector('.mp-msg').appendChild(cl);
+  if(tgt.classList.contains('cmb')){const st=getComputedStyle(tgt);cl.style.background=st.background;cl.style.color=st.color;cl.style.borderRadius=st.borderRadius;cl.style.font=st.font;cl.style.padding=st.padding;cl.style.letterSpacing=st.letterSpacing;cl.style.whiteSpace=st.whiteSpace;cl.style.wordBreak=st.wordBreak;cl.style.display=st.display;cl.style.flexDirection=st.flexDirection;cl.style.gap=st.gap}
+  let closing=false;const fin=v=>{if(closing)return;closing=true;el.classList.remove('show');const back=overlayOpen===el;setTimeout(()=>{closeOverlay(el);if(v==null)return;if(!back)return onPick(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);onPick(v)};addEventListener('popstate',ok);t=setTimeout(ok,450)},160)};
+  el.onclick=e=>{const b=e.target.closest('[data-v]');if(b)return fin(b.dataset.v);if(!e.target.closest('.mp-msg'))fin(null)};
+  openOverlay(el);
+  // 擺位置：訊息留在原本的位置；空間不夠就整組往上或往下推，表情列在上、選單在下
+  const box=el.querySelector('.mp-box'),rx=el.querySelector('.mp-rx'),acts=el.querySelector('.mp-acts');
+  const mb=document.getElementById('mbar');const safeT=Math.max(20,(mb&&mb.offsetParent?mb.getBoundingClientRect().bottom:0)+8),H=innerHeight;
+  const rxH=rx.offsetHeight,acH=acts.offsetHeight,g=10;let mh=Math.min(r.height,H*.42);el.querySelector('.mp-msg').style.maxHeight=mh+'px';
+  let top=r.top-rxH-g;const total=rxH+g+mh+g+acH;if(top<safeT)top=safeT;if(top+total>H-16)top=Math.max(safeT,H-16-total);
+  box.style.top=top+'px';if(mine){box.style.right=Math.max(10,innerWidth-r.right)+'px'}else box.style.left=Math.max(10,r.left)+'px';
+  el.querySelector('.mp-msg').style.transformOrigin=`${mine?'100%':'0%'} ${r.top-top-rxH-g<0?0:50}%`;el.style.setProperty('--dy',(r.top-(top+rxH+g))+'px');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')))}
 // 聊天背景（每個人自己選，記在這支手機）
 const CHT=[['milk','奶茶腳印','#FBF5EE','#F57B4F','#E2552E','#FFFFFF','D9A07A'],['sky','天空藍','#EDF5FD','#4FA3F5','#2D7AD6','#FFFFFF','7FA9D9'],['grass','草地綠','#EFF7EC','#3FB06B','#26874C','#FFFFFF','86B98C'],
   ['sakura','櫻花粉','#FDF0F4','#F27AA0','#D44E7C','#FFFFFF','E79AB4'],['lavender','薰衣草','#F3F0FC','#9A7BEA','#7354CF','#FFFFFF','A898DA'],['night','星空夜','#151A2B','#6E8BFF','#4B5FD6','#252C44','FFFFFF']];
@@ -4707,13 +4745,27 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
       const ph=x.querySelector('.cmph img');const opts=[['reply','回覆']];if(t)opts.push(['copy','複製文字']);if(ph)opts.push(['save','儲存照片']);if(mine&&Date.now()-Date.parse(m.created_at)<24*36e5)opts.push(['unsend','收回']);
       if(navigator.vibrate)try{navigator.vibrate(20)}catch(_){}
       const pv=t?`<span class="msgpv-t">${esc(t.innerText.slice(0,80))}</span>`:isStk(m)?`<span class="msgpv-s">${stkSVG((m.body||'').replace(/^\[stk:|\]$/g,''))}</span>`:ph?`<img src="${esc(ph.src)}" alt="">`:m.kind==='voice'?'<span class="msgpv-t">［語音］</span>':'<span class="msgpv-t">［訊息］</span>';
-      msgSheet(opts,(m.reactions||{})[me().id],async v=>{if(RX.includes(v))return react(m.id,v);if(v==='copy'){copy(t.innerText)}if(v==='reply')setReply(m.id);if(v==='save'&&ph)saveImageUrl(ph.src,'聊天照片');
+      msgPop(x,opts,(m.reactions||{})[me().id],async v=>{if(RX.includes(v))return react(m.id,v);if(v==='copy'){copy(t.innerText)}if(v==='reply')setReply(m.id);if(v==='save'&&ph)saveImageUrl(ph.src,'聊天照片');
         if(v==='unsend'){if(!await askSheet({title:'收回這則訊息？',body:'對方那邊也會一起消失，只會顯示「收回了一則訊息」。',ok:'收回',danger:true}))return;const {error}=await sb.rpc('chat_unsend',{p_id:m.id});if(error)return toast(/function|schema/i.test(error.message)?'收回功能還在更新中，請稍後再試':error.message.replace(/^.*?:\s*/,''),4000);
-          const el2=log.querySelector(`.cm[data-id="${m.id}"]`);if(el2){el2.classList.add('gone');setTimeout(()=>markDeleted(m.id),260)}else markDeleted(m.id);toast('已收回',1800)}},pv)};
+          const el2=log.querySelector(`.cm[data-id="${m.id}"]`);if(el2){el2.classList.add('gone');setTimeout(()=>markDeleted(m.id),260)}else markDeleted(m.id);toast('已收回',1800)}})};
     const unpress=()=>{log.querySelectorAll('.cm.press').forEach(y=>y.classList.remove('press'))};
-    log.addEventListener('touchstart',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a,button')||x.classList.contains('sys'))return;x.classList.add('press');lp=setTimeout(()=>{lp=null;unpress();menu(x)},480)},{passive:true});
-    ['touchend','touchmove','touchcancel'].forEach(ev=>log.addEventListener(ev,()=>{unpress();if(lp){clearTimeout(lp);lp=null}},{passive:true}));
+    log.addEventListener('touchstart',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a,button')||x.classList.contains('sys'))return;x.classList.add('press');lp=setTimeout(()=>{lp=null;unpress();menu(x)},420)},{passive:true});
+    let lx=0,ly=0;log.addEventListener('touchstart',e=>{lx=e.touches[0].clientX;ly=e.touches[0].clientY},{passive:true,capture:true});
+    log.addEventListener('touchmove',e=>{if(!lp)return;const t0=e.touches[0];if(Math.abs(t0.clientX-lx)>9||Math.abs(t0.clientY-ly)>9){unpress();clearTimeout(lp);lp=null}},{passive:true});
+    ['touchend','touchcancel'].forEach(ev=>log.addEventListener(ev,()=>{unpress();if(lp){clearTimeout(lp);lp=null}},{passive:true}));
     log.addEventListener('contextmenu',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a'))return;e.preventDefault();menu(x)})}
+  // 往左滑一則訊息＝回覆那一句（像 LINE）
+  {let sx=0,sy=0,row=null,mode=null,dx=0,hit=false;const MAX=78,TH=56;
+    log.addEventListener('touchstart',e=>{const x=e.target.closest('.cm');row=null;if(!x||x.classList.contains('sys')||x.classList.contains('pend')||x.classList.contains('del')||!byId[x.dataset.id])return;row=x;sx=e.touches[0].clientX;sy=e.touches[0].clientY;mode=null;dx=0;hit=false},{passive:true});
+    log.addEventListener('touchmove',e=>{if(!row)return;const t0=e.touches[0],mx=t0.clientX-sx,my=t0.clientY-sy;
+      if(!mode){if(Math.abs(mx)<10&&Math.abs(my)<10)return;mode=(mx<0&&Math.abs(mx)>Math.abs(my)*1.4)?'h':'v';if(mode!=='h'){row=null;return}
+        row.style.transition='none';if(!row.querySelector('.cswr'))row.insertAdjacentHTML('beforeend',`<span class="cswr" aria-hidden="true">${ic('reply')}</span>`)}
+      let v=Math.min(0,mx);if(v<-TH)v=-TH+(v+TH)*.35;dx=Math.max(-MAX,v);row.style.transform=`translateX(${dx}px)`;
+      const k=Math.min(1,-dx/TH),i=row.querySelector('.cswr');if(i){i.style.opacity=k;i.style.transform=`translateY(-50%) scale(${.5+k*.5})`;i.classList.toggle('on',k>=1)}
+      if(k>=1&&!hit){hit=true;if(navigator.vibrate)try{navigator.vibrate(12)}catch(_){}}else if(k<1)hit=false},{passive:true});
+    const end=()=>{if(!row)return;const x=row;row=null;if(mode!=='h')return;x.style.transition='transform .28s cubic-bezier(.2,1.2,.4,1)';x.style.transform='';const i=x.querySelector('.cswr');if(i){i.style.transition='opacity .2s';i.style.opacity=0;setTimeout(()=>i.remove(),260)}
+      if(dx<=-TH*.98){setReply(+x.dataset.id);const ta=$('#chIn');if(ta)try{ta.focus({preventScroll:true})}catch(_){}}};
+    log.addEventListener('touchend',end,{passive:true});log.addEventListener('touchcancel',end,{passive:true})}
   // 點引用的那一句：跳到原本的訊息
   log.addEventListener('click',e=>{const q=e.target.closest('.cq');if(!q)return;const el=log.querySelector(`.cm[data-id="${q.dataset.jump}"]`);if(!el)return toast('那則訊息在更早之前，請先按「看更早的訊息」');el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1200)});
   log.addEventListener('click',async e=>{const b=e.target.closest('.cmph');if(!b)return;const p=b.dataset.full;if(!urlCache[p]||Date.now()-(urlCache['_t'+p]||0)>50*60e3){delete urlCache[p];await signed([p])}if(urlCache[p]){const x=b.querySelector('.cmph-x');if(x)x.outerHTML=`<img src="${esc(urlCache[p])}" alt="照片">`;else{const all=[...log.querySelectorAll('.cmph[data-full]')].map(x=>x.dataset.full).filter(q=>urlCache[q]);lightbox(urlCache[p],{save:true,name:'聊天照片',list:all.map(q=>urlCache[q]),idx:Math.max(0,all.indexOf(p))})}}else toast('照片載入失敗，請稍後再試')});
