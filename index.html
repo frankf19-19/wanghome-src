@@ -2748,7 +2748,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.7';
+const BUILD = 'v7.2.8';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3998,16 +3998,19 @@ async function renderChats(){const _n=navId;setTitle('訊息');
     <div id="chList" class="chl"><div class="pskel"><div class="sk" style="height:68px"></div><div class="sk" style="height:68px"></div></div></div></div>`;
   $('#frAddBtn').onclick=()=>friendAddSheet();
   if(tab==='friends')return renderFriends(_n);
-  const {data,error}=await sb.rpc('chat_list');if(_n!==navId)return;const el=$('#chList');if(!el)return;
-  if(error){el.innerHTML=netErrHTML();return}
-  if(!data||!data.length){el.innerHTML=`<div class="xempty">${ic('chat')}<b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或加好友後直接聊天、傳照片，不用互留電話。</p><button type="button" class="btn" id="chAddF">${ic('userPlus')} 加好友</button></div>`;$('#chAddF').onclick=()=>friendAddSheet();chatUnreadCheck();return}
-  el.innerHTML=data.map(r=>{const name=r.other_name||'會員';const ctx=r.kind==='case'?`走失協尋・${r.title||''}`:r.kind==='found'?(r.title||'通報'):'私訊';
-    return `<a class="chi ${r.unread?'new':''}" href="#/chat/${r.chat_id}">${chatAva(name,r.other_avatar)}<span class="chb"><span class="cht"><b>${esc(name)}</b><small>${esc(chatTime(r.last_at))}</small></span><small class="chc">${esc(ctx)}</small><span class="chm">${r.last_sender===me().id?'你：':''}${esc(r.last_text||'')}</span></span>${r.unread?`<i class="chn">${r.unread>99?'99+':r.unread}</i>`:''}</a>`}).join('');
+  const el=$('#chList');if(!el)return;const ck=me().id+':c';
+  const draw=data=>{if(!data||!data.length){el.innerHTML=`<div class="xempty">${ic('chat')}<b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或加好友後直接聊天、傳照片，不用互留電話。</p><button type="button" class="btn" id="chAddF">${ic('userPlus')} 加好友</button></div>`;$('#chAddF').onclick=()=>friendAddSheet();return}
+    patchHTML(el,data.map(r=>{const name=r.other_name||'會員';const ctx=r.kind==='case'?`走失協尋・${r.title||''}`:r.kind==='found'?(r.title||'通報'):'私訊';
+    return `<a class="chi ${r.unread?'new':''}" href="#/chat/${r.chat_id}">${chatAva(name,r.other_avatar)}<span class="chb"><span class="cht"><b>${esc(name)}</b><small>${esc(chatTime(r.last_at))}</small></span><small class="chc">${esc(ctx)}</small><span class="chm">${r.last_sender===me().id?'你：':''}${esc(r.last_text||'')}</span></span>${r.unread?`<i class="chn">${r.unread>99?'99+':r.unread}</i>`:''}</a>`}).join(''));};
+  if(__chCache[ck])draw(__chCache[ck]);
+  const {data,error}=await sb.rpc('chat_list');if(_n!==navId||!el.isConnected)return;
+  if(error){if(!__chCache[ck])el.innerHTML=netErrHTML();return}
+  __chCache[ck]=data||[];draw(data);
   chatUnreadCheck()}
 /* ===== 好友 ===== */
 ICONS.userPlus='<circle cx="10" cy="8.5" r="3.8"/><path d="M3 20c1.3-3.6 3.9-5.4 7-5.4 1.5 0 2.9.4 4 1.2M18.5 13v6M15.5 16h6"/>';
 ICONS.qr='<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 14h2M14 18h2M18 18h2v2M16 16h2v2"/>';
-let __frN=0,__frCode='';
+let __frN=0,__frCode='';const __chCache={};
 const FR_REL={friend:'好友',sent:'已送出邀請',received:'想加你為好友'};
 function friendPing(uid){try{sb.auth.getSession().then(({data})=>{const t=data&&data.session&&data.session.access_token;if(!t)return;fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-message',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:'Bearer '+t},body:JSON.stringify({friend:uid})}).catch(()=>{})})}catch(_){}}
 async function friendAdd(uid,name){const {data,error}=await sb.rpc('friend_add',{p_user:uid});
@@ -4057,9 +4060,12 @@ function bindFriendRows(box,again){box.onclick=async e=>{const b=e.target.closes
   else if(b.dataset.fno)r=await friendRespond(b.dataset.fno,false,name);
   else if(b.dataset.fcancel){if(await askSheet({title:'取消好友邀請？',ok:'取消邀請',cancel:'不用'})){await sb.rpc('friend_remove',{p_user:b.dataset.fcancel});r='none'}}
   b.disabled=false;if(r!=null){const id=b.dataset.fadd||b.dataset.facc||b.dataset.fno||b.dataset.fcancel;if(row&&id)row.outerHTML=friendRowHTML({user_id:id,username:name,avatar_url:(row.querySelector('.cav img')||{}).src,rel:r},true);again()}}}
-async function renderFriends(_n){const el=$('#chList');
+async function renderFriends(_n){const el=$('#chList');const ck=me().id+':f';
+  if(__chCache[ck])drawFriends(el,__chCache[ck]);
   const {data,error}=await sb.rpc('friend_list');if(_n!==navId||!el.isConnected)return;
-  if(error){el.innerHTML=netErrHTML();return}
+  if(error){if(!__chCache[ck])el.innerHTML=netErrHTML();return}
+  __chCache[ck]=data||[];drawFriends(el,data||[]);chatUnreadCheck()}
+function drawFriends(el,data){
   const L=data||[],inc=L.filter(x=>x.rel==='received'),fr=L.filter(x=>x.rel==='friend'),sent=L.filter(x=>x.rel==='sent');
   el.innerHTML=`<button type="button" class="fradd" id="frAdd"><span class="fradd-ic">${ic('qr')}</span><span><b>加好友</b><small>輸入會員 ID、好友碼，或給朋友掃你的 QR Code</small></span><i>›</i></button>
     ${inc.length?`<h2 class="frh">好友邀請 <i class="chn">${inc.length}</i></h2><div class="frl">${inc.map(u=>friendRowHTML(u)).join('')}</div>`:''}
@@ -4067,7 +4073,7 @@ async function renderFriends(_n){const el=$('#chList');
     ${fr.length?`<div class="frl">${fr.map(u=>friendRowHTML(u)).join('')}</div>`:`<p class="frnone">還沒有好友。在對話裡按「加好友」，或把你的 QR Code 給朋友掃，就能隨時聊天。</p>`}
     ${sent.length?`<h2 class="frh">已送出的邀請</h2><div class="frl">${sent.map(u=>friendRowHTML(u)).join('')}</div>`:''}`;
   $('#frAdd').onclick=()=>friendAddSheet();
-  bindFriendRows(el,()=>{});chatUnreadCheck()}
+  bindFriendRows(el,()=>{})}
 // 邀請連結 #/add/<好友碼>：打開就看到對方，按一下加好友
 async function renderAddFriend(code){const _n=navId;setTitle('加好友');
   if(!me()){app.innerHTML=`<div class="xpage member"><div class="mcard"><span class="cav big">${ic('userPlus')}</span><h1>加好友</h1><p class="muted">登入後就能加對方為好友、直接聊天。</p><a class="btn" href="#/login" id="afLogin">登入／註冊（免費）</a></div></div>`;setReturn(location.hash);return}
