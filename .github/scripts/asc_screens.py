@@ -17,6 +17,11 @@ loc=[l for l in locs if l['attributes']['locale']==LOC][0]
 sets=api('GET',f"/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets?include=appScreenshots&limit=50")
 print('sets',[(s['attributes']['screenshotDisplayType'],len(s['relationships']['appScreenshots']['data'])) for s in sets['data']])
 PLAN={'APP_IPHONE_67':'iphone69_','APP_IPHONE_61':'iphone63_'}
+if os.environ.get('STATUS'):
+    for s0 in sets['data']:
+        st=api('GET',f"/appScreenshotSets/{s0['id']}/appScreenshots")['data']
+        print(s0['attributes']['screenshotDisplayType'],[(x['attributes']['fileName'],x['attributes'].get('assetDeliveryState')) for x in st])
+    raise SystemExit
 for dt,pre in PLAN.items():
     s=[x for x in sets['data'] if x['attributes']['screenshotDisplayType']==dt]
     if s: sid=s[0]['id']
