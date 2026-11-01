@@ -2770,6 +2770,13 @@ body.chfix[data-route=chat] .chat{position:fixed;left:0;right:0;top:var(--mbh,56
 body.chfix .chlog{flex:1 1 auto;min-height:0;max-height:none!important;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:4px 4px 6px;margin:0 -4px}
 body.chfix .chbar{position:relative!important;flex:none;margin:0 -12px}
 body.chfix .tabbar{display:none!important}
+.chsw .chact-l{left:0;right:auto;visibility:hidden}.chsw.sl .chact-l{visibility:visible}.chsw.sl .chact:not(.chact-l){visibility:hidden}
+.chact button.rd{background:#3E8EDE}.chact button.pn{background:#F2A33A}
+.chst{display:inline-flex;vertical-align:-2px;margin-left:5px;color:var(--ink-3)}.chst .ico{width:15px;height:15px}.chst.pin{color:#E8962E}
+.chi.pinned{background:color-mix(in srgb,var(--sheet) 88%,#F2A33A)}.chsw>.chi.pinned{background:color-mix(in srgb,var(--sheet) 90%,#F2A33A)}
+.chi.muted .chn{background:var(--ink-3)}
+.chtools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 4px 8px}.chtools .small{font-size:12.5px}
+@media (hover:hover) and (pointer:fine){.chtools>.small{display:none}}
 .chsw{position:relative;border-radius:20px;overflow:hidden;flex:none}
 .chsw>.chi{position:relative;z-index:1;background:var(--sheet);will-change:transform}
 .chact{position:absolute;top:0;bottom:0;right:0;width:156px;display:flex}
@@ -2933,7 +2940,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.4';
+const BUILD = 'v7.17.5';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4184,7 +4191,7 @@ function chatCta(kind,ref,label){const box=$('#chatCta');if(!box)return;const n0
     box.innerHTML=`<button type="button" class="btn ghost block chat-cta"><span>${ic('chat')} ${esc(label)}</span><small>不用留電話，可以傳照片</small></button>`;box.hidden=false;
     box.querySelector('button').onclick=()=>chatStart(kind,ref)}).catch(()=>{})}
 function chatRowHTML(r){const name=r.other_name||'會員';const ctx=r.kind==='case'?`走失協尋・${r.title||''}`:r.kind==='found'?(r.title||'通報'):'私訊';
-    return `<a class="chi ${r.unread?'new':''}" href="#/chat/${r.chat_id}">${chatAva(name,r.other_avatar)}<span class="chb"><span class="cht"><b>${esc(name)}</b><small>${esc(chatTime(r.last_at))}</small></span><small class="chc">${esc(ctx)}</small><span class="chm">${r.last_sender===me().id?'你：':''}${esc(/^\[stk:[a-z0-9_]+\]$/.test(r.last_text||'')?'［貼圖］':/^\[loc:/.test(r.last_text||'')?'［位置］':(r.last_text||''))}</span></span>${r.unread?`<i class="chn">${r.unread>99?'99+':r.unread}</i>`:''}</a>`}
+    return `<a class="chi ${r.unread?'new':''} ${r.muted?'muted':''} ${r.pinned?'pinned':''}" href="#/chat/${r.chat_id}" data-m="${r.muted?1:0}" data-p="${r.pinned?1:0}">${chatAva(name,r.other_avatar)}<span class="chb"><span class="cht"><b>${esc(name)}${r.muted?`<i class="chst" title="已靜音">${ic('bellOff')}</i>`:''}${r.pinned?`<i class="chst pin" title="已置頂">${ic('pinT')}</i>`:''}</b><small>${esc(chatTime(r.last_at))}</small></span><small class="chc">${esc(ctx)}</small><span class="chm">${r.last_sender===me().id?'你：':''}${esc(/^\[stk:[a-z0-9_]+\]$/.test(r.last_text||'')?'［貼圖］':/^\[loc:/.test(r.last_text||'')?'［位置］':(r.last_text||''))}</span></span>${r.unread?`<i class="chn">${r.unread>99?'99+':r.unread}</i>`:''}</a>`}
 // 電腦版（夠寬）：左邊對話列表、右邊聊天
 const chatSplit=()=>innerWidth>=1100;
 async function chatSideFill(side,active){const ck=me().id+':c';
@@ -4208,36 +4215,42 @@ async function renderChats(){const _n=navId;setTitle('訊息');
   {const xp=app.querySelector('.xpage.chats');if(xp)chatWrapSplit(xp,null,true)}
   if(tab==='friends')return renderFriends(_n);
   const el=$('#chList');if(!el)return;const ck=me().id+':c';
-  if(tab==='chats'){el.insertAdjacentHTML('beforebegin',`<label class="chsearch" hidden>${ic('search')}<input type="search" id="chQ" placeholder="搜尋名字或訊息" aria-label="搜尋對話"></label>`);
+  if(tab==='chats'){el.insertAdjacentHTML('beforebegin',`<label class="chsearch" hidden>${ic('search')}<input type="search" id="chQ" placeholder="搜尋名字或訊息" aria-label="搜尋對話"></label><div class="chtools"><span class="small muted">左右滑對話可以靜音、置頂、刪除</span><button type="button" class="linkbtn chreadall" hidden>全部標為已讀</button></div>`);
+    document.querySelector('.chreadall').onclick=async()=>{const {error}=await sb.rpc('chat_read_all');if(error)return toast('這個功能更新中，請稍後再試');toast('已全部標為已讀');chatsReload()};
     {let lp=null;const menu=a=>{const cid=(a.getAttribute('href')||'').split('/').pop();if(!cid)return;if(navigator.vibrate)try{navigator.vibrate(20)}catch(_){}
-      xPick(a.querySelector('.cht b')?a.querySelector('.cht b').textContent:'對話',[['read','標為已讀'],['mute','關閉通知（靜音）'],['unmute','打開通知'],['hide','刪除這個對話']],'',async v=>{
+      const isNew=a.classList.contains('new'),isM=a.dataset.m==='1',isP=a.dataset.p==='1';
+      xPick(a.querySelector('.cht b')?a.querySelector('.cht b').textContent:'對話',[isNew?['read','標為已讀']:['unread','標為未讀'],isP?['unpin','取消置頂']:['pin','置頂這個對話'],isM?['unmute','打開通知']:['mute','關閉通知（靜音）'],['hide','刪除這個對話']],'',v=>chAct(a,v))};
+    const chAct=async(a,v)=>{const cid=(a.getAttribute('href')||'').split('/').pop();if(!cid)return;{
         if(v==='read'){await sb.rpc('chat_read',{p_chat:cid});a.classList.remove('new');const n=a.querySelector('.chn');if(n)n.remove();chatUnreadCheck()}
-        if(v==='mute'||v==='unmute'){const {error}=await sb.rpc('chat_mute',{p_chat:cid,p_on:v==='mute'});toast(error?'沒有成功，請稍後再試':v==='mute'?'已靜音':'已打開通知')}
-        if(v==='hide'){if(!await askSheet({title:'刪除這個對話？',body:'只會從你的訊息列表移除；對方再傳訊息時會重新出現。',ok:'刪除',danger:true}))return;await sb.rpc('chat_hide',{p_chat:cid});(a.closest('.chsw')||a).remove();const c=__chCache[me().id+':c'];if(c)__chCache[me().id+':c']=c.filter(x=>x.chat_id!==cid)}})};
+        if(v==='unread'){const {error}=await sb.rpc('chat_mark_unread',{p_chat:cid});if(error)return toast('這個功能更新中，請稍後再試');chatsReload()}
+        if(v==='pin'||v==='unpin'){const {error}=await sb.rpc('chat_pin',{p_chat:cid,p_on:v==='pin'});if(error)return toast('這個功能更新中，請稍後再試');toast(v==='pin'?'已置頂':'已取消置頂');chatsReload()}
+        if(v==='mute'||v==='unmute'){const {error}=await sb.rpc('chat_mute',{p_chat:cid,p_on:v==='mute'});toast(error?'沒有成功，請稍後再試':v==='mute'?'已靜音：這個對話不會再推播':'已打開通知');if(!error)chatsReload()}
+        if(v==='hide'){if(!await askSheet({title:'刪除這個對話？',body:'只會從你的訊息列表移除；對方再傳訊息時會重新出現。',ok:'刪除',danger:true}))return;await sb.rpc('chat_hide',{p_chat:cid});(a.closest('.chsw')||a).remove();const c=__chCache[me().id+':c'];if(c)__chCache[me().id+':c']=c.filter(x=>x.chat_id!==cid)}}};
       el.addEventListener('touchstart',e=>{const a=e.target.closest('.chi');if(!a)return;lp=setTimeout(()=>{lp='done';menu(a)},520)},{passive:true});
       ['touchmove','touchcancel'].forEach(ev=>el.addEventListener(ev,()=>{if(lp&&lp!=='done')clearTimeout(lp);lp=null},{passive:true}));
       el.addEventListener('touchend',e=>{if(lp==='done'){e.preventDefault()}else if(lp)clearTimeout(lp);lp=null});
       el.addEventListener('click',e=>{if(e.target.closest('.chi')&&lp==='done'){e.preventDefault();lp=null}},true);
       el.addEventListener('contextmenu',e=>{const a=e.target.closest('.chi');if(!a)return;e.preventDefault();menu(a)});
       // 左滑對話：露出「更多」「刪除」（像 iPhone 的訊息 App）
-      {const W=156;let sx=0,sy=0,row=null,dx=0,mode=null,openRow=null,swiped=false;
+      {const W=156;let sx=0,sy=0,row=null,dx=0,mode=null,openRow=null,swiped=false,supp=0;
         const close=r=>{if(!r)return;const a=r.querySelector('.chi');if(a){a.style.transition='transform .25s cubic-bezier(.2,.8,.2,1)';a.style.transform=''}r.classList.remove('open');if(openRow===r)openRow=null};
-        const wrap=a=>{let r=a.parentElement;if(r&&r.classList.contains('chsw'))return r;r=document.createElement('div');r.className='chsw';a.before(r);
-          r.innerHTML=`<div class="chact" aria-hidden="true"><button type="button" data-a="more" tabindex="-1">${ic('dots')}<span>更多</span></button><button type="button" data-a="hide" class="del" tabindex="-1">${ic('trash')}<span>刪除</span></button></div>`;r.append(a);return r};
+        const wrap=a=>{let r=a.parentElement;if(r&&r.classList.contains('chsw'))return r;r=document.createElement('div');r.className='chsw';a.before(r);const isM=a.dataset.m==='1',isP=a.dataset.p==='1',isN=a.classList.contains('new');
+          r.innerHTML=`<div class="chact chact-l" aria-hidden="true"><button type="button" data-a="${isN?'read':'unread'}" class="rd" tabindex="-1">${ic(isN?'envOpen':'dot')}<span>${isN?'已讀':'未讀'}</span></button><button type="button" data-a="${isP?'unpin':'pin'}" class="pn" tabindex="-1">${ic('pinT')}<span>${isP?'取消置頂':'置頂'}</span></button></div><div class="chact" aria-hidden="true"><button type="button" data-a="${isM?'unmute':'mute'}" tabindex="-1">${ic(isM?'bell':'bellOff')}<span>${isM?'開通知':'靜音'}</span></button><button type="button" data-a="hide" class="del" tabindex="-1">${ic('trash')}<span>刪除</span></button></div>`;r.append(a);return r};
         const hideChat=async(a,r)=>{const cid=(a.getAttribute('href')||'').split('/').pop();const {error}=await sb.rpc('chat_hide',{p_chat:cid});if(error)return toast('沒有成功，請稍後再試');
           const box=r||a;box.style.transition='opacity .2s,max-height .25s .1s,margin .25s .1s';box.style.maxHeight=box.offsetHeight+'px';requestAnimationFrame(()=>{box.style.opacity='0';box.style.maxHeight='0';box.style.marginTop='-8px'});setTimeout(()=>box.remove(),400);
           const c=__chCache[me().id+':c'];if(c)__chCache[me().id+':c']=c.filter(x=>x.chat_id!==cid);chatUnreadCheck();toast('已刪除對話（對方再傳訊息時會重新出現）',2500)};
-        el.addEventListener('touchstart',e=>{if(openRow&&!e.target.closest('.chsw.open .chact'))close(openRow);const a=e.target.closest('.chi');if(!a)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;row=a;dx=0;mode=null;swiped=false},{passive:true});
+        el.addEventListener('touchstart',e=>{supp=0;if(openRow&&!e.target.closest('.chsw.open .chact')){close(openRow);supp=Date.now()}const a=e.target.closest('.chi');if(!a)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;row=a;dx=0;mode=null;swiped=false},{passive:true});
         el.addEventListener('touchmove',e=>{if(!row)return;const x=e.touches[0].clientX-sx,y=e.touches[0].clientY-sy;
           if(!mode){if(Math.abs(x)<8&&Math.abs(y)<8)return;mode=Math.abs(x)>Math.abs(y)*1.3?'h':'v';if(mode==='h'){wrap(row);row.style.transition='none'}}
-          if(mode!=='h')return;swiped=true;const base=row.parentElement.classList.contains('open')?-W:0;let v=base+x;if(v<-W)v=-W+(v+W)/3;dx=Math.min(0,v);row.style.transform=`translateX(${dx}px)`},{passive:true});
+          if(mode!=='h')return;swiped=true;const r=row.parentElement;const base=r.classList.contains('open')?(r.dataset.side==='l'?W:-W):0;let v=base+x;if(v<-W)v=-W+(v+W)/3;if(v>W)v=W+(v-W)/3;dx=v;r.classList.toggle('sl',dx>0);row.style.transform=`translateX(${dx}px)`},{passive:true});
         el.addEventListener('touchend',()=>{if(!row)return;if(mode==='h'){const r=row.parentElement;row.style.transition='transform .25s cubic-bezier(.2,.8,.2,1)';
-          if(dx<-W*.4){row.style.transform=`translateX(${-W}px)`;r.classList.add('open');if(openRow&&openRow!==r)close(openRow);openRow=r;if(navigator.vibrate)try{navigator.vibrate(10)}catch(_){}}else close(r)}row=null});
-        el.addEventListener('click',e=>{const b=e.target.closest('.chact button');if(b){e.preventDefault();const r=b.closest('.chsw'),a=r.querySelector('.chi');close(r);if(b.dataset.a==='hide')hideChat(a,r);else menu(a);return}
-          if(e.target.closest('.chi')&&(swiped||e.target.closest('.chsw.open'))){e.preventDefault();swiped=false;if(openRow)close(openRow)}},true)}}
+          if(Math.abs(dx)>W*.4){const L=dx>0;r.dataset.side=L?'l':'r';row.style.transform=`translateX(${L?W:-W}px)`;r.classList.add('open');if(openRow&&openRow!==r)close(openRow);openRow=r;if(navigator.vibrate)try{navigator.vibrate(10)}catch(_){}}else close(r)}row=null});
+        el.addEventListener('click',e=>{const b=e.target.closest('.chact button');if(b){e.preventDefault();const r=b.closest('.chsw'),a=r.querySelector('.chi');close(r);if(b.dataset.a==='hide')hideChat(a,r);else chAct(a,b.dataset.a);return}
+          if(e.target.closest('.chi')&&(swiped||(supp&&Date.now()-supp<1500)||e.target.closest('.chsw.open'))){e.preventDefault();e.stopPropagation();swiped=false;supp=0;if(openRow)close(openRow)}},true)}}
     $('#chQ').addEventListener('input',()=>{const q=$('#chQ').value.trim().toLowerCase();el.querySelectorAll('.chi').forEach(a=>{(a.closest('.chsw')||a).hidden=!!q&&!a.textContent.toLowerCase().includes(q)})})}
   const draw=data=>{if(!data||!data.length){el.innerHTML=`<div class="xempty chempty-l"><span class="chel-stk">${stkSVG('hi')}${stkSVG('love')}</span><b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或加好友後直接聊天、傳照片，不用互留電話。</p><button type="button" class="btn" id="chAddF">${ic('userPlus')} 加好友</button></div>`;$('#chAddF').onclick=()=>friendAddSheet();return}
-    patchHTML(el,data.map(chatRowHTML).join(''));};
+    patchHTML(el,data.map(chatRowHTML).join(''));{const ra=document.querySelector('.chreadall');if(ra)ra.hidden=!data.some(r=>r.unread)}};
+  const chatsReload=async()=>{const {data}=await sb.rpc('chat_list');if(data&&el.isConnected&&_n===navId){__chCache[ck]=data;draw(data)}chatUnreadCheck()};
   if(__chCache[ck])draw(__chCache[ck]);
   const {data,error}=await sb.rpc('chat_list');if(_n!==navId||!el.isConnected)return;
   if(error){if(!__chCache[ck])el.innerHTML=netErrHTML();return}
@@ -4448,6 +4461,7 @@ const RX=['❤️','😂','👍','😮','😢','🙏'];
 function chatRxHTML(m){const r=m.reactions||{};const ks=Object.keys(r);if(!ks.length||m.deleted)return '';const cnt={};ks.forEach(k=>{cnt[r[k]]=(cnt[r[k]]||0)+1});const mine=me()&&r[me().id];
   return `<span class="crx">${Object.entries(cnt).map(([e,n])=>`<button type="button" class="${e===mine?'on':''}" data-rx="${e}">${e}${n>1?`<i>${n}</i>`:''}</button>`).join('')}</span>`}
 ICONS.play='<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>';ICONS.pause='<path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/>';ICONS.mic='<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/>';
+ICONS.bellOff='<path d="M8.7 3.9A6 6 0 0 1 18 9c0 2.6.6 4.4 1.3 5.6M6.2 6.3C6.1 6.8 6 7.4 6 8c0 7-3 9-3 9h13M13.7 21a2 2 0 0 1-3.4 0M3 3l18 18"/>';ICONS.pinT='<path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z"/>';ICONS.envOpen='<path d="M3 9l9-6 9 6v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 9l9 6 9-6"/>';ICONS.dot='<circle cx="12" cy="12" r="5" fill="currentColor"/>';
 function voiceBars(seed){let x=(+seed||7)*9301+49297;const h=[];for(let i=0;i<22;i++){x=(x*9301+49297)%233280;h.push(4+Math.round(x/233280*14))}return h.map(v=>`<i style="height:${v}px"></i>`).join('')}
 let __voiceAudio=null,__voiceBtn=null;
 function voiceStop(){try{if(__voiceAudio){__voiceAudio.pause();__voiceAudio=null}}catch(_){}if(__voiceBtn){__voiceBtn.innerHTML=ic('play');const b=__voiceBtn.closest('.cvoice');if(b)b.style.setProperty('--vp','0%');__voiceBtn=null}}
