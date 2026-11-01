@@ -2764,7 +2764,13 @@ body[data-route=chat] .chsend.mic{background:var(--sheet);color:var(--brand-d,#D
 .chrec-x{border:0;background:var(--fill);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--ink)}.chrec-dot{width:10px;height:10px;border-radius:50%;background:#E53935;animation:recb 1s infinite}@keyframes recb{50%{opacity:.25}}.chrec-t{font-variant-numeric:tabular-nums;font-size:17px}.chrec-hint{flex:1;color:var(--ink-3);font-size:14px}.chrec-go{border:0;width:46px;height:46px;border-radius:50%;background:linear-gradient(140deg,var(--cmine1,#F57B4F),var(--cmine2,#E2552E));color:#fff;display:grid;place-items:center;cursor:pointer}
 .chtgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.chtgrid button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:center;font-size:13.5px}.chtpv{width:100%;aspect-ratio:3/4;border-radius:16px;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px;box-sizing:border-box;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}.chtpv i{display:block;height:16px;width:62%;border-radius:10px}.chtpv i.me{align-self:flex-end;width:52%}.chtgrid button.on .chtpv{box-shadow:0 0 0 3px var(--brand,#F2643D)}
 body[data-route=chat]{--chpat:none}
-.kbopen[data-route=chat] .chbar{padding-bottom:8px!important}.kbopen[data-route=chat] .tabbar{display:none!important}.cloc-wait{flex-direction:row!important;align-items:center;gap:10px!important}.cspin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:cspin .8s linear infinite;flex:none}@keyframes cspin{to{transform:rotate(360deg)}}.cm.pend{opacity:.6}.cm.pend time{font-style:italic}
+.kbopen[data-route=chat] .chbar{padding-bottom:8px!important}.kbopen[data-route=chat] .tabbar{display:none!important}.chfixh,body.chfix{overflow:hidden!important;overscroll-behavior:none}
+body.chfix .mbar{position:fixed!important;left:0;right:0;top:0}
+body.chfix[data-route=chat] .chat{position:fixed;left:0;right:0;top:var(--mbh,56px);bottom:0;margin:0!important;padding:0 16px;min-height:0!important;height:auto;z-index:1;will-change:transform;backface-visibility:hidden}
+body.chfix .chlog{flex:1 1 auto;min-height:0;max-height:none!important;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:6px}
+body.chfix .chbar{position:relative!important;flex:none;margin:0 -16px}
+body.chfix .tabbar{display:none!important}
+.cloc-wait{flex-direction:row!important;align-items:center;gap:10px!important}.cspin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:cspin .8s linear infinite;flex:none}@keyframes cspin{to{transform:rotate(360deg)}}.cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
 .cmph-x{display:grid;place-items:center;height:140px;padding:0 14px;text-align:center;font-size:13.5px;font-weight:700;background:rgba(0,0,0,.08);border-radius:14px}
@@ -2922,7 +2928,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.1';
+const BUILD = 'v7.17.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3283,7 +3289,7 @@ function geoWatch(cb,opt){   // 回傳停止函式
 async function geoGranted(){try{const G=IS_APP&&capPlugin('Geolocation');if(G&&G.checkPermissions){const r=await G.checkPermissions();return r.location==='granted'||r.coarseLocation==='granted'}if(navigator.permissions){const r=await navigator.permissions.query({name:'geolocation'});return r.state==='granted'}}catch(_){}return false}
 let __warm=0;
 let __kbInit=false;
-function kbInit(){if(__kbInit)return;__kbInit=true;const K=IS_APP&&capPlugin('Keyboard');if(!K||!K.addListener)return;const fire=v=>{if(v!=null)document.body.classList.toggle('kbopen',v);dispatchEvent(new Event('wh-kb'))};
+function kbInit(){if(__kbInit)return;__kbInit=true;const K=IS_APP&&capPlugin('Keyboard');if(!K||!K.addListener)return;const fire=v=>{if(v!=null&&!(document.body.classList.contains('chfix')&&window.__chkb))document.body.classList.toggle('kbopen',v);dispatchEvent(new Event('wh-kb'))};
   try{K.addListener('keyboardWillShow',()=>fire(true));K.addListener('keyboardDidShow',()=>fire(null));K.addListener('keyboardWillHide',()=>fire(false));K.addListener('keyboardDidHide',()=>fire(null))}catch(_){}}
 function geoWarm(){if(Date.now()-__warm<60000)return;__warm=Date.now();geoGranted().then(ok=>{if(!ok)return;let n=0;const stop=geoWatch(p=>{if(!p)return stop();__fix={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy||999,t:Date.now()};if(++n>=4||__fix.acc<=30)stop()});setTimeout(stop,20000)})}
 function geoFast(onPos,onFail){
@@ -3410,7 +3416,7 @@ function openAddSheet(){
 }
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.tb-add');if(a){e.preventDefault();openAddSheet()}const t=e.target.closest&&e.target.closest('.tabbar a');if(t){const i=t.querySelector('.i');if(i){i.classList.remove('pop');void i.offsetWidth;i.classList.add('pop')}}});
 function renderChrome(path,h){
-  document.body.classList.remove('chsplit-on');
+  document.body.classList.remove('chsplit-on');if(!/^#\/chat\//.test(location.hash))chfixLeave();
   document.body.dataset.route=(path.replace(/^#\/?/,'').split('/')[0]||'home');
   try{dsideSync()}catch(_){}
   app.classList.remove('withrail');document.querySelectorAll('#app>.drail').forEach(x=>x.remove());
@@ -4433,6 +4439,27 @@ function chatFetch(id){const now=Date.now(),o=__chatData[id];if(o&&o.p&&now-o.t<
     if(ch&&ch.kind==='case'&&ch.case_id)c=(await sb.from('cases_public').select('id,name,photos,status').eq('id',ch.case_id).maybeSingle()).data;if(ch&&ch.kind==='found'&&ch.found_id)f=(await sb.from('found_public').select('id,kind,photos,city,district').eq('id',ch.found_id).maybeSingle()).data;
     return {ppl,pe,ch,msgs:msgs||[],me2,c,f}})();
   __chatData[id]={p,t:now,res:o&&o.res};p.then(r=>{if(!r.pe&&!r.me2&&r.ch)__chatData[id].res=r},()=>{});return p}
+// App 聊天室：整個聊天固定在畫面上（訊息區自己捲），鍵盤上來時跟著鍵盤同步滑上去，不讓 iOS 整頁推來推去
+const winSc=()=>isMobV()&&!document.body.classList.contains('chfix');
+let __chfixOn=false;
+function chfixEnter(){const b=document.body;if(!IS_APP||!isMobV()){return}b.classList.add('chfix');document.documentElement.classList.add('chfixh');
+  const mb=document.getElementById('mbar');if(mb)document.documentElement.style.setProperty('--mbh',Math.round(mb.getBoundingClientRect().height)+'px');
+  if(__chfixOn)return;__chfixOn=true;const K=capPlugin('Keyboard');const ios=window.Capacitor&&Capacitor.getPlatform&&Capacitor.getPlatform()==='ios';
+  if(K&&ios){try{K.setResizeMode&&K.setResizeMode({mode:'none'}).catch(()=>{});K.setScroll&&K.setScroll({isDisabled:true}).catch(()=>{})}catch(_){}
+    if(!window.__chkb){window.__chkb=1;let open=false,T=0,H=0;
+      const parts=()=>{const c=document.querySelector('body.chfix .chat'),log=c&&c.querySelector('.chlog'),bar=c&&c.querySelector('.chbar');return {c,log,bar}};
+      const EASE='transform .3s cubic-bezier(.38,.7,.125,1)';
+      try{K.addListener('keyboardWillShow',info=>{const {c,log,bar}=parts();const h=Math.round(info&&info.keyboardHeight||0);if(!c||!log||!h)return;
+        if(open){const d=h-H;H=h;c.style.bottom=h+'px';log.scrollTop+=d;return}
+        open=true;H=h;const safe=bar?Math.max(0,parseFloat(getComputedStyle(bar).paddingBottom)-8):0;T=Math.max(0,h-safe);
+        c.style.transition=EASE;c.style.transform=`translate3d(0,${-T}px,0)`;
+        const fin=()=>{if(!open)return;c.style.transition='none';document.body.classList.add('kbopen');c.style.bottom=H+'px';c.style.transform='none';log.scrollTop+=T};
+        clearTimeout(c.__kt);c.__kt=setTimeout(fin,320)});
+      K.addListener('keyboardWillHide',()=>{const {c,log}=parts();if(!c||!log||!open){open=false;return}open=false;clearTimeout(c.__kt);
+        c.style.transition='none';document.body.classList.remove('kbopen');c.style.bottom='0px';c.style.transform=`translate3d(0,${-T}px,0)`;log.scrollTop-=T;
+        void c.offsetHeight;requestAnimationFrame(()=>{c.style.transition=EASE;c.style.transform='translate3d(0,0,0)'})})}catch(_){}}}}
+function chfixLeave(){const b=document.body;if(!b.classList.contains('chfix')&&!__chfixOn)return;b.classList.remove('chfix');document.documentElement.classList.remove('chfixh');
+  if(__chfixOn){__chfixOn=false;const K=capPlugin('Keyboard');try{K&&K.setScroll&&K.setScroll({isDisabled:false}).catch(()=>{});K&&K.setResizeMode&&K.setResizeMode({mode:'native'}).catch(()=>{})}catch(_){}}}
 async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply();
   if(!requireLogin('看訊息需要登入'))return;
   let R=__chatData[id]&&__chatData[id].res;
@@ -4459,7 +4486,8 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
       <button type="submit" class="chsend" id="chSend" aria-label="送出">${ic('send')}</button></form>`}
   </div>`;
   if(_n===navId)setNavAction(`<button type="button" aria-label="對話選項">${ic('dots')}</button>`,()=>{const b=$('#chMenu');if(b)b.click()});
-  {const c=app.querySelector('.chat');if(c)chatWrapSplit(c,id,false)}   // 手機：右上角「⋯」
+  {const c=app.querySelector('.chat');if(c)chatWrapSplit(c,id,false)}
+  if(!document.body.classList.contains('chsplit-on'))chfixEnter();   // 手機：右上角「⋯」
   const log=$('#chLog');const urlCache=__chatUrls;log.insertAdjacentHTML('afterbegin',`<p class="cnote">${ic('shield')}<span>${ch.kind==='dm'?'不要給對方密碼、驗證碼或匯款；見面約在人多的公共場所。':'見面約在派出所、動物醫院等公共場所。<b>要你先匯款、給驗證碼的都是詐騙。</b>'}</span></p>`);let lastId=0;const seen=new Set();
   let relNow='none';
   const drawFrBar=rel=>{relNow=rel;setMt(rel==='friend'?'好友':'');const old=$('#chFr');if(old){const w=old.closest('.chctx-row');old.remove();if(w){w.before(w.querySelector('.chctx'));w.remove()}}if(_n!==navId||!other.user_id||!other.username||other.blocked)return;
@@ -4492,15 +4520,15 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
     x.classList.toggle('cont',!!(same(p,x)&&Math.abs((+x.dataset.ts||0)-(+p.dataset.ts||0))<5*60e3));
     x.classList.toggle('hidet',!!(same(x,nx)&&!nx.classList.contains('pend')&&Math.floor((+x.dataset.ts||0)/60e3)===Math.floor((+nx.dataset.ts||0)/60e3)))}};
   const add=async(list,scroll=true)=>{list=list.filter(m=>!seen.has(m.id));if(!list.length||!me())return;list.forEach(m=>seen.add(m.id));await signed(list.flatMap(m=>(m.photo||'').split(',')));if(_n!==navId||!log.isConnected)return;
-    const near=scroll===true||(isMobV()?(document.documentElement.scrollHeight-scrollY-innerHeight<200):(log.scrollHeight-log.scrollTop-log.clientHeight<120));
+    const near=scroll===true||(winSc()?(document.documentElement.scrollHeight-scrollY-innerHeight<200):(log.scrollHeight-log.scrollTop-log.clientHeight<120));
     let h='';list.forEach(m=>{lastId=Math.max(lastId,m.id);if(!firstId||m.id<firstId)firstId=m.id;const dd=day(m.created_at);if(dd!==lastDay){lastDay=dd;h+=`<p class="cday">${esc(dd)}</p>`}h+=bubble(m)});
     const nBefore=log.children.length;log.insertAdjacentHTML('beforeend',h);if(scroll!==true)[...log.children].slice(nBefore).forEach(x=>{if(x.classList.contains('cm'))x.classList.add('pop')});regroup();if(near){requestAnimationFrame(()=>{toBottom(false)});setTimeout(()=>{try{if(pinned)toBottom(false)}catch(_){}},300)}else if(list.some(m=>m.sender_id!==me().id))showNew();
     {const cd=__chatData[id];if(cd&&cd.res)cd.res.msgs=Object.values(byId).sort((a,b)=>b.id-a.id).slice(0,80)}
     if(document.visibilityState==='visible')sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})};
-  const toBottom=(smooth)=>{hideNew();if(isMobV()){window.scrollTo({top:document.documentElement.scrollHeight,behavior:smooth?'smooth':'auto'})}else log.scrollTo({top:log.scrollHeight,behavior:smooth?'smooth':'auto'})};
+  const toBottom=(smooth)=>{hideNew();if(winSc()){window.scrollTo({top:document.documentElement.scrollHeight,behavior:smooth?'smooth':'auto'})}else log.scrollTo({top:log.scrollHeight,behavior:smooth?'smooth':'auto'})};
   const nb=document.createElement('button');nb.type='button';nb.className='chnew';nb.hidden=true;nb.innerHTML='↓ 有新訊息';nb.onclick=()=>toBottom(true);$('.chat').appendChild(nb);
   function showNew(){nb.hidden=false}function hideNew(){nb.hidden=true}
-  const atBottom=()=>isMobV()?(document.documentElement.scrollHeight-scrollY-innerHeight<160):(log.scrollHeight-log.scrollTop-log.clientHeight<100);
+  const atBottom=()=>winSc()?(document.documentElement.scrollHeight-scrollY-innerHeight<160):(log.scrollHeight-log.scrollTop-log.clientHeight<100);
   // 在最底下時：內容長高（照片載入、上面多一條提示）也一直貼著最新訊息；使用者往上滑就不動
   let pinned=true;{const onUser=()=>{setTimeout(()=>{pinned=atBottom()},120)};['touchmove','wheel'].forEach(ev=>{addEventListener(ev,onUser,{passive:true})});
     const onSc=()=>{if(_n!==navId){removeEventListener('scroll',onSc);return}if(atBottom()){hideNew();pinned=true}};addEventListener('scroll',onSc,{passive:true});log.addEventListener('scroll',onSc,{passive:true});
@@ -4513,7 +4541,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   const unreadN=(()=>{try{const r=(__chCache[me().id+':c']||[]).find(x=>x.chat_id===id);return r?+r.unread||0:0}catch(_){return 0}})();
   await add(msgs.slice().reverse(),true);
   // 未讀分隔線：「以下是未讀訊息」，並捲到那裡
-  if(unreadN>0&&_n===navId){const theirs=[...log.querySelectorAll('.cm:not(.me):not(.sys)')];const first=theirs[Math.max(0,theirs.length-unreadN)];if(first&&unreadN<theirs.length+1){first.insertAdjacentHTML('beforebegin','<p class="cunread">以下是未讀訊息</p>');if(unreadN>3)requestAnimationFrame(()=>{const d=log.querySelector('.cunread');if(d){pinned=false;if(isMobV())window.scrollTo(0,d.getBoundingClientRect().top+scrollY-90);else log.scrollTop=d.offsetTop-log.offsetTop-16}})}}
+  if(unreadN>0&&_n===navId){const theirs=[...log.querySelectorAll('.cm:not(.me):not(.sys)')];const first=theirs[Math.max(0,theirs.length-unreadN)];if(first&&unreadN<theirs.length+1){first.insertAdjacentHTML('beforebegin','<p class="cunread">以下是未讀訊息</p>');if(unreadN>3)requestAnimationFrame(()=>{const d=log.querySelector('.cunread');if(d){pinned=false;if(winSc())window.scrollTo(0,d.getBoundingClientRect().top+scrollY-90);else log.scrollTop=d.offsetTop-log.offsetTop-16}})}}
   {const r=(__chCache[me().id+':c']||[]).find(x=>x.chat_id===id);if(r)r.unread=0}
   if(_n!==navId||!log.isConnected)return;   // 已經換到別的對話
   // 更早的訊息：一次再抓 80 則，接在最上面，畫面停在原本的位置
@@ -4522,8 +4550,8 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
     const list=old.slice().reverse().filter(m=>!seen.has(m.id));list.forEach(m=>{seen.add(m.id);if(m.id<firstId)firstId=m.id});await signed(list.flatMap(m=>(m.photo||'').split(',')));
     let h='',ld='';list.forEach(m=>{const dd=day(m.created_at);if(dd!==ld){ld=dd;h+=`<p class="cday">${esc(dd)}</p>`}h+=bubble(m)});
     const f=log.querySelector('.cday');if(f&&f.textContent===ld)f.remove();
-    const y0=isMobV()?document.documentElement.scrollHeight:log.scrollHeight;{const nt=log.querySelector('.cnote');if(nt)nt.insertAdjacentHTML('afterend',h);else log.insertAdjacentHTML('afterbegin',h)}regroup();
-    if(isMobV())scrollTo(0,scrollY+document.documentElement.scrollHeight-y0);else log.scrollTop+=log.scrollHeight-y0;
+    const y0=winSc()?document.documentElement.scrollHeight:log.scrollHeight;{const nt=log.querySelector('.cnote');if(nt)nt.insertAdjacentHTML('afterend',h);else log.insertAdjacentHTML('afterbegin',h)}regroup();
+    if(winSc())scrollTo(0,scrollY+document.documentElement.scrollHeight-y0);else log.scrollTop+=log.scrollHeight-y0;
     if(old.length===80)olderBtn()}};
   if(msgs.length===80)olderBtn();
   // 長按訊息：複製（電腦按右鍵）
@@ -4575,7 +4603,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   let replyTo=null;const rb=document.createElement('div');rb.className='chreply';rb.hidden=true;if(form)form.before(rb);
   function setReply(mid){replyTo=mid||null;if(!mid){rb.hidden=true;rb.innerHTML='';return}const q=byId[mid];rb.innerHTML=`<span><b>回覆 ${esc(q&&q.sender_id===me().id?'自己':oname)}</b>${esc(snip(q).slice(0,50))}</span><button type="button" aria-label="取消回覆">✕</button>`;rb.hidden=false;rb.querySelector('button').onclick=()=>setReply(null);const i=$('#chIn');if(i)i.focus()}
   if(form){const inp=$('#chIn');{const sb2=$('#chSend');const canRec=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);const upd=()=>{const e=!inp.value.trim();sb2.classList.toggle('idle',e&&!canRec);sb2.classList.toggle('mic',e&&canRec);sb2.innerHTML=e&&canRec?ic('mic'):ic('send');sb2.setAttribute('aria-label',e&&canRec?'錄語音':'送出')};
-      sb2.addEventListener('click',e=>{if(!inp.value.trim()&&canRec){e.preventDefault();voiceRecord()}});inp.addEventListener('input',upd);upd();form.addEventListener('submit',()=>setTimeout(upd,0))}{let lastT=0;inp.addEventListener('input',()=>{const n=Date.now();if(n-lastT>2500&&inp.value.trim()&&__chatCh){lastT=n;try{__chatCh.send({type:'broadcast',event:'typing',payload:{u:me().id}})}catch(_){}}})}const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);inp.addEventListener('focus',()=>{if(!isMobV())return;setTimeout(()=>toBottom(true),350)});
+      sb2.addEventListener('click',e=>{if(!inp.value.trim()&&canRec){e.preventDefault();voiceRecord()}});inp.addEventListener('input',upd);upd();form.addEventListener('submit',()=>setTimeout(upd,0))}{let lastT=0;inp.addEventListener('input',()=>{const n=Date.now();if(n-lastT>2500&&inp.value.trim()&&__chatCh){lastT=n;try{__chatCh.send({type:'broadcast',event:'typing',payload:{u:me().id}})}catch(_){}}})}const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);inp.addEventListener('focus',()=>{if(!winSc())return;setTimeout(()=>toBottom(true),350)});
     inp.addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();form.requestSubmit()}});
     let busy=false;form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v||busy)return;busy=true;const b=$('#chSend');b.disabled=true;inp.value='';grow();
       const f0=log.querySelector('.cfirst');if(f0)f0.remove();log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span>${esc(v).replace(/\n/g,'<br>')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;regroup();requestAnimationFrame(()=>toBottom(false));
