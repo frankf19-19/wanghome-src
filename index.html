@@ -2922,7 +2922,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.0';
+const BUILD = 'v7.17.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4620,15 +4620,16 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
     // 傳位置：先確認，再邊定位邊顯示進度；有剛定位過的位置就直接用，不用等
     const sendLoc=async()=>{geoWarm();if(!await askSheet({title:'傳送你現在的位置？',body:'對方會看到一張小地圖，可以直接導航過去。',ok:'傳送位置'}))return;
       const go=async f=>{tmp.remove();await send('text',`[loc:${f.lat.toFixed(5)},${f.lng.toFixed(5)}]`)};
-      {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb cloc-wait"><span class="cspin" aria-hidden="true"></span><span>正在取得你的位置…</span></div><time>定位中</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));   // 等確認視窗完全收掉再動畫面（iOS 不然會整片空白）
+      {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb cloc-wait"><span class="cspin" aria-hidden="true"></span><span>正在取得你的位置…</span></div><time>定位中</time></div>`);const tmp=log.lastElementChild;toBottom(false);setTimeout(()=>{if(pinned)toBottom(false)},150);
       if(__fix&&Date.now()-__fix.t<120000&&__fix.acc<=200)return go(__fix);
       let best=null,first=0,done=false;const fin=f=>{if(done)return;done=true;stop();clearTimeout(t1);clearInterval(t2);if(f)go(f)};
       const stop=geoWatch((p2,code)=>{if(done)return;if(!p2){if(code===1){fin(null);tmp.remove();toast('沒有定位權限：請到手機設定允許汪喵回家使用位置',4500)}return}
         const f={lat:p2.coords.latitude,lng:p2.coords.longitude,acc:p2.coords.accuracy||999,t:Date.now()};__fix=f;if(!best||f.acc<best.acc)best=f;if(!first)first=Date.now();if(best.acc<=80)fin(best)},{maximumAge:120000});
       const t2=setInterval(()=>{if(first&&Date.now()-first>2500&&best)fin(best)},300);
       const t1=setTimeout(()=>{if(best)return fin(best);fin(null);tmp.remove();toast('定位失敗：請確認手機已開啟定位，或到窗邊、戶外再試一次',4500)},12000)};
-    $('#chPlus').onclick=()=>chatPlusSheet([['photo','image','相簿照片','一次最多 4 張'],['cam','camera','拍照',''],['loc','pin','傳送位置','傳一張小地圖'],...(helper&&ch.kind!=='dm'?[['ask','shield','請對方證明是飼主','問晶片末四碼等']]:[])],v=>{
-      if(v==='photo')$('#chPh').click();if(v==='cam')$('#chCam').click();if(v==='loc')sendLoc();if(v==='ask')askOwner()});
+    $('#chPlus').onclick=()=>{geoWarm();chatPlusSheet([['photo','image','相簿照片','一次最多 4 張'],['cam','camera','拍照',''],['loc','pin','傳送位置','傳一張小地圖'],...(helper&&ch.kind!=='dm'?[['ask','shield','請對方證明是飼主','問晶片末四碼等']]:[])],v=>{
+      if(v==='photo')$('#chPh').click();if(v==='cam')$('#chCam').click();if(v==='loc')sendLoc();if(v==='ask')askOwner()})};
     $('#chStk').onclick=()=>stkSheet(async sid=>{if(busy)return;busy=true;{const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm stk me pend pop" data-tmp><div class="cstk">${stkSVG(sid)}</div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));let {error}=await sendRPC('sticker',sid,null);
       if(error&&/格式錯誤/.test(error.message))({error}=await sendRPC('text','[stk:'+sid+']',null));   // 資料庫還沒更新時的備用格式
       if(error)toast(error.message.replace(/^.*?:\s*/,''),4500);else{await pull();ping()}tmp.remove();regroup();busy=false});
