@@ -2178,6 +2178,8 @@ html{-webkit-tap-highlight-color:transparent}
   .xsort b{color:var(--ink)}.xsort .ico{width:15px;height:15px;color:var(--ink-3)}
   .xseg{display:flex;background:var(--fill);border-radius:12px;padding:3px}
   .xseg button{width:40px;height:36px;border-radius:10px;border:0;background:none;display:grid;place-items:center;color:var(--ink-3);cursor:pointer}
+  .xsort{white-space:nowrap;min-width:0;flex-shrink:1;overflow:hidden}.xsort b{flex:none}
+  @media (max-width:359px){.xseg button{width:34px}.xsort{font-size:13.5px}.xtools{gap:6px}}
   .xseg button .ico{width:18px;height:18px}
   .xseg button.on{background:var(--sheet);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
   .xactive{display:flex;gap:6px;flex-wrap:wrap}.xactive:empty{display:none}.xactive{margin-top:8px}
@@ -2743,7 +2745,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.2';
+const BUILD = 'v7.2.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3327,6 +3329,9 @@ function parentOf(h){const p=h.split('?')[0];let m;
   if((m=p.match(/^#\/pet\/([0-9a-f-]{36})\/.+/)))return '#/pet/'+m[1];
   if(/^#\/(pet|health)\//.test(p))return '#/health';
   if(/^#\/admin/.test(p))return '#/me';
+  if(/^#\/chat\//.test(p))return '#/chats';
+  if(/^#\/(u|add)\//.test(p))return '#/chats?tab=friends';
+  if(p==='#/chats'||p==='#/inbox')return '#/me';
   if(/^#\/learn\/./.test(p))return '#/learn';
   return '#/'}
 function goBack(){if(overlayOpen){closeOverlay(overlayOpen);return}if(__wiz&&history.state&&history.state.wiz){history.back();return}if(navDepth>0){history.back();return}
