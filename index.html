@@ -2681,6 +2681,23 @@ body[data-route=me] #app .grid>.ccard:only-child{grid-column:1/-1;flex-direction
 body[data-route=chat] #app{padding-bottom:0!important}
 @media (max-width:760px){body[data-route=chat] .chbar{padding-bottom:calc(8px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom)))!important;padding-top:8px}body[data-route=chat] .chat{min-height:calc(100dvh - 56px - var(--safe-area-inset-top,env(safe-area-inset-top)))}}
 .xaddf{margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px 0 13px;border:0;border-radius:999px;background:var(--brand,#F2643D);color:#fff;font:inherit;font-size:15.5px;font-weight:800;cursor:pointer;box-shadow:0 6px 14px -8px rgba(217,80,43,.8)}.xaddf .ico{width:21px;height:21px}
+/* 手機：圖示按鈕加大（長輩比較好看、好按） */
+@media (max-width:760px){
+  .xtbtn,.xbell{width:48px!important;height:48px!important}.xtbtn .ico,.xbell .ico{width:25px!important;height:25px!important}
+  .xbell .xbadge{top:0;right:-3px}
+  .tabbar a:not(.cta):not(.cta2) svg.i{width:27px!important;height:27px!important}.tabbar a{font-size:12.5px!important}
+  .tabbar a.cta .i svg{width:28px!important;height:28px!important}
+  .chbtn{width:48px;height:48px}.chbtn .ico{width:24px;height:24px}.chsend{width:50px;height:50px}.chsend .ico{width:24px;height:24px}
+  .xseg button{height:40px}.xseg button svg,.xseg button .ico{width:21px;height:21px}
+  .xheart{width:46px;height:46px}.xheart .ico{width:24px;height:24px}
+  .xpt-row .xgear{width:48px;height:48px}.xpt-row .xgear .ico{width:23px;height:23px}
+  .mb-back{min-height:46px;font-size:17px}.mb-back svg{width:26px;height:26px}
+  .mb-act button .ico,.mb-act button svg{width:22px;height:22px}
+  .mb-home img,.mb-home svg{width:36px;height:36px}
+  .fri-act .btn.sm{min-height:42px;font-size:15px}
+  .chmenu{width:46px;height:46px}
+  .lb-x{width:50px;height:50px;font-size:20px}
+}
 .mcard{text-align:center;padding:28px 18px;background:var(--sheet);border-radius:26px;box-shadow:var(--lift);max-width:460px;margin:20px auto}
 .mcard h1{margin:12px 0 2px;font-size:26px}
 </style>
@@ -2764,7 +2781,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.3.2';
+const BUILD = 'v7.3.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
