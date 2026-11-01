@@ -2578,7 +2578,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.11.6';
+const BUILD = 'v6.11.7';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4549,14 +4549,18 @@ async function liveShelterMatch(c,token){
    案件詳情
    ============================================================ */
 const viewedCases=new Set();
-async function renderCase(id){const _n=navId;
-  clearInterval(refreshTimer);refreshTimer=null;
-  if(app.dataset.case!==id)if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('case');
-  let [{data:c,error},{data:sightings},{data:matches}]=await Promise.all([
+function caseFetch(id){return Promise.all([
     sb.from('cases_public').select('*').eq('id',id).single(),
     sb.from('sightings_public').select('*').eq('case_id',id).order('seen_at',{ascending:true}),
     sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false).order('score',{ascending:false})
-  ]);
+  ])}
+// 預先載入：手指一碰到案件卡片就開始抓資料（放開手指、換頁時資料多半已經到了）
+document.addEventListener('pointerdown',e=>{const a=e.target.closest&&e.target.closest('a[href^="#/case/"]');if(!a||!sb)return;const m=a.getAttribute('href').match(/^#\/case\/([0-9a-f-]{36})$/);if(!m)return;const pf=window.__casePf;if(pf&&pf.id===m[1]&&Date.now()-pf.t<15000)return;const p=caseFetch(m[1]);p.catch(()=>{});window.__casePf={id:m[1],t:Date.now(),p}},{passive:true,capture:true});
+async function renderCase(id){const _n=navId;
+  clearInterval(refreshTimer);refreshTimer=null;
+  if(app.dataset.case!==id)if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('case');
+  const pf=window.__casePf;window.__casePf=null;
+  let [{data:c,error},{data:sightings},{data:matches}]=await ((pf&&pf.id===id&&Date.now()-pf.t<15000)?pf.p:caseFetch(id));   // 手指按下卡片時就先開始載入
   if(_n!==navId)return;   // 已經切到別頁：不要再把這頁的按鈕綁到新頁面上
   sightings=sightings||[];matches=matches||[];
   if((error||!c)&&me()){try{const {data:ac}=await sb.rpc('admin_get_case',{p_id:id});if(ac)c=ac}catch(_){}if(_n!==navId)return}
