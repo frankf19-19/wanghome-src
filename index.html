@@ -2723,6 +2723,14 @@ body[data-route=chat] .chsend{transition:transform .15s,opacity .15s}body[data-r
 .chl .chi .chn{background:#D9502B;min-width:24px;height:24px;font-size:12.5px}
 .cunread{align-self:stretch;display:flex;align-items:center;gap:10px;margin:10px 0 6px;font-size:12.5px;font-weight:800;color:var(--brand-d,#D94A26)}.cunread::before,.cunread::after{content:'';flex:1;height:1.5px;background:color-mix(in srgb,var(--brand,#F2643D) 40%,transparent)}
 .chi{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.chctx-row{display:flex;align-items:center;gap:8px}.chctx-row .chctx{flex:1;min-width:0}
+.chfr-in{flex:none;border:0;padding:0;background:none;cursor:pointer}.chfr-in span{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px;border-radius:16px;background:linear-gradient(140deg,var(--cmine1,#F57B4F),var(--cmine2,#E2552E));color:#fff;font-weight:800;font-size:14px;box-shadow:0 6px 16px -10px rgba(226,85,46,.8)}.chfr-in .ico{width:18px;height:18px}
+@media (prefers-reduced-motion:no-preference){.cm.pop{animation:cpop .28s cubic-bezier(.2,1.4,.4,1)}.cm.me.pop{transform-origin:right bottom}.cm.pop:not(.me){transform-origin:left bottom}@keyframes cpop{0%{opacity:0;transform:scale(.85) translateY(8px)}100%{opacity:1;transform:none}}}
+.mtc[role=link]{cursor:pointer}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:50px;height:50px;border-radius:50%;border:0;background:rgba(255,255,255,.85);color:#222;font-size:30px;line-height:1;cursor:pointer;z-index:2}.lb-nav.prev{left:14px}.lb-nav.next{right:14px}
+.lb-n{position:absolute;top:calc(22px + var(--safe-area-inset-top,env(safe-area-inset-top)));left:50%;transform:translateX(-50%);color:#fff;font-weight:800;font-size:14px;background:rgba(0,0,0,.45);padding:4px 12px;border-radius:999px}
+@media (max-width:760px){.lb-nav{display:none}}
+.chat.drop{outline:3px dashed var(--brand,#F2643D);outline-offset:-8px}.chat.drop::after{content:'放開就傳送照片';position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--sheet);padding:14px 22px;border-radius:16px;font-weight:800;box-shadow:var(--lift);z-index:50}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2881,7 +2889,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.11.0';
+const BUILD = 'v7.12.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4352,7 +4360,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   const mine=ppl.find(p=>p.user_id===me().id)||{},other=ppl.find(p=>p.user_id!==me().id)||{};
   const oname=other.username||'會員';setTitle(oname);let ctxHTML='';
   const mtSub=ch.kind==='case'?'走失協尋':ch.kind==='found'?'拾獲／目擊通報':'私訊';
-  const setMt=extra=>{const mt=$('#mTitle');if(mt&&_n===navId)mt.innerHTML=`<span class="mtc">${chatAva(oname,other.avatar_url)}<span><b>${esc(oname)}</b><small>${esc(mtSub)}${extra?'・'+esc(extra):''}</small></span></span>`};setMt('');
+  const setMt=extra=>{const mt=$('#mTitle');if(mt&&_n===navId)mt.innerHTML=`<span class="mtc" ${other.username?`role="link" tabindex="0" onclick="location.hash='#/u/'+encodeURIComponent(${esc(JSON.stringify(other.username))})"`:''}>${chatAva(oname,other.avatar_url)}<span><b>${esc(oname)}</b><small>${esc(mtSub)}${extra?'・'+esc(extra):''}</small></span></span>`};setMt('');
   if(ch.kind==='case'&&ch.case_id){const {data:c}=await sb.from('cases_public').select('id,name,photos,status').eq('id',ch.case_id).maybeSingle();if(_n!==navId)return;
     if(c)ctxHTML=`<a class="chctx" href="#/case/${c.id}">${c.photos&&c.photos[0]?thumbImg(c.photos[0],''):spIc('dog')}<span><b>${esc(c.name||'走失協尋')}</b><small>${c.status==='searching'?'協尋中':'已結案'}・${mine.role==='owner'?'你的協尋案件':'對方的協尋案件'}</small></span><i>›</i></a>`}
   if(ch.kind==='found'&&ch.found_id){const {data:f}=await sb.from('found_public').select('id,kind,photos,city,district').eq('id',ch.found_id).maybeSingle();if(_n!==navId)return;
@@ -4371,11 +4379,13 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   {const c=app.querySelector('.chat');if(c)chatWrapSplit(c,id,false)}   // 手機：右上角「⋯」
   const log=$('#chLog');log.insertAdjacentHTML('afterbegin',`<p class="cnote">${ic('shield')}<span>${ch.kind==='dm'?'不要給對方密碼、驗證碼或匯款；見面約在人多的公共場所。':'見面約在派出所、動物醫院等公共場所。<b>要你先匯款、給驗證碼的都是詐騙。</b>'}</span></p>`);let lastId=0;const seen=new Set();const urlCache={};
   let relNow='none';
-  const drawFrBar=rel=>{relNow=rel;setMt(rel==='friend'?'好友':'');const old=$('#chFr');if(old)old.remove();if(_n!==navId||!other.user_id||!other.username||other.blocked)return;
+  const drawFrBar=rel=>{relNow=rel;setMt(rel==='friend'?'好友':'');const old=$('#chFr');if(old){const w=old.closest('.chctx-row');old.remove();if(w){w.before(w.querySelector('.chctx'));w.remove()}}if(_n!==navId||!other.user_id||!other.username||other.blocked)return;
     const talked=rel==='received'||msgs.some(m=>m.sender_id===other.user_id);if(!talked||!['none','received'].includes(rel))return;
-    log.insertAdjacentHTML('beforebegin',`<div class="chfr" id="chFr">${ic('userPlus')}<span>${rel==='received'?`<b>${esc(oname)}</b> 想加你為好友`:`加 <b>${esc(oname)}</b> 為好友`}</span><button type="button" class="btn sm" id="chFrGo">${rel==='received'?'接受':'加好友'}</button></div>`);
+    const cx=app.querySelector('.chctx');
+    if(cx){cx.insertAdjacentHTML('afterend',`<button type="button" class="chfr-in" id="chFr"><span id="chFrGo">${ic('userPlus')} ${rel==='received'?'接受好友':'加好友'}</span></button>`);const w=document.createElement('div');w.className='chctx-row';cx.before(w);w.append(cx,$('#chFr'))}
+    else log.insertAdjacentHTML('beforebegin',`<div class="chfr" id="chFr">${ic('userPlus')}<span>${rel==='received'?`<b>${esc(oname)}</b> 想加你為好友`:`加 <b>${esc(oname)}</b> 為好友`}</span><button type="button" class="btn sm" id="chFrGo">${rel==='received'?'接受':'加好友'}</button></div>`);
     try{if(pinned)requestAnimationFrame(()=>toBottom(false))}catch(_){}
-    $('#chFrGo').onclick=async e=>{e.target.disabled=true;const r=rel==='received'?await friendRespond(other.user_id,true,oname):await friendAdd(other.user_id,oname);e.target.disabled=false;if(r)drawFrBar(r)}};
+    $('#chFr').onclick=null;$('#chFrGo').onclick=async e=>{e.stopPropagation();e.target.disabled=true;const r=rel==='received'?await friendRespond(other.user_id,true,oname):await friendAdd(other.user_id,oname);e.target.disabled=false;if(r)drawFrBar(r)}};
   if(other.user_id&&other.username&&!other.blocked)sb.rpc('friend_rel',{p_user:other.user_id}).then(({data})=>drawFrBar(data||'none'),()=>{});
   const signed=async paths=>{const need=paths.filter(p=>p&&!urlCache[p]);if(need.length){try{const {data}=await sb.storage.from('chat').createSignedUrls(need,3600);(data||[]).forEach(x=>{if(x.signedUrl){urlCache[x.path]=x.signedUrl;urlCache['_t'+x.path]=Date.now()}})}catch(_){}}};
   const oAva=`<a class="cmav" ${other.username?`href="#/u/${encodeURIComponent(other.username)}"`:''} aria-hidden="true" tabindex="-1">${chatAva(oname,other.avatar_url)}</a>`;
@@ -4399,7 +4409,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   const add=async(list,scroll=true)=>{list=list.filter(m=>!seen.has(m.id));if(!list.length||!me())return;list.forEach(m=>seen.add(m.id));await signed(list.map(m=>m.photo));if(_n!==navId||!log.isConnected)return;
     const near=scroll===true||(isMobV()?(document.documentElement.scrollHeight-scrollY-innerHeight<200):(log.scrollHeight-log.scrollTop-log.clientHeight<120));
     let h='';list.forEach(m=>{lastId=Math.max(lastId,m.id);if(!firstId||m.id<firstId)firstId=m.id;const dd=day(m.created_at);if(dd!==lastDay){lastDay=dd;h+=`<p class="cday">${esc(dd)}</p>`}h+=bubble(m)});
-    log.insertAdjacentHTML('beforeend',h);regroup();if(near){requestAnimationFrame(()=>{toBottom(false)});setTimeout(()=>{try{if(pinned)toBottom(false)}catch(_){}},300)}else if(list.some(m=>m.sender_id!==me().id))showNew();
+    const nBefore=log.children.length;log.insertAdjacentHTML('beforeend',h);if(scroll!==true)[...log.children].slice(nBefore).forEach(x=>{if(x.classList.contains('cm'))x.classList.add('pop')});regroup();if(near){requestAnimationFrame(()=>{toBottom(false)});setTimeout(()=>{try{if(pinned)toBottom(false)}catch(_){}},300)}else if(list.some(m=>m.sender_id!==me().id))showNew();
     if(document.visibilityState==='visible')sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})};
   const toBottom=(smooth)=>{hideNew();if(isMobV()){window.scrollTo({top:document.documentElement.scrollHeight,behavior:smooth?'smooth':'auto'})}else log.scrollTo({top:log.scrollHeight,behavior:smooth?'smooth':'auto'})};
   const nb=document.createElement('button');nb.type='button';nb.className='chnew';nb.hidden=true;nb.innerHTML='↓ 有新訊息';nb.onclick=()=>toBottom(true);$('.chat').appendChild(nb);
@@ -4437,7 +4447,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
     log.addEventListener('contextmenu',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a'))return;e.preventDefault();menu(x)})}
   // 點引用的那一句：跳到原本的訊息
   log.addEventListener('click',e=>{const q=e.target.closest('.cq');if(!q)return;const el=log.querySelector(`.cm[data-id="${q.dataset.jump}"]`);if(!el)return toast('那則訊息在更早之前，請先按「看更早的訊息」');el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1200)});
-  log.addEventListener('click',async e=>{const b=e.target.closest('.cmph');if(!b)return;const p=b.dataset.full;if(!urlCache[p]||Date.now()-(urlCache['_t'+p]||0)>50*60e3){delete urlCache[p];await signed([p])}if(urlCache[p]){const x=b.querySelector('.cmph-x');if(x)x.outerHTML=`<img src="${esc(urlCache[p])}" alt="照片">`;else lightbox(urlCache[p],{save:true,name:'聊天照片'})}else toast('照片載入失敗，請稍後再試')});
+  log.addEventListener('click',async e=>{const b=e.target.closest('.cmph');if(!b)return;const p=b.dataset.full;if(!urlCache[p]||Date.now()-(urlCache['_t'+p]||0)>50*60e3){delete urlCache[p];await signed([p])}if(urlCache[p]){const x=b.querySelector('.cmph-x');if(x)x.outerHTML=`<img src="${esc(urlCache[p])}" alt="照片">`;else{const all=[...log.querySelectorAll('.cmph[data-full]')].map(x=>x.dataset.full).filter(q=>urlCache[q]);lightbox(urlCache[p],{save:true,name:'聊天照片',list:all.map(q=>urlCache[q]),idx:Math.max(0,all.indexOf(p))})}}else toast('照片載入失敗，請稍後再試')});
   // 新訊息：即時（Realtime）＋每 8 秒補抓一次（網路不穩時也收得到）
   chatStop();
   // 已讀：對方最後讀到的時間之前、我傳的訊息都標「已讀」
@@ -4465,27 +4475,34 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   const sendRPC=async(kind,body,photo)=>{const rp=replyTo;let r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null,...(rp?{p_reply:rp}:{})});
     if(r.error&&rp&&/p_reply|function|schema cache/i.test(r.error.message))r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null});   // 資料庫還沒更新：先不帶回覆
     if(!r.error)setReply(null);return r};
-  const send=async(kind,body,photo)=>{const {error}=await sendRPC(kind,body,photo);if(error){toast(error.message.replace(/^.*?:\s*/,''),4500);return false}const f=log.querySelector('.cfirst');if(f)f.remove();{const q=$('.chquick');if(q)q.remove()}await pull();ping();return true};
+  const send=async(kind,body,photo)=>{try{const HP=capPlugin('Haptics');if(HP&&HP.impact)HP.impact({style:'LIGHT'}).catch(()=>{})}catch(_){}const {error}=await sendRPC(kind,body,photo);if(error){toast(error.message.replace(/^.*?:\s*/,''),4500);return false}const f=log.querySelector('.cfirst');if(f)f.remove();{const q=$('.chquick');if(q)q.remove()}await pull();ping();return true};
   const form=$('#chForm');
   let replyTo=null;const rb=document.createElement('div');rb.className='chreply';rb.hidden=true;if(form)form.before(rb);
   function setReply(mid){replyTo=mid||null;if(!mid){rb.hidden=true;rb.innerHTML='';return}const q=byId[mid];rb.innerHTML=`<span><b>回覆 ${esc(q&&q.sender_id===me().id?'自己':oname)}</b>${esc(snip(q).slice(0,50))}</span><button type="button" aria-label="取消回覆">✕</button>`;rb.hidden=false;rb.querySelector('button').onclick=()=>setReply(null);const i=$('#chIn');if(i)i.focus()}
   if(form){const inp=$('#chIn');{const sb2=$('#chSend');const upd=()=>sb2.classList.toggle('idle',!inp.value.trim());inp.addEventListener('input',upd);upd();form.addEventListener('submit',()=>setTimeout(upd,0))}{let lastT=0;inp.addEventListener('input',()=>{const n=Date.now();if(n-lastT>2500&&inp.value.trim()&&__chatCh){lastT=n;try{__chatCh.send({type:'broadcast',event:'typing',payload:{u:me().id}})}catch(_){}}})}const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);inp.addEventListener('focus',()=>{if(!isMobV())return;setTimeout(()=>toBottom(true),350)});
     inp.addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();form.requestSubmit()}});
     let busy=false;form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v||busy)return;busy=true;const b=$('#chSend');b.disabled=true;inp.value='';grow();
-      const f0=log.querySelector('.cfirst');if(f0)f0.remove();log.insertAdjacentHTML('beforeend',`<div class="cm me pend" data-tmp><div class="cmb"><span>${esc(v).replace(/\n/g,'<br>')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;regroup();requestAnimationFrame(()=>toBottom(false));
+      const f0=log.querySelector('.cfirst');if(f0)f0.remove();log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span>${esc(v).replace(/\n/g,'<br>')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;regroup();requestAnimationFrame(()=>toBottom(false));
       const ok=await send('text',v);tmp.remove();regroup();if(!ok){inp.value=v;grow()}busy=false;b.disabled=false;inp.focus()};
     const sendPhoto=async f=>{const pv=URL.createObjectURL(f);
-      {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend" data-tmp><div class="cmb"><span class="cmph"><img src="${pv}" alt=""></span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
+      {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span class="cmph"><img src="${pv}" alt=""></span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
       try{const blob=await compressImage(f,1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
         urlCache[path]=pv;urlCache['_t'+path]=Date.now();const cap=inp.value.trim();if(await send('photo',cap,path)){inp.value='';grow()}}catch(err){toast('照片沒有傳成功：'+(err.message||'網路不穩'),4500)}tmp.remove();regroup()};
     const onPick=async e=>{const fs=[...e.target.files].slice(0,4);if(e.target.files.length>4)toast('一次最多 4 張，先傳前 4 張',3000);e.target.value='';for(const f of fs)await sendPhoto(f)};
     $('#chPh').onchange=onPick;$('#chCam').onchange=onPick;
+    // 電腦：把照片拖進來、或 Ctrl+V 貼上就傳；Esc 取消回覆
+    {const box=$('.chat');const imgs=dt=>[...(dt&&dt.files||[])].filter(f=>/^image\//.test(f.type)).slice(0,4);
+      box.addEventListener('dragover',e=>{if([...(e.dataTransfer&&e.dataTransfer.types||[])].includes('Files')){e.preventDefault();box.classList.add('drop')}});
+      box.addEventListener('dragleave',e=>{if(e.target===box||!box.contains(e.relatedTarget))box.classList.remove('drop')});
+      box.addEventListener('drop',async e=>{box.classList.remove('drop');const fs=imgs(e.dataTransfer);if(!fs.length)return;e.preventDefault();for(const f of fs)await sendPhoto(f)});
+      inp.addEventListener('paste',async e=>{const fs=[...(e.clipboardData&&e.clipboardData.items||[])].filter(x=>x.kind==='file'&&/^image\//.test(x.type)).map(x=>x.getAsFile()).filter(Boolean).slice(0,4);if(!fs.length)return;e.preventDefault();for(const f of fs)await sendPhoto(f)});
+      inp.addEventListener('keydown',e=>{if(e.key==='Escape'&&replyTo){e.preventDefault();setReply(null)}})}
     const sendLoc=()=>{if(!navigator.geolocation)return toast('這台裝置沒辦法定位');toast('定位中…',6000);navigator.geolocation.getCurrentPosition(async p=>{const la=p.coords.latitude.toFixed(5),lo=p.coords.longitude.toFixed(5);
         if(!await askSheet({title:'傳送你現在的位置？',body:'對方會看到一張小地圖，可以直接導航過去。',ok:'傳送位置'}))return;await send('text',`[loc:${la},${lo}]`)},
       e=>toast(e&&e.code===1?'沒有定位權限：請到手機設定允許汪喵回家使用位置':'定位失敗，請到戶外或稍後再試',4500),{enableHighAccuracy:true,timeout:15000,maximumAge:60000})};
     $('#chPlus').onclick=()=>chatPlusSheet([['photo','image','相簿照片','一次最多 4 張'],['cam','camera','拍照',''],['loc','pin','傳送位置','傳一張小地圖'],...(helper&&ch.kind!=='dm'?[['ask','shield','請對方證明是飼主','問晶片末四碼等']]:[])],v=>{
       if(v==='photo')$('#chPh').click();if(v==='cam')$('#chCam').click();if(v==='loc')sendLoc();if(v==='ask')askOwner()});
-    $('#chStk').onclick=()=>stkSheet(async sid=>{if(busy)return;busy=true;{const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm stk me pend" data-tmp><div class="cstk">${stkSVG(sid)}</div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));let {error}=await sendRPC('sticker',sid,null);
+    $('#chStk').onclick=()=>stkSheet(async sid=>{if(busy)return;busy=true;{const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm stk me pend pop" data-tmp><div class="cstk">${stkSVG(sid)}</div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));let {error}=await sendRPC('sticker',sid,null);
       if(error&&/格式錯誤/.test(error.message))({error}=await sendRPC('text','[stk:'+sid+']',null));   // 資料庫還沒更新時的備用格式
       if(error)toast(error.message.replace(/^.*?:\s*/,''),4500);else{await pull();ping()}tmp.remove();regroup();busy=false});
     const askOwner=()=>busy?null:xPick('請對方證明是飼主',CHAT_ASKS.map(t=>[t,t]).concat([['__own','自己寫一個問題…']]),'',async v=>{let q=v;if(v==='__own'){q=await textSheet({title:'想請對方回答什麼？',max:200,placeholder:'例：牠最喜歡的玩具是什麼？'});if(!q||!q.trim())return}send('ask',q.trim())});
@@ -5443,8 +5460,13 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   d.innerHTML=`<div class="mph-card"><img src="${esc(b.dataset.photo)}" referrerpolicy="no-referrer" alt="收容所照片"><div class="mph-b"><b>${esc(b.dataset.name)}</b><span class="muted small">收容編號 ${esc(b.dataset.sub)}</span>
    <div class="mph-acts">${b.dataset.link?`<a class="btn" target="_blank" rel="noopener" href="${esc(b.dataset.link)}">看收容所公告 ↗</a>`:''}${b.dataset.tel?`<a class="btn ghost" href="tel:${esc(b.dataset.tel)}">${ic('phone')} 打電話</a>`:''}<button type="button" class="btn ghost mph-x">關閉</button></div></div></div>`;
   d.onclick=ev=>{if(ev.target===d||ev.target.closest('.mph-x'))closeOverlay(d)};openOverlay(d)});
-function lightbox(u,opt={}){u=safeU(u);if(!u)return;const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<button type="button" class="lb-x" aria-label="關閉">✕</button><img src="${esc(u)}" referrerpolicy="no-referrer" alt="">${opt.save?`<button type="button" class="lb-save">${ic('download')} 存到手機</button>`:''}`;
-  d.onclick=e=>{const sv=e.target.closest('.lb-save');if(sv){e.stopPropagation();sv.disabled=true;saveImageUrl(u,opt.name||'汪喵回家照片').finally(()=>{sv.disabled=false});return}closeOverlay(d)};openOverlay(d)}
+function lightbox(u,opt={}){u=safeU(u);if(!u)return;const L=(opt.list||[]).map(safeU).filter(Boolean);let i=L.length?Math.max(0,L.indexOf(u)):0;if(!L.length)L.push(u);
+  const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<button type="button" class="lb-x" aria-label="關閉">✕</button><img src="${esc(u)}" referrerpolicy="no-referrer" alt="">${L.length>1?`<button type="button" class="lb-nav prev" aria-label="上一張">‹</button><button type="button" class="lb-nav next" aria-label="下一張">›</button><span class="lb-n"></span>`:''}${opt.save?`<button type="button" class="lb-save">${ic('download')} 存到手機</button>`:''}`;
+  const img=d.querySelector('img'),n=d.querySelector('.lb-n');const show=k=>{i=(k+L.length)%L.length;img.src=L[i];if(n)n.textContent=`${i+1} / ${L.length}`};show(i);
+  d.onclick=e=>{const sv=e.target.closest('.lb-save');if(sv){e.stopPropagation();sv.disabled=true;saveImageUrl(L[i],opt.name||'汪喵回家照片').finally(()=>{sv.disabled=false});return}const nv=e.target.closest('.lb-nav');if(nv){e.stopPropagation();show(i+(nv.classList.contains('next')?1:-1));return}closeOverlay(d)};
+  if(L.length>1){let x0=null;d.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});d.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50){e.preventDefault();show(i+(dx<0?1:-1))}});
+    const kb=e=>{if(!d.isConnected)return removeEventListener('keydown',kb);if(e.key==='ArrowRight')show(i+1);if(e.key==='ArrowLeft')show(i-1)};addEventListener('keydown',kb)}
+  openOverlay(d)}
 // 存照片：App 叫出分享選單（選「儲存影像」）；手機瀏覽器用系統分享；電腦直接下載
 async function saveImageUrl(u,name){try{const r=await fetch(u);if(!r.ok)throw 0;const blob=await r.blob();const ext=/png/.test(blob.type)?'png':'jpg';const fn=`${name}-${Date.now().toString(36)}.${ext}`;
   if(IS_APP){const b64=await new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]);fr.onerror=no;fr.readAsDataURL(blob)});if(await appShareFile(b64,fn,'存照片','')){toast('選「儲存影像」就會存到相簿',3500);return}}
