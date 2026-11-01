@@ -2696,7 +2696,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.0.4';
+const BUILD = 'v7.1.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5904,6 +5904,7 @@ function openReport(type,id,poster,after){
    領養：農業部「動物認領養」開放資料（全台公立收容所），依縣市載入
    ============================================================ */
 const ADOPT_SIZE={SMALL:'小型',MEDIUM:'中型',BIG:'大型'},ADOPT_AGE={CHILD:'幼年',ADULT:'成年'};
+const ADOPT_ALL='全台';const adoptArea=c=>c===ADOPT_ALL?'all':MOA_AREA[c];
 const adoptCache={};const adoptKey=(area,kind)=>area+'_'+kind+'_'+todayStr();   // 每天換新，網頁開著好幾天也不會一直看到舊名單
 function adoptRow(a){return {id:String(a.animal_id),subid:String(a.animal_subid||''),pk:a.animal_shelter_pkid,kind:a.animal_kind,variety:(a.animal_Variety||'').trim(),sex:a.animal_sex,size:a.animal_bodytype,colour:(a.animal_colour||'').trim(),age:a.animal_age,ster:a.animal_sterilization,bac:a.animal_bacterin,found:(a.animal_foundplace||'').trim(),remark:(a.animal_remark||'').trim(),photo:moaPic(a.album_file),created:(a.animal_createtime||'').replace(/\//g,'-'),open:a.animal_opendate,shelter:a.shelter_name||a.animal_place||'',tel:(a.shelter_tel||'').trim(),addr:(a.shelter_address||'').trim(),status:a.animal_status}}
 const adoptPending={};
@@ -5912,7 +5913,11 @@ async function moaJson(qs){const ac=new AbortController(),t=setTimeout(()=>ac.ab
   try{const res=await fetch(MOA_URL+qs,{signal:ac.signal});if(!res.ok)throw 0;const j=await res.json();if(!Array.isArray(j))throw 0;return j}
   catch(_){throw new Error(ADOPT_ERR)}finally{clearTimeout(t)}}
 function fetchAdopt(city,kind){
-  const area=MOA_AREA[city];if(!area)return Promise.resolve([]);
+  const area=adoptArea(city);if(!area)return Promise.resolve([]);
+  if(area==='all'){const ck=adoptKey('all',kind);if(adoptCache[ck])return Promise.resolve(adoptCache[ck]);   // 全台：用本站整理過的精簡資料（快很多），失敗才直接向農業部抓
+    return adoptPending[ck]||(adoptPending[ck]=(async()=>{let j=null;try{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),25000);const r=await fetch(CONFIG.SITE_URL+'api/moa/adopt?kind='+encodeURIComponent(kind),{signal:ac.signal});clearTimeout(t);if(r.ok){const x=await r.json();if(Array.isArray(x))j=x}}catch(_){}
+      if(!j)j=await moaJson(`&animal_kind=${encodeURIComponent(kind)}`);
+      return adoptCache[ck]=j.filter(a=>a.animal_status==='OPEN').map(adoptRow)})().finally(()=>{delete adoptPending[ck]}))}
   const ck=adoptKey(area,kind);if(adoptCache[ck])return Promise.resolve(adoptCache[ck]);
   // 同一份資料正在下載時共用同一個請求（約 1MB），不重複下載
   return adoptPending[ck]||(adoptPending[ck]=moaJson(`&animal_kind=${encodeURIComponent(kind)}&animal_area_pkid=${area}`)
@@ -5929,8 +5934,8 @@ function adoptTitle(r){return [r.variety||'混種',r.sex==='M'?'公':r.sex==='F'
 function waitDays(r){return r.created?daysSince(r.created+'T00:00:00+08:00'):null}
 let adoptSeq=0;
 let adoptOrder=[];   // 清單目前的順序（單筆頁「下一隻」用）
-let adoptState={city:'',dist:[],kind:'狗',size:[],sex:[],age:[],variety:[],colour:[],ster:[],sort:'new',photo:true,limit:30};
-try{const v=JSON.parse(localStorage.getItem('wh_adopt')||'null');if(v&&typeof v==='object')Object.assign(adoptState,{city:MOA_AREA[v.city]?v.city:'',dist:Array.isArray(v.dist)?v.dist.filter(x=>typeof x==='string').slice(0,20):(typeof v.dist==='string'&&v.dist?[v.dist]:[]),kind:v.kind==='貓'?'貓':'狗'})}catch(_){}
+let adoptState={city:'全台',dist:[],kind:'狗',size:[],sex:[],age:[],variety:[],colour:[],ster:[],sort:'new',photo:true,limit:30};
+try{const v=JSON.parse(localStorage.getItem('wh_adopt')||'null');if(v&&typeof v==='object')Object.assign(adoptState,{city:(MOA_AREA[v.city]||v.city==='全台')?v.city:'全台',dist:Array.isArray(v.dist)?v.dist.filter(x=>typeof x==='string').slice(0,20):(typeof v.dist==='string'&&v.dist?[v.dist]:[]),kind:v.kind==='貓'?'貓':'狗'})}catch(_){}
 async function renderAdopt(){const _n=navId;
   setTitle('領養毛孩');
   const st=adoptState;   // 篩選、顯示幾筆都保留：從單筆頁返回時回到原本位置
@@ -5948,7 +5953,7 @@ async function renderAdopt(){const _n=navId;
   <div class="card adopt-f">
     <div class="seg" id="aKind" role="group" aria-label="狗或貓"><button type="button" data-v="狗" aria-pressed="${st.kind==='狗'}" class="${st.kind==='狗'?'on':''}">${spIc('dog')} 狗</button><button type="button" data-v="貓" aria-pressed="${st.kind==='貓'}" class="${st.kind==='貓'?'on':''}">${spIc('cat')} 貓</button></div>
     <div class="row2" style="margin-top:10px">
-      <label class="f" style="margin:0"><span>縣市</span><select id="aCity">${cityOptions(st.city)}</select></label>
+      <label class="f" style="margin:0"><span>縣市</span><select id="aCity"><option value="全台" ${st.city==='全台'?'selected':''}>全台</option>${Object.keys(MOA_AREA).map(c=>`<option ${c===st.city?'selected':''}>${c}</option>`).join('')}</select></label>
       <label class="f" style="margin:0" id="aSortL"><span>排序</span><select id="aSort">${opt([['new','最新入所'],['old','待最久的']],st.sort)}</select></label>
     </div>
     <div id="afMore"><div id="aDyn"></div>
@@ -5963,7 +5968,7 @@ async function renderAdopt(){const _n=navId;
   </div>
   <div class="xfeed" id="xFeed" data-v="${xView()==='map'?'big':xView()}"><div id="aList" style="margin-top:14px" aria-live="polite"></div></div>`;
   drailAttach('adopt');
-  if(MV){$('#xWhere').onclick=()=>xPick('縣市',Object.keys(MOA_AREA).map(c=>[c,c]),st.city,v=>{const sel=$('#aCity');if(sel){sel.value=v;sel.dispatchEvent(new Event('change'))}const w=$('#xWhereT');if(w)w.textContent=v},true);
+  if(MV){$('#xWhere').onclick=()=>xPick('縣市',[['全台','全台'],...Object.keys(MOA_AREA).map(c=>[c,c])],st.city,v=>{const sel=$('#aCity');if(sel){sel.value=v;sel.dispatchEvent(new Event('change'))}const w=$('#xWhereT');if(w)w.textContent=v},true);
     $('#xView').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{localStorage.setItem('wh_xv',b.dataset.v)}catch(_){}document.querySelectorAll('#xView button').forEach(x=>x.classList.toggle('on',x===b));$('#xFeed').dataset.v=b.dataset.v}
     $('#xaK').onclick=e=>{const b=e.target.closest('.xchip');if(!b)return;const k=$('#aKind').querySelector(`[data-v="${b.dataset.k}"]`);if(k)k.click();document.querySelectorAll('#xaK .xchip').forEach(x=>x.classList.toggle('on',x===b))};
     const shut=()=>{const was=document.body.classList.contains('xas-open');document.body.classList.remove('xas-open');if(was){const b=$('#xaF');if(b)try{b.focus({preventScroll:true})}catch(_){}}};
@@ -5978,14 +5983,14 @@ async function renderAdopt(){const _n=navId;
       el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;st.dist=[];$('#aCity').value=st.city;load()});return}
     const my=navId,seq=++adoptSeq;const stale=()=>seq!==adoptSeq||my!==navId||!el.isConnected;   // 換了條件或換頁：舊的結果不要蓋上來
     let rows;const pr=fetchAdopt(st.city,st.kind);
-    if(!adoptCache[adoptKey(MOA_AREA[st.city],st.kind)])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
+    if(!adoptCache[adoptKey(adoptArea(st.city),st.kind)])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
     try{rows=await pr}catch(e){if(stale())return;{const xn=$('#xN');if(xn)xn.textContent='–'}el.innerHTML=`<div class="empty-card"><b>${esc(e.message)}</b><p><button type="button" class="btn" id="aRetry">再試一次</button></p><p class="small"><a target="_blank" rel="noopener" href="https://www.pet.gov.tw/AnimalApp/AnnounceMent.aspx?PageType=Adopt">改到農業部全國認領養網站看 ↗</a></p></div>`;$('#aRetry').onclick=load;return}
     if(stale())return;
     {const t=$('#xNt');if(t)t.outerHTML='有 <em id="xN">…</em> 隻在等一個家'}
     // 地區、犬種／貓種、毛色：依這個縣市實際有的資料列出（旁邊是幾隻），都可以多選
     const inD=r=>!st.dist.length||st.dist.includes(adoptDist(r));
     const cnt=(rs,f)=>{const m={};rs.forEach(r=>{const v=(f(r)||'').trim();if(v)m[v]=(m[v]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
-    const dists=cnt(rows,adoptDist);st.dist=st.dist.filter(d=>dists.some(x=>x[0]===d));
+    const dists=st.city==='全台'?[]:cnt(rows,adoptDist);   // 全台時不列「區」（各縣市都有同名的區）st.dist=st.dist.filter(d=>dists.some(x=>x[0]===d));
     const base=rows.filter(inD),vars=cnt(base,r=>r.variety||'混種'),cols=cnt(base,r=>r.colour);
     st.variety=st.variety.filter(v=>vars.some(x=>x[0]===v));st.colour=st.colour.filter(v=>cols.some(x=>x[0]===v));
     const grp=(k,t,arr,max)=>{if(!arr.length)return '';const showAll=st['_all_'+k];const sh=showAll?arr:arr.slice(0,max);const sel=arr.filter(x=>st[k].includes(x[0])&&!sh.includes(x));
@@ -6013,7 +6018,7 @@ async function renderAdopt(){const _n=navId;
     b.classList.toggle('on',i<0);b.setAttribute('aria-pressed',i<0);if(k==='dist'){st.variety=[];st.colour=[]}st.limit=30;load()});
   $('#aKind').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.kind=b.dataset.v;st.variety=[];st.colour=[];st.limit=30;$('#aKind').querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});load()});
   $('#aCity').onchange=e=>{st.city=e.target.value;st.dist=[];st.variety=[];st.colour=[];st.limit=30;load()};
-  window.__adoptReload=()=>{try{delete adoptCache[adoptKey(MOA_AREA[st.city],st.kind)]}catch(_){}load()};   // 下拉更新：保留篩選、重新下載
+  window.__adoptReload=()=>{try{delete adoptCache[adoptKey(adoptArea(st.city),st.kind)]}catch(_){}load()};   // 下拉更新：保留篩選、重新下載
   $('#aSort').onchange=e=>{st.sort=e.target.value;st.limit=30;load()};
   $('#aPhoto').onchange=e=>{st.photo=e.target.checked;st.limit=30;load()};
   load();
@@ -6064,7 +6069,7 @@ async function renderIntake(){const _n=navId;setTitle('收容所新收的毛孩'
     if(!st.city){el.innerHTML=`<div class="empty-card"><div class="big">${ic('pin')}</div><b>先選走失的縣市</b><div class="citygrid">${Object.keys(MOA_AREA).map(c=>`<button type="button" class="btn ghost" data-city="${c}">${c}</button>`).join('')}</div></div>`;
       el.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{st.city=b.dataset.city;st.dist=[];$('#iCity').value=st.city;load()});return}
     const my=navId,ck=st.city+st.kind+intakeState.days;el.dataset.k=ck;const stale=()=>my!==navId||!el.isConnected||el.dataset.k!==ck;
-    if(!adoptCache[adoptKey(MOA_AREA[st.city],st.kind)])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
+    if(!adoptCache[adoptKey(adoptArea(st.city),st.kind)])el.innerHTML='<div class="empty">讀取收容所資料中…（第一次約需幾秒）</div>';
     let rows;try{rows=await fetchAdopt(st.city,st.kind)}catch(e){if(stale())return;el.innerHTML=`<div class="empty-card"><b>${esc(e.message)}</b><p><button type="button" class="btn" id="iRetry">再試一次</button></p></div>`;$('#iRetry').onclick=load;return}
     if(stale())return;
     const list=rows.filter(r=>inDays(r,intakeState.days)).sort((a,b)=>(b.created||'').localeCompare(a.created||''));
