@@ -2636,6 +2636,7 @@ html{-webkit-tap-highlight-color:transparent}
 .chseg a.on{background:var(--sheet);color:var(--ink)!important;box-shadow:var(--lift)}
 .chseg .xbadge{position:static;min-width:18px;height:18px;font-size:11px}.chseg .xbadge[hidden]{display:none}
 .chfr{display:flex;align-items:center;gap:10px;margin:0 0 8px;padding:10px 12px;border-radius:16px;background:var(--brand-soft,#FFE7DE);color:var(--ink);font-size:14px;line-height:1.4}
+:root[data-theme=dark] .chfr{background:rgba(242,100,61,.16)}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .chfr{background:rgba(242,100,61,.16)}}
 .chfr>.ico{flex:none;color:var(--brand-d,#D94A26)}.chfr span{flex:1;min-width:0}.chfr .btn{flex:none}
 .fradd{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:20px;background:var(--sheet);box-shadow:var(--lift);color:var(--ink)}
 .fradd-ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--brand,#F2643D);color:#fff}
@@ -2657,6 +2658,7 @@ html{-webkit-tap-highlight-color:transparent}
 .frbtns{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
 .frok{display:inline-flex;align-items:center;gap:6px;font-weight:800;color:var(--green,#1F8A5B)}
 .mbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.grid.pets1{grid-template-columns:1fr!important}.grid.pets1>.ccard{flex-direction:row;align-items:stretch}.grid.pets1>.ccard>.ph{flex:none;width:42%;max-width:220px;aspect-ratio:auto;min-height:170px}.grid.pets1>.ccard>.b{flex:1;min-width:0;justify-content:center}.grid.pets1 .bd-chip{align-self:flex-start}
 .mcard{text-align:center;padding:28px 18px;background:var(--sheet);border-radius:26px;box-shadow:var(--lift);max-width:460px;margin:20px auto}
 .mcard h1{margin:12px 0 2px;font-size:26px}
 </style>
@@ -2740,7 +2742,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.0';
+const BUILD = 'v7.2.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2794,6 +2796,7 @@ if(IS_APP){
       if(/^wangmiaotw:/.test(u.protocol)&&/auth/.test(u.host+u.pathname)){const code=u.searchParams.get('code');const err=u.searchParams.get('error_description')||u.searchParams.get('error');try{const B=capPlugin('Browser');if(B)B.close().catch(()=>{})}catch(_){}
         if(err){toast('登入沒有成功：'+err,5000);return}
         if(code&&sb)sb.auth.exchangeCodeForSession(code).then(({data,error})=>{if(error)return toast('登入沒有成功：'+friendlyErr(error.message),5000);if(data&&data.session){session=data.session;updateAuthUI()}toast('✅ 已登入');if(location.hash.split('?')[0]==='#/login'){let back='#/me';back=takeReturn();goReplace(back)}});return}
+      {const a=u.pathname.match(/^\/a\/([A-Za-z0-9_.-]{2,40})$/);if(a){location.hash='#/add/'+a[1];return}}
       const m=u.pathname.match(/^\/(s|p|f)\/([0-9a-f-]{36})/);
       if(m)location.hash=(m[1]==='f'?'#/found/':'#/case/')+m[2];else if(u.hash&&u.hash.startsWith('#/'))location.hash=u.hash}catch(_){}});
     A.addListener('pause',()=>{window.__pausedAt=Date.now();try{document.dispatchEvent(new Event('app-pause'))}catch(_){}});
@@ -4003,7 +4006,7 @@ async function friendAdd(uid,name){const {data,error}=await sb.rpc('friend_add',
   friendPing(uid);toast(data==='friend'?`你和 ${name} 成為好友了`:`已送出好友邀請，等 ${name} 接受`,3000);chatUnreadCheck();return data}
 async function friendRespond(uid,ok,name){const {data,error}=await sb.rpc('friend_respond',{p_user:uid,p_accept:ok});if(error){toast('沒有成功，請再試一次');return null}
   if(ok){friendPing(uid);toast(`你和 ${name} 成為好友了`)}chatUnreadCheck();return data}
-function friendLink(code){return CONFIG.SITE_URL+'#/add/'+code}
+function friendLink(code){return CONFIG.SITE_URL+'a/'+code}
 async function friendMyCode(){if(__frCode)return __frCode;const {data,error}=await sb.rpc('friend_code');
   if(error){const m=error.message.replace(/^.*?:\s*/,'');if(/會員名稱/.test(m)){if(await askSheet({title:'先取一個會員 ID',body:'有了會員 ID 才會有好友碼，朋友也能用 ID 找到你。',ok:'去設定'})){setReturn(location.hash);location.hash='#/set-username'}}else toast(m);return ''}
   return __frCode=data||''}
@@ -4025,6 +4028,7 @@ async function friendAddSheet(){if(!me()){setReturn(location.hash);requireLogin(
     if(error){res.innerHTML=`<p class="frmiss">沒有成功，請再試一次</p>`;return}
     if(!u){res.innerHTML=`<p class="frmiss">找不到「${esc(q)}」。會員 ID 和好友碼要完全一樣（不分大小寫）。</p>`;return}
     res.innerHTML=friendRowHTML(u,true);bindFriendRows(res,()=>{});};
+  res.addEventListener('click',e=>{const d=e.target.closest('[data-fdm],.fri-who');if(!d)return;e.preventDefault();e.stopPropagation();const go=d.dataset.fdm?()=>chatStart('dm',d.dataset.fdm):()=>{location.hash=d.getAttribute('href')};fin();setTimeout(go,450)},true);
   const code=await friendMyCode();if(!el.isConnected)return;
   if(!code){el.querySelector('.frme').innerHTML=`<p class="small muted">設定會員 ID 後，這裡會出現你的 QR Code 和好友碼。</p><a class="btn ghost" href="#/set-username">設定會員 ID</a>`;return}
   const p=await getProfile().catch(()=>null);
@@ -4034,7 +4038,7 @@ async function friendAddSheet(){if(!me()){setReturn(location.hash);requireLogin(
   el.querySelector('#frShare').onclick=()=>share(`加我為汪喵回家好友（好友碼 ${code}）`,url);
   el.querySelector('#frCopy').onclick=()=>copy(code)}
 function friendRowHTML(u,find){const name=u.username||'會員',r=u.rel;
-  const act=r==='self'?'<small class="muted">這是你自己</small>':r==='friend'?`<button type="button" class="btn sm" data-fdm="${u.user_id}">${ic('chat')} 聊天</button>`:r==='received'?`<button type="button" class="btn sm" data-facc="${u.user_id}">接受</button>${find?'':`<button type="button" class="btn sm ghost" data-fno="${u.user_id}">略過</button>`}`:r==='sent'?`<button type="button" class="btn sm ghost" data-fcancel="${u.user_id}">取消邀請</button>`:`<button type="button" class="btn sm" data-fadd="${u.user_id}">${ic('userPlus')} 加好友</button>`;
+  const act=r==='self'?'<small class="muted">這是你自己</small>':r==='friend'?`<button type="button" class="btn sm ghost" data-fdm="${u.user_id}">${ic('chat')} 聊天</button>`:r==='received'?`<button type="button" class="btn sm" data-facc="${u.user_id}">接受</button>${find?'':`<button type="button" class="btn sm ghost" data-fno="${u.user_id}">略過</button>`}`:r==='sent'?`<button type="button" class="btn sm ghost" data-fcancel="${u.user_id}">取消邀請</button>`:`<button type="button" class="btn sm" data-fadd="${u.user_id}">${ic('userPlus')} 加好友</button>`;
   return `<div class="fri" data-name="${esc(name)}"><a class="fri-who" href="#/u/${encodeURIComponent(name)}">${chatAva(name,u.avatar_url)}<span><b>${esc(name)}</b><small>${r==='received'?'想加你為好友':r==='sent'?'等對方接受':r==='friend'&&u.since?'好友・'+esc(fmtDate(u.since)):''}</small></span></a><span class="fri-act">${act}</span></div>`}
 function bindFriendRows(box,again){box.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const row=b.closest('.fri'),name=row?row.dataset.name:'';
   if(b.dataset.fdm)return chatStart('dm',b.dataset.fdm);
@@ -4375,7 +4379,7 @@ async function renderHealth(){const _n=navId;
   <div id="xLostBar"></div>
   ${healthAdvice(pets,ds,hMeds,hLogs,petName)}
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
-  <div class="grid">${pets.map(petCardHTML).join('')}</div>
+  <div class="grid ${pets.length===1?'pets1':''}">${pets.map(petCardHTML).join('')}</div>
   ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2 id="medSec">${ic("pill")} 今天的用藥與保養品</h2><p class="muted small" style="margin:-6px 0 8px">餵完按一下就打勾，再按一次可以取消。</p><div class="card med-card">${rows.join('')}</div>`:''})()}
   <h2 id="dueSec">${ic("bell")} 到期提醒</h2>
   ${ds.length?`<div class="card" style="padding:6px 18px">${ds.map(r=>`<div class="sponsor due" data-go="#/pet/${r.pet_id}"><div class="av rk-av">${recIc(r.kind)}</div><div class="b"><b>${esc(petName[r.pet_id]||'')}｜${esc(r.title)}</b><div class="msg" style="${r.next_due<todayStr()?'color:var(--red);font-weight:700':''}">${r.next_due}・${dueText(r.next_due)}</div></div><div class="acts"><button class="btn sm done-chip" data-done="${r.id}">✓ 標記完成</button>${calMenu(petName[r.pet_id]||'毛孩',r)}</div></div>`).join('')}</div>`:`<div class="card muted small">到期前 2 個月會出現在這裡，到期前會提醒你。全部的到期日在各毛孩頁的「下次到期」。</div>`}
