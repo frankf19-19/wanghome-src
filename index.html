@@ -1370,6 +1370,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-sec>summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);opacity:.5;transition:transform .15s}
 .mg-sec[open]>summary::after{transform:rotate(225deg)}
 .mg-sec>summary .muted,.mg-sec>summary .tag{font-weight:600}
+@media (max-width:760px){.d-only{display:none!important}}
 .mg-body{padding:0 16px 16px}.pv-acts{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}.pv-acts .btn{padding-left:6px;padding-right:6px;white-space:nowrap;min-width:0}@media(max-width:640px){.pv-head .gallery .main{aspect-ratio:16/10!important;max-height:240px}}.medph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 4px}.medph .photos-preview{width:100%}.medph .photos-preview:empty{display:none}.medph small{flex:1 1 180px}.mg-ai{background:var(--sheet);border-radius:var(--r-card);box-shadow:var(--lift);padding:14px 14px 6px;margin:0 0 14px}
 .mg-ai-row{display:flex;align-items:center;gap:12px;padding:10px 2px;border-top:1px solid var(--line);color:inherit!important;text-decoration:none!important;min-height:52px}
 .mg-ai .sa-head+.mg-ai-row{border-top:0;margin-top:4px}
@@ -2520,7 +2521,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.10.1';
+const BUILD = 'v6.10.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3044,7 +3045,7 @@ function isNetErr(e){return !!e&&e.code!=='PGRST116'}
 // 連不上（不是資料庫回的錯誤）：沒有錯誤代碼，或訊息是 fetch 失敗
 function isFetchErr(e){return !!e&&(!e.code||/fetch|network|load failed/i.test(e.message||''))}
 function netErrHTML(){return `<div class="empty-card"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，資料沒有載入</b><p class="small">請確認網路後再試一次。</p><button type="button" class="btn" onclick="route()">再試一次</button></div>`}
-function rerender(fn){const y=scrollY;return Promise.resolve(fn()).then(()=>restoreScroll(y)).catch(()=>{})}
+function rerender(fn){const y=scrollY;let r;window.__quiet=true;try{r=fn()}catch(e){r=Promise.reject(e)}finally{window.__quiet=false}return Promise.resolve(r).then(()=>restoreScroll(y)).catch(()=>{})}   // 同一頁重畫：不先換成骨架畫面（不閃）
 // 回到上一頁時捲回原本位置：等新頁面畫好、名單載完（不是灰色載入卡片）再捲，不然會被壓到比較上面
 function offlineGate(){if(navigator.onLine!==false)return false;app.innerHTML=netErrHTML();return true}
 function pageSkel(kind){const b=(w,h=14)=>`<div class="sk" style="width:${w};height:${h}px"></div>`;
@@ -3178,7 +3179,7 @@ function route(){window.__lastRoute=Date.now();
   const trav=trackDepth(wasPop);
   // 同一頁只換分頁籤／篩選（?tab=、?f=…）：不要播換頁動畫，畫面才不會晃
   const samePage=curHash.split('?')[0]===newHash.split('?')[0];
-  app.classList.remove('enter','push','pop');const tabSw=TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash);if(!samePage&&window.__routed&&!tabSw){void app.offsetWidth;app.classList.add('enter')}window.__routed=true;   // 第一次開啟、切換底部分頁：直接顯示，不做淡入（才不會有一閃的感覺）clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!samePage&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
+  app.classList.remove('enter','push','pop');const tabSw=TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash);if(!samePage&&window.__routed&&!tabSw){void app.offsetWidth;app.classList.add('enter')}window.__routed=true;   /* 第一次開啟、切換底部分頁：直接顯示，不做淡入（才不會有一閃的感覺） */clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!samePage&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
   window.__fromHash=curHash;curHash=newHash;
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
   if(trav&&!samePage&&pcRestore(newHash))return;
@@ -3867,7 +3868,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
       <li>${ic("printer")}<span><b>完整健康資料</b>一頁看完病史、用藥和疫苗，看醫生直接給獸醫看</span></li>
       <li>${ic("siren")}<span><b>走失一鍵協尋</b>照片和特徵已建好，按「走失了」就能發出協尋</span></li>
     </ul>
-    <div class="promo-btns">${me()?`<a class="btn green" href="#/health">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費開始使用</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">只要 Email 免費註冊，不用密碼</span>`}</div>
+    <div class="promo-btns">${me()?`<a class="btn green" href="#/health">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費開始使用</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">免費註冊（Email、LINE、Google、Apple 都可以）</span>`}</div>
   </div>
   <div class="promo-demo" aria-hidden="true">
     <div class="pd-card">
@@ -3882,7 +3883,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
 async function renderHealth(){const _n=navId;
   setTitle('毛孩健康手冊');
   if(!me())return renderHealthLanding();
-  (_n===navId?app:_void).innerHTML=pageSkel('health');
+  if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('health');
   const [prof,{data:pets,error:pe},{data:dues},{data:medsA}]=await Promise.all([
     getProfile(), sb.from('pets').select('*').order('created_at'),
     sb.from('pet_records').select('id,pet_id,kind,title,clinic,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addMonths(todayStr(),2)).order('next_due').limit(40),
@@ -3925,7 +3926,7 @@ function renderHealthLanding(){
   ${promoHTML(true)}
   <h2>${ic("clipboard")} 怎麼開始</h2>
   <ol class="how">
-    <li><b>用 Email 免費註冊</b><span>不用密碼，收信點按鈕就完成，之後登入也一樣。</span></li>
+    <li><b>免費註冊</b><span>用 Email 設一組密碼，或直接用 LINE、Google、Apple 登入，一分鐘完成。</span></li>
     <li><b>建立毛孩檔案</b><span>名字、照片、晶片號碼、生日、特徵，一次填好。</span></li>
     <li><b>記下第一筆紀錄</b><span>選「疫苗」「驅蟲」等常用項目，下次到期日自動幫你算好。</span></li>
   </ol>
@@ -4176,7 +4177,7 @@ async function loadFoundList(el,more){
   let q=sb.from('found_public').select('*').eq('status','open').order('seen_at',{ascending:false}).limit(lim);
   q=fIn(q,'city',homeState.city);q=fSp(q);
   if(homeState.near){const {lat,lng}=homeState.near;q=q.gte('lat',lat-.55).lte('lat',lat+.55).gte('lng',lng-.6).lte('lng',lng+.6)}
-  const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;
+  const {data,error}=await q;if(my!==listSeq||!el.isConnected)return;el.classList.remove('ldim');
   if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(24,(homeState.limit||48)-24);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
   if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});return}
   if(!data.length){if(homeState.near){el.innerHTML=`<div class="empty-card"><div class="big">${ic("pin")}</div><b>你附近約 60 公里內沒有拾獲／目擊通報</b><p class="small">按上面的「取消距離排序」看全台。</p></div>`;return}el.innerHTML=emptyCard('found');return}
@@ -4347,7 +4348,7 @@ async function liveShelterMatch(c,token){
 const viewedCases=new Set();
 async function renderCase(id){const _n=navId;
   clearInterval(refreshTimer);refreshTimer=null;
-  if(app.dataset.case!==id)(_n===navId?app:_void).innerHTML=pageSkel('case');
+  if(app.dataset.case!==id)if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('case');
   let [{data:c,error},{data:sightings},{data:matches}]=await Promise.all([
     sb.from('cases_public').select('*').eq('id',id).single(),
     sb.from('sightings_public').select('*').eq('case_id',id).order('seen_at',{ascending:true}),
@@ -7224,7 +7225,7 @@ async function renderMeBody(){const _n=navId;
   setTitle('我的');
   if(!me()){app.innerHTML=`<h1>我的</h1>${mineHTML()||'<p class="lede">這支手機還沒有登記過案件。</p>'}
     <div class="card" style="margin-top:14px"><b>加入會員（免費，可以不加入）</b><p class="small muted">加入後換手機也能管理案件，還能用毛孩健康手冊、收到附近走失通知。用 Email、LINE、Google 或 Apple 都能註冊。</p><div class="bigacts"><a class="btn big" href="#/login?mode=signup" onclick="setReturn('#/me')">免費註冊</a><a class="btn big ghost" href="#/login?mode=login" onclick="setReturn('#/me')">我已經有帳號，登入</a></div></div>`;return}
-  (_n===navId?app:_void).innerHTML=pageSkel('me');
+  if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('me');
   const [prof,{data:cs,error:ce1},{data:fs},{data:pend},{data:fl},{data:pets,error:pe1},{data:dues}]=await Promise.all([
     getProfile(true).then(d=>({d}),e=>({e})), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),
     sb.from('follows').select('case_id,created_at').order('created_at',{ascending:false}),
@@ -7301,6 +7302,7 @@ async function renderMeBody(){const _n=navId;
       try{const [{data:ps},{data:rs}]=await Promise.all([sb.from('pets').select('photos'),sb.from('pet_records').select('files')]);
         pub=(ps||[]).flatMap(x=>x.photos||[]).map(u=>(String(u).split('/object/public/photos/')[1]||'')).filter(Boolean);
         const pv=new Set((rs||[]).flatMap(x=>x.files||[]));(await listAllFiles('pet-private',me().id)).forEach(x=>pv.add(x));priv=[...pv]}catch(_){}
+      try{const pr=await getProfile();const k=pr&&pr.avatar_url&&String(pr.avatar_url).split('/object/public/photos/')[1];if(k)pub.push(k.split('?')[0])}catch(_){}   // 大頭貼也一起刪
       const delC=!!$('#delContent')?.checked;const {error}=await sb.rpc('delete_my_account',{p_delete_content:delC});if(error)throw error;
       try{if(pub.length)await sb.storage.from('photos').remove([...pub,...pub.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]);if(priv.length)await removeAllFiles('pet-private',priv)}catch(_){}
       // 這支手機上的個人資料清掉；選擇保留案件時，留下管理網址，之後還能標記「找到了」或關閉
@@ -7470,7 +7472,7 @@ async function albNotify(){if(!IS_APP)return;const LN=capPlugin('LocalNotificati
   try{const p=await LN.checkPermissions();if(p.display!=='granted')return}catch(_){return}
   try{await LN.cancel({notifications:[{id:ID}]})}catch(_){}
   const end=albQInfo(albQKey(todayStr())).end;const [y,m,d]=end.split('-').map(Number);const at=new Date(y,m-1,d,10,0,0);const k=albQKey(todayStr());
-  try{await LN.schedule({notifications:[{id:ID,title:'🎞️ 這一季的回顧相簿做好了',body:`你和毛孩的${albQInfo(k).name}，三個月的甜蜜時光都在這裡`,schedule:{at,allowWhileIdle:true},extra:{recapq:k}}]})}catch(_){}}
+  try{await LN.schedule({notifications:[{id:ID,title:'🎞️ 這一季的回顧相簿做好了',body:`你和毛孩的${albQInfo(k).name}，三個月的甜蜜時光都在這裡`,schedule:{at,allowWhileIdle:true},extra:{wh:1,recapq:k}}]})}catch(_){}}
 
 // 寵物頁上的相簿區塊
 async function albSection(box,pet){const _n=navId;let ph=[];try{ph=await albFetch(pet.id)}catch(_){if(navId===_n&&box.isConnected)box.innerHTML='';return}
@@ -7617,7 +7619,7 @@ function weightChart(points){
 
 async function renderPetView(id){const _n=navId;
   if(!requireLogin())return;
-  (_n===navId?app:_void).innerHTML=pageSkel('pet');
+  if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('pet');
   const [{data:p,error:pe},{data:recs},{data:medsAll}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).order('created_at')]);
   if(pe){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
@@ -7653,6 +7655,7 @@ async function renderPetView(id){const _n=navId;
       <div class="actionbar pv-acts">
         <a class="btn" href="#/pet/${id}/record/new">${ic("plus")} 新增紀錄</a>
         <a class="btn ghost" href="#/pet/${id}/print">${ic("clipboard")} 完整健康資料</a>
+        <a class="btn ghost d-only" href="#/pet/${id}/edit" style="grid-column:1/-1">${ic("edit")} 編輯毛孩資料</a>
       </div>
       <details class="mg-sec" style="margin-top:14px"><summary>基本資料 <span class="muted small">晶片、結紮${p.notes?'、注意事項':''}</span></summary><div class="mg-body"><dl class="kv">
         <dt>晶片</dt><dd>${p.has_chip?(p.chip_no?esc(p.chip_no):'有'):'無／未填'}</dd>
