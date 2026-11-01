@@ -2782,34 +2782,87 @@ body.chfix .tabbar{display:none!important}
 .chact{position:absolute;top:0;bottom:0;right:0;width:156px;display:flex}
 .chact button{flex:1;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:inherit;font-size:13px;font-weight:800;color:#fff;background:#8E8A85;cursor:pointer}
 .chact button .ico{width:20px;height:20px}.chact button.del{background:#E5484D}
-/* 動態貼圖：聊天室裡的貼圖會動（彈跳、眨眼、愛心飄、星星閃…），播兩輪後停，點一下再播 */
-.cstk svg.stk-a .sk-b,.chel-stk svg.stk-a .sk-b{transform-box:fill-box;transform-origin:50% 100%;animation:skHop 1.6s cubic-bezier(.3,.7,.4,1) 2}
-.cstk svg.stk-a .sk-eyes,.chel-stk svg.stk-a .sk-eyes{transform-box:fill-box;transform-origin:50% 55%;animation:skBlink 1.6s 2}
-.cstk svg.stk-a .sk-ear{transform-box:fill-box;transform-origin:50% 80%;animation:skEar 1.6s ease-in-out 2}
-.cstk svg.stk-a .sk-wave{transform-box:fill-box;transform-origin:20% 90%;animation:skWave .5s ease-in-out 6 alternate}
-.cstk svg.stk-a .sk-fx{transform-box:fill-box;transform-origin:50% 50%;animation:skFx 1.6s ease-in-out 2}
-.cstk svg.fx-hearts .sk-fx,.cstk svg.ex-love .sk-fx{animation:skFloat 1.6s ease-out 2}
-.cstk svg.fx-zzz .sk-fx{animation:skFloat 2s ease-in-out 2}
-.cstk svg.fx-spark .sk-fx,.cstk svg.ex-star .sk-fx{animation:skTwinkle .8s ease-in-out 4}
-.cstk svg.fx-sweat .sk-fx{animation:skDrop 1.2s ease-in 3}
-.cstk svg.fx-bang .sk-fx,.cstk svg.fx-check .sk-fx,.cstk svg.fx-x .sk-fx{animation:skPop .8s cubic-bezier(.3,1.6,.5,1) 3}
-.cstk svg.ex-angry .sk-b,.cstk svg.ex-shock .sk-b{animation:skShake .45s ease-in-out 5}
-.cstk svg.ex-cry .sk-b,.cstk svg.ex-sad .sk-b{animation:skSob 1.2s ease-in-out 3}
-.cstk svg.ex-sleep .sk-b{animation:skBreath 2s ease-in-out 2}
-.cstk svg.ex-love .sk-eyes,.cstk svg.ex-star .sk-eyes{animation:skBeat .8s ease-in-out 4}
-@keyframes skHop{0%,100%{transform:none}18%{transform:translateY(0) scale(1.05,.94)}38%{transform:translateY(-6px) scale(.97,1.04)}58%{transform:translateY(0) scale(1.03,.97)}72%{transform:translateY(-2px)}}
-@keyframes skBlink{0%,44%,52%,100%{transform:none}48%{transform:scaleY(.12)}}
-@keyframes skEar{0%,100%{transform:none}30%{transform:rotate(-4deg)}60%{transform:rotate(4deg)}}
-@keyframes skWave{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
-@keyframes skFx{0%,100%{transform:none}50%{transform:translateY(-3px) scale(1.08)}}
-@keyframes skFloat{0%{transform:translateY(4px);opacity:.3}40%{opacity:1}100%{transform:translateY(-8px);opacity:1}}
-@keyframes skTwinkle{0%,100%{transform:scale(1) rotate(0);opacity:1}50%{transform:scale(1.25) rotate(18deg);opacity:.75}}
-@keyframes skDrop{0%{transform:translateY(-3px);opacity:0}30%{opacity:1}100%{transform:translateY(6px);opacity:0}}
-@keyframes skPop{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
-@keyframes skShake{0%,100%{transform:none}25%{transform:translateX(-2.5px) rotate(-2deg)}75%{transform:translateX(2.5px) rotate(2deg)}}
-@keyframes skSob{0%,100%{transform:none}25%,75%{transform:translateY(1.5px) scale(1.01,.98)}50%{transform:translateY(-1px)}}
-@keyframes skBreath{0%,100%{transform:none}50%{transform:scale(1.03,.97)}}
-@keyframes skBeat{0%,100%{transform:none}30%{transform:scale(1.18)}60%{transform:scale(.96)}}
+/* 動態貼圖（參考 LINE 動態貼圖）：每張有自己的動作，播 3 輪後停，點一下再播 */
+.cstk svg.stk-a,.chel-stk svg.stk-a{overflow:visible}
+.cstk svg.stk-a :is(.sk-all,.sk-b,.sk-head,.sk-pl,.sk-pr,.sk-eyes,.sk-fx,.sk-ear,.sk-wave,.sk-sh,.sk-tg),.chel-stk svg.stk-a :is(.sk-all,.sk-b,.sk-head,.sk-eyes){transform-box:fill-box;animation-duration:1.4s;animation-iteration-count:3;animation-timing-function:cubic-bezier(.45,.05,.35,1)}
+.cstk svg .sk-all{transform-origin:50% 100%}.cstk svg .sk-head{transform-origin:50% 90%}.cstk svg .sk-b{transform-origin:50% 100%}
+.cstk svg .sk-pl{transform-origin:70% 30%}.cstk svg .sk-pr{transform-origin:30% 30%}.cstk svg .sk-eyes{transform-origin:50% 55%}.cstk svg .sk-fx{transform-origin:50% 50%}.cstk svg .sk-sh{transform-origin:50% 50%}
+/* 共通：眨眼 */
+.cstk svg .sk-eyes,.chel-stk svg .sk-eyes{animation-name:skBlink}
+/* 謝謝：鞠躬 */
+.cstk svg.s-thanks .sk-head{animation-name:skBow}.cstk svg.s-thanks .sk-pl,.cstk svg.s-thanks .sk-pr{animation-name:skPawIn}
+/* 好的／收到：點頭＋勾勾彈出 */
+.cstk svg:is(.s-ok,.s-got) .sk-head{animation-name:skNod;animation-duration:.7s;animation-iteration-count:6}.cstk svg:is(.s-ok,.s-got) .sk-fx{animation-name:skPop;animation-duration:1.4s}
+/* 加油：跳高＋小手上下揮 */
+.cstk svg.s-fight .sk-all{animation-name:skJump}.cstk svg.s-fight .sk-sh{animation-name:skShadow}.cstk svg.s-fight .sk-pl{animation-name:skPump;animation-duration:.35s;animation-iteration-count:12;animation-direction:alternate}.cstk svg.s-fight .sk-pr{animation-name:skPump;animation-duration:.35s;animation-iteration-count:12;animation-direction:alternate-reverse}.cstk svg.s-fight .sk-fx{animation-name:skTwinkle;animation-duration:.7s;animation-iteration-count:6}
+/* 拜託：左右搖＋小手搓搓 */
+.cstk svg.s-please .sk-all{animation-name:skSway}.cstk svg.s-please .sk-pl{animation-name:skRubL;animation-duration:.25s;animation-iteration-count:16;animation-direction:alternate}.cstk svg.s-please .sk-pr{animation-name:skRubR;animation-duration:.25s;animation-iteration-count:16;animation-direction:alternate}.cstk svg.s-please .sk-fx{animation-name:skDrop}
+/* 找到了／太好了：跳起來轉一圈 */
+.cstk svg:is(.s-found,.s-yay) .sk-all{transform-origin:50% 50%;animation-name:skSpinJump;animation-duration:1.6s}.cstk svg:is(.s-found,.s-yay) .sk-sh{animation-name:skShadow;animation-duration:1.6s}.cstk svg:is(.s-found,.s-yay) .sk-fx{animation-name:skTwinkle;animation-duration:.8s;animation-iteration-count:6}.cstk svg.s-found .sk-eyes{animation-name:skBeat;animation-duration:.7s;animation-iteration-count:6}
+/* 抱抱／想你／愛你：擠一下＋愛心飄 */
+.cstk svg:is(.s-hug,.s-miss,.s-love) .sk-b{animation-name:skSqueeze}.cstk svg:is(.s-hug,.s-miss,.s-love) .sk-fx{animation-name:skFloat}.cstk svg:is(.s-miss,.s-love) .sk-eyes{animation-name:skBeat;animation-duration:.7s;animation-iteration-count:6}
+.cstk svg.s-hug .sk-pl{animation-name:skHugL}.cstk svg.s-hug .sk-pr{animation-name:skHugR}
+/* 哭哭：一抽一抽＋眼淚一直掉 */
+.cstk svg.s-cry .sk-b{animation-name:skSob;animation-duration:.7s;animation-iteration-count:6}.cstk svg.s-cry .sk-eyes{animation-name:skTears;animation-duration:.7s;animation-iteration-count:6}
+/* 晚安／想睡：頭慢慢點下去又驚醒，Z 往上飄 */
+.cstk svg:is(.s-night,.s-sleepy) .sk-head{animation-name:skDoze;animation-duration:2s;animation-iteration-count:2}.cstk svg:is(.s-night,.s-sleepy) .sk-fx{animation-name:skZzz;animation-duration:2s;animation-iteration-count:2}
+/* 嗨～／掰掰：大力揮手 */
+.cstk svg:is(.s-hi,.s-bye) .sk-wave{transform-origin:20% 90%;animation-name:skWave;animation-duration:.3s;animation-iteration-count:14;animation-direction:alternate}.cstk svg:is(.s-hi,.s-bye) .sk-all{animation-name:skTilt}
+/* 抱歉：一直鞠躬＋冒汗 */
+.cstk svg.s-sorry .sk-head{animation-name:skBow;animation-duration:.9s;animation-iteration-count:4}.cstk svg.s-sorry .sk-fx{animation-name:skDrop;animation-duration:.9s;animation-iteration-count:4}
+/* 害羞：扭來扭去 */
+.cstk svg.s-shy .sk-all{animation-name:skShy}.cstk svg.s-shy .sk-pl{animation-name:skCover}.cstk svg.s-shy .sk-pr{animation-name:skCover}
+/* 嚇到：往後跳＋抖＋驚嘆號 */
+.cstk svg.s-omg .sk-all{animation-name:skStartle}.cstk svg.s-omg .sk-fx{animation-name:skPop;animation-duration:.7s;animation-iteration-count:6}
+/* 生氣／不要：跺腳搖頭＋冒煙 */
+.cstk svg.s-angry .sk-all{animation-name:skStomp;animation-duration:.45s;animation-iteration-count:9}.cstk svg.s-angry .sk-fx{animation-name:skPuff;animation-duration:.9s;animation-iteration-count:5}
+.cstk svg.s-no .sk-head{animation-name:skShakeHead;animation-duration:.5s;animation-iteration-count:8}.cstk svg.s-no .sk-fx{animation-name:skPop;animation-duration:.7s;animation-iteration-count:5}
+/* 好吃：舔舔＋點頭 */
+.cstk svg.s-yum .sk-head{animation-name:skNod;animation-duration:.7s;animation-iteration-count:6}.cstk svg.s-yum .sk-tg{transform-origin:50% 0%;animation-name:skLick;animation-duration:.35s;animation-iteration-count:12;animation-direction:alternate}
+/* 回家了：蹦蹦跳 */
+.cstk svg.s-home .sk-all{animation-name:skHop2;animation-duration:.7s;animation-iteration-count:6}.cstk svg.s-home .sk-sh{animation-name:skShadow;animation-duration:.7s;animation-iteration-count:6}.cstk svg.s-home .sk-fx{animation-name:skNod;animation-duration:.7s;animation-iteration-count:6}
+/* 找找看：左看右看＋放大鏡晃 */
+.cstk svg.s-search .sk-eyes{animation-name:skLook;animation-duration:1.6s}.cstk svg.s-search .sk-head{animation-name:skPeek;animation-duration:1.6s}.cstk svg.s-search .sk-fx{animation-name:skSwing;animation-duration:.8s;animation-iteration-count:6}
+/* 等我：腳打拍子＋時鐘晃 */
+.cstk svg.s-wait .sk-pr{animation-name:skTap;animation-duration:.4s;animation-iteration-count:12}.cstk svg.s-wait .sk-fx{animation-name:skSwing;animation-duration:.8s;animation-iteration-count:6}.cstk svg.s-wait .sk-all{animation-name:skTilt}
+@keyframes skBlink{0%,40%,46%,100%{transform:none}43%{transform:scaleY(.1)}}
+@keyframes skBow{0%,100%{transform:none}35%,60%{transform:rotate(14deg) translateY(4px)}}
+@keyframes skPawIn{0%,100%{transform:none}35%,60%{transform:translateY(-3px)}}
+@keyframes skNod{0%,100%{transform:none}40%{transform:translateY(4px) rotate(3deg)}}
+@keyframes skPop{0%{transform:scale(.1);opacity:0}35%{transform:scale(1.35);opacity:1}55%{transform:scale(.9)}75%,100%{transform:scale(1)}}
+@keyframes skJump{0%,100%{transform:none}12%{transform:scale(1.12,.86)}40%{transform:translateY(-22px) scale(.94,1.08)}62%{transform:translateY(0) scale(1.1,.9)}76%{transform:scale(.97,1.03)}}
+@keyframes skShadow{0%,100%{transform:none;opacity:.12}40%{transform:scale(.6);opacity:.06}}
+@keyframes skPump{from{transform:translateY(4px)}to{transform:translateY(-12px) rotate(-10deg)}}
+@keyframes skSway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes skRubL{from{transform:translateX(0)}to{transform:translateX(5px) translateY(-6px)}}
+@keyframes skRubR{from{transform:translateX(0) translateY(-6px)}to{transform:translateX(-5px)}}
+@keyframes skSpinJump{0%,100%{transform:none}10%{transform:scale(1.12,.86)}45%{transform:translateY(-24px) rotate(180deg)}75%{transform:translateY(0) rotate(360deg) scale(1.08,.92)}88%{transform:rotate(360deg)}}
+@keyframes skSqueeze{0%,100%{transform:none}25%{transform:scale(1.12,.9)}45%{transform:scale(.94,1.06)}60%{transform:scale(1.04,.97)}}
+@keyframes skHugL{0%,100%{transform:none}25%,45%{transform:translateX(9px) translateY(-4px) rotate(-12deg)}}
+@keyframes skHugR{0%,100%{transform:none}25%,45%{transform:translateX(-9px) translateY(-4px) rotate(12deg)}}
+@keyframes skFloat{0%{transform:translateY(6px) scale(.6);opacity:0}30%{opacity:1}100%{transform:translateY(-14px) scale(1.15);opacity:0}}
+@keyframes skSob{0%,100%{transform:none}30%{transform:translateY(2px) scale(1.03,.96)}60%{transform:translateY(-2px) scale(.98,1.02)}}
+@keyframes skTears{0%,100%{transform:none}50%{transform:translateY(2px)}}
+@keyframes skDoze{0%,100%{transform:none}55%,70%{transform:rotate(-16deg) translateY(4px)}78%{transform:rotate(3deg) translateY(-3px)}}
+@keyframes skZzz{0%{transform:translate(-6px,8px) scale(.6);opacity:0}30%{opacity:1}100%{transform:translate(6px,-14px) scale(1.2);opacity:0}}
+@keyframes skWave{from{transform:rotate(-26deg)}to{transform:rotate(22deg)}}
+@keyframes skTilt{0%,100%{transform:none}30%{transform:rotate(-5deg)}70%{transform:rotate(5deg)}}
+@keyframes skDrop{0%{transform:translateY(-4px);opacity:0}30%{opacity:1}100%{transform:translateY(10px);opacity:0}}
+@keyframes skShy{0%,100%{transform:none}25%{transform:rotate(-8deg) translateX(-3px)}50%{transform:rotate(0)}75%{transform:rotate(8deg) translateX(3px)}}
+@keyframes skCover{0%,100%{transform:none}30%,70%{transform:translateY(-16px)}}
+@keyframes skStartle{0%,100%{transform:none}10%{transform:translateY(-14px) scale(1.08)}20%{transform:translateY(0) translateX(-3px)}30%{transform:translateX(3px)}40%{transform:translateX(-3px)}50%{transform:translateX(2px)}60%{transform:none}}
+@keyframes skStomp{0%,100%{transform:none}25%{transform:translateY(-6px) rotate(-5deg)}50%{transform:translateY(0) scale(1.06,.94)}75%{transform:translateY(-6px) rotate(5deg)}}
+@keyframes skPuff{0%{transform:translateY(4px) scale(.6);opacity:0}40%{opacity:1}100%{transform:translateY(-10px) scale(1.3);opacity:0}}
+@keyframes skShakeHead{0%,100%{transform:none}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+@keyframes skLick{from{transform:scaleY(.5)}to{transform:scaleY(1.3) translateX(1px)}}
+@keyframes skHop2{0%,100%{transform:none}15%{transform:scale(1.1,.9)}50%{transform:translateY(-14px) rotate(-6deg)}80%{transform:scale(1.06,.94)}}
+@keyframes skLook{0%,100%{transform:none}20%,40%{transform:translateX(-5px)}60%,80%{transform:translateX(5px)}}
+@keyframes skPeek{0%,100%{transform:none}20%,40%{transform:rotate(-7deg)}60%,80%{transform:rotate(7deg)}}
+@keyframes skSwing{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+@keyframes skTap{0%,100%{transform:none}50%{transform:translateY(-6px) rotate(-14deg)}}
+@keyframes skTwinkle{0%,100%{transform:scale(1) rotate(0);opacity:1}50%{transform:scale(1.4) rotate(25deg);opacity:.7}}
+@keyframes skBeat{0%,100%{transform:none}25%{transform:scale(1.28)}50%{transform:scale(.95)}}
+.chel-stk svg .sk-b{transform-origin:50% 100%;animation:skSqueeze 1.4s 3}
 .cstk{cursor:pointer}
 @media (prefers-reduced-motion:reduce){.cstk svg.stk-a *,.chel-stk svg.stk-a *{animation:none!important}}
 .cloc-wait{flex-direction:row!important;align-items:center;gap:10px!important}.cspin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:cspin .8s linear infinite;flex:none}@keyframes cspin{to{transform:rotate(360deg)}}.cm.pend{opacity:.6}.cm.pend time{font-style:italic}
@@ -2970,7 +3023,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.6';
+const BUILD = 'v7.17.7';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4402,7 +4455,7 @@ let __stkN=0;
 function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label,an,ex,fx]=s;const dog=an.startsWith('dog');const u='s'+(++__stkN);
   const PAL={dog:['#F2B36B','#C97A3C','#FFF4E6','#E89A52'],dog2:['#FFFFFF','#E9D8C6','#FFFFFF','#F3E6D8'],cat:['#D3D9E1','#9AA3B0','#FAFBFC','#B7C0CB'],cat2:['#F7B866','#DD8A33','#FFF4E4','#EBA049']}[an];
   const [face,dark,light,mid]=PAL,ink='#4A3226',line='#5A3B2A',blush='#FF8F9E';
-  let g=`<g class="sk-b">`;
+  let g=`<g class="sk-b"><g class="sk-head">`;
   // 耳朵
   g+=`<g class="sk-ear">`;
   if(dog)g+=`<ellipse cx="25" cy="57" rx="11.5" ry="19" transform="rotate(22 25 57)" fill="${dark}" stroke="${line}" stroke-width="2.6"/><ellipse cx="95" cy="57" rx="11.5" ry="19" transform="rotate(-22 95 57)" fill="${dark}" stroke="${line}" stroke-width="2.6"/>`;
@@ -4436,14 +4489,15 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
   g+=ex==='shock'?`<ellipse cx="60" cy="80" rx="4.6" ry="5.6" fill="#B8384A" stroke="${ink}" stroke-width="1.6"/>`
     :sadM?`<path d="M53 82q7-6 14 0" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`
     :(ex==='big'||ex==='star'||ex==='open')?`<path d="M51 75q9 13 18 0z" fill="#C2414F" stroke="${ink}" stroke-width="1.8" stroke-linejoin="round"/><path d="M55 80q5 4 10 0" fill="#FF8FA0"/>`
-    :`<path d="M52 75q4 5 8 0q4 5 8 0" fill="none" stroke="${ink}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>${fx==='tongue'?`<path d="M57 78q3 9 6 0z" fill="#FF7F92" stroke="${ink}" stroke-width="1.2"/>`:''}`;
+    :`<path d="M52 75q4 5 8 0q4 5 8 0" fill="none" stroke="${ink}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>${fx==='tongue'?`<path class="sk-tg" d="M57 78q3 9 6 0z" fill="#FF7F92" stroke="${ink}" stroke-width="1.2"/>`:''}`;
   g+='</g>';
   if(!dog)g+=`<path d="M14 63l9 2M15 70l8-1M106 63l-9 2M105 70l-8-1" stroke="${line}" stroke-width="2" stroke-linecap="round" opacity=".6"/>`;
   // 腮紅
   {const big=true;const ch=x=>`<ellipse cx="${x}" cy="74" rx="${big?8.5:7}" ry="${big?5.2:4.4}" fill="${blush}" opacity="${big?.85:.7}"/>${big?`<path d="M${x-4} 75l2-3M${x} 75l2-3M${x+4} 75l2-3" stroke="#fff" stroke-width="1.3" stroke-linecap="round" opacity=".9"/>`:''}`;g+=ch(30)+ch(90)}
+  g+='</g>';
   // 前面兩隻小肉掌
   const paw=(x,r)=>`<g transform="translate(${x} 89) rotate(${r})"><ellipse rx="10" ry="7.8" fill="${face}" stroke="${line}" stroke-width="2.4"/><ellipse cy="1.6" rx="3.4" ry="2.4" fill="#FFB3BE"/><circle cx="-4.6" cy="-2.6" r="1.5" fill="#FFB3BE"/><circle cx="0" cy="-4" r="1.5" fill="#FFB3BE"/><circle cx="4.6" cy="-2.6" r="1.5" fill="#FFB3BE"/></g>`;
-  g+=fx==='paw'?paw(44,-8)+`<g transform="translate(86 34) rotate(18)"><g class="sk-wave"><ellipse rx="10" ry="8.5" fill="${face}" stroke="${line}" stroke-width="2.4"/><ellipse cy="1.5" rx="4" ry="3" fill="#FFB3BE"/></g></g>`:paw(44,-8)+paw(76,8);
+  g+=fx==='paw'?`<g class="sk-pl">`+paw(44,-8)+`</g>`+`<g transform="translate(86 34) rotate(18)"><g class="sk-wave"><ellipse rx="10" ry="8.5" fill="${face}" stroke="${line}" stroke-width="2.4"/><ellipse cy="1.5" rx="4" ry="3" fill="#FFB3BE"/></g></g>`:`<g class="sk-pl">`+paw(44,-8)+`</g><g class="sk-pr">`+paw(76,8)+`</g>`;
   g+=`</g><g class="sk-fx">`;
   // 小道具
   if(fx==='spark')g+=`<path d="M104 20l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4zM14 30l1.6 4.2 4.2 1.6-4.2 1.6-1.6 4.2-1.6-4.2-4.2-1.6 4.2-1.6z" fill="#FFC531" stroke="${line}" stroke-width="1.2" stroke-linejoin="round"/>`;
@@ -4461,7 +4515,7 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
   const T=`<text x="60" y="117.5" text-anchor="middle" font-size="18" font-weight="900" letter-spacing="1" font-family="'PingFang TC','Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif" fill="${ink}" stroke="#fff" stroke-width="6" paint-order="stroke" stroke-linejoin="round">${esc(label)}</text>`;
   const defs=`<defs><linearGradient id="${u}h" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="${face}"/><stop offset="1" stop-color="${mid}"/></linearGradient>
     <filter id="${u}o" x="-10%" y="-10%" width="120%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d"/><feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/><feGaussianBlur in="d" stdDeviation="2.2" result="b"/><feFlood flood-color="#5A3B2A" flood-opacity=".22"/><feComposite in2="b" operator="in" result="sh"/><feOffset in="sh" dy="1.5" result="sh2"/><feMerge><feMergeNode in="sh2"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
-  return `<svg class="stk-a ex-${ex} fx-${fx||'none'}" viewBox="0 6 120 118" role="img" aria-label="${esc(label)}">${defs}<g filter="url(#${u}o)">${g}</g></g>${T}</svg>`}
+  return `<svg class="stk-a s-${id} ex-${ex} fx-${fx||'none'}" viewBox="0 6 120 118" role="img" aria-label="${esc(label)}">${defs}<ellipse class="sk-sh" cx="60" cy="100" rx="30" ry="4" fill="#5A3B2A" opacity=".12"/><g class="sk-all"><g filter="url(#${u}o)">${g}</g></g></g>${T}</svg>`}
 function msgSheet(opts,cur,onPick){const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet xpick msgsheet" role="dialog" aria-label="訊息"><div class="grab" aria-hidden="true"></div><div class="rxrow">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="xplist">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}">${esc(l)}</button>`).join('')}</div></div>`;
   el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){const v=b.dataset.v,back=overlayOpen===el;closeOverlay(el);if(!back)return onPick(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);onPick(v)};addEventListener('popstate',ok);t=setTimeout(ok,450);return}if(e.target===el)closeOverlay(el)};
