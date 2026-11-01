@@ -2462,7 +2462,7 @@ html{-webkit-tap-highlight-color:transparent}
 .chn{flex:none;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--brand,#F2643D);color:#fff;font-style:normal;font-size:12px;font-weight:800;display:grid;place-items:center}
 .chat{display:flex;flex-direction:column;max-width:760px;margin:0 auto;min-height:calc(100dvh - 140px)}
 .chhead{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 4px;background:var(--paper)}
-@media (max-width:760px){.chhead{position:static;padding:4px 0 8px}.chback{display:none}}
+@media (max-width:760px){.chhead{display:none}}
 .chback{font-size:30px;line-height:1;padding:0 8px;color:var(--ink)!important;text-decoration:none!important}
 .chwho{flex:1;min-width:0;display:flex;align-items:center;gap:10px;color:var(--ink)!important;text-decoration:none!important}
 .chwho .cav{width:40px;height:40px;font-size:16px}.chwho b{display:block;font-size:17px}.chwho small{color:var(--ink-3);font-size:12.5px}
@@ -2577,7 +2577,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.11.2';
+const BUILD = 'v6.11.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3818,6 +3818,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
       <textarea id="chIn" rows="1" maxlength="2000" placeholder="輸入訊息…" aria-label="輸入訊息"></textarea>
       <button type="submit" class="chsend" id="chSend" aria-label="送出">${ic('send')}</button></form>`}
   </div>`;
+  if(_n===navId)setNavAction(`<button type="button" aria-label="對話選項">${ic('dots')}</button>`,()=>{const b=$('#chMenu');if(b)b.click()});   // 手機：右上角「⋯」
   const log=$('#chLog');let lastId=0;const seen=new Set();const urlCache={};
   const signed=async paths=>{const need=paths.filter(p=>p&&!urlCache[p]);if(need.length){try{const {data}=await sb.storage.from('chat').createSignedUrls(need,3600);(data||[]).forEach(x=>{if(x.signedUrl){urlCache[x.path]=x.signedUrl;urlCache['_t'+x.path]=Date.now()}})}catch(_){}}};
   const bubble=m=>{const mineM=m.sender_id===me().id;const t=chatTime(m.created_at);
@@ -7433,6 +7434,7 @@ async function renderMeBody(){const _n=navId;
   (_n===navId?app:_void).innerHTML=`<div class="profile"><button type="button" class="pf-av ${p.avatar_url?'img':''}" id="pfAv" aria-label="更換大頭貼">${p.avatar_url?`<img src="${esc(safeU(p.avatar_url))}" alt="">`:esc([...(p.display_name||p.username||me().email||'會')][0].toUpperCase())}<i class="pf-cam" aria-hidden="true">${ic('camera')}</i></button><div class="pf-t"><h1>${esc(p.display_name||p.username||me().email||'會員')}</h1><span class="muted small">${p.username?'@'+esc(p.username):''}${p.username&&me().email?'・':''}${me().email?esc(me().email):''}</span></div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}</div></div>
 
   <a class="crosslink" href="#/health" style="margin:18px 0 6px"><span class="cl-ic">${ic("steth")}</span><span><b>毛孩健康手冊${(pets||[]).length?`・${pets.length} 隻毛孩`:''}</b>${(dues||[]).length?`有 ${dues.length} 項一個月內到期`:'健康紀錄、到期提醒和日曆同步都在這裡'}</span><em>打開</em></a>
+  <a class="crosslink" href="#/chats" style="margin:0 0 6px"><span class="cl-ic">${ic("chat")}</span><span><b>訊息${__chatN?`・${__chatN} 則未讀`:''}</b>和飼主、通報者、其他會員的對話</span><em>打開</em></a>
 
   ${(()=>{const L=cs||[],F=fs||[],M=mineHTML(new Set([...L,...F].map(x=>x.id)));
     if(!L.length&&!F.length)return `<h2>${ic("clipboard")} 我的案件</h2>${M||`<div class="card me-empty"><p style="margin:0 0 10px">還沒有登記任何案件。</p><div class="me-acts"><a class="btn" href="#/new">${ic("siren")} 我的毛孩走失了</a><a class="btn ghost" href="#/seen">${ic("hand")} 我撿到／看到一隻</a></div><p class="small muted" style="margin:10px 0 0">以前沒登入就登記過？打開管理頁按「存到我的帳號」就會出現在這裡。</p></div>`}`;
