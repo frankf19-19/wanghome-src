@@ -2663,6 +2663,7 @@ html{-webkit-tap-highlight-color:transparent}
 .mbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
 .grid.pets1{grid-template-columns:1fr!important}.grid.pets1>.ccard{flex-direction:row;align-items:stretch}.grid.pets1>.ccard>.ph{flex:none;width:42%;max-width:220px;aspect-ratio:auto;min-height:170px}.grid.pets1>.ccard>.b{flex:1;min-width:0;justify-content:center}.grid.pets1 .bd-chip{align-self:flex-start}
 body[data-route=me] #app .grid>.ccard:only-child{grid-column:1/-1;flex-direction:row;align-items:stretch}body[data-route=me] #app .grid>.ccard:only-child>.ph{flex:none;width:42%;max-width:220px;aspect-ratio:auto;min-height:150px}body[data-route=me] #app .grid>.ccard:only-child>.ph.noimg{height:auto}body[data-route=me] #app .grid>.ccard:only-child>.b{flex:1;min-width:0;justify-content:center}
+.nf404{max-width:420px;margin:48px auto;text-align:center;padding:32px 20px;background:var(--sheet);border-radius:26px;box-shadow:var(--lift)}.nf-ic{width:72px;height:72px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:var(--brand-soft,#FFE7DE);color:var(--brand-d,#D94A26)}.nf-ic .ico{width:36px;height:36px}.nf404 h1{font-size:24px;margin:0 0 6px}.nf404 p{color:var(--ink-2);margin:0 0 18px}.nf-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .mcard{text-align:center;padding:28px 18px;background:var(--sheet);border-radius:26px;box-shadow:var(--lift);max-width:460px;margin:20px auto}
 .mcard h1{margin:12px 0 2px;font-size:26px}
 </style>
@@ -2746,7 +2747,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.5';
+const BUILD = 'v7.2.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3482,7 +3483,7 @@ function route(){window.__lastRoute=Date.now();
   if(path==='#/terms')return renderTerms();
   if(path==='#/contact')return renderContact();
   if(path==='#/delete-account')return renderDeleteAccount();
-  setTitle('找不到頁面');app.innerHTML='<div class="empty">找不到這個頁面 <br><a href="#/">回首頁</a></div>';
+  setTitle('找不到頁面');app.innerHTML=`<div class="nf404"><div class="nf-ic">${ic('paw')}</div><h1>這一頁走丟了</h1><p>網址可能打錯了，或這個頁面已經移除。</p><div class="nf-btns"><a class="btn" href="#/">回首頁</a><a class="btn ghost" href="#/seen">我看到／撿到毛孩</a></div></div>`;
 }
 
 /* ============================================================
