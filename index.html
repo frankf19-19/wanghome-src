@@ -2782,6 +2782,36 @@ body.chfix .tabbar{display:none!important}
 .chact{position:absolute;top:0;bottom:0;right:0;width:156px;display:flex}
 .chact button{flex:1;border:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:inherit;font-size:13px;font-weight:800;color:#fff;background:#8E8A85;cursor:pointer}
 .chact button .ico{width:20px;height:20px}.chact button.del{background:#E5484D}
+/* 動態貼圖：聊天室裡的貼圖會動（彈跳、眨眼、愛心飄、星星閃…），播兩輪後停，點一下再播 */
+.cstk svg.stk-a .sk-b,.chel-stk svg.stk-a .sk-b{transform-box:fill-box;transform-origin:50% 100%;animation:skHop 1.6s cubic-bezier(.3,.7,.4,1) 2}
+.cstk svg.stk-a .sk-eyes,.chel-stk svg.stk-a .sk-eyes{transform-box:fill-box;transform-origin:50% 55%;animation:skBlink 1.6s 2}
+.cstk svg.stk-a .sk-ear{transform-box:fill-box;transform-origin:50% 80%;animation:skEar 1.6s ease-in-out 2}
+.cstk svg.stk-a .sk-wave{transform-box:fill-box;transform-origin:20% 90%;animation:skWave .5s ease-in-out 6 alternate}
+.cstk svg.stk-a .sk-fx{transform-box:fill-box;transform-origin:50% 50%;animation:skFx 1.6s ease-in-out 2}
+.cstk svg.fx-hearts .sk-fx,.cstk svg.ex-love .sk-fx{animation:skFloat 1.6s ease-out 2}
+.cstk svg.fx-zzz .sk-fx{animation:skFloat 2s ease-in-out 2}
+.cstk svg.fx-spark .sk-fx,.cstk svg.ex-star .sk-fx{animation:skTwinkle .8s ease-in-out 4}
+.cstk svg.fx-sweat .sk-fx{animation:skDrop 1.2s ease-in 3}
+.cstk svg.fx-bang .sk-fx,.cstk svg.fx-check .sk-fx,.cstk svg.fx-x .sk-fx{animation:skPop .8s cubic-bezier(.3,1.6,.5,1) 3}
+.cstk svg.ex-angry .sk-b,.cstk svg.ex-shock .sk-b{animation:skShake .45s ease-in-out 5}
+.cstk svg.ex-cry .sk-b,.cstk svg.ex-sad .sk-b{animation:skSob 1.2s ease-in-out 3}
+.cstk svg.ex-sleep .sk-b{animation:skBreath 2s ease-in-out 2}
+.cstk svg.ex-love .sk-eyes,.cstk svg.ex-star .sk-eyes{animation:skBeat .8s ease-in-out 4}
+@keyframes skHop{0%,100%{transform:none}18%{transform:translateY(0) scale(1.05,.94)}38%{transform:translateY(-6px) scale(.97,1.04)}58%{transform:translateY(0) scale(1.03,.97)}72%{transform:translateY(-2px)}}
+@keyframes skBlink{0%,44%,52%,100%{transform:none}48%{transform:scaleY(.12)}}
+@keyframes skEar{0%,100%{transform:none}30%{transform:rotate(-4deg)}60%{transform:rotate(4deg)}}
+@keyframes skWave{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
+@keyframes skFx{0%,100%{transform:none}50%{transform:translateY(-3px) scale(1.08)}}
+@keyframes skFloat{0%{transform:translateY(4px);opacity:.3}40%{opacity:1}100%{transform:translateY(-8px);opacity:1}}
+@keyframes skTwinkle{0%,100%{transform:scale(1) rotate(0);opacity:1}50%{transform:scale(1.25) rotate(18deg);opacity:.75}}
+@keyframes skDrop{0%{transform:translateY(-3px);opacity:0}30%{opacity:1}100%{transform:translateY(6px);opacity:0}}
+@keyframes skPop{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+@keyframes skShake{0%,100%{transform:none}25%{transform:translateX(-2.5px) rotate(-2deg)}75%{transform:translateX(2.5px) rotate(2deg)}}
+@keyframes skSob{0%,100%{transform:none}25%,75%{transform:translateY(1.5px) scale(1.01,.98)}50%{transform:translateY(-1px)}}
+@keyframes skBreath{0%,100%{transform:none}50%{transform:scale(1.03,.97)}}
+@keyframes skBeat{0%,100%{transform:none}30%{transform:scale(1.18)}60%{transform:scale(.96)}}
+.cstk{cursor:pointer}
+@media (prefers-reduced-motion:reduce){.cstk svg.stk-a *,.chel-stk svg.stk-a *{animation:none!important}}
 .cloc-wait{flex-direction:row!important;align-items:center;gap:10px!important}.cspin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:cspin .8s linear infinite;flex:none}@keyframes cspin{to{transform:rotate(360deg)}}.cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2940,7 +2970,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.5';
+const BUILD = 'v7.17.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3469,6 +3499,9 @@ function openOverlay(el){
     sh.addEventListener('touchmove',e=>{if(!on)return;dy=Math.max(0,e.touches[0].clientY-y0);if(dy>0&&sh.scrollTop<=0)sh.style.transform=`translateY(${dy}px)`},{passive:true});
     const end=()=>{if(!on)return;on=false;sh.style.transition='';if(dy>90){sh.style.transform='translateY(110%)';el.classList.remove('show');setTimeout(()=>closeOverlay(el),200)}else sh.style.transform=''};
     sh.addEventListener('touchend',end);sh.addEventListener('touchcancel',end)}}
+  // 長按打開的選單：放開手指那一下不算點擊（不然選單一出現就被關掉或誤選）
+  {const t0=Date.now();let fresh=false;el.addEventListener('touchstart',()=>{fresh=true},{capture:true,passive:true});el.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')fresh=true},true);
+    el.addEventListener('click',e=>{if(!fresh&&Date.now()-t0<800){e.preventDefault();e.stopImmediatePropagation()}},true)}
   document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{if(!el.isConnected||(el.contains(document.activeElement)&&document.activeElement!==el))return;const touch=matchMedia('(pointer:coarse)').matches;   // 手機：焦點放在視窗本身（不會在第一個選項出現黃框），鍵盤使用者照常跳到第一個選項
     const f=touch?el:(focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el);if(f===el&&!el.hasAttribute('tabindex'))el.setAttribute('tabindex','-1');try{f.focus({preventScroll:true,focusVisible:false})}catch(_){}},260);
   try{history.pushState({overlay:1,d:navDepth,h:location.hash||'#/'},'',location.href)}catch(_){}
@@ -4369,10 +4402,12 @@ let __stkN=0;
 function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label,an,ex,fx]=s;const dog=an.startsWith('dog');const u='s'+(++__stkN);
   const PAL={dog:['#F2B36B','#C97A3C','#FFF4E6','#E89A52'],dog2:['#FFFFFF','#E9D8C6','#FFFFFF','#F3E6D8'],cat:['#D3D9E1','#9AA3B0','#FAFBFC','#B7C0CB'],cat2:['#F7B866','#DD8A33','#FFF4E4','#EBA049']}[an];
   const [face,dark,light,mid]=PAL,ink='#4A3226',line='#5A3B2A',blush='#FF8F9E';
-  let g='';
+  let g=`<g class="sk-b">`;
   // 耳朵
+  g+=`<g class="sk-ear">`;
   if(dog)g+=`<ellipse cx="25" cy="57" rx="11.5" ry="19" transform="rotate(22 25 57)" fill="${dark}" stroke="${line}" stroke-width="2.6"/><ellipse cx="95" cy="57" rx="11.5" ry="19" transform="rotate(-22 95 57)" fill="${dark}" stroke="${line}" stroke-width="2.6"/>`;
   else g+=`<path d="M30 46 31 18q1-6 6-3l20 15z" fill="${face}" stroke="${line}" stroke-width="2.6" stroke-linejoin="round"/><path d="M90 46 89 18q-1-6-6-3L63 30z" fill="${face}" stroke="${line}" stroke-width="2.6" stroke-linejoin="round"/><path d="M35 38 36 24l11 9z" fill="#FFB3BE"/><path d="M85 38 84 24l-11 9z" fill="#FFB3BE"/>`;
+  g+='</g>';
   // 頭（漸層光澤）
   g+=`<path d="M60 26C88 26 101 42 101 62S86 95 60 95 19 84 19 62 32 26 60 26z" fill="url(#${u}h)" stroke="${line}" stroke-width="2.6"/><path d="M33 47q5-11 17-15" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" opacity=".75"/>`;
   if(an==='cat2')g+=`<path d="M52 28q8 5 16 0M49 35q11 5 22 0" fill="none" stroke="${mid}" stroke-width="3.2" stroke-linecap="round"/><path d="M22 55l7 1M99 55l-7 1" stroke="${mid}" stroke-width="3" stroke-linecap="round"/>`;
@@ -4392,7 +4427,7 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
     case 'shock':return `<circle cx="${x}" cy="53" r="8.5" fill="#fff" stroke="${ink}" stroke-width="2.6"/><circle cx="${x}" cy="53" r="3.6" fill="${ink}"/>`;
     case 'angry':return `<path d="M${x-8} ${x<60?44:49}l16 ${x<60?5:-5}" stroke="${ink}" stroke-width="3.6" stroke-linecap="round"/><ellipse cx="${x}" cy="56" rx="4.6" ry="5.4" fill="${ink}"/>`;
     default:return `<ellipse cx="${x}" cy="53" rx="6.4" ry="7.6" fill="${ink}"/><circle cx="${x+2.4}" cy="49.6" r="2.6" fill="#fff"/><circle cx="${x-2}" cy="56.4" r="1.3" fill="#fff"/>`}};
-  g+=`<g transform="translate(0 7)">${E(41)+E(79)}</g>`;
+  g+=`<g transform="translate(0 7)"><g class="sk-eyes">${E(41)+E(79)}</g></g>`;
   g+=`<g transform="translate(60 70) scale(.82) translate(-60 -68)">`;
   // 鼻子
   g+=dog?`<path d="M54 66q6-4 12 0q-1 5-6 6q-5-1-6-6z" fill="${ink}"/><ellipse cx="58" cy="66.6" rx="2" ry="1.1" fill="#fff" opacity=".7"/>`:`<path d="M57 66h6l-3 3.4z" fill="#F07D8C" stroke="${ink}" stroke-width="1" stroke-linejoin="round"/>`;
@@ -4405,10 +4440,11 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
   g+='</g>';
   if(!dog)g+=`<path d="M14 63l9 2M15 70l8-1M106 63l-9 2M105 70l-8-1" stroke="${line}" stroke-width="2" stroke-linecap="round" opacity=".6"/>`;
   // 腮紅
-  {const big=fx==='blush2'||fx==='blush';const ch=x=>`<ellipse cx="${x}" cy="74" rx="${big?8.5:7}" ry="${big?5.2:4.4}" fill="${blush}" opacity="${big?.85:.7}"/>${big?`<path d="M${x-4} 75l2-3M${x} 75l2-3M${x+4} 75l2-3" stroke="#fff" stroke-width="1.3" stroke-linecap="round" opacity=".9"/>`:''}`;g+=ch(30)+ch(90)}
+  {const big=true;const ch=x=>`<ellipse cx="${x}" cy="74" rx="${big?8.5:7}" ry="${big?5.2:4.4}" fill="${blush}" opacity="${big?.85:.7}"/>${big?`<path d="M${x-4} 75l2-3M${x} 75l2-3M${x+4} 75l2-3" stroke="#fff" stroke-width="1.3" stroke-linecap="round" opacity=".9"/>`:''}`;g+=ch(30)+ch(90)}
   // 前面兩隻小肉掌
-  const paw=(x,r)=>`<g transform="translate(${x} 89) rotate(${r})"><ellipse rx="10" ry="7.8" fill="${face}" stroke="${line}" stroke-width="2.4"/><path d="M-4 -3v4M0 -4v5M4 -3v4" stroke="${line}" stroke-width="1.6" stroke-linecap="round" opacity=".6"/></g>`;
-  g+=fx==='paw'?paw(44,-8)+`<g transform="translate(86 34) rotate(18)"><ellipse rx="10" ry="8.5" fill="${face}" stroke="${line}" stroke-width="2.4"/><ellipse cy="1.5" rx="4" ry="3" fill="#FFB3BE"/></g>`:paw(44,-8)+paw(76,8);
+  const paw=(x,r)=>`<g transform="translate(${x} 89) rotate(${r})"><ellipse rx="10" ry="7.8" fill="${face}" stroke="${line}" stroke-width="2.4"/><ellipse cy="1.6" rx="3.4" ry="2.4" fill="#FFB3BE"/><circle cx="-4.6" cy="-2.6" r="1.5" fill="#FFB3BE"/><circle cx="0" cy="-4" r="1.5" fill="#FFB3BE"/><circle cx="4.6" cy="-2.6" r="1.5" fill="#FFB3BE"/></g>`;
+  g+=fx==='paw'?paw(44,-8)+`<g transform="translate(86 34) rotate(18)"><g class="sk-wave"><ellipse rx="10" ry="8.5" fill="${face}" stroke="${line}" stroke-width="2.4"/><ellipse cy="1.5" rx="4" ry="3" fill="#FFB3BE"/></g></g>`:paw(44,-8)+paw(76,8);
+  g+=`</g><g class="sk-fx">`;
   // 小道具
   if(fx==='spark')g+=`<path d="M104 20l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4zM14 30l1.6 4.2 4.2 1.6-4.2 1.6-1.6 4.2-1.6-4.2-4.2-1.6 4.2-1.6z" fill="#FFC531" stroke="${line}" stroke-width="1.2" stroke-linejoin="round"/>`;
   if(fx==='hearts')g+=`<path d="M102 30c-7.5-5-7.5-11.5-2.8-11.5 1.7 0 2.5 1 2.8 2 .3-1 1.1-2 2.8-2 4.7 0 4.7 6.5-2.8 11.5zM17 36c-5.5-3.7-5.5-8.5-2-8.5 1.2 0 1.8.8 2 1.5.2-.7.8-1.5 2-1.5 3.5 0 3.5 4.8-2 8.5z" fill="#FF5A78" stroke="${line}" stroke-width="1.2"/>`;
@@ -4425,7 +4461,7 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
   const T=`<text x="60" y="117.5" text-anchor="middle" font-size="18" font-weight="900" letter-spacing="1" font-family="'PingFang TC','Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif" fill="${ink}" stroke="#fff" stroke-width="6" paint-order="stroke" stroke-linejoin="round">${esc(label)}</text>`;
   const defs=`<defs><linearGradient id="${u}h" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="${face}"/><stop offset="1" stop-color="${mid}"/></linearGradient>
     <filter id="${u}o" x="-10%" y="-10%" width="120%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d"/><feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/><feGaussianBlur in="d" stdDeviation="2.2" result="b"/><feFlood flood-color="#5A3B2A" flood-opacity=".22"/><feComposite in2="b" operator="in" result="sh"/><feOffset in="sh" dy="1.5" result="sh2"/><feMerge><feMergeNode in="sh2"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
-  return `<svg viewBox="0 6 120 118" role="img" aria-label="${esc(label)}">${defs}<g filter="url(#${u}o)">${g}</g>${T}</svg>`}
+  return `<svg class="stk-a ex-${ex} fx-${fx||'none'}" viewBox="0 6 120 118" role="img" aria-label="${esc(label)}">${defs}<g filter="url(#${u}o)">${g}</g></g>${T}</svg>`}
 function msgSheet(opts,cur,onPick){const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet xpick msgsheet" role="dialog" aria-label="訊息"><div class="grab" aria-hidden="true"></div><div class="rxrow">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="xplist">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}">${esc(l)}</button>`).join('')}</div></div>`;
   el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){const v=b.dataset.v,back=overlayOpen===el;closeOverlay(el);if(!back)return onPick(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);onPick(v)};addEventListener('popstate',ok);t=setTimeout(ok,450);return}if(e.target===el)closeOverlay(el)};
@@ -4604,6 +4640,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   log.addEventListener('click',e=>{const q=e.target.closest('.cq');if(!q)return;const el=log.querySelector(`.cm[data-id="${q.dataset.jump}"]`);if(!el)return toast('那則訊息在更早之前，請先按「看更早的訊息」');el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1200)});
   log.addEventListener('click',async e=>{const b=e.target.closest('.cmph');if(!b)return;const p=b.dataset.full;if(!urlCache[p]||Date.now()-(urlCache['_t'+p]||0)>50*60e3){delete urlCache[p];await signed([p])}if(urlCache[p]){const x=b.querySelector('.cmph-x');if(x)x.outerHTML=`<img src="${esc(urlCache[p])}" alt="照片">`;else{const all=[...log.querySelectorAll('.cmph[data-full]')].map(x=>x.dataset.full).filter(q=>urlCache[q]);lightbox(urlCache[p],{save:true,name:'聊天照片',list:all.map(q=>urlCache[q]),idx:Math.max(0,all.indexOf(p))})}}else toast('照片載入失敗，請稍後再試')});
   log.addEventListener('touchstart',e=>{const ta=$('#chIn');if(!ta||document.activeElement!==ta||!document.body.classList.contains('chfix'))return;if(e.target.closest('a,button,input,textarea,.cmb,.cstk'))return;ta.blur()},{passive:true});
+  log.addEventListener('click',e=>{const k=e.target.closest('.cstk');if(!k)return;const sv=k.querySelector('svg.stk-a');if(sv){const n=sv.cloneNode(true);sv.replaceWith(n)}});   // 點貼圖再播一次動畫
   log.addEventListener('click',async e=>{const b=e.target.closest('.cvplay');if(!b||!b.dataset.voice)return;e.stopPropagation();const pth=b.dataset.voice;
     if(__voiceBtn===b){voiceStop();return}voiceStop();if(!urlCache[pth]||Date.now()-(urlCache['_t'+pth]||0)>50*60e3){delete urlCache[pth];await signed([pth])}if(!urlCache[pth])return toast('語音載入失敗，請稍後再試');
     const a=new Audio(urlCache[pth]);__voiceAudio=a;__voiceBtn=b;b.innerHTML=ic('pause');const box=b.closest('.cvoice');
