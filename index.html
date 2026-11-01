@@ -2650,7 +2650,8 @@ html{-webkit-tap-highlight-color:transparent}
 .crx button{display:inline-flex;align-items:center;gap:2px;border:1.5px solid var(--sheet);background:var(--sheet);border-radius:999px;padding:1px 6px;font-size:13px;line-height:20px;box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer;color:var(--ink)}.crx button.on{border-color:var(--brand,#F2643D);background:var(--brand-soft,#FFE7DE)}.crx i{font-style:normal;font-size:11.5px;font-weight:800}
 .rxrow{display:flex;justify-content:space-between;gap:4px;margin:0 0 12px;padding:8px;border-radius:999px;background:var(--fill)}.rxrow button{all:unset;cursor:pointer;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:28px;transition:transform .12s}.rxrow button:active{transform:scale(1.25)}.rxrow button.on{background:var(--brand-soft,#FFE7DE)}
 .msgsheet .xplist button.danger{color:#D23B2A}
-body[data-route=chat] .chat{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23D9A07A' fill-opacity='.10'%3E%3Cg transform='translate(24 28) rotate(-18)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3Cg transform='translate(86 84) rotate(20)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}
+@media (max-width:760px){body[data-route=chat] .chat{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23D9A07A' fill-opacity='.10'%3E%3Cg transform='translate(24 28) rotate(-18)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3Cg transform='translate(86 84) rotate(20)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px;margin:0 -16px;padding:0 16px}}
+@media (min-width:761px){body[data-route=chat] .chat{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23D9A07A' fill-opacity='.10'%3E%3Cg transform='translate(24 28) rotate(-18)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3Cg transform='translate(86 84) rotate(20)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-8' cy='-3' r='3'/%3E%3Ccircle cx='-3' cy='-8' r='3'/%3E%3Ccircle cx='3' cy='-8' r='3'/%3E%3Ccircle cx='8' cy='-3' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}}
 /* 電腦版聊天：左右兩欄 */
 body.chsplit-on #app{max-width:1240px!important}
 .chsplit{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;height:calc(100dvh - 48px)}
@@ -2662,6 +2663,50 @@ body.chsplit-on #app{max-width:1240px!important}
 .chmain{min-width:0;min-height:0;display:flex}.chmain>.chat{flex:1;max-width:none;height:100%!important;padding:0 6px;border-radius:24px}
 .chempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--ink-3);border-radius:24px;border:2px dashed var(--line)}.chempty .ico{width:44px;height:44px}.chempty b{color:var(--ink-2);font-size:18px}
 body.chsplit-on .chhead .chback{display:none}
+/* ===== 聊天室 v2 外觀 ===== */
+body[data-route=chat]{--chbg:#FBF5EE;--cmine1:#F57B4F;--cmine2:#E2552E;--cother:#FFFFFF}
+:root[data-theme=dark] body[data-route=chat]{--chbg:#151210;--cother:#26211D}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) body[data-route=chat]{--chbg:#151210;--cother:#26211D}}
+body[data-route=chat]{background:var(--chbg)}
+body[data-route=chat] .mbar{background:color-mix(in srgb,var(--chbg) 88%,transparent)!important}
+body[data-route=chat] .chat{background-color:var(--chbg)}
+/* 上方：案件細條、加好友小條 */
+body[data-route=chat] .chctx{margin:6px 0 6px;padding:7px 10px 7px 7px;gap:10px;border-radius:16px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 6px 16px -12px rgba(80,50,20,.35)}
+body[data-route=chat] .chctx img,body[data-route=chat] .chctx>svg{width:38px;height:38px;border-radius:11px}
+body[data-route=chat] .chctx b{font-size:15px}body[data-route=chat] .chctx small{font-size:12.5px}
+body[data-route=chat] .chfr{margin:0 0 6px;padding:6px 6px 6px 12px;border-radius:999px;background:var(--sheet);box-shadow:0 6px 16px -12px rgba(80,50,20,.35);font-size:13.5px}
+body[data-route=chat] .chfr .btn{min-height:34px;padding:0 14px;font-size:13.5px;border-radius:999px}
+body[data-route=chat] .chtip{font-size:13px;margin:0 2px 6px;color:var(--ink-3)}
+.cnote{align-self:center;display:flex;gap:6px;align-items:flex-start;max-width:320px;margin:6px auto 10px;padding:0 6px;font-size:12px;line-height:1.5;color:var(--ink-3);text-align:left}.cnote .ico{flex:none;width:14px;height:14px;margin-top:2px}.cnote b{color:var(--ink-2);font-weight:700}
+/* 日期 */
+body[data-route=chat] .cday{background:color-mix(in srgb,var(--sheet) 80%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--ink-3);font-weight:700;font-size:12px;padding:4px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+/* 泡泡 */
+body[data-route=chat] .chlog{gap:4px}
+body[data-route=chat] .cmb{padding:10px 14px;font-size:16px;line-height:1.5;border-radius:22px 22px 22px 8px;background:var(--cother);box-shadow:0 1px 1px rgba(0,0,0,.04),0 4px 14px -10px rgba(80,50,20,.45)}
+body[data-route=chat] .cm.me .cmb{border-radius:22px 22px 8px 22px;background:linear-gradient(140deg,var(--cmine1),var(--cmine2));color:#fff;box-shadow:0 6px 16px -10px rgba(226,85,46,.75)}
+body[data-route=chat] .cm.cont:not(.me) .cmb{border-top-left-radius:8px}
+body[data-route=chat] .cm.me.cont .cmb{border-top-right-radius:8px}
+body[data-route=chat] .cm.cont{margin-top:0}
+body[data-route=chat] .cm time{font-size:10.5px;color:var(--ink-3);opacity:.85}
+body[data-route=chat] .cm .cmav .cav{width:32px;height:32px;font-size:13px;box-shadow:0 0 0 2px var(--sheet)}
+body[data-route=chat] .cm.ask .cmb{background:#EAF2FF;color:#173B7A;border:0;box-shadow:inset 0 0 0 1.5px #C9DAF7}
+body[data-route=chat] .cmb.cloc{background:var(--cother)!important;padding:5px}
+body[data-route=chat] .cm.me .cq{background:rgba(255,255,255,.2);border-left-color:#fff}
+body[data-route=chat] .cmph img{border-radius:16px}
+/* 輸入列：浮動圓角 */
+body[data-route=chat] .chbar{background:transparent;gap:6px;align-items:center}
+@media (max-width:760px){body[data-route=chat] .chbar::before{content:"";position:absolute;inset:-14px 0 0;background:linear-gradient(to top,var(--chbg) 55%,transparent);z-index:-1}}
+body[data-route=chat] .chbar{isolation:isolate}
+body[data-route=chat] .chbar textarea{border:0;background:var(--sheet);border-radius:24px;min-height:46px;padding:12px 16px;box-shadow:0 1px 1px rgba(0,0,0,.04),0 6px 18px -12px rgba(80,50,20,.5)}
+body[data-route=chat] .chbar textarea:focus{outline:2px solid color-mix(in srgb,var(--brand) 45%,transparent);outline-offset:0}
+body[data-route=chat] .chbtn{background:var(--sheet);color:var(--ink-2);box-shadow:0 1px 1px rgba(0,0,0,.04),0 6px 18px -12px rgba(80,50,20,.5)}
+body[data-route=chat] .chplus{background:var(--ink);color:var(--paper)}
+body[data-route=chat] .chsend{background:linear-gradient(140deg,var(--cmine1),var(--cmine2));box-shadow:0 8px 16px -8px rgba(226,85,46,.8)}
+body[data-route=chat] .chquick button{border:0;background:var(--sheet);box-shadow:0 6px 16px -12px rgba(80,50,20,.5);color:var(--brand-d,#D94A26)}
+body[data-route=chat] .chreply{border-radius:16px;margin:0 0 4px}
+/* 電腦版標頭 */
+body[data-route=chat] .chhead{background:transparent;padding:10px 4px 6px}
+body.chsplit-on .chmain>.chat{background-color:var(--chbg);box-shadow:var(--lift);padding:0 14px}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2820,7 +2865,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.8.0';
+const BUILD = 'v7.9.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4286,7 +4331,6 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   app.innerHTML=`<div class="chat">
     <div class="chhead"><a class="chback" href="#/chats" aria-label="回訊息列表">‹</a>${other.username?`<a class="chwho" href="#/u/${encodeURIComponent(other.username)}">`:'<span class="chwho">'}${chatAva(oname,other.avatar_url)}<span><b>${esc(oname)}</b><small>${other.joined?'加入 '+esc(fmtDate(other.joined)):''}</small></span>${other.username?'</a>':'</span>'}<button type="button" class="chmenu" id="chMenu" aria-label="更多">${ic('dots')}</button></div>
     ${ctxHTML}
-    <p class="chsafe">${ic('shield')}<span>${ch.kind==='dm'?'不要給對方密碼、驗證碼或匯款；見面約在人多的公共場所。':'見面約在派出所、動物醫院等公共場所。<b>要你先匯款、給驗證碼的都是詐騙。</b>'}</span></p>
     ${ownerSide&&ch.kind!=='dm'?`<p class="chtip">對方說看到或撿到你的毛孩？可以請他傳照片確認；你也要準備好晶片號碼、以前的照片，證明你是飼主。</p>`:''}
     <div class="chlog" id="chLog" aria-live="polite"></div>
     ${other.blocked?`<div class="chblk">你已經封鎖這位會員。<button type="button" class="linkbtn" id="chUnblk">解除封鎖</button></div>`:`<form class="chbar" id="chForm" autocomplete="off" data-nodirty>
@@ -4296,11 +4340,11 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   </div>`;
   if(_n===navId)setNavAction(`<button type="button" aria-label="對話選項">${ic('dots')}</button>`,()=>{const b=$('#chMenu');if(b)b.click()});
   {const c=app.querySelector('.chat');if(c)chatWrapSplit(c,id,false)}   // 手機：右上角「⋯」
-  const log=$('#chLog');let lastId=0;const seen=new Set();const urlCache={};
+  const log=$('#chLog');log.insertAdjacentHTML('afterbegin',`<p class="cnote">${ic('shield')}<span>${ch.kind==='dm'?'不要給對方密碼、驗證碼或匯款；見面約在人多的公共場所。':'見面約在派出所、動物醫院等公共場所。<b>要你先匯款、給驗證碼的都是詐騙。</b>'}</span></p>`);let lastId=0;const seen=new Set();const urlCache={};
   let relNow='none';
   const drawFrBar=rel=>{relNow=rel;const old=$('#chFr');if(old)old.remove();if(_n!==navId||!other.user_id||!other.username||other.blocked)return;
     const talked=rel==='received'||msgs.some(m=>m.sender_id===other.user_id);if(!talked||!['none','received'].includes(rel))return;
-    log.insertAdjacentHTML('beforebegin',`<div class="chfr" id="chFr">${ic('userPlus')}<span>${rel==='received'?`<b>${esc(oname)}</b> 想加你為好友`:`加 <b>${esc(oname)}</b> 為好友，之後隨時可以聊`}</span><button type="button" class="btn sm" id="chFrGo">${rel==='received'?'接受':'加好友'}</button></div>`);
+    log.insertAdjacentHTML('beforebegin',`<div class="chfr" id="chFr">${ic('userPlus')}<span>${rel==='received'?`<b>${esc(oname)}</b> 想加你為好友`:`加 <b>${esc(oname)}</b> 為好友`}</span><button type="button" class="btn sm" id="chFrGo">${rel==='received'?'接受':'加好友'}</button></div>`);
     try{if(pinned)requestAnimationFrame(()=>toBottom(false))}catch(_){}
     $('#chFrGo').onclick=async e=>{e.target.disabled=true;const r=rel==='received'?await friendRespond(other.user_id,true,oname):await friendAdd(other.user_id,oname);e.target.disabled=false;if(r)drawFrBar(r)}};
   if(other.user_id&&other.username&&!other.blocked)sb.rpc('friend_rel',{p_user:other.user_id}).then(({data})=>drawFrBar(data||'none'),()=>{});
@@ -4336,16 +4380,16 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   let pinned=true;{const onUser=()=>{setTimeout(()=>{pinned=atBottom()},120)};['touchmove','wheel'].forEach(ev=>{addEventListener(ev,onUser,{passive:true})});
     const onSc=()=>{if(_n!==navId){removeEventListener('scroll',onSc);return}if(atBottom()){hideNew();pinned=true}};addEventListener('scroll',onSc,{passive:true});log.addEventListener('scroll',onSc,{passive:true});
     try{const ro=new ResizeObserver(()=>{if(_n!==navId){ro.disconnect();return}if(pinned)toBottom(false)});ro.observe(log);ro.observe($('.chat'))}catch(_){}}
-  if(!msgs.length)log.innerHTML=`<p class="cfirst">${ch.kind==='dm'?`跟 ${esc(oname)} 打聲招呼吧。對方回覆前，你最多可以傳 3 則訊息。`:helper?`說說你在哪裡、什麼時候看到牠，可以直接傳照片給對方。`:'還沒有訊息。'}</p>`;
+  if(!msgs.length)log.insertAdjacentHTML('beforeend',`<p class="cfirst">${ch.kind==='dm'?`跟 ${esc(oname)} 打聲招呼吧。對方回覆前，你最多可以傳 3 則訊息。`:helper?`說說你在哪裡、什麼時候看到牠，可以直接傳照片給對方。`:'還沒有訊息。'}</p>`);
   await add(msgs.slice().reverse(),true);
   if(_n!==navId||!log.isConnected)return;   // 已經換到別的對話
   // 更早的訊息：一次再抓 80 則，接在最上面，畫面停在原本的位置
-  const olderBtn=()=>{if(log.querySelector('.chold'))return;log.insertAdjacentHTML('afterbegin','<button type="button" class="chold">看更早的訊息</button>');log.querySelector('.chold').onclick=async e=>{const b=e.target;b.disabled=true;b.textContent='載入中…';
+  const olderBtn=()=>{if(log.querySelector('.chold'))return;{const nt=log.querySelector('.cnote');const bh='<button type="button" class="chold">看更早的訊息</button>';if(nt)nt.insertAdjacentHTML('afterend',bh);else log.insertAdjacentHTML('afterbegin',bh)}log.querySelector('.chold').onclick=async e=>{const b=e.target;b.disabled=true;b.textContent='載入中…';
     const {data:old}=await sb.from('chat_messages').select('*').eq('chat_id',id).lt('id',firstId).order('id',{ascending:false}).limit(80);if(_n!==navId)return;b.remove();if(!old||!old.length)return;
     const list=old.slice().reverse().filter(m=>!seen.has(m.id));list.forEach(m=>{seen.add(m.id);if(m.id<firstId)firstId=m.id});await signed(list.map(m=>m.photo));
     let h='',ld='';list.forEach(m=>{const dd=day(m.created_at);if(dd!==ld){ld=dd;h+=`<p class="cday">${esc(dd)}</p>`}h+=bubble(m)});
-    const f=log.firstElementChild;if(f&&f.classList.contains('cday')&&f.textContent===ld)f.remove();
-    const y0=isMobV()?document.documentElement.scrollHeight:log.scrollHeight;log.insertAdjacentHTML('afterbegin',h);regroup();
+    const f=log.querySelector('.cday');if(f&&f.textContent===ld)f.remove();
+    const y0=isMobV()?document.documentElement.scrollHeight:log.scrollHeight;{const nt=log.querySelector('.cnote');if(nt)nt.insertAdjacentHTML('afterend',h);else log.insertAdjacentHTML('afterbegin',h)}regroup();
     if(isMobV())scrollTo(0,scrollY+document.documentElement.scrollHeight-y0);else log.scrollTop+=log.scrollHeight-y0;
     if(old.length===80)olderBtn()}};
   if(msgs.length===80)olderBtn();
