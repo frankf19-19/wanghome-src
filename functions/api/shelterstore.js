@@ -18,7 +18,17 @@ export async function onRequestPost({ request, env, params }) {
   const head = await fetch(`${SB}/storage/v1/object/public/photos/shelter/${sub}.jpg`, { method: "HEAD" });
   if (head.ok) return J({ ok: true, n: await setPhoto(key, sub), cached: true });
   // 照片來源：農業部網址，或用收容公告頁找照片（同一套邏輯在 /api/shelterpic）
-  let src = SRC_OK.test(src0) ? src0 : "";
+  // 瀏覽器給的照片網址只當線索：要和農業部開放資料裡這隻動物的照片一致才採用（防止有人替別的動物存錯照片）
+  let src = "";
+  if (SRC_OK.test(src0)) {
+    try {
+      const ac = new AbortController(); const t = setTimeout(() => ac.abort(), 8000);
+      const m = await fetch(`https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL&animal_subid=${encodeURIComponent(sub)}`, { signal: ac.signal }).then((r) => r.ok ? r.json() : []).catch(() => []);
+      clearTimeout(t);
+      const rec = Array.isArray(m) ? m.find((a) => String(a.animal_subid || "") === sub) : null;
+      if (rec && String(rec.album_file || "").replace(/^http:/, "https:") === src0.replace(/^http:/, "https:")) src = src0;
+    } catch (_) { /* 查不到就改用收容公告頁找照片 */ }
+  }
   const origin = new URL(request.url).origin;
   const target = src ? `${origin}/api/petimg?u=${encodeURIComponent(src)}` : `${origin}/api/shelterpic/${encodeURIComponent(sub)}.jpg`;
   let r; try { r = await fetch(target); } catch (_) { return J({ ok: false, why: "upstream" }, 502); }

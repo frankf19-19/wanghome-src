@@ -630,6 +630,7 @@ form.steps>h3::before{content:counter(step);flex:none;width:26px;height:26px;bor
 /* 地圖圖片還沒到之前，底下先顯示「地圖載入中…」，不會像壞掉 */
 .leaflet-container::before{content:'地圖載入中…';position:absolute;inset:0;display:grid;place-items:center;color:#8A8F88;font-size:14px;font-weight:600;z-index:0;pointer-events:none}
 .nomap{display:flex;align-items:center;justify-content:center;min-height:120px!important;height:auto!important;background:var(--beige);border-radius:12px}.nomap-msg{padding:16px;text-align:center;font-size:15px;color:var(--ink-2)}
+.mk-wrap{display:grid!important;place-items:center}
 .mk{background:var(--red-fill);color:#fff;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-weight:900;font-size:13px;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 .mk.start{background:#1F2A2E}
 .mk.pending{background:var(--mark);color:#1F2A2E}
@@ -2522,7 +2523,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.10.2';
+const BUILD = 'v6.10.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2569,7 +2570,7 @@ if(IS_APP){
     watchPosition:orig&&orig.watchPosition?orig.watchPosition.bind(orig):()=>0,clearWatch:orig&&orig.clearWatch?orig.clearWatch.bind(orig):()=>{}}})}catch(_){}
   // Android 返回鍵：先關視窗，再回上一頁；在首頁按返回就把 App 收到背景
   try{const A=capPlugin('App');if(A){
-    A.addListener('backButton',()=>{if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue)&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
+    A.addListener('backButton',()=>{if(window.__topSheet){history.back();return}if(__mapFs){mapFsClose();return}if(overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue)&&!__confirm('你輸入的內容還沒送出，確定要關閉嗎？'))return;closeOverlay(overlayOpen);return}const h=location.hash||'#/';if(h==='#/'||h==='#'){A.minimizeApp?A.minimizeApp():A.exitApp();return}goBack()});
     // 從連結打開 App（分享頁 /s/、/f/、網站網址）：跳到對應頁面
     A.addListener('appUrlOpen',({url})=>{try{if(/^line3rdp\./i.test(url)||/^https:\/\/wangmiaotw\.com\/line-auth/i.test(url))return;   // LINE App 授權完跳回，由原生 SDK 處理
       const u=new URL(url);
@@ -2806,6 +2807,8 @@ const IS_TOUCH=matchMedia('(pointer:coarse)').matches;
 const svURL=(lat,lng)=>`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${(+lat).toFixed(6)},${(+lng).toFixed(6)}`;
 const navURL=(lat,lng)=>`https://www.google.com/maps/dir/?api=1&destination=${(+lat).toFixed(6)},${(+lng).toFixed(6)}`;
 let __mapFs=null;
+// 按地圖上的「離開全螢幕」：連同進入時加的那一筆上一頁紀錄一起退掉
+function mapFsClose(){const p=__mapFs&&__mapFs.pushed;mapFsExit();if(p&&history.state&&history.state.mapfs){__selfPop=true;history.back()}}
 function mapFsExit(){const f=__mapFs;if(!f)return;__mapFs=null;const {m,el,ph}=f;el.classList.remove('mapfs');if(ph.parentNode){ph.parentNode.insertBefore(el,ph);ph.remove()}else{try{m.remove()}catch(_){}el.remove()}document.documentElement.classList.remove('mapfs-on');
   if(IS_TOUCH)m.dragging.disable();m.scrollWheelZoom.disable();const b=el.querySelector('[data-mk=fs]');if(b){b.innerHTML=ic('expand');b.title=b.ariaLabel='全螢幕'}setTimeout(()=>{try{m.invalidateSize()}catch(_){}},60)}
 addEventListener('hashchange',mapFsExit);addEventListener('keydown',e=>{if(e.key==='Escape'&&__mapFs)mapFsExit()});
@@ -2818,7 +2821,7 @@ function mapKit(m,base){const el=m.getContainer();
     d.innerHTML=`<a href="#" role="button" data-mk="fs" title="全螢幕" aria-label="全螢幕">${ic('expand')}</a><a href="#" role="button" data-mk="me" title="我的位置" aria-label="我的位置">${ic('locate')}</a><a href="#" role="button" data-mk="sat" title="切換空照圖" aria-label="切換空照圖">${ic('layers')}</a><a href="#" role="button" data-mk="sv" title="看街景" aria-label="看街景">${ic('eye')}</a>`;
     L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);
     d.addEventListener('click',e=>{const a=e.target.closest('[data-mk]');if(!a)return;e.preventDefault();const k=a.dataset.mk;
-      if(k==='fs'){if(__mapFs&&__mapFs.m===m)return mapFsExit();mapFsExit();const ph=document.createComment('map');el.parentNode.insertBefore(ph,el);document.body.appendChild(el);el.classList.add('mapfs');document.documentElement.classList.add('mapfs-on');__mapFs={m,el,ph};m.dragging.enable();m.scrollWheelZoom.enable();a.innerHTML=ic('shrink');a.title=a.ariaLabel='離開全螢幕';setTimeout(()=>{try{m.invalidateSize()}catch(_){}},60)}
+      if(k==='fs'){if(__mapFs&&__mapFs.m===m)return mapFsClose();mapFsClose();const ph=document.createComment('map');el.parentNode.insertBefore(ph,el);document.body.appendChild(el);el.classList.add('mapfs');document.documentElement.classList.add('mapfs-on');__mapFs={m,el,ph};try{history.pushState(Object.assign({},history.state||{},{mapfs:1}),'',location.href);__mapFs.pushed=true}catch(_){}m.dragging.enable();m.scrollWheelZoom.enable();a.innerHTML=ic('shrink');a.title=a.ariaLabel='離開全螢幕';setTimeout(()=>{try{m.invalidateSize()}catch(_){}},60)}
       else if(k==='me'){if(!navigator.geolocation)return toast('這台裝置沒辦法定位');a.classList.add('busy');navigator.geolocation.getCurrentPosition(p=>{a.classList.remove('busy');if(!el.isConnected)return;const ll=[p.coords.latitude,p.coords.longitude];if(m.__me)m.__me.remove();m.__me=L.circleMarker(ll,{radius:8,color:'#fff',weight:3,fillColor:'#2F6FE4',fillOpacity:1}).addTo(m).bindPopup('你現在的位置');m.flyTo(ll,Math.max(m.getZoom(),16),{duration:.6})},er=>{a.classList.remove('busy');toast(er&&er.code===1?'沒有定位權限，請到設定開啟位置權限':'定位失敗，請稍後再試')},{enableHighAccuracy:true,timeout:10000,maximumAge:30000})}
       else if(k==='sat'){if(m.hasLayer(sat)){m.removeLayer(sat);base.addTo(m);a.classList.remove('on');el.classList.remove('is-sat')}else{m.removeLayer(base);sat.addTo(m);a.classList.add('on');el.classList.add('is-sat');hint('空照圖：看得到草叢、空地、停車場，適合找躲起來的毛孩',2600)}}
       else if(k==='sv'){if(svOn)return svStop();svOn=true;a.classList.add('on');cover=document.createElement('div');cover.className='sv-cover';cover.innerHTML='<span>點地圖上想看的位置，打開 Google 街景</span>';el.appendChild(cover);
@@ -2830,8 +2833,9 @@ function mapKit(m,base){const el=m.getContainer();
   if(IS_TOUCH){m.dragging.disable();let one=false;el.addEventListener('touchstart',e=>{one=e.touches.length===1&&!el.classList.contains('mapfs')},{passive:true});el.addEventListener('touchmove',e=>{if(one&&e.touches.length===1&&!svOn)hint('用兩指移動地圖，或按右上角 ⛶ 全螢幕')},{passive:true})}
   else{el.addEventListener('wheel',()=>{if(!m.scrollWheelZoom.enabled())hint('點一下地圖，就能用滑鼠滾輪縮放',1400)},{passive:true});m.on('click',()=>m.scrollWheelZoom.enable());el.addEventListener('mouseleave',()=>{if(!el.classList.contains('mapfs'))m.scrollWheelZoom.disable()})}
 }
-function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);const base=(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);try{mapKit(m,base)}catch(e){console.warn(e)}return m}
-function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[26,26],iconAnchor:[13,13]})})}
+function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}window.__maps=(window.__maps||[]).filter(x=>{if(x.getContainer().isConnected)return true;try{x.remove()}catch(_){}return false});   // 換頁後留下的舊地圖要清掉（不然越積越多）
+  const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);const base=(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);try{mapKit(m,base)}catch(e){console.warn(e)}window.__maps.push(m);return m}
+function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'mk-wrap',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[40,40],iconAnchor:[20,20]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
 // 定位或點地圖後：自動帶入縣市、區、地點描述（只填空的或跟位置不一樣的），並請使用者確認
 // 瀏覽器內建的欄位提示改成中文（iPhone 語言是英文時會跳出「Select an item in the list」）
@@ -2948,6 +2952,8 @@ async function init(){
   try{await initAuth()}catch(e){console.warn('auth init',e)}
   route();bootDone();splashHide();
 }
+// 第一頁畫好、閒下來之後先在背景載入地圖程式，之後打開有地圖的頁面不用等（省流量模式不預載）
+setTimeout(()=>{try{if(window.L||(navigator.connection&&navigator.connection.saveData))return;(window.requestIdleCallback||setTimeout)(()=>{try{waitLeaflet()}catch(_){}},{timeout:4000})}catch(_){}},4000);
 function bootDone(){requestAnimationFrame(()=>document.documentElement.classList.remove('booting'))}
 // App 啟動畫面：第一個畫面畫好就收起來（不用固定等 1.2 秒）
 function splashHide(){if(!IS_APP)return;requestAnimationFrame(()=>setTimeout(()=>{try{const S=capPlugin('SplashScreen');S&&S.hide({fadeOutDuration:180})}catch(_){}},30))}
@@ -3013,6 +3019,8 @@ const scrollMem={};let curHash=location.hash||'#/',navByPop=false,overlayOpen=nu
 let __selfPop=false;
 window.addEventListener('popstate',e=>{
   if(__selfPop){__selfPop=false;return}                                    // 自己關視窗時退的那一步，不算「上一頁」
+  if(window.__topSheet){const f=window.__topSheet;window.__topSheet=null;f();return}   // 小視窗：上一頁＝關掉小視窗
+  if(__mapFs){mapFsExit();return}   // 全螢幕地圖：上一頁＝離開全螢幕
   if(overlayOpen){const o=overlayOpen,t=o._trigger;overlayOpen=null;o.remove();if(t&&t.isConnected)try{t.focus({preventScroll:true})}catch(_){};return}   // 上一頁先關掉視窗
   if(e.state&&e.state.overlay&&e.state.h===(location.hash||'#/')){try{history.back()}catch(_){}return}   // 視窗已經不在的空紀錄：直接再退一步
   if(__wiz&&__wiz.onPop(e))return;                                         // 分步驟表單：回上一步
@@ -3039,7 +3047,7 @@ function closeOverlay(el){const t=el._trigger;if(overlayOpen===el){overlayOpen=n
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlayOpen){if([...overlayOpen.querySelectorAll('textarea,input[type=text]')].some(x=>x.value.trim()&&x.value!==x.defaultValue))return;closeOverlay(overlayOpen)}});
 function closeOverlays(){document.querySelectorAll('.lightbox').forEach(x=>x.remove());overlayOpen=null}
 
-function showUndo(msg,onUndo){document.querySelectorAll('.undobar').forEach(x=>x.remove());{const t=$('#toast');if(t){t.classList.remove('show');clearTimeout(t._t)}}const d=document.createElement('div');d.className='undobar';d.innerHTML=`<span>${esc(msg)}</span><button type="button">復原</button>`;
+function showUndo(msg,onUndo){document.querySelectorAll('.undobar,#newSightBar').forEach(x=>x.remove());{const t=$('#toast');if(t){t.classList.remove('show');clearTimeout(t._t)}}const d=document.createElement('div');d.className='undobar';d.innerHTML=`<span>${esc(msg)}</span><button type="button">復原</button>`;
   document.body.appendChild(d);const t=setTimeout(()=>d.remove(),7000);const h0=location.hash;d.querySelector('button').onclick=async()=>{clearTimeout(t);d.remove();if(location.hash!==h0)return;await onUndo()}}
 function sightOps(id,st){id=esc(id);return (st!=='confirmed'?`<button class="btn sm green" data-s="${id}" data-v="confirmed">✓ 是牠（公開到地圖）</button>`:'')+(st!=='rejected'?`<button class="btn sm ghost" data-s="${id}" data-v="rejected">× 不是牠（不公開）</button>`:'')+(st==='rejected'?`<button class="btn sm ghost" data-s="${id}" data-v="pending">改回待確認</button>`:'')}
 // 連線失敗 ≠ 找不到：只有資料庫回答「沒有這筆」(PGRST116) 才說找不到，其他錯誤請使用者再試一次
@@ -3189,7 +3197,7 @@ function route(){window.__lastRoute=Date.now();
   if(trav&&scrollMem[newHash]>0)restoreScroll(scrollMem[newHash]);else if(!samePage)window.scrollTo(0,0);
   app.classList.toggle('narrow',/^#\/(how\/|new$|report\/|manage\/|found\/new|found-manage\/|login|resources|learn|about|privacy|thanks|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med)|health\/add|poster\/)/.test(path));
   let m;
-  if(!window.L&&!leafletGaveUp&&/^#\/(new$|report\/|found\/new|injured$|found\/[0-9a-f-]{36}$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
+  if(!window.L&&!leafletGaveUp&&/^#\/(new$|report\/|found\/new|injured$|me$)/.test(path)){const id=navId;app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';waitLeaflet().then(()=>{if(id===navId){navByPop=wasPop;route()}});return}
   if(path==='#/'||path==='#'||path==='#/lost')return renderHome();
   if(path==='#/new')return renderNew();
   if((m=path.match(/^#\/case\/([0-9a-f-]{36})$/)))return renderCase(m[1]);
@@ -4524,7 +4532,7 @@ async function renderCase(id){const _n=navId;
   const tm=setInterval(async()=>{
     if(location.hash.split('?')[0]!=='#/case/'+id||refreshTimer!==tm)return clearInterval(tm);
     const {count}=await sb.from('sightings_public').select('id',{count:'exact',head:true}).eq('case_id',id);
-    if(count!=null&&known!=null&&count>known){toast('🔔 有新的目擊回報');const y=window.scrollY;await renderCase(id);window.scrollTo(0,y)}
+    if(count!=null&&known!=null&&count>known&&!$('#newSightBar')){const d=document.createElement('button');d.id='newSightBar';d.type='button';d.className='updbar';d.textContent='🔔 有新的目擊回報，點這裡看';d.onclick=()=>{d.remove();rerender(()=>renderCase(id))};document.body.appendChild(d)}   // 不自動整頁重畫（會閃），讓使用者自己點
   },60000);
   clearInterval(refreshTimer);refreshTimer=tm;
 }
@@ -4573,7 +4581,7 @@ function shareText(c,url){
   if(c.status==='found')return `🎉 ${c.name} 已經找到了！（${c.lost_city}${c.lost_district||''}）\n謝謝所有幫忙分享、留意的朋友。\n${url}`;
   if(c.status==='closed')return `${c.name} 的協尋已結案（${c.lost_city}${c.lost_district||''}）。謝謝大家的幫忙。\n${url}`;
   return `【${sp(c.species).poster}】${c.name}｜${c.lost_city}${c.lost_district||''}
-走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}
+走失時間：${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}
 走失地點：${c.lost_place||c.lost_city+(c.lost_district||'')}
 特徵：${[c.breed||'混種',SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,c.colour,c.age_text].filter(Boolean).join('、')}${c.features?'；'+c.features:''}
 ${c.has_chip?'有晶片'+(c.chip_last4?'（末四碼 '+c.chip_last4+'）':''):'晶片：無／不確定'}${c.reward>0?'　尋獲獎金 NT$'+c.reward.toLocaleString():''}
@@ -5116,19 +5124,19 @@ function callScript(q){
   return `您好，我要通報路上受傷的${sp(q.species).name}。\n地點：${q.address}${q.place_text&&!String(q.address).includes(q.place_text)?'（'+q.place_text+'）':''}\n狀況：${q.injury||'受傷'}，${q.where==='taken'?'我已經帶走／送醫':'牠還在原地'}\n時間：今天 ${hm}\nGPS 座標：${q.lat.toFixed(5)}, ${q.lng.toFixed(5)}${q.url?'\n照片和地圖：'+q.url:''}`;
 }
 async function quickReport(){
-  const box=$('#quick');
+  const box=$('#quick');const QCALL=`<div class="telrow" style="margin-bottom:10px"><a class="btn" href="tel:1959">${ic('phone')} 1959 動保專線</a><a class="btn ghost" href="tel:110">${ic('phone')} 110</a></div>`;   // 定位、填表時打電話按鈕都還在
   if(!navigator.geolocation){toast('這支手機不支援定位，請用下方完整通報');(document.getElementById('fullDet')||{}).open=true;document.getElementById('fullForm')?.scrollIntoView({behavior:RM()?'auto':'smooth'});return}
-  box.innerHTML=`<div class="q-wait">${ic("pin")} 正在定位…（請允許${IS_APP?'汪喵回家':'瀏覽器'}使用位置）</div>`;
+  box.innerHTML=QCALL+`<div class="q-wait">${ic("pin")} 正在定位…（請允許${IS_APP?'汪喵回家':'瀏覽器'}使用位置）</div>`;
   {const qb=$('#btnQuick');if(qb)qb.disabled=true}
   let pos;try{pos=await new Promise((ok,no)=>{let r=false,best=null;geoFast((lat,lng,acc,final)=>{best={coords:{latitude:lat,longitude:lng,accuracy:acc}};if(final&&!r){r=true;ok(best)}},code=>{if(!r){r=true;best?ok(best):no(code)}});setTimeout(()=>{if(!r&&best){r=true;ok(best)}},4000)})}
-  catch(_){if(!box.isConnected)return;box.innerHTML=`<div class="notice red"><b>定位失敗</b>請確認已允許${IS_APP?'汪喵回家（手機「設定」裡）':'瀏覽器'}使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;const rb=box.querySelector('#btnQuick');if(rb)rb.onclick=quickReport;return}
+  catch(_){if(!box.isConnected)return;box.innerHTML=QCALL+`<div class="notice red"><b>定位失敗</b>請確認已允許${IS_APP?'汪喵回家（手機「設定」裡）':'瀏覽器'}使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;const rb=box.querySelector('#btnQuick');if(rb)rb.onclick=quickReport;return}
   const lat=pos.coords.latitude,lng=pos.coords.longitude;
   if(!box.isConnected)return;
-  box.innerHTML=`<div class="q-wait">${ic("pin")} 已定位，查詢地址中…</div>`;
+  box.innerHTML=QCALL+`<div class="q-wait">${ic("pin")} 已定位，查詢地址中…</div>`;
   const g=await reverseGeo(lat,lng);if(!box.isConnected)return;
   let species='dog',where='here';const inj=new Set();let photo=null;
   const acc=Math.round(pos.coords.accuracy||0);
-  box.innerHTML=`<div class="q-loc">${ic("pin")}<div><b>${esc(g.address)}</b><small>定位誤差約 ${acc} 公尺${g.geoOk?'':'・查不到詳細地址，請確認下方縣市'}</small></div></div>
+  box.innerHTML=`<div style="margin-bottom:12px">${agencyCallHTML(g.city)}</div><div class="q-loc">${ic("pin")}<div><b>${esc(g.address)}</b><small>定位誤差約 ${acc} 公尺${g.geoOk?'':'・查不到詳細地址，請確認下方縣市'}</small></div></div>
     ${acc>150?`<div class="notice" style="margin:-4px 0 10px"><b>定位不太準</b>請在「補充地點」寫下路名或明顯地標，救援人員才找得到。</div>`:''}
     <div class="row2" style="margin-bottom:10px"><label class="f" style="margin:0"><span>縣市</span><select id="qCity">${cityOptions(g.city)}</select></label><label class="f" style="margin:0"><span>鄉鎮市區</span><select id="qDist">${distOptions(g.city,g.district)}</select></label></div>
     <div class="seg" id="qSp"><button type="button" data-v="dog" class="on">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
@@ -5229,6 +5237,7 @@ function renderInjured(){geoWarm();
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出受傷通報</button></div>
   </form></div></details>`;
   $('#btnQuick').onclick=quickReport;
+  {const fd=$('#fullDet');if(fd)fd.addEventListener('toggle',()=>{if(fd.open)setTimeout(()=>(window.__maps||[]).forEach(m=>{try{m.invalidateSize()}catch(_){}}),60)})}   // 展開手動填寫時把地圖撐開（不然會是空白）
   let species='dog',where='here';const inj=new Set();
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
   $('#segInj').querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;inj.has(v)?inj.delete(v):inj.add(v);b.classList.toggle('on',inj.has(v))});
@@ -5416,7 +5425,7 @@ async function renderFound(id){const _n=navId;
     let t=null;try{t=localStorage.getItem('wh_ftoken_'+id)}catch(_){}
     if(t||me()){const {data}=await sb.rpc('can_manage_found',{p_id:id,p_token:t});if(data){location.hash=`#/found-manage/${id}`;return}}
     location.hash=`#/found-manage/${id}`};
-  if(f.lat){const m=makeMap('map',[f.lat,f.lng],15);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(m)}
+  if(f.lat)waitLeaflet().then(()=>{if(_n!==navId||!$('#map'))return;const m=makeMap('map',[f.lat,f.lng],15);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(m)});   // 先顯示內容，地圖程式到了再畫
   // 可能的飼主（走失案件）
   const since=new Date(new Date(f.seen_at)-60*86400000).toISOString();
   const {data:cs}=await sb.from('cases_public').select('*').eq('status','searching').eq('lost_city',f.city).eq('species',f.species||'dog').lte('lost_at',new Date(new Date(f.seen_at).getTime()+86400000).toISOString()).gte('lost_at',since).order('lost_at',{ascending:false}).limit(200);
@@ -6347,10 +6356,12 @@ function hasPw(){const u=me();if(!u)return false;if((u.user_metadata||{}).has_pw
 // strict：讀取失敗就丟出錯誤（存檔前一定要用，避免把「讀不到」當成「全部空白」覆蓋掉設定）
 // ── 暱稱（3 個月改一次）＋大頭貼 ──
 function nickNext(p){if(!p||!p.display_name_changed_at)return '';const t=new Date(p.display_name_changed_at).getTime()+90*864e5;if(Date.now()>=t)return '';const d=new Date(t);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`}
+// 小視窗：按上一頁（或 Android 返回鍵）只關掉這個視窗，不會連下面的頁面一起關
+function sheetHist(cancel){try{history.pushState(Object.assign({},history.state||{},{sh:1}),'',location.href)}catch(_){return ()=>{}}window.__topSheet=cancel;return ()=>{if(window.__topSheet===cancel){window.__topSheet=null;__selfPop=true;history.back()}}}
 function textSheet({title,value='',max=40,placeholder='',hint=''}){return new Promise(res=>{const d=document.createElement('div');d.className='lightbox sheet-bg';d.style.zIndex='3100';
   d.innerHTML=`<div class="sheet ask" role="dialog" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><p class="sh-t">${esc(title)}</p>${hint?`<p class="muted small" style="margin:-6px 0 12px">${esc(hint)}</p>`:''}<input type="text" id="tsIn" maxlength="${max}" placeholder="${esc(placeholder)}" value="${esc(value)}" style="width:100%"><button type="button" class="btn big block" data-v="1" style="margin-top:12px">儲存</button><button type="button" class="btn big block ghost" data-v="0" style="margin-top:8px">取消</button></div>`;
-  let done=false;const fin=ok=>{if(done)return;done=true;const v=d.querySelector('#tsIn').value;d.remove();res(ok?v:null)};
-  d.onclick=e=>{const b=e.target.closest('[data-v]');if(b)fin(b.dataset.v==='1');else if(e.target===d)fin(false)};document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add('show'));
+  let done=false,unh=()=>{};const fin=ok=>{if(done)return;done=true;const v=d.querySelector('#tsIn').value;d.remove();unh();res(ok?v:null)};
+  d.onclick=e=>{const b=e.target.closest('[data-v]');if(b)fin(b.dataset.v==='1');else if(e.target===d)fin(false)};document.body.appendChild(d);unh=sheetHist(()=>fin(false));requestAnimationFrame(()=>d.classList.add('show'));
   setTimeout(()=>{const i=d.querySelector('#tsIn');i.focus();i.onkeydown=e=>{if(e.key==='Enter')fin(true);if(e.key==='Escape')fin(false)}},120)})}
 function squareJpeg(file,size=400){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const s=Math.min(im.width,im.height),c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,size,size);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error('照片處理失敗')),'image/jpeg',.86)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('讀不到這張照片'))};im.src=u})}
 function avatarRemoveFile(url){try{const pre='/storage/v1/object/public/photos/';const i=String(url||'').indexOf(pre);if(i>=0)sb.storage.from('photos').remove([url.slice(i+pre.length)]).catch(()=>{})}catch(_){}}
@@ -7525,9 +7536,9 @@ function albView(pet,ph,i){if(i<0)return;const d=document.createElement('div');d
   let sx=null;d.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});d.addEventListener('touchend',e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)<50)return;if(dx<0&&cur<ph.length-1){cur++;draw()}else if(dx>0&&cur>0){cur--;draw()}},{passive:true});
   draw();openOverlay(d)}
 function albAsk(v){return new Promise(res=>{const d=document.createElement('div');d.className='lightbox sheet-bg';d.innerHTML=`<div class="sheet ask" role="dialog" aria-label="寫下這天的事"><div class="grab" aria-hidden="true"></div><p class="sh-t">寫下這天的事</p><input type="text" id="albCap" maxlength="80" placeholder="例：第一次去海邊，玩到不想回家" value="${esc(v)}" style="width:100%"><button type="button" class="btn big block" data-v="1" style="margin-top:12px">儲存</button><button type="button" class="btn big block ghost" data-v="0" style="margin-top:8px">取消</button></div>`;
-  let done=false;const inp=()=>d.querySelector('#albCap');const fin=ok=>{if(done)return;done=true;const val=inp().value;d.remove();res(ok?val:null)};
+  let done=false,unh=()=>{};const inp=()=>d.querySelector('#albCap');const fin=ok=>{if(done)return;done=true;const val=inp().value;d.remove();unh();res(ok?val:null)};
   d.onclick=e=>{const b=e.target.closest('[data-v]');if(b)fin(b.dataset.v==='1');else if(e.target===d)fin(false)};
-  d.style.zIndex='3100';document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add('show'));setTimeout(()=>{const i=inp();if(i){i.focus();i.onkeydown=e=>{if(e.key==='Enter')fin(true)}}},120)})}
+  d.style.zIndex='3100';document.body.appendChild(d);unh=sheetHist(()=>fin(false));requestAnimationFrame(()=>d.classList.add('show'));setTimeout(()=>{const i=inp();if(i){i.focus();i.onkeydown=e=>{if(e.key==='Enter')fin(true);if(e.key==='Escape')fin(false)}}},120)})}
 // 回顧相簿：像限時動態一樣一張一張播放
 async function renderRecap(petId,k){const _n=navId;if(!requireLogin())return;app.innerHTML=pageSkel('pet');
   const info=albQInfo(k);
@@ -7962,7 +7973,7 @@ async function renderPoster(id){const _n=navId;
   const STATUS=c.status==='found'?'已經找到了，謝謝大家！':c.status==='closed'?'協尋已結束':`走失第 ${daysSince(c.lost_at)} 天，急盼平安回家`;
   const LOOK=[c.colour,SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,SEX[c.sex],c.age_text].filter(Boolean).join('・')||sp(c.species).name;
   const DETAIL=[c.breed,c.has_chip?'有晶片'+(c.chip_last4?' 末四碼 '+c.chip_last4:''):null,c.neutered===true?'已結紮':null].filter(Boolean).join('｜');
-  const LATEST=ss&&ss[0]?`最新目擊｜${fmtDT(ss[0].seen_at)}  ${ss[0].place_text||''}${ss[0].direction?'  往'+ss[0].direction:''}`:`走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`;
+  const LATEST=ss&&ss[0]?`最新目擊｜${fmtDT(ss[0].seen_at)}  ${ss[0].place_text||''}${ss[0].direction?'  往'+ss[0].direction:''}`:`走失時間：${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}`;
   const WARN=c.status==='searching'?'看到請勿呼喊、追趕或包圍':c.status==='found'?'已經回家了，謝謝大家幫忙分享！':'協尋已結束，謝謝大家';
   const HOWTO=c.status!=='searching'?'掃 QR 看案件頁':qrc?'請拍照，記下時間、位置及方向，掃 QR 回報目擊':'請拍照，記下時間、位置及方向，上網站回報目擊';
   const FOOT=`${CONFIG.SITE_NAME}・${CONFIG.SITE_URL.replace(/^https?:\/\//,'').replace(/\/$/,'')}`;
@@ -8090,7 +8101,7 @@ async function renderPoster(id){const _n=navId;
   // 最新目擊
   let y2=1000;
   if(ss&&ss[0]){ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(M,900,W-M*2,70,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit(`最新目擊｜${fmtDT(ss[0].seen_at)}  ${ss[0].place_text||''}${ss[0].direction?'  往'+ss[0].direction:''}`,W-M*2-40,900,34,24),M+20,948)}
-  else{ctx.fillStyle='#333';ctx.fillText(fit(`走失時間：${fmtDate(c.lost_at)} ${fmtDT(c.lost_at).split(' ')[1]}`,W-M*2,700,34,24),M,948)}
+  else{ctx.fillStyle='#333';ctx.fillText(fit(`走失時間：${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}`,W-M*2,700,34,24),M,948)}
   // 警語
   ctx.fillStyle=red;ctx.beginPath();ctx.roundRect(M,y2,W-M*2,90,12);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(fit(WARN,W-M*2-40,900,48,32),M+20,y2+62);
   // 電話（寬度只到 QR Code 左邊）＋ QR
