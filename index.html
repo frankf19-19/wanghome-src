@@ -2533,6 +2533,8 @@ html{-webkit-tap-highlight-color:transparent}
   body[data-route="case"] .detail-head>div:last-child{position:sticky;top:20px}
   /* 其他頁面標題 */
   .xpt{font-size:34px!important}
+  body[data-route="case"] #app h1{font-size:38px!important}
+  body[data-route="case"] .xstats b{font-size:24px}
 }
 @media (min-width:761px) and (max-width:1100px){
   :root{--ds-w:84px}
@@ -2675,7 +2677,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.0.0';
+const BUILD = 'v7.0.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
