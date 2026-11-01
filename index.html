@@ -2577,7 +2577,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.11.3';
+const BUILD = 'v6.11.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2994,12 +2994,17 @@ async function init(){
   // 秒開：一般開啟時不等登入狀態確認（登入過期時要連網換新，會卡住第一個畫面），先用手機裡記住的登入資料畫出畫面
   const slow=/^#\/verify\?/.test(location.hash||'')||/[?&](code|error)=/.test(location.search);
   if(!slow){
-    try{const raw=localStorage.getItem('sb-'+new URL(CONFIG.SUPABASE_URL).hostname.split('.')[0]+'-auth-token');const s=raw&&JSON.parse(raw);if(s&&s.user&&s.user.id&&s.access_token)session=s}catch(_){}
+    const SK='sb-'+new URL(CONFIG.SUPABASE_URL).hostname.split('.')[0]+'-auth-token';let stored=null;
+    try{const raw=localStorage.getItem(SK);const s=raw&&JSON.parse(raw);if(s&&s.user&&s.user.id&&s.access_token){session=s;stored=s}}catch(_){}
     const was=me()&&me().id;
     try{route()}catch(e){console.warn('route',e)}
     bootDone();splashHide();
     try{await initAuth()}catch(e){console.warn('auth init',e)}
-    if(was&&!me()){setReturn(location.hash||'#/me');toast('登入已過期，請重新登入',6000);pushDrop()}
+    if(was&&!me()){
+      // 沒網路時換不到新的登入憑證：手機裡的登入資料還在，就當作仍然登入（有網路後會自動更新），不要說過期
+      let still=false;try{still=!!localStorage.getItem(SK)}catch(_){}
+      if(still||!navigator.onLine){session=stored;try{updateAuthUI()}catch(_){}}
+      else{setReturn(location.hash||'#/me');toast('登入已過期，請重新登入',6000);pushDrop()}}
     if(((me()&&me().id)||null)!==(was||null)&&!(__dirty||__wiz)){try{route()}catch(_){}}   // 實際登入狀態和記住的不同（例如已過期）：重畫一次
     return;
   }
@@ -3701,9 +3706,9 @@ async function loadFeed(_n,reset){const el=$('#feed');if(!el)return;if(reset){fe
     const m=$('#feedMore');if(m)m.innerHTML=feedSt.done?`<a class="af-all" href="#/lost">看全部正在協尋的毛孩（含沒有照片的）</a>`:'<div class="feed-more" aria-hidden="true"></div>';
     if(!feedSt.done){const t=m&&m.firstChild;if(t&&'IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();loadFeed(_n)}},{rootMargin:'800px'});io.observe(t)}}
   }finally{feedSt.busy=false}}
-document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('.fp-share');if(!b)return;const u=caseUrl(b.dataset.share),t=`請幫忙找「${b.dataset.name}」`;
-  if(navigator.share){try{await navigator.share({title:t,text:t,url:u})}catch(_){}return}
-  try{await navigator.clipboard.writeText(u);toast('已複製連結，可以貼到 LINE 群組')}catch(_){prompt('複製這個連結',u)}});
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('.fp-share');if(!b)return;const t=`請幫忙找「${b.dataset.name}」`;
+  const u=shareCache['s'+b.dataset.share]||`${CONFIG.SITE_URL}s/${b.dataset.share}`;   // 分享頁網址：貼到 LINE 會有照片預覽（不等網路，手機才叫得出分享選單）
+  share(t,u);try{buddyGive('share')}catch(_){}});
 function appMoreHTML(){return ''}
 // 「協尋」分頁（#/lost）＝只看名單；首頁（#/）＝四宮格＋協尋預覽。帶 ?tab= 的舊連結也直接進名單
 function isListOnly(){const h=location.hash||'#/';return h.split('?')[0]==='#/lost'||!!qs(h).tab}
@@ -3933,9 +3938,10 @@ function xHeadHTML(mode,title,where){return `<section class="xh">
 function xWhereText(){const h=homeState;return h.near?'我附近':h.city.length===1?h.city[0]:h.city.length?h.city.length+' 個縣市':'全台'}
 const XQK=[['all','全部'],['dog','狗狗'],['cat','貓咪'],['d3','3 天內'],['rw','有懸賞'],['found','有人撿到'],['intake','收容所新收','sp']];
 const XSORT=[['act','最新動態'],['new','最新走失'],['near','離我最近'],['rw','懸賞最高']];
+function dropNearQ(){if(/[?&]near=1/.test(location.hash))try{const h=location.hash.replace(/([?&])near=1&?/,'$1').replace(/[?&]$/,'');history.replaceState(history.state,'',location.pathname+location.search+h);if(typeof curHash!=='undefined')curHash=h}catch(_){}}   // 取消「我附近」後把網址的 near=1 拿掉，回上一頁才不會又打開
 async function renderHomeMob(){const _n=navId;
   document.title='汪喵回家 — 全台走失毛孩協尋平台';app.classList.remove('listonly');
-  {const t=qs(location.hash).tab;if(t==='found'){homeState.tab='found';homeState.qk='found'}else if(homeState.tab!=='map'||xView()!=='map')homeState.tab=xView()==='map'?'map':(homeState.qk==='found'?'found':'lost')}
+  {const t=qs(location.hash).tab;if(t==='map'){homeState.tab='map';try{localStorage.setItem('wh_xv','map')}catch(_){}}else if(t==='found'){homeState.tab='found';homeState.qk='found'}else if(homeState.tab!=='map'||xView()!=='map')homeState.tab=xView()==='map'?'map':(homeState.qk==='found'?'found':'lost')}
   const V=xView();
   (_n===navId?app:_void).innerHTML=`<h1 class="sr-only">汪喵回家：全台走失狗貓協尋平台</h1>
   ${mineHTML()}
@@ -3967,11 +3973,11 @@ async function renderHomeMob(){const _n=navId;
     const was=homeState.tab;homeState.tab=v==='map'?'map':(homeState.qk==='found'?'found':'lost');if(was!==homeState.tab||v==='map')reload()};
   // 我附近：用原本的定位流程
   $('#btnNear').onclick=()=>{
-    if(homeState.near){homeState.near=null;if(homeState.sort==='near')homeState.sort='act';reload();return}
+    if(homeState.near){homeState.near=null;dropNearQ();if(homeState.sort==='near')homeState.sort='act';reload();return}
     if(!navigator.geolocation)return toast('這支手機沒辦法定位');
     toast('定位中…');
     navigator.geolocation.getCurrentPosition(p=>{if(!$('#xFeed'))return;homeState.near={lat:p.coords.latitude,lng:p.coords.longitude};homeState.city=[];const s=$('#xSortT');if(s)s.textContent='離我最近';reload()},err=>toast(err&&err.code===1?(IS_APP?'你沒有允許定位。請到手機「設定」→ 汪喵回家，允許使用位置後再試一次':'你沒有允許定位。請到瀏覽器或手機設定，允許這個網站使用位置後再試一次'):'暫時抓不到你的位置，請稍後再試',6000),{enableHighAccuracy:false,timeout:10000,maximumAge:300000})};
-  $('#xWhere').onclick=()=>xPick('地區',[['near','📍 我附近'],['all','全台'],...Object.keys(CITY_CENTER).map(c=>[c,c])],homeState.near?'near':homeState.city.length===1?homeState.city[0]:'all',v=>{if(v==='near'){if(!homeState.near)$('#btnNear').click();return}homeState.near=null;homeState.city=v==='all'?[]:[v];if(homeState.sort==='near')homeState.sort='act';reload()},true);
+  $('#xWhere').onclick=()=>xPick('地區',[['near','📍 我附近'],['all','全台'],...Object.keys(CITY_CENTER).map(c=>[c,c])],homeState.near?'near':homeState.city.length===1?homeState.city[0]:'all',v=>{if(v==='near'){if(!homeState.near)$('#btnNear').click();return}homeState.near=null;dropNearQ();homeState.city=v==='all'?[]:[v];if(homeState.sort==='near')homeState.sort='act';reload()},true);
   $('#xSort').onclick=()=>xPick('排序',XSORT,homeState.near?'near':homeState.sort,v=>{const s=$('#xSortT');if(s)s.textContent=XSORT.find(x=>x[0]===v)[1];if(v==='near'){homeState.sort='act';if(!homeState.near)$('#btnNear').click();return}homeState.sort=v;if(homeState.near){homeState.near=null}reload()});
   if(qs(location.hash).near)setTimeout(()=>{if(_n===navId&&!homeState.near)$('#btnNear').click()},80);
   setTitle2();loadList();loadStats();inboxMaybe();
@@ -4393,6 +4399,8 @@ async function loadMapAll(el){const my=listSeq;
   let qc=sb.from('cases_public').select('id,species,name,lost_lat,lost_lng,lost_city,lost_district,photos,last_seen_at,poster').eq('status','searching').order('last_activity',{ascending:false}).limit(500);   // 案件很多時，先顯示最近有動靜的
   let qf=sb.from('found_public').select('id,species,kind,lat,lng,city,district,colour,size,photos,seen_at,poster').eq('status','open').order('seen_at',{ascending:false}).limit(500);
   qc=fIn(qc,'lost_city',homeState.city);qf=fIn(qf,'city',homeState.city);qc=fSp(qc);qc=fExtra(qc);qf=fSp(qf);
+  if(homeState.reward)qc=qc.gt('reward',0);
+  {const kw=(homeState.q||'').replace(/[%,()*\\]/g,'').trim();if(kw){const vs=[...new Set([kw,kw.replace(/台/g,'臺'),kw.replace(/臺/g,'台')])];const ors=[];vs.forEach(v=>{const k=`%${v}%`;ors.push(`name.ilike.${k}`,`breed.ilike.${k}`,`colour.ilike.${k}`,`lost_place.ilike.${k}`,`lost_district.ilike.${k}`,`lost_city.ilike.${k}`)});qc=qc.or(ors.join(','));qf=qf.or(vs.flatMap(v=>[`colour.ilike.%${v}%`,`city.ilike.%${v}%`,`district.ilike.%${v}%`,`place_text.ilike.%${v}%`]).join(','))}}   // 地圖也套用搜尋字
   const [{data:cs,error:e1},{data:fs,error:e2},{data:ls}]=await Promise.all([qc,qf,sb.from('sightings_public').select('case_id,lat,lng,seen_at').order('seen_at',{ascending:false}).limit(1000)]);if(my!==listSeq||!el.isConnected)return;
   if(e1&&e2){el.insertAdjacentHTML('afterbegin',netErrHTML());return}
   const last={};(ls||[]).forEach(s=>{if(!last[s.case_id]&&s.lat)last[s.case_id]=s});
@@ -4401,6 +4409,7 @@ async function loadMapAll(el){const my=listSeq;
   (fs||[]).filter(f=>!userHidden(f)).forEach(f=>{if(!f.lat)return;pts.push([f.lat,f.lng]);marker([f.lat,f.lng],f.kind==='injured'?'傷':f.kind==='found'?'拾':'見','found').addTo(grp).bindPopup(`<a href="#/found/${f.id}"><b>${f.kind==='injured'?'受傷':f.kind==='found'?'拾獲':'目擊'}：${esc([SIZE[f.size],f.colour].filter(Boolean).join('')+sp(f.species).name)}</b></a><br>${esc(f.city)}${esc(f.district||'')}<br>${fmtDT(f.seen_at)}`)});
   if(homeState.near)marker([homeState.near.lat,homeState.near.lng],'我','me').addTo(map);
   if(pts.length&&!homeState.near&&homeState.city.length!==1)map.fitBounds(pts,{padding:[30,30],maxZoom:13});
+  if(window.xListDone)xListDone(pts.length,100000);
   if(!pts.length)toast('目前地圖上沒有資料');
 }
 function cardHTML(c){
@@ -6300,10 +6309,11 @@ async function initAuth(){
   if(/^#\/verify\?/.test(location.hash||''))await handleVerify();
   // 魔法連結登入回來（PKCE ?code=）：清掉網址參數，回到原本的頁面
   if(location.search.includes('code=')||location.search.includes('error')){
-    const err=new URLSearchParams(location.search).get('error_description');
+    const qp=new URLSearchParams(location.search),err=qp.get('error_description')||qp.get('error'),hadCode=qp.has('code');
     let back='#/me';back=takeReturn();
-    history.replaceState(null,'',location.pathname+back);
-    if(err)setTimeout(()=>toast('登入失敗：'+err,4000),300);
+    if(hadCode&&!session&&!err){history.replaceState(null,'',location.pathname+'#/login?mode=login');setTimeout(()=>toast('Email 已經確認好了，請在這裡登入',5000),300)}   // 在別的瀏覽器打開信件連結：換不到登入，但信箱已確認
+    else history.replaceState(null,'',location.pathname+back);
+    if(err)setTimeout(()=>toast(/cancel|denied/i.test(err)?'已取消登入':'登入沒有成功，請再試一次',4000),300);
   }
   sb.auth.onAuthStateChange((ev,s)=>{
     const was=!!session;session=s;updateAuthUI();
