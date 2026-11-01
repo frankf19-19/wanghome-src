@@ -2802,7 +2802,7 @@ body[data-route=me] #app .grid>.ccard:only-child{grid-column:1/-1;flex-direction
 .tb-ic{position:relative;display:inline-grid;place-items:center}.tb-n{position:absolute;top:-4px;right:-9px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#D9502B;color:#fff;font-style:normal;font-size:10.5px;font-weight:800;line-height:17px;text-align:center;box-shadow:0 0 0 2px var(--sheet)}.tb-n[hidden]{display:none}
 .chintro{margin-top:12px;padding:26px 20px;border-radius:26px;background:var(--sheet);box-shadow:var(--lift);text-align:center}.chintro-ic{width:72px;height:72px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;background:var(--brand-soft,#FFE7DE);color:var(--brand-d,#D94A26)}.chintro-ic .ico{width:36px;height:36px}.chintro>b{display:block;font-size:20px;margin-bottom:12px}.chintro ul{list-style:none;margin:0 0 18px;padding:0;text-align:left;display:flex;flex-direction:column;gap:10px}.chintro li{display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.5;color:var(--ink-2)}.chintro li .ico{flex:none;margin-top:3px;color:var(--brand-d,#D94A26)}.chintro .small{margin:10px 0 0}
 .lb-save{position:absolute;left:50%;bottom:calc(24px + var(--safe-area-inset-bottom,env(safe-area-inset-bottom)));transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border:0;border-radius:999px;background:#fff;color:#1A1A1A;font:inherit;font-size:16px;font-weight:800;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer;z-index:2}.lb-save:disabled{opacity:.6}
-.cm.stk .cstk{width:108px;height:103px}.cm.stk .cstk svg{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.12))}
+.cm.stk .cstk{width:116px;height:114px}.cm.stk .cstk svg{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.12))}
 .stkgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:min(60vh,520px);overflow-y:auto;overscroll-behavior:contain}.stkgrid button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:16px;display:grid;place-items:center;padding:4px}.stkgrid button:hover,.stkgrid button:focus-visible{background:var(--fill)}.stkgrid svg{width:100%;height:100%}
 .qrscan{background:#000;padding:0}.qrscan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .qs-frame{position:absolute;left:50%;top:45%;width:min(64vw,280px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:24px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);outline:3px solid #fff;outline-offset:-3px}
@@ -2913,7 +2913,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.15.0';
+const BUILD = 'v7.16.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4313,45 +4313,65 @@ const STK=[['thanks','謝謝','dog','happy','blush'],['ok','好的','cat','happy
   ['shy','害羞','dog2','happy','blush2'],['omg','嚇到','cat2','shock','bang'],['angry','生氣','cat','angry','steam'],['yum','好吃','dog2','happy','tongue'],
   ['home','回家了','dog','star','house'],['miss','想你','cat2','love','hearts'],['bye','掰掰','dog2','wink','paw'],['yay','太好了','cat2','happy','spark'],
   ['search','找找看','dog','open','mag'],['wait','等我','cat','open','clock'],['no','不要','dog2','angry','x'],['sleepy','想睡','cat2','sleep','zzz']];
-function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label,an,ex,fx]=s;const dog=an.startsWith('dog');
-  const PAL={dog:['#EBA862','#B9733A','#FFF2E0'],dog2:['#FFFFFF','#E6D8CB','#FFF7EF'],cat:['#B7BEC8','#7D8794','#F4F5F7'],cat2:['#F4B061','#D9822F','#FFF3E2']}[an];
-  const face=PAL[0],dark=PAL[1],light=PAL[2],ink='#3A2A20';let g='';
-  g+=dog?`<ellipse cx="27" cy="50" rx="13" ry="22" transform="rotate(18 27 50)" fill="${dark}"/><ellipse cx="93" cy="50" rx="13" ry="22" transform="rotate(-18 93 50)" fill="${dark}"/>`
-        :`<path d="M28 44 33 14 52 32z" fill="${face}"/><path d="M92 44 87 14 68 32z" fill="${face}"/><path d="M33 36 35 22 45 32z" fill="#F4B3B8"/><path d="M87 36 85 22 75 32z" fill="#F4B3B8"/>`;
-  g+=`<circle cx="60" cy="56" r="36" fill="${face}"${an==='dog2'?' stroke="#E6D8CB" stroke-width="2"':''}/>`;
-  if(an==='cat2')g+=`<path d="M52 22q8 6 16 0M50 30q10 5 20 0" fill="none" stroke="${dark}" stroke-width="3" stroke-linecap="round"/>`;
-  g+=dog?`<ellipse cx="60" cy="70" rx="20" ry="15" fill="${light}"/><ellipse cx="60" cy="62" rx="6" ry="4.5" fill="${ink}"/>`:`<ellipse cx="60" cy="68" rx="17" ry="12" fill="${light}"/><path d="M57 63h6l-3 3.5z" fill="#E88A94"/><path d="M30 64h-14M31 70l-13 3M90 64h14M89 70l13 3" stroke="${ink}" stroke-width="2" stroke-linecap="round"/>`;
-  const E=(x)=>{switch(ex){case 'happy':return `<path d="M${x-7} 52q7-8 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
-    case 'big':return `<circle cx="${x}" cy="50" r="8" fill="${ink}"/><circle cx="${x+2.5}" cy="47" r="3" fill="#fff"/>`;
-    case 'star':return `<path d="M${x} 41l2.6 6 6.4.6-4.9 4.2 1.5 6.3-5.6-3.4-5.6 3.4 1.5-6.3-4.9-4.2 6.4-.6z" fill="#FFD23F" stroke="${ink}" stroke-width="1.5"/>`;
-    case 'love':return `<path d="M${x} 56c-9-6-9-14-3.5-14 2 0 3 1.2 3.5 2.5.5-1.3 1.5-2.5 3.5-2.5 5.5 0 5.5 8-3.5 14z" fill="#F0506E"/>`;
-    case 'sleep':return `<path d="M${x-7} 50q7 6 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
-    case 'wink':return x<60?`<path d="M${x-7} 52q7-8 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`:`<circle cx="${x}" cy="49" r="5.5" fill="${ink}"/>`;
-    case 'sad':return `<path d="M${x-7} 46q7 4 14 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/><circle cx="${x}" cy="52" r="4" fill="${ink}"/>`;
-    case 'shock':return `<circle cx="${x}" cy="49" r="9" fill="#fff" stroke="${ink}" stroke-width="2.5"/><circle cx="${x}" cy="49" r="3.5" fill="${ink}"/>`;
-    case 'angry':return `<path d="M${x-8} ${x<60?42:46}l16 ${x<60?4:-4}" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/><circle cx="${x}" cy="52" r="4.5" fill="${ink}"/>`;
-    case 'cry':return `<path d="M${x-7} 49q7-5 14 0" fill="none" stroke="${ink}" stroke-width="4" stroke-linecap="round"/><path d="M${x-3} 54q-4 10 0 14q4-4 0-14z" fill="#5BB8F0"/>`;
-    default:return `<circle cx="${x}" cy="49" r="5.5" fill="${ink}"/><circle cx="${x+1.8}" cy="47" r="1.8" fill="#fff"/>`}};
-  g+=E(45)+E(75);
-  const M=ex==='shock'?`<ellipse cx="60" cy="80" rx="5" ry="6" fill="#C2414F"/>`:ex==='angry'?`<path d="M52 81q8-6 16 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`:fx==='tongue'?`<path d="M52 76q4 5 8 0q4 5 8 0" fill="none" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/><path d="M57 79q3 9 6 0" fill="#F07D8C"/>`:ex==='cry'||ex==='sad'?`<path d="M53 80q7-6 14 0" fill="none" stroke="${ink}" stroke-width="3.5" stroke-linecap="round"/>`
-    :ex==='big'||ex==='star'||ex==='open'?`<path d="M51 76q9 12 18 0z" fill="#C2414F"/>`:`<path d="M52 76q4 5 8 0q4 5 8 0" fill="none" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/>`;
-  g+=M;
-  if(fx==='blush2')g+=`<ellipse cx="36" cy="66" rx="9" ry="5" fill="#F47A8A" opacity=".75"/><ellipse cx="84" cy="66" rx="9" ry="5" fill="#F47A8A" opacity=".75"/><path d="M30 64l4-3M36 64l4-3M80 64l4-3M86 64l4-3" stroke="#E2566C" stroke-width="1.5"/>`;
-  if(fx==='bang')g+=`<path d="M100 14v16" stroke="#F0506E" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="37" r="3" fill="#F0506E"/><path d="M110 18l-4 10" stroke="#F0506E" stroke-width="4" stroke-linecap="round"/>`;
-  if(fx==='steam')g+=`<path d="M96 22q-4-5 0-10M104 26q-4-5 0-10" fill="none" stroke="#9AA3AE" stroke-width="3" stroke-linecap="round"/><path d="M88 34l6-4M90 40l7 0" stroke="#F0506E" stroke-width="3" stroke-linecap="round"/>`;
-  if(fx==='house')g+=`<g transform="translate(88 12)"><path d="M2 14 13 4l11 10v12H2z" fill="#F2643D"/><path d="M10 26v-7h6v7" fill="#fff"/><path d="M0 14 13 2l13 12" fill="none" stroke="#B9452A" stroke-width="2.5" stroke-linecap="round"/></g>`;
-  if(fx==='mag')g+=`<circle cx="100" cy="26" r="9" fill="#DFF1FF" stroke="${ink}" stroke-width="3"/><path d="m107 33 7 7" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
-  if(fx==='clock')g+=`<circle cx="100" cy="26" r="11" fill="#fff" stroke="${ink}" stroke-width="2.5"/><path d="M100 19v7l5 3" fill="none" stroke="${ink}" stroke-width="2.5" stroke-linecap="round"/>`;
-  if(fx==='x')g+=`<circle cx="100" cy="26" r="11" fill="#F0506E"/><path d="m95 21 10 10m0-10-10 10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`;
-  if(fx==='blush'||ex==='happy')g+=`<ellipse cx="36" cy="66" rx="6" ry="3.5" fill="#F48A8A" opacity=".55"/><ellipse cx="84" cy="66" rx="6" ry="3.5" fill="#F48A8A" opacity=".55"/>`;
-  if(fx==='spark')g+=`<path d="M103 22l2 6 6 2-6 2-2 6-2-6-6-2 6-2zM15 28l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#FFC531"/>`;
-  if(fx==='hearts')g+=`<path d="M100 30c-7-5-7-11-2.5-11 1.6 0 2.3 1 2.5 2 .2-1 .9-2 2.5-2 4.5 0 4.5 6-2.5 11zM18 34c-5-3.5-5-8-1.8-8 1.1 0 1.6.7 1.8 1.4.2-.7.7-1.4 1.8-1.4 3.2 0 3.2 4.5-1.8 8z" fill="#F0506E"/>`;
-  if(fx==='sweat')g+=`<path d="M96 30q-5 8 0 11q5-3 0-11z" fill="#7FCBF5"/>`;
-  if(fx==='zzz')g+=`<text x="92" y="30" font-size="16" font-weight="900" fill="#7A8CD8" font-family="system-ui">Z</text><text x="104" y="18" font-size="11" font-weight="900" fill="#7A8CD8" font-family="system-ui">z</text>`;
-  if(fx==='check')g+=`<circle cx="100" cy="26" r="11" fill="#2FB36E"/><path d="m95 26 3.5 3.5 6.5-7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
-  if(fx==='paw')g+=`<g fill="${dark}"><ellipse cx="102" cy="34" rx="7" ry="6"/><circle cx="95" cy="25" r="3"/><circle cx="101" cy="22" r="3"/><circle cx="107" cy="23" r="3"/><circle cx="111" cy="29" r="3"/></g>`;
-  g+=`<text x="60" y="113" text-anchor="middle" font-size="19" font-weight="900" font-family="'PingFang TC','Noto Sans TC',system-ui,sans-serif" fill="#fff" stroke="${ink}" stroke-width="5" paint-order="stroke" stroke-linejoin="round">${esc(label)}</text>`;
-  return `<svg viewBox="0 6 120 114" role="img" aria-label="${esc(label)}">${g}</svg>`}
+let __stkN=0;
+function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label,an,ex,fx]=s;const dog=an.startsWith('dog');const u='s'+(++__stkN);
+  const PAL={dog:['#F2B36B','#C97A3C','#FFF4E6','#E89A52'],dog2:['#FFFFFF','#E9D8C6','#FFFFFF','#F3E6D8'],cat:['#C3CAD3','#8D96A3','#F6F7F9','#A9B2BD'],cat2:['#F7B866','#DD8A33','#FFF4E4','#EBA049']}[an];
+  const [face,dark,light,mid]=PAL,ink='#4A3226',line='#5A3B2A',blush='#FF8F9E';
+  let g='';
+  // 耳朵
+  if(dog)g+=`<path d="M27 40c-9 4-14 18-10 32 3 9 13 9 17 1 4-9 6-22 3-30-2-4-6-5-10-3z" fill="${dark}" stroke="${line}" stroke-width="2.6"/><path d="M93 40c9 4 14 18 10 32-3 9-13 9-17 1-4-9-6-22-3-30 2-4 6-5 10-3z" fill="${dark}" stroke="${line}" stroke-width="2.6"/>`;
+  else g+=`<path d="M30 46 31 18q1-6 6-3l20 15z" fill="${face}" stroke="${line}" stroke-width="2.6" stroke-linejoin="round"/><path d="M90 46 89 18q-1-6-6-3L63 30z" fill="${face}" stroke="${line}" stroke-width="2.6" stroke-linejoin="round"/><path d="M35 38 36 24l11 9z" fill="#FFB3BE"/><path d="M85 38 84 24l-11 9z" fill="#FFB3BE"/>`;
+  // 頭（漸層光澤）
+  g+=`<ellipse cx="60" cy="60" rx="39" ry="34" fill="url(#${u}h)" stroke="${line}" stroke-width="2.6"/>`;
+  if(an==='cat2')g+=`<path d="M52 28q8 5 16 0M49 35q11 5 22 0" fill="none" stroke="${mid}" stroke-width="3.2" stroke-linecap="round"/><path d="M24 60l8 2M24 68l8 0M96 60l-8 2M96 68l-8 0" stroke="${mid}" stroke-width="3" stroke-linecap="round"/>`;
+  if(an==='dog')g+=`<ellipse cx="46" cy="44" rx="4" ry="2.6" fill="${light}" opacity=".9"/><ellipse cx="74" cy="44" rx="4" ry="2.6" fill="${light}" opacity=".9"/>`;
+  // 嘴巴區
+  g+=dog?`<ellipse cx="60" cy="74" rx="19" ry="13.5" fill="${light}"/>`:`<ellipse cx="60" cy="72" rx="15" ry="10.5" fill="${light}"/>`;
+  // 眼睛
+  const E=x=>{const sh=`<circle cx="${x+2.4}" cy="50.5" r="2.2" fill="#fff"/><circle cx="${x-1.8}" cy="56" r="1.1" fill="#fff"/>`;switch(ex){
+    case 'happy':return `<path d="M${x-7} 56q7-9 14 0" fill="none" stroke="${ink}" stroke-width="3.6" stroke-linecap="round"/>`;
+    case 'big':return `<ellipse cx="${x}" cy="53" rx="7.5" ry="9" fill="${ink}"/><circle cx="${x+2.6}" cy="49" r="3.2" fill="#fff"/><circle cx="${x-2.4}" cy="57.5" r="1.6" fill="#fff"/>`;
+    case 'star':return `<path d="M${x} 43l2.9 6.2 6.7.8-5 4.6 1.4 6.6-6-3.4-6 3.4 1.4-6.6-5-4.6 6.7-.8z" fill="#FFD23F" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/>`;
+    case 'love':return `<path d="M${x} 61c-10-6.5-10-15-4-15 2.2 0 3.4 1.3 4 2.8.6-1.5 1.8-2.8 4-2.8 6 0 6 8.5-4 15z" fill="#FF5A78" stroke="${ink}" stroke-width="1.4"/>`;
+    case 'sleep':return `<path d="M${x-7} 54q7 6 14 0" fill="none" stroke="${ink}" stroke-width="3.6" stroke-linecap="round"/>`;
+    case 'wink':return x<60?`<path d="M${x-7} 56q7-9 14 0" fill="none" stroke="${ink}" stroke-width="3.6" stroke-linecap="round"/>`:`<ellipse cx="${x}" cy="53" rx="5.5" ry="6.8" fill="${ink}"/>${sh}`;
+    case 'sad':return `<path d="M${x-7} 46q7 4 14 0" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round" transform="rotate(${x<60?-10:10} ${x} 46)"/><ellipse cx="${x}" cy="55" rx="5" ry="6" fill="${ink}"/>${sh}`;
+    case 'cry':return `<path d="M${x-7} 53q7-6 14 0" fill="none" stroke="${ink}" stroke-width="3.6" stroke-linecap="round"/><path d="M${x-2} 58q-5 11 0 15q5-4 0-15z" fill="#7CCBFF" stroke="#4A9BD8" stroke-width="1"/>`;
+    case 'shock':return `<circle cx="${x}" cy="53" r="8.5" fill="#fff" stroke="${ink}" stroke-width="2.6"/><circle cx="${x}" cy="53" r="3.6" fill="${ink}"/>`;
+    case 'angry':return `<path d="M${x-8} ${x<60?44:49}l16 ${x<60?5:-5}" stroke="${ink}" stroke-width="3.6" stroke-linecap="round"/><ellipse cx="${x}" cy="56" rx="4.6" ry="5.4" fill="${ink}"/>`;
+    default:return `<ellipse cx="${x}" cy="53" rx="5.5" ry="6.8" fill="${ink}"/>${sh}`}};
+  g+=E(44)+E(76);
+  // 鼻子
+  g+=dog?`<path d="M54 66q6-4 12 0q-1 5-6 6q-5-1-6-6z" fill="${ink}"/><ellipse cx="58" cy="66.6" rx="2" ry="1.1" fill="#fff" opacity=".7"/>`:`<path d="M57 66h6l-3 3.4z" fill="#F07D8C" stroke="${ink}" stroke-width="1" stroke-linejoin="round"/>`;
+  // 嘴
+  const sadM=ex==='cry'||ex==='sad'||ex==='angry';
+  g+=ex==='shock'?`<ellipse cx="60" cy="80" rx="4.6" ry="5.6" fill="#B8384A" stroke="${ink}" stroke-width="1.6"/>`
+    :sadM?`<path d="M53 82q7-6 14 0" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`
+    :(ex==='big'||ex==='star'||ex==='open')?`<path d="M51 75q9 13 18 0z" fill="#C2414F" stroke="${ink}" stroke-width="1.8" stroke-linejoin="round"/><path d="M55 80q5 4 10 0" fill="#FF8FA0"/>`
+    :`<path d="M52 75q4 5 8 0q4 5 8 0" fill="none" stroke="${ink}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>${fx==='tongue'?`<path d="M57 78q3 9 6 0z" fill="#FF7F92" stroke="${ink}" stroke-width="1.2"/>`:''}`;
+  if(!dog)g+=`<path d="M26 66l12 1M27 72l11-2M94 66l-12 1M93 72l-11-2" stroke="${line}" stroke-width="1.8" stroke-linecap="round" opacity=".55"/>`;
+  // 腮紅
+  g+=`<ellipse cx="33" cy="68" rx="${fx==='blush2'?8:6}" ry="${fx==='blush2'?5:3.8}" fill="${blush}" opacity="${fx==='blush2'?.8:.55}"/><ellipse cx="87" cy="68" rx="${fx==='blush2'?8:6}" ry="${fx==='blush2'?5:3.8}" fill="${blush}" opacity="${fx==='blush2'?.8:.55}"/>`;
+  // 前面兩隻小肉掌
+  const paw=(x,r)=>`<g transform="translate(${x} 89) rotate(${r})"><ellipse rx="10" ry="7.8" fill="${face}" stroke="${line}" stroke-width="2.4"/><path d="M-4 -3v4M0 -4v5M4 -3v4" stroke="${line}" stroke-width="1.6" stroke-linecap="round" opacity=".6"/></g>`;
+  g+=fx==='paw'?paw(44,-8)+`<g transform="translate(86 34) rotate(18)"><ellipse rx="10" ry="8.5" fill="${face}" stroke="${line}" stroke-width="2.4"/><ellipse cy="1.5" rx="4" ry="3" fill="#FFB3BE"/></g>`:paw(44,-8)+paw(76,8);
+  // 小道具
+  if(fx==='spark')g+=`<path d="M104 20l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4zM14 30l1.6 4.2 4.2 1.6-4.2 1.6-1.6 4.2-1.6-4.2-4.2-1.6 4.2-1.6z" fill="#FFC531" stroke="${line}" stroke-width="1.2" stroke-linejoin="round"/>`;
+  if(fx==='hearts')g+=`<path d="M102 30c-7.5-5-7.5-11.5-2.8-11.5 1.7 0 2.5 1 2.8 2 .3-1 1.1-2 2.8-2 4.7 0 4.7 6.5-2.8 11.5zM17 36c-5.5-3.7-5.5-8.5-2-8.5 1.2 0 1.8.8 2 1.5.2-.7.8-1.5 2-1.5 3.5 0 3.5 4.8-2 8.5z" fill="#FF5A78" stroke="${line}" stroke-width="1.2"/>`;
+  if(fx==='sweat')g+=`<path d="M98 30q-6 9 0 12.5q6-3.5 0-12.5z" fill="#9AD8FF" stroke="#4A9BD8" stroke-width="1.2"/>`;
+  if(fx==='zzz')g+=`<text x="94" y="30" font-size="17" font-weight="900" fill="#7A8CD8" stroke="#fff" stroke-width="3" paint-order="stroke" font-family="system-ui">Z</text><text x="106" y="17" font-size="12" font-weight="900" fill="#7A8CD8" stroke="#fff" stroke-width="3" paint-order="stroke" font-family="system-ui">z</text>`;
+  if(fx==='check')g+=`<circle cx="102" cy="26" r="11" fill="#2FB36E" stroke="${line}" stroke-width="1.6"/><path d="m97 26 3.5 3.5 6.5-7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if(fx==='bang')g+=`<path d="M101 12v15" stroke="#FF4D6A" stroke-width="5" stroke-linecap="round"/><circle cx="101" cy="35" r="3" fill="#FF4D6A"/><path d="M112 16l-4 9M90 16l4 9" stroke="#FF4D6A" stroke-width="3.4" stroke-linecap="round"/>`;
+  if(fx==='steam')g+=`<path d="M98 24q-4-5 0-10M106 28q-4-5 0-10" fill="none" stroke="#B3BAC4" stroke-width="3" stroke-linecap="round"/><path d="M90 36h-6l3 3m0-6-3 3" stroke="#FF4D6A" stroke-width="2.8" stroke-linecap="round" fill="none"/>`;
+  if(fx==='house')g+=`<g transform="translate(90 10)"><path d="M2 14 13 4l11 10v12H2z" fill="#F2643D" stroke="${line}" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 26v-7h6v7" fill="#fff"/><path d="M0 14 13 2l13 12" fill="none" stroke="${line}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+  if(fx==='mag')g+=`<circle cx="101" cy="26" r="9" fill="#E3F4FF" stroke="${line}" stroke-width="3"/><path d="m108 33 7 7" stroke="${line}" stroke-width="4.5" stroke-linecap="round"/>`;
+  if(fx==='clock')g+=`<circle cx="102" cy="26" r="11" fill="#fff" stroke="${line}" stroke-width="2.6"/><path d="M102 19v7l5 3" fill="none" stroke="${line}" stroke-width="2.4" stroke-linecap="round"/>`;
+  if(fx==='x')g+=`<circle cx="102" cy="26" r="11" fill="#FF5A6E" stroke="${line}" stroke-width="1.6"/><path d="m97 21 10 10m0-10-10 10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`;
+  // 字：咖啡色圓體＋白邊
+  const T=`<text x="60" y="117.5" text-anchor="middle" font-size="18" font-weight="900" letter-spacing="1" font-family="'PingFang TC','Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif" fill="${ink}" stroke="#fff" stroke-width="6" paint-order="stroke" stroke-linejoin="round">${esc(label)}</text>`;
+  const defs=`<defs><radialGradient id="${u}h" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".42" stop-color="${face}"/><stop offset="1" stop-color="${mid}"/></radialGradient>
+    <filter id="${u}o" x="-10%" y="-10%" width="120%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d"/><feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/><feGaussianBlur in="d" stdDeviation="2.2" result="b"/><feFlood flood-color="#5A3B2A" flood-opacity=".22"/><feComposite in2="b" operator="in" result="sh"/><feOffset in="sh" dy="1.5" result="sh2"/><feMerge><feMergeNode in="sh2"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+  return `<svg viewBox="0 6 120 118" role="img" aria-label="${esc(label)}">${defs}<g filter="url(#${u}o)">${g}</g>${T}</svg>`}
 function msgSheet(opts,cur,onPick){const el=document.createElement('div');el.className='lightbox sheet-bg';
   el.innerHTML=`<div class="sheet xpick msgsheet" role="dialog" aria-label="訊息"><div class="grab" aria-hidden="true"></div><div class="rxrow">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="xplist">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}">${esc(l)}</button>`).join('')}</div></div>`;
   el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){const v=b.dataset.v,back=overlayOpen===el;closeOverlay(el);if(!back)return onPick(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);onPick(v)};addEventListener('popstate',ok);t=setTimeout(ok,450);return}if(e.target===el)closeOverlay(el)};
