@@ -17,6 +17,23 @@ loc=[l for l in locs if l['attributes']['locale']==LOC][0]
 sets=api('GET',f"/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets?include=appScreenshots&limit=50")
 print('sets',[(s['attributes']['screenshotDisplayType'],len(s['relationships']['appScreenshots']['data'])) for s in sets['data']])
 PLAN={'APP_IPHONE_67':'iphone69_','APP_IPHONE_61':'iphone63_'}
+def up(sid,f):
+    b=open(f,'rb').read(); n=os.path.basename(f)
+    sc=api('POST','/appScreenshots',json={'data':{'type':'appScreenshots','attributes':{'fileName':n,'fileSize':len(b)},'relationships':{'appScreenshotSet':{'data':{'type':'appScreenshotSets','id':sid}}}}})['data']
+    for op in sc['attributes']['uploadOperations']:
+        requests.request(op['method'],op['url'],headers={h['name']:h['value'] for h in op['requestHeaders']},data=b[op['offset']:op['offset']+op['length']]).raise_for_status()
+    api('PATCH',f"/appScreenshots/{sc['id']}",json={'data':{'type':'appScreenshots','id':sc['id'],'attributes':{'uploaded':True,'sourceFileChecksum':hashlib.md5(b).hexdigest()}}})
+    print('uploaded',n);return sc['id']
+if os.environ.get('STATUS')=='fix':
+    for s0 in sets['data']:
+        sid=s0['id'];st=api('GET',f'/appScreenshotSets/{sid}/appScreenshots')['data'];ids=[]
+        pre=PLAN[s0['attributes']['screenshotDisplayType']]
+        for x in st:
+            if (x['attributes'].get('assetDeliveryState') or {}).get('state')=='COMPLETE': ids.append(x['id']);continue
+            n=x['attributes']['fileName'];api('DELETE',f"/appScreenshots/{x['id']}");print('redo',n)
+            ids.append(up(sid,'app/store-assets/'+n))
+        api('PATCH',f'/appScreenshotSets/{sid}/relationships/appScreenshots',json={'data':[{'type':'appScreenshots','id':i} for i in ids]})
+    time.sleep(40)
 if os.environ.get('STATUS'):
     for s0 in sets['data']:
         st=api('GET',f"/appScreenshotSets/{s0['id']}/appScreenshots")['data']
