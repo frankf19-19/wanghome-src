@@ -2721,6 +2721,8 @@ body[data-route=chat] .chsend{transition:transform .15s,opacity .15s}body[data-r
 .chl .chi{padding:12px 14px;gap:13px}.chl .chi .cav{width:52px;height:52px;font-size:20px}
 .chl .chi.new .cht b{color:var(--ink)}.chl .chi.new .chm{color:var(--ink);font-weight:700}
 .chl .chi .chn{background:#D9502B;min-width:24px;height:24px;font-size:12.5px}
+.cunread{align-self:stretch;display:flex;align-items:center;gap:10px;margin:10px 0 6px;font-size:12.5px;font-weight:800;color:var(--brand-d,#D94A26)}.cunread::before,.cunread::after{content:'';flex:1;height:1.5px;background:color-mix(in srgb,var(--brand,#F2643D) 40%,transparent)}
+.chi{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -2879,7 +2881,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.10.0';
+const BUILD = 'v7.11.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4152,6 +4154,16 @@ async function renderChats(){const _n=navId;setTitle('訊息');
   if(tab==='friends')return renderFriends(_n);
   const el=$('#chList');if(!el)return;const ck=me().id+':c';
   if(tab==='chats'){el.insertAdjacentHTML('beforebegin',`<label class="chsearch" hidden>${ic('search')}<input type="search" id="chQ" placeholder="搜尋名字或訊息" aria-label="搜尋對話"></label>`);
+    {let lp=null;const menu=a=>{const cid=(a.getAttribute('href')||'').split('/').pop();if(!cid)return;if(navigator.vibrate)try{navigator.vibrate(20)}catch(_){}
+      xPick(a.querySelector('.cht b')?a.querySelector('.cht b').textContent:'對話',[['read','標為已讀'],['mute','關閉通知（靜音）'],['unmute','打開通知'],['hide','刪除這個對話']],'',async v=>{
+        if(v==='read'){await sb.rpc('chat_read',{p_chat:cid});a.classList.remove('new');const n=a.querySelector('.chn');if(n)n.remove();chatUnreadCheck()}
+        if(v==='mute'||v==='unmute'){const {error}=await sb.rpc('chat_mute',{p_chat:cid,p_on:v==='mute'});toast(error?'沒有成功，請稍後再試':v==='mute'?'已靜音':'已打開通知')}
+        if(v==='hide'){if(!await askSheet({title:'刪除這個對話？',body:'只會從你的訊息列表移除；對方再傳訊息時會重新出現。',ok:'刪除',danger:true}))return;await sb.rpc('chat_hide',{p_chat:cid});a.remove();const c=__chCache[me().id+':c'];if(c)__chCache[me().id+':c']=c.filter(x=>x.chat_id!==cid)}})};
+      el.addEventListener('touchstart',e=>{const a=e.target.closest('.chi');if(!a)return;lp=setTimeout(()=>{lp='done';menu(a)},520)},{passive:true});
+      ['touchmove','touchcancel'].forEach(ev=>el.addEventListener(ev,()=>{if(lp&&lp!=='done')clearTimeout(lp);lp=null},{passive:true}));
+      el.addEventListener('touchend',e=>{if(lp==='done'){e.preventDefault()}else if(lp)clearTimeout(lp);lp=null});
+      el.addEventListener('click',e=>{if(e.target.closest('.chi')&&lp==='done'){e.preventDefault();lp=null}},true);
+      el.addEventListener('contextmenu',e=>{const a=e.target.closest('.chi');if(!a)return;e.preventDefault();menu(a)})}
     $('#chQ').addEventListener('input',()=>{const q=$('#chQ').value.trim().toLowerCase();el.querySelectorAll('.chi').forEach(a=>{a.hidden=!!q&&!a.textContent.toLowerCase().includes(q)})})}
   const draw=data=>{if(!data||!data.length){el.innerHTML=`<div class="xempty">${ic('chat')}<b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或加好友後直接聊天、傳照片，不用互留電話。</p><button type="button" class="btn" id="chAddF">${ic('userPlus')} 加好友</button></div>`;$('#chAddF').onclick=()=>friendAddSheet();return}
     patchHTML(el,data.map(chatRowHTML).join(''));};
@@ -4398,7 +4410,11 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
     const onSc=()=>{if(_n!==navId){removeEventListener('scroll',onSc);return}if(atBottom()){hideNew();pinned=true}};addEventListener('scroll',onSc,{passive:true});log.addEventListener('scroll',onSc,{passive:true});
     try{const ro=new ResizeObserver(()=>{if(_n!==navId){ro.disconnect();return}if(pinned)toBottom(false)});ro.observe(log);ro.observe($('.chat'))}catch(_){}}
   if(!msgs.length)log.insertAdjacentHTML('beforeend',`<p class="cfirst"><span class="cfirst-stk">${stkSVG(ch.kind==='dm'?'hi':helper?'search':'please')}</span>${ch.kind==='dm'?`跟 ${esc(oname)} 打聲招呼吧。對方回覆前，你最多可以傳 3 則訊息。`:helper?`說說你在哪裡、什麼時候看到牠，可以直接傳照片給對方。`:'還沒有訊息。'}</p>`);
+  const unreadN=(()=>{try{const r=(__chCache[me().id+':c']||[]).find(x=>x.chat_id===id);return r?+r.unread||0:0}catch(_){return 0}})();
   await add(msgs.slice().reverse(),true);
+  // 未讀分隔線：「以下是未讀訊息」，並捲到那裡
+  if(unreadN>0&&_n===navId){const theirs=[...log.querySelectorAll('.cm:not(.me):not(.sys)')];const first=theirs[Math.max(0,theirs.length-unreadN)];if(first&&unreadN<theirs.length+1){first.insertAdjacentHTML('beforebegin','<p class="cunread">以下是未讀訊息</p>');if(unreadN>3)requestAnimationFrame(()=>{const d=log.querySelector('.cunread');if(d){pinned=false;if(isMobV())window.scrollTo(0,d.getBoundingClientRect().top+scrollY-90);else log.scrollTop=d.offsetTop-log.offsetTop-16}})}}
+  {const r=(__chCache[me().id+':c']||[]).find(x=>x.chat_id===id);if(r)r.unread=0}
   if(_n!==navId||!log.isConnected)return;   // 已經換到別的對話
   // 更早的訊息：一次再抓 80 則，接在最上面，畫面停在原本的位置
   const olderBtn=()=>{if(log.querySelector('.chold'))return;{const nt=log.querySelector('.cnote');const bh='<button type="button" class="chold">看更早的訊息</button>';if(nt)nt.insertAdjacentHTML('afterend',bh);else log.insertAdjacentHTML('afterbegin',bh)}log.querySelector('.chold').onclick=async e=>{const b=e.target;b.disabled=true;b.textContent='載入中…';
