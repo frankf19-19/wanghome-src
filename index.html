@@ -3063,7 +3063,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.15';
+const BUILD = 'v7.17.16';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4249,8 +4249,11 @@ function pushOK(){try{return IS_APP&&window.Capacitor.getPlatform()==='ios'&&!!c
 function pushBind(){if(__pushBound||!pushOK())return;__pushBound=true;const P=capPlugin('PushNotifications');
   P.addListener('registration',t=>{__pushToken=t&&t.value||'';try{localStorage.setItem('wh_push_tok',__pushToken)}catch(_){}if(me()&&__pushToken)sb.rpc('save_push_token',{p_token:__pushToken,p_platform:'ios'}).then(()=>{},()=>{})});
   P.addListener('registrationError',()=>{});
-  P.addListener('pushNotificationActionPerformed',a=>{const u=a&&a.notification&&a.notification.data&&a.notification.data.url;if(u&&/^#\/[\w\/?=&.%-]*$/.test(u))location.hash=u});
-  P.addListener('pushNotificationReceived',()=>{try{__inboxAt=0;inboxMaybe()}catch(_){}})}
+  // 點通知：已經在那個對話就直接抓新訊息（網址一樣時不會重新整理頁面）；不同對話就跳過去
+  P.addListener('pushNotificationActionPerformed',a=>{const u=a&&a.notification&&a.notification.data&&a.notification.data.url;if(!(u&&/^#\/[\w\/?=&.%-]*$/.test(u)))return;if(location.hash===u){chatLiveRefresh();setTimeout(chatLiveRefresh,1500)}else{const id=(u.match(/^#\/chat\/([0-9a-f-]+)/)||[])[1];if(id)delete __chatData[id];location.hash=u}});
+  P.addListener('pushNotificationReceived',()=>{try{__inboxAt=0;inboxMaybe()}catch(_){}chatLiveRefresh()})}
+// 有新訊息的訊號（通知、回到 App）：正在看的對話或訊息列表立刻更新
+function chatLiveRefresh(){try{if(window.__chatPull)window.__chatPull();if(window.__chatsReload)window.__chatsReload();chatUnreadCheck()}catch(_){}}
 async function pushInit(ask){if(!pushOK()||!me())return;pushBind();const P=capPlugin('PushNotifications');
   try{let st=await P.checkPermissions();
     if(st.receive==='prompt'||st.receive==='prompt-with-rationale'){
@@ -4376,8 +4379,9 @@ async function renderChats(){const _n=navId;setTitle('訊息');
     $('#chQ').addEventListener('input',()=>{const q=$('#chQ').value.trim().toLowerCase();el.querySelectorAll('.chi').forEach(a=>{(a.closest('.chsw')||a).hidden=!!q&&!a.textContent.toLowerCase().includes(q)})})}
   const draw=data=>{if(!data||!data.length){el.innerHTML=`<div class="xempty chempty-l"><span class="chel-stk">${stkSVG('hi')}${stkSVG('love')}</span><b>還沒有訊息</b><p>在走失毛孩的頁面按「傳訊息給飼主」，或加好友後直接聊天、傳照片，不用互留電話。</p><button type="button" class="btn" id="chAddF">${ic('userPlus')} 加好友</button></div>`;$('#chAddF').onclick=()=>friendAddSheet();return}
     patchHTML(el,data.map(chatRowHTML).join(''));{const ra=document.querySelector('.chreadall');if(ra)ra.hidden=!data.some(r=>r.unread)}};
-  const chatsReload=async()=>{const {data}=await sb.rpc('chat_list');if(data&&el.isConnected&&_n===navId){__chCache[ck]=data;draw(data)}chatUnreadCheck()};
+  const chatsReload=async()=>{if(_n!==navId||!el.isConnected)return;const {data}=await sb.rpc('chat_list');if(data&&el.isConnected&&_n===navId){__chCache[ck]=data;draw(data)}chatUnreadCheck()};
   if(__chCache[ck])draw(__chCache[ck]);
+  window.__chatsReload=()=>{if(_n===navId&&el.isConnected)chatsReload()};
   const {data,error}=await sb.rpc('chat_list');if(_n!==navId||!el.isConnected)return;
   if(error){if(!__chCache[ck])el.innerHTML=netErrHTML();return}
   __chCache[ck]=data||[];draw(data);{const sr=document.querySelector('.chsearch');if(sr)sr.hidden=!(data&&data.length>=4)}
@@ -4804,8 +4808,12 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   try{__chatCh=sb.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},()=>{hideTyping();pull()})
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'chat_messages',filter:'chat_id=eq.'+id},({new:nm})=>{if(!nm)return;if(nm.deleted)markDeleted(nm.id);else if(nm.reactions)setRx(nm.id,nm.reactions)})
     .on('broadcast',{event:'typing'},({payload})=>{if(payload&&payload.u&&payload.u!==me().id)showTyping()}).subscribe()}catch(_){}
-  {let rtOK=false;try{__chatCh&&__chatCh.on&&0}catch(_){}const tick=()=>{if(_n!==navId)return;pull();__chatPoll=setTimeout(tick,(__chatCh&&__chatCh.state==='joined')?25000:8000)};__chatPoll=setTimeout(tick,8000)}
-  const onVis=()=>{if(_n!==navId)return document.removeEventListener('visibilitychange',onVis);if(document.visibilityState==='visible'){pull();sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})}};document.addEventListener('visibilitychange',onVis);
+  {let rtOK=false;try{__chatCh&&__chatCh.on&&0}catch(_){}const tick=()=>{if(_n!==navId)return;pull();__chatPoll=setTimeout(tick,(__chatCh&&__chatCh.state==='joined')?12000:6000)};__chatPoll=setTimeout(tick,8000)}
+  window.__chatPull=()=>{if(_n===navId)pull()};
+  pull();setTimeout(()=>{if(_n===navId)pull()},1200);   // 一打開就抓最新的（快取的內容可能是舊的、通知可能比畫面先到）
+  const onVis=()=>{if(_n!==navId)return document.removeEventListener('visibilitychange',onVis);if(document.visibilityState==='visible'){pull();setTimeout(()=>{if(_n===navId)pull()},1500);
+      try{if(__chatCh&&__chatCh.state!=='joined'){__chatCh.subscribe()}}catch(_){}sb.rpc('chat_read',{p_chat:id}).then(()=>chatUnreadCheck(),()=>{})}};document.addEventListener('visibilitychange',onVis);
+  {const A=capPlugin('App');if(A&&A.addListener&&!window.__chatResumeB){window.__chatResumeB=1;A.addListener('resume',()=>chatLiveRefresh())}}
   const ping=()=>{try{sb.auth.getSession().then(({data})=>{const t=data&&data.session&&data.session.access_token;if(!t)return;fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-message',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:'Bearer '+t},body:JSON.stringify({chat_id:id})}).catch(()=>{})})}catch(_){}};
   const sendRPC=async(kind,body,photo)=>{const rp=replyTo;let r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null,...(rp?{p_reply:rp}:{})});
     if(r.error&&rp&&/p_reply|function|schema cache/i.test(r.error.message))r=await sb.rpc('chat_send',{p_chat:id,p_kind:kind,p_body:body||'',p_photo:photo||null});   // 資料庫還沒更新：先不帶回覆
