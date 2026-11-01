@@ -115,6 +115,7 @@ img{max-width:100%;display:block}
 .ico{flex:none;vertical-align:-0.17em}
 h2 .ico{color:var(--red);width:1em;height:1em}
 :focus-visible{outline:3px solid var(--mark);outline-offset:2px;border-radius:4px}
+[tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ---------- 頁首 ---------- */
@@ -3030,7 +3031,8 @@ function openOverlay(el){
     sh.addEventListener('touchmove',e=>{if(!on)return;dy=Math.max(0,e.touches[0].clientY-y0);if(dy>0&&sh.scrollTop<=0)sh.style.transform=`translateY(${dy}px)`},{passive:true});
     const end=()=>{if(!on)return;on=false;sh.style.transition='';if(dy>90){sh.style.transform='translateY(110%)';el.classList.remove('show');setTimeout(()=>closeOverlay(el),200)}else sh.style.transform=''};
     sh.addEventListener('touchend',end);sh.addEventListener('touchcancel',end)}}
-  document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{if(!el.isConnected||(el.contains(document.activeElement)&&document.activeElement!==el))return;const f=focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el;try{f.focus({preventScroll:true})}catch(_){}},260);
+  document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{if(!el.isConnected||(el.contains(document.activeElement)&&document.activeElement!==el))return;const touch=matchMedia('(pointer:coarse)').matches;   // 手機：焦點放在視窗本身（不會在第一個選項出現黃框），鍵盤使用者照常跳到第一個選項
+    const f=touch?el:(focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el);if(f===el&&!el.hasAttribute('tabindex'))el.setAttribute('tabindex','-1');try{f.focus({preventScroll:true,focusVisible:false})}catch(_){}},260);
   try{history.pushState({overlay:1,d:navDepth,h:location.hash||'#/'},'',location.href)}catch(_){}
 }
 function closeOverlay(el){const t=el._trigger;if(overlayOpen===el){overlayOpen=null;el.remove();__selfPop=true;try{history.back()}catch(_){__selfPop=false}}else el.remove();if(t&&t.isConnected)try{t.focus({preventScroll:true})}catch(_){}}
