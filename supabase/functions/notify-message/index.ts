@@ -1,5 +1,5 @@
 // 汪喵回家 — 私訊推播 v1.0
-// 網址：POST https://<project>.supabase.co/functions/v1/notify-message   {"chat_id":"<uuid>"}
+// 網址：POST https://<project>.supabase.co/functions/v1/notify-message   {"chat_id":"<uuid>"} 或 {"friend":"<對方 uuid>"}（好友邀請／接受）
 // 會員送出訊息後由網頁／App 呼叫（帶登入權杖）：推播給對話裡的另一個人。
 // 安全：只推「呼叫者自己剛送出（2 分鐘內）」的訊息；對方已讀就不推；同一對話 20 秒內只推一次（連續傳很多則不會一直響）。
 // Secrets：APNS_P8、APNS_KEY_ID、APNS_TEAM_ID（和 notify-sighting 共用）。可開啟 JWT 驗證。
@@ -70,12 +70,29 @@ Deno.serve(async (req) => {
   let body: any = {};
   try { body = await req.json(); } catch (_) { return json({ error: "json" }, 400); }
   const chatId = String(body.chat_id ?? "");
-  if (!/^[0-9a-f-]{36}$/.test(chatId)) return json({ error: "bad id" }, 400);
+  const friendId = String(body.friend ?? "");
+  if (!/^[0-9a-f-]{36}$/.test(chatId) && !/^[0-9a-f-]{36}$/.test(friendId)) return json({ error: "bad id" }, 400);
   const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), { auth: { persistSession: false } });
   const { data: u } = await sb.auth.getUser(jwt).catch(() => ({ data: null as any }));
   const me = u?.user?.id;
   if (!me) return json({ error: "login" }, 401);
+  // 好友邀請／接受邀請：只推「呼叫者自己剛做的」（2 分鐘內），每一筆只推一次
+  if (friendId) {
+    if (friendId === me) return json({ sent: 0 });
+    const a = me < friendId ? me : friendId, b = me < friendId ? friendId : me;
+    const { data: f } = await sb.from("friends").select("requester,status,created_at,accepted_at,pushed_at").eq("a", a).eq("b", b).maybeSingle();
+    if (!f || f.pushed_at) return json({ sent: 0, reason: "none" });
+    const fresh = (t: string | null) => !!t && Date.now() - new Date(t).getTime() < 120e3;
+    let title = "", text = "";
+    const { data: prof } = await sb.from("profiles").select("username").eq("id", me).maybeSingle();
+    const name = prof?.username || "會員";
+    if (f.status === "pending" && f.requester === me && fresh(f.created_at)) { title = "好友邀請"; text = `${name} 想加你為好友`; }
+    else if (f.status === "accepted" && fresh(f.accepted_at)) { title = "成為好友了"; text = `${name} 和你成為好友了，可以直接聊天`; }
+    else return json({ sent: 0, reason: "old" });
+    await sb.from("friends").update({ pushed_at: new Date().toISOString() }).eq("a", a).eq("b", b);
+    return json({ sent: await pushToUser(friendId, title, text, "#/chats?tab=friends") });
+  }
   const since = new Date(Date.now() - 120e3).toISOString();
   const { data: msg } = await sb.from("chat_messages").select("id,kind,body,created_at")
     .eq("chat_id", chatId).eq("sender_id", me).gte("created_at", since).order("id", { ascending: false }).limit(1).maybeSingle();
