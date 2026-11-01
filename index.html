@@ -2875,6 +2875,16 @@ body.chfix .tabbar{display:none!important}
 .cstk svg:is(.s-night,.s-sleepy,.s-cry,.s-sorry) .sk-all{animation-name:none}.cstk svg:is(.s-night,.s-sleepy) :is(.sk-pl,.sk-pr){animation:none}
 .cstk{cursor:pointer}
 @media (prefers-reduced-motion:reduce){.cstk svg.stk-a *,.chel-stk svg.stk-a *{animation:none!important}}
+/* 長按訊息：不要跳出 iPhone 的選字、拷貝選單；按住時訊息微微縮一下 */
+body[data-route=chat] .chlog .cm,body.chsplit-on .chlog .cm,.lightbox .sheet{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.lightbox .sheet :is(input,textarea){-webkit-user-select:text;user-select:text}
+.chlog .cm>.cmb,.chlog .cm>.cstk,.chlog .cm .cmb{transition:transform .35s cubic-bezier(.2,.8,.2,1)}.chlog .cm.press :is(.cmb,.cstk){transform:scale(.95)}
+.chlog .cm.gone{transition:opacity .25s,transform .25s;opacity:0;transform:scale(.85)}
+.msgpv{display:flex;justify-content:center;margin:2px 0 12px}.msgpv-t{max-width:88%;padding:10px 14px;border-radius:18px;background:var(--fill,#F2ECE5);font-size:15px;line-height:1.45;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.msgpv-s svg{width:84px;height:82px}.msgpv img{max-width:140px;max-height:120px;border-radius:14px;object-fit:cover}
+.msgacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-top:12px}
+.msgacts button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:0;border-radius:16px;background:var(--fill,#F2ECE5);color:var(--ink);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.msgacts button .ico{width:22px;height:22px}.msgacts button.danger{color:#D93A3F;background:color-mix(in srgb,#E5484D 12%,var(--sheet))}.msgacts button:active{transform:scale(.95)}
 .cloc-wait{flex-direction:row!important;align-items:center;gap:10px!important}.cspin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:cspin .8s linear infinite;flex:none}@keyframes cspin{to{transform:rotate(360deg)}}.cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
@@ -3033,7 +3043,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.11';
+const BUILD = 'v7.17.12';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4526,8 +4536,9 @@ function stkSVG(id){const s=STK.find(x=>x[0]===id);if(!s)return '';const [,label
   const defs=`<defs><linearGradient id="${u}h" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="${face}"/><stop offset="1" stop-color="${mid}"/></linearGradient>
     <filter id="${u}o" x="-10%" y="-10%" width="120%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="3.2" result="d"/><feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/><feGaussianBlur in="d" stdDeviation="2.2" result="b"/><feFlood flood-color="#5A3B2A" flood-opacity=".22"/><feComposite in2="b" operator="in" result="sh"/><feOffset in="sh" dy="1.5" result="sh2"/><feMerge><feMergeNode in="sh2"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
   return `<svg class="stk-a s-${id} ex-${ex} fx-${fx||'none'}" viewBox="0 6 120 118" role="img" aria-label="${esc(label)}">${defs}<ellipse class="sk-sh" cx="60" cy="100" rx="30" ry="4" fill="#5A3B2A" opacity=".12"/><g class="sk-all"><g filter="url(#${u}o)">${g}</g></g></g>${T}</svg>`}
-function msgSheet(opts,cur,onPick){const el=document.createElement('div');el.className='lightbox sheet-bg';
-  el.innerHTML=`<div class="sheet xpick msgsheet" role="dialog" aria-label="訊息"><div class="grab" aria-hidden="true"></div><div class="rxrow">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="xplist">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}">${esc(l)}</button>`).join('')}</div></div>`;
+ICONS.reply='<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v4"/>';ICONS.copy='<rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>';ICONS.undo='<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>';
+function msgSheet(opts,cur,onPick,pv){const el=document.createElement('div');el.className='lightbox sheet-bg';const IC={reply:'reply',copy:'copy',unsend:'undo',save:'download'};
+  el.innerHTML=`<div class="sheet xpick msgsheet" role="dialog" aria-label="訊息"><div class="grab" aria-hidden="true"></div>${pv?`<div class="msgpv">${pv}</div>`:''}<div class="rxrow">${RX.map(e=>`<button type="button" data-v="${e}" class="${e===cur?'on':''}" aria-label="回應 ${e}">${e}</button>`).join('')}</div><div class="msgacts">${opts.map(([v,l])=>`<button type="button" data-v="${v}" class="${v==='unsend'?'danger':''}">${IC[v]?ic(IC[v]):''}<span>${esc(l)}</span></button>`).join('')}</div></div>`;
   el.onclick=e=>{const b=e.target.closest('[data-v]');if(b){const v=b.dataset.v,back=overlayOpen===el;closeOverlay(el);if(!back)return onPick(v);let done=false,t;const ok=()=>{if(done)return;done=true;clearTimeout(t);removeEventListener('popstate',ok);onPick(v)};addEventListener('popstate',ok);t=setTimeout(ok,450);return}if(e.target===el)closeOverlay(el)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
 // 聊天背景（每個人自己選，記在這支手機）
@@ -4693,12 +4704,15 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   if(msgs.length===80)olderBtn();
   // 長按訊息：複製（電腦按右鍵）
   {let lp=null;const menu=x=>{if(x.classList.contains('pend')||x.classList.contains('sys'))return;const m=byId[x.dataset.id];if(!m)return;const t=x.querySelector('.cmt');const mine=m.sender_id===me().id;
-      const opts=[['reply','回覆']];if(t)opts.push(['copy','複製文字']);if(mine&&Date.now()-Date.parse(m.created_at)<24*36e5)opts.push(['unsend','收回']);
+      const ph=x.querySelector('.cmph img');const opts=[['reply','回覆']];if(t)opts.push(['copy','複製文字']);if(ph)opts.push(['save','儲存照片']);if(mine&&Date.now()-Date.parse(m.created_at)<24*36e5)opts.push(['unsend','收回']);
       if(navigator.vibrate)try{navigator.vibrate(20)}catch(_){}
-      msgSheet(opts,(m.reactions||{})[me().id],async v=>{if(RX.includes(v))return react(m.id,v);if(v==='copy')copy(t.innerText);if(v==='reply')setReply(m.id);
-        if(v==='unsend'){if(!await askSheet({title:'收回這則訊息？',body:'對方那邊也會一起消失，只會顯示「收回了一則訊息」。',ok:'收回',danger:true}))return;const {error}=await sb.rpc('chat_unsend',{p_id:m.id});if(error)return toast(/function|schema/i.test(error.message)?'收回功能還在更新中，請稍後再試':error.message.replace(/^.*?:\s*/,''),4000);markDeleted(m.id)}})};
-    log.addEventListener('touchstart',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a,button'))return;lp=setTimeout(()=>{lp=null;menu(x)},520)},{passive:true});
-    ['touchend','touchmove','touchcancel'].forEach(ev=>log.addEventListener(ev,()=>{if(lp){clearTimeout(lp);lp=null}},{passive:true}));
+      const pv=t?`<span class="msgpv-t">${esc(t.innerText.slice(0,80))}</span>`:isStk(m)?`<span class="msgpv-s">${stkSVG((m.body||'').replace(/^\[stk:|\]$/g,''))}</span>`:ph?`<img src="${esc(ph.src)}" alt="">`:m.kind==='voice'?'<span class="msgpv-t">［語音］</span>':'<span class="msgpv-t">［訊息］</span>';
+      msgSheet(opts,(m.reactions||{})[me().id],async v=>{if(RX.includes(v))return react(m.id,v);if(v==='copy'){copy(t.innerText)}if(v==='reply')setReply(m.id);if(v==='save'&&ph)saveImageUrl(ph.src,'聊天照片');
+        if(v==='unsend'){if(!await askSheet({title:'收回這則訊息？',body:'對方那邊也會一起消失，只會顯示「收回了一則訊息」。',ok:'收回',danger:true}))return;const {error}=await sb.rpc('chat_unsend',{p_id:m.id});if(error)return toast(/function|schema/i.test(error.message)?'收回功能還在更新中，請稍後再試':error.message.replace(/^.*?:\s*/,''),4000);
+          const el2=log.querySelector(`.cm[data-id="${m.id}"]`);if(el2){el2.classList.add('gone');setTimeout(()=>markDeleted(m.id),260)}else markDeleted(m.id);toast('已收回',1800)}},pv)};
+    const unpress=()=>{log.querySelectorAll('.cm.press').forEach(y=>y.classList.remove('press'))};
+    log.addEventListener('touchstart',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a,button')||x.classList.contains('sys'))return;x.classList.add('press');lp=setTimeout(()=>{lp=null;unpress();menu(x)},480)},{passive:true});
+    ['touchend','touchmove','touchcancel'].forEach(ev=>log.addEventListener(ev,()=>{unpress();if(lp){clearTimeout(lp);lp=null}},{passive:true}));
     log.addEventListener('contextmenu',e=>{const x=e.target.closest('.cm');if(!x||e.target.closest('a'))return;e.preventDefault();menu(x)})}
   // 點引用的那一句：跳到原本的訊息
   log.addEventListener('click',e=>{const q=e.target.closest('.cq');if(!q)return;const el=log.querySelector(`.cm[data-id="${q.dataset.jump}"]`);if(!el)return toast('那則訊息在更早之前，請先按「看更早的訊息」');el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1200)});
