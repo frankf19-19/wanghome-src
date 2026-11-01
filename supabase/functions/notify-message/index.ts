@@ -96,6 +96,7 @@ Deno.serve(async (req) => {
   for (const o of others ?? []) {
     if (o.last_read_at && new Date(o.last_read_at) >= new Date(msg.created_at)) continue;   // 已經讀了
     if (o.pushed_at && Date.now() - new Date(o.pushed_at).getTime() < 20e3) continue;         // 剛推過
+    if (o.pushed_at && new Date(o.pushed_at) >= new Date(msg.created_at)) continue;          // 這則已經推過了
     const { data: blk } = await sb.from("user_blocks").select("blocker").eq("blocker", o.user_id).eq("blocked", me).maybeSingle();
     if (blk) continue;
     await sb.from("chat_members").update({ pushed_at: new Date().toISOString() }).eq("chat_id", chatId).eq("user_id", o.user_id);
