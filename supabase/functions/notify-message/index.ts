@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     const { data: c } = await sb.from("cases").select("name").eq("id", chat.case_id).maybeSingle();
     if (c?.name) ctx = `（${c.name}）`;
   }
-  const text = msg.kind === "photo" ? "傳了一張照片" : msg.kind === "sticker" || /^\[stk:[a-z0-9_]+\]$/.test(String(msg.body ?? "")) ? "傳了一張貼圖" : msg.kind === "ask" ? "請你證明是飼主" : String(msg.body ?? "").slice(0, 120);
+  const text = msg.kind === "photo" ? "傳了一張照片" : msg.kind === "sticker" || /^\[stk:[a-z0-9_]+\]$/.test(String(msg.body ?? "")) ? "傳了一張貼圖" : /^\[loc:/.test(String(msg.body ?? "")) ? "傳了一個位置給你" : msg.kind === "ask" ? "請你證明是飼主" : String(msg.body ?? "").slice(0, 120);
   let sent = 0;
   for (const o of others ?? []) {
     if (o.last_read_at && new Date(o.last_read_at) >= new Date(msg.created_at)) continue;   // 已經讀了
