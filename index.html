@@ -2520,7 +2520,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.10.0';
+const BUILD = 'v6.10.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5639,11 +5639,14 @@ async function renderAdopt(){const _n=navId;
     adoptOrder=list.map(r=>r.id);
     {const xn=$('#xN');if(xn)xn.textContent=list.length.toLocaleString();const w=$('#xWhereT');if(w)w.textContent=st.city;const xc=$('#xCnt');if(xc)xc.textContent=list.length+' 隻・';const fc=$('#xaFc');if(fc){const n=st.dist.length+st.variety.length+st.colour.length+st.ster.length+st.size.length+st.sex.length+st.age.length;fc.textContent=n||'';fc.classList.toggle('on',!!n)}}
     const shown=list.slice(0,st.limit);
-    el.innerHTML=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist.length?st.dist.join('、')+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
+    const H=`<p class="small muted" style="margin:0 0 8px">${esc(st.city+(st.dist.length?st.dist.join('、')+'的收容所':''))}共有 <b>${list.length}</b> 隻${st.kind==='貓'?'貓':'狗'}在等家</p><div class="grid">${shown.map(r=>{const d=waitDays(r);return `<a class="ccard adopt-card" href="#/adopt/${esc(r.id)}">
       <div class="ph ${r.photo?'':'noimg'} ${r.kind==='貓'?'cat':''}">${r.photo?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="${esc(adoptTitle(r))}">`:''}<button type="button" class="xheart ${afavHas(r.id)?'on':''}" data-afav="${esc(r.id)}" aria-label="收藏" aria-pressed="${afavHas(r.id)}">${ic('heart')}</button>${d&&isMobV()?`<span class="band xwait">等家 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}${d&&d>=180&&!isMobV()?`<span class="band">等了 ${d>=365?Math.floor(d/365)+' 年多':d+' 天'}</span>`:''}</div>
       <div class="b"><div class="t">${esc(r.variety||'混種')} <span class="sexm">${r.sex==='M'?'公':r.sex==='F'?'母':''}</span></div><div class="small muted">${esc([ADOPT_SIZE[r.size],ADOPT_AGE[r.age],r.colour,r.ster==='T'?'已結紮':r.ster==='F'?'未結紮':''].filter(Boolean).join('・'))}</div><div class="small">${ic('pin')} ${esc(shortShelter(r,st.city))}</div></div></a>`}).join('')}</div>
       ${list.length>shown.length?`<div class="more-row"><button type="button" class="btn ghost big" id="aMore">顯示更多（還有 ${list.length-shown.length} 隻）</button></div>`:''}
       <p class="small muted" style="margin-top:12px">資料來源：農業部「動物認領養」開放資料。實際狀況以收容所為準，可能已被領養。</p>`;
+    {const t=document.createElement('template');t.innerHTML=H;const og=el.querySelector(':scope>.grid');   // 換條件時沿用相同的卡片，照片不會閃
+      if(og){const out=[...t.content.childNodes].map(n=>{if(n.nodeType===1&&n.classList.contains('grid')){patchHTML(og,n.innerHTML);return og}return n});el.replaceChildren(...out)}
+      else{el.innerHTML=H;const g=el.querySelector(':scope>.grid');if(g)g.childNodes.forEach(n=>{if(n.nodeType===1)n.__k=n.outerHTML})}}
     const m=$('#aMore');if(m)m.onclick=()=>{const k=st.limit;st.limit+=30;const y=scrollY;load().then(()=>{scrollTo(0,y);const c=document.querySelectorAll('.adopt-card')[k];if(c)c.focus({preventScroll:true})})}};
   // 點標籤：加入或取消這個條件
   app.querySelector('.adopt-f').addEventListener('click',e=>{const b=e.target.closest('.fchip[data-k]');if(!b)return;const k=b.dataset.k,v=b.dataset.v;const a=st[k];const i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);
