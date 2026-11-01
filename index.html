@@ -1212,7 +1212,7 @@ body{touch-action:manipulation}
 .btn,.pill,.ccard,.mp,.mrow{transition:transform .12s ease}
 /* 換頁淡入 */
 @media (prefers-reduced-motion:no-preference){#app.enter>*:not(.sticky-cta):not(.lightbox):not(#ptr){animation:appIn .22s ease-out}#app.enter.push>*:not(.sticky-cta):not(.lightbox):not(#ptr){animation:pushIn .24s cubic-bezier(.2,.8,.2,1)}#app.enter.pop>*:not(.sticky-cta):not(.lightbox):not(#ptr){animation:popIn .22s cubic-bezier(.2,.8,.2,1)}}
-@keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes pushIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}@keyframes popIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+@keyframes appIn{from{opacity:.55;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes pushIn{from{opacity:.6;transform:translateX(28px)}to{opacity:1;transform:none}}@keyframes popIn{from{opacity:.6;transform:translateX(-18px)}to{opacity:1;transform:none}}
 /* 載入中：小圓圈 */
 .empty.loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:70px 0;color:var(--ink-3)}
 .spin.sm{width:18px;height:18px;border-width:3px;display:inline-block;vertical-align:-3px}
@@ -1669,7 +1669,7 @@ body[data-space="health"] .uploadbtn{border-color:color-mix(in srgb,var(--green)
   #app.enter>*{animation-fill-mode:both}
   #app.enter>*:nth-child(2){animation-delay:.04s}#app.enter>*:nth-child(3){animation-delay:.08s}#app.enter>*:nth-child(4){animation-delay:.12s}#app.enter>*:nth-child(5){animation-delay:.16s}#app.enter>*:nth-child(6){animation-delay:.2s}#app.enter>*:nth-child(n+7){animation-delay:.24s}
   #app.enter .tiles4 .tile4{animation:tileIn .5s cubic-bezier(.2,.8,.2,1) both}#app.enter .tiles4 .tile4:nth-child(2){animation-delay:.06s}#app.enter .tiles4 .tile4:nth-child(3){animation-delay:.12s}#app.enter .tiles4 .tile4:nth-child(4){animation-delay:.18s}
-  @keyframes tileIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes tileIn{from{opacity:.35;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
   #app.enter .bs-duo{animation:duoIn .7s cubic-bezier(.34,1.4,.64,1) both .1s}@keyframes duoIn{from{opacity:0;transform:translateY(16px) scale(.9)}to{opacity:1;transform:none}}
   #app.enter .lp-row .lp{animation:tileIn .45s cubic-bezier(.2,.8,.2,1) both}#app.enter .lp-row .lp:nth-child(2){animation-delay:.05s}#app.enter .lp-row .lp:nth-child(3){animation-delay:.1s}#app.enter .lp-row .lp:nth-child(4){animation-delay:.15s}
   #app.enter .ccard{animation:tileIn .45s cubic-bezier(.2,.8,.2,1) both}#app.enter .grid .ccard:nth-child(2){animation-delay:.05s}#app.enter .grid .ccard:nth-child(3){animation-delay:.1s}#app.enter .grid .ccard:nth-child(4){animation-delay:.15s}#app.enter .grid .ccard:nth-child(n+5){animation-delay:.2s}
@@ -2441,6 +2441,19 @@ html{-webkit-tap-highlight-color:transparent}
 <meta name="theme-color" content="#1E171C" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="汪喵回家">
+<script>
+/* 開啟時不閃：深色主題在第一個畫面前就套上；手機在第一頁畫好前先不顯示電腦版的頂欄和「載入中」 */
+(function(){var d=document.documentElement,t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
+if(t!=='auto')d.setAttribute('data-theme',t==='cocoa'?'dark':t);if(t==='cocoa')d.setAttribute('data-tone','cocoa');
+d.classList.add('booting');setTimeout(function(){d.classList.remove('booting')},4000)})();
+</script>
+<style>
+@media (max-width:760px){html.booting body>header,html.booting .tabbar,html.booting #tabbar{visibility:hidden}}
+#app>.empty.loading{opacity:0;animation:bootShow .15s .35s forwards}   /* 很快就載好的頁面不要閃一下「載入中」 */
+html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
+@keyframes bootShow{to{opacity:1}}
+.grid.ldim{opacity:.5;transition:opacity .15s}
+</style>
 </head>
 <body>
 <a href="#app" class="skip" onclick="event.preventDefault();document.getElementById('app').focus()">跳到主要內容</a>
@@ -2507,7 +2520,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v6.9.2';
+const BUILD = 'v6.10.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2907,7 +2920,7 @@ function applyTheme(t){setTimeout(()=>{try{window.__sbUpd&&window.__sbUpd()}catc
 (function(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}if(t!=='auto')document.documentElement.setAttribute('data-theme',t==='cocoa'?'dark':t);if(t==='cocoa')document.documentElement.setAttribute('data-tone','cocoa')})();
 async function init(){
   netState();
-  if(typeof supabase==='undefined'){app.innerHTML='<div class="empty">網站元件載入失敗，可能是網路不穩。<br><a href="javascript:location.reload()">重新整理</a></div>';return}
+  if(typeof supabase==='undefined'){document.documentElement.classList.remove('booting');app.innerHTML='<div class="empty">網站元件載入失敗，可能是網路不穩。<br><a href="javascript:location.reload()">重新整理</a></div>';return}
   {let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}applyTheme(t);
    $('#themeBtn').onclick=()=>{let cur='auto';try{cur=localStorage.getItem('wh_theme')||'auto'}catch(_){}const nx=THEMES[(THEMES.findIndex(x=>x[0]===cur)+1)%THEMES.length][0];try{localStorage.setItem('wh_theme',nx)}catch(_){}applyTheme(nx)}}
   $('#siteName').textContent=CONFIG.SITE_NAME;$('#footName').textContent=CONFIG.SITE_NAME;
@@ -2924,15 +2937,16 @@ async function init(){
     try{const raw=localStorage.getItem('sb-'+new URL(CONFIG.SUPABASE_URL).hostname.split('.')[0]+'-auth-token');const s=raw&&JSON.parse(raw);if(s&&s.user&&s.user.id&&s.access_token)session=s}catch(_){}
     const was=me()&&me().id;
     try{route()}catch(e){console.warn('route',e)}
-    splashHide();
+    bootDone();splashHide();
     try{await initAuth()}catch(e){console.warn('auth init',e)}
     if(was&&!me()){setReturn(location.hash||'#/me');toast('登入已過期，請重新登入',6000);pushDrop()}
     if(((me()&&me().id)||null)!==(was||null)&&!(__dirty||__wiz)){try{route()}catch(_){}}   // 實際登入狀態和記住的不同（例如已過期）：重畫一次
     return;
   }
   try{await initAuth()}catch(e){console.warn('auth init',e)}
-  route();splashHide();
+  route();bootDone();splashHide();
 }
+function bootDone(){requestAnimationFrame(()=>document.documentElement.classList.remove('booting'))}
 // App 啟動畫面：第一個畫面畫好就收起來（不用固定等 1.2 秒）
 function splashHide(){if(!IS_APP)return;requestAnimationFrame(()=>setTimeout(()=>{try{const S=capPlugin('SplashScreen');S&&S.hide({fadeOutDuration:180})}catch(_){}},30))}
 let refreshTimer=null;
@@ -3164,7 +3178,7 @@ function route(){window.__lastRoute=Date.now();
   const trav=trackDepth(wasPop);
   // 同一頁只換分頁籤／篩選（?tab=、?f=…）：不要播換頁動畫，畫面才不會晃
   const samePage=curHash.split('?')[0]===newHash.split('?')[0];
-  app.classList.remove('enter','push','pop');if(!samePage){void app.offsetWidth;app.classList.add('enter')}clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!samePage&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
+  app.classList.remove('enter','push','pop');const tabSw=TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash);if(!samePage&&window.__routed&&!tabSw){void app.offsetWidth;app.classList.add('enter')}window.__routed=true;   // 第一次開啟、切換底部分頁：直接顯示，不做淡入（才不會有一閃的感覺）clearTimeout(window.__enterT);window.__enterT=setTimeout(()=>app.classList.remove('enter','push','pop'),1600);if(IS_APP&&!samePage&&!(TOP_PAGES.test(curHash)&&TOP_PAGES.test(newHash)))app.classList.add(trav?'pop':'push');
   window.__fromHash=curHash;curHash=newHash;
   document.body.classList.toggle('inner',!TOP_PAGES.test(newHash));{const m=document.getElementById('mTitle');if(m)m.textContent='';setNavAction('')}
   if(trav&&!samePage&&pcRestore(newHash))return;
@@ -4092,6 +4106,12 @@ function sightAnaHTML(a){if(!a)return '';
 function km(a,b){const R=6371,toR=x=>x*Math.PI/180;const dLat=toR(b.lat-a.lat),dLng=toR(b.lng-a.lng);const h=Math.sin(dLat/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function distText(lat,lng){if(!homeState.near||lat==null)return '';const d=km(homeState.near,{lat,lng});return `<span class="dist">距你 ${fmtKm(d)}</span>`}
 function sortNear(arr,latK,lngK){if(!homeState.near)return arr;return arr.slice().sort((a,b)=>{const da=a[latK]==null?1e9:km(homeState.near,{lat:a[latK],lng:a[lngK]});const db=b[latK]==null?1e9:km(homeState.near,{lat:b[latK],lng:b[lngK]});return da-db})}
+// 換清單內容但不閃：內容一樣的卡片直接沿用（照片不用重新載入），只換有變的
+function patchHTML(el,html){if(!el)return;const t=document.createElement('template');t.innerHTML=html;const nw=[...t.content.childNodes];
+  const old=[...el.childNodes].filter(n=>n.nodeType===1&&n.__k);if(!old.length){el.innerHTML=html;el.childNodes.forEach(n=>{if(n.nodeType===1)n.__k=n.outerHTML});return}
+  const pool=new Map();old.forEach(n=>{const a=pool.get(n.__k);a?a.push(n):pool.set(n.__k,[n])});
+  const frag=document.createDocumentFragment();nw.forEach(n=>{if(n.nodeType===1){const k=n.outerHTML;const a=pool.get(k);if(a&&a.length){frag.appendChild(a.shift());return}n.__k=k}frag.appendChild(n)});
+  el.replaceChildren(frag)}
 // 第一屏的照片馬上下載（不要等延遲載入），清單一出來就看得到照片
 function firstImgs(el){if(!el)return;el.querySelectorAll('img').forEach((i,k)=>{if(k<(isMobV()?2:6)){i.loading='eager';try{i.fetchPriority='high'}catch(_){}}})}
 let listSeq=0;
@@ -4101,7 +4121,7 @@ async function loadList(){
   $('#lostFilters').classList.toggle('hidden',homeState.tab!=='lost');document.querySelectorAll('.lost-f').forEach(x=>x.classList.toggle('hidden',homeState.tab!=='lost'));
   if(homeState.tab==='map')return loadMapAll(el);
   el.className='grid';const more=!!homeState._more;homeState._more=false;const dflt=homeState.tab==='lost'&&!homeState.q&&!homeState.chip&&!homeState.near&&fCount()===0&&(homeState.sort||'act')==='act'&&!homeState.species.length&&!homeState.days&&!homeState.reward;
-  if(!more){let c=null;if(dflt)try{c=JSON.parse(localStorage.getItem('wh_hc')||'null')}catch(_){}el.innerHTML=c&&c.r&&c.r.length&&Date.now()-c.t<864e5?c.r.map(cardHTML).join(''):skel();firstImgs(el)}   // 先顯示上次的名單（秒開），新資料到了再換掉   // 「顯示更多」時保留原本的卡片，不閃空
+  if(!more){let c=null;if(dflt)try{c=JSON.parse(localStorage.getItem('wh_hc')||'null')}catch(_){}{const ok=c&&c.r&&c.r.length&&Date.now()-c.t<864e5;if(ok)patchHTML(el,c.r.map(cardHTML).join(''));else if(!el.querySelector('.ccard:not(.skel)'))el.innerHTML=skel();else el.classList.add('ldim')}firstImgs(el)}   // 先顯示上次的名單（秒開），新資料到了再換掉   // 「顯示更多」時保留原本的卡片，不閃空
   if(homeState.tab==='found')return loadFoundList(el,more);
   const lim=homeState.near?200:(homeState.limit||24);
   const build=()=>{let q=sb.from('cases_public').select('*').order(homeState.sort==='new'?'lost_at':homeState.sort==='rw'?'reward':'last_activity',{ascending:false,nullsFirst:false});
@@ -4122,6 +4142,7 @@ async function loadList(){
   else{const r1=await build().not('photos','eq','{}').not('photos','is',null).limit(lim);({data,error}=r1);
     if(!error&&data.length<lim){const r2=await build().or('photos.is.null,photos.eq.{}').limit(lim-data.length);if(!r2.error)data=data.concat(r2.data||[])}}
   if(my!==listSeq||!el.isConnected)return;
+  el.classList.remove('ldim');
   if(error&&more&&el.querySelector('#btnMore')){const b=el.querySelector('#btnMore');homeState.limit=Math.max(24,(homeState.limit||48)-24);b.disabled=false;b.textContent='沒有載入成功，再試一次';toast('網路不穩，請再試一次');return}   // 載入更多失敗：保留已經顯示的卡片
   if(error){el.innerHTML=`<div class="empty-card" style="grid-column:1/-1"><div class="big">${ic('wifi')}</div><b>網路好像不太穩，清單沒有載入</b><p class="small">換個有訊號的地方，或等一下再試。</p><div class="btns"><button type="button" class="btn" onclick="loadList()">再試一次</button></div></div>`;['#cLost','#cFound','#xN'].forEach(k=>{const c=$(k);if(c&&c.textContent==='…')c.textContent='–'});{const c=$('#xCnt');if(c)c.textContent=''}return}
   if(!data.length){
@@ -4133,7 +4154,7 @@ async function loadList(){
     el.innerHTML=emptyCard('lost');return}
   const ord=homeState.near?sortNear(data,'lost_lat','lost_lng'):data;
   if(dflt&&!more)try{localStorage.setItem('wh_hc',JSON.stringify({t:Date.now(),r:data.slice(0,12)}))}catch(_){}
-  el.innerHTML=ord.map(cardHTML).join('')+moreBtn(data.length,lim);bindMore(el);
+  patchHTML(el,ord.map(cardHTML).join('')+moreBtn(data.length,lim));el.classList.remove('ldim');bindMore(el);
   if(!more)firstImgs(el);
   if(window.xListDone)xListDone(data.length,lim);
 }
@@ -4245,7 +4266,9 @@ async function checkUpdate(){
     if(!v||v===BUILD)return;
     const busy=__wiz||__dirty||document.body.classList.contains('formpage')||!!document.querySelector('.lightbox form,.lightbox textarea');
     try{await fetch('./?fresh='+now,{cache:'no-store'}).then(r=>r.text())}catch(_){}   // 先把新版存進手機（離線殼），重新整理才會拿到新版
-    if(!busy){let done='';try{done=sessionStorage.getItem('wh_upd')||''}catch(_){}if(done!==v){try{sessionStorage.setItem('wh_upd',v)}catch(_){}location.reload();return}}
+    // 有離線殼（service worker）：新版已經存好，下次打開就是新版，不要在使用中突然重新整理（畫面會閃）
+    if(navigator.serviceWorker&&navigator.serviceWorker.controller&&performance.now()<20*60e3)return;
+    void busy;   // 不再自動重新整理（畫面會閃），改成下方小提示讓使用者自己按
     if(!$('#updBar')){const d=document.createElement('button');d.id='updBar';d.type='button';d.className='updbar';d.textContent='網站有新版本，點這裡更新';d.onclick=()=>location.reload();document.body.appendChild(d)}
   }catch(_){}
 }
