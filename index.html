@@ -2621,6 +2621,7 @@ html{-webkit-tap-highlight-color:transparent}
 .cm time{flex:none;font-size:11px;color:var(--ink-3);margin-bottom:2px}
 .cmb{padding:9px 13px;border-radius:20px 20px 20px 6px;background:var(--sheet);color:var(--ink);box-shadow:var(--lift);font-size:15.5px;line-height:1.5;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:6px}
 .cm.me .cmb{border-radius:20px 20px 6px 20px;background:#D9502B;color:#fff}
+.cm.pend{opacity:.6}.cm.pend time{font-style:italic}
 .cm.ask .cmb{background:#E7F0FF;color:#173B7A;border:1.5px solid #BFD3F7}.cm.ask .cmb b{display:flex;gap:6px;align-items:center;font-size:14px}.cm.ask .cmb small{opacity:.75;font-size:12.5px}
 .cm.ask.me .cmb{background:#E7F0FF;color:#173B7A}
 .cmph-x{display:grid;place-items:center;height:140px;padding:0 14px;text-align:center;font-size:13.5px;font-weight:700;background:rgba(0,0,0,.08);border-radius:14px}
@@ -2747,7 +2748,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.2.6';
+const BUILD = 'v7.2.7';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4140,7 +4141,9 @@ async function renderChat(id){const _n=navId;setTitle('訊息');
   const form=$('#chForm');
   if(form){const inp=$('#chIn');const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);
     inp.addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();form.requestSubmit()}});
-    let busy=false;form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v||busy)return;busy=true;const b=$('#chSend');b.disabled=true;inp.value='';grow();if(!await send('text',v)){inp.value=v;grow()}busy=false;b.disabled=false;inp.focus()};
+    let busy=false;form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v||busy)return;busy=true;const b=$('#chSend');b.disabled=true;inp.value='';grow();
+      const f0=log.querySelector('.cfirst');if(f0)f0.remove();log.insertAdjacentHTML('beforeend',`<div class="cm me pend" data-tmp><div class="cmb"><span>${esc(v).replace(/\n/g,'<br>')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>{if(isMobV())tmp.scrollIntoView({block:'end'});else log.scrollTop=log.scrollHeight});
+      const ok=await send('text',v);tmp.remove();if(!ok){inp.value=v;grow()}busy=false;b.disabled=false;inp.focus()};
     $('#chPh').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;toast('照片上傳中…',8000);
       try{const blob=await compressImage(f,1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
         const cap=inp.value.trim();if(await send('photo',cap,path)){inp.value='';grow();toast('已傳送',1200)}}catch(err){toast('照片沒有傳成功：'+(err.message||'網路不穩'),4500)}};
