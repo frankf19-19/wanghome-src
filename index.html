@@ -3063,7 +3063,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.13';
+const BUILD = 'v7.17.14';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3593,7 +3593,7 @@ function openOverlay(el){
     const end=()=>{if(!on)return;on=false;sh.style.transition='';if(dy>90){sh.style.transform='translateY(110%)';el.classList.remove('show');setTimeout(()=>closeOverlay(el),200)}else sh.style.transform=''};
     sh.addEventListener('touchend',end);sh.addEventListener('touchcancel',end)}}
   // 長按打開的選單：放開手指那一下不算點擊（不然選單一出現就被關掉或誤選）
-  {const t0=Date.now();let fresh=false;el.addEventListener('touchstart',()=>{fresh=true},{capture:true,passive:true});el.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')fresh=true},true);
+  {const t0=Date.now();let fresh=false;el.addEventListener('touchstart',()=>{fresh=true},{capture:true,passive:true});el.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')fresh=true},true);el.addEventListener('keydown',()=>{fresh=true},true);
     el.addEventListener('click',e=>{if(!fresh&&Date.now()-t0<800){e.preventDefault();e.stopImmediatePropagation()}},true)}
   document.body.appendChild(el);overlayOpen=el;setTimeout(()=>{if(!el.isConnected||(el.contains(document.activeElement)&&document.activeElement!==el))return;const touch=matchMedia('(pointer:coarse)').matches;   // 手機：焦點放在視窗本身（不會在第一個選項出現黃框），鍵盤使用者照常跳到第一個選項
     const f=touch?el:(focusables().find(x=>!x.classList.contains('sheet-x'))||focusables()[0]||el);if(f===el&&!el.hasAttribute('tabindex'))el.setAttribute('tabindex','-1');try{f.focus({preventScroll:true,focusVisible:false})}catch(_){}},260);
@@ -4628,7 +4628,15 @@ function chatFetch(id){const now=Date.now(),o=__chatData[id];if(o&&o.p&&now-o.t<
 // App 聊天室：整個聊天固定在畫面上（訊息區自己捲），鍵盤上來時跟著鍵盤同步滑上去，不讓 iOS 整頁推來推去
 const winSc=()=>isMobV()&&!document.body.classList.contains('chfix');
 let __chfixOn=false;
-function chfixEnter(){const b=document.body;if(!IS_APP||!isMobV()){return}b.classList.add('chfix');document.documentElement.classList.add('chfixh');
+function chfixEnter(){const b=document.body;if(!isMobV()){return}b.classList.add('chfix');document.documentElement.classList.add('chfixh');
+  // 手機瀏覽器（Safari、LINE 內建瀏覽器）：用 visualViewport 算鍵盤高度，聊天框貼著鍵盤，不留空白
+  if(!IS_APP&&window.visualViewport&&!window.__chvv){window.__chvv=1;const vv=window.visualViewport;
+    const upd=()=>{const c=document.querySelector('body.chfix .chat');const mb=document.getElementById('mbar');if(!c){if(mb)mb.style.transform='';return}const log=c.querySelector('.chlog');
+      const ot=Math.max(0,Math.round(vv.offsetTop)),kb=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop)),prev=+c.dataset.kb||0;
+      c.dataset.kb=kb;c.style.bottom=kb+'px';c.style.top=`calc(var(--mbh,56px) + ${ot}px)`;if(mb)mb.style.transform=ot?`translateY(${ot}px)`:'';
+      document.body.classList.toggle('kbopen',kb>80);if(log&&kb!==prev)log.scrollTop+=kb-prev};
+    vv.addEventListener('resize',upd);vv.addEventListener('scroll',upd);window.__chvvUpd=upd}
+  if(window.__chvvUpd)requestAnimationFrame(window.__chvvUpd);
   const mb=document.getElementById('mbar');if(mb)document.documentElement.style.setProperty('--mbh',Math.round(mb.getBoundingClientRect().height)+'px');
   if(__chfixOn)return;__chfixOn=true;const K=capPlugin('Keyboard');const ios=window.Capacitor&&Capacitor.getPlatform&&Capacitor.getPlatform()==='ios';
   if(K&&ios){try{K.setResizeMode&&K.setResizeMode({mode:'none'}).catch(()=>{});K.setScroll&&K.setScroll({isDisabled:true}).catch(()=>{})}catch(_){}
@@ -4644,7 +4652,7 @@ function chfixEnter(){const b=document.body;if(!IS_APP||!isMobV()){return}b.clas
       K.addListener('keyboardWillHide',()=>{const {c,log}=parts();if(!c||!log||!open){open=false;return}open=false;clearTimeout(c.__kt);
         c.style.transition='none';document.body.classList.remove('kbopen');c.style.bottom='0px';c.style.transform=`translate3d(0,${-T}px,0)`;log.scrollTop-=T;
         void c.offsetHeight;requestAnimationFrame(()=>{c.style.transition=EASE;c.style.transform='translate3d(0,0,0)'})})}catch(_){}}}}
-function chfixLeave(){const b=document.body;if(!b.classList.contains('chfix')&&!__chfixOn)return;b.classList.remove('chfix');document.documentElement.classList.remove('chfixh');
+function chfixLeave(){const b=document.body;if(!b.classList.contains('chfix')&&!__chfixOn)return;b.classList.remove('chfix');document.documentElement.classList.remove('chfixh');{const mb=document.getElementById('mbar');if(mb)mb.style.transform=''}if(!IS_APP)b.classList.remove('kbopen');
   if(__chfixOn){__chfixOn=false;const K=capPlugin('Keyboard');try{K&&K.setScroll&&K.setScroll({isDisabled:false}).catch(()=>{});K&&K.setResizeMode&&K.setResizeMode({mode:'native'}).catch(()=>{})}catch(_){}}}
 async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply();
   if(!requireLogin('看訊息需要登入'))return;
