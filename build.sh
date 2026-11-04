@@ -14,6 +14,7 @@ cp sw.js manifest.webmanifest _headers dist/
 [ -f robots.txt ] && cp robots.txt dist/
 [ -f sitemap.xml ] && cp sitemap.xml dist/ || true   # 改由 functions/sitemap.xml.js 即時產生
 [ -f 404.html ] && cp 404.html dist/
+cp google*.html BingSiteAuth.xml dist/ 2>/dev/null || true   # 搜尋引擎（Search Console / Bing）網站擁有權驗證檔
 cp ./*.png ./*.svg ./shot-*.jpg dist/
 mkdir -p dist/vendor && cp vendor/*.js vendor/*.css dist/vendor/
 # iOS 通用連結（LINE 登入跳回 App）與它的備用頁
