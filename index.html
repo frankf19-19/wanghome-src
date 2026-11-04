@@ -3063,7 +3063,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.16';
+const BUILD = 'v7.17.17';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6389,6 +6389,9 @@ async function quickReport(){
   catch(_){if(!box.isConnected)return;box.innerHTML=QCALL+`<div class="notice red"><b>定位失敗</b>請確認已允許${IS_APP?'汪喵回家（手機「設定」裡）':'瀏覽器'}使用位置，或用下方的完整通報手動點地圖。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;const rb=box.querySelector('#btnQuick');if(rb)rb.onclick=quickReport;return}
   const lat=pos.coords.latitude,lng=pos.coords.longitude;
   if(!box.isConnected)return;
+  if(!(lat>=21.7&&lat<=26.6&&lng>=117.8&&lng<=122.3)){   // 定位到台灣以外（模擬器、VPN、定位漂移）：不用這個座標，改手動點地圖
+    box.innerHTML=QCALL+`<div class="notice red"><b>定位結果不在台灣</b>手機回報的位置不在台灣，可能是定位漂移。請用下方的完整通報，直接在地圖上點出位置。</div><button type="button" class="btn block" id="btnQuick" style="margin-top:10px">${ic("pin")} 再試一次</button>`;const rb=box.querySelector('#btnQuick');if(rb)rb.onclick=quickReport;
+    (document.getElementById('fullDet')||{}).open=true;return}
   box.innerHTML=QCALL+`<div class="q-wait">${ic("pin")} 已定位，查詢地址中…</div>`;
   const g=await reverseGeo(lat,lng);if(!box.isConnected)return;
   let species='dog',where='here';const inj=new Set();let photo=null;
