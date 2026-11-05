@@ -1523,6 +1523,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 .fsheet{max-height:86vh;overflow-y:auto}
 .fs-acts{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:-22px;background:var(--paper);padding:8px 0 22px;margin-bottom:-22px;box-shadow:0 -10px 14px -6px var(--paper)}.fs-acts .btn{flex:1;min-height:50px}
 
+.seo-intro{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* 毛孩小學堂 */
 .lgroup{background:var(--sheet);border-radius:22px;box-shadow:var(--lift);overflow:hidden;margin-top:12px}
 .lcard{display:flex;align-items:center;gap:14px;padding:12px 14px;color:var(--ink)!important;text-decoration:none!important;min-height:72px}
@@ -3029,7 +3030,11 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 </header>
 
 <div class="mbar" id="mbar" role="navigation" aria-label="頁面導覽"><button type="button" class="mb-back" id="mBack" aria-label="返回"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span></button><b id="mTitle"></b><span id="mAct" class="mb-act"></span><a href="#/" class="mb-home" aria-label="回首頁"><img src="icon.svg" alt="" width="30" height="30"></a></div>
-<main id="app" tabindex="-1"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></main>
+<main id="app" tabindex="-1"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>
+<!-- 搜尋引擎看得到的首頁簡介（畫面載入後會被 App 畫面取代） -->
+<section class="seo-intro" aria-hidden="true"><h1>汪喵回家 — 全台走失狗貓協尋平台</h1>
+<p>毛孩走失了，免費登記協尋：自動產生 QR Code 海報、網友目擊回報畫在地圖時間軸上、每天自動比對全台收容所與農業部遺失申報。看到或撿到走失的狗貓，也可以登記通報，系統會自動比對附近的走失案件。</p>
+<ul><li><a href="https://wangmiaotw.com/g/dog-lost">狗走失了怎麼辦？黃金 48 小時要做的 10 件事</a></li><li><a href="https://wangmiaotw.com/g/cat-lost">貓走失了怎麼找？</a></li><li><a href="https://wangmiaotw.com/g/found-pet">撿到狗或貓怎麼辦？</a></li><li><a href="https://wangmiaotw.com/g/shelter-search">寵物走失後怎麼查收容所？</a></li><li><a href="https://wangmiaotw.com/l/">各縣市正在協尋的走失毛孩</a></li><li><a href="https://wangmiaotw.com/g/">更多協尋指南與毛孩小學堂</a></li></ul></section></main>
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p></div>
@@ -3063,7 +3068,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.18';
+const BUILD = 'v7.17.19';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5978,6 +5983,7 @@ function renderNew(){
       sent=true;clearTimeout(dT);   // 送出成功：還在等的草稿儲存不要再寫回去
       try{localStorage.setItem('wh_token_'+data.id,data.token);localStorage.removeItem('wh_draft_new')}catch(_){}
       rememberMine('case',data.id,p.name);
+      try{fetch(CONFIG.SITE_URL+'api/indexnow?id='+data.id).catch(()=>{})}catch(_){}   // 通知搜尋引擎來收錄這個案件頁（背景、失敗不影響）
       contactSave($('#f'),CT_NEW);__submitting=false;if(_n!==navId){toast('✅ 已登記完成。管理網址存在這支手機，到「我的」就找得到',6000);return}renderCreated(data.id,data.token,(p.contact_email||'').trim(),p.name);
     }catch(err){__submitting=false;$('#pg')?.classList.add('hidden');toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出登記'}
   };
