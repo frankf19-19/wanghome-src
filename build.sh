@@ -34,4 +34,15 @@ V=$(grep -oE "const BUILD = 'v[0-9.]+'" index.html | grep -oE "v[0-9.]+")
 # 每次發版換 service worker 的快取名稱，舊快取（圖示、manifest）才會更新
 # （不用 sed -i：Mac 和 Linux 的寫法不同，App 在 Mac 上打包）
 if [ -n "$V" ]; then sed "s/const CACHE = 'wanghome-[^']*'/const CACHE = 'wanghome-$V'/" dist/sw.js > dist/sw.js.tmp && mv dist/sw.js.tmp dist/sw.js; fi
+# App 線上更新包：App 啟動時比對 /app-live/manifest.json，有新版就下載這些檔案，下次開 App 改用新畫面（不用每次送審）
+# minNative：新畫面需要的最低 App 原生版本（加了新的原生外掛才要調高 app/live-min-native），舊 App 會繼續用自己內建的畫面
+bash scripts/make_app_www.sh dist dist/app-live >/dev/null
+node -e '
+const fs=require("fs"),path=require("path"),crypto=require("crypto");const dir="dist/app-live";const files=[];
+(function walk(d){for(const n of fs.readdirSync(d)){const f=path.join(d,n);if(fs.statSync(f).isDirectory())walk(f);else files.push(path.relative(dir,f))}})(dir);
+fs.renameSync(path.join(dir,"index.html"),path.join(dir,"index.page.txt"));   // Cloudflare 會把 .html 轉址，改名避開
+const list=files.sort().map(p=>{const u=p==="index.html"?"index.page.txt":p;const b=fs.readFileSync(path.join(dir,u));return {p,u,s:b.length,h:crypto.createHash("sha256").update(b).digest("hex").slice(0,16)}});
+let min=0;try{min=parseInt(fs.readFileSync("app/live-min-native","utf8"),10)||0}catch(_){}
+fs.writeFileSync(path.join(dir,"manifest.json"),JSON.stringify({build:process.argv[1],minNative:min,files:list}));
+console.log("app-live:",list.length,"files,",list.reduce((a,b)=>a+b.s,0),"bytes, minNative",min);' "$V"
 echo "built: $(find dist -type f | wc -l) files"

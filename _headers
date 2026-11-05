@@ -25,3 +25,6 @@
 /.well-known/apple-app-site-association
   Content-Type: application/json
   Cache-Control: public, max-age=3600
+/app-live/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: no-cache
