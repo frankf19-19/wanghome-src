@@ -1,0 +1,23 @@
+name: App Store 送審
+on:
+  workflow_dispatch:
+    inputs:
+      version: {required: true}
+      build: {required: true}
+      whats_new: {default: ''}
+      submit: {default: '1'}
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY: ${{ secrets.ASC_API_KEY_P8 }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+      VERSION: ${{ inputs.version }}
+      BUILD: ${{ inputs.build }}
+      WHATS_NEW: ${{ inputs.whats_new }}
+      SUBMIT: ${{ inputs.submit }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyjwt cryptography requests
+      - run: python .github/scripts/asc_release.py
