@@ -9,6 +9,7 @@ const vm=require("vm");const f=process.argv[1];const s=require("fs").readFileSyn
 while((m=re.exec(s))){i++;try{new vm.Script(m[1],{filename:f+"#"+i})}catch(e){bad++;console.error(f+" script #"+i+" 語法錯誤："+e.message)}}
 if(!i){console.error(f+" 找不到程式");process.exit(1)}if(bad)process.exit(1);console.log(f+" syntax ok: "+i+" scripts");' "$1"; }
 check index.html
+node scripts/gen_learn.js   # 毛孩小學堂文章 → lib/learn.js（給 /g/ 靜態頁用）
 rm -rf dist && mkdir -p dist
 cp sw.js manifest.webmanifest _headers dist/
 [ -f robots.txt ] && cp robots.txt dist/
