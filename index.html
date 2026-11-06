@@ -1538,6 +1538,11 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 .fs-acts{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:-22px;background:var(--paper);padding:8px 0 22px;margin-bottom:-22px;box-shadow:0 -10px 14px -6px var(--paper)}.fs-acts .btn{flex:1;min-height:50px}
 
 .drail .dr-card.dr-app{display:flex;flex-direction:row;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}.dr-app img{border-radius:11px;flex:none}.dr-app span{flex:1;display:flex;flex-direction:column;line-height:1.35}.dr-app b{font-size:15px}.dr-app small{font-size:12.5px;color:var(--mute)}.dr-app i{font-style:normal;color:var(--mute);font-size:20px}
+html.is-app body.kbopen:not(.chfix) #app{padding-bottom:calc(var(--kbh,0px) + 24px)}
+html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)}html.is-app body.kbopen .lightbox{padding-bottom:var(--kbh,0px)}html.is-app body.kbopen .lightbox .sheet{max-height:calc(100dvh - var(--kbh,0px) - 40px)}
+.meapp{display:flex;gap:14px;align-items:center;text-decoration:none;color:#fff;background:linear-gradient(135deg,#F2784B,#D9542B);border-radius:22px;padding:16px 18px;margin:6px 0 16px;box-shadow:0 14px 28px -18px rgba(200,70,30,.7)}
+.meapp img{border-radius:14px;flex:none;box-shadow:0 4px 12px rgba(0,0,0,.18)}.meapp span{display:flex;flex-direction:column;gap:3px;line-height:1.35;min-width:0}.meapp b{font-size:17px}.meapp small{font-size:13px;opacity:.92}
+.meapp em{font-style:normal;font-weight:800;font-size:14px;background:#fff;color:#C8461E;border-radius:99px;padding:6px 14px;align-self:flex-start;margin-top:6px}.meapp i{font-style:normal;font-size:11.5px;opacity:.8}
 .appbar{display:flex;align-items:center;gap:10px;background:var(--card,#fff);border-radius:16px;padding:10px 12px;margin:0 0 12px;box-shadow:0 8px 20px -16px rgba(90,30,50,.4)}
 .appbar img{border-radius:10px;flex:none}.appbar span{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}.appbar b{font-size:14px}.appbar small{font-size:12px;color:var(--mute)}
 .appbar .btn{flex:none;white-space:nowrap}.appbar-x{flex:none;border:0;background:none;font-size:20px;line-height:1;color:var(--mute);padding:4px 6px;cursor:pointer}
@@ -3090,7 +3095,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.21';
+const BUILD = 'v7.17.22';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3125,8 +3130,8 @@ function capPlugin(n){try{const C=window.Capacitor;return (C&&C.Plugins&&C.Plugi
 // ---- 網站上的「下載 App」入口（App 裡不顯示）----
 const IS_IOS_WEB=!IS_APP&&(/iPhone|iPad|iPod/.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
 const IOS_SAFARI=IS_IOS_WEB&&/Safari\//.test(navigator.userAgent||'')&&!/CriOS|FxiOS|EdgiOS|Line\/|FBAN|FBAV|Instagram|MicroMessenger/i.test(navigator.userAgent||'');
-// 首頁上方的小橫幅：iPhone 用其他瀏覽器、LINE／FB 內開網站時顯示（Safari 有系統內建的 App 橫幅，不重複），可關閉
-function appGetHTML(){if(!IS_IOS_WEB||IOS_SAFARI)return '';try{if(localStorage.getItem('wh_appbar_x'))return ''}catch(_){}
+// 首頁上方的小橫幅：iPhone 開網站時顯示（Safari 的系統橫幅常被關掉或不出現，這裡也放一個），可關閉
+function appGetHTML(){if(!IS_IOS_WEB)return '';try{if(localStorage.getItem('wh_appbar_x'))return ''}catch(_){}
   return `<div class="appbar" id="appBar"><img src="icon-192.png" alt="" width="40" height="40"><span><b>汪喵回家 iPhone App</b><small>走失通知、目擊回報即時推播</small></span><a class="btn sm" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener">免費下載</a><button type="button" class="appbar-x" aria-label="關閉" onclick="try{localStorage.setItem('wh_appbar_x','1')}catch(_){}this.parentNode.remove()">×</button></div>`}
 /* ============================================================
    App 線上更新：App 不用每次送審也能換新畫面。
@@ -3522,7 +3527,21 @@ async function geoGranted(){try{const G=IS_APP&&capPlugin('Geolocation');if(G&&G
 let __warm=0;
 let __kbInit=false;
 function kbInit(){if(__kbInit)return;__kbInit=true;const K=IS_APP&&capPlugin('Keyboard');if(!K||!K.addListener)return;const fire=v=>{if(v!=null&&!(document.body.classList.contains('chfix')&&window.__chkb))document.body.classList.toggle('kbopen',v);dispatchEvent(new Event('wh-kb'))};
-  try{K.addListener('keyboardWillShow',()=>fire(true));K.addListener('keyboardDidShow',()=>fire(null));K.addListener('keyboardWillHide',()=>fire(false));K.addListener('keyboardDidHide',()=>fire(null))}catch(_){}}
+  // iOS：鍵盤出現時不再縮小整個畫面（原生縮放會讓整頁重排、卡一下），改成畫面不動、只在底部留出鍵盤的高度，
+  //      輸入框被擋住才平滑捲上來。聊天室另有自己的鍵盤動畫（chfixEnter）。
+  const ios=window.Capacitor&&Capacitor.getPlatform&&Capacitor.getPlatform()==='ios';
+  if(ios){try{K.setResizeMode&&K.setResizeMode({mode:'none'}).catch(()=>{})}catch(_){}}
+  const R=document.documentElement.style;
+  const reveal=()=>{if(document.body.classList.contains('chfix'))return;const a=document.activeElement;if(!a||!/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&!a.isContentEditable)return;
+    if(a.closest('.lightbox')){setTimeout(()=>{try{a.scrollIntoView({block:'nearest',behavior:RM()?'auto':'smooth'})}catch(_){}},260);return}
+    const kb=parseFloat(R.getPropertyValue('--kbh'))||0;if(!kb)return;const r=a.getBoundingClientRect(),lim=innerHeight-kb-16;
+    if(r.bottom>lim)scrollBy({top:r.bottom-lim+Math.min(40,Math.max(0,r.height)),behavior:RM()?'auto':'smooth'});else if(r.top<70)scrollBy({top:r.top-90,behavior:RM()?'auto':'smooth'})};
+  try{K.addListener('keyboardWillShow',info=>{if(ios){R.setProperty('--kbh',Math.round(info&&info.keyboardHeight||0)+'px')}fire(true)});
+    K.addListener('keyboardDidShow',()=>{fire(null);if(ios)requestAnimationFrame(reveal)});
+    K.addListener('keyboardWillHide',()=>{fire(false)});
+    K.addListener('keyboardDidHide',()=>{if(ios)R.setProperty('--kbh','0px');fire(null)})}catch(_){}
+  // 鍵盤開著時換到下一個輸入框：也確認沒有被鍵盤擋住
+  if(ios)document.addEventListener('focusin',()=>{if(document.body.classList.contains('kbopen'))setTimeout(reveal,60)},true)}
 function geoWarm(){if(Date.now()-__warm<60000)return;__warm=Date.now();geoGranted().then(ok=>{if(!ok)return;let n=0;const stop=geoWatch(p=>{if(!p)return stop();__fix={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy||999,t:Date.now()};if(++n>=4||__fix.acc<=30)stop()});setTimeout(stop,20000)})}
 function geoFast(onPos,onFail){
   let best=1e9,got=false,ended=false;
@@ -3567,6 +3586,7 @@ function applyTheme(t){setTimeout(()=>{try{window.__sbUpd&&window.__sbUpd()}catc
 (function(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}if(t!=='auto')document.documentElement.setAttribute('data-theme',t==='cocoa'?'dark':t);if(t==='cocoa')document.documentElement.setAttribute('data-tone','cocoa')})();
 async function init(){
   if(liveApplyPending())return;   // App：已下載好的新畫面，切過去（會重新載入）
+  if(IS_APP)try{kbInit()}catch(_){}   // App：整個 App 的鍵盤處理（不是只有聊天室）
   netState();
   if(typeof supabase==='undefined'){document.documentElement.classList.remove('booting');app.innerHTML='<div class="empty">網站元件載入失敗，可能是網路不穩。<br><a href="javascript:location.reload()">重新整理</a></div>';return}
   {let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}applyTheme(t);
@@ -4756,7 +4776,7 @@ function chfixEnter(){const b=document.body;if(!isMobV()){return}b.classList.add
         c.style.transition='none';document.body.classList.remove('kbopen');c.style.bottom='0px';c.style.transform=`translate3d(0,${-T}px,0)`;log.scrollTop-=T;
         void c.offsetHeight;requestAnimationFrame(()=>{c.style.transition=EASE;c.style.transform='translate3d(0,0,0)'})})}catch(_){}}}}
 function chfixLeave(){const b=document.body;if(!b.classList.contains('chfix')&&!__chfixOn)return;b.classList.remove('chfix');document.documentElement.classList.remove('chfixh');{const mb=document.getElementById('mbar');if(mb)mb.style.transform=''}if(!IS_APP)b.classList.remove('kbopen');
-  if(__chfixOn){__chfixOn=false;const K=capPlugin('Keyboard');try{K&&K.setScroll&&K.setScroll({isDisabled:false}).catch(()=>{});K&&K.setResizeMode&&K.setResizeMode({mode:'native'}).catch(()=>{})}catch(_){}}}
+  if(__chfixOn){__chfixOn=false;const K=capPlugin('Keyboard');try{K&&K.setScroll&&K.setScroll({isDisabled:false}).catch(()=>{});K&&K.setResizeMode&&K.setResizeMode({mode:(window.Capacitor&&Capacitor.getPlatform&&Capacitor.getPlatform()==='ios')?'none':'native'}).catch(()=>{})}catch(_){}}}
 async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply();
   if(!requireLogin('看訊息需要登入'))return;
   let R=__chatData[id]&&__chatData[id].res;
@@ -8572,6 +8592,7 @@ function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'au
   <p class="mver">汪喵回家 ${BUILD}${IS_APP?'':'・全台走失狗貓協尋平台'}</p></div>`}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cycle-theme]'))openThemePick()});
 async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&location.hash.split('?')[0]==='#/me'&&!$('.morelist'))app.insertAdjacentHTML('beforeend',moreListHTML());
+  if(_n===navId&&!IS_APP&&location.hash.split('?')[0]==='#/me'&&!$('.meapp')){const h=app.querySelector('h1');const c=`<a class="meapp" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><img src="icon-192.png" alt="" width="56" height="56"><span><b>汪喵回家 App 上架了！</b><small>走失通知、目擊回報、私訊即時推播，比網頁更快收到消息</small><em>到 App Store 免費下載 ›</em><i>Android 版即將推出</i></span></a>`;h?h.insertAdjacentHTML('afterend',c):app.insertAdjacentHTML('afterbegin',c)}
   // 刪除帳號放到整頁最下面（版本號下方），不跟常用功能擠在一起
   const o=$('#outSec'),d=$('#delSec');if(o&&_n===navId)app.appendChild(o);if(d&&_n===navId)app.appendChild(d)}
 async function renderMeBody(){const _n=navId;
