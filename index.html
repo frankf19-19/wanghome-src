@@ -1537,6 +1537,7 @@ button.mph{position:relative;border:0;padding:0;cursor:pointer;font:inherit}
 .fsheet{max-height:86vh;overflow-y:auto}
 .fs-acts{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:-22px;background:var(--paper);padding:8px 0 22px;margin-bottom:-22px;box-shadow:0 -10px 14px -6px var(--paper)}.fs-acts .btn{flex:1;min-height:50px}
 
+.drail .dr-card.dr-app{display:flex;flex-direction:row;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}.dr-app img{border-radius:11px;flex:none}.dr-app span{flex:1;display:flex;flex-direction:column;line-height:1.35}.dr-app b{font-size:15px}.dr-app small{font-size:12.5px;color:var(--mute)}.dr-app i{font-style:normal;color:var(--mute);font-size:20px}
 .appbar{display:flex;align-items:center;gap:10px;background:var(--card,#fff);border-radius:16px;padding:10px 12px;margin:0 0 12px;box-shadow:0 8px 20px -16px rgba(90,30,50,.4)}
 .appbar img{border-radius:10px;flex:none}.appbar span{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}.appbar b{font-size:14px}.appbar small{font-size:12px;color:var(--mute)}
 .appbar .btn{flex:none;white-space:nowrap}.appbar-x{flex:none;border:0;background:none;font-size:20px;line-height:1;color:var(--mute);padding:4px 6px;cursor:pointer}
@@ -3089,7 +3090,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.20';
+const BUILD = 'v7.17.21';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4373,6 +4374,7 @@ function drailAttach(kind){if(!matchMedia('(min-width:1280px)').matches||documen
     <a class="dr-card dr-link" href="#/intake">${ic('shelter')}<span><b>收容所最近新收</b><small>走失的毛孩常被送到收容所</small></span><i>›</i></a>
     <a class="dr-card dr-link" href="#/injured">${ic('siren')}<span><b>看到受傷的毛孩</b><small>一鍵找當地動保電話</small></span><i>›</i></a>
     <div class="dr-card dr-tip"><b>${ic('shield')} 防詐提醒</b><p>真的飼主不會要你先匯款。交還毛孩前，請對方說出晶片號碼或出示以前的照片。</p></div>
+    ${IS_APP?'':`<a class="dr-card dr-app" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><img src="icon-192.png" alt="" width="44" height="44"><span><b>下載 iPhone App</b><small>走失通知、目擊回報即時推播。Android 版即將推出</small></span><i>›</i></a>`}
     <p class="dr-foot"><a href="#/resources">協尋攻略</a>・<a href="#/learn">毛孩小學堂</a>・<a href="#/about">關於本站</a></p>`;
   app.classList.add('withrail');app.appendChild(r)}
 /* ===== 電腦版左側選單（手機版不顯示） ===== */
