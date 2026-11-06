@@ -3098,7 +3098,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.27';
+const BUILD = 'v7.17.28';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4949,13 +4949,17 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   let replyTo=null;const rb=document.createElement('div');rb.className='chreply';rb.hidden=true;if(form)form.before(rb);
   function setReply(mid){replyTo=mid||null;if(!mid){rb.hidden=true;rb.innerHTML='';return}const q=byId[mid];rb.innerHTML=`<span><b>回覆 ${esc(q&&q.sender_id===me().id?'自己':oname)}</b>${esc(snip(q).slice(0,50))}</span><button type="button" aria-label="取消回覆">✕</button>`;rb.hidden=false;rb.querySelector('button').onclick=()=>setReply(null);const i=$('#chIn');if(i)i.focus()}
   if(form){const inp=$('#chIn');{const sb2=$('#chSend');const canRec=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);const upd=()=>{const e=!inp.value.trim();sb2.classList.toggle('idle',e&&!canRec);sb2.classList.toggle('mic',e&&canRec);sb2.innerHTML=e&&canRec?ic('mic'):ic('send');sb2.setAttribute('aria-label',e&&canRec?'錄語音':'送出')};
-      sb2.addEventListener('click',e=>{if(!inp.value.trim()&&canRec){e.preventDefault();voiceRecord()}});inp.addEventListener('input',upd);upd();form.addEventListener('submit',()=>setTimeout(upd,0))}{let lastT=0;inp.addEventListener('input',()=>{const n=Date.now();if(n-lastT>2500&&inp.value.trim()&&__chatCh){lastT=n;try{__chatCh.send({type:'broadcast',event:'typing',payload:{u:me().id}})}catch(_){}}})}const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);inp.addEventListener('focus',()=>{if(!winSc())return;setTimeout(()=>toBottom(true),350)});
+      sb2.addEventListener('click',e=>{if(!inp.value.trim()&&canRec){e.preventDefault();voiceRecord()}});
+      // 手機點送出鈕時，不要讓輸入框失焦：失焦會讓鍵盤先收起再彈出，整個聊天畫面上下跳一下。
+      // 有文字時在 touchstart 就攔下來直接送出，焦點留在輸入框、鍵盤不動。
+      sb2.addEventListener('touchstart',e=>{if(document.activeElement!==inp||!inp.value.trim())return;e.preventDefault();form.requestSubmit()},{passive:false});
+      sb2.addEventListener('mousedown',e=>{if(document.activeElement===inp)e.preventDefault()});inp.addEventListener('input',upd);upd();form.addEventListener('submit',()=>setTimeout(upd,0))}{let lastT=0;inp.addEventListener('input',()=>{const n=Date.now();if(n-lastT>2500&&inp.value.trim()&&__chatCh){lastT=n;try{__chatCh.send({type:'broadcast',event:'typing',payload:{u:me().id}})}catch(_){}}})}const grow=()=>{inp.style.height='auto';inp.style.height=Math.min(140,inp.scrollHeight)+'px'};inp.addEventListener('input',grow);inp.addEventListener('focus',()=>{if(!winSc())return;setTimeout(()=>toBottom(true),350)});
     inp.addEventListener('keydown',e=>{if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();form.requestSubmit()}});
     let busy=false;form.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v||busy)return;busy=true;const b=$('#chSend');b.disabled=true;inp.value='';grow();
       const f0=log.querySelector('.cfirst');if(f0)f0.remove();log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span>${esc(v).replace(/\n/g,'<br>')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;regroup();requestAnimationFrame(()=>toBottom(false));
       const ok=await send('text',v);
       if(!ok&&lastNet){const fail=()=>{tmp.classList.add('fail');tmp.querySelector('time').innerHTML='<button type="button" class="cretry">沒傳出去・點一下重試</button>';tmp.querySelector('.cretry').onclick=async ev=>{ev.stopPropagation();tmp.classList.remove('fail');tmp.querySelector('time').textContent='傳送中…';if(await send('text',v)){tmp.remove();regroup()}else if(lastNet)fail();else{tmp.remove();regroup()}}};fail()}
-      else{tmp.remove();regroup();if(!ok){inp.value=v;grow()}}busy=false;b.disabled=false;inp.focus()};
+      else{tmp.remove();regroup();if(!ok){inp.value=v;grow()}}busy=false;b.disabled=false;if(document.activeElement!==inp)try{inp.focus({preventScroll:true})}catch(_){}};
     const sendPhoto=async f=>{const pv=URL.createObjectURL(f);
       {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span class="cmph"><img src="${pv}" alt=""></span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
       try{const blob=await compressImage(f,1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
