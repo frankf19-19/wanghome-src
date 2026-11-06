@@ -1584,6 +1584,16 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pals-rules{margin-top:22px}.pals-rules ul{margin:6px 0 0;padding-left:20px}.pals-rules li{margin:3px 0}
 .pals .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .narrow-in{max-width:640px;margin:0 auto}
+.pals-promo{display:flex;align-items:center;gap:12px;margin:10px 0 14px;padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--green) 16%,var(--sheet)),color-mix(in srgb,#F2784B 14%,var(--sheet)));border:1px solid color-mix(in srgb,var(--green) 30%,var(--line));color:var(--ink);text-decoration:none}
+.pals-promo .pp-ic{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--green);color:#fff}.pals-promo .pp-ic .ico{width:24px;height:24px}
+.pals-promo .pp-t{flex:1;display:flex;flex-direction:column}.pals-promo b{font-size:16px}.pals-promo small{color:var(--ink-2);font-size:13px}
+.pal-sheet .btns .btn{width:100%}
+.pal-board{display:flex;flex-direction:column;gap:12px;margin:6px 0 10px}
+.pb-msg{display:flex;gap:10px;align-items:flex-start}.pb-msg>div{flex:1;min-width:0;background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
+.pb-msg.me>div{background:color-mix(in srgb,var(--green) 10%,var(--sheet))}
+.pb-h{margin:0;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.pb-h a{color:inherit;text-decoration:none}.pb-h i{font-style:normal;font-size:11.5px;padding:1px 7px;border-radius:99px;background:var(--green);color:#fff}.pb-h small{color:var(--ink-3);font-size:12px}.pb-h .linkbtn{margin-left:auto;font-size:12px;color:var(--ink-3)}
+.pb-b{margin:3px 0 0;white-space:pre-wrap;word-break:break-word}
+.pal-say{display:flex;gap:8px;align-items:flex-end;margin-bottom:6px}.pal-say textarea{flex:1;min-height:46px}.pal-say .btn{flex:none}
 .seo-intro{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* 毛孩小學堂 */
 .lgroup{background:var(--sheet);border-radius:22px;box-shadow:var(--lift);overflow:hidden;margin-top:12px}
@@ -3131,7 +3141,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.0';
+const BUILD = 'v7.18.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3701,6 +3711,7 @@ function openAddSheet(){
     ${r('#/health/add?type=rec',ic('clipboard'),'s3','看診、疫苗、驅蟲','記一次，可設到期提醒')}
     ${r('#/health/add?type=med',ic('pill'),'s3','每天吃的藥、保養品','每天打勾「今天吃了沒」')}
     ${r('#/pet/new',ic('paw'),'s4','新增毛孩檔案','生日、晶片、照片')}
+    ${r('#/pals/meet/new',ic('calendar'),'s3','揪團散步、約玩','找附近的毛孩一起玩')}
     <button type="button" class="btn ghost block sh-x">取消</button></div>`;
   el.onclick=e=>{const a=e.target.closest('a.srow');if(a){e.preventDefault();const h=a.getAttribute('href');overlayOpen=null;el.remove();location.replace(location.pathname+location.search+h);return}
     if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};
@@ -5156,6 +5167,7 @@ async function renderHomeMob(){const _n=navId;
   const V=xView();
   (_n===navId?app:_void).innerHTML=`<h1 class="sr-only">汪喵回家：全台走失狗貓協尋平台</h1>
   ${appGetHTML()}${mineHTML()}
+  <a class="pals-promo" href="#/pals"><span class="pp-ic">${ic('paw')}</span><span class="pp-t"><b>毛孩交朋友</b><small>找散步夥伴、揪團約玩</small></span>${ic('chev','mrc')}</a>
   ${xHeadHTML('lost',`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`,xWhereText())}
   <div class="xsticky">
     <div class="xsrow"><label class="xsearch">${ic('search')}<input type="search" id="fQ" aria-label="搜尋走失的毛孩" enterkeyhint="search" placeholder="搜尋走失的毛孩" value="${esc(homeState.chip||homeState.q)}"></label><button type="button" class="xfbtn" id="btnFilter" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="fCnt"></i></button></div>
@@ -5301,6 +5313,7 @@ async function renderHealth(){const _n=navId;
   (_n===navId?app:_void).innerHTML=`<div class="health-hero row"><div><h1>我的毛孩</h1></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
   <div id="xLostBar"></div>
   ${healthAdvice(pets,ds,hMeds,hLogs,petName)}
+  <a class="pals-promo" href="#/pals"><span class="pp-ic">${ic("paw")}</span><span class="pp-t"><b>幫毛孩找朋友</b><small>放上名片牆、揪團散步約玩</small></span>${ic("chev","mrc")}</a>
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
   <div class="grid ${pets.length===1?'pets1':''}">${pets.map(petCardHTML).join('')}</div>
   ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2 id="medSec">${ic("pill")} 今天的用藥與保養品</h2><p class="muted small" style="margin:-6px 0 8px">餵完按一下就打勾，再按一次可以取消。</p><div class="card med-card">${rows.join('')}</div>`:''})()}
@@ -8654,9 +8667,9 @@ async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q
   app.innerHTML=`<div class="pals">
     <h1>${ic('paw')} 毛孩交朋友</h1>
     <p class="muted">幫毛孩找散步夥伴、玩伴。主角是毛孩，只顯示到「區」，不公開住址。</p>
-    <div class="pals-tabs" role="tablist"><a role="tab" class="${tab==='cards'?'on':''}" href="#/pals${st.sp||st.city?'?'+new URLSearchParams({...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{})}):''}">毛孩名片牆</a><a role="tab" class="${tab==='meets'?'on':''}" href="#/pals?tab=meets${st.sp?'&sp='+st.sp:''}${st.city?'&city='+encodeURIComponent(st.city):''}">約散步</a></div>
+    <div class="pals-tabs" role="tablist"><a role="tab" class="${tab==='cards'?'on':''}" href="#/pals${st.sp||st.city?'?'+new URLSearchParams({...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{})}):''}">毛孩名片牆</a><a role="tab" class="${tab==='meets'?'on':''}" href="#/pals?tab=meets${st.sp?'&sp='+st.sp:''}${st.city?'&city='+encodeURIComponent(st.city):''}">揪團約玩</a></div>
     ${palFilterBar(st,tab)}
-    <div class="pals-cta">${tab==='cards'?`<button type="button" class="btn green" id="palMine">${ic('plus')} 放上我的毛孩</button>`:`<a class="btn green" href="#/pals/meet/new">${ic('plus')} 發起約散步</a>`}</div>
+    <div class="pals-cta">${tab==='cards'?`<button type="button" class="btn green" id="palMine">${ic('plus')} 放上我的毛孩</button>`:`<a class="btn green" href="#/pals/meet/new">${ic('plus')} 發起揪團（散步、約玩）</a>`}</div>
     <div id="palList"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></div>
     ${PAL_RULES}</div>`;
   app.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>go({sp:b.dataset.sp}));
@@ -8678,7 +8691,7 @@ async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q
     const {data,error}=await qy;if(_n!==navId)return;const box=$('#palList');
     if(error){box.innerHTML=netErrHTML();return}
     const rows=(data||[]).filter(m=>!bl.has(m.owner_id)&&!hd.has(m.id));
-    if(!rows.length){box.innerHTML=`<div class="empty-card"><div class="big">${ic('calendar')}</div><b>最近還沒有約散步</b><p class="small">發起一個吧！選一個公園和時間，附近的毛孩就能一起來。</p></div>`;return}
+    if(!rows.length){box.innerHTML=`<div class="empty-card"><div class="big">${ic('calendar')}</div><b>最近還沒有揪團</b><p class="small">發起一個吧！選一個公園和時間，附近的毛孩家長都能報名，在活動頁一起討論。</p></div>`;return}
     box.innerHTML=`<div class="pals-meets">${rows.map(m=>`<a class="pal-meet" href="#/pals/meet/${m.id}"><span class="pm-when"><b>${esc(palWhen(m.starts_at))}</b><small>${m.species==='cat'?'貓咪':m.species==='dog'?'狗狗':'狗貓都可以'}${m.size_pref&&m.size_pref!=='any'?'・'+PAL_SIZE[m.size_pref]+'犬':''}</small></span><span class="pm-b"><b>${esc(m.title)}</b><small>${ic('pin')} ${esc((m.city||'').replace(/^臺/,'台')+(m.district||''))}・${esc(m.place)}</small><small>${esc(m.username)} 發起・${m.joined+1}/${m.cap} 人</small></span>${ic('chev','mrc')}</a>`).join('')}</div>`;
   }
 }
@@ -8693,12 +8706,14 @@ function palCardSheet(c){const d=document.createElement('div');d.className='ligh
     ${(c.tags||[]).length?`<p class="pal-tags">${c.tags.map(t=>`<i>${esc(t)}</i>`).join('')}</p>`:''}
     ${c.intro?`<p class="pal-intro">${esc(c.intro)}</p>`:''}
     <div class="pal-owner">${chatAva(c.username,c.avatar_url)}<span>飼主 <b>${esc(c.username)}</b></span></div>
-    <div class="btns">${mine?`<a class="btn" href="#/pals/card/${c.pet_id}">${ic('edit')} 編輯名片</a>`:`<a class="btn green" href="#/u/${encodeURIComponent(c.username)}">${ic('userPlus')} 打招呼（到飼主頁加好友）</a>`}<button type="button" class="btn ghost" data-x>關閉</button></div>
+    <div class="btns">${mine?`<a class="btn" href="#/pals/card/${c.pet_id}">${ic('edit')} 編輯名片</a>`:`<button type="button" class="btn green" data-add>${ic('userPlus')} 加好友</button><button type="button" class="btn" data-dm>${ic('chat')} 傳訊息打招呼</button><a class="btn ghost" href="#/u/${encodeURIComponent(c.username)}">看飼主的會員頁</a>`}<button type="button" class="btn ghost" data-x>關閉</button></div>
     ${mine?'':`<p class="small" style="text-align:center;margin-top:10px"><button type="button" class="linkbtn" data-rep style="color:var(--ink-3)">檢舉這張名片</button></p>`}
   </div>`;
   d.onclick=()=>closeOverlay(d);openOverlay(d);requestAnimationFrame(()=>d.classList.add('show'));
   d.querySelector('[data-x]').onclick=()=>closeOverlay(d);
   {const r=d.querySelector('[data-rep]');if(r)r.onclick=()=>{closeOverlay(d);palReport(c.owner_id,c.pet_id,c.username)}}
+  {const a=d.querySelector('[data-add]');if(a)a.onclick=async()=>{if(!me()){closeOverlay(d);setReturn(location.hash);requireLogin('加好友需要登入（免費註冊）');return}a.disabled=true;const r=await friendAdd(c.owner_id,c.username);a.disabled=false;if(r)a.innerHTML=`${ic('check')} ${r==='friend'?'已是好友':'已送出好友邀請'}`}}
+  {const m=d.querySelector('[data-dm]');if(m)m.onclick=()=>{closeOverlay(d);chatStart('dm',c.owner_id)}}
 }
 
 async function palReport(owner,itemId,username){if(!me()){setReturn(location.hash);location.hash='#/login';return}
@@ -8753,9 +8768,9 @@ async function renderPalCard(petId){const _n=navId;if(!requireLogin())return;set
 }
 
 function palLocalDT(d){const t=tw(d.toISOString());return `${t.y}-${String(t.m).padStart(2,'0')}-${String(t.d).padStart(2,'0')}T${String(t.h).padStart(2,'0')}:${String(t.mi).padStart(2,'0')}`}
-async function renderMeetNew(){if(!requireLogin())return;setTitle('發起約散步');
+async function renderMeetNew(){if(!requireLogin())return;setTitle('發起揪團');
   const min=new Date(Date.now()+30*60e3),max=new Date(Date.now()+29*864e5),def=new Date(Date.now()+864e5);def.setUTCMinutes(0);
-  app.innerHTML=`<div class="pals narrow-in"><h1>發起約散步</h1>
+  app.innerHTML=`<div class="pals narrow-in"><h1>發起揪團散步／約玩</h1><p class="muted">發起後，大家可以報名，也可以在活動頁的「大家一起聊」討論。</p>
     <form id="mtf" novalidate>
       <label class="f"><span>標題</span><input name="title" maxlength="40" required placeholder="例如：週六傍晚河堤小型犬跑跑"></label>
       <div class="row2"><label class="f"><span>誰可以來</span><select name="species"><option value="dog">狗狗</option><option value="cat">貓咪</option><option value="any">狗貓都可以</option></select></label>
@@ -8778,17 +8793,17 @@ async function renderMeetNew(){if(!requireLogin())return;setTitle('發起約散�
     __submitting=true;toast('🎉 已發起，附近的毛孩就看得到了',3000);location.hash='#/pals/meet/'+data.id};
 }
 
-async function renderMeet(id){const _n=navId;setTitle('約散步');
+async function renderMeet(id){const _n=navId;setTitle('揪團約玩');
   app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
   const {data:m,error}=await sb.from('pet_meets_public').select('*').eq('id',id).maybeSingle();if(_n!==navId)return;
   if(error){app.innerHTML=netErrHTML();return}
-  if(!m){app.innerHTML=`<div class="empty-card"><b>這個活動已經結束或被移除了</b><a class="btn" href="#/pals?tab=meets">看其他約散步</a></div>`;return}
+  if(!m){app.innerHTML=`<div class="empty-card"><b>這個活動已經結束或被移除了</b><a class="btn" href="#/pals?tab=meets">看其他揪團</a></div>`;return}
   const u=me();const host=u&&u.id===m.owner_id;
   let people=[];if(u){const {data}=await sb.from('pet_meet_people').select('*').eq('meet_id',id).order('created_at');people=data||[];if(_n!==navId)return}
   const joined=u&&people.some(x=>x.user_id===u.id);const full=m.joined+1>=m.cap;const past=new Date(m.starts_at)<Date.now();
   setTitle(m.title);
   app.innerHTML=`<div class="pals narrow-in pal-meet-page">
-    <p class="muted"><a href="#/pals?tab=meets">← 約散步</a></p>
+    <p class="muted"><a href="#/pals?tab=meets">← 揪團約玩</a></p>
     <h1>${esc(m.title)}</h1>
     <dl class="kv"><dt>時間</dt><dd>${esc(palWhen(m.starts_at))}${past?'（已開始）':''}</dd><dt>地點</dt><dd>${esc((m.city||'').replace(/^臺/,'台')+(m.district||''))}・${esc(m.place)}</dd>
     <dt>誰可以來</dt><dd>${m.species==='cat'?'貓咪':m.species==='dog'?'狗狗':'狗貓都可以'}${m.size_pref&&m.size_pref!=='any'?'・'+PAL_SIZE[m.size_pref]+'犬':''}</dd><dt>人數</dt><dd>${m.joined+1} / ${m.cap} 人</dd></dl>
@@ -8796,6 +8811,8 @@ async function renderMeet(id){const _n=navId;setTitle('約散步');
     <a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((m.city||'')+(m.district||'')+' '+m.place)}">${ic('map')} 在地圖上看</a>
     <h3>參加的毛孩家長</h3>
     <div class="pal-people"><a href="#/u/${encodeURIComponent(m.username)}">${chatAva(m.username,m.avatar_url)}<span><b>${esc(m.username)}</b><small>發起人</small></span></a>${u?people.map(x=>`<a href="#/u/${encodeURIComponent(x.username)}">${chatAva(x.username,x.avatar_url)}<span><b>${esc(x.username)}</b>${x.pet_name?`<small>帶 ${esc(x.pet_name)}</small>`:''}</span></a>`).join(''):`<p class="small muted">登入後可以看到參加名單。</p>`}</div>
+    <h3>${ic('chat')} 大家一起聊</h3><div class="pal-board" id="mtBoard">${u?'<p class="small muted">載入中…</p>':`<p class="small muted">登入後就能看到大家的討論、一起留言。<a href="#/login">登入／註冊（免費）</a></p>`}</div>
+    ${u&&!past?`<form class="pal-say" id="mtSay" data-nodirty><textarea id="mtMsg" maxlength="300" rows="2" placeholder="例如：我會帶小麥準時到！要帶水嗎？" aria-label="留言"></textarea><button class="btn green" id="mtSend">${ic('send')} 送出</button></form>`:''}
     <div class="btns" style="margin-top:16px">${host?`<button type="button" class="btn ghost danger" id="mtDel">取消這個活動</button>`:joined?`<button type="button" class="btn ghost" id="mtLeave">取消參加</button>`:past?'':full?`<button type="button" class="btn" disabled>名額已滿</button>`:`<button type="button" class="btn green" id="mtJoin">${ic('paw')} 我要參加</button>`}
       ${host?'':`<a class="btn ghost" href="#/u/${encodeURIComponent(m.username)}">${ic('chat')} 跟發起人聊聊</a>`}</div>
     ${host?'':`<p class="small" style="margin-top:12px"><button type="button" class="linkbtn" id="mtRep" style="color:var(--ink-3)">檢舉這個活動</button></p>`}
@@ -8810,13 +8827,25 @@ async function renderMeet(id){const _n=navId;setTitle('約散步');
   {const b=$('#mtLeave');if(b)b.onclick=async()=>{const {error}=await sb.from('pet_meet_joins').delete().eq('meet_id',id).eq('user_id',u.id);if(error)return toast(friendlyErr(error.message));toast('已取消參加');again()}}
   {const b=$('#mtDel');if(b)b.onclick=async()=>{if(!await askSheet({title:'取消這個活動？',body:'已經參加的人會看不到這個活動，建議先私訊跟大家說一聲。',ok:'取消活動',danger:true}))return;const {error}=await sb.from('pet_meets').delete().eq('id',id);if(error)return toast(friendlyErr(error.message));toast('已取消活動');location.hash='#/pals?tab=meets'}}
   {const b=$('#mtRep');if(b)b.onclick=()=>palReport(m.owner_id,m.id,m.username)}
+  if(!u)return;
+  const bl=palBlocked();let last='';
+  const draw=async()=>{if(_n!==navId)return;const {data,error}=await sb.from('pet_meet_board').select('*').eq('meet_id',id).order('id',{ascending:true}).limit(200);if(_n!==navId)return;const box=$('#mtBoard');if(!box)return;
+    if(error){box.innerHTML='<p class="small muted">討論區暫時載入不了，請稍後再試。</p>';return}
+    const rows=(data||[]).filter(x=>!bl.has(x.user_id));const sig=rows.map(x=>x.id).join(',');if(sig===last)return;last=sig;
+    box.innerHTML=rows.length?rows.map(x=>`<div class="pb-msg ${x.user_id===u.id?'me':''}">${chatAva(x.username,x.avatar_url)}<div><p class="pb-h"><a href="#/u/${encodeURIComponent(x.username)}"><b>${esc(x.username)}</b></a>${x.user_id===m.owner_id?'<i>發起人</i>':''}<small>${esc(palWhen(x.created_at))}</small>${x.user_id===u.id||host?`<button type="button" class="linkbtn" data-del="${x.id}">刪除</button>`:''}</p><p class="pb-b">${esc(x.body)}</p></div></div>`).join(''):'<p class="small muted">還沒有人留言。打個招呼，說說你家毛孩會不會來吧！</p>';
+    box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!await askSheet({title:'刪除這則留言？',ok:'刪除',danger:true}))return;const {error}=await sb.from('pet_meet_msgs').delete().eq('id',+b.dataset.del);if(error)return toast(friendlyErr(error.message));last='';draw()})};
+  draw();const tm=setInterval(()=>{if(_n!==navId){clearInterval(tm);return}if(!document.hidden)draw()},15000);
+  {const f=$('#mtSay');if(f)f.onsubmit=async e=>{e.preventDefault();const t=$('#mtMsg'),v=t.value.trim();if(!v)return;const b=$('#mtSend');b.disabled=true;
+    const {error}=await sb.from('pet_meet_msgs').insert({meet_id:id,body:v});b.disabled=false;
+    if(error)return toast(/太快|買賣|結束/.test(error.message)?error.message.replace(/^.*?(留言|交朋友|這個)/,'$1'):'送出失敗：'+friendlyErr(error.message),4000);
+    t.value='';last='';draw()}}
 }
 
 // 「我的」頁下方：像 App 設定頁的清單（手機上取代網站頁尾）
 function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
-  <p class="mlh">毛孩交朋友</p><div class="mgroup">${row('#/pals','paw','毛孩名片牆','c3')}${row('#/pals?tab=meets','calendar','約散步、約玩','c2')}</div>
+  <p class="mlh">毛孩交朋友</p><div class="mgroup">${row('#/pals','paw','毛孩名片牆','c3')}${row('#/pals?tab=meets','calendar','揪團散步、約玩','c2')}</div>
   <p class="mlh">協尋資源</p><div class="mgroup">${row('#/fav','mark','收藏（追蹤的協尋、想領養的）','c1')}${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}${row('#/injured','siren','受傷毛孩通報','c2')}${row('#/intake','search','收容所最近新收','c2')}${row('#/adopt','shelter','領養毛孩','c3')}${row('#/?tab=map','map','走失地圖','c4')}</div>
   ${IS_APP?'':`<p class="mlh">App</p><div class="mgroup"><a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a></div>`}
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${IS_APP?'':row('#/thanks','heart','贊助感謝牆','c1')}${(CONFIG.SOCIAL||[]).map(x=>`<a class="mrow" href="${x.u}" target="_blank" rel="noopener"><span class="mri c2">${ic(x.k)}</span><span class="mrl">追蹤 ${esc(x.n)}</span><span class="mrv">${x.k==='fb'?'官方粉專':'@wangmiaotw'}</span>${ic('chev','mrc')}</a>`).join('')}${row('#/contact','mail','聯絡我們','c3')}${row('#/terms','doc','使用條款','c5')}${row('#/privacy','shield','隱私權政策','c5')}</div>
