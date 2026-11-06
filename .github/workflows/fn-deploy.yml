@@ -20,4 +20,4 @@ jobs:
           NAME: ${{ inputs.name }}
         run: |
           [[ "$NAME" =~ ^[a-z0-9-]+$ ]] && [ -d "supabase/functions/$NAME" ] || { echo "::error::找不到函式 $NAME"; exit 1; }
-          supabase functions deploy "$NAME" --project-ref nopyhfpaykkiieudvoko --no-verify-jwt --use-api
+          supabase functions deploy "$NAME" --project-ref nopyhfpaykkiieudvoko --no-verify-jwt --use-api --yes
