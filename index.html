@@ -3141,7 +3141,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.3';
+const BUILD = 'v7.18.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4452,7 +4452,7 @@ function drailAttach(kind){if(!matchMedia('(min-width:1280px)').matches||documen
     <p class="dr-foot"><a href="#/resources">協尋攻略</a>・<a href="#/learn">毛孩小學堂</a>・<a href="#/about">關於本站</a></p>`;
   app.classList.add('withrail');app.appendChild(r)}
 /* ===== 電腦版左側選單（手機版不顯示） ===== */
-const DSIDE=[['#/','search','找走失毛孩',/^(home|lost|case|report|found|gov-lost|map|seen|injured|intake|new|found-manage|manage|poster)$/],['#/adopt','shelter','領養毛孩',/^adopt$/],['#/fav','mark','收藏',/^fav$/],['#/health','paw','我的毛孩',/^(health|pet)$/],['#/chats','chat','訊息',/^(chats|chat|add|u)$/],['#/inbox','bell','通知',/^inbox$/],['#/me','user','我的',/^(me|login|set-username|admin|delete-account)$/]];
+const DSIDE=[['#/','search','找走失毛孩',/^(home|lost|case|report|found|gov-lost|map|seen|injured|intake|new|found-manage|manage|poster)$/],['#/adopt','shelter','領養毛孩',/^adopt$/],['#/fav','mark','收藏',/^fav$/],['#/health','paw','我的毛孩',/^(health|pet)$/],['#/pals','heart','毛孩交朋友',/^pals$/],['#/chats','chat','訊息',/^(chats|chat|add|u)$/],['#/inbox','bell','通知',/^inbox$/],['#/me','user','我的',/^(me|login|set-username|admin|delete-account)$/]];
 function dsideHTML(){return `<a class="ds-brand" href="#/"><img src="icon.svg" alt="" width="36" height="36"><b>汪喵回家</b></a>
   <nav class="ds-menu" aria-label="主選單">${DSIDE.map(([h,i,t])=>`<a href="${h}" data-ds="${h}" title="${t}" aria-label="${t}"${h==='#/chats'?' id="dsChat"':''}>${ic(i)}<span>${t}</span><i class="ds-n" hidden></i></a>`).join('')}</nav>
   <div class="ds-cta"><a class="ds-b1" href="#/new" title="登記走失" aria-label="登記走失">${ic('plus')}<span>登記走失</span></a><a class="ds-b2" href="#/seen" title="我看到／撿到一隻" aria-label="我看到／撿到一隻">${ic('eye')}<span>我看到／撿到一隻</span></a></div>
