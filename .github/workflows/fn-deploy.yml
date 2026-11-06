@@ -1,0 +1,23 @@
+name: 部署 Edge Function
+# 手動執行：把 supabase/functions/<name> 部署到 Supabase（關閉 Verify JWT，函式自己用 x-run-secret 驗證）
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: '函式名稱，例如 social-post'
+        required: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: {version: latest}
+      - name: 部署
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          NAME: ${{ inputs.name }}
+        run: |
+          [[ "$NAME" =~ ^[a-z0-9-]+$ ]] && [ -d "supabase/functions/$NAME" ] || { echo "::error::找不到函式 $NAME"; exit 1; }
+          supabase functions deploy "$NAME" --project-ref nopyhfpaykkiieudvoko --no-verify-jwt --use-api

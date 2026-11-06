@@ -3098,7 +3098,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.17.28';
+const BUILD = 'v7.17.29';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6041,6 +6041,7 @@ function renderNew(){
     <label class="f"><span>怎麼稱呼你</span><input type="text" name="contact_name" autocomplete="name" placeholder="例：陳小姐"></label>
     <label class="f"><span><b class="lbl">電話</b><small class="hint">會顯示在案件頁</small></span><input type="tel" name="contact_phone" autocomplete="tel" pattern="${PHONE_PAT}" inputmode="tel" placeholder="09xx-xxx-xxx"></label>
     <label class="chk" id="ppWrap"><input type="checkbox" name="phone_public" checked> 讓看到<span class="pn">牠</span>的人可以直接打電話給我</label>
+    <label class="chk"><input type="checkbox" name="social_ok" checked> 讓汪喵回家的 FB／IG 粉專幫忙分享協尋（只放照片、走失地點和特徵，不放你的聯絡方式）</label>
     <label class="f"><span><b class="lbl">Email</b><small class="hint long">不公開；有人回報會寄信通知你</small></span><input type="email" name="contact_email" inputmode="email" autocomplete="email" placeholder="例：mingmei@gmail.com"></label>
     <label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開，方便大家聯絡你</small></span><input type="text" name="contact_line" autocapitalize="off" spellcheck="false"></label>
     <details class="more"><summary>獎金、補充（可以不填）</summary>
@@ -6107,7 +6108,8 @@ function renderNew(){
       sent=true;clearTimeout(dT);   // 送出成功：還在等的草稿儲存不要再寫回去
       try{localStorage.setItem('wh_token_'+data.id,data.token);localStorage.removeItem('wh_draft_new')}catch(_){}
       rememberMine('case',data.id,p.name);
-      try{fetch(CONFIG.SITE_URL+'api/indexnow?id='+data.id).catch(()=>{})}catch(_){}   // 通知搜尋引擎來收錄這個案件頁（背景、失敗不影響）
+      try{fetch(CONFIG.SITE_URL+'api/indexnow?id='+data.id).catch(()=>{})}catch(_){}
+      if(!fd.get('social_ok'))try{sb.rpc('set_social_ok',{p_case:data.id,p_token:data.token,p_ok:false}).then(()=>{},()=>{})}catch(_){}   // 不要粉專分享   // 通知搜尋引擎來收錄這個案件頁（背景、失敗不影響）
       contactSave($('#f'),CT_NEW);__submitting=false;if(_n!==navId){toast('✅ 已登記完成。管理網址存在這支手機，到「我的」就找得到',6000);return}renderCreated(data.id,data.token,(p.contact_email||'').trim(),p.name);
     }catch(err){__submitting=false;$('#pg')?.classList.add('hidden');toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出登記'}
   };
