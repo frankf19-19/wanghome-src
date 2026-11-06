@@ -45,8 +45,8 @@ if(h.indexOf('#mig=')===0){
   location.replace(to+(n?'#mig='+btoa(unescape(encodeURIComponent(JSON.stringify(o2)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')+'&h='+encodeURIComponent(location.hash):location.hash));
 }}catch(e){}})();
 </script>
-<title>汪喵回家 — 全台走失毛孩協尋平台</title>
-<meta name="description" content="走失狗貓協尋：登記案件、網友目擊回報、地圖時間軸、每日自動比對全台收容所。看到請勿呼喊追趕，拍照記下時間地點。">
+<title>汪喵回家｜走失狗、走失貓協尋平台・全台收容所每日比對（免費）</title>
+<meta name="description" content="狗狗、貓咪走失怎麼辦？汪喵回家免費幫你登記走失、自動做協尋海報，網友目擊回報畫在地圖上，每天比對全台收容所新收的毛孩。也能領養、通報受傷毛孩。">
 <meta property="og:title" content="汪喵回家 — 全台走失毛孩協尋平台">
 <meta property="og:description" content="目擊回報、地圖時間軸、收容所自動比對，幫走失的狗貓平安回家。">
 <meta property="og:type" content="website">
@@ -3141,7 +3141,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.4';
+const BUILD = 'v7.18.5';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5162,7 +5162,7 @@ const XSORT=[['act','最新動態'],['new','最新走失'],['near','離我最近
 function syncSortLabel(){const t=homeState.near?'離我最近':homeState.tab==='found'?'最新動態':(XSORT.find(x=>x[0]===homeState.sort)||XSORT[0])[1];['#xSortT','#dSortT'].forEach(k=>{const e=$(k);if(e&&e.textContent!==t)e.textContent=t})}   // 排序文字永遠跟實際排序一致（定位失敗、取消時也一樣）
 function dropNearQ(){if(/[?&]near=1/.test(location.hash))try{const h=location.hash.replace(/([?&])near=1&?/,'$1').replace(/[?&]$/,'');history.replaceState(history.state,'',location.pathname+location.search+h);if(typeof curHash!=='undefined')curHash=h}catch(_){}}   // 取消「我附近」後把網址的 near=1 拿掉，回上一頁才不會又打開
 async function renderHomeMob(){const _n=navId;
-  document.title='汪喵回家 — 全台走失毛孩協尋平台';app.classList.remove('listonly');
+  document.title='汪喵回家｜走失狗、走失貓協尋平台・全台收容所每日比對（免費）';app.classList.remove('listonly');
   {const t=qs(location.hash).tab;if(t==='map'){homeState.tab='map';try{localStorage.setItem('wh_xv','map')}catch(_){}}else if(t==='found'){homeState.tab='found';homeState.qk='found'}else if(homeState.tab!=='map'||xView()!=='map')homeState.tab=xView()==='map'?'map':(homeState.qk==='found'?'found':'lost')}
   const V=xView();
   (_n===navId?app:_void).innerHTML=`<h1 class="sr-only">汪喵回家：全台走失狗貓協尋平台</h1>
@@ -5221,7 +5221,7 @@ function xPick(title,opts,cur,cb,grid){const el=document.createElement('div');el
 async function renderHome(){const _n=navId;
   return renderHomeMob();   // 手機、電腦都用同一套新版首頁
   if(me())inboxMaybe();dBellSet();
-  document.title='汪喵回家 — 全台走失毛孩協尋平台';
+  document.title='汪喵回家｜走失狗、走失貓協尋平台・全台收容所每日比對（免費）';
   const LO=isListOnly();app.classList.toggle('listonly',LO);if(LO)setTitle('正在協尋的毛孩');
   {const t=qs(location.hash).tab;homeState.tab=(t==='map'||t==='found')?t:'lost'}   // 分頁記在網址上，按「上一頁」會回到原本的分頁
   (_n===navId?app:_void).innerHTML=`
