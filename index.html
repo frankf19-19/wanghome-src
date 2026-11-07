@@ -1573,14 +1573,14 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .pd-wrap{display:flex;flex-direction:column;align-items:center}
 .pd-stack{position:relative;width:100%;max-width:440px;height:min(60vh,520px);margin:2px auto 0}
-.pd-card{position:absolute;inset:0;border-radius:26px;overflow:hidden;background:var(--sheet);box-shadow:0 12px 32px rgba(70,30,20,.18);touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s;cursor:grab;--lk:0;--np:0}
-.pd-card.pd-next{transform:scale(.94) translateY(16px);pointer-events:none;filter:brightness(.97)}.pd-card.pd-next.rise{transform:none;filter:none}
+.swc{position:absolute;inset:0;border-radius:26px;overflow:hidden;background:var(--sheet);box-shadow:0 12px 32px rgba(70,30,20,.18);touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s;cursor:grab;--lk:0;--np:0}
+.swc.pd-next{transform:scale(.94) translateY(16px);pointer-events:none;filter:brightness(.97)}.swc.pd-next.rise{transform:none;filter:none}
 .pd-ph{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(160deg,#FFE3D6,#FFD0DE);color:var(--red)}.pd-ph.cat{background:linear-gradient(160deg,#E8E4FF,#FFDDE8)}
 .pd-ph img{width:100%;height:100%;object-fit:cover;pointer-events:none}.pd-ph .sp-i{width:110px;height:110px;opacity:.7}
-.pd-info{position:absolute;left:0;right:0;bottom:0;padding:70px 20px 20px;background:linear-gradient(to bottom,transparent,rgba(20,8,4,.78));color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:3px;pointer-events:none}
+.pd-info{position:absolute;left:0;right:0;bottom:0;padding:70px 20px 20px;background:linear-gradient(to bottom,transparent,rgba(20,8,4,.6) 38%,rgba(20,8,4,.86));color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:3px;pointer-events:none}
 .pd-info b{font-size:28px;font-weight:800;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.3)}.pd-info small{font-size:14.5px;opacity:.95;display:flex;align-items:center;gap:4px}.pd-info small .ico{width:15px;height:15px}
 .pd-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.pd-tags i{font-style:normal;font-size:13px;font-weight:600;padding:3px 11px;border-radius:99px;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.pd-card .pal-badge{top:16px;left:16px;font-size:13px;padding:4px 11px}
+.swc .pal-badge{top:16px;left:16px;font-size:13px;padding:4px 11px}
 .pd-stamp{position:absolute;top:70px;z-index:2;font-style:normal;font-weight:900;font-size:30px;letter-spacing:2px;padding:4px 16px;border:4px solid;border-radius:14px;pointer-events:none}
 .pd-stamp.like{left:22px;color:#FF4F86;border-color:#FF4F86;background:rgba(255,255,255,.85);transform:rotate(-14deg);opacity:var(--lk)}
 .pd-stamp.nope{right:22px;color:#fff;border-color:#fff;background:rgba(0,0,0,.28);transform:rotate(14deg);opacity:var(--np)}
@@ -3211,7 +3211,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.20.0';
+const BUILD = 'v7.20.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -8849,7 +8849,7 @@ function palDeck(box,rows){
   deck.sort((a,b)=>((palLikesMe(b)?1000:0)+((palScore(b)||{}).pct||0)+(palIsNew(b)?5:0))-((palLikesMe(a)?1000:0)+((palScore(a)||{}).pct||0)+(palIsNew(a)?5:0)));
   let i=0,busy=false;const hist=[];
   const HP=()=>{try{const h=capPlugin('Haptics');if(h&&h.impact)h.impact({style:'MEDIUM'}).catch(()=>{})}catch(_){}};
-  const card=(c,cls)=>`<div class="pd-card ${cls}"><div class="pd-ph ${c.species==='cat'?'cat':''}">${c.photo?`<img src="${esc(safeU(c.photo))}" alt="${esc(c.name)}" draggable="false">`:spIc(c.species)}</div>${palBadge(c)}<i class="pd-stamp like" aria-hidden="true">喜歡</i><i class="pd-stamp nope" aria-hidden="true">下一個</i>
+  const card=(c,cls)=>`<div class="swc ${cls}"><div class="pd-ph ${c.species==='cat'?'cat':''}">${c.photo?`<img src="${esc(safeU(c.photo))}" alt="${esc(c.name)}" draggable="false">`:spIc(c.species)}</div>${palBadge(c)}<i class="pd-stamp like" aria-hidden="true">喜歡</i><i class="pd-stamp nope" aria-hidden="true">下一個</i>
     <div class="pd-info"><b>${esc(c.name)}</b><small>${esc([c.breed,c.sex&&PAL_SEX[c.sex],c.age_text].filter(Boolean).join('・')||(c.species==='cat'?'貓咪':'狗狗'))}</small><small>${ic('pin')} ${esc((c.city||'').replace(/^臺/,'台')+(c.district||''))}</small>${palScoreHTML(c,'on-dark')}${(c.tags||[]).length?`<span class="pd-tags">${c.tags.slice(0,4).map(t=>`<i>${esc(t)}</i>`).join('')}</span>`:''}</div></div>`;
   const draw=()=>{if(!box.isConnected)return;busy=false;
     if(i>=deck.length){const n=Object.keys(palSkipGet()).length;box.innerHTML=`<div class="empty-card pd-done"><div class="big">🐾</div><b>${deck.length?'附近的新朋友都看過了':'目前沒有新朋友可以認識'}</b><p class="small">${me()&&!__palMine.length?'把你家毛孩也放上來，別人才看得到牠、跟你配對。':'過幾天會有新朋友加入，也可以換個縣市看看。'}</p><div class="btns">${me()&&!__palMine.length?`<button type="button" class="btn" id="pdMine">${ic('plus')} 放上我的毛孩</button>`:''}<a class="btn ${me()&&!__palMine.length?'ghost':''}" href="#/pals?tab=cards">看全部名片</a>${n?'<button type="button" class="btn ghost" id="pdReset">重新看略過的</button>':''}</div></div>`;
@@ -8859,18 +8859,18 @@ function palDeck(box,rows){
       <div class="pd-acts"><button type="button" class="pd-btn sm" id="pdUndo" aria-label="回上一隻" ${hist.length?'':'disabled'}>${ic('undo')}</button><button type="button" class="pd-btn nope" id="pdNope" aria-label="下一個">✕</button><button type="button" class="pd-btn like" id="pdLike" aria-label="喜歡${esc(cur.name)}">${palHeart(true)}</button><button type="button" class="pd-btn sm" id="pdInfo" aria-label="看${esc(cur.name)}的名片">${ic('info')}</button></div>
       <p class="pd-left">${!me()?'登入後按喜歡，飼主就會知道是你':!__palMine.length?'<button type="button" class="linkbtn" id="pdMine2">先放上你家毛孩，才能配對、看合不合</button>':'右滑喜歡、左滑看下一個・還有 '+(deck.length-i)+' 隻'}</p></div>`;
     {const m=$('#pdMine2');if(m)m.onclick=palPickMine}
-    const top=box.querySelector('.pd-card.pd-top');let x0=null,y0=0,dx=0,dy=0,moved=false;
+    const top=box.querySelector('.swc.pd-top');let x0=null,y0=0,dx=0,dy=0,moved=false;
     top.addEventListener('pointerdown',e=>{if(busy)return;x0=e.clientX;y0=e.clientY;dx=dy=0;moved=false;try{top.setPointerCapture(e.pointerId)}catch(_){}top.style.transition='none'});
     top.addEventListener('pointermove',e=>{if(x0==null)return;dx=e.clientX-x0;dy=e.clientY-y0;if(Math.abs(dx)>6||Math.abs(dy)>6)moved=true;top.style.transform=`translate(${dx}px,${dy*.25}px) rotate(${dx/16}deg)`;top.style.setProperty('--lk',Math.max(0,Math.min(1,dx/90)));top.style.setProperty('--np',Math.max(0,Math.min(1,-dx/90)))});
     const up=()=>{if(x0==null)return;x0=null;top.style.transition='';if(dx>95)act(true);else if(dx<-95)act(false);else{top.style.transform='';top.style.setProperty('--lk',0);top.style.setProperty('--np',0);if(!moved)palCardSheet(cur)}};
     top.addEventListener('pointerup',up);top.addEventListener('pointercancel',()=>{x0=null;top.style.transition='';top.style.transform=''});
     $('#pdNope').onclick=()=>act(false);$('#pdLike').onclick=()=>act(true);$('#pdInfo').onclick=()=>palCardSheet(cur);
     $('#pdUndo').onclick=()=>{if(!hist.length||busy)return;i=hist.pop();palSkipDel(deck[i].pet_id);draw()}};
-  const act=async like=>{if(busy)return;const cur=deck[i],top=box.querySelector('.pd-card.pd-top');
+  const act=async like=>{if(busy)return;const cur=deck[i],top=box.querySelector('.swc.pd-top');
     if(like&&!me()){if(top){top.style.transform='';top.style.setProperty('--lk',0)}setReturn(location.hash);requireLogin('按喜歡需要登入（免費註冊）');return}
     busy=true;HP();
     if(top){top.style.transition='transform .32s ease-in,opacity .32s';top.style.transform=`translate(${like?560:-560}px,40px) rotate(${like?26:-26}deg)`;top.style.opacity='0';top.style.setProperty(like?'--lk':'--np',1)}
-    const nx=box.querySelector('.pd-card.pd-next');if(nx)nx.classList.add('rise');
+    const nx=box.querySelector('.swc.pd-next');if(nx)nx.classList.add('rise');
     if(like){__palLiked.add(cur.pet_id);cur.likes=(cur.likes||0)+1;
       sb.from('pet_card_likes').insert({pet_id:cur.pet_id}).then(({error})=>{if(error&&!/duplicate/.test(error.message)){__palLiked.delete(cur.pet_id);toast(friendlyErr(error.message),4000)}else if(__palLikers.has(cur.owner_id))setTimeout(()=>palMatch(cur),150)})}
     else{palSkipAdd(cur.pet_id);hist.push(i)}
