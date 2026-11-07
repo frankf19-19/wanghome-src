@@ -3155,7 +3155,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.11';
+const BUILD = 'v7.18.12';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3594,6 +3594,10 @@ function kbInit(){if(__kbInit)return;__kbInit=true;const K=IS_APP&&capPlugin('Ke
   //      輸入框被擋住才平滑捲上來。聊天室另有自己的鍵盤動畫（chfixEnter）。
   const ios=window.Capacitor&&Capacitor.getPlatform&&Capacitor.getPlatform()==='ios';
   if(ios){try{K.setResizeMode&&K.setResizeMode({mode:'none'}).catch(()=>{})}catch(_){}}
+  // 鍵盤收不起來：iOS 顯示鍵盤上方的「完成」列；點輸入框以外的地方也會收鍵盤
+  if(ios){try{K.setAccessoryBarVisible&&K.setAccessoryBarVisible({isVisible:true}).catch(()=>{})}catch(_){}}
+  document.addEventListener('touchstart',e=>{const a=document.activeElement;if(!a||!/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&!a.isContentEditable)return;
+    const t=e.target;if(t.closest&&t.closest('input,textarea,select,label,button,a,[contenteditable=true],[role=button],.chbar,.chat form'))return;a.blur()},{passive:true});
   const R=document.documentElement.style;
   const reveal=()=>{if(document.body.classList.contains('chfix'))return;const a=document.activeElement;if(!a||!/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&!a.isContentEditable)return;
     if(a.closest('.lightbox')){setTimeout(()=>{try{a.scrollIntoView({block:'nearest',behavior:RM()?'auto':'smooth'})}catch(_){}},260);return}
