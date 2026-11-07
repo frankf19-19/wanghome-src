@@ -1258,7 +1258,7 @@ body{touch-action:manipulation}
 .mri{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff}
 .mri .ico{width:19px;height:19px}
 .mri.c1{background:#E86A92}.mri.c2{background:#F08A5D}.mri.c3{background:#3FAF84}.mri.c4{background:#5B8DEF}.mri.c5{background:#8E7CE0}
-.mrl{flex:1;font-size:16px;font-weight:600}.mrv{color:var(--ink-3);font-size:15px}
+.mrl{flex:1;font-size:16px;font-weight:600}.mrv{color:var(--ink-3);font-size:15px}.mrv.mrbadge{min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--red-fill);color:#fff;font-size:12.5px;font-weight:800;line-height:22px;text-align:center;margin-right:4px}.morelist .mg-sec{margin:0 0 10px!important}
 .mrc{color:var(--ink-3);width:18px;height:18px}
 .mver{text-align:center;color:var(--ink-3);font-size:12px;letter-spacing:.2px;margin:22px 0 8px}
 .pskel{display:grid;gap:12px;padding:8px 0;position:relative}.pskel::after{content:'載入比較久，網路可能不穩…';position:absolute;left:0;right:0;top:-2px;text-align:center;font-size:13px;color:var(--ink-3);opacity:0;animation:slowHint .3s 4s forwards}@keyframes slowHint{to{opacity:1}}.pskel .sk{background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 55%,var(--sheet)) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px}.pskel .card{display:grid;gap:10px}
@@ -2213,6 +2213,8 @@ html{-webkit-tap-highlight-color:transparent}
 .xheart{display:none}
 .xstats{display:none}
 @media all{   /* 設計系統顏色：手機、電腦一起用 */
+  /* v7.19 一種主色：交朋友、健康手冊、我的也用汪喵回家的珊瑚橘（原本是綠色） */
+  body[data-space="health"]{--green:var(--red);--green-ink:var(--red-ink);--green-soft:var(--red-soft);--green-fill:var(--red-fill)}
   :root,:root:not([data-theme="dark"]){--paper:#F7F6F4;--sheet:#FFFFFF;--ink:#1A1A1A;--ink-2:#55524E;--ink-3:#6F6A64;--line:#ECE9E5;--red:#E8502E;--red-ink:#C2401F;--red-fill:#EE5A35;--red-soft:#FFEFE8;--green:#1A8F63;--green-fill:#1F9D6E;--green-soft:#E4F5EE;--brand:#F2643D;--brand-d:#D94A26;--ok:#1F9D6E;--fill:#EFEDEA;
     --lift:0 1px 0 rgba(0,0,0,.03),0 10px 24px -18px rgba(60,40,20,.4);--display:system-ui,-apple-system,"PingFang TC","Noto Sans TC",sans-serif;--r-card:22px}
   :root[data-theme="dark"]{--paper:#0F0F10;--sheet:#1B1B1D;--ink:#F5F4F2;--ink-2:#C9C6C1;--ink-3:#8E8A85;--line:#2A2A2C;--red:#FF6A45;--red-ink:#FF8A6A;--red-fill:#EE5A35;--red-soft:#3A1E14;--green:#3CC28E;--green-fill:#1F9D6E;--green-soft:#10291F;--fill:#262628;--lift:0 1px 0 rgba(0,0,0,.4)}
@@ -3170,7 +3172,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.19.0';
+const BUILD = 'v7.19.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -8980,7 +8982,7 @@ async function renderMeet(id){const _n=navId;setTitle('揪團約玩');
 function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
-  <p class="mlh">常用</p><div class="mgroup">${row('#/fav','mark','收藏','c1')}${row('#/intake','search','收容所最近新收','c2')}</div>
+  <p class="mlh">常用</p><div class="mgroup">${me()?`<a class="mrow" href="#/chats"><span class="mri c4">${ic('chat')}</span><span class="mrl">訊息與好友</span>${__chatN?`<span class="mrv mrbadge">${__chatN>99?'99+':__chatN}</span>`:''}${ic('chev','mrc')}</a>`:''}${row('#/fav','mark','收藏','c1')}${row('#/intake','search','收容所最近新收','c2')}</div>
   <p class="mlh">學習</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}</div>
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${row('#/contact','mail','聯絡我們','c3')}${(CONFIG.SOCIAL||[]).length?`<div class="mrow msoc"><span class="mri c2">${ic('heart')}</span><span class="mrl">追蹤我們</span><span class="msoc-i">${CONFIG.SOCIAL.map(x=>`<a href="${x.u}" target="_blank" rel="noopener" aria-label="追蹤 ${esc(x.n)}">${ic(x.k)}</a>`).join('')}</span></div>`:''}${IS_APP?'':`<a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a>`}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
@@ -8989,6 +8991,7 @@ function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'au
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cycle-theme]'))openThemePick()});
 async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&location.hash.split('?')[0]==='#/me'&&!$('.morelist'))app.insertAdjacentHTML('beforeend',moreListHTML());
   // 刪除帳號放到整頁最下面（版本號下方），不跟常用功能擠在一起
+  {const h=[...document.querySelectorAll('.morelist .mlh')].find(x=>x.textContent==='設定');if(h&&_n===navId)['#nfSec','#acSec'].forEach(k=>{const e=$(k);if(e){e.style.marginTop='0';h.after(e)}})}   // 帳號、通知收進「設定」
   const o=$('#outSec'),d=$('#delSec');if(o&&_n===navId)app.appendChild(o);if(d&&_n===navId)app.appendChild(d)}
 async function renderMeBody(){const _n=navId;
   setTitle('我的');
@@ -9010,11 +9013,10 @@ async function renderMeBody(){const _n=navId;
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
   (_n===navId?app:_void).innerHTML=`<div class="profile"><button type="button" class="pf-av ${p.avatar_url?'img':''}" id="pfAv" aria-label="更換大頭貼">${p.avatar_url?`<img src="${esc(safeU(p.avatar_url))}" alt="">`:esc([...(p.display_name||p.username||me().email||'會')][0].toUpperCase())}<i class="pf-cam" aria-hidden="true">${ic('camera')}</i></button><div class="pf-t"><h1>${esc(p.display_name||p.username||me().email||'會員')}</h1><span class="muted small">${p.username?'@'+esc(p.username):''}${p.username&&me().email?'・':''}${me().email?esc(me().email):''}</span></div><div class="pf-acts">${p.is_admin?`<a class="btn sm" href="#/admin">${ic('shield')} 管理後台</a>`:''}</div></div>
 
-  <a class="crosslink" href="#/health" style="margin:18px 0 6px"><span class="cl-ic">${ic("steth")}</span><span><b>毛孩健康手冊${(pets||[]).length?`・${pets.length} 隻毛孩`:''}</b>${(dues||[]).length?`有 ${dues.length} 項一個月內到期`:'健康紀錄、到期提醒和日曆同步都在這裡'}</span><em>打開</em></a>
-  <a class="crosslink" href="#/chats" style="margin:0 0 6px"><span class="cl-ic">${ic("chat")}</span><span><b>訊息與好友${__chatN?`・${__chatN} 則未讀`:''}</b>和飼主、通報者、好友聊天；加好友、我的 QR Code</span><em>打開</em></a>
+  <div style="height:6px"></div>
 
   ${(()=>{const L=cs||[],F=fs||[],M=mineHTML(new Set([...L,...F].map(x=>x.id)));
-    if(!L.length&&!F.length)return `<h2>${ic("clipboard")} 我的案件</h2>${M||`<div class="card me-empty"><p style="margin:0 0 10px">還沒有登記任何案件。</p><div class="me-acts"><a class="btn" href="#/new">${ic("siren")} 我的毛孩走失了</a><a class="btn ghost" href="#/seen">${ic("hand")} 我撿到／看到一隻</a></div><p class="small muted" style="margin:10px 0 0">以前沒登入就登記過？打開管理頁按「存到我的帳號」就會出現在這裡。</p></div>`}`;
+    if(!L.length&&!F.length)return M?`<h2>${ic("clipboard")} 我的案件</h2>${M}`:'';if(0)return `${`<div class="card me-empty"><p style="margin:0 0 10px">還沒有登記任何案件。</p><div class="me-acts"><a class="btn" href="#/new">${ic("siren")} 我的毛孩走失了</a><a class="btn ghost" href="#/seen">${ic("hand")} 我撿到／看到一隻</a></div><p class="small muted" style="margin:10px 0 0">以前沒登入就登記過？打開管理頁按「存到我的帳號」就會出現在這裡。</p></div>`}`;
     return (L.length?`<h2>${ic("clipboard")} 我登記的走失案件</h2><div class="grid">${L.map(c=>cardHTML(c).replace('href="#/case/','href="#/manage/').replace('<div class="t">',`<div class="t">${pendMap[c.id]?`<span class="tag amber">${pendMap[c.id]} 筆目擊待確認</span>`:''}`)).join('')}</div>`:'')
       +(F.length?`<h2>${ic("hand")} 我的看到／撿到通報</h2><div class="grid">${F.map(f=>foundCardHTML(f).replace('href="#/found/','href="#/found-manage/')).join('')}</div>`:'')+M})()}
 
