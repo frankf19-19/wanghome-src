@@ -953,6 +953,12 @@ body[data-space="health"] h2 > .ico:first-child{background:var(--green-soft)}
   .mb-home img{width:30px;height:30px;border-radius:9px}
   .mb-act{flex:none;display:grid;place-items:center}.mb-act:empty{display:none}.mb-act:not(:empty)+.mb-home{display:none}.mb-act button{width:44px;height:44px;border:0;background:none;color:var(--red);display:grid;place-items:center;border-radius:50%;cursor:pointer}.mb-act button:active{background:var(--red-soft)}.mb-act .ico{width:24px;height:24px}
   body.inner #app{padding-top:10px}
+  /* v7.19 導覽列：像 iOS 一樣只有圓形返回鍵，標題置中，不放 logo */
+  .mb-back{width:40px;height:40px;min-height:40px;padding:0;justify-content:center;border-radius:50%;background:color-mix(in srgb,var(--sheet) 88%,transparent);box-shadow:0 1px 6px rgba(120,80,40,.14)}
+  .mb-back span{display:none}.mb-back svg{width:22px;height:22px;margin-left:-2px}
+  .mb-home{visibility:hidden;pointer-events:none;width:40px}
+  .mb-act button{width:40px;height:40px;background:color-mix(in srgb,var(--sheet) 88%,transparent);box-shadow:0 1px 6px rgba(120,80,40,.14)}
+  .mb-act:not(:empty){min-width:40px}
   body.inner .backlink{display:none}   /* 上方已經有「返回」 */
 }
 @media print{.mbar{display:none!important}}
@@ -3164,7 +3170,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.21';
+const BUILD = 'v7.19.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3231,7 +3237,7 @@ async function liveConfirm(){if(!IS_APP)return;try{const L=localStorage,W=capPlu
   const cur=L.getItem('wh_live_cur');
   if(cur&&cur===BUILD){L.setItem('wh_live_ok',BUILD);L.removeItem('wh_live_try');
     const {path}=await W.getServerBasePath();if(path&&path.indexOf(LIVE.dir+'/')>=0)await W.persistServerBasePath();}
-  setTimeout(liveCheck,10000);
+  setTimeout(liveCheck,10000);if(!window.__liveIv)window.__liveIv=setInterval(()=>{if(document.visibilityState==='visible')liveCheck()},3*60e3+5e3);   // 開著 App 也會定時檢查
   const A=capPlugin('App');if(A&&A.addListener&&!window.__liveResume){window.__liveResume=1;A.addListener('pause',()=>{window.__livePausedAt=Date.now()});A.addListener('resume',()=>{const away=Date.now()-(window.__livePausedAt||Date.now());if(away>20e3&&TOP_PAGES.test(location.hash||'#/')&&!__uploading&&!document.querySelector('.lightbox,.sheet-bg')&&liveApplyPending())return;setTimeout(liveCheck,3000)})}
 }catch(e){console.warn('live confirm',e)}}
 async function liveCheck(){if(!IS_APP||LIVE.busy)return;const L=localStorage,FS=capPlugin('Filesystem'),W=capPlugin('WebView');if(!FS||!W)return;
@@ -3259,12 +3265,16 @@ async function liveCheck(){if(!IS_APP||LIVE.busy)return;const L=localStorage,FS=
       if(f.p==='index.html'){const t=await b.text();if(!new RegExp('\\bBUILD\\s*=\\s*["\']'+m.build.replace(/\./g,'\\.')+'["\']').test(t)||t.indexOf('</html>')<0)throw new Error('index check')}
       await liveWrite(name,f.p,b)}
     L.setItem('wh_live_ready',m.build);L.setItem('wh_live_ready_path',await livePath(name));
+    liveReadyBar();
     // 清掉用不到的舊版（保留：目前、上一版、備份、剛下載的）
     try{const keep=new Set([name,L.getItem('wh_live_cur'),L.getItem('wh_live_prev'),'base-'+L.getItem('wh_live_base')]);
       const {files}=await FS.readdir({directory:liveFsDir(),path:LIVE.dir});for(const e of files||[]){const n=e.name||e;if(!keep.has(n))await liveRm(n)}}catch(_){}
   }catch(e){console.warn('live update',e);L.removeItem('wh_live_at')}
   finally{LIVE.busy=false}
 }
+// 新版下載好了：上方出現綠色條，點了馬上換新版（不用關掉 App）
+function liveReadyBar(){try{if(document.getElementById('updBar'))return;const d=document.createElement('button');d.id='updBar';d.type='button';d.className='updbar';d.textContent='App 有新版本，點這裡更新';
+  d.onclick=()=>{if(window.__uploading)return toast('等照片傳完再更新');d.disabled=true;d.textContent='更新中…';if(!liveApplyPending())location.reload()};document.body.appendChild(d)}catch(_){}}
 function b64utf8(t){return btoa(unescape(encodeURIComponent(t)))}
 // 把檔案存到 App 暫存區，再叫出系統分享選單（存到相簿、傳 LINE、加到行事曆…）
 async function appShareFile(base64,filename,title,text){
@@ -3746,7 +3756,7 @@ function openAddSheet(){
     if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'));
 }
-document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.tb-add');if(a){e.preventDefault();openAddSheet()}const t=e.target.closest&&e.target.closest('.tabbar a');if(t){const i=t.querySelector('.i');if(i){i.classList.remove('pop');void i.offsetWidth;i.classList.add('pop')}}});
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('.tb-add');if(a){e.preventDefault();openAddSheet()}const t=e.target.closest&&e.target.closest('.tabbar a');if(t&&t.classList.contains('on')&&!t.classList.contains('tb-add')&&!document.body.classList.contains('inner')&&(location.hash||'#/').split('?')[0]===(t.getAttribute('href')||'').split('?')[0]){e.preventDefault();window.scrollTo({top:0,behavior:RM()?'auto':'smooth'})}if(t){const i=t.querySelector('.i');if(i){i.classList.remove('pop');void i.offsetWidth;i.classList.add('pop')}}});
 function renderChrome(path,h){
   document.body.classList.remove('chsplit-on');if(!/^#\/chat\//.test(location.hash))chfixLeave();
   document.body.dataset.route=(path.replace(/^#\/?/,'').split('/')[0]||'home');
@@ -3857,6 +3867,14 @@ function parentOf(h){const p=h.split('?')[0];let m;
   if(p==='#/chats'||p==='#/inbox')return '#/me';
   if(/^#\/learn\/./.test(p))return '#/learn';
   return '#/'}
+// Android App：從螢幕左邊往右滑＝返回（像 iOS），畫面會跟著手指走
+(function(){let pf='';try{pf=window.Capacitor.getPlatform()}catch(_){}if(!IS_APP||pf!=='android'||!('ontouchstart' in window))return;   // iOS 已經有系統內建的左滑返回
+  let x0=null,y0=0,dx=0,t0=0,on=false;const W=()=>innerWidth||375;
+  const reset=(anim)=>{app.style.transition=anim?'transform .22s cubic-bezier(.2,.8,.2,1)':'';app.style.transform='';app.style.boxShadow='';setTimeout(()=>{app.style.transition='';app.style.willChange=''},240)};
+  document.addEventListener('touchstart',e=>{x0=null;if(e.touches.length!==1||!document.body.classList.contains('inner')||overlayOpen||document.querySelector('.lightbox,.sheet-bg')||document.body.classList.contains('kbopen'))return;const t=e.touches[0];if(t.clientX>22)return;x0=t.clientX;y0=t.clientY;dx=0;t0=Date.now();on=false},{passive:true});
+  document.addEventListener('touchmove',e=>{if(x0==null)return;const t=e.touches[0];const mx=t.clientX-x0,my=Math.abs(t.clientY-y0);if(!on){if(my>12&&my>mx){x0=null;return}if(mx<10)return;on=true;app.style.willChange='transform'}dx=Math.max(0,mx);app.style.transform='translateX('+dx+'px)';app.style.boxShadow='-8px 0 24px rgba(0,0,0,.12)'},{passive:true});
+  const end=()=>{if(x0==null)return;x0=null;if(!on)return;const v=dx/Math.max(1,Date.now()-t0);if(dx>W()*.33||(v>.6&&dx>40)){app.style.transition='transform .18s ease-out';app.style.transform='translateX('+W()+'px)';setTimeout(()=>{app.style.transition='';app.style.transform='';app.style.boxShadow='';app.style.willChange='';goBack()},170)}else reset(true)};
+  document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',()=>{if(x0!=null&&on)reset(true);x0=null},{passive:true})})();
 function goBack(){if(overlayOpen){closeOverlay(overlayOpen);return}if(__wiz&&history.state&&history.state.wiz){history.back();return}if(navDepth>0){history.back();return}
   // 直接打開的頁面：沒有上一頁，換成上一層；填到一半先問，不然取消時會退出網站
   if(__dirty&&!__submitting&&!__confirm(__dirtyMsg||'你填的資料還沒送出。\n按「取消」留在這頁繼續填；按「確定」放棄離開。'))return;__dirty=false;__replacing=true;goReplace(parentOf(location.hash||'#/'))}
