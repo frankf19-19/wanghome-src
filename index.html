@@ -1561,6 +1561,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pchip.on{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--sheet));color:var(--ink)}
 .pal-tagpick{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}.pal-tagpick input{position:absolute;opacity:0;pointer-events:none}
 .pals-cta{margin:4px 0 14px}
+.petseg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 14px;border-radius:16px;background:var(--beige,#F3ECE4)}.petseg a{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 6px;border-radius:12px;font-weight:800;font-size:15.5px;color:var(--ink-3);text-decoration:none}.petseg a .ico{width:18px;height:18px}.petseg a.on{background:var(--sheet);color:var(--green);box-shadow:0 2px 8px rgba(150,90,40,.14)}
 .msoc{cursor:default}.msoc-i{display:flex;gap:6px;margin-left:auto}.msoc-i a{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--paper);color:var(--ink-2)}.msoc-i a:hover{color:var(--ink)}.msoc-i .ico{width:20px;height:20px}
 .mlinks{text-align:center;font-size:13.5px;color:var(--ink-3);margin:18px 0 0}.mlinks a{color:var(--ink-3)}
 .pals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
@@ -3154,7 +3155,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.8';
+const BUILD = 'v7.18.9';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3740,7 +3741,7 @@ function renderChrome(path,h){
   document.querySelectorAll('.nav a.link').forEach(a=>{const hr=a.getAttribute('href');const on=hr==='#/'?(path==='#/'||path==='#'):(path===hr||path.startsWith(hr+'/'));a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   {const meOn=path==='#/me'||path==='#/login';$('#navMe')?.classList.toggle('on',meOn);document.querySelector('.hd-av')?.classList.toggle('on',meOn)}
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
-  const rk=/^#\/(chats|chat\/|u\/|add\/)/.test(path)?'chats':path==='#/fav'?'fav':(path==='#/lost'||path==='#/'||path==='#')?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured'||path==='#/intake')?'home':(path.startsWith('#/adopt')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path==='#/admin'?'me':'';
+  const rk=/^#\/(chats|chat\/|u\/|add\/)/.test(path)?'chats':path==='#/fav'?'fav':(path==='#/lost'||path==='#/'||path==='#')?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured'||path==='#/intake')?'home':(path.startsWith('#/adopt')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path.startsWith('#/pals')?'health':path==='#/admin'?'me':'';
   const items=space==='health'
    ?TABS():TABS();
   $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${r===rk?'on':''}"${r==='add'?' role="button" aria-label="新增"':''}>${inner}</a>`).join('');
@@ -5324,7 +5325,7 @@ async function renderHealth(){const _n=navId;
   if(!(pets||[]).length){(_n===navId?app:_void).innerHTML=`<div class="health-hero art"><img src="duo.svg" alt="" width="220" height="150"><div><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div></div>
     <div class="empty-card" style="margin-top:16px"><div class="big"><img src="duo.svg" alt="" width="120" height="82"></div><b>還沒有毛孩檔案</b><p class="small">名字、照片、晶片號碼、生日，一次填好；走失時也能一鍵轉成協尋案件。</p><div class="btns"><a class="btn green" href="#/pet/new">建立第一隻毛孩</a></div></div>`;return}
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
-  (_n===navId?app:_void).innerHTML=`<div class="health-hero row"><div><h1>我的毛孩</h1></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
+  (_n===navId?app:_void).innerHTML=`${petSegHTML('health')}<div class="health-hero row"><div><h1>我的毛孩</h1></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
   <div id="xLostBar"></div>
   ${healthAdvice(pets,ds,hMeds,hLogs,petName)}
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
@@ -5344,8 +5345,9 @@ async function renderHealth(){const _n=navId;
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:RM()?'auto':'smooth'})},60);
 }
+function petSegHTML(on){return `<nav class="petseg" aria-label="我的毛孩"><a href="#/health" class="${on==='health'?'on':''}" ${on==='health'?'aria-current="page"':''}>${ic('steth')}健康手冊</a><a href="#/pals" class="${on==='pals'?'on':''}" ${on==='pals'?'aria-current="page"':''}>${ic('paw')}毛孩交朋友</a></nav>`}
 function renderHealthLanding(){
-  app.innerHTML=`<div class="health-hero art">
+  app.innerHTML=`${petSegHTML('health')}<div class="health-hero art">
     <img class="hh-img" src="duo.svg" alt="" width="220" height="150">
     <div><h1>我的毛孩</h1>
     <p class="lede">回診、疫苗、驅蟲、體重，全部記在同一個地方。到期前自動提醒，看醫生時打開完整健康資料給獸醫看。免費，只有你自己看得到。</p>
@@ -8680,7 +8682,7 @@ async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q
   const st={sp:['dog','cat'].includes(q.sp)?q.sp:'',city:q.city||'',dist:q.city&&q.dist||''};
   setTitle('毛孩交朋友');
   const go=(o)=>{const p=new URLSearchParams({...(tab==='meets'?{tab:'meets'}:{}),...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{}),...o});for(const [k,v] of [...p])if(!v)p.delete(k);goReplace('#/pals'+(p.toString()?'?'+p:''))};
-  app.innerHTML=`<div class="pals">
+  app.innerHTML=`${petSegHTML('pals')}<div class="pals">
     <h1>${ic('paw')} 毛孩交朋友</h1>
     <p class="muted">幫毛孩找散步夥伴、玩伴。主角是毛孩，只顯示到「區」，不公開住址。</p>
     <div class="pals-tabs" role="tablist"><a role="tab" class="${tab==='cards'?'on':''}" href="#/pals${st.sp||st.city?'?'+new URLSearchParams({...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{})}):''}">毛孩名片牆</a><a role="tab" class="${tab==='meets'?'on':''}" href="#/pals?tab=meets${st.sp?'&sp='+st.sp:''}${st.city?'&city='+encodeURIComponent(st.city):''}${st.dist?'&dist='+encodeURIComponent(st.dist):''}">揪團約玩</a></div>
