@@ -1597,7 +1597,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pal-photos input:checked+img{box-shadow:0 0 0 2px var(--sheet),0 0 0 4px var(--green)}.pal-photos label:has(input:checked)::after{content:"✓";position:absolute;right:4px;top:4px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font:800 13px/22px system-ui;text-align:center}
 .pal-addph span{width:76px;height:76px;border-radius:14px;border:2px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink-2);background:var(--sheet)}.pal-addph small{font-size:11.5px}.pal-addph .ico{width:22px;height:22px}.pal-addph.busy span{opacity:.6;animation:pulse 1s infinite}.pal-addph input{width:1px;height:1px}
 .pal-phhint{margin:-2px 0 4px}
-.pals-rules{margin-top:22px}.pals-rules ul{margin:6px 0 0;padding-left:20px}.pals-rules li{margin:3px 0}
+.pals-rules{margin-top:22px;padding:12px 16px;border-radius:14px;background:var(--sheet);color:var(--ink-2);font-size:14px}.pals-rules summary{cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;list-style:none}.pals-rules summary::-webkit-details-marker{display:none}.pals-rules summary::after{content:'看一下';margin-left:auto;font-weight:600;font-size:13px;color:var(--ink-3)}.pals-rules[open] summary::after{content:'收起'}.pals-rules summary .ico{width:16px;height:16px}.pals-rules ul{margin:8px 0 0;padding-left:20px}.pals-rules li{margin:3px 0}
 .pals .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .narrow-in{max-width:640px;margin:0 auto}
 .pals-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:18px 12px;border-radius:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--green) 18%,var(--sheet)),color-mix(in srgb,var(--green) 6%,var(--sheet)));border:1px solid color-mix(in srgb,var(--green) 28%,var(--line));color:var(--ink);text-decoration:none;min-height:180px}
@@ -2216,7 +2216,7 @@ html{-webkit-tap-highlight-color:transparent}
   html,body{background:var(--paper)!important;background-image:none!important}
   body::before,body::after{display:none!important}
   /* 主要分頁不顯示網站頂列，改用每頁自己的大標題 */
-  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="me"],[data-route="chats"]):not(.inner) header{display:none!important}
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner) header{display:none!important}
   /* 頂端：Logo、鈴鐺 */
   .xh{display:block;padding:4px 2px 0}
   .xbar{display:flex;align-items:center;gap:10px;height:44px}
@@ -2380,6 +2380,8 @@ html{-webkit-tap-highlight-color:transparent}
   .xa-k .xchip{height:48px;padding:0 18px;display:inline-flex;align-items:center;gap:6px;background:var(--sheet);border-color:transparent;box-shadow:var(--lift)}
   .xa-k .xchip.on{background:var(--ink);color:var(--paper)}
   .xa-k .xchip .ico{width:18px;height:18px}
+  .xa-k{min-width:0}.xa-k .xchip{padding:0 14px}#xaK~.xseg{flex:none;align-self:center}#xaK~.xseg button{width:36px}
+  @media (max-width:359px){.xa-k .xchip{padding:0 11px}.xa-k .xchip .ico{display:none}}
   /* 毛孩詳細頁 */
   .xstats{display:none}
   body[data-route="case"] .poster-head{margin-top:18px}
@@ -3162,7 +3164,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.16';
+const BUILD = 'v7.18.17';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3717,7 +3719,7 @@ const pawI='<span class="i"><svg viewBox="0 0 24 24" width="18" height="18" fill
 let lastSpace='lost';try{lastSpace=sessionStorage.getItem('wh_space')||'lost'}catch(_){}
 function spaceOf(path){
   // 帳號頁（我的、登入、管理後台）沿用上一個空間，不會突然跳色
-  const sp=(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':(path==='#/me'||path==='#/login'||path==='#/admin')?lastSpace:'lost';
+  const sp=(path.startsWith('#/health')||path.startsWith('#/pet')||path.startsWith('#/pals'))?'health':(path==='#/me'||path==='#/login'||path==='#/admin')?lastSpace:'lost';
   lastSpace=sp;try{sessionStorage.setItem('wh_space',sp)}catch(_){}
   return sp;
 }
@@ -5345,7 +5347,7 @@ async function renderHealth(){const _n=navId;
   if(!(pets||[]).length){(_n===navId?app:_void).innerHTML=`<div class="health-hero art"><img src="duo.svg" alt="" width="220" height="150"><div><h1>毛孩健康手冊</h1><p class="lede">先建立第一隻毛孩，就可以開始記錄回診、疫苗和驅蟲，到期前自動提醒。</p></div></div>
     <div class="empty-card" style="margin-top:16px"><div class="big"><img src="duo.svg" alt="" width="120" height="82"></div><b>還沒有毛孩檔案</b><p class="small">名字、照片、晶片號碼、生日，一次填好；走失時也能一鍵轉成協尋案件。</p><div class="btns"><a class="btn green" href="#/pet/new">建立第一隻毛孩</a></div></div>`;return}
   if(_n!==navId)return;   // 使用者已經換頁：不要畫到別的頁面上
-  setTimeout(palSegBadge,50);(_n===navId?app:_void).innerHTML=`${petSegHTML('health')}<div class="health-hero row"><div><h1>我的毛孩</h1></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
+  setTimeout(palSegBadge,50);(_n===navId?app:_void).innerHTML=`${petSegHTML('health')}<div class="health-hero row"><div><h1>健康手冊</h1></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
   <div id="xLostBar"></div>
   ${healthAdvice(pets,ds,hMeds,hLogs,petName)}
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
@@ -7081,8 +7083,8 @@ async function renderAdopt(){const _n=navId;
   const chips=(k,arr)=>arr.map(([v,t,n])=>`<button type="button" class="fchip ${st[k].includes(v)?'on':''}" data-k="${k}" data-v="${esc(v)}" aria-pressed="${st[k].includes(v)}">${esc(t)}${n!=null?` <i>${n}</i>`:''}</button>`).join('');
   const nMore=()=>st.size.length+st.sex.length+st.age.length+(st.photo?0:1);
   const MV=true;   // 手機、電腦都用新版領養頁
-  app.innerHTML=`${MV?xHeadHTML('adopt',st.city?'有 <em id="xN">…</em> 隻在等一個家':'<span id="xNt">的毛孩在等一個家</span>',st.city||'選縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div>
-    <div class="xtools"><button type="button" class="xsort" id="xaSort"><b id="xCnt"></b><span id="xaSortT">${st.sort==='old'?'等最久的':'最新入所'}</span>${XI.down}</button><div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid','list'].map(v=>`<button type="button" data-v="${v}" class="${(xView()==='map'?'big':xView())===v?'on':''}" aria-pressed="${(xView()==='map'?'big':xView())===v}" aria-label="${{big:'大圖',grid:'格狀',list:'清單'}[v]}">${XI[v]}</button>`).join('')}</div></div></div><div class="xas-bg" id="xasBg"></div>`:''}<h1>領養毛孩</h1>
+  const aV=xView()==='grid'?'grid':'big';   // 領養頁只有大圖／格狀；排序在篩選裡
+  app.innerHTML=`${MV?xHeadHTML('adopt',st.city?'有 <em id="xN">…</em> 隻在等一個家':'<span id="xNt">的毛孩在等一個家</span>',st.city||'選縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid'].map(v=>`<button type="button" data-v="${v}" class="${aV===v?'on':''}" aria-pressed="${aV===v}" aria-label="${{big:'大圖',grid:'格狀'}[v]}">${XI[v]}</button>`).join('')}</div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div></div><div class="xas-bg" id="xasBg"></div>`:''}<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
   <p class="tipbox">📞 想領養？先打電話給收容所，確認牠還在、問清楚流程（通常要帶身分證）。</p>
   <a class="intake-cta" href="#/intake"><span>${ic('search')}</span><div><b>在找走失的毛孩？</b><small>看收容所最近新收的狗貓和被發現的地點</small></div></a>
@@ -7102,7 +7104,7 @@ async function renderAdopt(){const _n=navId;
     </details></div>
     <div class="fsum" id="aSum"></div>
   </div>
-  <div class="xfeed" id="xFeed" data-v="${xView()==='map'?'big':xView()}"><div id="aList" style="margin-top:14px" aria-live="polite"></div></div>`;
+  <div class="xfeed" id="xFeed" data-v="${aV}"><div id="aList" style="margin-top:14px" aria-live="polite"></div></div>`;
   drailAttach('adopt');
   if(MV){$('#xWhere').onclick=()=>xPick('縣市',[['全台','全台'],...Object.keys(MOA_AREA).map(c=>[c,c])],st.city,v=>{const sel=$('#aCity');if(sel){sel.value=v;sel.dispatchEvent(new Event('change'))}const w=$('#xWhereT');if(w)w.textContent=v},true);
     $('#xView').onclick=e=>{const b=e.target.closest('button');if(!b)return;try{localStorage.setItem('wh_xv',b.dataset.v)}catch(_){}document.querySelectorAll('#xView button').forEach(x=>x.classList.toggle('on',x===b));$('#xFeed').dataset.v=b.dataset.v}
@@ -7111,7 +7113,7 @@ async function renderAdopt(){const _n=navId;
     $('#xaF').onclick=()=>{document.body.classList.add('xas-open');const f=$('.adopt-f');if(f){f.scrollTop=0;f.setAttribute('role','dialog');f.setAttribute('aria-label','篩選');f.tabIndex=-1;try{f.focus()}catch(_){}}};
     if(!window.__xasEsc){window.__xasEsc=true;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('xas-open'))(window.__xasShut||(()=>{}))()})}window.__xasShut=shut;$('#xasBg').onclick=shut;
     $('.adopt-f').insertAdjacentHTML('beforeend','<button type="button" class="btn block xas-done" id="xasDone">看結果</button>');$('#xasDone').onclick=shut;$('.adopt-f').insertAdjacentHTML('afterbegin','<button type="button" class="xas-x" id="xasX" aria-label="關閉">✕</button>');$('#xasX').onclick=shut;
-    $('#xaSort').onclick=()=>xPick('排序',[['new','最新入所'],['old','等最久的']],st.sort,v=>{const sel=$('#aSort');if(sel){sel.value=v;sel.dispatchEvent(new Event('change'))}$('#xaSortT').textContent=v==='old'?'等最久的':'最新入所'})}
+}
   const save=()=>{try{localStorage.setItem('wh_adopt',JSON.stringify({city:st.city,dist:st.dist,kind:st.kind}))}catch(_){}};
   const sum=()=>{const n=st.dist.length+st.variety.length+st.colour.length+st.ster.length+nMore();const e=$('#aSum');if(e)e.innerHTML=n?`已選 ${n} 個條件 <button type="button" class="linkbtn" id="aClear">全部清除</button>`:'';const c=$('#aClear');if(c)c.onclick=()=>{['dist','variety','colour','ster','size','sex','age'].forEach(k=>st[k]=[]);st.photo=true;st.limit=30;renderAdopt()}};
   const load=async()=>{const el=$('#aList');if(!el)return;save();sum();{const m=$('#afMore'),sl=$('#aSortL');if(m)m.hidden=!st.city;if(sl)sl.style.visibility=st.city?'':'hidden'}
@@ -8698,7 +8700,7 @@ function renderLogin(){
 const PAL_TAGS=['親人','親狗','親貓','怕生慢熟','活潑愛玩','溫和穩定','愛玩球','愛散步','愛吃','黏人','獨立','愛撒嬌','精力旺盛','老人家慢慢走','適合小型犬','大狗也 OK'];
 const PAL_SIZE={small:'小型',medium:'中型',large:'大型'};
 const PAL_SEX={male:'男生',female:'女生'};
-const PAL_RULES=`<div class="notice pals-rules"><b>${ic('shield')} 交朋友守則</b><ul><li>只約公園、寵物餐廳這類公開地點，不要公開住址。</li><li>禁止買賣、配種、送養收費，違規會直接下架。</li><li>第一次見面先在大家看得到的地方，毛孩互相聞一聞、慢慢來。</li><li>遇到騷擾或可疑的人，到他的會員頁檢舉、封鎖。</li></ul></div>`;
+const PAL_RULES=`<details class="pals-rules"><summary>${ic('shield')} 交朋友守則</summary><ul><li>主角是毛孩，位置只顯示到「區」，不會公開住址。</li><li>只約公園、寵物餐廳這類公開地點，不要公開住址。</li><li>禁止買賣、配種、送養收費，違規會直接下架。</li><li>第一次見面先在大家看得到的地方，毛孩互相聞一聞、慢慢來。</li><li>遇到騷擾或可疑的人，到他的會員頁檢舉、封鎖。</li></ul></details>`;
 const palBlocked=()=>new Set(lsList('wh_blocked'));
 const palHidden=()=>new Set(lsList('wh_hidden'));
 function palWhen(s){const t=tw(s),n=tw(new Date().toISOString());const wk='日一二三四五六'[new Date(new Date(s).getTime()+8*3600e3).getUTCDay()];
@@ -8714,11 +8716,9 @@ async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q
   setTitle('毛孩交朋友');
   const go=(o)=>{const p=new URLSearchParams({...(tab==='meets'?{tab:'meets'}:{}),...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{}),...o});for(const [k,v] of [...p])if(!v)p.delete(k);if(!p.get('sp')&&!p.get('city'))p.set('keep','1');goReplace('#/pals'+(p.toString()?'?'+p:''))};
   app.innerHTML=`${petSegHTML('pals')}<div class="pals">
-    <h1>${ic('paw')} 毛孩交朋友</h1>
-    <p class="muted">幫毛孩找散步夥伴、玩伴。主角是毛孩，只顯示到「區」，不公開住址。</p>
+    <div class="health-hero row"><div><h1>毛孩交朋友</h1></div>${tab==='cards'?`<button type="button" class="btn green" id="palMine">${ic('plus')} 放上我的毛孩</button>`:`<a class="btn green" href="#/pals/meet/new">${ic('plus')} 發起揪團</a>`}</div>
     <div class="pals-tabs" role="tablist"><a role="tab" class="${tab==='cards'?'on':''}" href="#/pals${st.sp||st.city?'?'+new URLSearchParams({...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{})}):''}">毛孩名片牆</a><a role="tab" class="${tab==='meets'?'on':''}" href="#/pals?tab=meets${st.sp?'&sp='+st.sp:''}${st.city?'&city='+encodeURIComponent(st.city):''}${st.dist?'&dist='+encodeURIComponent(st.dist):''}">揪團約玩</a></div>
     ${palFilterBar(st,tab)}
-    <div class="pals-cta">${tab==='cards'?`<button type="button" class="btn green" id="palMine">${ic('plus')} 放上我的毛孩</button>`:`<a class="btn green" href="#/pals/meet/new">${ic('plus')} 發起揪團（散步、約玩）</a>`}</div>
     <div id="palList"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></div>
     ${PAL_RULES}</div>`;
   palSegBadge();
