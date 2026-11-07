@@ -5,6 +5,8 @@ on:
       mode: {default: 'read'}
       promo: {default: ''}
       keywords: {default: ''}
+      subtitle: {default: ''}
+      desc: {default: ''}
 jobs:
   go:
     runs-on: ubuntu-latest
@@ -15,6 +17,8 @@ jobs:
       MODE: ${{ inputs.mode }}
       PROMO: ${{ inputs.promo }}
       KEYWORDS: ${{ inputs.keywords }}
+      SUBTITLE: ${{ inputs.subtitle }}
+      DESC: ${{ inputs.desc }}
     steps:
       - uses: actions/checkout@v4
       - run: pip install pyjwt cryptography requests

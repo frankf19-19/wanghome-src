@@ -11,13 +11,17 @@ vs=api('GET',f'/apps/{APP}/appStoreVersions?filter[platform]=IOS&limit=5')['data
 for v in vs:
     print('VERSION',v['attributes']['versionString'],v['attributes']['appStoreState'])
     for l in api('GET',f"/appStoreVersions/{v['id']}/appStoreVersionLocalizations")['data']:
-        a=l['attributes'];print(json.dumps({k:a.get(k) for k in ('locale','keywords','promotionalText','marketingUrl','supportUrl')},ensure_ascii=False))
+        a=l['attributes'];print(json.dumps({k:a.get(k) for k in ('locale','keywords','promotionalText','marketingUrl','supportUrl','description')},ensure_ascii=False))
         if os.environ.get('MODE')=='write':
             upd={}
             if os.environ.get('PROMO'): upd['promotionalText']=os.environ['PROMO']
-            if os.environ.get('KEYWORDS') and v['attributes']['appStoreState'] in ('PREPARE_FOR_SUBMISSION','DEVELOPER_REJECTED','REJECTED','METADATA_REJECTED','WAITING_FOR_REVIEW','READY_FOR_REVIEW'): upd['keywords']=os.environ['KEYWORDS']
+            editable=v['attributes']['appStoreState'] in ('PREPARE_FOR_SUBMISSION','DEVELOPER_REJECTED','REJECTED','METADATA_REJECTED','READY_FOR_REVIEW')
+            if os.environ.get('KEYWORDS') and editable: upd['keywords']=os.environ['KEYWORDS']
+            if os.environ.get('DESC') and editable: upd['description']=os.environ['DESC']
             if upd: print('PATCH',api('PATCH',f"/appStoreVersionLocalizations/{l['id']}",json={'data':{'type':'appStoreVersionLocalizations','id':l['id'],'attributes':upd}}) is not None,list(upd))
 infos=api('GET',f'/apps/{APP}/appInfos')['data']
 for i in infos:
     for l in api('GET',f"/appInfos/{i['id']}/appInfoLocalizations")['data']:
-        a=l['attributes'];print('INFO',json.dumps({k:a.get(k) for k in ('locale','name','subtitle')},ensure_ascii=False))
+        a=l['attributes'];print('INFO',i['attributes'].get('appStoreState') or i['attributes'].get('state'),json.dumps({k:a.get(k) for k in ('locale','name','subtitle')},ensure_ascii=False))
+        if os.environ.get('MODE')=='write' and os.environ.get('SUBTITLE') and (i['attributes'].get('appStoreState') or i['attributes'].get('state')) not in ('READY_FOR_SALE','READY_FOR_DISTRIBUTION'):
+            print('PATCH subtitle',api('PATCH',f"/appInfoLocalizations/{l['id']}",json={'data':{'type':'appInfoLocalizations','id':l['id'],'attributes':{'subtitle':os.environ['SUBTITLE']}}}) is not None)

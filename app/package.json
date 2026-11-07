@@ -1,7 +1,7 @@
 {
   "name": "wangmiao-app",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "汪喵回家 iOS / Android App（Capacitor，打包網站 dist/）",
   "scripts": {
     "web": "bash prepare-web.sh",
