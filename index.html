@@ -1600,6 +1600,9 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pals-rules{margin-top:22px}.pals-rules ul{margin:6px 0 0;padding-left:20px}.pals-rules li{margin:3px 0}
 .pals .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .narrow-in{max-width:640px;margin:0 auto}
+.pals-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:18px 12px;border-radius:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--green) 18%,var(--sheet)),color-mix(in srgb,var(--green) 6%,var(--sheet)));border:1px solid color-mix(in srgb,var(--green) 28%,var(--line));color:var(--ink);text-decoration:none;min-height:180px}
+.pals-tile .pt-ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--green);color:#fff}.pals-tile .pt-ic .ico{width:28px;height:28px}.pals-tile b{font-size:18px}.pals-tile small{color:var(--ink-2);font-size:13px;line-height:1.5}.pals-tile .pt-go{margin-top:4px;display:inline-flex;align-items:center;gap:2px;font-weight:800;font-size:14px;color:var(--green)}.pals-tile .pt-go .ico{width:16px;height:16px}
+.xfeed[data-v="big"] .pals-tile{min-height:0;flex-direction:row;flex-wrap:wrap;text-align:left;justify-content:flex-start;padding:14px 16px}.xfeed[data-v="big"] .pals-tile small br{display:none}
 .pals-promo{display:flex;align-items:center;gap:12px;margin:10px 0 14px;padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--green) 16%,var(--sheet)),color-mix(in srgb,#F2784B 14%,var(--sheet)));border:1px solid color-mix(in srgb,var(--green) 30%,var(--line));color:var(--ink);text-decoration:none}
 .pals-promo .pp-ic{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--green);color:#fff}.pals-promo .pp-ic .ico{width:24px;height:24px}
 .pals-promo .pp-t{flex:1;display:flex;flex-direction:column}.pals-promo b{font-size:16px}.pals-promo small{color:var(--ink-2);font-size:13px}
@@ -3157,7 +3160,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.14';
+const BUILD = 'v7.18.15';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5177,6 +5180,11 @@ function xHeadHTML(mode,title,where){return `<section class="xh">
   <nav class="xmode ${mode==='adopt'?'adopt':''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失毛孩</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養毛孩</a></nav>
   <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
+// 首頁：在第 6 張卡片後面放一格「毛孩交朋友」，看起來就像清單裡的一張卡，不另外佔一排
+function palsTileInsert(){const el=$('#list'),f=$('#xFeed');if(!el||!f||el.querySelector('.pals-tile'))return;
+  if(homeState.tab!=='lost'||homeState.near||homeState.q||homeState.chip||!['grid','big'].includes(f.dataset.v))return;
+  const cards=[...el.children].filter(x=>!x.matches('.more,.morebtn,button'));if(cards.length<6)return;
+  cards[5].insertAdjacentHTML('afterend',`<a class="pals-tile" href="#/pals"><span class="pt-ic">${ic('paw')}</span><b>毛孩交朋友</b><small>放上毛孩名片<br>找散步夥伴、揪團約玩</small><span class="pt-go">去看看 ${ic('chev')}</span></a>`)}
 function xWhereText(){const h=homeState;return h.near?'我附近':h.city.length===1?h.city[0]:h.city.length?h.city.length+' 個縣市':'全台'}
 const XQK=[['all','全部'],['dog','狗狗'],['cat','貓咪'],['d3','3 天內'],['rw','有懸賞'],['found','有人撿到'],['intake','收容所新收','sp']];
 const XSORT=[['act','最新動態'],['new','最新走失'],['near','離我最近'],['rw','懸賞最高']];
@@ -5197,14 +5205,13 @@ async function renderHomeMob(){const _n=navId;
     <div id="fActive" class="xactive"></div>
   </div>
   <div class="hidden" aria-hidden="true"><div id="lostFilters"></div><div id="tabs"><button data-t="lost"></button><button data-t="found"></button><button data-t="map"></button></div><button id="btnNear"></button><p id="nearInfo"></p><span id="cLost"></span><span id="cFound"></span></div>
-  <a class="pals-promo" href="#/pals"><span class="pp-ic">${ic('paw')}</span><span class="pp-t"><b>毛孩交朋友</b><small>找散步夥伴、揪團約玩</small></span>${ic('chev','mrc')}</a>
   <div class="xfeed" id="xFeed" data-v="${V}"><div id="list" class="grid">${skel(4)}</div></div>
   <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>`;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c){c.textContent=n||'';c.classList.toggle('on',!!n)}const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
   const setTitle2=()=>{const t=$('#xTitle');if(t)t.innerHTML=`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`;const w=$('#xWhereT');if(w)w.textContent=xWhereText();xCountQ()};
   const xCountQ=async()=>{if(homeState.near)return;const f=homeState.tab==='found';let q=f?sb.from('found_public').select('id',{count:'exact',head:true}).eq('status','open'):sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching');q=fIn(q,f?'city':'lost_city',homeState.city);q=fSp(q);const {count}=await q;if(_n!==navId||!$('#xFeed'))return;const e=$('#xN');if(e&&count!=null)e.textContent=count.toLocaleString()};
   if(_n===navId)drailAttach('lost');
-  window.xListDone=(n,lim)=>{if(!$('#xFeed'))return;const c=$('#xCnt');if(c)c.textContent=n>=lim?`${n}+ 隻・`:`${n} ${homeState.tab==='found'?'則':'隻'}・`;if(homeState.near){const e=$('#xN');if(e)e.textContent=n>=lim?n+'+':n}};
+  window.xListDone=(n,lim)=>{if(!$('#xFeed'))return;palsTileInsert();const c=$('#xCnt');if(c)c.textContent=n>=lim?`${n}+ 隻・`:`${n} ${homeState.tab==='found'?'則':'隻'}・`;if(homeState.near){const e=$('#xN');if(e)e.textContent=n>=lim?n+'+':n}};
   const reload=()=>{homeState.limit=24;showF();setTitle2();loadList()};
   $('#btnFilter').onclick=()=>openFilterSheet(()=>{reload()});
   $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;if(['sex','colour','breed'].includes(k))homeState[k]=homeState[k].filter(x=>x!==b.dataset.v);if(k==='days')homeState.days=0;if(k==='photo')homeState.photo=false;if(k==='src')homeState.src=[];{const q=homeState.qk;if((k==='sp'&&(q==='dog'||q==='cat'))||(k==='days'&&q==='d3')||(k==='rw'&&q==='rw')){homeState.qk='all';document.querySelectorAll('#xChips .xchip').forEach(x=>x.classList.toggle('on',x.dataset.q==='all'))}}reload()};
