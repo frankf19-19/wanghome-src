@@ -3172,7 +3172,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.19.2';
+const BUILD = 'v7.19.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3588,7 +3588,7 @@ function autoFillPlace(mapEl,lat,lng,now){clearTimeout(__afT);const seq=++__afSe
   const g=await reverseGeo(lat,lng);if(seq!==__afSeq||!box.isConnected||!g.city||!TW[g.city])return;   // 只套用最後一次點選的結果
   if(!g.geoOk&&cs.value)return;   // 查不到地址時只是猜最近的縣市，不要蓋掉使用者選好的
   if(cs.value!==g.city){cs.value=g.city;if(ds)ds.innerHTML=distOptions(g.city,g.district)}else if(ds&&g.district)ds.value=g.district;
-  const pt=f.querySelector('[name=lost_place],[name=place_text]');let road='';
+  const pt=f.querySelector('[name=lost_place],[name=place_text],#mtf [name=place]');let road='';
   if(g.geoOk){road=g.address.replace(g.city,'').replace(g.district,'').trim();if(pt&&!pt.value.trim()&&road)pt.value=road}
   [cs,ds,pt].forEach(x=>x&&x._ferrClr&&x._ferrClr());
   [cs,ds,pt].forEach(x=>{if(x){x.classList.remove('autofill');void x.offsetWidth;x.classList.add('autofill')}});
@@ -3959,7 +3959,7 @@ function route(){window.__lastRoute=Date.now();
   checkUsername(path);   // 登入了但還沒設定使用者名稱：先去設定
   renderChrome(path,h);
   document.body.classList.remove('has-cta','xas-open');
-  document.body.classList.toggle('formpage',/^#\/(chat\/|new$|report\/|found\/new|injured$|pet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
+  document.body.classList.toggle('formpage',/^#\/(chat\/|new$|report\/|found\/new|injured$|pet\/new|pals\/meet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
   const trav=trackDepth(wasPop);
@@ -8913,18 +8913,23 @@ async function renderMeetNew(){if(!requireLogin())return;setTitle('發起揪團'
       <div class="row2"><label class="f"><span>誰可以來</span><select name="species"><option value="dog">狗狗</option><option value="cat">貓咪</option><option value="any">狗貓都可以</option></select></label>
       <label class="f"><span>體型</span><select name="size_pref"><option value="any">不限</option><option value="small">小型犬</option><option value="medium">中型犬</option><option value="large">大型犬</option></select></label></div>
       <label class="f"><span>時間</span><input type="datetime-local" name="starts_at" data-future required min="${palLocalDT(min)}" max="${palLocalDT(max)}" value="${palLocalDT(def)}"></label>
-      <div class="row2"><label class="f"><span>縣市</span><select name="city" id="mtCity" required>${cityOptions('')}</select></label><label class="f"><span>區</span><select name="district" id="mtDist">${distOptions('')}</select></label></div>
-      <label class="f"><span>地點<small class="hint">公園、河濱、寵物餐廳這類公開地點</small></span><input name="place" maxlength="60" required placeholder="例如：大安森林公園 寵物公園"></label>
+      <label class="f"><span><b class="lbl">集合地點</b><small class="hint">點地圖標出來，縣市、區會自動帶入</small></span></label>
+      <button type="button" class="btn block ghost" id="mtLoc" style="margin:0 0 8px">${ic("pin")} 我現在就在這裡（用手機定位）</button>
+      <div class="map pick" id="mtMap"><div class="pin-hint">${ic('pin')} 點一下地圖，標出集合地點</div></div>
+      <div class="row2"><label class="f"><span>縣市</span><select name="city" id="city" required>${cityOptions('')}</select></label><label class="f"><span>區</span><select name="district" id="dist">${distOptions('')}</select></label></div>
+      <label class="f"><span>地點名稱<small class="hint">公園、河濱、寵物餐廳這類公開地點</small></span><input name="place" maxlength="60" required placeholder="例如：大安森林公園 寵物公園"></label>
       <label class="f"><span>人數上限（含你）</span><input type="number" name="cap" min="2" max="30" value="8" required></label>
       <label class="f"><span>說明<small class="hint">選填，300 字內</small></span><textarea name="note" maxlength="300" placeholder="例如：會帶水和球，下雨就取消。"></textarea></label>
-      <div class="submitbar"><button class="btn green" id="mtSave">發起</button></div>
+      <div class="submitbar"><button class="btn big block" id="mtSave">發起揪團</button></div>
     </form>${PAL_RULES}</div>`;
-  $('#mtCity').onchange=e=>{$('#mtDist').innerHTML=distOptions(e.target.value)};
+  $('#city').onchange=e=>{$('#dist').innerHTML=distOptions(e.target.value)};
+  const picker=pickerMap('mtMap',[23.9,121]);picker.map.setZoom(7);$('#mtLoc').onclick=picker.locate;
   $('#mtf').onsubmit=async e=>{e.preventDefault();const f=e.target,fd=new FormData(f);
     for(const n of ['title','starts_at','city','place']){const el=f.elements[n];if(!String(el.value).trim())return fieldErr(el)}
     const when=new Date(fd.get('starts_at')+':00+08:00');if(!(when>Date.now()))return fieldErr(f.elements.starts_at,'請選之後的時間');
     const b=$('#mtSave');b.disabled=true;b.textContent='送出中…';
     const row={title:fd.get('title').trim(),species:fd.get('species'),size_pref:fd.get('species')==='cat'?'any':fd.get('size_pref'),starts_at:when.toISOString(),city:fd.get('city'),district:fd.get('district')||null,place:fd.get('place').trim(),cap:Math.min(30,Math.max(2,+fd.get('cap')||8)),note:(fd.get('note')||'').trim()||null};
+    {const v=picker.get();if(v&&v.lat>21.5&&v.lat<26.5&&v.lng>118&&v.lng<122.5){row.lat=+v.lat.toFixed(5);row.lng=+v.lng.toFixed(5)}}
     const {data,error}=await sb.from('pet_meets').insert(row).select('id').single();
     if(error){b.disabled=false;b.textContent='發起';const m=error.message||'';return toast(/住家|買賣|30 天|最多/.test(m)?m.replace(/^.*?(請|交朋友|一天|時間)/,'$1'):'送出失敗：'+friendlyErr(m),5000)}
     __submitting=true;toast('🎉 已發起，附近的毛孩就看得到了',3000);location.hash='#/pals/meet/'+data.id};
@@ -8945,7 +8950,7 @@ async function renderMeet(id){const _n=navId;setTitle('揪團約玩');
     <dl class="kv"><dt>時間</dt><dd>${esc(palWhen(m.starts_at))}${past?'（已開始）':''}</dd><dt>地點</dt><dd>${esc((m.city||'').replace(/^臺/,'台')+(m.district||''))}・${esc(m.place)}</dd>
     <dt>誰可以來</dt><dd>${m.species==='cat'?'貓咪':m.species==='dog'?'狗狗':'狗貓都可以'}${m.size_pref&&m.size_pref!=='any'?'・'+PAL_SIZE[m.size_pref]+'犬':''}</dd><dt>人數</dt><dd>${m.joined+1} / ${m.cap} 人</dd></dl>
     ${m.note?`<p class="pal-intro">${esc(m.note)}</p>`:''}
-    <a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent((m.city||'')+(m.district||'')+' '+m.place)}">${ic('map')} 在地圖上看</a>
+    ${m.lat?`<div class="map" id="mtView" style="height:200px;margin:4px 0 10px"></div>`:''}<a class="btn ghost sm" target="_blank" rel="noopener" href="${m.lat?`https://www.google.com/maps/search/?api=1&query=${m.lat},${m.lng}`:`https://www.google.com/maps/search/${encodeURIComponent((m.city||'')+(m.district||'')+' '+m.place)}`}">${ic('map')} ${m.lat?'用 Google 地圖導航':'在地圖上看'}</a>
     <h3>參加的毛孩家長</h3>
     <div class="pal-people"><a href="#/u/${encodeURIComponent(m.username)}">${chatAva(m.username,m.avatar_url)}<span><b>${esc(m.username)}</b><small>發起人</small></span></a>${u?people.map(x=>`<a href="#/u/${encodeURIComponent(x.username)}">${chatAva(x.username,x.avatar_url)}<span><b>${esc(x.username)}</b>${x.pet_name?`<small>帶 ${esc(x.pet_name)}</small>`:''}</span></a>`).join(''):`<p class="small muted">登入後可以看到參加名單。</p>`}</div>
     <h3>${ic('chat')} 大家一起聊</h3><div class="pal-board" id="mtBoard">${u?'<p class="small muted">載入中…</p>':`<p class="small muted">登入後就能看到大家的討論、一起留言。<a href="#/login">登入／註冊（免費）</a></p>`}</div>
@@ -8964,6 +8969,7 @@ async function renderMeet(id){const _n=navId;setTitle('揪團約玩');
   {const b=$('#mtLeave');if(b)b.onclick=async()=>{const {error}=await sb.from('pet_meet_joins').delete().eq('meet_id',id).eq('user_id',u.id);if(error)return toast(friendlyErr(error.message));toast('已取消參加');again()}}
   {const b=$('#mtDel');if(b)b.onclick=async()=>{if(!await askSheet({title:'取消這個活動？',body:'已經參加的人會看不到這個活動，建議先私訊跟大家說一聲。',ok:'取消活動',danger:true}))return;const {error}=await sb.from('pet_meets').delete().eq('id',id);if(error)return toast(friendlyErr(error.message));toast('已取消活動');location.hash='#/pals?tab=meets'}}
   {const b=$('#mtRep');if(b)b.onclick=()=>palReport(m.owner_id,m.id,m.username)}
+  if(m.lat&&$('#mtView')){try{const mp=makeMap('mtView',[m.lat,m.lng],16);marker([m.lat,m.lng],'🐾','me').addTo(mp)}catch(_){}}
   if(!u)return;
   const bl=palBlocked();let last='';
   const draw=async()=>{if(_n!==navId)return;const {data,error}=await sb.from('pet_meet_board').select('*').eq('meet_id',id).order('id',{ascending:true}).limit(200);if(_n!==navId)return;const box=$('#mtBoard');if(!box)return;
