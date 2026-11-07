@@ -3211,7 +3211,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.20.1';
+const BUILD = 'v7.20.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3316,6 +3316,8 @@ async function liveCheck(){if(!IS_APP||LIVE.busy)return;const L=localStorage,FS=
 // 新版下載好了：上方出現綠色條，點了馬上換新版（不用關掉 App）
 function liveReadyBar(){try{if(document.getElementById('updBar'))return;const d=document.createElement('button');d.id='updBar';d.type='button';d.className='updbar';d.textContent='App 有新版本，點這裡更新';
   d.onclick=()=>{if(window.__uploading)return toast('等照片傳完再更新');d.disabled=true;d.textContent='更新中…';if(!liveApplyPending())location.reload()};document.body.appendChild(d)}catch(_){}}
+// LINE 分享文字：手機開 LINE App；電腦（沒有 LINE App 網址可接）改用 LINE 網頁版分享
+function lineShareHref(text){const t=String(text||'');const mob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||IS_APP;if(mob)return 'https://line.me/R/share?text='+encodeURIComponent(t);const u=(t.match(/https?:\/\/\S+/)||[])[0]||'https://wangmiaotw.com/';return 'https://social-plugins.line.me/lineit/share?url='+encodeURIComponent(u)+'&text='+encodeURIComponent(t)}
 function b64utf8(t){return btoa(unescape(encodeURIComponent(t)))}
 // 把檔案存到 App 暫存區，再叫出系統分享選單（存到相簿、傳 LINE、加到行事曆…）
 async function appShareFile(base64,filename,title,text){
@@ -6285,7 +6287,7 @@ function renderCreated(id,token,email,petName){const PN=esc(petName||'牠');
   <p class="lede">還差${email?'三':'兩'}件事，照著做就好。</p>
   <section class="cstep"><h2><span class="cnum">1</span>先把「管理網址」存起來</h2>
     <p>之後要確認目擊、修改資料、標記「找到了」，都要從這個網址進去。${me()?'你已登入，在「我的」也找得到，這個網址當備用。':'<b>這個網址只會出現這一次，請一定要存。</b>'}</p>
-    <div class="bigacts"><a class="btn big line" href="https://line.me/R/share?text=${encodeURIComponent(saveMsg)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a>
+    <div class="bigacts"><a class="btn big line" href="${lineShareHref(saveMsg)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a>
     <button type="button" class="btn big ghost" id="cpManage">複製管理網址</button></div>
     <details class="more"><summary>我要自己抄下來</summary><div class="tokenbox" id="mlink">${esc(manage)}</div></details>
   </section>
@@ -6295,7 +6297,7 @@ function renderCreated(id,token,email,petName){const PN=esc(petName||'牠');
   <section class="cstep${me()?'':' locked'}" ${me()?'':'inert'}><h2><span class="cnum">${email?3:2}</span>做海報、分享出去</h2>
     <p>貼到附近的 FB 社團、LINE 群組，看到的人越多越好找。</p>
     <div class="bigacts"><a class="btn big" href="#/poster/${id}">${ic("image")} 做協尋海報</a>
-    ${IS_APP?`<button type="button" class="btn big ghost" id="btnShareNew">${ic("share")} 分享給朋友（LINE、FB…）</button>`:`<a class="btn big ghost" href="https://line.me/R/share?text=${encodeURIComponent('請幫忙協尋，看到請回報：\n'+cUrl)}" target="_blank" rel="noopener">用 LINE 分享案件</a>`}</div>
+    ${IS_APP?`<button type="button" class="btn big ghost" id="btnShareNew">${ic("share")} 分享給朋友（LINE、FB…）</button>`:`<a class="btn big ghost" href="${lineShareHref('請幫忙協尋，看到請回報：\n'+cUrl)}" target="_blank" rel="noopener">用 LINE 分享案件</a>`}</div>
     <a class="btn big block green" href="#/manage/${id}" style="margin-top:12px">下一步：看今天建議你做的事</a>
   </section>
   </div>`;
@@ -6394,7 +6396,7 @@ async function renderReport(id){const _n=navId;
       <p class="small" id="mailNote" style="color:var(--green);font-weight:700;margin:0 0 8px" aria-live="polite"></p>
       <div class="bigacts">${tel?`<a class="btn big call" href="tel:${esc(tel)}">${ic('phone')} 打電話給${esc(c.contact_name||'飼主')}</a>`:''}
       ${lineId?`<a class="btn big line" href="${lineUrl}" target="_blank" rel="noopener">加飼主 LINE（${esc(lineId)}）</a>`:''}
-      ${tel||lineId?`<a class="btn big ghost" href="https://line.me/R/share?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">用 LINE 傳這段話</a>`:''}</div>
+      ${tel||lineId?`<a class="btn big ghost" href="${lineShareHref(msg)}" target="_blank" rel="noopener">用 LINE 傳這段話</a>`:''}</div>
       ${tel||lineId?`<label class="f" style="text-align:left;margin-top:14px"><span>要傳給飼主的話（可以複製）</span><textarea id="msgTxt" rows="5" readonly>${esc(msg)}</textarea></label>
       <button class="btn ghost" id="cpMsg" type="button">複製這段話</button>`:''}
       <p class="small muted" style="margin-top:14px">如果牠還在你視線內：保持距離、不要追，蹲低側身不直視牠，等飼主來。</p>
@@ -6716,7 +6718,7 @@ async function quickReport(){
       box.innerHTML=`<div class="q-done"><b>${ic("aid")} 通報已記錄，現在請打電話</b><span>本站無法派人到現場，要請當地動保單位來救援。</span></div>
         ${agencyCallHTML(qCity)}
         <div class="q-script"><b>電話裡被問到時，照著唸：</b><dl>${kv.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
-          <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報內容</button><a class="btn sm line" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(script)}">用 LINE 傳給動保／朋友</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} Google 地圖</a></div>
+          <div class="er-call"><button type="button" class="btn sm ghost" id="qCopy">${ic("link")} 複製通報內容</button><a class="btn sm line" target="_blank" rel="noopener" href="${lineShareHref(script)}">用 LINE 傳給動保／朋友</a><a class="btn sm ghost" target="_blank" rel="noopener" href="${mapUrl}">${ic("map")} Google 地圖</a></div>
           <textarea id="qScript" readonly hidden>${esc(script)}</textarea></div>
         <div class="q-wait-tips"><b>等救援時</b><ul><li>保持距離，不要徒手抱牠，受傷的動物會因為害怕咬人。</li><li>注意自己的安全，不要站在車道上；可以開車燈、放三角錐提醒來車。</li><li>不要餵食或餵水，可能要麻醉手術。</li><li>手機保持暢通，救援人員可能會回電問路。</li></ul></div>
         <p class="small"><a href="#/found/${data.id}">查看通報頁</a>（附近的人和飼主看得到這則通報）</p>`;
@@ -6810,7 +6812,7 @@ function renderInjured(){geoWarm();
       <div class="notice red"><b>還沒打電話的話，請現在打</b>本站無法派人救援。</div>
       <div class="bigacts"><a class="btn big" href="tel:1959">${ic("phone")} 撥打 1959 動保專線</a><a class="btn big ghost" href="tel:1999">${ic("phone")} 接不通改撥 1999</a></div>
       <section class="cstep"><h2><span class="cnum">✓</span>把「管理網址」存起來</h2><p>牠被救走或送醫後，用這個網址更新狀況。</p>
-        <div class="bigacts"><a class="btn big line" href="https://line.me/R/share?text=${encodeURIComponent('汪喵回家｜受傷通報管理網址（請勿外流）\n'+manage)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a><button type="button" class="btn big ghost" id="cpIManage">複製管理網址</button></div></section>
+        <div class="bigacts"><a class="btn big line" href="${lineShareHref('汪喵回家｜受傷通報管理網址（請勿外流）\n'+manage)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a><button type="button" class="btn big ghost" id="cpIManage">複製管理網址</button></div></section>
       <div class="bigacts"><a class="btn big ghost" href="#/found/${data.id}">查看通報</a></div></div>`;
       $('#cpIManage').onclick=()=>copy(manage);
     }catch(err){toast('送出失敗：'+(err.message||err));btn.disabled=false;btn.textContent='送出受傷通報'}
@@ -6910,7 +6912,7 @@ function renderFoundNew(){
       <p class="lede">系統會自動比對附近的走失案件，飼主登記時也會看到你。</p>
       <section class="cstep"><h2><span class="cnum">1</span>把「管理網址」存起來${kind==='seen'?'（可以不存）':''}</h2>
         <p>${kind==='seen'?'如果之後牠被帶走或回家了，可以用這個網址更新或刪除。沒存也沒關係，通報 60 天後會自動結案、不再公開你的聯絡方式。':'牠回到主人身邊後，用這個網址標記「已回家」。網址只會出現這一次。'}</p>
-        <div class="bigacts"><a class="btn big line" href="https://line.me/R/share?text=${encodeURIComponent(`汪喵回家｜我的${kind==='seen'?'目擊':'拾獲'}通報管理網址（請勿外流）\n`+manage)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a>
+        <div class="bigacts"><a class="btn big line" href="${lineShareHref(`汪喵回家｜我的${kind==='seen'?'目擊':'拾獲'}通報管理網址（請勿外流）\n`+manage)}" target="_blank" rel="noopener">用 LINE 傳給自己保存</a>
         <button type="button" class="btn big ghost" id="cpFManage">複製管理網址</button></div>
       </section>
       <section class="cstep"><h2><span class="cnum">2</span>看看有沒有人在找牠</h2>
