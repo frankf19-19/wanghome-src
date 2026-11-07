@@ -3157,7 +3157,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.13';
+const BUILD = 'v7.18.14';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -7384,17 +7384,25 @@ function admContact(r){const rows=[];
   if(r.member_email&&r.member_email!==em)rows.push(`會員帳號：${admMail(r.member_email,title)}`);
   return rows.length?`<div class="adm-ct small">${rows.join('<br>')}</div>`:'<div class="adm-ct small muted">沒有留聯絡方式</div>'}
 // 收容所照片：用站長自己（在台灣）的瀏覽器，把比對結果的收容所照片存到網站，排程才能做 AI 照片比對
+async function shPicTodo(){const {data,error}=await sb.from('shelter_matches').select('animal_subid,photo_url').eq('dismissed',false).limit(3000);if(error)throw error;
+  return [...new Map((data||[]).filter(m=>m.animal_subid&&!String(m.photo_url||'').startsWith(SH_STORE)).map(m=>[m.animal_subid.trim(),m.photo_url])).entries()]}
+async function shPicRun(subs,onp,stop){let ok=0,none=0,i=0;
+  const one=async([sub,u])=>{let src=moaPic(u);if(!src)src=CONFIG.SITE_URL+'api/shelterpic/'+sub+'.jpg?v=3';try{sessionStorage.removeItem('wh_shs_'+sub)}catch(_){}
+    let r=null;try{r=await shelterStore(sub,src)}catch(_){}if(r)ok++;else none++;i++;onp&&onp(i,ok,none)};
+  for(let k=0;k<subs.length;k+=3){if(stop&&stop())break;await Promise.all(subs.slice(k,k+3).map(one))}return {ok,none,i}}
+// 站長打開網站／App 時，在背景自動補收容所照片（每 3 小時最多一次、每次最多 120 隻；畫面不在前景就先停）
+async function shPicAuto(){try{if(!me()||!sb)return;const L=localStorage;if(Date.now()-(+L.getItem('wh_shauto')||0)<3*36e5)return;
+  const {data:adm}=await sb.rpc('is_admin');if(!adm)return;L.setItem('wh_shauto',String(Date.now()));
+  const subs=(await shPicTodo()).slice(0,120);if(!subs.length)return;
+  const r=await shPicRun(subs,null,()=>document.visibilityState!=='visible');console.info('shelter photos auto',r)}catch(e){console.warn('shPicAuto',e)}}
+setTimeout(()=>{if(typeof shPicAuto==='function')shPicAuto()},25000);
 async function admShPic(box){const _n=navId;box.innerHTML='<div class="empty">讀取中…</div>';
-  const {data,error}=await sb.from('shelter_matches').select('animal_subid,photo_url').eq('dismissed',false).limit(3000);if(_n!==navId)return;
-  if(error){box.innerHTML=`<div class="empty-card"><b>讀取失敗</b><p class="small">${esc(error.message)}</p></div>`;return}
-  const subs=[...new Map((data||[]).filter(m=>m.animal_subid&&!String(m.photo_url||'').startsWith(SH_STORE)).map(m=>[m.animal_subid.trim(),m.photo_url])).entries()];
-  box.innerHTML=`<p class="small muted">寵物登記網不接受國外主機連線，AI 照片比對要先把收容所照片存到網站。打開協尋頁時會自動存；這裡可以一次補齊（請用台灣的網路）。</p>
+  let subs;try{subs=await shPicTodo()}catch(error){if(_n===navId)box.innerHTML=`<div class="empty-card"><b>讀取失敗</b><p class="small">${esc(error.message)}</p></div>`;return}if(_n!==navId)return;
+  box.innerHTML=`<p class="small muted">寵物登記網不接受國外主機連線，AI 照片比對要先把收容所照片存到網站。<b>現在會自動補：</b>你（站長）打開網站或 App 時，背景每 3 小時自動補最多 120 隻，不用手動按；打開協尋頁時也會自動存。想一次補齊可以按下面的按鈕（請用台灣的網路）。</p>
   <p>還沒存的收容所動物：<b>${subs.length}</b> 隻</p><button type="button" class="btn" id="shGo" ${subs.length?'':'disabled'}>開始補照片</button><p class="small muted" id="shSt"></p>`;
-  $('#shGo').onclick=async()=>{const b=$('#shGo');b.disabled=true;let ok=0,none=0,i=0;const st=$('#shSt');
-    const one=async([sub,u])=>{let src=moaPic(u);if(!src)src=CONFIG.SITE_URL+'api/shelterpic/'+sub+'.jpg?v=3';try{sessionStorage.removeItem('wh_shs_'+sub)}catch(_){}
-      const r=await shelterStore(sub,src);if(r)ok++;else none++;i++;if(st)st.textContent=`進度 ${i}/${subs.length}：存好 ${ok}、沒有照片或略過 ${none}`};
-    for(let k=0;k<subs.length;k+=3){if(_n!==navId)return;await Promise.all(subs.slice(k,k+3).map(one))}
-    if(st)st.textContent+=`。完成！下一次排程（每 6 小時）會用這些照片做 AI 比對。`}}
+  $('#shGo').onclick=async()=>{const b=$('#shGo');b.disabled=true;const st=$('#shSt');
+    await shPicRun(subs,(i,ok,none)=>{if(st)st.textContent=`進度 ${i}/${subs.length}：存好 ${ok}、沒有照片或略過 ${none}`},()=>_n!==navId);
+    if(st&&_n===navId)st.textContent+=`。完成！下一次排程（每 6 小時）會用這些照片做 AI 比對。`}}
 // 農業部申報案件的目擊：飼主沒有使用本站，由站長打電話轉告飼主後標記
 async function admMoa(box,showAll){const _n=navId;box.innerHTML='<div class="empty">讀取中…</div>';
   const {data:rs,error}=await sb.rpc('admin_moa_sightings',{p_include_done:showAll});if(_n!==navId)return;
