@@ -7,6 +7,13 @@ def api(m,p,**k):
     r=requests.request(m,B+p,headers={'Authorization':'Bearer '+tok(),'Content-Type':'application/json'},**k)
     if r.status_code>=400: print(m,p,r.status_code,r.text[:800]); return None
     return r.json() if r.text else {}
+if os.environ.get('MODE')=='cancel':
+    subs=api('GET',f'/reviewSubmissions?filter[app]={APP}&filter[platform]=IOS&limit=10')['data']
+    for sb in subs:
+        print('SUB',sb['id'],sb['attributes'].get('state'))
+        if sb['attributes'].get('state') in ('WAITING_FOR_REVIEW','READY_FOR_REVIEW'):
+            print('CANCEL',api('PATCH',f"/reviewSubmissions/{sb['id']}",json={'data':{'type':'reviewSubmissions','id':sb['id'],'attributes':{'canceled':True}}}) is not None)
+    raise SystemExit(0)
 vs=api('GET',f'/apps/{APP}/appStoreVersions?filter[platform]=IOS&limit=5')['data']
 for v in vs:
     print('VERSION',v['attributes']['versionString'],v['attributes']['appStoreState'])
