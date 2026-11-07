@@ -23,7 +23,7 @@ begin
   begin insert into public.pet_meet_joins(meet_id,pet_name) values(mid,'x'); perform set_config('audit.out',current_setting('audit.out')||' | joins.own(should block) OK?!',true); exception when others then perform set_config('audit.out',current_setting('audit.out')||' | joins.own blocked: '||sqlerrm,true); end;
   begin perform 1 from public.pet_meet_board limit 1; perform 1 from public.pet_meet_people limit 1; perform 1 from public.pet_card_likers limit 1; perform set_config('audit.out',current_setting('audit.out')||' | views OK',true); exception when others then perform set_config('audit.out',current_setting('audit.out')||' | views ERR '||sqlerrm,true); end;
   if cid is not null then
-    begin insert into public.follows(case_id) values(cid); perform set_config('audit.out',current_setting('audit.out')||' | follows.ins OK',true); exception when others then perform set_config('audit.out',current_setting('audit.out')||' | follows.ins ERR '||sqlerrm,true); end;
+    begin insert into public.follows(user_id,case_id) values(uid,cid); perform set_config('audit.out',current_setting('audit.out')||' | follows.ins OK',true); exception when others then perform set_config('audit.out',current_setting('audit.out')||' | follows.ins ERR '||sqlerrm,true); end;
     begin insert into public.sightings(case_id,seen_at,place_text,note) values(cid,now()-interval '1 hour','稽核測試','測試'); perform set_config('audit.out',current_setting('audit.out')||' | sightings.ins(auth) OK',true); exception when others then perform set_config('audit.out',current_setting('audit.out')||' | sightings.ins(auth) ERR '||sqlerrm,true); end;
   end if;
   execute 'reset role';
