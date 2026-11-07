@@ -1269,7 +1269,7 @@ body{touch-action:manipulation}
 
 /* ===== v4.2 App 導覽：固定 5 個分頁＋中間新增鈕、底部滑出選單 ===== */
 @media (max-width:760px){
-  .tabbar{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .tabbar{grid-template-columns:repeat(6,minmax(0,1fr))!important}.tabbar a{font-size:11.5px;white-space:nowrap}
   .tabbar a.cta .i{width:54px!important;height:54px!important;border-radius:50%!important;margin-top:-26px!important;background:var(--red-fill)!important;box-shadow:0 8px 18px -6px rgba(184,53,99,.6),0 0 0 5px var(--sheet)!important}
   .tabbar a.cta .i svg{width:26px!important;height:26px!important}
   .tabbar a.cta{color:var(--ink-3)!important;font-weight:600!important}
@@ -3164,7 +3164,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.17';
+const BUILD = 'v7.18.19';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3703,6 +3703,7 @@ function splashHide(){if(!IS_APP)return;requestAnimationFrame(()=>setTimeout(()=
 let refreshTimer=null;
 
 const TI={
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
  home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/>',
  map:'<path d="M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
  me:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/>',
@@ -3727,7 +3728,8 @@ function spaceOf(path){
 function meLabel(){try{return session?.user?'我的':'註冊／登入'}catch(_){return '註冊／登入'}}
 // 底部選單：固定 5 個（像一般 App），中間「＋」打開新增選單
 const TI_SEARCH='<svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>';
-function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/chats','chats','<span class="tb-ic">'+tbI('chat')+'<i class="tb-n" id="tbChatN"'+(__chatN?'':' hidden')+'>'+(__chatN>9?'9+':__chatN)+'</i></span>訊息'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/health','health',tbI('paw')+'我的毛孩'],['#/me','me',tbI('me')+'我的']]}
+let __palN=0;
+function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/chats','chats','<span class="tb-ic">'+tbI('chat')+'<i class="tb-n" id="tbChatN"'+(__chatN?'':' hidden')+'>'+(__chatN>9?'9+':__chatN)+'</i></span>訊息'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/pals','pals','<span class="tb-ic">'+tbI('heart')+'<i class="tb-n" id="tbPalN"'+(__palN?'':' hidden')+'>'+(__palN>9?'9+':__palN)+'</i></span>交朋友'],['#/health','health',tbI('paw')+'我的毛孩'],['#/me','me',tbI('me')+'我的']]}
 function openAddSheet(){
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   const r=(h,i,c,t,d)=>`<a class="srow" href="${h}"><span class="sri ${c}">${i}</span><span class="srt"><b>${t}</b><small>${d}</small></span>${ic('chev','mrc')}</a>`;
@@ -3754,7 +3756,7 @@ function renderChrome(path,h){
   document.querySelectorAll('.nav a.link').forEach(a=>{const hr=a.getAttribute('href');const on=hr==='#/'?(path==='#/'||path==='#'):(path===hr||path.startsWith(hr+'/'));a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   {const meOn=path==='#/me'||path==='#/login';$('#navMe')?.classList.toggle('on',meOn);document.querySelector('.hd-av')?.classList.toggle('on',meOn)}
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
-  const rk=/^#\/(chats|chat\/|u\/|add\/)/.test(path)?'chats':path==='#/fav'?'fav':(path==='#/lost'||path==='#/'||path==='#')?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured'||path==='#/intake')?'home':(path.startsWith('#/adopt')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path.startsWith('#/pals')?'health':path==='#/admin'?'me':'';
+  const rk=/^#\/(chats|chat\/|u\/|add\/)/.test(path)?'chats':path==='#/fav'?'fav':(path==='#/lost'||path==='#/'||path==='#')?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured'||path==='#/intake')?'home':(path.startsWith('#/adopt')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path.startsWith('#/pals')?'pals':path==='#/admin'?'me':'';
   const items=space==='health'
    ?TABS():TABS();
   $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${r===rk?'on':''}"${r==='add'?' role="button" aria-label="新增"':''}>${inner}</a>`).join('');
@@ -5191,7 +5193,8 @@ function xHeadHTML(mode,title,where){return `<section class="xh">
   <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
 // 首頁：在第 6 張卡片後面放一格「毛孩交朋友」，看起來就像清單裡的一張卡，不另外佔一排
-function palsTileInsert(){const el=$('#list'),f=$('#xFeed');if(!el||!f||el.querySelector('.pals-tile'))return;
+function palsTileInsert(){return;   // 交朋友已經在底部分頁，首頁不再放入口
+  const el=$('#list'),f=$('#xFeed');if(!el||!f||el.querySelector('.pals-tile'))return;
   if(homeState.tab!=='lost'||homeState.near||homeState.q||homeState.chip||!['grid','big'].includes(f.dataset.v))return;
   const cards=[...el.children].filter(x=>!x.matches('.more,.morebtn,button'));if(cards.length<6)return;
   cards[5].insertAdjacentHTML('afterend',`<a class="pals-tile" href="#/pals"><span class="pt-ic">${ic('paw')}</span><b>毛孩交朋友</b><small>放上毛孩名片<br>找散步夥伴、揪團約玩</small><span class="pt-go">去看看 ${ic('chev')}</span></a>`)}
@@ -5367,7 +5370,7 @@ async function renderHealth(){const _n=navId;
   const q=qs(location.hash);const tgt=q.cal?'#calSec':q.due?'#dueSec':null;
   if(tgt)setTimeout(()=>{const el=$(tgt);if(el)window.scrollTo({top:el.getBoundingClientRect().top+scrollY-(innerWidth>640?150:20),behavior:RM()?'auto':'smooth'})},60);
 }
-function petSegHTML(on){return `<nav class="petseg" aria-label="我的毛孩"><a href="#/health" class="${on==='health'?'on':''}" ${on==='health'?'aria-current="page"':''}>${ic('steth')}健康手冊</a><a href="#/pals" class="${on==='pals'?'on':''}" ${on==='pals'?'aria-current="page"':''}>${ic('paw')}毛孩交朋友</a></nav>`}
+function petSegHTML(on){return ''}   // 交朋友已經是底部獨立分頁，不再需要切換列
 function renderHealthLanding(){
   app.innerHTML=`${petSegHTML('health')}<div class="health-hero art">
     <img class="hh-img" src="duo.svg" alt="" width="220" height="150">
@@ -7411,7 +7414,7 @@ async function shPicAuto(){try{if(!me()||!sb)return;const L=localStorage;if(Date
   const {data:adm}=await sb.rpc('is_admin');if(!adm)return;L.setItem('wh_shauto',String(Date.now()));
   const subs=(await shPicTodo()).slice(0,120);if(!subs.length)return;
   const r=await shPicRun(subs,null,()=>document.visibilityState!=='visible');console.info('shelter photos auto',r)}catch(e){console.warn('shPicAuto',e)}}
-setTimeout(()=>{if(typeof shPicAuto==='function')shPicAuto()},25000);
+setTimeout(()=>{if(typeof shPicAuto==='function')shPicAuto()},25000);setTimeout(()=>{if(typeof palSegBadge==='function')palSegBadge()},6000);
 async function admShPic(box){const _n=navId;box.innerHTML='<div class="empty">讀取中…</div>';
   let subs;try{subs=await shPicTodo()}catch(error){if(_n===navId)box.innerHTML=`<div class="empty-card"><b>讀取失敗</b><p class="small">${esc(error.message)}</p></div>`;return}if(_n!==navId)return;
   box.innerHTML=`<p class="small muted">寵物登記網不接受國外主機連線，AI 照片比對要先把收容所照片存到網站。<b>現在會自動補：</b>你（站長）打開網站或 App 時，背景每 3 小時自動補最多 120 隻，不用手動按；打開協尋頁時也會自動存。想一次補齊可以按下面的按鈕（請用台灣的網路）。</p>
@@ -8790,7 +8793,7 @@ function palRank(c){return (palLikesMe(c)&&!__palLiked.has(c.pet_id)?3:0)+(palMu
 function palBadge(c){if(palMutual(c))return '<span class="pal-badge mu">互相喜歡</span>';if(palLikesMe(c))return '<span class="pal-badge lk">喜歡你家毛孩</span>';if(palIsNew(c))return '<span class="pal-badge nw">新朋友</span>';return ''}
 // 「毛孩交朋友」分頁上的紅點：上次看過之後，又有幾個人喜歡我家毛孩
 async function palSegBadge(){if(!me())return;try{await palLikedLoad();const seen=localStorage.getItem('wh_likes_seen')||'';let n=0;__palLikers.forEach(t=>{if(t>seen)n++});
-  const a=document.querySelector('.petseg a[href="#/pals"]');if(!a)return;let b=a.querySelector('.pbadge');if(!n){b&&b.remove();return}if(!b){b=document.createElement('i');b.className='pbadge';a.appendChild(b)}b.textContent=n>9?'9+':n}catch(_){}}
+  __palN=n;const e=document.getElementById('tbPalN');if(e){e.hidden=!n;e.textContent=n>9?'9+':n}}catch(_){}}
 function palLikesSeen(){try{localStorage.setItem('wh_likes_seen',new Date().toISOString())}catch(_){}palSegBadge()}
 function palHeart(on){return `<svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" aria-hidden="true" fill="${on?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`}
 function palLikeBtn(c,i){const mine=me()&&me().id===c.owner_id,on=__palLiked.has(c.pet_id);
@@ -8959,7 +8962,7 @@ async function renderMeet(id){const _n=navId;setTitle('揪團約玩');
 function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
-  <p class="mlh">常用</p><div class="mgroup">${row('#/fav','mark','收藏','c1')}${row('#/pals','paw','毛孩交朋友','c3')}${row('#/intake','search','收容所最近新收','c2')}</div>
+  <p class="mlh">常用</p><div class="mgroup">${row('#/fav','mark','收藏','c1')}${row('#/intake','search','收容所最近新收','c2')}</div>
   <p class="mlh">學習</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}</div>
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${row('#/contact','mail','聯絡我們','c3')}${(CONFIG.SOCIAL||[]).length?`<div class="mrow msoc"><span class="mri c2">${ic('heart')}</span><span class="mrl">追蹤我們</span><span class="msoc-i">${CONFIG.SOCIAL.map(x=>`<a href="${x.u}" target="_blank" rel="noopener" aria-label="追蹤 ${esc(x.n)}">${ic(x.k)}</a>`).join('')}</span></div>`:''}${IS_APP?'':`<a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a>`}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
