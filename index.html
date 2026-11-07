@@ -1571,6 +1571,45 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .msoc{cursor:default}.msoc-i{display:flex;gap:6px;margin-left:auto}.msoc-i a{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--paper);color:var(--ink-2)}.msoc-i a:hover{color:var(--ink)}.msoc-i .ico{width:20px;height:20px}
 .mlinks{text-align:center;font-size:13.5px;color:var(--ink-3);margin:18px 0 0}.mlinks a{color:var(--ink-3)}
 .pals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.pd-wrap{display:flex;flex-direction:column;align-items:center}
+.pd-stack{position:relative;width:100%;max-width:440px;height:min(60vh,520px);margin:2px auto 0}
+.pd-card{position:absolute;inset:0;border-radius:26px;overflow:hidden;background:var(--sheet);box-shadow:0 12px 32px rgba(70,30,20,.18);touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s;cursor:grab;--lk:0;--np:0}
+.pd-card.pd-next{transform:scale(.94) translateY(16px);pointer-events:none;filter:brightness(.97)}.pd-card.pd-next.rise{transform:none;filter:none}
+.pd-ph{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(160deg,#FFE3D6,#FFD0DE);color:var(--red)}.pd-ph.cat{background:linear-gradient(160deg,#E8E4FF,#FFDDE8)}
+.pd-ph img{width:100%;height:100%;object-fit:cover;pointer-events:none}.pd-ph .sp-i{width:110px;height:110px;opacity:.7}
+.pd-info{position:absolute;left:0;right:0;bottom:0;padding:70px 20px 20px;background:linear-gradient(to bottom,transparent,rgba(20,8,4,.78));color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:3px;pointer-events:none}
+.pd-info b{font-size:28px;font-weight:800;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.3)}.pd-info small{font-size:14.5px;opacity:.95;display:flex;align-items:center;gap:4px}.pd-info small .ico{width:15px;height:15px}
+.pd-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.pd-tags i{font-style:normal;font-size:13px;font-weight:600;padding:3px 11px;border-radius:99px;background:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pd-card .pal-badge{top:16px;left:16px;font-size:13px;padding:4px 11px}
+.pd-stamp{position:absolute;top:70px;z-index:2;font-style:normal;font-weight:900;font-size:30px;letter-spacing:2px;padding:4px 16px;border:4px solid;border-radius:14px;pointer-events:none}
+.pd-stamp.like{left:22px;color:#FF4F86;border-color:#FF4F86;background:rgba(255,255,255,.85);transform:rotate(-14deg);opacity:var(--lk)}
+.pd-stamp.nope{right:22px;color:#fff;border-color:#fff;background:rgba(0,0,0,.28);transform:rotate(14deg);opacity:var(--np)}
+.pd-acts{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 4px}
+.pd-btn{width:62px;height:62px;border-radius:50%;border:0;background:var(--sheet);box-shadow:0 6px 18px rgba(70,30,20,.16);display:grid;place-items:center;font:800 26px/1 var(--body);color:var(--ink-2);cursor:pointer;transition:transform .12s}
+.pd-btn:active{transform:scale(.9)}.pd-btn:disabled{opacity:.35}.pd-btn .ico{width:22px;height:22px}
+.pd-btn.like{width:74px;height:74px;color:#fff;background:linear-gradient(135deg,#FF8AA6,#E8457E)}.pd-btn.like .ico{width:34px;height:34px}
+.pd-btn.sm{width:46px;height:46px}
+.pd-left{text-align:center;margin:8px 0 0;color:var(--ink-3);font-size:13.5px}.pd-left .linkbtn{font-size:13.5px}
+.pal-score{display:inline-block;margin-top:5px;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,#E8457E 12%,var(--sheet));color:#C2306A;font-size:12.5px;font-weight:800;font-style:normal}
+.pal-score.on-dark{background:rgba(255,255,255,.94);color:#C2306A;font-size:13.5px;margin-top:6px}
+.pal-top{margin:0 0 16px}.pal-top-h{font-weight:800;font-size:16px;margin:0 0 10px}
+.pal-top-row{display:flex;gap:10px;overflow-x:auto;margin:0 -16px;padding:14px 16px 6px;scrollbar-width:none}.pal-top-row::-webkit-scrollbar{display:none}
+.pal-top-i{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;font:inherit;color:inherit;cursor:pointer;padding:0}
+.pal-top-ph{position:relative;width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:var(--beige,#F3ECE4);color:var(--red);box-shadow:0 0 0 3px var(--sheet),0 0 0 5px color-mix(in srgb,#E8457E 35%,var(--line))}
+.pal-top-i:first-child .pal-top-ph{box-shadow:0 0 0 3px var(--sheet),0 0 0 5px #F2B33D}
+.pal-top-ph img{width:66px;height:66px;border-radius:50%;object-fit:cover}.pal-top-ph .sp-i{width:34px;height:34px}
+.crown{position:absolute;top:-17px;left:50%;transform:translateX(-50%) rotate(-10deg);font-style:normal;font-size:22px;z-index:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2))}
+.pal-top-i b{font-size:13px;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pal-top-i small{font-size:12px;color:#C2306A;font-weight:800}
+.pal-match-bg{align-items:center!important;background:rgba(40,10,24,.6)!important}
+.pal-match{margin:auto;width:min(92vw,380px);padding:26px 22px 22px;border-radius:30px;background:linear-gradient(160deg,#FF9AB2,#E8457E 58%,#C2306A);color:#fff;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:pmIn .5s cubic-bezier(.34,1.5,.64,1)}
+@keyframes pmIn{from{transform:scale(.6) rotate(-4deg);opacity:0}to{transform:none;opacity:1}}
+.pal-match h2{font-size:34px;margin:2px 0 4px;color:#fff;letter-spacing:1px}.pal-match p{margin:0 0 18px;opacity:.95}.pm-heart{font-size:46px;line-height:1}
+.pm-pair{display:flex;justify-content:center;margin:0 0 22px}.pm-pair span{width:112px;height:112px;border-radius:50%;overflow:hidden;border:4px solid #fff;background:#FFE9EF;display:grid;place-items:center;color:#E8457E;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.pm-pair span:first-child{transform:rotate(-6deg)}.pm-pair span+span{margin-left:-20px;transform:rotate(6deg)}.pm-pair img{width:100%;height:100%;object-fit:cover}.pm-pair .sp-i{width:54px;height:54px}
+.pal-match .btns{display:flex;flex-direction:column;gap:10px}.pal-match .btn{background:#fff!important;color:#C2306A!important;box-shadow:none!important}.pal-match .btn.ghost{background:transparent!important;color:#fff!important;border:2px solid rgba(255,255,255,.75)!important}
+.pm-map{height:min(62vh,520px);border-radius:20px;overflow:hidden}.pm-pop{display:flex;flex-direction:column;gap:2px;color:var(--ink)!important;text-decoration:none;min-width:170px}.pm-pop b{font-size:15px}.pm-pop small{color:var(--ink-2)}.pm-pop em{font-style:normal;color:var(--red);font-weight:700;margin-top:2px}
+.pal-mv{margin-left:auto;flex:none}.pals-tabs a{font-size:15px}
+
 .pal-cw{position:relative;display:flex}.pal-badge{position:absolute;top:10px;left:10px;z-index:1;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:800;color:#fff;background:var(--green);pointer-events:none}.pal-badge.mu{background:#E0457B}.pal-badge.lk{background:#F28C38}
 .pal-mu{margin:8px 0 2px;padding:9px 12px;border-radius:14px;background:color-mix(in srgb,#E0457B 12%,var(--sheet));color:#C2306A;font-weight:800;text-align:center}.pal-mu.lk{background:color-mix(in srgb,#F28C38 14%,var(--sheet));color:#B8601D}
 .petseg a{position:relative}.pbadge{position:absolute;top:4px;right:10px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#E0457B;color:#fff;font:800 11px/18px var(--body);font-style:normal;text-align:center}.pal-cw .pal-card{flex:1;width:100%}
@@ -3172,7 +3211,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.19.3';
+const BUILD = 'v7.20.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3397,7 +3436,7 @@ ICONS.th='<path d="M16.5 11.2c-.3-2.6-2-4-4.6-4-2.4 0-4 1.4-4.4 3.4"/><path d="M
 ICONS.mobile='<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/>';
 ICONS.phone='<path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z"/>';
 function pawSvg(){return '<svg class="ico" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="6.2" cy="10.6" r="2"/><circle cx="9.6" cy="6.6" r="2.1"/><circle cx="14.4" cy="6.6" r="2.1"/><circle cx="17.8" cy="10.6" r="2"/></svg>'}
-Object.assign(ICONS,{mark:'<path d="M6.5 4h11v16.5L12 16.8l-5.5 3.7z"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>',doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',chev:'<path d="m9 6 6 6-6 6"/>',phone:'<path d="M6.5 3.5h3l1.5 4-2 1.3a11 11 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z"/>'});
+Object.assign(ICONS,{undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',mark:'<path d="M6.5 4h11v16.5L12 16.8l-5.5 3.7z"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/>',doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',chev:'<path d="m9 6 6 6-6 6"/>',phone:'<path d="M6.5 3.5h3l1.5 4-2 1.3a11 11 0 0 0 6.2 6.2l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z"/>'});
 function ic(n,cls=''){return `<svg class="ico ${cls}" viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`}
 
 const SIZE = {small:'小型',medium:'中型',large:'大型'};
@@ -8729,18 +8768,18 @@ const palHidden=()=>new Set(lsList('wh_hidden'));
 function palWhen(s){const t=tw(s),n=tw(new Date().toISOString());const wk='日一二三四五六'[new Date(new Date(s).getTime()+8*3600e3).getUTCDay()];
   const day=t.y===n.y&&t.m===n.m&&t.d===n.d?'今天':`${t.m}/${t.d}（${wk}）`;return `${day} ${String(t.h).padStart(2,'0')}:${String(t.mi).padStart(2,'0')}`}
 function palFilterBar(st,tab){return `<div class="pals-filter"><div class="pchips">${[['','全部'],['dog','狗狗'],['cat','貓咪']].map(([v,l])=>`<button type="button" class="pchip ${st.sp===v?'on':''}" data-sp="${v}">${l}</button>`).join('')}</div>
-  <select id="palCity" aria-label="縣市">${cityOptions(st.city).replace('選擇縣市','全部縣市')}</select>${st.city?`<select id="palDist" aria-label="區">${distOptions(st.city,st.dist).replace('選擇區','全部區域')}</select>`:''}</div>`}
+  <select id="palCity" aria-label="縣市">${cityOptions(st.city).replace('選擇縣市','全部縣市')}</select>${st.city?`<select id="palDist" aria-label="區">${distOptions(st.city,st.dist).replace('選擇區','全部區域')}</select>`:''}${tab==='meets'?(()=>{let v='list';try{v=localStorage.getItem('wh_pals_mv')||'list'}catch(_){}return `<div class="xseg pal-mv" role="group" aria-label="顯示方式">${[['list','清單'],['map','地圖']].map(([k,l])=>`<button type="button" data-mv="${k}" class="${v===k?'on':''}" aria-label="${l}" aria-pressed="${v===k}">${XI[k]}</button>`).join('')}</div>`})():''}</div>`}
 
-async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q.tab==='meets'?'meets':'cards';
+async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q.tab==='meets'?'meets':q.tab==='cards'?'cards':'swipe';const tq=tab==='swipe'?{}:{tab};
   if(!q.sp&&!q.city&&!q.keep){let f=null;try{f=JSON.parse(localStorage.getItem('wh_pals_f')||'null')}catch(_){}
-    if(f&&(f.sp||f.city)){const p=new URLSearchParams({...(tab==='meets'?{tab:'meets'}:{}),...(f.sp?{sp:f.sp}:{}),...(f.city?{city:f.city}:{}),...(f.city&&f.dist?{dist:f.dist}:{})});goReplace('#/pals?'+p);return}}
+    if(f&&(f.sp||f.city)){const p=new URLSearchParams({...tq,...(f.sp?{sp:f.sp}:{}),...(f.city?{city:f.city}:{}),...(f.city&&f.dist?{dist:f.dist}:{})});goReplace('#/pals?'+p);return}}
   const st={sp:['dog','cat'].includes(q.sp)?q.sp:'',city:q.city||'',dist:q.city&&q.dist||''};
   try{localStorage.setItem('wh_pals_f',JSON.stringify(st))}catch(_){}
   setTitle('毛孩交朋友');
-  const go=(o)=>{const p=new URLSearchParams({...(tab==='meets'?{tab:'meets'}:{}),...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{}),...o});for(const [k,v] of [...p])if(!v)p.delete(k);if(!p.get('sp')&&!p.get('city'))p.set('keep','1');goReplace('#/pals'+(p.toString()?'?'+p:''))};
+  const go=(o)=>{const p=new URLSearchParams({...tq,...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{}),...o});for(const [k,v] of [...p])if(!v)p.delete(k);if(!p.get('sp')&&!p.get('city'))p.set('keep','1');goReplace('#/pals'+(p.toString()?'?'+p:''))};
   app.innerHTML=`${petSegHTML('pals')}<div class="pals">
-    <div class="health-hero row"><div><h1>毛孩交朋友</h1></div>${tab==='cards'?`<button type="button" class="btn green" id="palMine">${ic('plus')} 放上我的毛孩</button>`:`<a class="btn green" href="#/pals/meet/new">${ic('plus')} 發起揪團</a>`}</div>
-    <div class="pals-tabs" role="tablist"><a role="tab" class="${tab==='cards'?'on':''}" href="#/pals${st.sp||st.city?'?'+new URLSearchParams({...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{})}):''}">毛孩名片牆</a><a role="tab" class="${tab==='meets'?'on':''}" href="#/pals?tab=meets${st.sp?'&sp='+st.sp:''}${st.city?'&city='+encodeURIComponent(st.city):''}${st.dist?'&dist='+encodeURIComponent(st.dist):''}">揪團約玩</a></div>
+    <div class="health-hero row"><div><h1>毛孩交朋友</h1></div>${tab!=='meets'?`<button type="button" class="btn green" id="palMine">${ic('plus')} 放上我的毛孩</button>`:`<a class="btn green" href="#/pals/meet/new">${ic('plus')} 發起揪團</a>`}</div>
+    <div class="pals-tabs" role="tablist">${[['swipe','認識新朋友'],['cards','名片牆'],['meets','揪團約玩']].map(([t,l])=>{const p=new URLSearchParams({...(t==='swipe'?{}:{tab:t}),...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{})});if(!p.get('sp')&&!p.get('city'))p.set('keep','1');return `<a role="tab" class="${tab===t?'on':''}" aria-selected="${tab===t}" href="#/pals?${p}">${l}</a>`}).join('')}</div>
     ${palFilterBar(st,tab)}
     <div id="palList"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></div>
     ${PAL_RULES}</div>`;
@@ -8748,21 +8787,24 @@ async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q
   app.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>go({sp:b.dataset.sp}));
   $('#palCity').onchange=e=>go({city:e.target.value,dist:''});
   {const d=$('#palDist');if(d)d.onchange=e=>go({dist:e.target.value})}
+  app.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('wh_pals_mv',b.dataset.mv)}catch(_){}route()});
   {const b=$('#palMine');if(b)b.onclick=palPickMine}
   const bl=palBlocked(),hd=palHidden();
-  if(tab==='cards'){
-    let qy=sb.from('pet_cards_public').select('*').order('updated_at',{ascending:false}).limit(60);
+  if(tab!=='meets'){
+    let qy=sb.from('pet_cards_public').select('*').order('updated_at',{ascending:false}).limit(tab==='swipe'?150:60);
     if(st.sp)qy=qy.eq('species',st.sp);if(st.city)qy=qy.eq('city',st.city);if(st.dist)qy=qy.eq('district',st.dist);
     const {data,error}=await qy;if(_n!==navId)return;const box=$('#palList');
     if(error){box.innerHTML=netErrHTML();return}
     const rows=(data||[]).filter(c=>!bl.has(c.owner_id)&&!hd.has(c.pet_id));
-    await palLikedLoad();if(_n!==navId)return;
+    await Promise.all([palLikedLoad(),palMineLoad()]);if(_n!==navId)return;
+    if(tab==='swipe'&&rows.length){palDeck(box,rows);return}
     if(!rows.length){box.innerHTML=`<div class="empty-card"><div class="big">${ic('paw')}</div><b>${st.city||st.sp?`${esc((st.city||'').replace(/^臺/,'台')+(st.dist||''))}還沒有${st.sp==='cat'?'貓咪':st.sp==='dog'?'狗狗':'毛孩'}名片`:'還沒有毛孩名片'}</b><p class="small">當第一個吧！把你家毛孩放上來，附近的毛孩就找得到牠。</p><button type="button" class="btn ghost" id="palInvite">${ic('share')} 邀請朋友一起放上來</button></div>`;
       {const b=$('#palInvite');if(b)b.onclick=()=>share('汪喵回家・毛孩交朋友：把你家毛孩放上名片牆，一起找散步夥伴、揪團約玩！','https://wangmiaotw.com/#/pals')}return}
-    if(me())rows.sort((a,b)=>palRank(b)-palRank(a));
-    box.innerHTML=`<div class="pals-grid">${rows.map((c,i)=>`<div class="pal-cw">${palBadge(c)}<button type="button" class="pal-card" data-i="${i}"><span class="pal-ph ${c.species==='cat'?'cat':''}">${c.photo?thumbImg(c.photo,c.name):spIc(c.species)}</span><b>${esc(c.name)}</b><small>${esc([c.breed,c.age_text].filter(Boolean).join('・')||(c.species==='cat'?'貓咪':'狗狗'))}</small><small class="pal-loc">${ic('pin')} ${esc((c.city||'').replace(/^臺/,'台')+(c.district||''))}</small>${(c.tags||[]).length?`<span class="pal-tags">${c.tags.slice(0,3).map(t=>`<i>${esc(t)}</i>`).join('')}</span>`:''}</button>${palLikeBtn(c,i)}</div>`).join('')}</div>`;
+    if(me())rows.sort((a,b)=>palSortKey(b)-palSortKey(a));
+    box.innerHTML=`<div class="pals-grid">${rows.map((c,i)=>`<div class="pal-cw">${palBadge(c)}<button type="button" class="pal-card" data-i="${i}"><span class="pal-ph ${c.species==='cat'?'cat':''}">${c.photo?thumbImg(c.photo,c.name):spIc(c.species)}</span><b>${esc(c.name)}</b><small>${esc([c.breed,c.age_text].filter(Boolean).join('・')||(c.species==='cat'?'貓咪':'狗狗'))}</small><small class="pal-loc">${ic('pin')} ${esc((c.city||'').replace(/^臺/,'台')+(c.district||''))}</small>${palScoreHTML(c)}${(c.tags||[]).length?`<span class="pal-tags">${c.tags.slice(0,3).map(t=>`<i>${esc(t)}</i>`).join('')}</span>`:''}</button>${palLikeBtn(c,i)}</div>`).join('')}</div>`;
     box.querySelectorAll('.pal-card').forEach(b=>b.onclick=()=>palCardSheet(rows[+b.dataset.i]));
     box.querySelectorAll('.pal-like').forEach(b=>b.onclick=()=>palLikeTap(rows[+b.dataset.i],b));
+    palTopRow(box,bl,hd);
   }else{
     let qy=sb.from('pet_meets_public').select('*').order('starts_at',{ascending:true}).limit(60);
     if(st.sp)qy=qy.in('species',[st.sp,'any']);if(st.city)qy=qy.eq('city',st.city);if(st.dist)qy=qy.eq('district',st.dist);
@@ -8770,9 +8812,86 @@ async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q
     if(error){box.innerHTML=netErrHTML();return}
     const rows=(data||[]).filter(m=>!bl.has(m.owner_id)&&!hd.has(m.id));
     if(!rows.length){box.innerHTML=`<div class="empty-card"><div class="big">${ic('calendar')}</div><b>${st.city?esc((st.city||'').replace(/^臺/,'台')+(st.dist||''))+'最近':'最近'}還沒有揪團</b><p class="small">發起一個吧！選一個公園和時間，附近的毛孩家長都能報名，在活動頁一起討論。</p></div>`;return}
+    {let v='list';try{v=localStorage.getItem('wh_pals_mv')||'list'}catch(_){}if(v==='map'){palMeetsMap(box,rows);return}}
     box.innerHTML=`<div class="pals-meets">${rows.map(m=>`<a class="pal-meet" href="#/pals/meet/${m.id}"><span class="pm-when"><b>${esc(palWhen(m.starts_at))}</b><small>${m.species==='cat'?'貓咪':m.species==='dog'?'狗狗':'狗貓都可以'}${m.size_pref&&m.size_pref!=='any'?'・'+PAL_SIZE[m.size_pref]+'犬':''}</small></span><span class="pm-b"><b>${esc(m.title)}</b><small>${ic('pin')} ${esc((m.city||'').replace(/^臺/,'台')+(m.district||''))}・${esc(m.place)}</small><small>${esc(m.username)} 發起・${m.joined+1}/${m.cap} 人</small></span>${ic('chev','mrc')}</a>`).join('')}</div>`;
   }
 }
+
+// ===== v7.20 交朋友：跟你家毛孩合不合、滑卡認識、本週人氣、配對成功 =====
+let __palMine=[],__palMineAt=0;
+async function palMineLoad(){if(!me()){__palMine=[];return}if(Date.now()-__palMineAt<60e3)return;
+  const {data}=await sb.from('pet_cards').select('pet_id,name,species,size,tags,city,district,photo').eq('owner_id',me().id);__palMine=data||[];__palMineAt=Date.now()}
+// 合不合：種類、體型、個性標籤、住得近不近（用自己放上名片牆的毛孩來比）
+function palScore(c){if(!__palMine.length||(me()&&c.owner_id===me().id))return null;let best=null;const O=['small','medium','large'];
+  for(const m of __palMine){let r=m.species===c.species?30:5;
+    if(m.species==='dog'&&c.species==='dog'){const a=O.indexOf(m.size),b=O.indexOf(c.size);r+=a<0||b<0?8:a===b?15:Math.abs(a-b)===1?8:2}else r+=10;
+    const A=c.tags||[],B=m.tags||[],tg=A.filter(t=>B.includes(t)).length;r+=A.length&&B.length?Math.min(25,tg*10+(tg?5:0)):8;
+    r+=m.city&&m.city===c.city?(m.district&&m.district===c.district?30:18):5;
+    const pct=Math.min(99,Math.round(40+r*.6));if(!best||pct>best.pct)best={pct,name:m.name}}
+  return best}
+function palScoreHTML(c,cls=''){const s=palScore(c);return s?`<span class="pal-score ${cls}">跟${esc(s.name)}合 ${s.pct}%</span>`:''}
+function palSortKey(c){return palRank(c)*100+((palScore(c)||{}).pct||0)}
+// 本週人氣毛孩
+async function palTopRow(box,bl,hd){try{
+  const {data:w,error}=await sb.from('pet_card_week').select('pet_id,n').order('n',{ascending:false}).limit(10);if(error||!w||!w.length||!box.isConnected)return;
+  const {data:cs}=await sb.from('pet_cards_public').select('*').in('pet_id',w.map(x=>x.pet_id));if(!box.isConnected)return;
+  const map=new Map((cs||[]).filter(c=>!bl.has(c.owner_id)&&!hd.has(c.pet_id)).map(c=>[c.pet_id,c]));
+  const top=w.map(x=>({c:map.get(x.pet_id),n:x.n})).filter(x=>x.c).slice(0,8);if(!top.length)return;
+  box.insertAdjacentHTML('afterbegin',`<div class="pal-top"><p class="pal-top-h">🏆 本週人氣毛孩</p><div class="pal-top-row">${top.map((x,i)=>`<button type="button" class="pal-top-i" data-t="${i}"><span class="pal-top-ph">${i===0?'<i class="crown" aria-hidden="true">👑</i>':''}${x.c.photo?thumbImg(x.c.photo,x.c.name):spIc(x.c.species)}</span><b>${esc(x.c.name)}</b><small>❤ ${x.n}</small></button>`).join('')}</div></div>`);
+  box.querySelectorAll('.pal-top-i').forEach(b=>b.onclick=()=>palCardSheet(top[+b.dataset.t].c))}catch(_){}}
+// 滑卡：右滑喜歡、左滑下一個（略過的 3 天內不再出現）
+function palSkipGet(){try{return JSON.parse(localStorage.getItem('wh_pal_skip')||'{}')||{}}catch(_){return {}}}
+function palSkipAdd(id){const o=palSkipGet(),now=Date.now();for(const k in o)if(now-o[k]>3*864e5)delete o[k];o[id]=now;try{localStorage.setItem('wh_pal_skip',JSON.stringify(o))}catch(_){}}
+function palSkipDel(id){const o=palSkipGet();delete o[id];try{localStorage.setItem('wh_pal_skip',JSON.stringify(o))}catch(_){}}
+function palDeck(box,rows){
+  const sk=palSkipGet(),now=Date.now();
+  const deck=rows.filter(c=>!(me()&&c.owner_id===me().id)&&!__palLiked.has(c.pet_id)&&!(sk[c.pet_id]&&now-sk[c.pet_id]<3*864e5));
+  deck.sort((a,b)=>((palLikesMe(b)?1000:0)+((palScore(b)||{}).pct||0)+(palIsNew(b)?5:0))-((palLikesMe(a)?1000:0)+((palScore(a)||{}).pct||0)+(palIsNew(a)?5:0)));
+  let i=0,busy=false;const hist=[];
+  const HP=()=>{try{const h=capPlugin('Haptics');if(h&&h.impact)h.impact({style:'MEDIUM'}).catch(()=>{})}catch(_){}};
+  const card=(c,cls)=>`<div class="pd-card ${cls}"><div class="pd-ph ${c.species==='cat'?'cat':''}">${c.photo?`<img src="${esc(safeU(c.photo))}" alt="${esc(c.name)}" draggable="false">`:spIc(c.species)}</div>${palBadge(c)}<i class="pd-stamp like" aria-hidden="true">喜歡</i><i class="pd-stamp nope" aria-hidden="true">下一個</i>
+    <div class="pd-info"><b>${esc(c.name)}</b><small>${esc([c.breed,c.sex&&PAL_SEX[c.sex],c.age_text].filter(Boolean).join('・')||(c.species==='cat'?'貓咪':'狗狗'))}</small><small>${ic('pin')} ${esc((c.city||'').replace(/^臺/,'台')+(c.district||''))}</small>${palScoreHTML(c,'on-dark')}${(c.tags||[]).length?`<span class="pd-tags">${c.tags.slice(0,4).map(t=>`<i>${esc(t)}</i>`).join('')}</span>`:''}</div></div>`;
+  const draw=()=>{if(!box.isConnected)return;busy=false;
+    if(i>=deck.length){const n=Object.keys(palSkipGet()).length;box.innerHTML=`<div class="empty-card pd-done"><div class="big">🐾</div><b>${deck.length?'附近的新朋友都看過了':'目前沒有新朋友可以認識'}</b><p class="small">${me()&&!__palMine.length?'把你家毛孩也放上來，別人才看得到牠、跟你配對。':'過幾天會有新朋友加入，也可以換個縣市看看。'}</p><div class="btns">${me()&&!__palMine.length?`<button type="button" class="btn" id="pdMine">${ic('plus')} 放上我的毛孩</button>`:''}<a class="btn ${me()&&!__palMine.length?'ghost':''}" href="#/pals?tab=cards">看全部名片</a>${n?'<button type="button" class="btn ghost" id="pdReset">重新看略過的</button>':''}</div></div>`;
+      {const r=$('#pdReset');if(r)r.onclick=()=>{try{localStorage.removeItem('wh_pal_skip')}catch(_){}route()}}{const m=$('#pdMine');if(m)m.onclick=palPickMine}return}
+    const cur=deck[i],nx=deck[i+1];
+    box.innerHTML=`<div class="pd-wrap"><div class="pd-stack">${nx?card(nx,'pd-next'):''}${card(cur,'pd-top')}</div>
+      <div class="pd-acts"><button type="button" class="pd-btn sm" id="pdUndo" aria-label="回上一隻" ${hist.length?'':'disabled'}>${ic('undo')}</button><button type="button" class="pd-btn nope" id="pdNope" aria-label="下一個">✕</button><button type="button" class="pd-btn like" id="pdLike" aria-label="喜歡${esc(cur.name)}">${palHeart(true)}</button><button type="button" class="pd-btn sm" id="pdInfo" aria-label="看${esc(cur.name)}的名片">${ic('info')}</button></div>
+      <p class="pd-left">${!me()?'登入後按喜歡，飼主就會知道是你':!__palMine.length?'<button type="button" class="linkbtn" id="pdMine2">先放上你家毛孩，才能配對、看合不合</button>':'右滑喜歡、左滑看下一個・還有 '+(deck.length-i)+' 隻'}</p></div>`;
+    {const m=$('#pdMine2');if(m)m.onclick=palPickMine}
+    const top=box.querySelector('.pd-card.pd-top');let x0=null,y0=0,dx=0,dy=0,moved=false;
+    top.addEventListener('pointerdown',e=>{if(busy)return;x0=e.clientX;y0=e.clientY;dx=dy=0;moved=false;try{top.setPointerCapture(e.pointerId)}catch(_){}top.style.transition='none'});
+    top.addEventListener('pointermove',e=>{if(x0==null)return;dx=e.clientX-x0;dy=e.clientY-y0;if(Math.abs(dx)>6||Math.abs(dy)>6)moved=true;top.style.transform=`translate(${dx}px,${dy*.25}px) rotate(${dx/16}deg)`;top.style.setProperty('--lk',Math.max(0,Math.min(1,dx/90)));top.style.setProperty('--np',Math.max(0,Math.min(1,-dx/90)))});
+    const up=()=>{if(x0==null)return;x0=null;top.style.transition='';if(dx>95)act(true);else if(dx<-95)act(false);else{top.style.transform='';top.style.setProperty('--lk',0);top.style.setProperty('--np',0);if(!moved)palCardSheet(cur)}};
+    top.addEventListener('pointerup',up);top.addEventListener('pointercancel',()=>{x0=null;top.style.transition='';top.style.transform=''});
+    $('#pdNope').onclick=()=>act(false);$('#pdLike').onclick=()=>act(true);$('#pdInfo').onclick=()=>palCardSheet(cur);
+    $('#pdUndo').onclick=()=>{if(!hist.length||busy)return;i=hist.pop();palSkipDel(deck[i].pet_id);draw()}};
+  const act=async like=>{if(busy)return;const cur=deck[i],top=box.querySelector('.pd-card.pd-top');
+    if(like&&!me()){if(top){top.style.transform='';top.style.setProperty('--lk',0)}setReturn(location.hash);requireLogin('按喜歡需要登入（免費註冊）');return}
+    busy=true;HP();
+    if(top){top.style.transition='transform .32s ease-in,opacity .32s';top.style.transform=`translate(${like?560:-560}px,40px) rotate(${like?26:-26}deg)`;top.style.opacity='0';top.style.setProperty(like?'--lk':'--np',1)}
+    const nx=box.querySelector('.pd-card.pd-next');if(nx)nx.classList.add('rise');
+    if(like){__palLiked.add(cur.pet_id);cur.likes=(cur.likes||0)+1;
+      sb.from('pet_card_likes').insert({pet_id:cur.pet_id}).then(({error})=>{if(error&&!/duplicate/.test(error.message)){__palLiked.delete(cur.pet_id);toast(friendlyErr(error.message),4000)}else if(__palLikers.has(cur.owner_id))setTimeout(()=>palMatch(cur),150)})}
+    else{palSkipAdd(cur.pet_id);hist.push(i)}
+    setTimeout(()=>{i++;draw()},300)};
+  draw()}
+// 互相喜歡：配對成功
+function palMatch(c){const mine=__palMine[0];const d=document.createElement('div');d.className='lightbox sheet-bg pal-match-bg';d.setAttribute('aria-label','配對成功');
+  const ph=(x,sp)=>x&&x.photo?`<img src="${esc(safeU(x.photo))}" alt="">`:spIc(sp);
+  d.innerHTML=`<div class="pal-match" onclick="event.stopPropagation()"><div class="pm-heart" aria-hidden="true">💞</div><h2>配對成功！</h2><p>${esc(c.username)} 也喜歡你家${mine?esc(mine.name):'毛孩'}</p>
+    <div class="pm-pair"><span>${ph(mine,mine?mine.species:'dog')}</span><span>${ph(c,c.species)}</span></div>
+    <div class="btns"><button type="button" class="btn big block" data-dm>${ic('chat')} 傳訊息約${esc(c.name)}散步</button><button type="button" class="btn ghost block" data-x>繼續認識新朋友</button></div></div>`;
+  d.onclick=()=>closeOverlay(d);openOverlay(d);requestAnimationFrame(()=>d.classList.add('show'));
+  d.querySelector('[data-x]').onclick=()=>closeOverlay(d);d.querySelector('[data-dm]').onclick=()=>{closeOverlay(d);chatStart('dm',c.owner_id)};
+  try{const h=capPlugin('Haptics');if(h&&h.notification)h.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}
+  setTimeout(()=>{try{burst(d.querySelector('.pm-heart'),'#E0457B')}catch(_){}},250)}
+// 揪團地圖
+function palMeetsMap(box,rows){box.innerHTML=`<div class="map pm-map" id="pmMap"></div><p class="muted small" style="margin:8px 2px 0">沒標地圖位置的活動，會先放在縣市的大概位置。</p>`;
+  const mp=makeMap('pmMap',[23.7,120.95],7);if(!mp||mp.__stub||typeof L==='undefined')return;const pts=[];
+  rows.forEach(m=>{const c=CITY_CENTER[m.city];const ll=m.lat?[m.lat,m.lng]:c?[c[0]+((m.id.charCodeAt(0)%10)-5)*.004,c[1]+((m.id.charCodeAt(1)%10)-5)*.004]:null;if(!ll)return;pts.push(ll);
+    try{marker(ll,'🐾','meet').addTo(mp).bindPopup(`<a class="pm-pop" href="#/pals/meet/${m.id}"><b>${esc(m.title)}</b><small>${esc(palWhen(m.starts_at))}</small><small>${esc((m.district||m.city||'').replace(/^臺/,'台'))}・${esc(m.place)}</small><em>${m.joined+1}/${m.cap} 人・看活動 ›</em></a>`)}catch(_){}});
+  if(pts.length)try{mp.fitBounds(pts,{padding:[36,36],maxZoom:14})}catch(_){}}
 
 function palCardSheet(c){const d=document.createElement('div');d.className='lightbox sheet-bg';d.setAttribute('aria-label',c.name+' 的名片');
   const mine=me()&&me().id===c.owner_id;
@@ -8780,7 +8899,7 @@ function palCardSheet(c){const d=document.createElement('div');d.className='ligh
     <div class="pal-big ${c.species==='cat'?'cat':''}">${c.photo?`<img src="${esc(safeU(c.photo))}" alt="${esc(c.name)}">`:spIc(c.species)}</div>
     <h2>${esc(c.name)}</h2>
     <p class="muted">${esc([c.species==='cat'?'貓咪':'狗狗',c.breed,c.sex&&PAL_SEX[c.sex],c.size&&PAL_SIZE[c.size],c.age_text].filter(Boolean).join('・'))}</p>
-    <p class="pal-loc">${ic('pin')} ${esc((c.city||'').replace(/^臺/,'台')+(c.district||''))}</p>
+    <p class="pal-loc">${ic('pin')} ${esc((c.city||'').replace(/^臺/,'台')+(c.district||''))}</p>${palScoreHTML(c)?`<p style="text-align:center;margin:0">${palScoreHTML(c)}</p>`:''}
     ${(c.tags||[]).length?`<p class="pal-tags">${c.tags.map(t=>`<i>${esc(t)}</i>`).join('')}</p>`:''}
     ${c.intro?`<p class="pal-intro">${esc(c.intro)}</p>`:''}
     <div class="pal-owner">${chatAva(c.username,c.avatar_url)}<span>飼主 <b>${esc(c.username)}</b></span></div>
