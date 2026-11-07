@@ -3172,7 +3172,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.19.1';
+const BUILD = 'v7.19.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3580,7 +3580,7 @@ document.addEventListener('submit',e=>{const f=e.target;if(!f||!f.querySelectorA
   for(const x of f.querySelectorAll('input[type=date],input[type=datetime-local]')){const y=+String(x.value).slice(0,4);if(x.value&&(y<1990||y>2100)){e.preventDefault();e.stopImmediatePropagation();x.setCustomValidity('日期不太對（年份 '+y+'），請再確認一下');toast('日期不太對（年份 '+y+'），請再確認一下');if(x.offsetParent)x.reportValidity();return}}
 },true);
 // 時間不能填未來（多留 15 分鐘誤差）
-document.addEventListener('submit',e=>{const f=e.target;if(!f||!f.querySelectorAll)return;for(const x of f.querySelectorAll('input[type=datetime-local]')){if(!x.value)continue;if(twParse(x.value).getTime()>Date.now()+15*60e3){e.preventDefault();e.stopImmediatePropagation();x.setCustomValidity('時間不能是未來，請再確認一下');toast('時間不能是未來，請再確認一下');if(x.offsetParent)x.reportValidity();return}}},true);
+document.addEventListener('submit',e=>{const f=e.target;if(!f||!f.querySelectorAll)return;for(const x of f.querySelectorAll('input[type=datetime-local]:not([data-future])')){if(!x.value)continue;if(twParse(x.value).getTime()>Date.now()+15*60e3){e.preventDefault();e.stopImmediatePropagation();x.setCustomValidity('時間不能是未來，請再確認一下');toast('時間不能是未來，請再確認一下');if(x.offsetParent)x.reportValidity();return}}},true);
 let __afT=null,__afSeq=0;
 function autoFillPlace(mapEl,lat,lng,now){clearTimeout(__afT);const seq=++__afSeq;__afT=setTimeout(async()=>{
   const box=typeof mapEl==='string'?document.getElementById(mapEl):mapEl;const f=box&&box.closest('form');if(!f)return;
@@ -4086,7 +4086,7 @@ function wizard(form,checks={}){
     // 先看區塊層級的（沒選狗貓），再看欄位；聯絡方式那種「至少填一種」則等欄位格式都對了再說
     if(msg&&!/至少/.test(msg)){stepErr(steps[k],msg);return false}
     const bad=firstBad(steps[k]);if(bad){fieldErr(bad);return false}
-    for(const x of steps[k].querySelectorAll('input[type=datetime-local]')){if(x.value&&twParse(x.value).getTime()>Date.now()+15*60e3){fieldErr(x,'時間不能是未來，請再確認一次');return false}}
+    for(const x of steps[k].querySelectorAll('input[type=datetime-local]:not([data-future])')){if(x.value&&twParse(x.value).getTime()>Date.now()+15*60e3){fieldErr(x,'時間不能是未來，請再確認一次');return false}}
     if(msg){stepErr(steps[k],msg);return false}return true};
   // 步驟級的錯誤（沒選狗貓、沒留聯絡方式…）：直接顯示在該區塊下面，不用 toast
   const stepErr=(st,msg)=>{document.querySelectorAll('.ferr').forEach(x=>x.remove());const tgt=(/地圖|位置|地點/.test(msg)&&st.querySelector('.map.pick'))||st.querySelector('.seg,.tipbox,.map.pick,label.f,input,select,textarea')||st.querySelector('h3');
@@ -8912,7 +8912,7 @@ async function renderMeetNew(){if(!requireLogin())return;setTitle('發起揪團'
       <label class="f"><span>標題</span><input name="title" maxlength="40" required placeholder="例如：週六傍晚河堤小型犬跑跑"></label>
       <div class="row2"><label class="f"><span>誰可以來</span><select name="species"><option value="dog">狗狗</option><option value="cat">貓咪</option><option value="any">狗貓都可以</option></select></label>
       <label class="f"><span>體型</span><select name="size_pref"><option value="any">不限</option><option value="small">小型犬</option><option value="medium">中型犬</option><option value="large">大型犬</option></select></label></div>
-      <label class="f"><span>時間</span><input type="datetime-local" name="starts_at" required min="${palLocalDT(min)}" max="${palLocalDT(max)}" value="${palLocalDT(def)}"></label>
+      <label class="f"><span>時間</span><input type="datetime-local" name="starts_at" data-future required min="${palLocalDT(min)}" max="${palLocalDT(max)}" value="${palLocalDT(def)}"></label>
       <div class="row2"><label class="f"><span>縣市</span><select name="city" id="mtCity" required>${cityOptions('')}</select></label><label class="f"><span>區</span><select name="district" id="mtDist">${distOptions('')}</select></label></div>
       <label class="f"><span>地點<small class="hint">公園、河濱、寵物餐廳這類公開地點</small></span><input name="place" maxlength="60" required placeholder="例如：大安森林公園 寵物公園"></label>
       <label class="f"><span>人數上限（含你）</span><input type="number" name="cap" min="2" max="30" value="8" required></label>
