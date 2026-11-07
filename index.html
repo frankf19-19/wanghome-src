@@ -1561,6 +1561,8 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pchip.on{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--sheet));color:var(--ink)}
 .pal-tagpick{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}.pal-tagpick input{position:absolute;opacity:0;pointer-events:none}
 .pals-cta{margin:4px 0 14px}
+.msoc{cursor:default}.msoc-i{display:flex;gap:6px;margin-left:auto}.msoc-i a{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--paper);color:var(--ink-2)}.msoc-i a:hover{color:var(--ink)}.msoc-i .ico{width:20px;height:20px}
+.mlinks{text-align:center;font-size:13.5px;color:var(--ink-3);margin:18px 0 0}.mlinks a{color:var(--ink-3)}
 .pals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .pal-cw{position:relative;display:flex}.pal-cw .pal-card{flex:1;width:100%}
 .pal-like{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;min-width:40px;height:34px;padding:0 9px;border-radius:99px;border:0;background:color-mix(in srgb,var(--sheet) 88%,transparent);box-shadow:0 1px 4px rgba(0,0,0,.12);color:var(--ink-3);font:700 13px/1 var(--body);cursor:pointer}
@@ -2212,7 +2214,7 @@ html{-webkit-tap-highlight-color:transparent}
   /* 頂端：Logo、鈴鐺 */
   .xh{display:block;padding:4px 2px 0}
   .xbar{display:flex;align-items:center;gap:10px;height:44px}
-  .xlogo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--ink)!important;text-decoration:none!important;letter-spacing:.02em}
+  .xlogo{margin-right:auto;display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--ink)!important;text-decoration:none!important;letter-spacing:.02em}
   .xlogo img{width:30px;height:30px;border-radius:9px}
   .xtbtn{margin-left:auto;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet);color:var(--ink);box-shadow:var(--lift);cursor:pointer}
   .xtbtn .ico{width:20px;height:20px}
@@ -3152,7 +3154,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.7';
+const BUILD = 'v7.18.8';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5164,7 +5166,7 @@ function dView(){try{return localStorage.getItem('wh_dv')||'card'}catch(_){retur
 function xView(){try{return localStorage.getItem('wh_xv')||'big'}catch(_){return 'big'}}
 function xBellHTML(){const n=me()?inboxUnread():0;return `<a class="xbell" href="#/inbox" aria-label="通知${n?'，'+n+' 則未讀':''}">${XI.bell}${n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}</a>`}
 function xHeadHTML(mode,title,where){return `<section class="xh">
-  <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><button type="button" class="xtbtn" data-theme-pick aria-label="外觀（深淺色）">${ic('moon')}</button><a class="xbell" href="#/fav" aria-label="收藏">${ic('mark')}</a><span id="xBell">${xBellHTML()}</span></div>
+  <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><a class="xbell" href="#/fav" aria-label="收藏">${ic('mark')}</a><span id="xBell">${xBellHTML()}</span></div>
   <nav class="xmode ${mode==='adopt'?'adopt':''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失毛孩</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養毛孩</a></nav>
   <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
@@ -5325,7 +5327,6 @@ async function renderHealth(){const _n=navId;
   (_n===navId?app:_void).innerHTML=`<div class="health-hero row"><div><h1>我的毛孩</h1></div><a class="btn green" href="#/health/add">${ic("plus")} 新增紀錄</a></div>
   <div id="xLostBar"></div>
   ${healthAdvice(pets,ds,hMeds,hLogs,petName)}
-  <a class="pals-promo" href="#/pals"><span class="pp-ic">${ic("paw")}</span><span class="pp-t"><b>幫毛孩找朋友</b><small>放上名片牆、揪團散步約玩</small></span>${ic("chev","mrc")}</a>
   <h2>${ic("paw")} 我的毛孩 <a class="btn sm ghost" href="#/pet/new" style="margin-left:auto">${ic("plus")} 新增毛孩</a></h2>
   <div class="grid ${pets.length===1?'pets1':''}">${pets.map(petCardHTML).join('')}</div>
   ${(()=>{const rows=hMeds.map(x=>medTodayHTML(x,hLogs,petName[x.pet_id])).filter(Boolean);return rows.length?`<h2 id="medSec">${ic("pill")} 今天的用藥與保養品</h2><p class="muted small" style="margin:-6px 0 8px">餵完按一下就打勾，再按一次可以取消。</p><div class="card med-card">${rows.join('')}</div>`:''})()}
@@ -8909,15 +8910,14 @@ async function renderMeet(id){const _n=navId;setTitle('揪團約玩');
 function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
-  <p class="mlh">毛孩交朋友</p><div class="mgroup">${row('#/pals','paw','毛孩名片牆','c3')}${row('#/pals?tab=meets','calendar','揪團散步、約玩','c2')}</div>
-  <p class="mlh">協尋資源</p><div class="mgroup">${row('#/fav','mark','收藏（追蹤的協尋、想領養的）','c1')}${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}${row('#/injured','siren','受傷毛孩通報','c2')}${row('#/intake','search','收容所最近新收','c2')}${row('#/adopt','shelter','領養毛孩','c3')}${row('#/?tab=map','map','走失地圖','c4')}</div>
-  ${IS_APP?'':`<p class="mlh">App</p><div class="mgroup"><a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a></div>`}
-  <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${IS_APP?'':row('#/thanks','heart','贊助感謝牆','c1')}${(CONFIG.SOCIAL||[]).map(x=>`<a class="mrow" href="${x.u}" target="_blank" rel="noopener"><span class="mri c2">${ic(x.k)}</span><span class="mrl">追蹤 ${esc(x.n)}</span><span class="mrv">${x.k==='fb'?'官方粉專':'@wangmiaotw'}</span>${ic('chev','mrc')}</a>`).join('')}${row('#/contact','mail','聯絡我們','c3')}${row('#/terms','doc','使用條款','c5')}${row('#/privacy','shield','隱私權政策','c5')}</div>
+  <p class="mlh">常用</p><div class="mgroup">${row('#/fav','mark','收藏','c1')}${row('#/pals','paw','毛孩交朋友','c3')}${row('#/intake','search','收容所最近新收','c2')}</div>
+  <p class="mlh">學習</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}</div>
+  <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${row('#/contact','mail','聯絡我們','c3')}${(CONFIG.SOCIAL||[]).length?`<div class="mrow msoc"><span class="mri c2">${ic('heart')}</span><span class="mrl">追蹤我們</span><span class="msoc-i">${CONFIG.SOCIAL.map(x=>`<a href="${x.u}" target="_blank" rel="noopener" aria-label="追蹤 ${esc(x.n)}">${ic(x.k)}</a>`).join('')}</span></div>`:''}${IS_APP?'':`<a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a>`}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
+  <p class="mlinks">${IS_APP?'':'<a href="#/thanks">贊助感謝牆</a>・'}<a href="#/terms">使用條款</a>・<a href="#/privacy">隱私權政策</a></p>
   <p class="mver">汪喵回家 ${BUILD}${IS_APP?'':'・全台走失狗貓協尋平台'}</p></div>`}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cycle-theme]'))openThemePick()});
 async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&location.hash.split('?')[0]==='#/me'&&!$('.morelist'))app.insertAdjacentHTML('beforeend',moreListHTML());
-  if(_n===navId&&!IS_APP&&location.hash.split('?')[0]==='#/me'&&!$('.meapp')){const h=app.querySelector('h1');const c=`<a class="meapp" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><img src="icon-192.png" alt="" width="56" height="56"><span><b>汪喵回家 App 上架了！</b><small>走失通知、目擊回報、私訊即時推播，比網頁更快收到消息</small><em>到 App Store 免費下載 ›</em><i>Android 版即將推出</i></span></a>`;h?h.insertAdjacentHTML('afterend',c):app.insertAdjacentHTML('afterbegin',c)}
   // 刪除帳號放到整頁最下面（版本號下方），不跟常用功能擠在一起
   const o=$('#outSec'),d=$('#delSec');if(o&&_n===navId)app.appendChild(o);if(d&&_n===navId)app.appendChild(d)}
 async function renderMeBody(){const _n=navId;
