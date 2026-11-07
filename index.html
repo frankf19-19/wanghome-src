@@ -1581,6 +1581,9 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pal-people{display:flex;flex-direction:column;gap:8px}.pal-people a{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}.pal-people span{display:flex;flex-direction:column}.pal-people small{color:var(--ink-3)}
 .pal-photos{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 12px}.pal-photos label{position:relative;cursor:pointer}.pal-photos input{position:absolute;opacity:0}
 .pal-photos img{width:76px;height:76px;border-radius:14px;object-fit:cover;border:3px solid transparent;display:block}.pal-photos input:checked+img{border-color:var(--green)}
+.pal-photos input:checked+img{box-shadow:0 0 0 2px var(--sheet),0 0 0 4px var(--green)}.pal-photos label:has(input:checked)::after{content:"✓";position:absolute;right:4px;top:4px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font:800 13px/22px system-ui;text-align:center}
+.pal-addph span{width:76px;height:76px;border-radius:14px;border:2px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink-2);background:var(--sheet)}.pal-addph small{font-size:11.5px}.pal-addph .ico{width:22px;height:22px}.pal-addph.busy span{opacity:.6;animation:pulse 1s infinite}.pal-addph input{width:1px;height:1px}
+.pal-phhint{margin:-2px 0 4px}
 .pals-rules{margin-top:22px}.pals-rules ul{margin:6px 0 0;padding-left:20px}.pals-rules li{margin:3px 0}
 .pals .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .narrow-in{max-width:640px;margin:0 auto}
@@ -3141,7 +3144,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.5';
+const BUILD = 'v7.18.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5167,7 +5170,6 @@ async function renderHomeMob(){const _n=navId;
   const V=xView();
   (_n===navId?app:_void).innerHTML=`<h1 class="sr-only">汪喵回家：全台走失狗貓協尋平台</h1>
   ${appGetHTML()}${mineHTML()}
-  <a class="pals-promo" href="#/pals"><span class="pp-ic">${ic('paw')}</span><span class="pp-t"><b>毛孩交朋友</b><small>找散步夥伴、揪團約玩</small></span>${ic('chev','mrc')}</a>
   ${xHeadHTML('lost',`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`,xWhereText())}
   <div class="xsticky">
     <div class="xsrow"><label class="xsearch">${ic('search')}<input type="search" id="fQ" aria-label="搜尋走失的毛孩" enterkeyhint="search" placeholder="搜尋走失的毛孩" value="${esc(homeState.chip||homeState.q)}"></label><button type="button" class="xfbtn" id="btnFilter" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="fCnt"></i></button></div>
@@ -5177,6 +5179,7 @@ async function renderHomeMob(){const _n=navId;
     <div id="fActive" class="xactive"></div>
   </div>
   <div class="hidden" aria-hidden="true"><div id="lostFilters"></div><div id="tabs"><button data-t="lost"></button><button data-t="found"></button><button data-t="map"></button></div><button id="btnNear"></button><p id="nearInfo"></p><span id="cLost"></span><span id="cFound"></span></div>
+  <a class="pals-promo" href="#/pals"><span class="pp-ic">${ic('paw')}</span><span class="pp-t"><b>毛孩交朋友</b><small>找散步夥伴、揪團約玩</small></span>${ic('chev','mrc')}</a>
   <div class="xfeed" id="xFeed" data-v="${V}"><div id="list" class="grid">${skel(4)}</div></div>
   <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>`;
   const showF=()=>{const n=fCount();const c=$('#fCnt');if(c){c.textContent=n||'';c.classList.toggle('on',!!n)}const a=$('#fActive');if(a)a.innerHTML=fActiveHTML()};showF();
@@ -8745,7 +8748,8 @@ async function renderPalCard(petId){const _n=navId;if(!requireLogin())return;set
     <p class="muted">放上名片牆後，大家可以看到毛孩的照片、品種、個性和所在的「區」。<b>不會顯示你的聯絡方式、晶片號碼和健康紀錄。</b></p>
     <form id="pcf" novalidate>
       <h3>照片</h3>
-      ${photos.length?`<div class="pal-photos">${photos.map((u,i)=>`<label><input type="radio" name="ph" value="${i}" ${(cur?false:i===0)?'checked':''}>${thumbImg(u,p.name)}</label>`).join('')}${cur?`<label><input type="radio" name="ph" value="keep" checked><img src="${esc(safeU(cur))}" alt="目前的名片照片"></label>`:''}</div>`:`<p class="small muted">這隻毛孩還沒有照片，名片會顯示圖示。<a href="#/pet/${p.id}/edit">去加照片</a></p>`}
+      <p class="small muted pal-phhint">點一張當名片照片，也可以按「＋」從手機選新的。</p>
+      <div class="pal-photos" id="pcPhotos">${cur?`<label><input type="radio" name="ph" value="keep" checked><img src="${esc(safeU(cur))}" alt="目前的名片照片"></label>`:''}${photos.map((u,i)=>`<label><input type="radio" name="ph" value="${i}" ${(cur?false:i===0)?'checked':''}>${thumbImg(u,p.name)}</label>`).join('')}<label class="pal-addph" title="選新的照片"><input type="file" accept="image/*" id="pcFile"><span>${ic('plus')}<small>新增照片</small></span></label></div>
       <h3>在哪一區</h3>
       <div class="row2"><label class="f"><span>縣市</span><select name="city" id="pcCity" required>${cityOptions(city)}</select></label><label class="f"><span>區</span><select name="district" id="pcDist">${distOptions(city,dist)}</select></label></div>
       <h3>個性（最多 6 個）</h3>
@@ -8754,13 +8758,22 @@ async function renderPalCard(petId){const _n=navId;if(!requireLogin())return;set
       <div class="submitbar"><button class="btn green" id="pcSave">${c?'儲存名片':'放上名片牆'}</button>${c?`<button type="button" class="btn ghost danger" id="pcDel">從名片牆移除</button>`:''}</div>
     </form>${PAL_RULES}</div>`;
   $('#pcCity').onchange=e=>{$('#pcDist').innerHTML=distOptions(e.target.value)};
+  const extra=[];   // 這次新選的照片（已上傳）
+  $('#pcFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+    const add=e.target.closest('.pal-addph');add.classList.add('busy');add.querySelector('small').textContent='上傳中…';
+    try{const u=await uploadPhoto(f,'cases');if(!u)throw new Error('上傳失敗');extra.push(u);
+      add.insertAdjacentHTML('beforebegin',`<label><input type="radio" name="ph" value="x${extra.length-1}" checked><img src="${esc(thumbUrl(u))}" onerror="this.onerror=null;this.src='${esc(u)}'" alt="新選的照片"></label>`);
+      toast('已加入照片，就用這張當名片照片')}
+    catch(err){toast(BAD_IMG.test(err.message||'')?'這張照片讀不到，請換一張（可以用截圖）':'照片上傳失敗：'+friendlyErr(err.message||err),4500)}
+    finally{add.classList.remove('busy');add.querySelector('small').textContent='新增照片'}};
   app.querySelectorAll('.pal-tagpick input').forEach(i=>i.onchange=()=>{const n=app.querySelectorAll('.pal-tagpick input:checked').length;if(n>6){i.checked=false;toast('最多選 6 個');}i.closest('.pchip').classList.toggle('on',i.checked)});
   {const d=$('#pcDel');if(d)d.onclick=async()=>{if(!await askSheet({title:'從名片牆移除？',body:'移除後大家就看不到這張名片，之後可以再放上來。',ok:'移除',danger:true}))return;const {error}=await sb.from('pet_cards').delete().eq('pet_id',petId);if(error)return toast(friendlyErr(error.message));__submitting=true;toast('已移除');location.hash='#/pals'}}
   $('#pcf').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target);const b=$('#pcSave');
     if(!fd.get('city'))return fieldErr($('#pcCity'),'請選縣市');
     b.disabled=true;b.textContent='儲存中…';
     try{let photo=cur||null;const pv=fd.get('ph');
-      if(pv!=null&&pv!=='keep'){const u=photos[+pv];const k=String(u).split('/object/public/photos/')[1];
+      if(pv&&pv[0]==='x')photo=extra[+pv.slice(1)]||photo;
+      else if(pv!=null&&pv!=='keep'){const u=photos[+pv];const k=String(u).split('/object/public/photos/')[1];
         if(k&&k.startsWith('cases/'))photo=u;
         else if(k){const nk=`cases/pc-${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;const {error:ce}=await sb.storage.from('photos').copy(k,nk);
           if(ce)throw ce;sb.storage.from('photos').copy(k.replace(/\.jpg$/,'_t.jpg'),nk.replace(/\.jpg$/,'_t.jpg')).catch(()=>{});photo=sb.storage.from('photos').getPublicUrl(nk).data.publicUrl}}
