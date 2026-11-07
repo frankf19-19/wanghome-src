@@ -28,3 +28,6 @@
 /app-live/*
   Access-Control-Allow-Origin: *
   Cache-Control: no-cache
+
+/shot-share-*
+  Access-Control-Allow-Origin: *
