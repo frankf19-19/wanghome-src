@@ -1269,7 +1269,7 @@ body{touch-action:manipulation}
 
 /* ===== v4.2 App 導覽：固定 5 個分頁＋中間新增鈕、底部滑出選單 ===== */
 @media (max-width:760px){
-  .tabbar{grid-template-columns:repeat(6,minmax(0,1fr))!important}.tabbar a{font-size:11.5px;white-space:nowrap}
+  .tabbar{grid-template-columns:repeat(5,minmax(0,1fr))!important}.tabbar a{white-space:nowrap}.xbell .xbadge[hidden]{display:none}.xbell svg.i{width:24px;height:24px}
   .tabbar a.cta .i{width:54px!important;height:54px!important;border-radius:50%!important;margin-top:-26px!important;background:var(--red-fill)!important;box-shadow:0 8px 18px -6px rgba(184,53,99,.6),0 0 0 5px var(--sheet)!important}
   .tabbar a.cta .i svg{width:26px!important;height:26px!important}
   .tabbar a.cta{color:var(--ink-3)!important;font-weight:600!important}
@@ -3164,7 +3164,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.18.20';
+const BUILD = 'v7.18.21';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3729,7 +3729,7 @@ function meLabel(){try{return session?.user?'我的':'註冊／登入'}catch(_){
 // 底部選單：固定 5 個（像一般 App），中間「＋」打開新增選單
 const TI_SEARCH='<svg class="i" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>';
 let __palN=0;
-function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/chats','chats','<span class="tb-ic">'+tbI('chat')+'<i class="tb-n" id="tbChatN"'+(__chatN?'':' hidden')+'>'+(__chatN>9?'9+':__chatN)+'</i></span>訊息'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/pals','pals','<span class="tb-ic">'+tbI('heart')+'<i class="tb-n" id="tbPalN"'+(__palN?'':' hidden')+'>'+(__palN>9?'9+':__palN)+'</i></span>交朋友'],['#/health','health',tbI('paw')+'我的毛孩'],['#/me','me',tbI('me')+'我的']]}
+function TABS(){return [['#/','home',tbI('home')+'首頁'],['#/pals','pals','<span class="tb-ic">'+tbI('heart')+'<i class="tb-n" id="tbPalN"'+(__palN?'':' hidden')+'>'+(__palN>9?'9+':__palN)+'</i></span>交朋友'],['javascript:void 0','add',plusI+'新增','cta tb-add'],['#/health','health',tbI('paw')+'我的毛孩'],['#/me','me',tbI('me')+'我的']]}   // 5 格：訊息在首頁右上角
 function openAddSheet(){
   const el=document.createElement('div');el.className='lightbox sheet-bg';
   const r=(h,i,c,t,d)=>`<a class="srow" href="${h}"><span class="sri ${c}">${i}</span><span class="srt"><b>${t}</b><small>${d}</small></span>${ic('chev','mrc')}</a>`;
@@ -3842,7 +3842,7 @@ function trackDepth(wasPop){const st=history.state,h=location.hash||'#/';
   if(st&&typeof st.d==='number'&&st.h===h){const trav=!__firstRoute;navDepth=st.d;__firstRoute=false;__replacing=false;return trav}
   if(__firstRoute)navDepth=0;else if(!__replacing)navDepth=navDepth+1;__firstRoute=false;   // 新的一頁（瀏覽器在換 #網址時也會發 popstate，所以不能靠它判斷是不是上一頁）
   __replacing=false;try{history.replaceState(Object.assign({},st||{},{d:navDepth,h}),'')}catch(_){}return false}
-const TOP_PAGES=IS_APP?/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|chats|pals)(\?.*)?$/:/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|chats|pals)(\?.*)?$/;
+const TOP_PAGES=IS_APP?/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|pals)(\?.*)?$/:/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|pals)(\?.*)?$/;
 function parentOf(h){const p=h.split('?')[0];let m;
   if((m=p.match(/^#\/(report|manage|poster)\/([0-9a-f-]{36})/)))return '#/case/'+m[2];
   if((m=p.match(/^#\/found-manage\/([0-9a-f-]{36})/)))return '#/found/'+m[1];
@@ -5188,7 +5188,7 @@ function dView(){try{return localStorage.getItem('wh_dv')||'card'}catch(_){retur
 function xView(){try{return localStorage.getItem('wh_xv')||'big'}catch(_){return 'big'}}
 function xBellHTML(){const n=me()?inboxUnread():0;return `<a class="xbell" href="#/inbox" aria-label="通知${n?'，'+n+' 則未讀':''}">${XI.bell}${n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}</a>`}
 function xHeadHTML(mode,title,where){return `<section class="xh">
-  <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><a class="xbell" href="#/fav" aria-label="收藏">${ic('mark')}</a><span id="xBell">${xBellHTML()}</span></div>
+  <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><a class="xbell" href="#/chats" aria-label="訊息">${tbI('chat')}<i class="xbadge" id="tbChatN"${__chatN?'':' hidden'}>${__chatN>9?'9+':__chatN}</i></a><span id="xBell">${xBellHTML()}</span></div>
   <nav class="xmode ${mode==='adopt'?'adopt':''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失毛孩</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養毛孩</a></nav>
   <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
