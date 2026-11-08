@@ -3211,7 +3211,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.20.3';
+const BUILD = 'v7.20.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6008,6 +6008,10 @@ async function renderCase(id){const _n=navId;
   // 地圖程式還沒下載完也先把案件內容顯示出來，地圖等它好了再畫（分享連結最常開這頁）
   const ana=sightAnalysis(c,pts);{const sa=$('#sAna');if(sa)sa.innerHTML=ana?sightAnaHTML(ana):lostPlanHTML(c)}
   const drawMap=()=>{const map=makeMap('map',center,pts.find(p=>p.lat)?15:10);
+  // 沒標地圖位置：改用鄉鎮區的位置當中心（不然只會停在縣市中心，可能差很遠）
+  if(!pts.find(p=>p.lat)&&c.lost_district&&map&&map.setView){const q=(c.lost_city||'')+(c.lost_district||'');let hit=null;try{hit=JSON.parse(localStorage.getItem('wh_geo_'+q)||'null')}catch(_){}
+    const go=ll=>{try{map.setView(ll,13);if(typeof L!=='undefined')L.circle(ll,{radius:2500,color:'#B8325E',weight:2,dashArray:'4 6',fillColor:'#B8325E',fillOpacity:.06}).addTo(map).bindPopup('走失地區（大概範圍）：'+esc(c.lost_district))}catch(_){}};
+    if(hit)go(hit);else fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tw&accept-language=zh-TW&q='+encodeURIComponent(q)).then(r=>r.json()).then(j=>{if(!j||!j[0])return;const ll=[+j[0].lat,+j[0].lon];try{localStorage.setItem('wh_geo_'+q,JSON.stringify(ll))}catch(_){}if($('#map'))go(ll)}).catch(()=>{})}
   // 依時間把走失點和目擊點連起來，並圈出建議先找的範圍
   if(typeof L!=='undefined'&&map&&map.addLayer){const line=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t)).map(p=>[p.lat,p.lng]);
     if(line.length>=2){L.polyline(line,{color:'#fff',weight:6,opacity:.8}).addTo(map);L.polyline(line,{color:'#B8325E',weight:3,opacity:.9,dashArray:'6 8',lineCap:'round'}).addTo(map)}
