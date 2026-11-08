@@ -3211,7 +3211,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.20.2';
+const BUILD = 'v7.20.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3276,6 +3276,8 @@ function liveApplyPending(){if(!IS_APP)return false;try{
 // 第一頁畫好之後：確認目前這版能用，記下來；清掉用不到的舊版
 async function liveConfirm(){if(!IS_APP)return;try{const L=localStorage,W=capPlugin('WebView');if(!W)return;
   const cur=L.getItem('wh_live_cur');
+  // App Store 更新後系統會改回內建畫面：記錄的「目前版本」已經不是正在跑的這版，清掉，否則同一版下載好也不會套用
+  if(cur&&cur!==BUILD){L.removeItem('wh_live_cur');L.removeItem('wh_live_cur_path')}
   if(cur&&cur===BUILD){L.setItem('wh_live_ok',BUILD);L.removeItem('wh_live_try');
     const {path}=await W.getServerBasePath();if(path&&path.indexOf(LIVE.dir+'/')>=0)await W.persistServerBasePath();}
   setTimeout(liveCheck,10000);if(!window.__liveIv)window.__liveIv=setInterval(()=>{if(document.visibilityState==='visible')liveCheck()},3*60e3+5e3);   // 開著 App 也會定時檢查
