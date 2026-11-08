@@ -668,6 +668,8 @@ async function runPhotoCleanup(dry = false) {
   for (const r of await sbAll("cases", { select: "id,photos" }, 1000, 1e7, true)) for (const u of r.photos ?? []) add(u);
   for (const r of await sbAll("found_reports", { select: "id,photos" }, 1000, 1e7, true)) for (const u of r.photos ?? []) add(u);
   for (const r of await sbAll("sightings", { select: "id,photo_url" }, 1000, 1e7, true)) add(r.photo_url);
+  // 毛孩交朋友名片、揪團：舊的名片照片可能放在 cases/，不能刪
+  for (const r of await sbAll("pet_cards", { select: "pet_id,photo" }, 1000, 1e7, true)) add(r.photo);
   if (!used.size) { log("照片清理：找不到任何使用中的照片，為了安全這次不刪"); return; }
   const cutoff = Date.now() - 12 * 3600e3;
   const stale: string[] = [];
