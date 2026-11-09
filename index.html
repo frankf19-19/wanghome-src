@@ -2605,6 +2605,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xpage{max-width:1080px;margin:0 auto}
   .xmode.small{max-width:420px}
 }
+.adm-case{margin:14px 0 6px;padding:12px 14px;border-radius:14px;background:var(--blue-soft,#EAF2FB);border:1px solid rgba(43,108,176,.18)}.adm-case-t{margin:0 0 8px;font-weight:700;font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}.adm-case-t svg{width:15px;height:15px}.adm-case-b{display:flex;flex-wrap:wrap;gap:8px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3211,7 +3212,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.20.5';
+const BUILD = 'v7.20.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5886,6 +5887,30 @@ function caseFetch(id){return Promise.all([
   ])}
 // 預先載入：手指一碰到案件卡片就開始抓資料（放開手指、換頁時資料多半已經到了）
 document.addEventListener('pointerdown',e=>{const a=e.target.closest&&e.target.closest('a[href^="#/case/"]');if(!a||!sb)return;const m=a.getAttribute('href').match(/^#\/case\/([0-9a-f-]{36})$/);if(!m)return;const pf=window.__casePf;if(pf&&pf.id===m[1]&&Date.now()-pf.t<15000)return;const p=caseFetch(m[1]);p.catch(()=>{});window.__casePf={id:m[1],t:Date.now(),p}},{passive:true,capture:true});
+// 管理員在案件頁直接處理：標記已回家／改回協尋、編輯、隱藏、刪除
+let __isAdm=null;
+async function amAdmin(){if(!me())return false;if(__isAdm!==null)return __isAdm;try{const {data}=await sb.rpc('is_admin');__isAdm=!!data}catch(_){__isAdm=false}return __isAdm}
+async function admCaseBar(c,id,_n){
+  if(!(await amAdmin())||_n!==navId)return;
+  const foot=document.querySelector('#app .ownerfoot');if(!foot||document.getElementById('admCase'))return;
+  const found=c.status==='found',hid=!!c.hidden;
+  foot.insertAdjacentHTML('beforebegin',`<div class="adm-case" id="admCase"><p class="adm-case-t">${ic('shield')} 管理員</p><div class="adm-case-b">
+    ${found?`<button type="button" class="btn sm ghost" data-st="searching">改回協尋中</button>`:`<button type="button" class="btn sm" data-st="found">${ic('check')} 標記已回家</button>`}
+    ${c.status!=='closed'?`<button type="button" class="btn sm ghost" data-st="closed">結案</button>`:''}
+    <button type="button" class="btn sm ghost" data-ed>編輯</button>
+    <button type="button" class="btn sm ghost" data-hd>${hid?'恢復顯示':'隱藏'}</button>
+    <button type="button" class="btn sm danger ghost" data-dl>刪除</button></div></div>`);
+  const box=document.getElementById('admCase');
+  const reload=()=>{if(location.hash.split('?')[0]==='#/case/'+id)route()};
+  box.querySelectorAll('[data-st]').forEach(b=>b.onclick=once(async()=>{const st=b.dataset.st;
+    const {error}=await sb.rpc('admin_update',{p_type:'case',p_id:id,p:{status:st}});if(error)return toast(error.message);
+    toast(st==='found'?'已標記「已回家」':st==='closed'?'已結案':'已改回協尋中');reload()}));
+  box.querySelector('[data-ed]').onclick=async()=>{let r=c;try{const {data}=await sb.rpc('admin_get_case',{p_id:id});if(data)r=data}catch(_){}admEdit('case',r,reload)};
+  box.querySelector('[data-hd]').onclick=once(async()=>{const {error}=await sb.rpc('admin_set_hidden',{p_type:'case',p_id:id,p_hidden:!hid});if(error)return toast(error.message);toast(hid?'已恢復顯示':'已隱藏，只有管理員看得到');reload()});
+  box.querySelector('[data-dl]').onclick=async()=>{
+    if(!confirm('確定要永久刪除這個案件嗎？\n刪除後無法復原（目擊回報也會一起刪除）。\n狗狗找到了請改按「標記已回家」；只是暫時不想公開請按「隱藏」。'))return;
+    const {error}=await sb.rpc('admin_delete',{p_type:'case',p_id:id});if(error)return toast(error.message);toast('已刪除');location.hash='#/'};
+}
 async function renderCase(id){const _n=navId;
   clearInterval(refreshTimer);refreshTimer=null;
   if(app.dataset.case!==id)if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('case');
@@ -5989,6 +6014,7 @@ async function renderCase(id){const _n=navId;
   applyShareUrl(url,shareTitle);
   getShareUrl('s',id).then(u=>{if(u===url||location.hash.split('?')[0]!=='#/case/'+id)return;applyShareUrl(u,shareTitle);const t=$('#shareText');if(t)t.value=shareText(c,u)});
   $('#btnReport').onclick=()=>openReport('case',id,c.poster);
+  admCaseBar(c,id,_n);
   {const bb=$('#btnBlock');if(bb)bb.onclick=()=>blockPoster(c.poster,()=>{location.hash='#/'})}
   if(_n===navId)setNavAction(`<button type="button">${ic('share')}<span>分享</span></button>`,()=>{const b=$('#btnShare');if(b)b.click()});
   $('#btnManage').onclick=async()=>{
