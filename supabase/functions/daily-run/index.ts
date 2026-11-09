@@ -558,6 +558,19 @@ async function runNotifications() {
   }
 }
 
+// ---------------------------------------------------------------- 追蹤的毛孩回家了（只推播＋站內通知，不寄信，不佔寄信額度）
+async function runReuniteNotices() {
+  const rows = (await sb("POST", "rpc/reunite_targets", { p_hours: 26 })) ?? [];
+  let n = 0;
+  for (const r of rows.slice(0, 500)) {
+    try {
+      await sb("POST", "notify_log", [{ user_id: r.user_id, kind: "reunite", ref_id: r.case_id }], undefined, "return=minimal,resolution=ignore-duplicates");
+      n += await pushToUser(r.user_id, `${r.case_name} 平安回家了 🎉`, "謝謝你幫忙留意和轉發，點開看回家的經過", `#/case/${r.case_id}`);
+    } catch (e) { log("回家通知失敗：", errName(e)); }
+  }
+  if (rows.length) log(`回家通知：${rows.length} 位追蹤者，推播 ${n} 則`);
+}
+
 // ---------------------------------------------------------------- 會員通知
 const SP_NAME: Record<string, string> = { dog: "狗", cat: "貓" };
 async function runMemberNotifications(nearby = true) {
@@ -665,7 +678,7 @@ async function runPhotoCleanup(dry = false) {
       used.add(k); used.add(k.replace(/\.jpg$/, "_t.jpg"));
     }
   };
-  for (const r of await sbAll("cases", { select: "id,photos" }, 1000, 1e7, true)) for (const u of r.photos ?? []) add(u);
+  for (const r of await sbAll("cases", { select: "id,photos,found_photo" }, 1000, 1e7, true)) { for (const u of r.photos ?? []) add(u); add(r.found_photo); }
   for (const r of await sbAll("found_reports", { select: "id,photos" }, 1000, 1e7, true)) for (const u of r.photos ?? []) add(u);
   for (const r of await sbAll("sightings", { select: "id,photo_url" }, 1000, 1e7, true)) add(r.photo_url);
   // 毛孩交朋友名片、揪團：舊的名片照片可能放在 cases/，不能刪
@@ -725,6 +738,7 @@ async function run(mode: Mode) {
     if (full || mode === "match" || mode === "notify") await step("拾獲比對", runFoundMatching);
     if (full || mode === "notify") await step("飼主通知", runNotifications);
     if (full || mode === "notify") await step("會員通知", () => runMemberNotifications(full));
+    if (full || mode === "notify") await step("回家通知", runReuniteNotices);
     if (full || mode === "notify") await step("檢舉通知", runReportAlerts);
     if (full) await step("到期提醒", runDueReminders);
     if (full) {

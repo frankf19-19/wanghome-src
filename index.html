@@ -2606,6 +2606,8 @@ html{-webkit-tap-highlight-color:transparent}
   .xmode.small{max-width:420px}
 }
 .adm-case{margin:14px 0 6px;padding:12px 14px;border-radius:14px;background:var(--blue-soft,#EAF2FB);border:1px solid rgba(43,108,176,.18)}.adm-case-t{margin:0 0 8px;font-weight:700;font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}.adm-case-t svg{width:15px;height:15px}.adm-case-b{display:flex;flex-wrap:wrap;gap:8px}
+.reun{margin:12px 0 14px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#EAF7F0,#FFF6E9);border:1px solid rgba(31,157,110,.22);box-shadow:0 10px 26px -14px rgba(31,157,110,.45)}.reun-ph{position:relative;aspect-ratio:4/3;background:#dfeee6}.reun-ph img{width:100%;height:100%;object-fit:cover;display:block}.reun-badge{position:absolute;left:12px;top:12px;background:#1F9D6E;color:#fff;font-weight:800;font-size:13px;padding:6px 11px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.18)}.reun-b{padding:14px 16px 16px}.reun-t{margin:0;font-size:22px;font-weight:900;color:#14563F}.reun-s{margin:4px 0 0;color:#3E6B5A;font-size:14px;font-weight:600}.reun-q{margin:12px 0 0;padding:12px 14px;background:rgba(255,255,255,.75);border-radius:14px;border-left:4px solid #1F9D6E;font-size:15px;line-height:1.65;color:var(--ink)}.reun-q cite{display:block;margin-top:6px;font-style:normal;font-size:12.5px;color:var(--ink-3)}.reun-thx{margin:12px 0 0;font-size:14px;color:#3E6B5A}.reun-own{margin-top:12px}.lostlog-btn{margin:18px 0 6px}
+.fp-row{display:flex;align-items:center;gap:12px;margin-top:6px}.fp-prev{width:84px;height:84px;border-radius:14px;overflow:hidden;background:var(--bg-2,#F1EEE8);display:grid;place-items:center;color:var(--ink-3);flex:none}.fp-prev img{width:100%;height:100%;object-fit:cover}.fp-prev svg{width:28px;height:28px}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3212,7 +3214,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.20.6';
+const BUILD = 'v7.21.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5206,7 +5208,7 @@ async function inboxItems(){if(!me())return [];const out=[];const since=new Date
   const jobs=[];
   if(mid.length){mid.slice(0,5).forEach(id=>jobs.push(sb.rpc('owner_sightings',{p_id:id,p_token:null}).then(({data})=>(data||[]).filter(x=>(x.created_at||x.seen_at)>since).slice(0,10).forEach(x=>{if(x.status==='rejected')return;const c=byId[x.case_id];out.push({t:x.created_at||x.seen_at,k:'mine',ic:'eye',col:'#F2643D',img:x.photo_url||(c.photos||[])[0],href:'#/manage/'+x.case_id,h:`<b>有人看到 ${esc(c.name)}</b>${x.place_text?'：'+esc(x.place_text):''}${x.status==='pending'?'（等你確認）':''}`})})).catch(()=>{out.err=true})));
     jobs.push(sb.from('shelter_matches').select('*').in('case_id',mid).eq('dismissed',false).gte('photo_sim',70).order('photo_sim',{ascending:false}).limit(10).then(({data})=>(data||[]).forEach(x=>{const c=byId[x.case_id];out.push({t:x.matched_at||x.created_at||'2000-01-01T00:00:00Z',k:'mine',ic:'shelter',col:'#2F6FE0',img:(c.photos||[])[0],href:'#/case/'+x.case_id+'?sec=shelter',h:`<b>收容所有一隻很像 ${esc(c.name)}</b>，照片相似度 ${Math.round(x.photo_sim)}%`})})).catch(()=>{out.err=true}))}
-  if(fid.length){jobs.push(sb.from('cases_public').select('id,name,photos,status,found_at,last_seen_at').in('id',fid).then(({data})=>(data||[]).forEach(c=>{if(c.status==='found'&&c.found_at&&c.found_at>since)out.push({t:c.found_at,k:'follow',ic:'heart',col:'#1F9D6E',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`🎉 你追蹤的 <b>${esc(c.name)}</b> 回家了！`});else if(c.status==='searching'&&c.last_seen_at&&c.last_seen_at>since)out.push({t:c.last_seen_at,k:'follow',ic:'eye',col:'#F2643D',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`你追蹤的 <b>${esc(c.name)}</b> 有新的目擊`})})).catch(()=>{out.err=true}))}
+  if(fid.length){jobs.push(sb.from('cases_public').select('id,name,photos,status,found_at,last_seen_at').in('id',fid).then(({data})=>(data||[]).forEach(c=>{if(c.status==='found'&&c.found_at&&c.found_at>since)out.push({t:c.found_at,k:'follow',ic:'heart',col:'#1F9D6E',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`🎉 你追蹤的 <b>${esc(c.name)}</b> 平安回家了！謝謝你的幫忙 🙏`});else if(c.status==='searching'&&c.last_seen_at&&c.last_seen_at>since)out.push({t:c.last_seen_at,k:'follow',ic:'eye',col:'#F2643D',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`你追蹤的 <b>${esc(c.name)}</b> 有新的目擊`})})).catch(()=>{out.err=true}))}
   const p=prof||{};
   if(p.home_lat&&p.home_lng){const r=(p.home_radius_km||3)/111;jobs.push(sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,created_at,lost_lat,lost_lng').eq('status','searching').gte('created_at',new Date(Date.now()-7*864e5).toISOString()).gte('lost_lat',p.home_lat-r).lte('lost_lat',p.home_lat+r).gte('lost_lng',p.home_lng-r*1.1).lte('lost_lng',p.home_lng+r*1.1).order('created_at',{ascending:false}).limit(10).then(({data})=>(data||[]).filter(c=>!byId[c.id]).forEach(c=>out.push({t:c.created_at,k:'near',ic:'pin',col:'#F2643D',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`<b>你家附近</b>有${c.species==='cat'?'貓咪':'狗狗'}走失：${esc(c.name)}（${esc((c.lost_city||'')+(c.lost_district||''))}）`}))).catch(()=>{out.err=true}))}
   const pn={},pp={};(pets||[]).forEach(x=>{pn[x.id]=x.name;pp[x.id]=(x.photos||[])[0]});
@@ -5887,6 +5889,26 @@ function caseFetch(id){return Promise.all([
   ])}
 // 預先載入：手指一碰到案件卡片就開始抓資料（放開手指、換頁時資料多半已經到了）
 document.addEventListener('pointerdown',e=>{const a=e.target.closest&&e.target.closest('a[href^="#/case/"]');if(!a||!sb)return;const m=a.getAttribute('href').match(/^#\/case\/([0-9a-f-]{36})$/);if(!m)return;const pf=window.__casePf;if(pf&&pf.id===m[1]&&Date.now()-pf.t<15000)return;const p=caseFetch(m[1]);p.catch(()=>{});window.__casePf={id:m[1],t:Date.now(),p}},{passive:true,capture:true});
+// 已回家的案件：回家故事卡片（團圓照、走失幾天回家、經過、找回方式）
+function reunionHTML(c,id){
+  const ph=c.found_photo;
+  const d=c.found_at?Math.max(0,Math.round((new Date(c.found_at)-new Date(c.lost_at))/864e5)):null;
+  return `<section class="reun" id="reun">
+    ${ph?`<div class="reun-ph"><img src="${esc(safeU(ph))}" alt="${esc(c.name)}" loading="lazy"><span class="reun-badge">🏠 平安回家</span></div>`:''}
+    <div class="reun-b">
+      <p class="reun-t">🎉 ${esc(c.name)} 平安回家了！</p>
+      <p class="reun-s">${d!==null?(d<1?'走失當天就回家了':`走失 ${d} 天後回家`):'已經回家了'}${c.found_at?'・'+fmtDate(c.found_at):''}${c.found_method?'・'+esc(c.found_method):''}</p>
+      ${c.found_note?`<blockquote class="reun-q">${esc(c.found_note)}<cite>— ${esc(c.contact_name||'飼主')}</cite></blockquote>`:''}
+      <p class="reun-thx">謝謝每一位幫忙留意、轉發的朋友 🙏</p>
+      <a class="btn sm ghost reun-own" id="reunOwn" href="#/manage/${id}?p=home" hidden>${ic('image')} ${c.found_photo||c.found_note?'修改團圓照和感謝的話':'加一張團圓照、寫下感謝的話'}</a>
+    </div></section>`}
+function reunionBind(c,id,_n){
+  const b=$('#btnLostLog');if(b)b.onclick=()=>{const l=$('#lostLog');if(l){l.hidden=false;b.remove();setTimeout(()=>window.dispatchEvent(new Event('resize')),60);l.scrollIntoView({behavior:RM()?'auto':'smooth',block:'start'})}};
+  const show=()=>{if(_n!==navId)return;const o=$('#reunOwn');if(o)o.hidden=false};
+  let t=null;try{t=localStorage.getItem('wh_token_'+id)}catch(_){}
+  if(t)return show();
+  if(me())sb.rpc('can_manage_case',{p_id:id,p_token:null}).then(({data})=>{if(data)show()}).catch(()=>{});
+}
 // 管理員在案件頁直接處理：標記已回家／改回協尋、編輯、隱藏、刪除
 let __isAdm=null;
 async function amAdmin(){if(!me())return false;if(__isAdm!==null)return __isAdm;try{const {data}=await sb.rpc('is_admin');__isAdm=!!data}catch(_){__isAdm=false}return __isAdm}
@@ -5932,13 +5954,13 @@ async function renderCase(id){const _n=navId;
   <div class="pad-bottom">
   <div class="poster-head">
     <span class="status-pill ${c.status}">${STATUS[c.status]}</span>
-    ${c.reward>0?`<span class="tag blue">尋獲獎金 NT$${c.reward.toLocaleString()}</span>`:''}${c.source==='moa'?'<span class="tag">農業部申報</span>':''}
+    ${c.reward>0&&c.status!=='found'?`<span class="tag blue">尋獲獎金 NT$${c.reward.toLocaleString()}</span>`:''}${c.source==='moa'?'<span class="tag">農業部申報</span>':''}
   </div>
   <h1>${sp(c.species).poster}｜${esc(c.name)}</h1>
   <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}</span></p>
-  <div class="xstats"><div><small>走失</small><b>${c.status==='searching'?'第 ':''}${daysSince(c.lost_at)}<span>天</span></b></div><div><small>目擊</small><b>${c.sighting_count||0}<span>次</span></b></div><div class="${c.reward>0?'rw':''}"><small>${c.reward>0?'懸賞':'晶片'}</small><b>${c.reward>0?'$'+c.reward.toLocaleString():c.has_chip?'有':'不確定'}</b></div></div>
+  <div class="xstats"${c.status==='found'?' hidden':''}><div><small>走失</small><b>${c.status==='searching'?'第 ':''}${daysSince(c.lost_at)}<span>天</span></b></div><div><small>目擊</small><b>${c.sighting_count||0}<span>次</span></b></div><div class="${c.reward>0?'rw':''}"><small>${c.reward>0?'懸賞':'晶片'}</small><b>${c.reward>0?'$'+c.reward.toLocaleString():c.has_chip?'有':'不確定'}</b></div></div>
   ${c.source==='moa'?`<details class="notice moa"><summary><b>農業部遺失申報</b>看到牠請直接打給飼主 ›</summary>飼主在農業部寵物登記網申報走失，沒有使用汪喵回家。看到牠最快的方式是直接打電話給飼主；不方便打電話的話，也可以回報目擊位置，由汪喵回家確認後打電話轉告飼主。地圖上標的是走失地區的大概位置。</details>`:''}
-  ${c.status==='found'?`<div class="notice green"><b>🎉 ${esc(c.name)} 已經找到了！</b>${c.found_note?esc(c.found_note):'謝謝所有幫忙的人。'}${c.found_method?`<div class="small muted">找回方式：${esc(c.found_method)}</div>`:''}</div>`:''}
+  ${c.status==='found'?reunionHTML(c,id):''}
   <div class="detail-head" style="margin-top:12px">
     <div class="gallery">
       <div class="main ${photos[0]?'':'noimg'} ${c.species==='cat'?'cat':''}" id="gMain" ${photos[0]?`role="button" tabindex="0" aria-label="放大看 ${esc(c.name)} 的照片" style="background-image:url('${esc(safeU(photos[0]))}')"`:''}>${c.status==='searching'?`<span class="days">走失第 ${daysSince(c.lost_at)} 天</span>`:c.status==='found'?'<span class="days found">已回家</span>':''}</div>
@@ -5972,26 +5994,28 @@ async function renderCase(id){const _n=navId;
     </div>
   </div>
 
+  ${c.status==='found'?`<button type="button" class="btn ghost block lostlog-btn" id="btnLostLog">${ic('map')} 看走失和目擊紀錄</button>`:''}<div id="lostLog"${c.status==='found'?' hidden':''}>
   <h2>${ic("map")} 目擊位置與時間軸</h2>
   ${c.pending_count>0?`<p class="notice pend-n">🕒 另有 <b>${c.pending_count}</b> 則新的目擊回報，等飼主確認後會顯示在地圖上。</p>`:''}
   <div id="sAna"></div>
   <div class="trail"><div class="trail-map"><div id="map"></div></div><div class="timeline" id="tl"></div></div>
+  </div>
 
   <div id="shelterBox">${shelterBoxHTML(matches,c.status==='searching')}</div>
 
   <div id="foundMatches"></div>
 
-  <h2>${ic("megaphone")} 幫忙擴散</h2>
+  <h2>${ic("megaphone")} ${c.status==='found'?'分享好消息':'幫忙擴散'}</h2>
   <div class="card">
-    <p class="small" style="margin-top:0"><b>貼到社團最有效：</b>按「複製協尋貼文」，整段（含網址）貼到當地協尋社團、LINE 群。</p>
+    <p class="small" style="margin-top:0">${c.status==='found'?'<b>讓幫忙轉發過的朋友知道：</b>按「複製好消息」，貼到之前分享過的社團、LINE 群，大家就不用再找了。':'<b>貼到社團最有效：</b>按「複製協尋貼文」，整段（含網址）貼到當地協尋社團、LINE 群。'}</p>
     <details class="sharetext"><summary>看貼文內容</summary><textarea id="shareText" aria-label="分享文案" readonly style="min-height:150px;margin-top:8px">${esc(shareText(c,url))}</textarea></details>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">複製協尋貼文</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a></div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">${c.status==='found'?'複製好消息':'複製協尋貼文'}</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a></div>
   </div>
   </div>
       <p class="small muted casemeta">${ic('eye')} 瀏覽 ${((c.view_count||0)+(firstView?1:0)).toLocaleString()}　·　${fmtDT(c.created_at)} 登記</p><p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">${ic("shield")} 封鎖發布者</button></p>
   ${active?(c.source==='moa'?(c.contact_phone?`<div class="sticky-cta"><a class="btn block" href="tel:${esc(telNum(c.contact_phone))}">${ic('phone')} 看到${esc(c.name||"牠")}了，打給飼主</a></div>`:''):`<div class="sticky-cta"><a class="btn block" href="#/report/${id}">${ic("eye")} 我看到${esc(c.name||"牠")}了，回報目擊</a></div>`):''}`;
 
-  if(isMobV()){const g=app.querySelector('.detail-head .gallery'),pb=app.querySelector('.pad-bottom');if(g&&pb){pb.prepend(g);g.classList.add('xhero')}}
+  if(isMobV()&&!(c.status==='found'&&c.found_photo)){const g=app.querySelector('.detail-head .gallery'),pb=app.querySelector('.pad-bottom');if(g&&pb){pb.prepend(g);g.classList.add('xhero')}}
   document.querySelectorAll('.gallery .thumbs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('.gallery .thumbs div').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#gMain').style.backgroundImage=`url('${safeU(photos[+t.dataset.i])}')`});
   $('#gMain').onclick=()=>{const u=$('#gMain').style.backgroundImage.slice(5,-2);if(u)lightbox(u)};
   // 鍵盤也能操作照片（Enter／空白鍵）
@@ -6015,6 +6039,7 @@ async function renderCase(id){const _n=navId;
   getShareUrl('s',id).then(u=>{if(u===url||location.hash.split('?')[0]!=='#/case/'+id)return;applyShareUrl(u,shareTitle);const t=$('#shareText');if(t)t.value=shareText(c,u)});
   $('#btnReport').onclick=()=>openReport('case',id,c.poster);
   admCaseBar(c,id,_n);
+  if(c.status==='found')reunionBind(c,id,_n);
   {const bb=$('#btnBlock');if(bb)bb.onclick=()=>blockPoster(c.poster,()=>{location.hash='#/'})}
   if(_n===navId)setNavAction(`<button type="button">${ic('share')}<span>分享</span></button>`,()=>{const b=$('#btnShare');if(b)b.click()});
   $('#btnManage').onclick=async()=>{
@@ -6541,15 +6566,16 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     </section>
     <section ${P==='home'?'':'hidden'}>
       <h1>${c.status==='searching'?esc(c.name||'牠')+'回家了嗎？':'案件狀態'}</h1>
-      <div id="homeDone" class="home-done ${c.status==='found'?'':'hidden'}"><div class="hd-ic" aria-hidden="true">🎉</div><b>${esc(c.name||'牠')}已經回家了！</b><p>謝謝你回來更新，大家就知道不用再找了。</p><div class="bigacts"><button type="button" class="btn big green" id="btnShareFound">${ic("share")} 分享好消息</button></div></div>
+      <div id="homeDone" class="home-done ${c.status==='found'?'':'hidden'}"><div class="hd-ic" aria-hidden="true">🎉</div><b>${esc(c.name||'牠')}已經回家了！</b><p>謝謝你回來更新，大家就知道不用再找了。往下加一張團圓照、寫幾句感謝的話，幫忙過的人會很開心 🥰</p><div class="bigacts"><button type="button" class="btn big green" id="btnShareFound">${ic("share")} 分享好消息</button></div></div>
       ${c.status==='searching'?`<p>按下面的按鈕，案件會改成「已回家」，大家就知道不用再找了。之後還能改回來。</p><button type="button" class="btn big green home-btn" id="btnHome">🎉 確定，${esc(c.name||'牠')}回家了！</button>`:''}
       <div class="mg-statusbox">${c.status==='searching'?'<p class="small muted">確定找不回來、不想再協尋，也可以改成「已結案」：</p>':''}
     <div class="seg" id="segStatus">${Object.entries(STATUS).map(([k,v])=>`<button type="button" data-v="${k}" class="${c.status===k?'on':''}">${v}</button>`).join('')}</div>
     <div id="foundBox" class="${c.status==='found'?'':'hidden'}" style="margin-top:12px">
       <label class="f"><span><b class="lbl">怎麼找到的？</b><small class="hint">會公開，幫助其他飼主</small></span><select id="foundMethod"><option value="">選擇</option>${FOUND_METHODS.map(m=>`<option ${c.found_method===m?'selected':''}>${m}</option>`).join('')}</select></label>
-      <label class="f"><span><b class="lbl">找到的經過</b><small class="hint">會公開</small></span><textarea id="foundNote" maxlength="1000">${esc(c.found_note||'')}</textarea></label>
+      <div class="f"><span><b class="lbl">團圓照</b><small class="hint">會放在案件頁最上面，可以不放</small></span><div class="fp-row"><div class="fp-prev" id="fpPrev">${c.found_photo?`<img src="${esc(safeU(c.found_photo))}" alt="">`:ic('image')}</div><label class="uploadbtn">${ic("image")} <span id="fpLbl">${c.found_photo?'換一張':'選一張團圓照'}</span><input type="file" id="foundPhotoIn" accept="image/*"></label></div></div>
+      <label class="f"><span><b class="lbl">找到的經過、想感謝的話</b><small class="hint">會公開，例如：在泰山被好心人撿到，謝謝大家幫忙轉發</small></span><textarea id="foundNote" maxlength="1000">${esc(c.found_note||'')}</textarea></label>
     </div>
-    <button class="btn big ${c.status==='found'?'':'hidden'}" style="margin-top:12px" id="btnStatus">儲存找到的經過</button>
+    <button class="btn big ${c.status==='found'?'':'hidden'}" style="margin-top:12px" id="btnStatus">儲存團圓照和感謝的話</button>
     <ul class="small muted statushelp"><li>點一下就會儲存。<b>已結案</b>＝不再協尋（例如確定找不回來）。</li></ul>
       </div>
     </section>
@@ -6585,7 +6611,11 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     if(v==='searching'){if($('#foundNote'))$('#foundNote').value='';if($('#foundMethod'))$('#foundMethod').selectedIndex=0}   // 改回協尋中：資料庫也清掉了，畫面一起清
     toast(v==='found'?'🎉 太好了！已改成「已回家」。想分享怎麼找到的，往下寫就好':'已儲存：'+STATUS[v]);
     if(v==='found')($('#foundBox').closest('details')||{}).open=true;$('#foundBox').scrollIntoView({behavior:RM()?'auto':'smooth',block:'center'})});
-  $('#btnStatus').onclick=async e=>{const bt=e.currentTarget;if(bt.disabled)return;bt.disabled=true;const p={status:'found',found_method:$('#foundMethod').value,found_note:$('#foundNote').value};const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});bt.disabled=false;if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('已儲存，謝謝你的分享');setTimeout(()=>goReplace('#/case/'+id),1200)};
+  let foundPhoto=c.found_photo||'';
+  {const fi=$('#foundPhotoIn');if(fi)fi.onchange=async()=>{const f=fi.files&&fi.files[0];fi.value='';if(!f)return;const lb=$('#fpLbl');if(lb)lb.textContent='上傳中…';
+    try{const u=await uploadPhoto(f,'cases');foundPhoto=u;$('#fpPrev').innerHTML=`<img src="${esc(safeU(u))}" alt="">`;if(lb)lb.textContent='換一張';toast('照片好了，記得按下面「儲存」')}catch(err){if(lb)lb.textContent=foundPhoto?'換一張':'選一張團圓照';toast('照片上傳失敗：'+(err&&err.message||err))}}}
+  $('#btnStatus').onclick=async e=>{const bt=e.currentTarget;if(bt.disabled)return;bt.disabled=true;const p={status:'found',found_method:$('#foundMethod').value,found_note:$('#foundNote').value};
+    if(foundPhoto!==(c.found_photo||'')){p.found_photo=foundPhoto;const rest=(c.photos||[]).filter(x=>x!==c.found_photo&&x!==foundPhoto);p.photos=(foundPhoto?[foundPhoto,...rest]:rest).slice(0,10)}const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});bt.disabled=false;if(error)return toast('儲存失敗：'+friendlyErr(error.message));toast('已儲存，謝謝你的分享');setTimeout(()=>goReplace('#/case/'+id),1200)};
   // 確認／退回目擊：只更新那一筆，不重畫整頁（避免清掉正在編輯的資料）
   const bindOps=root=>root.querySelectorAll('.ops [data-s]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;b.disabled=true;const v=b.dataset.v;const {error}=await sb.rpc('set_sighting_status',{p_case:id,p_sighting:b.dataset.s,p_token:token,p_status:v});if(error){b.disabled=false;return toast(friendlyErr(error.message))}
     toast(v==='confirmed'?'✅ 已確認，會顯示在公開頁':v==='rejected'?'已標記「不是牠」，不會公開':'已改回待確認');const row=b.closest('.tl');if(!row)return;
