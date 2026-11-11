@@ -2491,6 +2491,13 @@ html{-webkit-tap-highlight-color:transparent}
   .mine-mini em{font-style:normal;font-size:13px;font-weight:700;color:var(--brand);flex:none}.mine-mini[open] summary em{visibility:hidden}
   .mine-mini .mine-row{border-top:1px solid var(--line)}
 }
+.near-tile{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:20px;background:linear-gradient(160deg,color-mix(in srgb,var(--brand) 12%,var(--sheet)),var(--sheet));border:1px solid color-mix(in srgb,var(--brand) 22%,var(--line))}
+.near-tile .nt-ic{flex:none;width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center}.near-tile .nt-ic .ico{width:20px;height:20px}
+.near-tile .nt-t{flex:1;min-width:0}.near-tile .nt-t b{display:block;font-size:15px;line-height:1.3}.near-tile .nt-t small{display:block;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.near-tile .btn{flex:none;white-space:nowrap}.near-tile .nt-x{flex:none;border:0;background:none;color:var(--ink-3);font-size:16px;padding:6px 2px;cursor:pointer}
+.cjoin{margin:14px 0 4px;padding:12px 14px 6px;border-radius:20px;background:var(--sheet);box-shadow:var(--lift)}.cj-t{margin:0 0 4px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px}.cj-t .ico{width:17px;height:17px;color:var(--brand)}
+.cj-row{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 0;border:0;border-top:1px solid var(--line);background:none;font:inherit;text-align:left;color:var(--ink)!important;text-decoration:none!important;cursor:pointer}
+.cj-row span{flex:1;min-width:0}.cj-row b{display:block;font-size:15px}.cj-row small{display:block;font-size:12.5px;color:var(--ink-2)}.cj-row em{flex:none;font-style:normal;font-weight:800;font-size:13.5px;color:#fff;background:var(--brand);border-radius:999px;padding:7px 13px}.cj-row[data-on="1"] em{background:none;color:var(--ok,#1F9D6E);padding:7px 0}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3093,7 +3100,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.22.0';
+const BUILD = 'v7.23.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5142,6 +5149,16 @@ function xHeadHTML(mode,title,where){return `<section class="xh">
   <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
 // 首頁：在第 6 張卡片後面放一格「毛孩交朋友」，看起來就像清單裡的一張卡，不另外佔一排
+// 首頁：第 4 張卡片後面放一格「家附近有毛孩走失就通知我」（已經開通知、或按過不要的人不會看到）
+let __nearOn=null;
+async function nearTileInsert(){const list=$('#list');if(!list||homeState.tab==='found'||document.querySelector('.near-tile'))return;
+  try{if(localStorage.getItem('wh_neartile_x'))return}catch(_){}
+  if(__nearOn===null&&me()){try{const p=await getProfile();__nearOn=!!(p&&p.notify_enabled&&p.home_lat)}catch(_){__nearOn=false}}
+  if(__nearOn||document.querySelector('.near-tile'))return;
+  const cards=list.querySelectorAll(':scope > a');if(cards.length<4)return;
+  cards[3].insertAdjacentHTML('afterend',`<div class="near-tile"><span class="nt-ic">${ic('bell')}</span><span class="nt-t"><b>家附近有毛孩走失，通知我</b><small>${me()?'設定家的位置，一起幫忙留意':'免費加入，設定家的位置，一起幫忙留意'}</small></span><a class="btn sm" href="#/me?nf=1" data-nearjoin>${me()?'開啟通知':'免費加入'}</a><button type="button" class="nt-x" aria-label="不要再顯示">✕</button></div>`);
+  const t=document.querySelector('.near-tile');t.querySelector('.nt-x').onclick=()=>{try{localStorage.setItem('wh_neartile_x','1')}catch(_){}t.remove()}}
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-nearjoin]');if(!a||me())return;e.preventDefault();setReturn('#/me?nf=1');location.hash='#/login'});
 function palsTileInsert(){return;   // 交朋友已經在底部分頁，首頁不再放入口
   const el=$('#list'),f=$('#xFeed');if(!el||!f||el.querySelector('.pals-tile'))return;
   if(homeState.tab!=='lost'||homeState.near||homeState.q||homeState.chip||!['grid','big'].includes(f.dataset.v))return;
@@ -5174,7 +5191,7 @@ async function renderHomeMob(){const _n=navId;
   const setTitle2=()=>{const t=$('#xTitle');if(t)t.innerHTML=`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`;const w=$('#xWhereT');if(w)w.textContent=xWhereText();xCountQ()};
   const xCountQ=async()=>{if(homeState.near)return;const f=homeState.tab==='found';let q=f?sb.from('found_public').select('id',{count:'exact',head:true}).eq('status','open'):sb.from('cases_public').select('id',{count:'exact',head:true}).eq('status','searching');q=fIn(q,f?'city':'lost_city',homeState.city);q=fSp(q);const {count}=await q;if(_n!==navId||!$('#xFeed'))return;const e=$('#xN');if(e&&count!=null)e.textContent=count.toLocaleString()};
   if(_n===navId)drailAttach('lost');
-  window.xListDone=(n,lim)=>{if(!$('#xFeed'))return;palsTileInsert();const c=$('#xCnt');if(c)c.textContent=n>=lim?`${n}+ 隻・`:`${n} ${homeState.tab==='found'?'則':'隻'}・`;if(homeState.near){const e=$('#xN');if(e)e.textContent=n>=lim?n+'+':n}};
+  window.xListDone=(n,lim)=>{if(!$('#xFeed'))return;palsTileInsert();nearTileInsert();const c=$('#xCnt');if(c)c.textContent=n>=lim?`${n}+ 隻・`:`${n} ${homeState.tab==='found'?'則':'隻'}・`;if(homeState.near){const e=$('#xN');if(e)e.textContent=n>=lim?n+'+':n}};
   const reload=()=>{homeState.limit=24;showF();setTitle2();loadList()};
   $('#btnFilter').onclick=()=>openFilterSheet(()=>{reload()},{kind:1,sort:1});
   $('#fActive').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const k=b.dataset.rm;if(k==='fnd'){homeState.fnd=false;if(homeState.tab==='found')homeState.tab='lost'}if(k==='sort')homeState.sort='act';if(k==='sp')homeState.species=[];if(k==='city')homeState.city=homeState.city.filter(x=>x!==b.dataset.v);if(k==='st')homeState.status=['searching'];if(k==='rw')homeState.reward=false;if(['sex','colour','breed'].includes(k))homeState[k]=homeState[k].filter(x=>x!==b.dataset.v);if(k==='days')homeState.days=0;if(k==='photo')homeState.photo=false;if(k==='src')homeState.src=[];reload()};
@@ -5772,6 +5789,16 @@ function caseFetch(id){return Promise.all([
   ])}
 // 預先載入：手指一碰到案件卡片就開始抓資料（放開手指、換頁時資料多半已經到了）
 document.addEventListener('pointerdown',e=>{const a=e.target.closest&&e.target.closest('a[href^="#/case/"]');if(!a||!sb)return;const m=a.getAttribute('href').match(/^#\/case\/([0-9a-f-]{36})$/);if(!m)return;const pf=window.__casePf;if(pf&&pf.id===m[1]&&Date.now()-pf.t<15000)return;const p=caseFetch(m[1]);p.catch(()=>{});window.__casePf={id:m[1],t:Date.now(),p}},{passive:true,capture:true});
+// 案件頁：把路過的人留下來。追蹤這隻毛孩、或這一帶有新走失時通知我（已經開附近通知的人只看到追蹤）
+async function caseJoinBar(c,id,_n){const el=$('#caseJoin');if(!el||c.status!=='searching')return;
+  let near=false,fol=false;
+  if(me()){try{const [p,f]=await Promise.all([getProfile().catch(()=>null),sb.from('follows').select('case_id').eq('case_id',id).maybeSingle()]);near=!!(p&&p.notify_enabled&&p.home_lat);fol=!!(f&&f.data)}catch(_){}}
+  if(_n!==navId||!el.isConnected)return;
+  const area=esc((c.lost_city||'')+(c.lost_district||''));
+  el.innerHTML=`<div class="cjoin"><p class="cj-t">${ic('bell')} 想幫忙？有消息第一個知道</p>
+    <button type="button" class="cj-row" id="cjFollow" data-on="${fol?1:0}"><span><b>${fol?'已追蹤':'追蹤'}${esc(c.name||'牠')}</b><small>${fol?'有新目擊、找到了都會通知你':'有人回報目擊、平安回家時通知我'}</small></span><em>${fol?'追蹤中 ✓':'追蹤'}</em></button>
+    ${near?'':`<a class="cj-row" href="#/me?nf=1" data-nearjoin><span><b>${area}一帶有毛孩走失時通知我</b><small>設定家的位置，附近有新走失就通知你</small></span><em>${me()?'開啟':'免費加入'}</em></a>`}</div>`;
+  $('#cjFollow').onclick=async()=>{const b=$('#btnFollow');if(!b)return;await toggleFollow(id,b);if(me())caseJoinBar(c,id,_n)}}
 // 已回家的案件：回家故事卡片（團圓照、走失幾天回家、經過、找回方式）
 function reunionHTML(c,id){
   const ph=c.found_photo;
@@ -5866,6 +5893,7 @@ async function renderCase(id){const _n=navId;
         ${c.contact_phone?`<a class="btn big call" href="tel:${esc(telNum(c.contact_phone))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(c.contact_phone)}</span></a>`:''}
       </div>
       <div class="chat-ctaw" id="chatCta" hidden></div>
+      <div id="caseJoin"></div>
       ${c.source==='moa'?`<p class="moa-rel"><a href="#/report/${id}">${ic("eye")} 不方便打電話？回報目擊位置，由汪喵回家轉告飼主 ›</a></p>`:''}
       ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}按上面按鈕回報，飼主會收到通知。</p>`}
       <p class="tipbox ic-tip"><span class="tb-ic">${ic('paw')}</span><span>看到${esc(c.name||"牠")}：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</span></p>`:''}
@@ -5922,6 +5950,7 @@ async function renderCase(id){const _n=navId;
   getShareUrl('s',id).then(u=>{if(u===url||location.hash.split('?')[0]!=='#/case/'+id)return;applyShareUrl(u,shareTitle);const t=$('#shareText');if(t)t.value=shareText(c,u)});
   $('#btnReport').onclick=()=>openReport('case',id,c.poster);
   admCaseBar(c,id,_n);
+  caseJoinBar(c,id,_n);
   if(c.status==='found')reunionBind(c,id,_n);
   {const bb=$('#btnBlock');if(bb)bb.onclick=()=>blockPoster(c.poster,()=>{location.hash='#/'})}
   if(_n===navId)setNavAction(`<button type="button">${ic('share')}<span>分享</span></button>`,()=>{const b=$('#btnShare');if(b)b.click()});
