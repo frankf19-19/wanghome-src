@@ -1,6 +1,8 @@
 // IndexNow：新案件一登記就通知 Bing 等搜尋引擎來收錄（Google 不支援 IndexNow，靠 sitemap）。
 // GET /api/indexnow?id=<案件 id>   網頁登記成功後背景呼叫；只有真的存在的公開案件才會送出。
 // 金鑰檔放在網站根目錄 /<KEY>.txt（IndexNow 規定），由 build.sh 複製。
+import { GUIDE_IDS } from "../../lib/guides.js";
+import { CITIES } from "../../lib/seo.js";
 const KEY = "73080c78bdeeab41a5d6fcb7fa0d1bc7";
 const SITE = "https://wangmiaotw.com/";
 const SUPABASE_URL = "https://nopyhfpaykkiieudvoko.supabase.co";
@@ -12,6 +14,15 @@ export async function onRequestGet({ request, waitUntil }) {
   const origin = request.headers.get("Origin") || "";
   const cors = { "Access-Control-Allow-Origin": ALLOW.includes(origin) ? origin : "https://wangmiaotw.com", "Vary": "Origin", "Content-Type": "application/json", "Cache-Control": "no-store" };
   const id = new URL(request.url).searchParams.get("id") || "";
+  // ?all=1：把固定的重點頁（指南、各縣市走失、各縣市領養）一次送出；改版後手動呼叫一次即可
+  if (new URL(request.url).searchParams.get("all") === "1") {
+    const urlList = [SITE, `${SITE}l/`, `${SITE}g/`, `${SITE}adopt/`, ...GUIDE_IDS().map((g) => `${SITE}g/${g}`),
+      ...CITIES.map((c) => `${SITE}l/${encodeURIComponent(c)}`), ...CITIES.flatMap((c) => ["狗", "貓"].map((k) => `${SITE}adopt/${encodeURIComponent(c)}/${encodeURIComponent(k)}`))];
+    let status = 0;
+    try { const r = await fetch("https://api.indexnow.org/indexnow", { method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ host: "wangmiaotw.com", key: KEY, keyLocation: `${SITE}${KEY}.txt`, urlList }) }); status = r.status; } catch (_) {}
+    return new Response(JSON.stringify({ ok: status >= 200 && status < 300, status, urls: urlList.length }), { headers: cors });
+  }
   if (!UUID.test(id)) return new Response('{"error":"bad_id"}', { status: 400, headers: cors });
   let row = null;
   try {
