@@ -2499,6 +2499,14 @@ html{-webkit-tap-highlight-color:transparent}
 .cjoin{margin:14px 0 4px;padding:12px 14px 6px;border-radius:20px;background:var(--sheet);box-shadow:var(--lift)}.cj-t{margin:0 0 4px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px}.cj-t .ico{width:17px;height:17px;color:var(--brand)}
 .cj-row{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 0;border:0;border-top:1px solid var(--line);background:none;font:inherit;text-align:left;color:var(--ink)!important;text-decoration:none!important;cursor:pointer}
 .cj-row span{flex:1;min-width:0}.cj-row b{display:block;font-size:15px}.cj-row small{display:block;font-size:12.5px;color:var(--ink-2)}.cj-row em{flex:none;font-style:normal;font-weight:800;font-size:13.5px;color:#fff;background:var(--brand);border-radius:999px;padding:7px 13px}.cj-row[data-on="1"] em{background:none;color:var(--ok,#1F9D6E);padding:7px 0}
+
+/* 照片排序：封面標籤、設為封面、拖曳 */
+.photos-preview.pv-sort{gap:12px}.photos-preview.pv-sort>div{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.photos-preview .pv-cover{position:absolute;left:5px;bottom:5px;background:var(--green,#2E8B57);color:#fff;font:800 11px/1 system-ui,sans-serif;padding:4px 8px;border-radius:999px;pointer-events:none}
+.photos-preview div .pv-first{top:auto!important;right:5px!important;left:5px;bottom:5px;width:auto!important;height:auto!important;border-radius:999px!important;background:rgba(25,20,18,.66)!important;color:#fff!important;border:0!important;box-shadow:none!important;font:700 11px/1 system-ui,sans-serif!important;padding:6px 0!important;display:block!important;cursor:pointer}
+.photos-preview>div.pv-drag{z-index:5;cursor:grabbing;box-shadow:0 14px 28px -10px rgba(0,0,0,.45);opacity:.92}
+.photos-preview>div.pv-over{outline:3px dashed var(--accent,#F2643D);outline-offset:2px}
+.photos-preview .pv-hint{flex-basis:100%;margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3101,7 +3109,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.23.0';
+const BUILD = 'v7.24.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3445,6 +3453,27 @@ function applyPhotoMeta(meta,{dateInput,picker,hintEl}){
 const TW_BOUNDS=[[21.7,117.8],[26.6,122.3]];
 // 照片預覽網址：同一個檔案只建一次，換頁時一起釋放
 const __pv=new Map();function pvUrl(f){let u=__pv.get(f);if(!u){u=URL.createObjectURL(f);__pv.set(f,u)}return u}
+// 照片縮圖列：第一張＝封面；「設為封面」一鍵換第一張；按住拖曳可調整順序（手機、電腦都可以）
+function pvTiles(pv,list,bg,redraw,o={}){pv.innerHTML='';const many=list.length>1;pv.classList.toggle('pv-sort',many);
+  list.forEach((x,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${bg(x)}')`;d.dataset.i=i;
+    if(many&&i===0){const t=document.createElement('span');t.className='pv-cover';t.textContent='封面';d.appendChild(t)}
+    else if(many){const f=document.createElement('button');f.type='button';f.className='pv-first';f.textContent='設為封面';f.onclick=e=>{e.stopPropagation();list.unshift(list.splice(i,1)[0]);redraw();toast('已設為封面（第一張）')};d.appendChild(f)}
+    if(!o.noDel){const b=document.createElement('button');b.type='button';b.className='pv-x';b.textContent='×';b.setAttribute('aria-label','移除這張照片');b.onclick=e=>{e.stopPropagation();list.splice(i,1);redraw()};d.appendChild(b)}
+    if(many)pvDrag(d,pv,list,redraw);pv.appendChild(d)});
+  if(many){const h=document.createElement('p');h.className='pv-hint';h.textContent='第一張是封面。按「設為封面」換第一張，或按住照片拖曳調整順序';pv.appendChild(h)}}
+function pvDrag(d,pv,list,redraw){d.onpointerdown=e=>{if(e.target.closest('button')||e.button>0)return;
+  const from=+d.dataset.i,sx=e.clientX,sy=e.clientY,touch=e.pointerType!=='mouse';let on=false,over=null,hold=null;
+  const tiles=()=>[...pv.querySelectorAll(':scope>div')].filter(t=>t!==d);
+  const start=()=>{if(on)return;on=true;d.classList.add('pv-drag');try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}};
+  const hit=(x,y)=>tiles().find(t=>{const r=t.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom})||null;
+  try{d.setPointerCapture(e.pointerId)}catch(_){}
+  if(touch)hold=setTimeout(start,220);
+  const mv=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;if(!on){if(!touch&&Math.hypot(dx,dy)>6)start();else return}
+    ev.preventDefault();d.style.transform=`translate(${dx}px,${dy}px) scale(1.06)`;const t=hit(ev.clientX,ev.clientY);if(t!==over){if(over)over.classList.remove('pv-over');over=t;if(t)t.classList.add('pv-over')}};
+  const end=ev=>{clearTimeout(hold);d.removeEventListener('pointermove',mv);d.removeEventListener('pointerup',end);d.removeEventListener('pointercancel',end);
+    d.classList.remove('pv-drag');d.style.transform='';if(over)over.classList.remove('pv-over');
+    if(on&&over&&ev.type==='pointerup'){const to=+over.dataset.i;list.splice(to,0,list.splice(from,1)[0]);redraw()}};
+  d.addEventListener('pointermove',mv);d.addEventListener('pointerup',end);d.addEventListener('pointercancel',end)}}
 // 地圖：換頁時把舊地圖拆掉（不然會一直留著監聽視窗大小）
 let __maps=[];
 function pruneMaps(){__maps=__maps.filter(m=>{const c=m.getContainer&&m.getContainer();if(c&&c.isConnected)return true;try{m.remove()}catch(_){}return false})}
@@ -5831,6 +5860,7 @@ async function admCaseBar(c,id,_n){
     ${found?`<button type="button" class="btn sm ghost" data-st="searching">改回協尋中</button>`:`<button type="button" class="btn sm" data-st="found">${ic('check')} 標記已回家</button>`}
     ${c.status!=='closed'?`<button type="button" class="btn sm ghost" data-st="closed">結案</button>`:''}
     <button type="button" class="btn sm ghost" data-ed>編輯</button>
+    ${(c.photos||[]).length>1?`<button type="button" class="btn sm ghost" data-ph>${ic('camera')} 照片順序</button>`:''}
     <button type="button" class="btn sm ghost" data-hd>${hid?'恢復顯示':'隱藏'}</button>
     <button type="button" class="btn sm danger ghost" data-dl>刪除</button></div></div>`);
   const box=document.getElementById('admCase');
@@ -5839,6 +5869,11 @@ async function admCaseBar(c,id,_n){
     const {error}=await sb.rpc('admin_update',{p_type:'case',p_id:id,p:{status:st}});if(error)return toast(error.message);
     toast(st==='found'?'已標記「已回家」':st==='closed'?'已結案':'已改回協尋中');reload()}));
   box.querySelector('[data-ed]').onclick=async()=>{let r=c;try{const {data}=await sb.rpc('admin_get_case',{p_id:id});if(data)r=data}catch(_){}admEdit('case',r,reload)};
+  const phB=box.querySelector('[data-ph]');if(phB)phB.onclick=()=>{const list=(c.photos||[]).slice();const el=document.createElement('div');el.className='lightbox sheet-bg';
+    el.innerHTML=`<div class="sheet ask" role="dialog" aria-label="照片順序"><div class="grab" aria-hidden="true"></div><p class="sh-t">照片順序</p><div class="photos-preview" id="admPv" style="margin:0 0 16px"></div><button type="button" class="btn big block" data-ok>儲存順序</button><button type="button" class="btn big block ghost sh-x" style="margin-top:8px">取消</button></div>`;
+    const pv=el.querySelector('#admPv');const draw=()=>pvTiles(pv,list,safeU,draw,{noDel:true});draw();
+    el.onclick=async e=>{if(e.target.closest('[data-ok]')){const b=e.target.closest('[data-ok]');b.disabled=true;const {error}=await sb.rpc('admin_update',{p_type:'case',p_id:id,p:{photos:list}});b.disabled=false;if(error)return toast('儲存失敗：'+friendlyErr(error.message));closeOverlay(el);toast('已更新照片順序');setTimeout(reload,400)}
+      else if(e.target===el||e.target.closest('.sh-x'))closeOverlay(el)};openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))};
   box.querySelector('[data-hd]').onclick=once(async()=>{const {error}=await sb.rpc('admin_set_hidden',{p_type:'case',p_id:id,p_hidden:!hid});if(error)return toast(error.message);toast(hid?'已恢復顯示':'已隱藏，只有管理員看得到');reload()});
   box.querySelector('[data-dl]').onclick=async()=>{
     if(!confirm('確定要永久刪除這個案件嗎？\n刪除後無法復原（目擊回報也會一起刪除）。\n狗狗找到了請改按「標記已回家」；只是暫時不想公開請按「隱藏」。'))return;
@@ -6176,12 +6211,12 @@ function renderNew(){
     <label class="chk agree"><input type="checkbox" name="agree" data-agree><span>我已閱讀並同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>，並同意本站公開上述資料（Email 除外）供協尋使用</span></label>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出登記</button></div>
   </form>`;
-  let photoFiles=[],presetPhotos=[],species='';
+  let pics=[],species='';   // 照片：字串＝已上傳（從寵物帶入），File＝還沒上傳；順序＝案件照片順序
   const setSp=v=>{species=v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));qpRedraw($('#f'))};
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>setSp(b.dataset.v));
   const pv=$('#pv');
-  $('#photoIn').onchange=e=>{const all=photoFiles.concat([...e.target.files]),max=4-presetPhotos.length;if(all.length>max)toast(`最多 4 張照片，只保留前 ${max} 張`,4000);photoFiles=all.slice(0,max);drawPV();e.target.value=''};
-  function drawPV(){pv.innerHTML='';presetPhotos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{presetPhotos.splice(i,1);drawPV()};d.appendChild(b);pv.appendChild(d)});photoFiles.forEach((f,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${pvUrl(f)}')`;const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{photoFiles.splice(i,1);drawPV()};d.appendChild(b);pv.appendChild(d)})}
+  $('#photoIn').onchange=e=>{const add=[...e.target.files],max=4-pics.length;if(add.length>max)toast(max>0?`最多 4 張照片，只加入前 ${max} 張`:'最多 4 張照片，請先刪掉一張再加',4000);pics.push(...add.slice(0,Math.max(0,max)));drawPV();e.target.value=''};
+  function drawPV(){pvTiles(pv,pics,x=>typeof x==='string'?safeU(x):pvUrl(x),drawPV)}
   // 從寵物檔案一鍵帶入
   const petId=qs(location.hash).pet;
   // 草稿：自動存、自動帶回（照片無法存）
@@ -6202,7 +6237,7 @@ function renderNew(){
     set('name',pt.name);f.elements.name.dispatchEvent(new Event('input',{bubbles:true}));set('sex',pt.sex||'');set('size',pt.size||'');set('breed',pt.breed);set('colour',pt.colour);qpRedraw(f);set('features',pt.features);set('temperament',pt.temperament);
     if(pt.birthday){const y=Math.floor((Date.now()-new Date(pt.birthday))/31557600000);set('age_text',y>0?y+'歲':'未滿1歲')}
     f.elements['has_chip'].checked=!!pt.has_chip;if(pt.chip_no)set('chip_last4',String(pt.chip_no).slice(-4));if(pt.neutered!=null)set('neutered',String(pt.neutered));
-    presetPhotos=(pt.photos||[]).slice(0,4);drawPV();__dirty=true;f.dispatchEvent(new Event('input',{bubbles:true}));toast(`已帶入 ${pt.name} 的資料，請補上走失時間地點`)})}
+    pics=[...(pt.photos||[]),...pics.filter(x=>typeof x!=='string')].slice(0,4);drawPV();__dirty=true;f.dispatchEvent(new Event('input',{bubbles:true}));toast(`已帶入 ${pt.name} 的資料，請補上走失時間地點`)})}
   if(petId&&me())applyPet(petId);
   $('#city').onchange=()=>{$('#dist').innerHTML=distOptions($('#city').value);const c=CITY_CENTER[$('#city').value];if(c)picker.map.setView(c,12)};
   const picker=pickerMap('pmap',[23.9,121]);picker.map.setZoom(7);
@@ -6214,7 +6249,9 @@ function renderNew(){
     const btn=$('#btnSubmit');btn.disabled=true;btn.textContent='上傳中…';
     try{
       // 從寵物檔案帶入的照片複製一份到案件資料夾（之後刪寵物或帳號，案件照片不會跟著不見）
-      const photos=[];for(const u of presetPhotos){const k=String(u).split('/object/public/photos/')[1];
+      const photos=[];const pg=$('#pg');const nf=pics.filter(x=>typeof x!=='string').length;let fi=0;if(nf)pg.classList.remove('hidden');
+      for(const u of pics){if(typeof u!=='string'){const r=await tryUpload(u,'cases');if(r)photos.push(r);fi++;pg.querySelector('i').style.width=(fi/nf*100)+'%';continue}
+        const k=String(u).split('/object/public/photos/')[1];
         if(k&&k.startsWith('pets/')){const nk=`cases/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
           const {error:ce}=await sb.storage.from('photos').copy(k,nk);
           if(!ce){sb.storage.from('photos').copy(k.replace(/\.jpg$/,'_t.jpg'),nk.replace(/\.jpg$/,'_t.jpg')).catch(()=>{});photos.push(sb.storage.from('photos').getPublicUrl(nk).data.publicUrl);continue}
@@ -6223,8 +6260,6 @@ function renderNew(){
           // 還是不行：略過這張（寵物照片網址含帳號資料夾，不放到公開案件）
           if(/^pets\/[0-9a-f-]{36}\//.test(k)){toast('有一張寵物照片沒有帶入，可以再手動加一次',4000);continue}}
         photos.push(u)}
-      const pg=$('#pg');pg.classList.remove('hidden');
-      for(let i=0;i<photoFiles.length;i++){{const u=await tryUpload(photoFiles[i],'cases');if(u)photos.push(u)}pg.querySelector('i').style.width=((i+1)/photoFiles.length*100)+'%'}
       const loc=picker.get();
       const p={species,name:fd.get('name').trim(),sex:fd.get('sex'),size:fd.get('size'),age_text:fd.get('age_text'),breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),collar_desc:fd.get('collar_desc'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_last4:hw(fd.get('chip_last4')||'').replace(/[^0-9]/g,'').slice(0,4),neutered:fd.get('neutered')||null,photos,lost_at:twParse(fd.get('lost_at')).toISOString(),lost_city:fd.get('lost_city'),lost_district:fd.get('lost_district'),lost_place:fd.get('lost_place'),lost_lat:loc?.lat??null,lost_lng:loc?.lng??null,contact_name:fd.get('contact_name'),contact_phone:hw(fd.get('contact_phone')||'').trim(),phone_public:!!fd.get('phone_public'),contact_email:fd.get('contact_email'),contact_line:fd.get('contact_line'),reward:Math.max(0,Math.round(+(fd.get('reward')||0))||0),notes:fd.get('notes')};
       const {data,error}=await sb.rpc('create_case',{p});
@@ -6541,7 +6576,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   app.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{b.disabled=true;const {error}=await sb.rpc('dismiss_match',{p_case:id,p_match:b.dataset.m,p_token:token});if(error){b.disabled=false;return toast(error.message)}
     const w=b.closest('div[style*="opacity"]');if(w)w.style.opacity='.5';b.remove();toast('已隱藏這筆比對')});   // 只改這一筆，不整頁重畫（不會弄丟正在編輯的資料）
   let photos=(c.photos||[]).slice();const pv=$('#pv');
-  const drawPV=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{photos.splice(i,1);drawPV()};d.appendChild(x);pv.appendChild(d)})};drawPV();
+  const drawPV=()=>pvTiles(pv,photos,safeU,drawPV);drawPV();
   $('#photoIn').onchange=async e=>{if(photos.length>=4){toast('最多 4 張照片，請先刪掉一張再加');e.target.value='';return}for(const f of [...e.target.files].slice(0,4-photos.length)){if(photos.length>=4)break;toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
   $('#btnDelCase').onclick=async()=>{if(!await askSheet({title:`永久刪除「${c.name}」的案件？`,body:`所有目擊回報也會一起刪除，無法復原。只是找到了的話，請改按「${c.name}回家了」。`,ok:'刪除案件',danger:true}))return;
     const {error}=await sb.rpc('delete_case',{p_id:id,p_token:token});if(error){__submitting=false;return toast('刪除失敗：'+error.message)}
@@ -6767,7 +6802,7 @@ function renderInjured(){geoWarm();
   const picker=pickerMap('pmap',[23.9,121]);picker.map.setZoom(7);
   $('#photoIn').onchange=async e=>{const first=!photoFiles.length&&e.target.files[0];{const all=photoFiles.concat([...e.target.files]);if(all.length>4)toast('最多 4 張照片，只保留前 4 張',4000);photoFiles=all.slice(0,4)}drawPV();e.target.value='';
     if(first){const meta=await readPhotoMeta(first);if(meta.date||meta.lat){applyPhotoMeta(meta,{dateInput:$('#f').elements['seen_at'],picker,hintEl:$('#exifHintF')})}}};
-  function drawPV(){pv.innerHTML='';photoFiles.forEach((f,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${pvUrl(f)}')`;const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{photoFiles.splice(i,1);drawPV()};d.appendChild(b);pv.appendChild(d)})}
+  function drawPV(){pvTiles(pv,photoFiles,pvUrl,drawPV)}
   $('#city').onchange=()=>{$('#dist').innerHTML=distOptions($('#city').value);const c=CITY_CENTER[$('#city').value];if(c)picker.map.setView(c,12)};
   $('#btnLoc').onclick=picker.locate;
   $('#f').onsubmit=async e=>{const _n=navId;
@@ -6864,7 +6899,7 @@ function renderFoundNew(){
   let photoFiles=[];const pv=$('#pv');
   $('#photoIn').onchange=async e=>{const first=!photoFiles.length&&e.target.files[0];{const all=photoFiles.concat([...e.target.files]);if(all.length>4)toast('最多 4 張照片，只保留前 4 張',4000);photoFiles=all.slice(0,4)}drawPV();e.target.value='';
     if(first){const meta=await readPhotoMeta(first);if(meta.date||meta.lat){applyPhotoMeta(meta,{dateInput:$('#f').elements['seen_at'],picker,hintEl:$('#exifHintF')})}}};
-  function drawPV(){pv.innerHTML='';photoFiles.forEach((f,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${pvUrl(f)}')`;const b=document.createElement('button');b.type='button';b.textContent='×';b.onclick=()=>{photoFiles.splice(i,1);drawPV()};d.appendChild(b);pv.appendChild(d)})}
+  function drawPV(){pvTiles(pv,photoFiles,pvUrl,drawPV)}
   const picker=pickerMap('pmap',[23.9,121]);picker.map.setZoom(7);
   $('#city').onchange=()=>{$('#dist').innerHTML=distOptions($('#city').value);const c=CITY_CENTER[$('#city').value];if(c)picker.map.setView(c,12)};
   $('#btnLoc').onclick=picker.locate;
@@ -9245,7 +9280,7 @@ async function renderPet(id){const _n=navId;
   const phPath=u=>(String(u).split('/object/public/photos/')[1]||'');const rmPh=l=>{const ps=l.map(phPath).filter(x=>x.startsWith('pets/'));if(ps.length)removeAllFiles('photos',[...ps,...ps.map(x=>x.replace(/\.jpg$/,'_t.jpg'))]).catch(()=>{})};
   $('#segSp').querySelectorAll('button').forEach(b=>b.onclick=()=>{species=b.dataset.v;$('#segSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
   const pv=$('#pv');
-  const draw=()=>{pv.innerHTML='';photos.forEach((u,i)=>{const d=document.createElement('div');d.style.backgroundImage=`url('${safeU(u)}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','移除這張照片');x.onclick=()=>{photos.splice(i,1);draw()};d.appendChild(x);pv.appendChild(d)})};draw();
+  const draw=()=>pvTiles(pv,photos,safeU,draw);draw();
   {const pf=$('#pf');const mo=new MutationObserver(()=>{if(pf.isConnected)return;mo.disconnect();if(!didSave&&freshPh.length)rmPh(freshPh)});mo.observe(app,{childList:true})}
   $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,6-photos.length)){if(photos.length>=6){toast('最多 6 張照片');break}toast('上傳中…');try{const u=await uploadPhoto(f,'pets');photos.push(u);freshPh.push(u)}catch(err){toast('上傳失敗：'+err.message)}}draw();e.target.value=''};
   $('#pf').onsubmit=once(async e=>{
