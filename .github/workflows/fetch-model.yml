@@ -1,0 +1,12 @@
+name: 取得 AI 模型檔（一次性）
+on: { workflow_dispatch: {} }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sSL -o dinov2s-q8.onnx https://huggingface.co/Xenova/dinov2-small/resolve/main/onnx/model_quantized.onnx
+          curl -sSL -o preprocessor_config.json https://huggingface.co/Xenova/dinov2-small/resolve/main/preprocessor_config.json
+          ls -la; sha256sum dinov2s-q8.onnx
+      - uses: actions/upload-artifact@v4
+        with: { name: model, path: "dinov2s-q8.onnx\npreprocessor_config.json", retention-days: 2 }
