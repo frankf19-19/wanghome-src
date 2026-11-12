@@ -10,7 +10,9 @@ rm -rf "$DST" && mkdir -p "$DST"
 rm -f "$DST"/sw.js "$DST"/_headers "$DST"/404.html "$DST"/robots.txt "$DST"/sitemap.xml "$DST"/mail-logo*.png "$DST"/og.png "$DST"/shot-*.jpg
 rm -f "$DST"/google*.html "$DST"/BingSiteAuth.xml "$DST"/[0-9a-f]*[0-9a-f].txt
 rm -rf "$DST"/.well-known "$DST"/line-auth
-CSP="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://wangmiaotw.com https://nopyhfpaykkiieudvoko.supabase.co wss://nopyhfpaykkiieudvoko.supabase.co https://data.moa.gov.tw https://nominatim.openstreetmap.org; media-src 'self' blob: https://nopyhfpaykkiieudvoko.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'"
+# AI 模型和 wasm 很大（共約 35MB），不放進 App；App 用到時直接從 wangmiaotw.com 下載
+rm -rf "$DST"/ai; rm -f "$DST"/vendor/ort/*.wasm
+CSP="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://wangmiaotw.com https://nopyhfpaykkiieudvoko.supabase.co wss://nopyhfpaykkiieudvoko.supabase.co https://data.moa.gov.tw https://nominatim.openstreetmap.org; media-src 'self' blob: https://nopyhfpaykkiieudvoko.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'"
 node -e '
 const fs=require("fs"),f=process.argv[2]+"/index.html";let s=fs.readFileSync(f,"utf8");
 const tag=`<meta http-equiv="Content-Security-Policy" content="${process.argv[1]}">`;

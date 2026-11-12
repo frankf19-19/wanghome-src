@@ -2507,6 +2507,24 @@ html{-webkit-tap-highlight-color:transparent}
 .photos-preview>div.pv-drag{z-index:5;cursor:grabbing;box-shadow:0 14px 28px -10px rgba(0,0,0,.45);opacity:.92}
 .photos-preview>div.pv-over{outline:3px dashed var(--accent,#F2643D);outline-offset:2px}
 .photos-preview .pv-hint{flex-basis:100%;margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
+
+/* 照片找毛孩 */
+.ph-page{max-width:720px;margin:0 auto}.ph-lead{margin:6px 0 14px;color:var(--ink-2)}
+.ph-drop{display:block;border:2px dashed var(--line);border-radius:20px;background:var(--sheet);cursor:pointer;overflow:hidden}
+.ph-drop-in{display:grid;justify-items:center;gap:6px;padding:34px 18px;text-align:center;color:var(--ink-2)}.ph-drop-in .ico{width:38px;height:38px;color:var(--accent,#F2643D)}.ph-drop-in b{font-size:18px;color:var(--ink)}.ph-drop-in small{font-size:13px;color:var(--muted)}
+.ph-drop.has{border-style:solid}.ph-drop.has .ph-drop-in{padding:12px}.ph-drop-in img{max-width:100%;max-height:300px;border-radius:14px;object-fit:contain}
+.ph-opts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}.ph-opts select{flex:1 1 140px;min-height:42px}
+.ph-prog{margin:14px 0}.ph-bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}.ph-bar i{display:block;height:100%;width:0;background:var(--accent,#F2643D);transition:width .25s}.ph-prog p{margin:8px 0 0;font-size:14px;color:var(--ink-2)}
+.ph-note{display:flex;gap:8px;align-items:flex-start;margin:14px 0 0;font-size:13px;line-height:1.55;color:var(--muted)}.ph-note .ico{flex:none;width:18px;height:18px;margin-top:2px}
+.ph-warn{margin:22px 0 4px;padding:12px 14px;border-radius:14px;background:var(--sheet);box-shadow:var(--lift);font-size:14px;line-height:1.6}
+.ph-sec h2{display:flex;align-items:center;gap:8px;font-size:17px;margin:22px 0 10px}
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
+.ph-card{display:block;border-radius:16px;overflow:hidden;background:var(--sheet);box-shadow:var(--lift);color:inherit!important;text-decoration:none!important}
+.ph-img{display:block;position:relative;aspect-ratio:1;background:var(--line)}.ph-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-sim{position:absolute;left:8px;bottom:8px;font:800 12px/1 system-ui,sans-serif;font-style:normal;padding:5px 9px;border-radius:99px;color:#fff;background:rgba(25,20,18,.7)}.ph-sim.hi{background:#1F9D55}.ph-sim.mid{background:#C77700}
+.ph-t{display:block;padding:9px 11px 11px}.ph-t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ph-t small{display:block;margin-top:2px;font-size:12.5px;line-height:1.45;color:var(--muted)}
+.ph-next{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0 8px}
+.sg-sim{margin-top:6px;padding:7px 10px;border-radius:10px;background:var(--line)}.sg-sim.hi{background:#E3F5EA;color:#14532D}.sg-sim.lo{color:var(--muted)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3109,7 +3127,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.24.0';
+const BUILD = 'v7.25.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3985,6 +4003,7 @@ function route(){window.__lastRoute=Date.now();
   if(path==='#/resources')return renderResources();
   if(path==='#/learn')return renderLearn();
   if((m=path.match(/^#\/learn\/([a-z-]{2,30})$/)))return renderLearnOne(m[1]);
+  if(path==='#/photo')return renderPhoto();
   if(path==='#/about')return renderAbout();
   if(path==='#/privacy')return renderPrivacy();
   if(path==='#/terms')return renderTerms();
@@ -4087,6 +4106,7 @@ function renderSeen(){
     <a class="bigbtn b-green" href="#/found/new?k=found"><span class="bb-ic">${pawSvg()}</span><span class="bb-t"><b>牠在我這裡</b><small>我已經帶走、收留或送醫了</small></span><span class="bb-go" aria-hidden="true">›</span></a>
     <a class="bigbtn b-white" href="#/found/new?k=seen"><span class="bb-ic">${ic("eye")}</span><span class="bb-t"><b>我看到，但沒有帶走</b><small>在路上、公園看到流浪或走失的</small></span><span class="bb-go" aria-hidden="true">›</span></a>
   </div>
+  <a class="bigbtn b-white" href="#/photo" style="margin-top:12px"><span class="bb-ic">${ic("camera")}</span><span class="bb-t"><b>用照片找找看牠的主人</b><small>上傳照片，AI 比對走失協尋和收容所</small></span><span class="bb-go" aria-hidden="true">›</span></a>
   <a class="bigbtn b-white" href="#/lost" style="margin-top:12px"><span class="bb-ic">${ic("search")}</span><span class="bb-t"><b>是協尋名單上的某一隻</b><small>找到牠的案件，直接回報給飼主</small></span><span class="bb-go" aria-hidden="true">›</span></a>`;
 }
 function renderSetup(){
@@ -5207,7 +5227,7 @@ async function renderHomeMob(){const _n=navId;
   ${appGetHTML()}
   ${xHeadHTML('lost',`有 <em id="xN">…</em> ${homeState.tab==='found'?'則撿到／目擊通報':'隻毛孩走失中'}`,xWhereText())}
   <div class="xsticky">
-    <div class="xsrow"><label class="xsearch">${ic('search')}<input type="search" id="fQ" aria-label="搜尋走失的毛孩" enterkeyhint="search" placeholder="搜尋走失的毛孩" value="${esc(homeState.chip||homeState.q)}"></label><button type="button" class="xfbtn" id="btnFilter" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="fCnt"></i></button></div>
+    <div class="xsrow"><label class="xsearch">${ic('search')}<input type="search" id="fQ" aria-label="搜尋走失的毛孩" enterkeyhint="search" placeholder="搜尋走失的毛孩" value="${esc(homeState.chip||homeState.q)}"></label><a class="xfbtn" href="#/photo" aria-label="用照片找毛孩">${ic('camera')}</a><button type="button" class="xfbtn" id="btnFilter" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="fCnt"></i></button></div>
     <div class="xcrow"><div class="xchips" id="xChips">${XQK.map(([k,l,c])=>`<button type="button" class="xchip ${c||''} ${homeState.qk===k?'on':''}" data-q="${k}">${l}</button>`).join('')}</div>
       <div class="xseg" id="xView" role="group" aria-label="顯示方式">${['grid','map'].map(v=>`<button type="button" data-v="${v}" class="${V===v?'on':''}" aria-label="${{grid:'格狀',map:'地圖'}[v]}" aria-pressed="${V===v}">${XI[v]}</button>`).join('')}</div></div>
     <div id="fActive" class="xactive"></div>
@@ -6450,7 +6470,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
     ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
-    ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>`:''}
+    ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>${s.photo_sim>=0&&s.photo_sim!=null?`<div class="small sg-sim ${s.photo_sim>=70?'hi':s.photo_sim>=45?'mid':'lo'}">AI 比對照片：和 ${esc(c.name)} 的相似度 <b>${s.photo_sim}%</b>${s.photo_sim>=70?'，很像，建議優先確認':s.photo_sim<45?'，看起來不太像，仍請自己判斷':''}</div>`:''}`:''}
     <div class="ops">${sightOps(s.id,s.status)}</div></div>`;
   const STATUS_TAG={searching:'<span class="tag red">協尋中</span>',found:'<span class="tag green">已回家</span>',closed:'<span class="tag gray">已結案</span>'};
   // 管理頁分成「首頁」和幾個單一工作的頁面（網址 ?p=...），一次只做一件事
@@ -10180,6 +10200,77 @@ function renderResources(){
   $('#selCity').onchange=()=>{const c=$('#selCity').value;{const rc=$('#resChan');if(rc)rc.innerHTML=channelsHTML(c)}$('#cityDB').textContent=c||'縣市名';$('#cityLinks').innerHTML=c?(AGENCY[c]?`<p class="small" style="margin:0 0 8px"><b>${esc(AGENCY[c].n)}</b>：${AGENCY[c].t.map(e=>`<a href="${agTel(e)}">${esc(agNum(e))}</a>${e.h?'（'+agHours(e.h)+'）':''}`).join('、')}</p>`:'')+`<a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(c+' 動物保護處 電話')}">搜尋 ${esc(c)} 動保處</a> <a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c+' 寵物 協尋')}">搜尋 ${esc(c)} 協尋社團</a>`:''};
   sb.from('found_stats').select('*').then(({data,error})=>{const el=$('#foundStats');if(!el)return;const hideSt=()=>{const w=$('#statsWrap');if(w)w.remove()};if(error)return hideSt();data=(data||[]).filter(d=>d.n>0);if(!data.length)return hideSt();const tot=data.reduce((a,b)=>a+b.n,0);el.innerHTML=data.map(d=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px"><div style="width:140px">${esc(d.found_method)}</div><div style="flex:1;background:var(--line);border-radius:4px;height:14px"><div style="width:${Math.round(d.n/tot*100)}%;background:var(--red-fill);height:100%;border-radius:4px"></div></div><div style="width:60px;text-align:right">${d.n} 件</div></div>`).join('')});
 }
+/* ============================================================
+   照片找毛孩：AI 在使用者的手機／電腦上分析照片（不上傳），再和資料庫裡的照片特徵比對
+   模型 ai/dinov2s-q8.onnx（DINOv2-small 量化版）＋ onnxruntime-web；scripts/photo_index.py 用同一個模型建索引
+   ============================================================ */
+const AI_BASE=IS_APP?'https://wangmiaotw.com/':'./';
+const AI_MODEL=AI_BASE+'ai/dinov2s-q8.onnx',AI_MODEL_MB=24.5;
+let __aiSess=null;
+async function aiModelBytes(onProg){
+  let cache=null;try{cache=await caches.open('wanghome-vendor');const hit=await cache.match(AI_MODEL);if(hit){onProg&&onProg(1,true);return await hit.arrayBuffer()}}catch(_){cache=null}
+  const r=await fetch(AI_MODEL);if(!r.ok)throw new Error('model '+r.status);
+  const total=+r.headers.get('content-length')||AI_MODEL_MB*1048576;let buf;
+  if(r.body&&r.body.getReader){const rd=r.body.getReader(),parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onProg&&onProg(Math.min(.99,got/total),false)}
+    const u=new Uint8Array(got);let o=0;for(const x of parts){u.set(x,o);o+=x.length}buf=u.buffer}
+  else buf=await r.arrayBuffer();
+  if(cache)try{await cache.put(AI_MODEL,new Response(buf.slice(0),{headers:{'content-type':'application/octet-stream'}}))}catch(_){}
+  onProg&&onProg(1,false);return buf}
+async function aiSession(onProg){
+  if(__aiSess)return __aiSess;
+  await loadScript('vendor/ort/ort-1.16.3.min.js');
+  ort.env.wasm.numThreads=1;ort.env.wasm.wasmPaths=AI_BASE+'vendor/ort/';
+  const buf=await aiModelBytes(onProg);
+  return __aiSess=await ort.InferenceSession.create(buf,{executionProviders:['wasm'],graphOptimizationLevel:'all'})}
+// 和 scripts/photo_index.py 的 embed() 相同：置中裁正方形 → 224×224 → CLS 特徵（384 維、長度 1）
+async function photoEmbed(file,onProg){
+  const sess=await aiSession(onProg);
+  let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(_){bmp=await new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=()=>no(new Error('這張照片讀不出來，換一張試試'));im.src=URL.createObjectURL(file)})}
+  const w=bmp.width||bmp.naturalWidth,h=bmp.height||bmp.naturalHeight,sq=Math.min(w,h),c=document.createElement('canvas');c.width=c.height=224;
+  const g=c.getContext('2d',{willReadFrequently:true});g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(bmp,(w-sq)/2,(h-sq)/2,sq,sq,0,0,224,224);
+  const d=g.getImageData(0,0,224,224).data,N=224*224,x=new Float32Array(3*N),M=[0.485,0.456,0.406],SD=[0.229,0.224,0.225];
+  for(let i=0;i<N;i++)for(let k=0;k<3;k++)x[k*N+i]=(d[i*4+k]/255-M[k])/SD[k];
+  const out=await sess.run({pixel_values:new ort.Tensor('float32',x,[1,3,224,224])});const hs=out.last_hidden_state.data;
+  let n=0;const v=new Array(384);for(let i=0;i<384;i++){v[i]=hs[i];n+=hs[i]*hs[i]}n=Math.sqrt(n)||1;
+  return '['+v.map(a=>(a/n).toFixed(5)).join(',')+']'}
+const PH_KIND={case:['走失協尋','red'],found:['拾獲／目擊','amber'],shelter:['收容所','green']};
+function phCard(r){const i=r.info||{},k=r.kind;const where=esc((i.city||'')+(i.district||''));
+  const href=k==='case'?'#/case/'+r.ref:k==='found'?'#/found/'+r.ref:'https://wangmiaotw.com/adopt/a/'+encodeURIComponent(r.ref);
+  const title=k==='case'?esc(i.name||'走失毛孩'):k==='found'?(i.k==='found'?'有人撿到':'有人看到'):esc(i.variety||(i.sp==='cat'?'貓':'狗'));
+  const meta=k==='case'?`${where}・${fmtDate(i.at)} 走失`:k==='found'?`${where}・${fmtDate(i.at)}${i.colour?'・'+esc(i.colour):''}`:`${esc(i.shelter||where)}${i.sex?'・'+esc(i.sex):''}${i.colour?'・'+esc(i.colour):''}`;
+  const lv=r.sim>=70?'hi':r.sim>=45?'mid':'lo';
+  return `<a class="ph-card" href="${href}" ${k==='shelter'?'target="_blank" rel="noopener"':''}><span class="ph-img">${thumbImg(r.url,'')}<i class="ph-sim ${lv}">相似 ${Math.round(r.sim)}%</i></span><span class="ph-t"><b>${title}</b><small>${meta}</small></span></a>`}
+function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
+  let file=null,sp='',city='',busy=false;
+  app.innerHTML=`<div class="ph-page"><h1>用照片找毛孩</h1>
+  <p class="ph-lead">上傳一張狗或貓的照片，AI 會從<b>協尋中的走失毛孩</b>、<b>拾獲通報</b>和<b>全台收容所</b>裡，找出長得像的。</p>
+  <label class="ph-drop" id="phDrop"><input type="file" id="phIn" accept="image/*" hidden><span class="ph-drop-in" id="phDropIn">${ic('camera')}<b>選一張照片</b><small>正面、清楚、毛孩佔畫面大一點，比對比較準</small></span></label>
+  <div class="ph-opts"><div class="seg" id="phSp" role="group" aria-label="狗或貓"><button type="button" data-v="" class="on">都找</button><button type="button" data-v="dog">狗</button><button type="button" data-v="cat">貓</button></div>
+    <select id="phCity" aria-label="縣市"><option value="">全台灣</option>${Object.keys(TW).map(c=>`<option>${c}</option>`).join('')}</select></div>
+  <button type="button" class="btn big block" id="phGo" disabled>開始比對</button>
+  <div class="ph-prog hidden" id="phProg"><div class="ph-bar"><i id="phBar"></i></div><p id="phMsg"></p></div>
+  <p class="ph-note">${ic('shield')} 照片只在你的手機上分析，不會上傳到我們的主機。第一次使用要下載 AI 模型（約 35MB，建議用 Wi-Fi），之後就不用了。</p>
+  <div id="phOut"></div></div>`;
+  const $go=$('#phGo'),$out=$('#phOut'),$prog=$('#phProg'),$bar=$('#phBar'),$msg=$('#phMsg');
+  $('#phIn').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;file=f;$('#phDropIn').innerHTML=`<img src="${pvUrl(f)}" alt="你上傳的照片"><small>點一下可以換一張</small>`;$('#phDrop').classList.add('has');$go.disabled=false;$out.innerHTML=''};
+  $('#phSp').onclick=e=>{const b=e.target.closest('button');if(!b)return;sp=b.dataset.v;$('#phSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
+  $('#phCity').onchange=e=>{city=e.target.value};
+  const prog=(p,msg)=>{$prog.classList.remove('hidden');$bar.style.width=Math.round(p*100)+'%';$msg.textContent=msg};
+  $go.onclick=async()=>{if(!file||busy)return;busy=true;$go.disabled=true;$out.innerHTML='';
+    try{prog(.03,'準備 AI 模型…');
+      const q=await photoEmbed(file,(p,cached)=>prog(.05+p*.75,cached?'載入 AI 模型…':`下載 AI 模型 ${Math.round(p*AI_MODEL_MB)} / ${Math.round(AI_MODEL_MB)} MB（只有第一次）`));
+      if(_n!==navId)return;prog(.88,'比對照片中…');
+      const {data,error}=await sb.rpc('photo_search',{q,p_sp:sp||null,p_city:city||null,p_limit:18});if(error)throw new Error(friendlyErr(error.message));
+      if(_n!==navId)return;$prog.classList.add('hidden');
+      const rows=data||[],by=k=>rows.filter(r=>r.kind===k);
+      if(!rows.length){$out.innerHTML=`<div class="empty"><p>這個條件下沒有可以比對的照片。</p><p class="small muted">把縣市改成「全台灣」再試一次。</p></div>`;return}
+      const sec=(k,t,empty)=>{const l=by(k);return `<section class="ph-sec"><h2><span class="tag ${PH_KIND[k][1]}">${PH_KIND[k][0]}</span> ${t}</h2>${l.length?`<div class="ph-grid">${l.map(phCard).join('')}</div>`:`<p class="small muted">${empty}</p>`}</section>`};
+      $out.innerHTML=`<p class="ph-warn">下面是<b>長得像</b>的毛孩，不代表就是同一隻。請點進去看照片、特徵和地點再確認。</p>
+        ${sec('case','走失中、飼主正在找的','這個條件下沒有相似的走失案件。')}${sec('found','有人撿到或看到的','這個條件下沒有相似的拾獲通報。')}${sec('shelter','收容所裡的','這個條件下沒有相似的收容所毛孩。')}
+        <div class="ph-next"><a class="btn ghost" href="#/new">沒找到？登記走失</a><a class="btn ghost" href="#/found/new">撿到了？通報拾獲</a></div>`;
+      $out.scrollIntoView({behavior:'smooth',block:'start'})}
+    catch(err){$prog.classList.add('hidden');const m=String(err&&err.message||err);$out.innerHTML=`<div class="empty"><p>比對沒有成功。</p><p class="small muted">${esc(/model|wasm|fetch|load|Failed|abort|memory/i.test(m)?(IS_APP?'這支手機的 App 裡跑不動 AI 模型，請改用瀏覽器打開 wangmiaotw.com 再試。':'AI 模型沒有載入成功，請確認網路後再試一次。'):m)}</p></div>`}
+    finally{busy=false;$go.disabled=!file}}}
 function renderAbout(){
   setTitle('關於');
   app.innerHTML=`<h1>關於 ${esc(CONFIG.SITE_NAME)}</h1><div class="card">
