@@ -6,6 +6,7 @@ on:
       promo: {default: ''}
       keywords: {default: ''}
       subtitle: {default: ''}
+      name: {default: ''}
       desc: {default: ''}
 jobs:
   go:
@@ -18,6 +19,7 @@ jobs:
       PROMO: ${{ inputs.promo }}
       KEYWORDS: ${{ inputs.keywords }}
       SUBTITLE: ${{ inputs.subtitle }}
+      APPNAME: ${{ inputs.name }}
       DESC: ${{ inputs.desc }}
     steps:
       - uses: actions/checkout@v4

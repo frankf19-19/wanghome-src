@@ -30,5 +30,7 @@ infos=api('GET',f'/apps/{APP}/appInfos')['data']
 for i in infos:
     for l in api('GET',f"/appInfos/{i['id']}/appInfoLocalizations")['data']:
         a=l['attributes'];print('INFO',i['attributes'].get('appStoreState') or i['attributes'].get('state'),json.dumps({k:a.get(k) for k in ('locale','name','subtitle')},ensure_ascii=False))
+        if os.environ.get('MODE')=='write' and os.environ.get('APPNAME') and (i['attributes'].get('appStoreState') or i['attributes'].get('state')) not in ('READY_FOR_SALE','READY_FOR_DISTRIBUTION'):
+            print('PATCH name',api('PATCH',f"/appInfoLocalizations/{l['id']}",json={'data':{'type':'appInfoLocalizations','id':l['id'],'attributes':{'name':os.environ['APPNAME']}}}) is not None)
         if os.environ.get('MODE')=='write' and os.environ.get('SUBTITLE') and (i['attributes'].get('appStoreState') or i['attributes'].get('state')) not in ('READY_FOR_SALE','READY_FOR_DISTRIBUTION'):
             print('PATCH subtitle',api('PATCH',f"/appInfoLocalizations/{l['id']}",json={'data':{'type':'appInfoLocalizations','id':l['id'],'attributes':{'subtitle':os.environ['SUBTITLE']}}}) is not None)
