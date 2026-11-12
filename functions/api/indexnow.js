@@ -17,7 +17,7 @@ export async function onRequestGet({ request, waitUntil }) {
   const id = new URL(request.url).searchParams.get("id") || "";
   // ?all=1：把固定的重點頁（指南、各縣市走失、各縣市領養）一次送出；改版後手動呼叫一次即可
   if (new URL(request.url).searchParams.get("all") === "1") {
-    const urlList = [SITE, `${SITE}l/`, `${SITE}g/`, `${SITE}adopt/`, ...GUIDE_IDS().map((g) => `${SITE}g/${g}`),
+    const urlList = [SITE, `${SITE}l/`, `${SITE}g/`, `${SITE}adopt/`, `${SITE}adopt/b/`, ...GUIDE_IDS().map((g) => `${SITE}g/${g}`),
       ...CITIES.map((c) => `${SITE}l/${encodeURIComponent(c)}`), ...CITIES.flatMap((c) => ["狗", "貓"].map((k) => `${SITE}adopt/${encodeURIComponent(c)}/${encodeURIComponent(k)}`))];
     // 共用入口常回 429（太多網站共用同一批 IP），所以依序改試 Bing、Yandex 自己的入口，有一個收下就算成功
     let status = 0, via = "";
