@@ -1,0 +1,36 @@
+name: 照片找毛孩索引
+# 每 6 小時：把協尋案件、拾獲通報、收容所毛孩的照片算成 AI 特徵（scripts/photo_index.py），並比對目擊回報的照片
+on:
+  schedule:
+    - cron: '23 1-23/6 * * *'
+  workflow_dispatch:
+    inputs:
+      max_new:
+        description: '這次最多新算幾張'
+        required: false
+        default: '2500'
+permissions:
+  contents: read
+concurrency:
+  group: photo-index
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+          key: photo-match-v1
+      - name: 安裝 AI 影像模型工具
+        run: pip install --quiet torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install --quiet transformers pillow
+      - name: 建立索引
+        env:
+          SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          MAX_NEW: ${{ inputs.max_new || '2500' }}
+        run: cd scripts && python3 -u photo_index.py
