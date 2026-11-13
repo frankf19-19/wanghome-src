@@ -2179,6 +2179,9 @@ html{-webkit-tap-highlight-color:transparent}
   .xsearch:focus-within{box-shadow:0 0 0 2px var(--brand)}
   .xfbtn{position:relative;flex:none;width:48px;height:48px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);display:grid;place-items:center;cursor:pointer}
   .xfbtn .ico{width:21px;height:21px}
+  .xcam{position:fixed;right:14px;bottom:calc(var(--tabbar-h) + var(--safe-area-inset-bottom,env(safe-area-inset-bottom)) + 14px);z-index:55;display:inline-flex;align-items:center;gap:8px;height:54px;padding:0 20px 0 17px;border-radius:27px;background:var(--brand);color:#fff;font-weight:800;font-size:16px;box-shadow:0 8px 22px rgba(120,50,20,.32);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+  .xcam .ico{width:23px;height:23px}.xcam:active{transform:scale(.95)}.xcam:focus-within{outline:3px solid var(--ink);outline-offset:2px}
+  body.xas-open .xcam{display:none}
   .xfbtn .fcnt{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--brand);color:#fff;font-style:normal;font-size:11.5px;font-weight:800;line-height:20px;text-align:center;box-shadow:0 0 0 2px var(--paper);display:none}
   .xfbtn .fcnt.on{display:block}
   .xchips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:0 16px;scrollbar-width:none}.xchips::-webkit-scrollbar{display:none}
@@ -3129,7 +3132,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.28.1';
+const BUILD = 'v7.29.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5236,7 +5239,9 @@ async function renderHomeMob(){const _n=navId;
   </div>
   <div class="hidden" aria-hidden="true"><div id="lostFilters"></div><div id="tabs"><button data-t="lost"></button><button data-t="found"></button><button data-t="map"></button></div><button id="btnNear"></button><p id="nearInfo"></p><span id="cLost"></span><span id="cFound"></span><button type="button" id="xSort" tabindex="-1"><b id="xCnt"></b><span id="xSortT"></span></button></div>
   ${mineMiniHTML()}<div class="xfeed" id="xFeed" data-v="${V}"><div id="list" class="grid">${skel(4)}</div></div>
-  <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>`;
+  <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
+  <label class="xcam" id="xCam"><input type="file" id="xCamIn" accept="image/*" class="sr-only" aria-label="拍照比對：拍一張或選一張毛孩的照片，看有沒有人在找牠">${ic('camera')}<span>拍照比對</span></label>`;
+  {const ci=$('#xCamIn');if(ci)ci.onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;window.__photoStart=f;location.hash='#/photo'}}
   const showF=()=>{const h=homeState,srt=!h.near&&h.sort!=='act'&&!(h.tab==='found');const n=fCount()+(h.fnd?1:0)+(srt?1:0);const c=$('#fCnt');if(c){c.textContent=n||'';c.classList.toggle('on',!!n)}
     const pre=(h.fnd?`<button type="button" class="pill fact" data-rm="fnd" aria-label="取消 有人撿到">有人撿到 ✕</button>`:'')+(srt?`<button type="button" class="pill fact" data-rm="sort" aria-label="取消 ${(XSORT.find(x=>x[0]===h.sort)||XSORT[0])[1]}">${(XSORT.find(x=>x[0]===h.sort)||XSORT[0])[1]} ✕</button>`:'');
     const a=$('#fActive');if(a)a.innerHTML=pre+fActiveHTML();h.qk=h.species.length===1?h.species[0]:'all';document.querySelectorAll('#xChips .xchip').forEach(x=>x.classList.toggle('on',x.dataset.q===h.qk))};showF();
@@ -6853,6 +6858,7 @@ function renderInjured(){geoWarm();
   $('#segWhere').querySelectorAll('button').forEach(b=>b.onclick=()=>{where=b.dataset.v;$('#segWhere').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#curWrap').classList.toggle('hidden',where!=='taken')});
   let photoFiles=[];const pv=$('#pv');
   const picker=pickerMap('pmap',[23.9,121]);picker.map.setZoom(7);
+  setTimeout(()=>carryPhotoInto($('#photoIn')),300);
   $('#photoIn').onchange=async e=>{const first=!photoFiles.length&&e.target.files[0];{const all=photoFiles.concat([...e.target.files]);if(all.length>4)toast('最多 4 張照片，只保留前 4 張',4000);photoFiles=all.slice(0,4)}drawPV();e.target.value='';if(first)seenPhotoMatch(first,$('#fnMatch'));
     if(first){const meta=await readPhotoMeta(first);if(meta.date||meta.lat){applyPhotoMeta(meta,{dateInput:$('#f').elements['seen_at'],picker,hintEl:$('#exifHintF')})}}};
   function drawPV(){pvTiles(pv,photoFiles,pvUrl,drawPV)}
@@ -6951,6 +6957,7 @@ function renderFoundNew(){
    if(k==='seen'||k==='found'){$('#segKind').style.display='none';$('#segKind').insertAdjacentHTML('afterend',`<p class="small muted" style="margin:0 0 8px">你選的是：<b>${k==='seen'?'看到，但沒有帶走':'牠在我這裡'}</b>　<a href="#/seen">改選</a></p>`)}
    setLabel()}
   let photoFiles=[];const pv=$('#pv');
+  setTimeout(()=>carryPhotoInto($('#photoIn')),300);
   $('#photoIn').onchange=async e=>{const first=!photoFiles.length&&e.target.files[0];{const all=photoFiles.concat([...e.target.files]);if(all.length>4)toast('最多 4 張照片，只保留前 4 張',4000);photoFiles=all.slice(0,4)}drawPV();e.target.value='';if(first)seenPhotoMatch(first,$('#fnMatch'));
     if(first){const meta=await readPhotoMeta(first);if(meta.date||meta.lat){applyPhotoMeta(meta,{dateInput:$('#f').elements['seen_at'],picker,hintEl:$('#exifHintF')})}}};
   function drawPV(){pvTiles(pv,photoFiles,pvUrl,drawPV)}
@@ -10299,6 +10306,7 @@ async function photoEmbed(file,onProg){
   return '['+v.map(a=>(a/n).toFixed(5)).join(',')+']'}
 // 路人拍到毛孩：上傳照片後，直接比對有沒有人正在找牠。只列出照片「很像」的（相似 80 分以上），不像的不列
 const SEEN_SIM=80;
+function carryPhotoInto(inp){const cp=window.__carryPhoto;window.__carryPhoto=null;if(!cp||!inp||!inp.isConnected)return;try{const dt=new DataTransfer();dt.items.add(cp);inp.files=dt.files;inp.dispatchEvent(new Event('change',{bubbles:true}))}catch(_){}}
 async function seenPhotoMatch(file,box){if(!box||!file)return;const _n=navId;
   const run=async()=>{box.innerHTML=`<div class="fnm"><b>${ic('search')} 正在比對有沒有人在找牠…</b><div class="progress"><i id="fnmBar" style="width:6%"></i></div><p class="small muted" id="fnmMsg">AI 在你的手機上比對，照片不會多傳一份</p></div>`;
     try{const q=await photoEmbed(file,(p,cached)=>{const b=$('#fnmBar'),m=$('#fnmMsg');if(b)b.style.width=Math.round(6+p*74)+'%';if(m&&!cached&&p<1)m.textContent=`第一次使用，下載 AI 模型 ${Math.round(p*100)}%`});
@@ -10337,7 +10345,11 @@ function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
   <p class="ph-note">${ic('shield')} 照片只在你的手機上分析，不會上傳到我們的主機。第一次使用要下載 AI 模型（約 35MB，建議用 Wi-Fi），之後就不用了。</p>
   <div id="phOut"></div></div>`;
   const $go=$('#phGo'),$out=$('#phOut'),$prog=$('#phProg'),$bar=$('#phBar'),$msg=$('#phMsg');
-  $('#phIn').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;file=f;$('#phDropIn').innerHTML=`<img src="${pvUrl(f)}" alt="你上傳的照片"><small>點一下可以換一張</small>`;$('#phDrop').classList.add('has');$go.disabled=false;$out.innerHTML=''};
+  // 選好照片：AI 模型已經在手機裡就直接比對；還沒下載過（要花流量）才讓人自己按
+  const setFile=async f=>{file=f;$('#phDropIn').innerHTML=`<img src="${pvUrl(f)}" alt="你上傳的照片"><small>點一下可以換一張</small>`;$('#phDrop').classList.add('has');$go.disabled=false;$out.innerHTML='';
+    let cached=false;try{const c=await caches.open('wanghome-vendor');cached=!!(await c.match(AI_MODEL))}catch(_){}
+    if(_n===navId&&file===f&&cached&&!busy)$go.click()};
+  $('#phIn').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)setFile(f)};
   $('#phSp').onclick=e=>{const b=e.target.closest('button');if(!b)return;sp=b.dataset.v;$('#phSp').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
   $('#phCity').onchange=e=>{city=e.target.value};
   const prog=(p,msg)=>{$prog.classList.remove('hidden');$bar.style.width=Math.round(p*100)+'%';$msg.textContent=msg};
@@ -10350,12 +10362,18 @@ function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
       const rows=data||[],by=k=>rows.filter(r=>r.kind===k);
       if(!rows.length){$out.innerHTML=`<div class="empty"><p>這個條件下沒有可以比對的照片。</p><p class="small muted">把縣市改成「全台灣」再試一次。</p></div>`;return}
       const sec=(k,t,empty)=>{const l=by(k);return `<section class="ph-sec"><h2><span class="tag ${PH_KIND[k][1]}">${PH_KIND[k][0]}</span> ${t}</h2>${l.length?`<div class="ph-grid">${l.map(phCard).join('')}</div>`:`<p class="small muted">${empty}</p>`}</section>`};
-      $out.innerHTML=`<p class="ph-warn">下面是<b>長得像</b>的毛孩，不代表就是同一隻。請點進去看照片、特徵和地點再確認。</p>
+      window.__carryPhoto=file;   // 接下來去回報或通報，這張照片會自動帶過去
+      const hits=by('case').filter(r=>r.sim>=SEEN_SIM).slice(0,3);
+      $out.innerHTML=(hits.length?`<div class="fnm hit"><b>🔔 有人正在找長得很像的毛孩</b><p class="small muted">請看照片是不是同一隻。是的話直接回報給飼主，你這張照片會自動帶過去。</p>
+        ${hits.map(r=>{const i=r.info||{};return `<div class="fnm-row"><a href="#/case/${esc(r.ref)}" class="fnm-ph">${thumbImg(r.url,'')}</a><div class="fnm-t"><b>${esc(i.name||'走失毛孩')}</b><small>${esc((i.city||'')+(i.district||''))}・${fmtDate(i.at)} 走失</small><small class="fnm-sim">照片相似 ${Math.round(r.sim)}%</small><a class="btn sm" href="#/report/${esc(r.ref)}">是牠！回報給飼主</a></div></div>`}).join('')}</div>`
+        :`<div class="fnm"><b>${ic('search')} 目前沒有照片很像的走失毛孩</b><p class="small muted">可以通報你看到牠，之後有飼主來找相似的毛孩，系統會通知對方。</p><div class="ph-next" style="margin:8px 0 0"><a class="btn" href="#/found/new?k=seen">通報我看到牠</a><a class="btn ghost" href="#/found/new?k=found">牠在我這裡</a></div></div>`)
+        +`<p class="ph-warn">下面是<b>長得像</b>的毛孩，不代表就是同一隻。請點進去看照片、特徵和地點再確認。</p>
         ${sec('case','走失中、飼主正在找的','這個條件下沒有相似的走失案件。')}${sec('found','有人撿到或看到的','這個條件下沒有相似的拾獲通報。')}${sec('shelter','收容所裡的','這個條件下沒有相似的收容所毛孩。')}
-        <div class="ph-next"><a class="btn ghost" href="#/new">沒找到？登記走失</a><a class="btn ghost" href="#/found/new">撿到了？通報拾獲</a></div>`;
+        <div class="ph-next"><a class="btn ghost" href="#/found/new?k=seen">在路上看到的？通報目擊</a><a class="btn ghost" href="#/found/new?k=found">撿到了？通報拾獲</a><a class="btn ghost" href="#/new">是我的毛孩走失了</a></div>`;
       $out.scrollIntoView({behavior:'smooth',block:'start'})}
     catch(err){$prog.classList.add('hidden');const m=String(err&&err.message||err);$out.innerHTML=`<div class="empty"><p>比對沒有成功。</p><p class="small muted">${esc(/model|wasm|fetch|load|Failed|abort|memory/i.test(m)?(IS_APP?'這支手機的 App 裡跑不動 AI 模型，請改用瀏覽器打開 wangmiaotw.com 再試。':'AI 模型沒有載入成功，請確認網路後再試一次。'):m)}</p></div>`}
-    finally{busy=false;$go.disabled=!file}}}
+    finally{busy=false;$go.disabled=!file}};
+  {const f0=window.__photoStart;window.__photoStart=null;if(f0)setFile(f0)}}
 function renderAbout(){
   setTitle('關於');
   app.innerHTML=`<h1>關於 ${esc(CONFIG.SITE_NAME)}</h1><div class="card">
