@@ -375,6 +375,27 @@ async function sendCaseMail(c: any, subject: string, body: string, html?: string
   return true;
 }
 
+// 通知信不重複：寄之前先在 mail_sent 登記「這個信箱＋這個項目」，登記成功的才寄；
+// 之前登記過的（已經通知過）不會再出現在信裡。登記失敗就當作不能寄（寧可晚寄，不要重複）。
+async function claimItems(to: string, items: string[]): Promise<Set<string>> {
+  const em = normMail(to), out = new Set<string>();
+  if (!em || !items.length) return out;
+  try {
+    const rows = (await sb("POST", "mail_sent?on_conflict=to_email,item", [...new Set(items)].map((item) => ({ to_email: em, item })), undefined, "return=representation,resolution=ignore-duplicates")) ?? [];
+    for (const r of rows) out.add(r.item);
+  } catch (e) { log("登記通知項目失敗，這次先不寄：", errName(e)); }
+  return out;
+}
+async function alreadySent(to: string, items: string[]): Promise<boolean> {
+  try { const rows = (await sb("GET", "mail_sent", undefined, { select: "item", to_email: `eq.${normMail(to)}`, item: `in.(${items.map((x) => `"${x}"`).join(",")})` })) ?? []; return rows.length > 0; }
+  catch (_) { return false; }
+}
+async function unclaimItems(to: string, items: string[]) {
+  if (!items.length) return;
+  try { await sb("DELETE", "mail_sent", undefined, { to_email: `eq.${normMail(to)}`, item: `in.(${items.map((x) => `"${x}"`).join(",")})` }, "return=minimal"); }
+  catch (e) { log("取消登記通知項目失敗：", errName(e)); }
+}
+
 // 台灣時間 MM/DD HH:MM
 function fmt(ts?: string | null) {
   const t = Date.parse(ts ?? "");
@@ -508,10 +529,17 @@ async function runNotifications() {
   const smQuiet = smAll.filter((m) => m.photo_sim != null && m.photo_sim < 88).map((m) => m.id);
   if (smQuiet.length) await markNotified("shelter_matches", smQuiet);
   const sm = smAll.filter((m) => m.photo_sim != null && m.photo_sim >= 88);
-  for (const [cid, lst] of groupBy(sm, (m) => m.case_id)) {
+  for (const [cid, lst0] of groupBy(sm, (m) => m.case_id)) {
     const c = cases.get(cid);
-    if (!c || !c.contact_email || c.status !== "searching") { await markNotified("shelter_matches", lst.map((m) => m.id)); continue; }
-    if (!c.email_verified) { await skipUnverified("shelter_matches", lst, "matched_at"); continue; }
+    if (!c || !c.contact_email || c.status !== "searching") { await markNotified("shelter_matches", lst0.map((m) => m.id)); continue; }
+    if (!c.email_verified) { await skipUnverified("shelter_matches", lst0, "matched_at"); continue; }
+    // 同一個信箱、同一隻收容動物只通知一次
+    const sKey = (m: any) => `s:${m.animal_id}`;
+    const sFresh = await claimItems(c.contact_email, lst0.map(sKey));
+    const lst = lst0.filter((m) => sFresh.has(sKey(m)));
+    const sDup = lst0.filter((m) => !sFresh.has(sKey(m))).map((m) => m.id);
+    if (sDup.length && sFresh.size) await markNotified("shelter_matches", sDup);   // 已經通知過的
+    if (!lst.length) { if (sDup.length && await alreadySent(c.contact_email, lst0.map(sKey))) await markNotified("shelter_matches", sDup); continue; }
     const lines = [`AI 比對照片，在收容所找到 ${lst.length} 隻和「${c.name}」長得很像的毛孩，請盡快親自確認：`, ""];
     for (const m of lst.slice(0, 10)) {
       const sim = `照片相似 ${m.photo_sim}%`;
@@ -527,9 +555,9 @@ async function runNotifications() {
     }
     lines.push("AI 照片比對只是參考，請打電話到收容所提供晶片號碼核對，或親自到所比對。", `案件頁：${SITE_URL}#/case/${cid}`, "", `— ${SITE_NAME}`);
     try {
-      if (!(await sendCaseMail(c, `【${SITE_NAME}】收容所有疑似 ${c.name} 的毛孩`, lines.join("\n")))) continue;
+      if (!(await sendCaseMail(c, `【${SITE_NAME}】收容所有疑似 ${c.name} 的毛孩`, lines.join("\n")))) { await unclaimItems(c.contact_email, lst.map(sKey)); continue; }
       log(`已通知比對：${c.name} x${lst.length}`);
-    } catch (e) { log("寄信失敗：", errName(e)); continue; }
+    } catch (e) { log("寄信失敗：", errName(e)); await unclaimItems(c.contact_email, lst.map(sKey)); continue; }
     await markNotified("shelter_matches", lst.map((m) => m.id));
   }
 
@@ -551,10 +579,17 @@ async function runNotifications() {
     const waiting = (m: any) => fr.has(m.found_id) && hasPh(m) && m.photo_sim == null && Date.now() - Date.parse(m.created_at) < 6 * 3600e3;
     const quiet = all.filter((m) => !fr.has(m.found_id) || (!good(m) && !waiting(m))).map((m) => m.id);
     if (quiet.length) await markNotified("found_matches", quiet);
-    const lst = c ? all.filter((m) => fr.has(m.found_id) && good(m)) : [];
+    const lstA = c ? all.filter((m) => fr.has(m.found_id) && good(m)) : [];
+    if (!lstA.length) continue;
+    if (!c || !c.contact_email || c.status !== "searching") { await markNotified("found_matches", lstA.map((m) => m.id)); continue; }
+    if (!c.email_verified) { await skipUnverified("found_matches", lstA); continue; }
+    // 同一個信箱、同一筆路人通報只通知一次
+    const fKey = (m: any) => `f:${m.found_id}`;
+    const fFresh = await claimItems(c.contact_email, lstA.map(fKey));
+    const lst = lstA.filter((m) => fFresh.has(fKey(m)));
+    const fDup = lstA.filter((m) => !fFresh.has(fKey(m))).map((m) => m.id);
+    if (fDup.length && (fFresh.size || await alreadySent(c.contact_email, lstA.map(fKey)))) await markNotified("found_matches", fDup);
     if (!lst.length) continue;
-    if (!c || !c.contact_email || c.status !== "searching") { await markNotified("found_matches", lst.map((m) => m.id)); continue; }
-    if (!c.email_verified) { await skipUnverified("found_matches", lst); continue; }
     const lines = [`有網友登記了 ${lst.length} 筆可能是「${c.name}」的拾獲／目擊通報：`, ""];
     for (const m of lst.slice(0, 10)) {
       const f = fr.get(m.found_id) ?? {};
@@ -565,9 +600,9 @@ async function runNotifications() {
     }
     lines.push("請點連結看照片，並直接聯絡通報者。", "", `— ${SITE_NAME}`);
     try {
-      if (!(await sendCaseMail(c, `【${SITE_NAME}】有人可能撿到／看到 ${c.name}`, lines.join("\n")))) continue;
+      if (!(await sendCaseMail(c, `【${SITE_NAME}】有人可能撿到／看到 ${c.name}`, lines.join("\n")))) { await unclaimItems(c.contact_email, lst.map(fKey)); continue; }
       log(`已通知拾獲比對：${c.name} x${lst.length}`);
-    } catch (e) { log("寄信失敗：", errName(e)); continue; }
+    } catch (e) { log("寄信失敗：", errName(e)); await unclaimItems(c.contact_email, lst.map(fKey)); continue; }
     await markNotified("found_matches", lst.map((m) => m.id));
   }
 }
