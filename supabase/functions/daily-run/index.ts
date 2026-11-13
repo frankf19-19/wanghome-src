@@ -503,11 +503,11 @@ async function runNotifications() {
   }
 
   // 收容所比對
-  // 只通知「AI 比對過照片、而且照片也像」的（photo_sim >= 70）；還沒比對的先不動，等下次；比對過不像或沒照片的，不通知
+  // 只通知「AI 比對過照片、而且照片很像」的（photo_sim >= 88，約等於實測誤認率 10% 的門檻）；還沒比對的先不動，等下次；比對過不像或沒照片的，不通知
   const smAll = await sbAll("shelter_matches", { select: "*", notified: "eq.false", dismissed: "eq.false", order: "score.desc" });
-  const smQuiet = smAll.filter((m) => m.photo_sim != null && m.photo_sim < 70).map((m) => m.id);
+  const smQuiet = smAll.filter((m) => m.photo_sim != null && m.photo_sim < 88).map((m) => m.id);
   if (smQuiet.length) await markNotified("shelter_matches", smQuiet);
-  const sm = smAll.filter((m) => m.photo_sim != null && m.photo_sim >= 70);
+  const sm = smAll.filter((m) => m.photo_sim != null && m.photo_sim >= 88);
   for (const [cid, lst] of groupBy(sm, (m) => m.case_id)) {
     const c = cases.get(cid);
     if (!c || !c.contact_email || c.status !== "searching") { await markNotified("shelter_matches", lst.map((m) => m.id)); continue; }

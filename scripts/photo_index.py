@@ -23,16 +23,29 @@ T0 = time.time(); BUDGET = int(os.environ.get("BUDGET_SEC", "1200"))
 _sess = None
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32); STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 _emb = {}
+AI_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai")
+VER = 2   # 特徵算法版本：2＝先偵測出狗／貓、裁掉背景再算（和網頁 photoEmbed() 一致）
+def crop_pet(im):
+    """用 YOLOX-nano 找出狗／貓的位置，裁成剛好包住牠的正方形（超出照片的地方補灰色）；找不到就置中裁正方形"""
+    from PIL import Image
+    from photo_detect import detect
+    w, h = im.size
+    r = detect(im, os.path.join(AI_DIR, "yolox_nano.onnx"))
+    if not r or r[0][0] < 0.3:
+        s = min(w, h); return im.crop(((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s))
+    _, _, x0, y0, x1, y1 = r[0]; s = max(x1 - x0, y1 - y0, 8); l, t = (x0 + x1) / 2 - s / 2, (y0 + y1) / 2 - s / 2
+    bg = Image.new("RGB", (int(round(s)), int(round(s))), (124, 116, 104))
+    bg.paste(im.crop((int(round(max(0, l))), int(round(max(0, t))), int(round(min(w, l + s))), int(round(min(h, t + s))))), (int(round(max(0, -l))), int(round(max(0, -t)))))
+    return bg
 def embed(url, im):
-    """和網頁 photoEmbed() 相同：置中裁正方形 → 224 → DINOv2 的 CLS 特徵（384 維，長度 1）"""
+    """和網頁 photoEmbed() 相同：框出狗／貓 → 224 → DINOv2 的 CLS 特徵（384 維，長度 1）"""
     global _sess
     if url in _emb: return _emb[url]
     if _sess is None:
         import onnxruntime as ort
-        _sess = ort.InferenceSession(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", "dinov2s-q8.onnx"), providers=["CPUExecutionProvider"])
+        _sess = ort.InferenceSession(os.path.join(AI_DIR, "dinov2s-q8.onnx"), providers=["CPUExecutionProvider"])
     from PIL import Image
-    w, h = im.size; s = min(w, h)
-    im = im.crop(((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s)).resize((224, 224), Image.BICUBIC)
+    im = crop_pet(im).resize((224, 224), Image.BICUBIC)
     x = ((np.asarray(im, dtype=np.float32) / 255 - MEAN) / STD).transpose(2, 0, 1)[None]
     v = _sess.run(None, {"pixel_values": x})[0][0][0]
     v = v / np.linalg.norm(v)
@@ -63,19 +76,22 @@ def wanted():
             if not u: continue
             w[("shelter", str(a.get("animal_id")), u)] = {"sp": "cat" if kind == "貓" else "dog", "city": CITY.get(a.get("animal_area_pkid")), "shelter": a.get("shelter_name"),
                 "variety": (a.get("animal_Variety") or "").strip(), "colour": a.get("animal_colour"), "sex": {"M": "公", "F": "母"}.get(a.get("animal_sex"), ""),
-                "body": BODY.get(a.get("animal_bodytype"), ""), "sub": a.get("animal_subid"), "at": (a.get("animal_createtime") or "").replace("/", "-")[:10]}
+                "body": BODY.get(a.get("animal_bodytype"), ""), "sub": a.get("animal_subid"), "at": (a.get("animal_createtime") or "").replace("/", "-")[:10],
+                "tel": (a.get("shelter_tel") or "").strip(), "addr": (a.get("shelter_address") or "").strip(), "place": (a.get("animal_foundplace") or "").strip()}
     return w, True
 
 def vec_str(v): return "[" + ",".join(f"{x:.5f}" for x in v.tolist()) + "]"
 
 def index():
     w, shelter_ok = wanted()
-    have = {(r["kind"], r["ref"], r["url"]): r["id"] for r in sb_all("photo_vecs?select=id,kind,ref,url")}
+    rows0 = sb_all("photo_vecs?select=id,kind,ref,url,ver")
+    have = {(r["kind"], r["ref"], r["url"]): r["id"] for r in rows0}
+    cur = {(r["kind"], r["ref"], r["url"]) for r in rows0 if (r.get("ver") or 1) >= VER}   # 已經用新算法算過的
     # 下架的刪掉（收容所資料讀不到時，不動收容所那部分）
     gone = [i for k, i in have.items() if k not in w and (shelter_ok or k[0] != "shelter")]
     for i in range(0, len(gone), 150):
         sb("DELETE", "photo_vecs?id=in.(" + ",".join(map(str, gone[i:i + 150])) + ")", prefer="return=minimal")
-    todo = [k for k in w if k not in have]
+    todo = [k for k in w if k not in cur]
     # 先算案件和拾獲（數量少、最重要），再算收容所
     todo.sort(key=lambda k: {"case": 0, "found": 1, "shelter": 2}[k[0]])
     todo = todo[:MAX_NEW]
@@ -89,11 +105,18 @@ def index():
             if im is None: fail += 1; continue
             try: v = embed(k[2], im)
             except Exception: fail += 1; continue
-            rows.append({"kind": k[0], "ref": k[1], "url": k[2], "vec": vec_str(v), "info": w[k]})
+            rows.append({"kind": k[0], "ref": k[1], "url": k[2], "vec": vec_str(v), "info": w[k], "ver": VER})
         if rows:
             sb("POST", "photo_vecs?on_conflict=kind,ref,url", rows, "return=minimal,resolution=merge-duplicates"); done += len(rows)
-    left = len([k for k in w if k not in have]) - done - fail
-    note(f"照片索引：應有 {len(w)} 張，原有 {len(have)}，刪除 {len(gone)}，新增 {done}，讀不到 {fail}，還沒算 {max(0, left)}")
+    left = len([k for k in w if k not in cur]) - done - fail
+    note(f"照片索引（第 {VER} 版）：應有 {len(w)} 張，已是新版 {len(cur)}，刪除 {len(gone)}，新增 {done}，讀不到 {fail}，還沒算 {max(0, left)}")
+
+def sync_matches():
+    """把照片比對結果同步到 shelter_matches（首頁提醒、管理頁、Email 通知用）"""
+    try:
+        r = sb("POST", "rpc/sync_photo_matches", {})
+        note(f"收容所照片比對同步：{r}")
+    except Exception as e: note(f"收容所照片比對同步失敗：{str(e)[:200]}")
 
 def sightings():
     """目擊回報的照片 vs 走失毛孩的照片"""
@@ -116,14 +139,14 @@ def sightings():
                 if cim is None: continue
                 cos = float(a @ embed(u, cim))
                 best = cos if best is None else max(best, cos)
-        sim = -1 if best is None else int(round(max(0, min(1, (best - 0.20) / 0.50)) * 100))
+        sim = -1 if best is None else int(round(max(0, min(1, (best - 0.35) / 0.45)) * 100))
         sb("PATCH", f"sightings?id=eq.{s['id']}", {"photo_sim": sim}, "return=minimal"); n += 1
     note(f"目擊照片比對：{n} 則")
 
 if __name__ == "__main__":
     import traceback, urllib.error
     try:
-        index(); sightings()
+        index(); sync_matches(); sightings()
     except urllib.error.HTTPError as e:
         body = e.read()[:400].decode("utf-8", "replace").replace("\n", " ")
         print(f"::error::HTTP {e.code} {e.url[:120]} {body}", flush=True); raise SystemExit(1)

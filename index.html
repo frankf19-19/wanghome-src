@@ -3127,7 +3127,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.26.0';
+const BUILD = 'v7.27.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5147,7 +5147,7 @@ async function inboxItems(){if(!me())return [];const out=[];const since=new Date
   const fid=(fl||[]).map(f=>f.case_id).filter(id=>!byId[id]);
   const jobs=[];
   if(mid.length){mid.slice(0,5).forEach(id=>jobs.push(sb.rpc('owner_sightings',{p_id:id,p_token:null}).then(({data})=>(data||[]).filter(x=>(x.created_at||x.seen_at)>since).slice(0,10).forEach(x=>{if(x.status==='rejected')return;const c=byId[x.case_id];out.push({t:x.created_at||x.seen_at,k:'mine',ic:'eye',col:'#F2643D',img:x.photo_url||(c.photos||[])[0],href:'#/manage/'+x.case_id,h:`<b>有人看到 ${esc(c.name)}</b>${x.place_text?'：'+esc(x.place_text):''}${x.status==='pending'?'（等你確認）':''}`})})).catch(()=>{out.err=true})));
-    jobs.push(sb.from('shelter_matches').select('*').in('case_id',mid).eq('dismissed',false).gte('photo_sim',70).order('photo_sim',{ascending:false}).limit(10).then(({data})=>(data||[]).forEach(x=>{const c=byId[x.case_id];out.push({t:x.matched_at||x.created_at||'2000-01-01T00:00:00Z',k:'mine',ic:'shelter',col:'#2F6FE0',img:(c.photos||[])[0],href:'#/case/'+x.case_id+'?sec=shelter',h:`<b>收容所有一隻很像 ${esc(c.name)}</b>，照片相似度 ${Math.round(x.photo_sim)}%`})})).catch(()=>{out.err=true}))}
+    jobs.push(sb.from('shelter_matches').select('*').in('case_id',mid).eq('dismissed',false).gte('photo_sim',85).order('photo_sim',{ascending:false}).limit(10).then(({data})=>(data||[]).forEach(x=>{const c=byId[x.case_id];out.push({t:x.matched_at||x.created_at||'2000-01-01T00:00:00Z',k:'mine',ic:'shelter',col:'#2F6FE0',img:(c.photos||[])[0],href:'#/case/'+x.case_id+'?sec=shelter',h:`<b>收容所有一隻很像 ${esc(c.name)}</b>，照片相似度 ${Math.round(x.photo_sim)}%`})})).catch(()=>{out.err=true}))}
   if(fid.length){jobs.push(sb.from('cases_public').select('id,name,photos,status,found_at,last_seen_at').in('id',fid).then(({data})=>(data||[]).forEach(c=>{if(c.status==='found'&&c.found_at&&c.found_at>since)out.push({t:c.found_at,k:'follow',ic:'heart',col:'#1F9D6E',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`🎉 你追蹤的 <b>${esc(c.name)}</b> 平安回家了！謝謝你的幫忙 🙏`});else if(c.status==='searching'&&c.last_seen_at&&c.last_seen_at>since)out.push({t:c.last_seen_at,k:'follow',ic:'eye',col:'#F2643D',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`你追蹤的 <b>${esc(c.name)}</b> 有新的目擊`})})).catch(()=>{out.err=true}))}
   const p=prof||{};
   if(p.home_lat&&p.home_lng){const r=(p.home_radius_km||3)/111;jobs.push(sb.from('cases_public').select('id,name,species,photos,lost_city,lost_district,created_at,lost_lat,lost_lng').eq('status','searching').gte('created_at',new Date(Date.now()-7*864e5).toISOString()).gte('lost_lat',p.home_lat-r).lte('lost_lat',p.home_lat+r).gte('lost_lng',p.home_lng-r*1.1).lte('lost_lng',p.home_lng+r*1.1).order('created_at',{ascending:false}).limit(10).then(({data})=>(data||[]).filter(c=>!byId[c.id]).forEach(c=>out.push({t:c.created_at,k:'near',ic:'pin',col:'#F2643D',img:(c.photos||[])[0],href:'#/case/'+c.id,h:`<b>你家附近</b>有${c.species==='cat'?'貓咪':'狗狗'}走失：${esc(c.name)}（${esc((c.lost_city||'')+(c.lost_district||''))}）`}))).catch(()=>{out.err=true}))}
@@ -5971,7 +5971,7 @@ async function renderCase(id){const _n=navId;
   <div class="trail"><div class="trail-map"><div id="map"></div></div><div class="timeline" id="tl"></div></div>
   </div>
 
-  <div id="shelterBox">${shelterBoxHTML(matches,c.status==='searching')}</div>
+  <div id="shelterBox" hidden></div>
   <div id="photoMatch"></div>
 
   <div id="foundMatches"></div>
@@ -6059,10 +6059,10 @@ async function renderCase(id){const _n=navId;
   capList(tl);
   tl.querySelectorAll('.tl-rep').forEach(b=>b.onclick=()=>openReport('sighting',b.dataset.sid,b.dataset.poster||null));
   const slowNet=(()=>{const n=navigator.connection;return !!n&&(n.saveData||/(^|-)2g|3g/.test(n.effectiveType||''))})();
-  if(c.status==='searching'&&slowNet){const st=$('#shelterStatus');if(st)st.innerHTML='你的網路較慢或開了省流量，沒有自動比對收容所（約要下載 1MB）。<button type="button" class="btn sm ghost" id="btnShelterNow">現在比對</button>';const b=$('#btnShelterNow');if(b)b.onclick=()=>{b.disabled=true;b.textContent='比對中…';let tk=null;try{tk=localStorage.getItem('wh_token_'+id)}catch(_){}
+  if(false&&c.status==='searching'&&slowNet){const st=$('#shelterStatus');if(st)st.innerHTML='你的網路較慢或開了省流量，沒有自動比對收容所（約要下載 1MB）。<button type="button" class="btn sm ghost" id="btnShelterNow">現在比對</button>';const b=$('#btnShelterNow');if(b)b.onclick=()=>{b.disabled=true;b.textContent='比對中…';let tk=null;try{tk=localStorage.getItem('wh_token_'+id)}catch(_){}
     liveShelterMatch({...c},tk).then(async()=>{if(_n!==navId)return;const {data:m2}=await sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false);const box=$('#shelterBox');if(!box)return;
       box.innerHTML=shelterBoxHTML(m2,false)||`<h2>${ic('shelter')} 收容所比對</h2><p class="muted small">比對完成：目前 ${esc(c.lost_city)} 收容所沒有走失日之後收容、特徵相符的動物。</p>`}).catch(()=>{b.disabled=false;b.textContent='讀取不到，再試一次'})}}
-  else if(c.status==='searching'){
+  else if(false&&c.status==='searching'){
     liveShelterMatch({...c},(()=>{try{return localStorage.getItem('wh_token_'+id)}catch(_){return null}})()).then(async()=>{
       if(location.hash.split('?')[0]!=='#/case/'+id)return;
       const {data:m2}=await sb.from('shelter_matches').select('*').eq('case_id',id).eq('dismissed',false);
@@ -6121,14 +6121,14 @@ function shNoPhoto(img){const card=img.closest('.match'),box=img.closest('#shelt
 // 收容所照片比對：用牠的照片直接和全台收容所動物的照片比（不看文字描述）
 async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.photos||[]).length)return;
   const d0=new Date(new Date(c.lost_at)-86400000).toISOString().slice(0,10);
-  const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=55);
-    box.innerHTML=`<h2>${ic('camera')} 照片最像的收容動物 ${rows.length?`<span class="tag amber">${rows.length}</span>`:''}</h2>
-    <p class="muted small">AI 用${esc(c.name||'牠')}的照片，和${esc(c.lost_city)}收容所在走失後收容的${c.species==='cat'?'貓':'狗'}照片一張一張比。${how}</p>
-    ${rows.length?`<div class="ph-grid">${rows.map(r=>phCard({...r,kind:'shelter'})).join('')}</div><p class="muted small">點照片看收容所電話和地址。AI 只是參考，請打電話給收容所提供晶片號碼確認。</p>`:`<p class="muted small">目前沒有照片相似的收容動物，收容所每天有新動物，會持續比對。</p>`}`};
+  const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=45).slice(0,6);const hi=rows.filter(r=>r.sim>=85).length;
+    box.innerHTML=`<h2>${ic('camera')} 收容所裡照片最像的 ${hi?`<span class="tag amber">很像 ${hi}</span>`:''}</h2>
+    <p class="muted small">AI 先把照片裡的${c.species==='cat'?'貓':'狗'}框出來、去掉背景，再拿${esc(c.name||'牠')}的照片和${esc(c.lost_city)}收容所在走失後收容的${c.species==='cat'?'貓':'狗'}一張一張比，把最像的排在前面。${how}</p>
+    ${rows.length?`<div class="ph-grid">${rows.map(r=>phCard({...r,kind:'shelter'})).join('')}</div><p class="muted small">點照片看收容所電話和地址。AI 只能幫忙把像的排前面，不能保證是牠：實測同一隻毛孩有九成會排在前 10 名內。請自己看照片，像的話打電話給收容所提供晶片號碼確認。</p>`:`<p class="muted small">目前${esc(c.lost_city)}收容所沒有照片相似的${c.species==='cat'?'貓':'狗'}。收容所每天有新動物，會持續比對。</p>`}`};
   try{const {data:ready}=await sb.rpc('case_photo_ready',{p_case:id});
     if(ready){const {data}=await sb.rpc('case_photo_matches',{p_case:id,p_limit:8});show(data,'每 6 小時更新。');return}}catch(_){return}
   if(_n!==navId||!box.isConnected)return;
-  box.innerHTML=`<h2>${ic('camera')} 照片最像的收容動物</h2><p class="muted small">新登記的案件，系統會在 6 小時內幫牠的照片建好 AI 比對。也可以現在就在你的手機上比對（第一次要下載約 25MB 的 AI 模型）。</p><button type="button" class="btn sm ghost" id="pmNow">${ic('camera')} 現在用照片比對收容所</button>`;
+  box.innerHTML=`<h2>${ic('camera')} 照片最像的收容動物</h2><p class="muted small">新登記的案件，系統會在 6 小時內幫牠的照片建好 AI 比對。也可以現在就在你的手機上比對（第一次要下載約 28MB 的 AI 模型）。</p><button type="button" class="btn sm ghost" id="pmNow">${ic('camera')} 現在用照片比對收容所</button>`;
   $('#pmNow').onclick=async()=>{const b=$('#pmNow');b.disabled=true;b.textContent='準備中…';
     try{const blob=await (await fetch(safeU(c.photos[0]))).blob();
       const q=await photoEmbed(new File([blob],'p.jpg',{type:blob.type||'image/jpeg'}),p=>{if(b.isConnected)b.textContent=p<1?`下載 AI 模型 ${Math.round(p*100)}%`:'比對中…'});
@@ -6492,7 +6492,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
     ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
-    ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>${s.photo_sim>=0&&s.photo_sim!=null?`<div class="small sg-sim ${s.photo_sim>=70?'hi':s.photo_sim>=45?'mid':'lo'}">AI 比對照片：和 ${esc(c.name)} 的相似度 <b>${s.photo_sim}%</b>${s.photo_sim>=70?'，很像，建議優先確認':s.photo_sim<45?'，看起來不太像，仍請自己判斷':''}</div>`:''}`:''}
+    ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>${s.photo_sim>=0&&s.photo_sim!=null?`<div class="small sg-sim ${s.photo_sim>=85?'hi':s.photo_sim>=65?'mid':'lo'}">AI 比對照片：和 ${esc(c.name)} 的相似度 <b>${s.photo_sim}%</b>${s.photo_sim>=85?'，很像，建議優先確認':s.photo_sim<65?'，看起來不太像，仍請自己判斷':''}</div>`:''}`:''}
     <div class="ops">${sightOps(s.id,s.status)}</div></div>`;
   const STATUS_TAG={searching:'<span class="tag red">協尋中</span>',found:'<span class="tag green">已回家</span>',closed:'<span class="tag gray">已結案</span>'};
   // 管理頁分成「首頁」和幾個單一工作的頁面（網址 ?p=...），一次只做一件事
@@ -10244,23 +10244,53 @@ async function aiSession(onProg){
   ort.env.wasm.numThreads=1;ort.env.wasm.wasmPaths=AI_BASE+'vendor/ort/';
   const buf=await aiModelBytes(onProg);
   return __aiSess=await ort.InferenceSession.create(buf,{executionProviders:['wasm'],graphOptimizationLevel:'all'})}
-// 和 scripts/photo_index.py 的 embed() 相同：置中裁正方形 → 224×224 → CLS 特徵（384 維、長度 1）
+// 偵測模型（YOLOX-nano，3.7MB）：先找出照片裡的狗／貓在哪裡，裁掉背景再比對，準確度高很多
+const AI_DET=AI_BASE+'ai/yolox_nano.onnx';let __detSess=null;
+async function detSession(){
+  if(__detSess)return __detSess;
+  let buf=null,cache=null;try{cache=await caches.open('wanghome-vendor');const hit=await cache.match(AI_DET);if(hit)buf=await hit.arrayBuffer()}catch(_){cache=null}
+  if(!buf){const r=await fetch(AI_DET);if(!r.ok)throw new Error('det '+r.status);buf=await r.arrayBuffer();if(cache)try{await cache.put(AI_DET,new Response(buf.slice(0),{headers:{'content-type':'application/octet-stream'}}))}catch(_){}}
+  return __detSess=await ort.InferenceSession.create(buf,{executionProviders:['wasm'],graphOptimizationLevel:'all'})}
+// 回傳狗／貓的外框 [x0,y0,x1,y1]（src 畫布座標），找不到回傳 null。和 scripts/photo_detect.py 的 detect() 相同
+async function petBox(src){
+  const det=await detSession(),S=416,w=src.width,h=src.height,r=Math.min(S/w,S/h),nw=Math.floor(w*r),nh=Math.floor(h*r);
+  const c=document.createElement('canvas');c.width=c.height=S;const g=c.getContext('2d',{willReadFrequently:true});g.fillStyle='rgb(114,114,114)';g.fillRect(0,0,S,S);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(src,0,0,w,h,0,0,nw,nh);
+  const d=g.getImageData(0,0,S,S).data,N=S*S,x=new Float32Array(3*N);
+  for(let i=0;i<N;i++){x[i]=d[i*4+2];x[N+i]=d[i*4+1];x[2*N+i]=d[i*4]}   // BGR、0～255
+  const out=await det.run({images:new ort.Tensor('float32',x,[1,3,S,S])});const o=(out.output||out[Object.keys(out)[0]]).data;
+  const CL=[15,16,17,18,19,21];let best=null,row=0;   // 貓、狗；馬羊牛熊是狗貓常被認成的類別（打六折）
+  const top=CL.map(()=>({s:0,row:-1,st:0,gx:0,gy:0}));
+  for(const st of [8,16,32]){const n=S/st;for(let gy=0;gy<n;gy++)for(let gx=0;gx<n;gx++,row++){const b=row*85,obj=o[b+4];if(obj<0.05)continue;
+    for(let k=0;k<CL.length;k++){const sc=obj*o[b+5+CL[k]];if(sc>top[k].s)top[k]={s:sc,row,st,gx,gy}}}}
+  for(let k=0;k<CL.length;k++){const t=top[k];if(t.s<=0.15)continue;const sc=t.s*(k<2?1:.6);if(!best||sc>best.sc)best={sc,t}}
+  if(!best||best.sc<0.3)return null;
+  const t=best.t,b=t.row*85,cx=(o[b]+t.gx)*t.st/r,cy=(o[b+1]+t.gy)*t.st/r,bw=Math.exp(o[b+2])*t.st/r,bh=Math.exp(o[b+3])*t.st/r;
+  return [Math.max(0,cx-bw/2),Math.max(0,cy-bh/2),Math.min(w,cx+bw/2),Math.min(h,cy+bh/2)]}
+// 和 scripts/photo_index.py 的 embed() 相同：縮到 640 內 → 框出狗／貓、裁成正方形 → 224×224 → CLS 特徵（384 維、長度 1）
 async function photoEmbed(file,onProg){
   const sess=await aiSession(onProg);
   let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(_){bmp=await new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=()=>no(new Error('這張照片讀不出來，換一張試試'));im.src=URL.createObjectURL(file)})}
-  const w=bmp.width||bmp.naturalWidth,h=bmp.height||bmp.naturalHeight,sq=Math.min(w,h),c=document.createElement('canvas');c.width=c.height=224;
-  const g=c.getContext('2d',{willReadFrequently:true});g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(bmp,(w-sq)/2,(h-sq)/2,sq,sq,0,0,224,224);
+  const w0=bmp.width||bmp.naturalWidth,h0=bmp.height||bmp.naturalHeight,k=Math.min(1,640/Math.max(w0,h0)),w=Math.max(1,Math.round(w0*k)),h=Math.max(1,Math.round(h0*k));
+  const src=document.createElement('canvas');src.width=w;src.height=h;const sg=src.getContext('2d');sg.imageSmoothingEnabled=true;sg.imageSmoothingQuality='high';sg.drawImage(bmp,0,0,w,h);
+  let box=null;try{box=await petBox(src)}catch(_){box=null}
+  const c=document.createElement('canvas');c.width=c.height=224;
+  const g=c.getContext('2d',{willReadFrequently:true});g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.fillStyle='rgb(124,116,104)';g.fillRect(0,0,224,224);
+  if(box){const s=Math.max(box[2]-box[0],box[3]-box[1],8),l=(box[0]+box[2])/2-s/2,t=(box[1]+box[3])/2-s/2;
+    const sx=Math.max(0,l),sy=Math.max(0,t),ex=Math.min(w,l+s),ey=Math.min(h,t+s),f=224/s;   // 超出照片的部分留灰色
+    g.drawImage(src,sx,sy,ex-sx,ey-sy,(sx-l)*f,(sy-t)*f,(ex-sx)*f,(ey-sy)*f)}
+  else{const sq=Math.min(w,h);g.drawImage(src,(w-sq)/2,(h-sq)/2,sq,sq,0,0,224,224)}
   const d=g.getImageData(0,0,224,224).data,N=224*224,x=new Float32Array(3*N),M=[0.485,0.456,0.406],SD=[0.229,0.224,0.225];
   for(let i=0;i<N;i++)for(let k=0;k<3;k++)x[k*N+i]=(d[i*4+k]/255-M[k])/SD[k];
   const out=await sess.run({pixel_values:new ort.Tensor('float32',x,[1,3,224,224])});const hs=out.last_hidden_state.data;
   let n=0;const v=new Array(384);for(let i=0;i<384;i++){v[i]=hs[i];n+=hs[i]*hs[i]}n=Math.sqrt(n)||1;
+  photoEmbed.lastBox=box;
   return '['+v.map(a=>(a/n).toFixed(5)).join(',')+']'}
 const PH_KIND={case:['走失協尋','red'],found:['拾獲／目擊','amber'],shelter:['收容所','green']};
 function phCard(r){const i=r.info||{},k=r.kind;const where=esc((i.city||'')+(i.district||''));
   const href=k==='case'?'#/case/'+r.ref:k==='found'?'#/found/'+r.ref:'https://wangmiaotw.com/adopt/a/'+encodeURIComponent(r.ref);
   const title=k==='case'?esc(i.name||'走失毛孩'):k==='found'?(i.k==='found'?'有人撿到':'有人看到'):esc(i.variety||(i.sp==='cat'?'貓':'狗'));
   const meta=k==='case'?`${where}・${fmtDate(i.at)} 走失`:k==='found'?`${where}・${fmtDate(i.at)}${i.colour?'・'+esc(i.colour):''}`:`${esc(i.shelter||where)}${i.sex?'・'+esc(i.sex):''}${i.colour?'・'+esc(i.colour):''}`;
-  const lv=r.sim>=70?'hi':r.sim>=45?'mid':'lo';
+  const lv=r.sim>=85?'hi':r.sim>=65?'mid':'lo';
   return `<a class="ph-card" href="${href}" ${k==='shelter'?'target="_blank" rel="noopener"':''}><span class="ph-img">${thumbImg(r.url,'')}<i class="ph-sim ${lv}">相似 ${Math.round(r.sim)}%</i></span><span class="ph-t"><b>${title}</b><small>${meta}</small></span></a>`}
 function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
   let file=null,sp='',city='',busy=false;

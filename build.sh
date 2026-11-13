@@ -19,7 +19,7 @@ cp google*.html BingSiteAuth.xml 73080c78bdeeab41a5d6fcb7fa0d1bc7.txt dist/ 2>/d
 cp ./*.png ./*.svg ./shot-*.jpg dist/
 mkdir -p dist/vendor && cp vendor/*.js vendor/*.css dist/vendor/
 # 照片找毛孩：AI 模型（DINOv2-small 量化版）和執行環境（onnxruntime-web），使用者第一次用到才下載
-mkdir -p dist/vendor/ort dist/ai && cp vendor/ort/* dist/vendor/ort/ && cp ai/dinov2s-q8.onnx dist/ai/
+mkdir -p dist/vendor/ort dist/ai && cp vendor/ort/* dist/vendor/ort/ && cp ai/dinov2s-q8.onnx ai/yolox_nano.onnx dist/ai/
 # iOS 通用連結（LINE 登入跳回 App）與它的備用頁
 mkdir -p dist/.well-known dist/line-auth && cp .well-known/apple-app-site-association dist/.well-known/ && cp line-auth/index.html dist/line-auth/
 if npx --yes html-minifier-terser@7.2.0 --config-file minify.config.json -o dist/index.html index.html 2>/tmp/minify.log \

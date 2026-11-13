@@ -1,8 +1,7 @@
 name: 收容所比對與照片相似度
-# 每 6 小時：所有協尋中的毛孩和收容所動物做條件比對，再用 AI 比對照片相似度（scripts/photo_match.py）
+# （已停用排程，只保留手動）原本每 6 小時：所有協尋中的毛孩和收容所動物做條件比對，再用 AI 比對照片相似度（scripts/photo_match.py）
 on:
-  schedule:
-    - cron: '53 */6 * * *'
+  # 2026-11-13 起停用排程：照片相似度改由 photo-index（先框出狗貓再比對）計算並同步到 shelter_matches
   workflow_dispatch:
     inputs:
       debug:
