@@ -1296,6 +1296,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-tile .mg-go{font-size:28px;color:var(--ink-3);flex:none}
 .mg-tile.hot{background:var(--mark-soft,#FFF5CC);box-shadow:0 0 0 2px var(--mark,#FFD23F)}
 .mg-tile.green{background:var(--green-soft);box-shadow:0 0 0 1px var(--green-soft)}.mg-tile.green b{color:var(--green)}
+.mg-case{display:flex;align-items:center;gap:6px;min-height:44px;margin-top:6px;font-weight:800;color:var(--red);text-decoration:none}.mg-case span{margin-left:auto;font-size:22px}
 .mg-back{display:inline-flex;align-items:center;min-height:44px;font-weight:700;margin:0 0 6px}
 .mg-big{display:flex;flex-direction:column;gap:10px;margin-top:12px}.mg-big .btn{width:100%;justify-content:center}
 .mg-statusbox{margin-top:22px}
@@ -3127,7 +3128,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.27.1';
+const BUILD = 'v7.27.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6507,12 +6508,12 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   const mgAnaHTML=()=>{const conf=(ss||[]).filter(x=>x.status==='confirmed'&&x.seen_at&&!x.hidden).sort((x,y)=>new Date(x.seen_at)-new Date(y.seen_at));const pts=[];if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,t:c.lost_at,cls:'start',label:'走'});conf.forEach((x,i)=>{if(x.lat)pts.push({lat:x.lat,lng:x.lng,t:x.seen_at,cls:'',label:String(i+1),where:x.place_text})});const h=sightAnaHTML(sightAnalysis(c,pts));return h?h+`<p class="small" style="margin:-6px 0 14px"><a href="#/case/${id}">看地圖上的路線和範圍 ›</a></p>`:''};
   (_n===navId?app:_void).innerHTML=`
   <div ${P?'hidden':''}>
-    <div class="mg-head"><h1>${esc(c.name)} ${STATUS_TAG[c.status]||''}</h1><p class="muted">${c.status==='searching'?`走失第 ${daysSince(c.lost_at)} 天。要做什麼？點下面一項就好。`:c.status==='found'?'牠已經回家了，謝謝你回來更新 🎉':'這個案件已結案。'}</p></div>
+    <div class="mg-head"><h1>${esc(c.name)} ${STATUS_TAG[c.status]||''}</h1><p class="muted">${c.status==='searching'?`走失第 ${daysSince(c.lost_at)} 天。要做什麼？點下面一項就好。`:c.status==='found'?'牠已經回家了，謝謝你回來更新 🎉':'這個案件已結案。'}</p><a class="mg-case" href="#/case/${id}">${ic('eye')} 看${esc(c.name||'牠')}的協尋頁（大家看到的樣子）<span aria-hidden="true">›</span></a></div>
     ${c.hidden?'<div class="notice red"><b>這個案件目前沒有公開</b>可能含可疑字眼，或被檢舉後由站方隱藏。站方確認後會恢復；有疑問請寫信到 service@wangmiaotw.com。</div>':''}
   ${c.contact_email&&c.email_verified===false?`<div class="notice" id="vnotice"><b>Email 還沒確認</b>有人回報看到${esc(c.name||'牠')}時，我們還不能寄信給你。請到 <b>${esc(c.contact_email)}</b> 的信箱按「確認信箱」（也找找垃圾郵件匣）。<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><button type="button" class="btn sm" id="btnRev">重寄確認信</button><span class="small" id="vmsg" aria-live="polite"></span></div></div>`:''}
     ${c.status==='searching'?mgAdvice(c,pendS,ss,go,id):''}
     <div class="mg-tiles">
-      ${tile('see','👀','看目擊回報',pendS.length?`<em>${pendS.length} 筆新的，等你確認</em>`:`${(ss||[]).length?`共 ${(ss||[]).length} 筆`:'還沒有人回報'}${(matches||[]).filter(m=>!m.dismissed).length?`・收容所疑似 ${(matches||[]).filter(m=>!m.dismissed).length} 筆`:''}`,pendS.length?'hot':'')}
+      ${tile('see','👀','看目擊回報',pendS.length?`<em>${pendS.length} 筆新的，等你確認</em>`:`${(ss||[]).length?`共 ${(ss||[]).length} 筆`:'還沒有人回報'}${(matches||[]).filter(m=>!m.dismissed&&+m.photo_sim>=85).length?`・收容所照片很像 ${(matches||[]).filter(m=>!m.dismissed&&+m.photo_sim>=85).length} 隻`:''}`,pendS.length?'hot':'')}
       ${c.status==='searching'?tile('share','📣','幫忙擴散','做海報、分享到 LINE 和 FB'):''}
       ${tile('edit','✏️','修改資料或照片','名字、特徵、聯絡電話、獎金')}
       ${c.status==='searching'?tile('home','🎉',esc(c.name||'牠')+'回家了','找到了就按這裡，大家就不用再找','green'):tile('home','📋','案件狀態',STATUS[c.status]||'')}
