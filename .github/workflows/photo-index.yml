@@ -17,7 +17,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: 安裝 AI 影像模型工具
@@ -27,4 +27,5 @@ jobs:
           SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           MAX_NEW: ${{ inputs.max_new || '2500' }}
+          BUDGET_SEC: '2000'
         run: cd scripts && python3 -u photo_index.py
