@@ -2519,7 +2519,7 @@ html{-webkit-tap-highlight-color:transparent}
 .ph-warn{margin:22px 0 4px;padding:12px 14px;border-radius:14px;background:var(--sheet);box-shadow:var(--lift);font-size:14px;line-height:1.6}
 .ph-sec h2{display:flex;align-items:center;gap:8px;font-size:17px;margin:22px 0 10px}
 .ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
-.ph-card{display:block;border-radius:16px;overflow:hidden;background:var(--sheet);box-shadow:var(--lift);color:inherit!important;text-decoration:none!important}
+.ph-card{display:block;width:100%;padding:0;border:0;font:inherit;text-align:left;cursor:pointer;border-radius:16px;overflow:hidden;background:var(--sheet);box-shadow:var(--lift);color:inherit!important;text-decoration:none!important}
 .ph-img{display:block;position:relative;aspect-ratio:1;background:var(--line)}.ph-img img{width:100%;height:100%;object-fit:cover;display:block}
 .ph-sim{position:absolute;left:8px;bottom:8px;font:800 12px/1 system-ui,sans-serif;font-style:normal;padding:5px 9px;border-radius:99px;color:#fff;background:rgba(25,20,18,.7)}.ph-sim.hi{background:#1F9D55}.ph-sim.mid{background:#C77700}
 .ph-t{display:block;padding:9px 11px 11px}.ph-t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ph-t small{display:block;margin-top:2px;font-size:12.5px;line-height:1.45;color:var(--muted)}
@@ -3127,7 +3127,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.27.0';
+const BUILD = 'v7.27.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6169,8 +6169,13 @@ if(window.CanvasRenderingContext2D&&!CanvasRenderingContext2D.prototype.roundRec
 // 收容所比對：點照片放大，下面直接有「看收容所公告」「打電話」
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.mph');if(!b)return;e.preventDefault();
   const d=document.createElement('div');d.className='lightbox mphbox';
-  d.innerHTML=`<div class="mph-card"><img src="${esc(b.dataset.photo)}" referrerpolicy="no-referrer" alt="收容所照片"><div class="mph-b"><b>${esc(b.dataset.name)}</b><span class="muted small">收容編號 ${esc(b.dataset.sub)}</span>
-   <div class="mph-acts">${b.dataset.link?`<a class="btn" target="_blank" rel="noopener" href="${esc(b.dataset.link)}">看收容所公告 ↗</a>`:''}${b.dataset.tel?`<a class="btn ghost" href="tel:${esc(b.dataset.tel)}">${ic('phone')} 打電話</a>`:''}<button type="button" class="btn ghost mph-x">關閉</button></div></div></div>`;
+  const D=b.dataset,map=D.addr?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(D.name+' '+D.addr):'',more=D.aid&&/^\d+$/.test(D.aid)?'https://wangmiaotw.com/adopt/a/'+D.aid:'';
+  d.innerHTML=`<div class="mph-card"><img src="${esc(D.photo)}" referrerpolicy="no-referrer" alt="收容所照片"><div class="mph-b"><b>${esc(D.name)}</b>
+   ${D.sim?`<span class="small"><b>照片相似 ${esc(D.sim)}%</b>・AI 只是參考，請自己看照片確認</span>`:''}
+   ${D.desc?`<span class="small">${esc(D.desc)}</span>`:''}
+   <span class="muted small">收容編號 ${esc(D.sub)}${D.at?'・'+esc(D.at)+' 收容':''}${D.place?'・拾獲地：'+esc(D.place):''}</span>
+   ${D.addr?`<span class="muted small">${ic('pin')} ${esc(D.addr)}</span>`:''}${D.telt?`<span class="muted small">${ic('phone')} ${esc(D.telt)}</span>`:''}
+   <div class="mph-acts">${D.tel?`<a class="btn" href="tel:${esc(D.tel)}">${ic('phone')} 打電話給收容所</a>`:''}${map?`<a class="btn ghost" target="_blank" rel="noopener" href="${esc(map)}">${ic('pin')} 地圖</a>`:''}${D.link?`<a class="btn ghost" target="_blank" rel="noopener" href="${esc(D.link)}">收容所公告 ↗</a>`:more&&!D.tel?`<a class="btn ghost" target="_blank" rel="noopener" href="${esc(more)}">收容所電話、地址 ↗</a>`:''}<button type="button" class="btn ghost mph-x">關閉</button></div></div></div>`;
   d.onclick=ev=>{if(ev.target===d||ev.target.closest('.mph-x'))closeOverlay(d)};openOverlay(d)});
 function lightbox(u,opt={}){u=safeU(u);if(!u)return;const L=(opt.list||[]).map(safeU).filter(Boolean);let i=L.length?Math.max(0,L.indexOf(u)):0;if(!L.length)L.push(u);
   const d=document.createElement('div');d.className='lightbox';d.innerHTML=`<button type="button" class="lb-x" aria-label="關閉">✕</button><img src="${esc(u)}" referrerpolicy="no-referrer" alt="">${L.length>1?`<button type="button" class="lb-nav prev" aria-label="上一張">‹</button><button type="button" class="lb-nav next" aria-label="下一張">›</button><span class="lb-n"></span>`:''}${opt.save?`<button type="button" class="lb-save">${ic('download')} 存到手機</button>`:''}`;
@@ -10291,7 +10296,10 @@ function phCard(r){const i=r.info||{},k=r.kind;const where=esc((i.city||'')+(i.d
   const title=k==='case'?esc(i.name||'走失毛孩'):k==='found'?(i.k==='found'?'有人撿到':'有人看到'):esc(i.variety||(i.sp==='cat'?'貓':'狗'));
   const meta=k==='case'?`${where}・${fmtDate(i.at)} 走失`:k==='found'?`${where}・${fmtDate(i.at)}${i.colour?'・'+esc(i.colour):''}`:`${esc(i.shelter||where)}${i.sex?'・'+esc(i.sex):''}${i.colour?'・'+esc(i.colour):''}`;
   const lv=r.sim>=85?'hi':r.sim>=65?'mid':'lo';
-  return `<a class="ph-card" href="${href}" ${k==='shelter'?'target="_blank" rel="noopener"':''}><span class="ph-img">${thumbImg(r.url,'')}<i class="ph-sim ${lv}">相似 ${Math.round(r.sim)}%</i></span><span class="ph-t"><b>${title}</b><small>${meta}</small></span></a>`}
+  const inner=`<span class="ph-img">${thumbImg(r.url,'')}<i class="ph-sim ${lv}">相似 ${Math.round(r.sim)}%</i></span><span class="ph-t"><b>${title}</b><small>${meta}</small></span>`;
+  // 收容所的：在 App／網頁裡直接打開大圖和收容所電話、地址（不跳到外部網頁，App 裡外部連結常打不開）
+  if(k==='shelter')return `<button type="button" class="ph-card mph" data-photo="${esc(safeU(r.url))}" data-name="${esc(i.shelter||'收容所')}" data-sub="${esc(i.sub||r.ref)}" data-tel="${esc(telClean(i.tel||''))}" data-telt="${esc(i.tel||'')}" data-addr="${esc(i.addr||'')}" data-desc="${esc([i.variety,i.sex,i.body,i.colour].filter(Boolean).join('・'))}" data-place="${esc(i.place||'')}" data-at="${esc(i.at||'')}" data-sim="${Math.round(r.sim)}" data-link="${esc(shelterLink(i.sub)||'')}" data-aid="${esc(r.ref)}">${inner}</button>`;
+  return `<a class="ph-card" href="${href}">${inner}</a>`}
 function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
   let file=null,sp='',city='',busy=false;
   app.innerHTML=`<div class="ph-page"><h1>用照片找毛孩</h1>
