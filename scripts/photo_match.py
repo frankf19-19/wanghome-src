@@ -49,7 +49,7 @@ def sb_all(path):
     return out
 
 def colour_set(s):
-    s = s or ""
+    s = re.sub("米黃|米色", "黃", re.sub("米白|奶油|乳白|象牙", "白", s or ""))
     return {g for g, ks in GROUPS.items() if any(k in s for k in ks)}
 
 def moa_pic(u):

@@ -110,7 +110,8 @@ COLOUR_GROUPS = {
     "虎斑": ["虎斑","斑"], "灰": ["灰","銀"], "花": ["花","三色","黑白","黃白","雙色"], "紅": ["紅","橘"],
 }
 def colour_tokens(s):
-    s = s or ""
+    # 「米白」「奶油」是白色系，「米黃」「米色」才算黃色系
+    s = re.sub("米黃|米色", "黃", re.sub("米白|奶油|乳白|象牙", "白", s or ""))
     out = set()
     for g, kws in COLOUR_GROUPS.items():
         if any(k in s for k in kws): out.add(g)

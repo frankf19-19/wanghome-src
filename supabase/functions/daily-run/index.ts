@@ -121,7 +121,8 @@ const COLOUR_GROUPS: Record<string, string[]> = {
   "虎斑": ["虎斑", "斑"], "灰": ["灰", "銀"], "花": ["花", "三色", "黑白", "黃白", "雙色"], "紅": ["紅", "橘"],
 };
 function colourTokens(s?: string | null): Set<string> {
-  const str = s ?? "";
+  // 「米白」「奶油」是白色系，「米黃」「米色」才算黃色系（不然米白的狗會配到黃狗）
+  const str = (s ?? "").replace(/米白|奶油|乳白|象牙/g, "白").replace(/米黃|米色/g, "黃");
   const out = new Set<string>();
   for (const [g, kws] of Object.entries(COLOUR_GROUPS)) if (kws.some((k) => str.includes(k))) out.add(g);
   return out;
@@ -149,6 +150,8 @@ function score(c: any, a: any): number {
   const t = Date.parse(lostDt + "T00:00:00Z");
   if (!Number.isNaN(t)) lostM1 = new Date(t - 86400e3).toISOString().slice(0, 10);
   if (foundDt && foundDt < lostM1) return -1;
+  const yrs = Number((String(c.age_text ?? "").match(/(\d+(?:\.\d+)?)\s*歲/) || [])[1]);
+  if (a.animal_age === "CHILD" && yrs >= 1) return -1;   // 走失的是成犬／成貓，收容所的是幼犬／幼貓
   s += 10;
   const ct = colourTokens(c.colour), at = colourTokens(a.animal_colour);
   if (ct.size && at.size) {
@@ -166,7 +169,7 @@ async function runMatching() {
   // 農業部開放資料只接受台灣 IP（Supabase 東京也連不上）；收容所比對在瀏覽器端進行。
   // 只有設定了 MOA_API_URL（例如台灣的代理）才在這裡跑。
   if (!MOA_API_URL) { log("收容所比對：由網站前端執行（未設定 MOA_API_URL，略過）"); return; }
-  const cases = await sbAll("cases", { select: "id,name,species,lost_city,lost_district,lost_at,colour,size,sex,contact_email", status: "eq.searching", hidden: "eq.false" });
+  const cases = await sbAll("cases", { select: "id,name,species,lost_city,lost_district,lost_at,colour,size,sex,age_text,contact_email", status: "eq.searching", hidden: "eq.false" });
   if (!cases.length) { log("沒有協尋中案件"); return; }
   // deno-lint-ignore no-explicit-any
   let animals: any[];

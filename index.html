@@ -2082,7 +2082,7 @@ button.lp{background:none;border:0;padding:0;font:inherit;text-align:left;cursor
 .match .ph-none{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;color:var(--ink-3);font-size:11.5px;line-height:1.35}.match .ph-none .ico{width:26px;height:26px;opacity:.6}
 .match .ph-try img{width:100%;height:100%;object-fit:cover;display:block}
 .sm-np{margin-top:10px}.sm-np>summary{cursor:pointer;color:var(--ink-2);font-size:14.5px;padding:10px 4px;font-weight:700}.sm-np .match .ph{display:none}.sm-np .match{padding:10px 14px}
-.match .score.hi{background:#1E7A55;color:#fff}.sm-wait .match .ph,.sm-low .match .ph{display:block}
+.match .score.hi{background:#1E7A55;color:#fff}.match .score.wait{background:#EEE9E4;color:#5E5560;font-weight:700}.sm-wait .match .ph,.sm-low .match .ph{display:block}
 /* 首頁精簡：四個大按鈕變一排、提醒收成一行，讓「正在協尋的毛孩」往上 */
 .bigstart{gap:10px;margin-bottom:14px}
 .bs-hero{margin:0 0 4px!important;padding:8px 4px 6px 16px!important}.bs-hero .bs-hello{font-size:19px!important}.bs-hero .bs-duo{width:120px!important;height:auto!important}
@@ -3127,7 +3127,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.25.0';
+const BUILD = 'v7.25.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5765,7 +5765,7 @@ setTimeout(checkUpdate,4000);
 
 /* 比對分數（前端即時；與 daily.py 同邏輯的簡化版） */
 const COLOUR_GROUPS={'黑':['黑'],'白':['白'],'黃':['黃','米','淺棕','卡其','金'],'棕':['棕','咖啡','褐','茶'],'虎斑':['虎斑','斑'],'灰':['灰','銀'],'花':['花','三色','黑白','黃白','雙色'],'紅':['紅','橘']};
-function colourSet(s){s=s||'';return new Set(Object.entries(COLOUR_GROUPS).filter(([g,k])=>k.some(x=>s.includes(x))).map(([g])=>g))}
+function colourSet(s){s=String(s||'').replace(/米白|奶油|乳白|象牙/g,'白').replace(/米黃|米色/g,'黃');return new Set(Object.entries(COLOUR_GROUPS).filter(([g,k])=>k.some(x=>s.includes(x))).map(([g])=>g))}
 function matchScore(lost,found){
   // lost: {city,district,lat,lng,at,colour,size,sex}  found: same keys
   if(lost.city!==found.city)return -1;
@@ -5810,6 +5810,9 @@ function shelterScore(c,a){
   const lostDay=String(c.lost_at).slice(0,10);
   const minDay=new Date(new Date(lostDay)-86400000).toISOString().slice(0,10);
   if(!a.created||a.created<minDay)return -1;           // 走失前就已收容 → 不是
+  const yrs=(()=>{const m=String(c.age_text||'').match(/(\d+(?:\.\d+)?)\s*歲/);return m?+m[1]:null})();
+  if(a.age==='CHILD'&&yrs!=null&&yrs>=1)return -1;    // 走失的是成犬／成貓，收容所的是幼犬／幼貓 → 不是
+  if(a.open_date&&String(a.open_date).replace(/\//g,'-').slice(0,10)<minDay)return -1;   // 公告日在走失前 → 不是
   let s=40;                                            // 同縣市 + 時間吻合
   const cs=colourSet(c.colour),as=colourSet(a.colour);
   if(cs.size&&as.size){if(![...cs].some(x=>as.has(x)))return -1;s+=25}
@@ -6094,7 +6097,7 @@ function telClean(t){t=hw(t);return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)|
 function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String(m.animal_id)]||''};
   return `<div class="match">
     ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span>${String(m.photo_url).startsWith(SH_STORE)||!m.animal_subid?'':`<img hidden alt="" src="${esc(safeU(m.photo_url))}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)">`}</button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg?v=3')}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)" onerror="shNoPhoto(this)"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
-    <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> ${m.photo_sim!=null&&+m.photo_sim>=0?`<span class="score ${+m.photo_sim>=80?'hi':''}">照片相似 ${+m.photo_sim}%</span>`:`<span class="score">條件相符</span>`}
+    <div class="b"><b>${esc(m.shelter_name||'收容所')}</b> ${m.photo_sim!=null&&+m.photo_sim>=0?`<span class="score ${+m.photo_sim>=80?'hi':''}">照片相似 ${+m.photo_sim}%</span>`:`<span class="score wait">${m.photo_sim===-1||!(moaPic(m.photo_url)||__shelterPic[String(m.animal_id)])?'沒有照片可比對':'等待 AI 比對照片'}</span>`}
       <div>${esc([m.variety,m.sex,m.bodytype,m.colour,m.age].filter(Boolean).join(' · '))}</div>
       <div class="muted small">拾獲地：${esc(m.found_place||'未註明')} · 收容編號 ${esc(m.animal_subid||m.animal_id)}${m.open_date?' · 公告 '+esc(m.open_date):''}</div>
       <div class="small">${m.shelter_tel?`${ic('phone')} <a href="tel:${esc(telClean(m.shelter_tel))}">${esc(m.shelter_tel)}</a> · `:''}${esc(m.shelter_address||'')}</div>
@@ -6126,7 +6129,7 @@ function shelterBoxHTML(matches,loading){
   return `<h2>${ic("shelter")} 收容所比對 ${top.length?`<span class="tag amber">照片相似 ${top.length}</span>`:''}</h2>
   <p class="muted small" id="shelterStatus">先用農業部收容所資料找出條件相符的動物（走失後才收容、同縣市、毛色、體型、性別），再由 AI 比對照片。<b>照片也相似的才列在這裡</b>；AI 只是參考，像的話請打電話給收容所，提供晶片號碼或親自去確認。</p>
   <div class="sm-list">${top.length?top.map(matchHTML).join(''):`<p class="muted small sm-empty">目前沒有照片相似的收容動物。${wait.length?'還有幾隻照片正在比對中，每 6 小時更新一次。':''}</p>`}</div>
-  ${grp('sm-wait','照片比對中，每 6 小時更新',wait,false)}${grp('sm-low','條件相符，但 AI 判斷照片不太像',low,false)}
+  ${grp('sm-wait','只有條件接近、AI 還沒比對照片的（每 6 小時比對一次，不代表長得像）',wait,false)}${grp('sm-low','條件相符，但 AI 判斷照片不太像',low,false)}
   <details class="sm-np sm-none" ${none.length?'':'hidden'}><summary>條件相符、但收容所沒有放照片的（<span class="sm-np-n">${none.length}</span> 隻）</summary><div class="sm-np-list">${none.map(matchHTML).join('')}</div></details>`;
 }
 function shareText(c,url){
