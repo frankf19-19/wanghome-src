@@ -3127,7 +3127,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.25.1';
+const BUILD = 'v7.26.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5972,6 +5972,7 @@ async function renderCase(id){const _n=navId;
   </div>
 
   <div id="shelterBox">${shelterBoxHTML(matches,c.status==='searching')}</div>
+  <div id="photoMatch"></div>
 
   <div id="foundMatches"></div>
 
@@ -6070,6 +6071,7 @@ async function renderCase(id){const _n=navId;
     }).catch(()=>{const st=$('#shelterStatus');if(!st)return;if(/正在比對/.test(st.textContent)){const box=$('#shelterBox');if(box)box.innerHTML=''}});
   }
 
+  if(c.status==='searching')casePhotoMatch(c,id,_n);
   // 可能相符的拾獲通報（即時計算）
   if(c.status==='searching'){
     const {data:fr}=await sb.from('found_public').select('*').eq('status','open').eq('city',c.lost_city).eq('species',c.species||'dog').gte('seen_at',new Date(new Date(c.lost_at)-86400000).toISOString()).order('seen_at',{ascending:false}).limit(200);
@@ -6116,6 +6118,23 @@ function shPhotoOk(img){const sub=img.dataset.sub;if(sub)setTimeout(()=>shelterS
 function shNoPhoto(img){const card=img.closest('.match'),box=img.closest('#shelterBox');const ph=img.parentNode;ph.classList.add('ph-none');ph.innerHTML=ph.dataset.none||'';
   if(!card||!box)return;const d=box.querySelector('.sm-none');if(!d)return;d.querySelector('.sm-np-list').appendChild(card);d.hidden=false;d.querySelector('.sm-np-n').textContent=d.querySelectorAll('.match').length;
   const left=box.querySelectorAll('.sm-list .match').length;if(!left&&!box.querySelector('.sm-empty'))box.querySelector('.sm-list').insertAdjacentHTML('beforeend','<p class="muted small sm-empty">目前沒有照片相似的收容動物。</p>');d.querySelectorAll('.match').forEach(()=>{});const w=box.querySelector('.sm-wait');if(w){const n=w.querySelectorAll('.match').length;w.querySelector('.sm-np-n').textContent=n;if(!n)w.hidden=true}}
+// 收容所照片比對：用牠的照片直接和全台收容所動物的照片比（不看文字描述）
+async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.photos||[]).length)return;
+  const d0=new Date(new Date(c.lost_at)-86400000).toISOString().slice(0,10);
+  const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=55);
+    box.innerHTML=`<h2>${ic('camera')} 照片最像的收容動物 ${rows.length?`<span class="tag amber">${rows.length}</span>`:''}</h2>
+    <p class="muted small">AI 用${esc(c.name||'牠')}的照片，和${esc(c.lost_city)}收容所在走失後收容的${c.species==='cat'?'貓':'狗'}照片一張一張比。${how}</p>
+    ${rows.length?`<div class="ph-grid">${rows.map(r=>phCard({...r,kind:'shelter'})).join('')}</div><p class="muted small">點照片看收容所電話和地址。AI 只是參考，請打電話給收容所提供晶片號碼確認。</p>`:`<p class="muted small">目前沒有照片相似的收容動物，收容所每天有新動物，會持續比對。</p>`}`};
+  try{const {data:ready}=await sb.rpc('case_photo_ready',{p_case:id});
+    if(ready){const {data}=await sb.rpc('case_photo_matches',{p_case:id,p_limit:8});show(data,'每 6 小時更新。');return}}catch(_){return}
+  if(_n!==navId||!box.isConnected)return;
+  box.innerHTML=`<h2>${ic('camera')} 照片最像的收容動物</h2><p class="muted small">新登記的案件，系統會在 6 小時內幫牠的照片建好 AI 比對。也可以現在就在你的手機上比對（第一次要下載約 25MB 的 AI 模型）。</p><button type="button" class="btn sm ghost" id="pmNow">${ic('camera')} 現在用照片比對收容所</button>`;
+  $('#pmNow').onclick=async()=>{const b=$('#pmNow');b.disabled=true;b.textContent='準備中…';
+    try{const blob=await (await fetch(safeU(c.photos[0]))).blob();
+      const q=await photoEmbed(new File([blob],'p.jpg',{type:blob.type||'image/jpeg'}),p=>{if(b.isConnected)b.textContent=p<1?`下載 AI 模型 ${Math.round(p*100)}%`:'比對中…'});
+      const {data,error}=await sb.rpc('photo_search',{q,p_sp:c.species||'dog',p_city:String(c.lost_city||'').replace(/^台/,'臺'),p_limit:40});if(error)throw error;
+      show((data||[]).filter(r=>r.kind==='shelter'&&String((r.info||{}).at||'9999')>=d0).slice(0,8),'這次是在你的手機上比對的。')}
+    catch(e){if(b.isConnected){b.disabled=false;b.textContent='比對失敗，再試一次'}}}}
 function shelterBoxHTML(matches,loading){
   const list=(matches||[]).filter(m=>!m.dismissed).sort((a,b)=>b.score-a.score);
   if(!list.length)return loading?`<h2>${ic('shelter')} 收容所比對</h2><p class="muted small" id="shelterStatus">正在比對全台收容所資料…</p>`:'';
@@ -6127,10 +6146,10 @@ function shelterBoxHTML(matches,loading){
     wait=list.filter(m=>sim(m)==null&&can(m)),none=list.filter(m=>sim(m)===-1||(sim(m)==null&&!can(m)));
   const grp=(cls,t,arr,open)=>arr.length?`<details class="sm-np ${cls}" ${open?'open':''}><summary>${t}（<span class="sm-np-n">${arr.length}</span>）</summary><div class="sm-np-list">${arr.map(matchHTML).join('')}</div></details>`:'';
   return `<h2>${ic("shelter")} 收容所比對 ${top.length?`<span class="tag amber">照片相似 ${top.length}</span>`:''}</h2>
-  <p class="muted small" id="shelterStatus">先用農業部收容所資料找出條件相符的動物（走失後才收容、同縣市、毛色、體型、性別），再由 AI 比對照片。<b>照片也相似的才列在這裡</b>；AI 只是參考，像的話請打電話給收容所，提供晶片號碼或親自去確認。</p>
-  <div class="sm-list">${top.length?top.map(matchHTML).join(''):`<p class="muted small sm-empty">目前沒有照片相似的收容動物。${wait.length?'還有幾隻照片正在比對中，每 6 小時更新一次。':''}</p>`}</div>
-  ${grp('sm-wait','只有條件接近、AI 還沒比對照片的（每 6 小時比對一次，不代表長得像）',wait,false)}${grp('sm-low','條件相符，但 AI 判斷照片不太像',low,false)}
-  <details class="sm-np sm-none" ${none.length?'':'hidden'}><summary>條件相符、但收容所沒有放照片的（<span class="sm-np-n">${none.length}</span> 隻）</summary><div class="sm-np-list">${none.map(matchHTML).join('')}</div></details>`;
+  <p class="muted small" id="shelterStatus">由 AI 比對牠的照片和全台收容所動物的照片，<b>照片相似的才列在這裡</b>。AI 只是參考，像的話請打電話給收容所，提供晶片號碼或親自去確認。</p>
+  <div class="sm-list">${top.length?top.map(matchHTML).join(''):`<p class="muted small sm-empty">目前沒有照片相似的收容動物。${wait.length?`還有 ${wait.length} 隻收容動物等 AI 比對照片，比對完、照片也像才會列出來。`:''}</p>`}</div>
+  ${grp('sm-low','AI 比對過照片，但不太像的',low,false)}
+  <details class="sm-np sm-none" hidden><summary>收容所照片打不開的（<span class="sm-np-n">0</span> 隻）</summary><div class="sm-np-list"></div></details>`;
 }
 function shareText(c,url){
   if(c.status==='found')return `🎉 ${c.name} 已經找到了！（${c.lost_city}${c.lost_district||''}）\n謝謝所有幫忙分享、留意的朋友。\n${url}`;

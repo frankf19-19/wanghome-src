@@ -503,15 +503,18 @@ async function runNotifications() {
   }
 
   // 收容所比對
-  const sm = await sbAll("shelter_matches", { select: "*", notified: "eq.false", dismissed: "eq.false", order: "score.desc" });
+  // 只通知「AI 比對過照片、而且照片也像」的（photo_sim >= 70）；還沒比對的先不動，等下次；比對過不像或沒照片的，不通知
+  const smAll = await sbAll("shelter_matches", { select: "*", notified: "eq.false", dismissed: "eq.false", order: "score.desc" });
+  const smQuiet = smAll.filter((m) => m.photo_sim != null && m.photo_sim < 70).map((m) => m.id);
+  if (smQuiet.length) await markNotified("shelter_matches", smQuiet);
+  const sm = smAll.filter((m) => m.photo_sim != null && m.photo_sim >= 70);
   for (const [cid, lst] of groupBy(sm, (m) => m.case_id)) {
     const c = cases.get(cid);
     if (!c || !c.contact_email || c.status !== "searching") { await markNotified("shelter_matches", lst.map((m) => m.id)); continue; }
     if (!c.email_verified) { await skipUnverified("shelter_matches", lst, "matched_at"); continue; }
-    const lines = [`系統在收容所資料中找到 ${lst.length} 筆與「${c.name}」疑似相符的毛孩，請盡快親自確認：`, ""];
+    const lines = [`AI 比對照片，在收容所找到 ${lst.length} 隻和「${c.name}」長得很像的毛孩，請盡快親自確認：`, ""];
     for (const m of lst.slice(0, 10)) {
-      const sc = m.score ?? 0;
-      const sim = sc >= 80 ? "很像" : sc >= 60 ? "有點像" : "可能相關";
+      const sim = `照片相似 ${m.photo_sim}%`;
       if (m.shelter_tel) {   // 系統自己向農業部查到的（可信）
         lines.push(`・${m.shelter_name || "收容所"}（${sim}）  ${m.sex || ""} ${m.bodytype || ""} ${m.colour || ""}`);
         lines.push(`  拾獲地：${m.found_place || "未註明"}  電話：${m.shelter_tel}`);
@@ -522,7 +525,7 @@ async function runNotifications() {
       if (m.photo_url) lines.push(`  照片：${m.photo_url}`);
       lines.push("");
     }
-    lines.push("這只是粗略比對，請打電話到收容所提供晶片號碼核對，或親自到所比對。", `案件頁：${SITE_URL}#/case/${cid}`, "", `— ${SITE_NAME}`);
+    lines.push("AI 照片比對只是參考，請打電話到收容所提供晶片號碼核對，或親自到所比對。", `案件頁：${SITE_URL}#/case/${cid}`, "", `— ${SITE_NAME}`);
     try {
       if (!(await sendCaseMail(c, `【${SITE_NAME}】收容所有疑似 ${c.name} 的毛孩`, lines.join("\n")))) continue;
       log(`已通知比對：${c.name} x${lst.length}`);
