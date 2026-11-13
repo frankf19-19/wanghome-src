@@ -1,8 +1,8 @@
 name: 照片找毛孩索引
-# 每 6 小時：把協尋案件、拾獲通報、收容所毛孩的照片算成 AI 特徵（scripts/photo_index.py），並比對目擊回報的照片
+# 每小時：把協尋案件、拾獲通報、收容所毛孩的照片算成 AI 特徵（scripts/photo_index.py），並比對目擊回報的照片
 on:
   schedule:
-    - cron: '23 1-23/6 * * *'
+    - cron: '23 * * * *'
   workflow_dispatch:
     inputs:
       max_new:

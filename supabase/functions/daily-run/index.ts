@@ -534,24 +534,32 @@ async function runNotifications() {
   }
 
   // 拾獲通報比對
-  const fm = await sbAll("found_matches", { select: "id,case_id,found_id,score,created_at", notified: "eq.false", order: "score.desc" });
+  const fm = await sbAll("found_matches", { select: "id,case_id,found_id,score,photo_sim,created_at", notified: "eq.false", order: "score.desc" });
   // deno-lint-ignore no-explicit-any
   const fr = new Map<string, any>();
   const fids = [...new Set(fm.map((m) => m.found_id))].sort();
   for (const part of chunks(fids, 100)) {
-    const rows = (await sb("GET", "found_reports", undefined, { select: "id,kind,seen_at,city,district,place_text,colour,size,current_place,hidden", id: `in.(${part.join(",")})` })) ?? [];
+    const rows = (await sb("GET", "found_reports", undefined, { select: "id,kind,seen_at,city,district,place_text,colour,size,current_place,hidden,photos", id: `in.(${part.join(",")})` })) ?? [];
     for (const f of rows) if (!f.hidden) fr.set(f.id, f);
   }
   for (const [cid, all] of groupBy(fm, (m) => m.case_id)) {
     const c = cases.get(cid);
-    const lst = c ? all.filter((m) => fr.has(m.found_id)) : all;
-    if (!c || !c.contact_email || !lst.length || c.status !== "searching") { await markNotified("found_matches", all.map((m) => m.id)); continue; }
+    // 只通知「像的」：通報有照片 → 要 AI 比對過、照片相似 80 分以上（還沒比對的先等，下一輪再看）；
+    // 通報沒照片 → 時間地點特徵要很接近（70 分以上）。其他的不通知。
+    const hasPh = (m: any) => ((fr.get(m.found_id) ?? {}).photos ?? []).length > 0;
+    const good = (m: any) => hasPh(m) ? (m.photo_sim != null && m.photo_sim >= 80) : (m.score ?? 0) >= 70;
+    const waiting = (m: any) => fr.has(m.found_id) && hasPh(m) && m.photo_sim == null && Date.now() - Date.parse(m.created_at) < 6 * 3600e3;
+    const quiet = all.filter((m) => !fr.has(m.found_id) || (!good(m) && !waiting(m))).map((m) => m.id);
+    if (quiet.length) await markNotified("found_matches", quiet);
+    const lst = c ? all.filter((m) => fr.has(m.found_id) && good(m)) : [];
+    if (!lst.length) continue;
+    if (!c || !c.contact_email || c.status !== "searching") { await markNotified("found_matches", lst.map((m) => m.id)); continue; }
     if (!c.email_verified) { await skipUnverified("found_matches", lst); continue; }
     const lines = [`有網友登記了 ${lst.length} 筆可能是「${c.name}」的拾獲／目擊通報：`, ""];
     for (const m of lst.slice(0, 10)) {
       const f = fr.get(m.found_id) ?? {};
       const kind = f.kind === "injured" ? "受傷" : f.kind === "found" ? "拾獲" : "目擊";
-      lines.push(`・${kind}  相似 ${m.score}  ${fmt(f.seen_at ?? "")}  ${f.city ?? ""}${f.district || ""} ${f.place_text || ""}`);
+      lines.push(`・${kind}  ${m.photo_sim != null ? "照片相似 " + m.photo_sim + "%" : "時間地點特徵接近"}  ${fmt(f.seen_at ?? "")}  ${f.city ?? ""}${f.district || ""} ${f.place_text || ""}`);
       if (f.current_place) lines.push(`  目前在：${f.current_place}`);
       lines.push(`  ${SITE_URL}#/found/${m.found_id}`, "");
     }
