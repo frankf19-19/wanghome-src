@@ -1,0 +1,24 @@
+name: 照片比對準確度實測
+on:
+  workflow_dispatch:
+    inputs:
+      n_shelter:
+        description: '收容所干擾照片張數'
+        required: false
+        default: '700'
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --quiet onnxruntime numpy pillow
+      - run: mkdir -p /tmp/det && for m in yolox_nano yolox_tiny; do curl -sSL -o /tmp/det/$m.onnx https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/$m.onnx; done
+      - name: 實測
+        env:
+          SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          N_SHELTER: ${{ inputs.n_shelter || '700' }}
+        run: cd scripts && python3 -u photo_eval.py
