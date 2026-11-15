@@ -6,6 +6,8 @@ Supabase → Authentication → Emails → Templates（需先設定自訂 SMTP�
 |---|---|---|
 | Magic link or OTP | 【汪喵回家】你的登入連結 | magic_link.html（連結：https://wangmiaotw.com/#/verify?th={{ .TokenHash }}&type=email） |
 | Confirm sign up | 【汪喵回家】歡迎加入！請確認你的信箱 | confirm_signup.html（連結：…&type=signup） |
+| Reset password | 【汪喵回家】重設你的密碼 | reset_password.html（連結用 {{ .ConfirmationURL }}；網站目前沒用到） |
+| Change email address | 【汪喵回家】請確認你的新信箱 | change_email.html（連結用 {{ .ConfirmationURL }}；網站目前沒用到） |
 | Reauthentication | 【汪喵回家】設定密碼的驗證碼 | reauthentication.html（只有驗證碼，沒有連結） |
 
 版面和通知信（Edge Function 裡的 MAILKIT）同一套：白色卡片、上方品牌色線、標誌、圓角大按鈕。
