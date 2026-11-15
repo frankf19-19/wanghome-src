@@ -433,39 +433,163 @@ async function manageUrl(cid: string) {
 
 const E = (x: unknown) => String(x ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;" }[ch]!));
 
-// 目擊通知的信件版面：照片直接顯示、地圖與管理頁用大按鈕；網友填的文字一律跳脫
+// ===== 信件版面 MAILKIT START（daily-run 和 notify-sighting 共用同一份，改這裡要兩邊一起改）=====
+const MK_BRAND = "#CC3F1E", MK_INK = "#1F2A2E", MK_SUB = "#46545A", MK_MUTE = "#6B777B", MK_LINE = "#E9E3DB", MK_BG = "#F6F2EC", MK_SOFT = "#FBF7F2";
+const MK_SITE = "https://wangmiaotw.com/";
+const MK_FONT = "-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif";
+const mkE = (x: unknown) => String(x ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;" }[ch]!));
+// 按鈕（整顆都能點）；primary=false 是白底紅框的次要按鈕
+const mkBtn = (href: string, label: string, primary = true) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:10px 0 0"><tr><td align="center" bgcolor="${primary ? MK_BRAND : "#FFFFFF"}" style="border-radius:999px;border:2px solid ${MK_BRAND}">` +
+  `<a href="${mkE(href)}" style="display:block;padding:13px 20px;font-family:${MK_FONT};font-size:17px;font-weight:800;line-height:1.35;color:${primary ? "#FFFFFF" : MK_BRAND};text-decoration:none;border-radius:999px">${mkE(label)}</a></td></tr></table>`;
+const MK_TONE: Record<string, [string, string]> = { green: ["#E4F4EA", "#146C43"], red: ["#FDE9E5", "#A8321A"], amber: ["#FFF1CC", "#7A5200"], gray: ["#EEEAE4", "#46545A"] };
+const mkPill = (text: string, tone = "green") =>
+  `<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${MK_TONE[tone][0]};color:${MK_TONE[tone][1]};font-size:13px;font-weight:800;line-height:1.5;white-space:nowrap">${mkE(text)}</span>`;
+// 「標籤：內容」的表格（內容一律跳脫）
+const mkRows = (rows: [string, string][]) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-family:${MK_FONT};font-size:15.5px;line-height:1.6;color:${MK_SUB}">` +
+  rows.map(([k, v]) => `<tr><td style="width:60px;vertical-align:top;color:${MK_MUTE};font-weight:700;padding:2px 8px 2px 0;white-space:nowrap">${mkE(k)}</td><td style="vertical-align:top;padding:2px 0;color:${MK_INK};word-break:break-word">${mkE(v)}</td></tr>`).join("") + `</table>`;
+const mkPhoto = (src: string, alt: string, href?: string) => {
+  const img = `<img src="${mkE(src)}" alt="${mkE(alt)}" width="472" style="display:block;width:100%;max-width:472px;height:auto;border-radius:14px;background:#EEE9E2;border:0">`;
+  return href ? `<a href="${mkE(href)}" style="text-decoration:none">${img}</a>` : img;
+};
+// 一筆項目的卡片：左邊小圖（可省略）、右邊標題＋幾行說明；extra 放按鈕等已經組好的 HTML
+const mkItem = (o: { img?: string; href?: string; title: string; pill?: string; lines?: string[]; extra?: string }) => {
+  const thumb = o.img ? `<td width="92" style="width:92px;vertical-align:top;padding:0 14px 0 0">${o.href ? `<a href="${mkE(o.href)}">` : ""}<img src="${mkE(o.img)}" alt="" width="92" height="92" style="display:block;width:92px;height:92px;object-fit:cover;border-radius:12px;background:#EEE9E2;border:0">${o.href ? "</a>" : ""}</td>` : "";
+  const title = o.href ? `<a href="${mkE(o.href)}" style="color:${MK_INK};text-decoration:none">${mkE(o.title)}</a>` : mkE(o.title);
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 10px;background:${MK_SOFT};border-radius:16px"><tr><td style="padding:14px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${thumb}<td style="vertical-align:top;font-family:${MK_FONT}">` +
+    `<p style="margin:0;font-size:17px;font-weight:800;line-height:1.4;color:${MK_INK}">${title}</p>` +
+    (o.pill ? `<p style="margin:5px 0 0">${o.pill}</p>` : "") +
+    (o.lines ?? []).filter(Boolean).map((l) => `<p style="margin:4px 0 0;font-size:14.5px;line-height:1.55;color:${MK_SUB};word-break:break-word">${mkE(l)}</p>`).join("") +
+    `</td></tr></table>${o.extra ?? ""}</td></tr></table>`;
+};
+const mkNote = (html: string) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0 0"><tr><td style="padding:12px 14px;background:#FFF6DD;border-radius:12px;font-family:${MK_FONT};font-size:14px;line-height:1.65;color:#5C4500">${html}</td></tr></table>`;
+// 整封信：上方標誌、標題（可帶毛孩的照片）、內容、頁尾。title／lead 會跳脫；body／foot 是已經組好的 HTML
+const mkShell = (o: { pre: string; title: string; lead?: string; hero?: string; body: string; foot?: string }) => {
+  const hero = o.hero ? `<td width="76" style="width:76px;vertical-align:middle;padding:0 14px 0 0"><img src="${mkE(o.hero)}" alt="" width="76" height="76" style="display:block;width:76px;height:76px;object-fit:cover;border-radius:50%;background:#EEE9E2;border:3px solid #FFE3D8"></td>` : "";
+  return `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>` +
+    `<body style="margin:0;padding:0;background:${MK_BG};font-family:${MK_FONT};color:${MK_INK};-webkit-text-size-adjust:100%">` +
+    `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${MK_BG};font-size:1px;line-height:1px">${mkE(o.pre)}</div>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${MK_BG}"><tr><td align="center" style="padding:24px 12px 32px">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">` +
+    `<tr><td style="background:#FFFFFF;border-radius:20px;border-top:6px solid ${MK_BRAND};padding:18px 24px 22px">` +
+    `<a href="${MK_SITE}" style="text-decoration:none"><img src="${MK_SITE}mail-logo-2x.png" alt="汪喵回家" width="137" height="42" style="display:block;width:137px;height:42px;border:0;font-family:${MK_FONT};font-size:22px;font-weight:800;color:${MK_INK}"></a>` +
+    `<div style="height:1px;line-height:1px;font-size:0;background:${MK_LINE};margin:14px 0 18px">&nbsp;</div>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${hero}<td style="vertical-align:middle;font-family:${MK_FONT}">` +
+    `<p style="margin:0;font-size:23px;font-weight:800;line-height:1.35;color:${MK_INK}">${mkE(o.title)}</p>` +
+    (o.lead ? `<p style="margin:6px 0 0;font-size:16px;line-height:1.6;color:${MK_SUB}">${mkE(o.lead)}</p>` : "") +
+    `</td></tr></table><div style="height:18px;line-height:18px;font-size:0">&nbsp;</div>${o.body}</td></tr>` +
+    `<tr><td style="padding:16px 10px 0;font-family:${MK_FONT};font-size:12.5px;line-height:1.7;color:${MK_MUTE}">${o.foot ?? ""}` +
+    `汪喵回家｜全台走失毛孩協尋平台　<a href="${MK_SITE}" style="color:${MK_MUTE}">wangmiaotw.com</a><br>這封信由系統自動寄出。本站不會要你匯款或提供密碼。</td></tr>` +
+    `</table></td></tr></table></body></html>`;
+};
+// 目擊通知（daily-run 的補寄和 notify-sighting 的即時通知用同一個版面）
 // deno-lint-ignore no-explicit-any
-function sightingHtml(c: any, manage: string, lst: any[]) {
-  const pub = `${SUPABASE_URL}/storage/v1/object/public/photos/`;
-  const btn = (href: string, label: string, bg: string, fg = "#fff", border?: string) =>
-    `<a href="${E(href)}" style="display:block;background:${bg};color:${fg};border:2px solid ${border ?? bg};text-decoration:none;` +
-    `font-size:17px;font-weight:800;padding:13px 16px;border-radius:12px;text-align:center;margin:8px 0 0">${label}</a>`;
+function mkSightingMail(name: string, manage: string, lst: any[], pub: string, when: (t: string) => string, hero?: string) {
   const items = lst.map((s) => {
-    const rows: [string, string][] = [["時間", fmt(s.seen_at)], ["地點", s.place_text || (s.lat ? "（看地圖）" : "未標示")]];
+    const rows: [string, string][] = [["時間", when(s.seen_at)], ["地點", s.place_text || (s.lat ? "請看地圖" : "未標示")]];
     if (s.direction) rows.push(["方向", "往" + s.direction]);
     if (s.note) rows.push(["狀況", s.note]);
     rows.push(["回報者", (s.reporter_name || "匿名") + (s.reporter_contact ? `（${s.reporter_contact}）` : "")]);
-    const ph = s.photo_url ?? "";
-    const img = typeof ph === "string" && ph.startsWith(pub)
-      ? `<a href="${E(ph)}"><img src="${E(ph)}" alt="目擊照片" width="432" style="display:block;width:100%;max-width:432px;height:auto;border-radius:12px;margin:0 0 12px;background:#EEE"></a>`
-      : "";
-    const tbl = rows.map(([k, v]) => `<tr><td style="width:64px;vertical-align:top;color:#5A6A70;font-weight:700;padding:2px 0">${k}</td><td style="padding:2px 0">${E(v)}</td></tr>`).join("");
-    const mp = s.lat ? btn(`https://www.google.com/maps?q=${Number(s.lat).toFixed(5)},${Number(s.lng).toFixed(5)}`, "📍 在 Google 地圖看位置", "#ffffff", "#CC3F1E", "#CC3F1E") : "";
-    return `<tr><td style="padding:16px 24px 6px">${img}<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:16px;line-height:1.6;color:#36454B">${tbl}</table>${mp}</td></tr>`;
+    const ph = typeof s.photo_url === "string" && s.photo_url.startsWith(pub) ? `<div style="margin:0 0 12px">${mkPhoto(s.photo_url, "目擊照片", s.photo_url)}</div>` : "";
+    const mp = s.lat ? mkBtn(`https://www.google.com/maps?q=${Number(s.lat).toFixed(5)},${Number(s.lng).toFixed(5)}`, "在 Google 地圖看位置", false) : "";
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;background:${MK_SOFT};border-radius:16px"><tr><td style="padding:14px">${ph}${mkRows(rows)}${mp}</td></tr></table>`;
+  }).join("");
+  return mkShell({
+    pre: `有 ${lst.length} 筆新的目擊回報，請到管理頁確認`, title: `有人看到${name}了`, lead: `有 ${lst.length} 筆新的目擊回報，請看是不是牠。`, hero,
+    body: items + mkBtn(manage, "到管理頁確認這筆目擊") +
+      `<p style="margin:10px 0 0;font-size:13.5px;line-height:1.65;color:${MK_MUTE}">確認後才會顯示在公開地圖上。這個按鈕 30 天內可以直接進入管理頁，<b>請不要轉寄這封信</b>。</p>` +
+      mkNote("以上是網友填寫的內容，請自行判斷真假。<br>看到牠時不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。"),
   });
-  const sep = '<tr><td style="padding:6px 24px"><div style="border-top:1px solid #E3E7E2"></div></td></tr>';
-  return `<!DOCTYPE html><html lang="zh-Hant"><body style="margin:0;background:#EFF2EE;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;color:#141E22">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:16px;overflow:hidden">
-<tr><td style="background:#CC3F1E;padding:18px 24px;color:#fff;font-size:22px;font-weight:900">🐾 ${SITE_NAME}</td></tr>
-<tr><td style="padding:22px 24px 4px"><p style="margin:0;font-size:22px;font-weight:900">有人看到${E(c.name)}了！</p>
-<p style="margin:6px 0 0;font-size:16px;color:#36454B">有 ${lst.length} 筆新的目擊回報：</p></td></tr>
-${items.join(sep)}
-<tr><td style="padding:14px 24px 6px">${btn(manage, "到管理頁確認這筆目擊", "#CC3F1E")}
-<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上。這個按鈕 30 天內都能直接進入管理，<b>請勿轉寄這封信</b>。</p></td></tr>
-<tr><td style="padding:12px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
-以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。<br>看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。<br>${SITE_NAME}｜全台走失毛孩協尋平台　<a href="${SITE_URL}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
-</table></td></tr></table></body></html>`;
+}
+// ===== MAILKIT END =====
+
+// ---- 各種通知信的版面（用上面的 MAILKIT）----
+const MK_PUB = `${SUPABASE_URL}/storage/v1/object/public/photos/`;
+const MK_GOV = /^https:\/\/(www\.pet\.gov\.tw|asms\.moa\.gov\.tw|asms\.coa\.gov\.tw)\//;   // 農業部的收容動物照片
+const mkOwn = (u: unknown) => (typeof u === "string" && u.startsWith(MK_PUB) ? u : undefined);
+// deno-lint-ignore no-explicit-any
+const mkHero = (c: any) => mkOwn((c?.photos ?? [])[0]);
+// 一批案件的第一張照片（附近通知、追蹤通知的小圖）
+async function casePhotoMap(ids: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  for (const part of chunks([...new Set(ids)].sort(), 100)) {
+    try {
+      const rows = (await sb("GET", "cases", undefined, { select: "id,photos", id: `in.(${part.join(",")})`, hidden: "eq.false" })) ?? [];
+      for (const r of rows) { const u = mkOwn((r.photos ?? [])[0]); if (u) out.set(r.id, u); }
+    } catch (e) { log("讀取案件照片失敗（信裡不放小圖）：", errName(e)); }
+  }
+  return out;
+}
+// deno-lint-ignore no-explicit-any
+function sightingHtml(c: any, manage: string, lst: any[]) {
+  return mkSightingMail(String(c.name ?? ""), manage, lst, MK_PUB, (t) => fmt(t), mkHero(c));
+}
+// deno-lint-ignore no-explicit-any
+function shelterHtml(c: any, cid: string, lst: any[]) {
+  const items = lst.slice(0, 10).map((m) => {
+    const trusted = !!m.shelter_tel;   // 系統自己向農業部查到的才放文字；網友回報的只放相似度
+    const img = typeof m.photo_url === "string" && (m.photo_url.startsWith(MK_PUB) || MK_GOV.test(m.photo_url)) ? m.photo_url : undefined;
+    return mkItem({
+      img, title: trusted ? String(m.shelter_name || "收容所") : "收容所裡一隻疑似的毛孩", pill: mkPill(`照片相似 ${m.photo_sim}%`),
+      lines: trusted ? [[m.sex, m.bodytype, m.colour].filter(Boolean).join("・"), `拾獲地：${m.found_place || "未註明"}`, `電話：${m.shelter_tel}`] : ["收容所的電話和地址，請打開案件頁查看"],
+    });
+  }).join("");
+  return mkShell({
+    pre: `AI 比對照片，找到 ${lst.length} 隻長得很像的，請盡快確認`, title: `收容所有疑似${c.name}的毛孩`, hero: mkHero(c),
+    lead: `AI 比對照片，在收容所找到 ${lst.length} 隻長得很像的，請盡快確認。`,
+    body: items + mkBtn(`${SITE_URL}#/case/${cid}`, "打開案件頁看比對結果") + mkNote("AI 照片比對只是參考。請打電話到收容所，提供晶片號碼核對，或親自到所確認。"),
+  });
+}
+// deno-lint-ignore no-explicit-any
+function foundHtml(c: any, cid: string, lst: any[], fr: Map<string, any>) {
+  const items = lst.slice(0, 10).map((m) => {
+    const f = fr.get(m.found_id) ?? {};
+    const kind = f.kind === "injured" ? "有人看到牠受傷" : f.kind === "found" ? "有人撿到" : "有人看到";
+    return mkItem({
+      img: mkOwn((f.photos ?? [])[0]), href: `${SITE_URL}#/found/${m.found_id}`, title: `${kind}｜${f.city ?? ""}${f.district || ""}`,
+      pill: m.photo_sim != null ? mkPill(`照片相似 ${m.photo_sim}%`) : mkPill("時間、地點、特徵接近", "gray"),
+      lines: [fmt(f.seen_at ?? ""), f.place_text || "", f.current_place ? `目前在：${f.current_place}` : ""],
+    });
+  }).join("");
+  return mkShell({
+    pre: `有 ${lst.length} 筆可能是牠的拾獲／目擊通報`, title: `有人可能撿到或看到${c.name}`, hero: mkHero(c),
+    lead: `有網友登記了 ${lst.length} 筆可能是牠的通報。請點進去看照片，是牠的話直接聯絡通報者。`,
+    body: items + mkBtn(`${SITE_URL}#/case/${cid}`, "打開案件頁看全部") + mkNote("以上是網友填寫的內容，請自行判斷真假。對方要求先付錢才還毛孩的，都是詐騙。"),
+  });
+}
+// deno-lint-ignore no-explicit-any
+function nearbyHtml(lst: any[], photos: Map<string, string>) {
+  const items = lst.slice(0, 10).map((r) => mkItem({
+    img: photos.get(r.case_id), href: `${SITE_URL}#/case/${r.case_id}`, title: `${r.case_name}${SP_NAME[r.species] ? `（${SP_NAME[r.species]}）` : ""}`,
+    pill: mkPill(`離你家約 ${Number(r.distance_km).toFixed(1)} 公里`, "amber"), lines: [`${r.lost_city ?? ""}${r.lost_district || ""} ${r.lost_place || ""}`.trim()],
+  })).join("");
+  const more = lst.length > 10 ? `<p style="margin:2px 0 0;font-size:14.5px;color:${MK_SUB}">還有 ${lst.length - 10} 隻，到網站看全部。</p>` : "";
+  return mkShell({
+    pre: "出門時幫忙留意，看到請拍照回報、不要追", title: `你家附近有 ${lst.length} 隻毛孩走失`, lead: "出門時幫忙留意。看到請拍照回報，不要追。",
+    body: items + more + mkBtn(`${SITE_URL}#/lost?near=1`, "看附近走失的毛孩"),
+    foot: `不想再收到這類通知？到 <a href="${SITE_URL}#/me" style="color:${MK_MUTE}">我的 → 通知設定</a> 關閉。<br>`,
+  });
+}
+// deno-lint-ignore no-explicit-any
+function followHtml(lst: any[], photos: Map<string, string>) {
+  const items = lst.slice(0, 15).map((r) => mkItem({
+    img: photos.get(r.case_id), href: `${SITE_URL}#/case/${r.case_id}`, title: String(r.case_name ?? ""), lines: [fmt(r.seen_at), r.place_text || "位置請看地圖"],
+  })).join("");
+  return mkShell({
+    pre: `${lst[0].case_name} 有新的目擊回報`, title: "你追蹤的毛孩有新目擊", lead: "點進去可以在地圖上看位置。你剛好在附近的話，幫忙多看一眼。",
+    body: items + mkBtn(`${SITE_URL}#/fav`, "看我追蹤的毛孩"),
+    foot: `不想再收到這類通知？到 <a href="${SITE_URL}#/me" style="color:${MK_MUTE}">我的 → 通知設定</a> 關閉。<br>`,
+  });
+}
+// deno-lint-ignore no-explicit-any
+function dueHtml(lst: any[], when: (r: any) => [string, string]) {
+  const items = lst.map((r) => { const [w, tone] = when(r); return mkItem({ title: `${r.pet_name}｜${r.title}`, pill: mkPill(w, tone), lines: [`到期日：${r.next_due}`] }); }).join("");
+  return mkShell({
+    pre: "毛孩的健康項目快到期了", title: "毛孩健康提醒", lead: "下面的項目快到期了。完成之後記得到健康手冊標記，下次才會準時提醒。",
+    body: items + mkBtn(`${SITE_URL}#/health`, "打開健康手冊"),
+    foot: `不想再收到這類提醒？到 <a href="${SITE_URL}#/me" style="color:${MK_MUTE}">我的 → 通知設定</a> 關閉。<br>`,
+  });
 }
 
 // deno-lint-ignore no-explicit-any
@@ -477,7 +601,7 @@ function groupBy<T extends Record<string, any>>(rows: T[], key: (r: T) => string
 
 async function runNotifications() {
   if (!MAIL_OK) { log("未設定寄信，略過通知"); return; }
-  const caseRows = await sbAll("cases", { select: "id,name,contact_email,hidden,email_verified,status", status: "eq.searching", hidden: "eq.false" }, 1000, 1e6, true);
+  const caseRows = await sbAll("cases", { select: "id,name,contact_email,hidden,email_verified,status,photos", status: "eq.searching", hidden: "eq.false" }, 1000, 1e6, true);
   const cases = new Map(caseRows.map((c) => [c.id, c]));
   const oldCut = new Date(Date.now() - 3 * 86400e3).toISOString();
   // 信箱還沒確認：先不寄、留著；超過 3 天的就標記掉，不再累積
@@ -555,7 +679,7 @@ async function runNotifications() {
     }
     lines.push("AI 照片比對只是參考，請打電話到收容所提供晶片號碼核對，或親自到所比對。", `案件頁：${SITE_URL}#/case/${cid}`, "", `— ${SITE_NAME}`);
     try {
-      if (!(await sendCaseMail(c, `【${SITE_NAME}】收容所有疑似 ${c.name} 的毛孩`, lines.join("\n")))) { await unclaimItems(c.contact_email, lst.map(sKey)); continue; }
+      if (!(await sendCaseMail(c, `【${SITE_NAME}】收容所有疑似 ${c.name} 的毛孩`, lines.join("\n"), shelterHtml(c, cid, lst)))) { await unclaimItems(c.contact_email, lst.map(sKey)); continue; }
       log(`已通知比對：${c.name} x${lst.length}`);
     } catch (e) { log("寄信失敗：", errName(e)); await unclaimItems(c.contact_email, lst.map(sKey)); continue; }
     await markNotified("shelter_matches", lst.map((m) => m.id));
@@ -600,7 +724,7 @@ async function runNotifications() {
     }
     lines.push("請點連結看照片，並直接聯絡通報者。", "", `— ${SITE_NAME}`);
     try {
-      if (!(await sendCaseMail(c, `【${SITE_NAME}】有人可能撿到／看到 ${c.name}`, lines.join("\n")))) { await unclaimItems(c.contact_email, lst.map(fKey)); continue; }
+      if (!(await sendCaseMail(c, `【${SITE_NAME}】有人可能撿到／看到 ${c.name}`, lines.join("\n"), foundHtml(c, cid, lst, fr)))) { await unclaimItems(c.contact_email, lst.map(fKey)); continue; }
       log(`已通知拾獲比對：${c.name} x${lst.length}`);
     } catch (e) { log("寄信失敗：", errName(e)); await unclaimItems(c.contact_email, lst.map(fKey)); continue; }
     await markNotified("found_matches", lst.map((m) => m.id));
@@ -636,7 +760,7 @@ async function runMemberNotifications(nearby = true) {
     if (lst.length > 10) lines.push("", `還有 ${lst.length - 10} 隻，到網站看全部：${SITE_URL}#/lost?near=1`);
     lines.push("", `不想再收到？到「我的 → 通知設定」關閉：${SITE_URL}#/me`, `— ${SITE_NAME}`);
     try {
-      if (!(await sendMail(email, `【${SITE_NAME}】你家附近有毛孩走失`, lines.join("\n"), "nearby", MAIL_CAP_LOW))) break;
+      if (!(await sendMail(email, `【${SITE_NAME}】你家附近有毛孩走失`, lines.join("\n"), "nearby", MAIL_CAP_LOW, nearbyHtml(lst, await casePhotoMap(lst.slice(0, 10).map((r) => r.case_id)))))) break;
       await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: "nearby", ref_id: r.case_id })), undefined, "return=minimal,resolution=ignore-duplicates");   // 全部記下來，超過 10 隻的隔天不會再寄
       log(`附近通知：${lst.length} 筆 → 1 位會員`);
       await pushToUser(uid, `你家附近有 ${lst.length} 隻毛孩走失`, `${lst[0].case_name}（約 ${Number(lst[0].distance_km).toFixed(1)} 公里）${lst.length > 1 ? "等" : ""}，出門時幫忙留意`, lst.length === 1 ? `#/case/${lst[0].case_id}` : "#/inbox");
@@ -653,7 +777,7 @@ async function runMemberNotifications(nearby = true) {
     }
     lines.push("", `管理追蹤與通知：${SITE_URL}#/me`, `— ${SITE_NAME}`);
     try {
-      if (!(await sendMail(email, `【${SITE_NAME}】追蹤的案件有新目擊`, lines.join("\n"), "follow", MAIL_CAP_LOW))) break;
+      if (!(await sendMail(email, `【${SITE_NAME}】追蹤的案件有新目擊`, lines.join("\n"), "follow", MAIL_CAP_LOW, followHtml(lst, await casePhotoMap(lst.slice(0, 15).map((r) => r.case_id)))))) break;
       await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: "follow", ref_id: r.sighting_id })), undefined, "return=minimal,resolution=ignore-duplicates");
       log(`追蹤通知：${lst.length} 筆 → 1 位會員`);
       await pushToUser(uid, `你追蹤的${lst[0].case_name}有新目擊`, `${lst[0].place_text || "點開看位置"}`, `#/case/${lst[0].case_id}`);
@@ -679,7 +803,7 @@ async function runDueReminders() {
     lines.push("", `完成後到「我的」頁標記已完成：${SITE_URL}#/me`, `— ${SITE_NAME}`);
     try {
       // 主旨沿用舊版：用排序前的第一筆
-      if (!(await sendMail(email, `【${SITE_NAME}】毛孩健康提醒：${lst0[0].pet_name} ${lst0[0].title}`, lines.join("\n"), "due", MAIL_CAP_LOW))) break;
+      if (!(await sendMail(email, `【${SITE_NAME}】毛孩健康提醒：${lst0[0].pet_name} ${lst0[0].title}`, lines.join("\n"), "due", MAIL_CAP_LOW, dueHtml(lst, (r) => { const d = dayNum(r.next_due) - dayNum(today); return d < 0 ? [`已過期 ${-d} 天`, "red"] : d === 0 ? ["今天到期", "red"] : [`${d} 天後到期`, "amber"]; })))) break;
       await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: `due:${r.next_due}`, ref_id: r.record_id })), undefined, "return=minimal,resolution=ignore-duplicates");
       log(`到期提醒：${lst.length} 筆 → 1 位會員`);
     } catch (e) { log("到期提醒寄送失敗：", errName(e)); }

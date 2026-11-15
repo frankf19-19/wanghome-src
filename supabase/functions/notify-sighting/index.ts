@@ -38,6 +38,76 @@ function fmt(ts: string) {
   return `${p(d.getUTCMonth() + 1)}/${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
 }
 const escH = (s: string) => s.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]!));
+// ===== 信件版面 MAILKIT START（daily-run 和 notify-sighting 共用同一份，改這裡要兩邊一起改）=====
+const MK_BRAND = "#CC3F1E", MK_INK = "#1F2A2E", MK_SUB = "#46545A", MK_MUTE = "#6B777B", MK_LINE = "#E9E3DB", MK_BG = "#F6F2EC", MK_SOFT = "#FBF7F2";
+const MK_SITE = "https://wangmiaotw.com/";
+const MK_FONT = "-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif";
+const mkE = (x: unknown) => String(x ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#x27;" }[ch]!));
+// 按鈕（整顆都能點）；primary=false 是白底紅框的次要按鈕
+const mkBtn = (href: string, label: string, primary = true) =>
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:10px 0 0"><tr><td align="center" bgcolor="${primary ? MK_BRAND : "#FFFFFF"}" style="border-radius:999px;border:2px solid ${MK_BRAND}">` +
+  `<a href="${mkE(href)}" style="display:block;padding:13px 20px;font-family:${MK_FONT};font-size:17px;font-weight:800;line-height:1.35;color:${primary ? "#FFFFFF" : MK_BRAND};text-decoration:none;border-radius:999px">${mkE(label)}</a></td></tr></table>`;
+const MK_TONE: Record<string, [string, string]> = { green: ["#E4F4EA", "#146C43"], red: ["#FDE9E5", "#A8321A"], amber: ["#FFF1CC", "#7A5200"], gray: ["#EEEAE4", "#46545A"] };
+const mkPill = (text: string, tone = "green") =>
+  `<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${MK_TONE[tone][0]};color:${MK_TONE[tone][1]};font-size:13px;font-weight:800;line-height:1.5;white-space:nowrap">${mkE(text)}</span>`;
+// 「標籤：內容」的表格（內容一律跳脫）
+const mkRows = (rows: [string, string][]) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-family:${MK_FONT};font-size:15.5px;line-height:1.6;color:${MK_SUB}">` +
+  rows.map(([k, v]) => `<tr><td style="width:60px;vertical-align:top;color:${MK_MUTE};font-weight:700;padding:2px 8px 2px 0;white-space:nowrap">${mkE(k)}</td><td style="vertical-align:top;padding:2px 0;color:${MK_INK};word-break:break-word">${mkE(v)}</td></tr>`).join("") + `</table>`;
+const mkPhoto = (src: string, alt: string, href?: string) => {
+  const img = `<img src="${mkE(src)}" alt="${mkE(alt)}" width="472" style="display:block;width:100%;max-width:472px;height:auto;border-radius:14px;background:#EEE9E2;border:0">`;
+  return href ? `<a href="${mkE(href)}" style="text-decoration:none">${img}</a>` : img;
+};
+// 一筆項目的卡片：左邊小圖（可省略）、右邊標題＋幾行說明；extra 放按鈕等已經組好的 HTML
+const mkItem = (o: { img?: string; href?: string; title: string; pill?: string; lines?: string[]; extra?: string }) => {
+  const thumb = o.img ? `<td width="92" style="width:92px;vertical-align:top;padding:0 14px 0 0">${o.href ? `<a href="${mkE(o.href)}">` : ""}<img src="${mkE(o.img)}" alt="" width="92" height="92" style="display:block;width:92px;height:92px;object-fit:cover;border-radius:12px;background:#EEE9E2;border:0">${o.href ? "</a>" : ""}</td>` : "";
+  const title = o.href ? `<a href="${mkE(o.href)}" style="color:${MK_INK};text-decoration:none">${mkE(o.title)}</a>` : mkE(o.title);
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 10px;background:${MK_SOFT};border-radius:16px"><tr><td style="padding:14px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${thumb}<td style="vertical-align:top;font-family:${MK_FONT}">` +
+    `<p style="margin:0;font-size:17px;font-weight:800;line-height:1.4;color:${MK_INK}">${title}</p>` +
+    (o.pill ? `<p style="margin:5px 0 0">${o.pill}</p>` : "") +
+    (o.lines ?? []).filter(Boolean).map((l) => `<p style="margin:4px 0 0;font-size:14.5px;line-height:1.55;color:${MK_SUB};word-break:break-word">${mkE(l)}</p>`).join("") +
+    `</td></tr></table>${o.extra ?? ""}</td></tr></table>`;
+};
+const mkNote = (html: string) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:14px 0 0"><tr><td style="padding:12px 14px;background:#FFF6DD;border-radius:12px;font-family:${MK_FONT};font-size:14px;line-height:1.65;color:#5C4500">${html}</td></tr></table>`;
+// 整封信：上方標誌、標題（可帶毛孩的照片）、內容、頁尾。title／lead 會跳脫；body／foot 是已經組好的 HTML
+const mkShell = (o: { pre: string; title: string; lead?: string; hero?: string; body: string; foot?: string }) => {
+  const hero = o.hero ? `<td width="76" style="width:76px;vertical-align:middle;padding:0 14px 0 0"><img src="${mkE(o.hero)}" alt="" width="76" height="76" style="display:block;width:76px;height:76px;object-fit:cover;border-radius:50%;background:#EEE9E2;border:3px solid #FFE3D8"></td>` : "";
+  return `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>` +
+    `<body style="margin:0;padding:0;background:${MK_BG};font-family:${MK_FONT};color:${MK_INK};-webkit-text-size-adjust:100%">` +
+    `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:${MK_BG};font-size:1px;line-height:1px">${mkE(o.pre)}</div>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${MK_BG}"><tr><td align="center" style="padding:24px 12px 32px">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">` +
+    `<tr><td style="background:#FFFFFF;border-radius:20px;border-top:6px solid ${MK_BRAND};padding:18px 24px 22px">` +
+    `<a href="${MK_SITE}" style="text-decoration:none"><img src="${MK_SITE}mail-logo-2x.png" alt="汪喵回家" width="137" height="42" style="display:block;width:137px;height:42px;border:0;font-family:${MK_FONT};font-size:22px;font-weight:800;color:${MK_INK}"></a>` +
+    `<div style="height:1px;line-height:1px;font-size:0;background:${MK_LINE};margin:14px 0 18px">&nbsp;</div>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${hero}<td style="vertical-align:middle;font-family:${MK_FONT}">` +
+    `<p style="margin:0;font-size:23px;font-weight:800;line-height:1.35;color:${MK_INK}">${mkE(o.title)}</p>` +
+    (o.lead ? `<p style="margin:6px 0 0;font-size:16px;line-height:1.6;color:${MK_SUB}">${mkE(o.lead)}</p>` : "") +
+    `</td></tr></table><div style="height:18px;line-height:18px;font-size:0">&nbsp;</div>${o.body}</td></tr>` +
+    `<tr><td style="padding:16px 10px 0;font-family:${MK_FONT};font-size:12.5px;line-height:1.7;color:${MK_MUTE}">${o.foot ?? ""}` +
+    `汪喵回家｜全台走失毛孩協尋平台　<a href="${MK_SITE}" style="color:${MK_MUTE}">wangmiaotw.com</a><br>這封信由系統自動寄出。本站不會要你匯款或提供密碼。</td></tr>` +
+    `</table></td></tr></table></body></html>`;
+};
+// 目擊通知（daily-run 的補寄和 notify-sighting 的即時通知用同一個版面）
+// deno-lint-ignore no-explicit-any
+function mkSightingMail(name: string, manage: string, lst: any[], pub: string, when: (t: string) => string, hero?: string) {
+  const items = lst.map((s) => {
+    const rows: [string, string][] = [["時間", when(s.seen_at)], ["地點", s.place_text || (s.lat ? "請看地圖" : "未標示")]];
+    if (s.direction) rows.push(["方向", "往" + s.direction]);
+    if (s.note) rows.push(["狀況", s.note]);
+    rows.push(["回報者", (s.reporter_name || "匿名") + (s.reporter_contact ? `（${s.reporter_contact}）` : "")]);
+    const ph = typeof s.photo_url === "string" && s.photo_url.startsWith(pub) ? `<div style="margin:0 0 12px">${mkPhoto(s.photo_url, "目擊照片", s.photo_url)}</div>` : "";
+    const mp = s.lat ? mkBtn(`https://www.google.com/maps?q=${Number(s.lat).toFixed(5)},${Number(s.lng).toFixed(5)}`, "在 Google 地圖看位置", false) : "";
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;background:${MK_SOFT};border-radius:16px"><tr><td style="padding:14px">${ph}${mkRows(rows)}${mp}</td></tr></table>`;
+  }).join("");
+  return mkShell({
+    pre: `有 ${lst.length} 筆新的目擊回報，請到管理頁確認`, title: `有人看到${name}了`, lead: `有 ${lst.length} 筆新的目擊回報，請看是不是牠。`, hero,
+    body: items + mkBtn(manage, "到管理頁確認這筆目擊") +
+      `<p style="margin:10px 0 0;font-size:13.5px;line-height:1.65;color:${MK_MUTE}">確認後才會顯示在公開地圖上。這個按鈕 30 天內可以直接進入管理頁，<b>請不要轉寄這封信</b>。</p>` +
+      mkNote("以上是網友填寫的內容，請自行判斷真假。<br>看到牠時不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。"),
+  });
+}
+// ===== MAILKIT END =====
 async function sha256hex(s: string) {
   const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
   return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
@@ -139,7 +209,7 @@ Deno.serve(async (req) => {
     }
   }
   const { data: c, error: ce } = await sb.from("cases")
-    .select("id,name,status,contact_email,hidden,email_verified,email_verify_sent_at,email_verify_hash,owner_id").eq("id", caseId).maybeSingle();
+    .select("id,name,status,contact_email,hidden,email_verified,email_verify_sent_at,email_verify_hash,owner_id,photos").eq("id", caseId).maybeSingle();
   if (ce) return json({ error: "lookup" }, 500);
   // 會員登記的案件：手機推播給飼主（不需要確認信箱）
   // 只有 15 分鐘內真的有新目擊才推；同一案件 10 分鐘最多推一次（避免被人拿來洗推播）
@@ -216,18 +286,12 @@ Deno.serve(async (req) => {
     const text = [`你好，你在${SITE_NAME}登記了走失協尋，並留下這個 Email。`, "",
       "請點下面的連結確認這是你的信箱。確認之後，有人回報看到牠，我們會馬上寄信通知你：", link, "",
       "連結 7 天內有效。", "不是你登記的？直接刪除這封信就好，我們不會再寄信給你。", "", `— ${SITE_NAME}　${SITE}`].join("\n");
-    const html = `<!DOCTYPE html><html lang="zh-Hant"><body style="margin:0;background:#EFF2EE;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;color:#141E22">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:16px;overflow:hidden">
-<tr><td style="background:#CC3F1E;padding:18px 24px;color:#fff;font-size:22px;font-weight:900">🐾 ${SITE_NAME}</td></tr>
-<tr><td style="padding:26px 24px 8px">
-<p style="margin:0 0 12px;font-size:22px;font-weight:900">請確認你的信箱</p>
-<p style="margin:0 0 22px;font-size:17px;line-height:1.7;color:#36454B">你在${SITE_NAME}登記了走失協尋。點下面的按鈕確認這是你的信箱，之後有人回報看到牠，我們會馬上寄信通知你。</p>
-<a href="${link}" style="display:block;background:#CC3F1E;color:#fff;text-decoration:none;font-size:20px;font-weight:900;padding:16px 20px;border-radius:12px;text-align:center">✅ 確認信箱</a>
-<p style="margin:18px 0 0;font-size:15px;line-height:1.7;color:#36454B">連結 7 天內有效。</p></td></tr>
-<tr><td style="padding:18px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
-不是你登記的？直接刪除這封信就好，我們不會再寄信給你。<br>${SITE_NAME}｜全台走失毛孩協尋平台　<a href="${SITE}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
-</table></td></tr></table></body></html>`;
+    const html = mkShell({
+      pre: "點按鈕確認信箱，之後有人看到牠才收得到通知", title: "請確認你的信箱",
+      lead: `你在${SITE_NAME}登記了走失協尋。確認這是你的信箱之後，有人回報看到牠，我們會馬上寄信通知你。`,
+      body: mkBtn(link, "確認信箱") + `<p style="margin:12px 0 0;font-size:14px;line-height:1.65;color:${MK_MUTE}">連結 7 天內有效。</p>`,
+      foot: "不是你登記的？直接刪除這封信就好，我們不會再寄信給你。<br>",
+    });
     try {
       await sendMail(to, `【${SITE_NAME}】請確認你的信箱，才收得到目擊通知`, text, html);
       await sb.from("case_mail_log").insert({ case_id: caseId, to_email: toKey, kind: "verify" });
@@ -283,36 +347,11 @@ Deno.serve(async (req) => {
     "確認後才會顯示在公開地圖上，點下面的網址就能直接到管理頁處理（30 天內有效，請勿轉傳）：",
     manageUrl, "", "看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。", "", `— ${SITE_NAME}`);
 
-  // 信件版面（HTML）：照片直接顯示在信裡、地圖和管理頁用大按鈕；網友填的文字一律跳脫
-  const okPhoto = (u: string) => typeof u === "string" && u.startsWith(Deno.env.get("SUPABASE_URL") + "/storage/v1/object/public/photos/");
-  const btn = (href: string, label: string, bg: string, fg = "#fff", border = bg) =>
-    `<a href="${escH(href)}" style="display:block;background:${bg};color:${fg};border:2px solid ${border};text-decoration:none;font-size:17px;font-weight:800;padding:13px 16px;border-radius:12px;text-align:center;margin:8px 0 0">${label}</a>`;
-  const items = ss.map((s) => {
-    const map = s.lat ? `https://www.google.com/maps?q=${(+s.lat).toFixed(5)},${(+s.lng).toFixed(5)}` : "";
-    const rows: [string, string][] = [["時間", fmt(s.seen_at)], ["地點", s.place_text || (s.lat ? "（看地圖）" : "未標示")]];
-    if (s.direction) rows.push(["方向", "往" + s.direction]);
-    if (s.note) rows.push(["狀況", s.note]);
-    rows.push(["回報者", (s.reporter_name || "匿名") + (s.reporter_contact ? "（" + s.reporter_contact + "）" : "")]);
-    return `<tr><td style="padding:16px 24px 6px">
-${okPhoto(s.photo_url) ? `<a href="${escH(s.photo_url)}"><img src="${escH(s.photo_url)}" alt="目擊照片" width="432" style="display:block;width:100%;max-width:432px;height:auto;border-radius:12px;margin:0 0 12px;background:#EEE"></a>` : ""}
-<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:16px;line-height:1.6;color:#36454B">
-${rows.map(([k, v]) => `<tr><td style="width:64px;vertical-align:top;color:#5A6A70;font-weight:700;padding:2px 0">${k}</td><td style="padding:2px 0">${escH(v)}</td></tr>`).join("")}
-</table>
-${map ? btn(map, "📍 在 Google 地圖看位置", "#ffffff", "#CC3F1E", "#CC3F1E") : ""}
-</td></tr>`;
-  }).join(`<tr><td style="padding:6px 24px"><div style="border-top:1px solid #E3E7E2"></div></td></tr>`);
-  const html = `<!DOCTYPE html><html lang="zh-Hant"><body style="margin:0;background:#EFF2EE;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;color:#141E22">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:16px;overflow:hidden">
-<tr><td style="background:#CC3F1E;padding:18px 24px;color:#fff;font-size:22px;font-weight:900">🐾 ${SITE_NAME}</td></tr>
-<tr><td style="padding:22px 24px 4px"><p style="margin:0;font-size:22px;font-weight:900">有人看到${escH(c.name)}了！</p>
-<p style="margin:6px 0 0;font-size:16px;color:#36454B">剛剛有 ${ss.length} 筆新的目擊回報：</p></td></tr>
-${items}
-<tr><td style="padding:14px 24px 6px">${btn(manageUrl, "到管理頁確認這筆目擊", "#CC3F1E")}
-<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#5A6A70">確認後才會顯示在公開地圖上。這個按鈕 30 天內都能直接進入管理，<b>請勿轉寄這封信</b>。</p></td></tr>
-<tr><td style="padding:12px 24px 24px"><p style="margin:0;font-size:13px;line-height:1.7;color:#5A6A70;border-top:1px solid #E3E7E2;padding-top:14px">
-以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。<br>看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。<br>${SITE_NAME}｜全台走失毛孩協尋平台　<a href="${SITE}" style="color:#CC3F1E">wangmiaotw.com</a></p></td></tr>
-</table></td></tr></table></body></html>`;
+  // 信件版面（HTML）：和排程補寄的目擊通知用同一個版面；網友填的文字一律跳脫
+  const pubPrefix = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "") + "/storage/v1/object/public/photos/";
+  // deno-lint-ignore no-explicit-any
+  const hero0 = ((c as any).photos ?? [])[0];
+  const html = mkSightingMail(String(c.name ?? ""), manageUrl, ss, pubPrefix, fmt, typeof hero0 === "string" && hero0.startsWith(pubPrefix) ? hero0 : undefined);
 
   try {
     await sendMail(to, `【${SITE_NAME}】有人看到${c.name}了！`, lines.join("\n"), html);
