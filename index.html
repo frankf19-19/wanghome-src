@@ -3139,7 +3139,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.0';
+const BUILD = 'v7.30.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4523,7 +4523,9 @@ ICONS.dots='<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><ci
 var __chatN=0,__chatCh=null,__chatPoll=null;
 function chatBadge(n){return n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}
 function chatIconHTML(){if(!me())return '';const n=__chatN;return `<a class="xbell" href="#/chats" aria-label="訊息${n?'，'+n+' 則未讀':''}">${ic('chat')}${chatBadge(n)}</a>`}
-async function chatUnreadCheck(){if(!me()){__chatN=0;__frN=0}else{try{const [{data,error},{data:fp,error:fe}]=await Promise.all([sb.rpc('chat_unread'),sb.rpc('friend_pending')]);if(!fe)__frN=+fp||0;if(!error)__chatN=(+data||0)+__frN}catch(_){}}
+// 同一時間有好幾個地方要查未讀數（導覽列、底部選單、首頁）時，只向主機問一次
+let __unreadP=null;
+async function chatUnreadCheck(){if(!me()){__chatN=0;__frN=0}else{try{if(!__unreadP){__unreadP=Promise.all([sb.rpc('chat_unread'),sb.rpc('friend_pending')]);__unreadP.then(()=>{__unreadP=null},()=>{__unreadP=null})}const [{data,error},{data:fp,error:fe}]=await __unreadP;if(!fe)__frN=+fp||0;if(!error)__chatN=(+data||0)+__frN}catch(_){}}
   {const fb=$('#frBadge');if(fb){fb.hidden=!__frN;fb.textContent=__frN>9?'9+':__frN}}
   {const tb=$('#tbChatN');if(tb){tb.hidden=!__chatN;tb.textContent=__chatN>9?'9+':__chatN}}
   const a=$('#xChat');if(a)a.innerHTML=chatIconHTML();const d=$('#dChat .dbadge');if(d){d.hidden=!__chatN;d.textContent=__chatN>9?'9+':__chatN}
@@ -8044,9 +8046,13 @@ function avatarPick(p){const inp=document.createElement('input');inp.type='file'
       if(p&&p.avatar_url)avatarRemoveFile(p.avatar_url);try{localStorage.setItem('wh_av_'+uid,url)}catch(_){}toast('✅ 大頭貼已更新');route()}
     catch(e){toast('大頭貼沒有更新成功：'+friendlyErr(e.message||String(e)),5000)}};
   inp.click()}
+// 同一時間重複要會員資料時共用同一次查詢（查完就不保留，改名字、換大頭貼後再查一定是新的）
+let __profP=null,__profU=null;
 async function getProfile(strict){
   if(!me())return null;
-  const {data,error}=await sb.from('profiles').select('*').eq('id',me().id).maybeSingle();
+  const uid=me().id;
+  if(!__profP||__profU!==uid){__profU=uid;const p=Promise.resolve(sb.from('profiles').select('*').eq('id',uid).maybeSingle());__profP=p;const done=()=>{if(__profP===p)__profP=null};p.then(done,done)}
+  const {data,error}=await __profP;
   if(error&&strict)throw error;
   return data;
 }
