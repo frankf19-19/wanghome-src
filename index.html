@@ -2525,6 +2525,13 @@ html{-webkit-tap-highlight-color:transparent}
 .ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
 .ph-card{display:block;width:100%;padding:0;border:0;font:inherit;text-align:left;cursor:pointer;border-radius:16px;overflow:hidden;background:var(--sheet);box-shadow:var(--lift);color:inherit!important;text-decoration:none!important}
 .ph-img{display:block;position:relative;aspect-ratio:1;background:var(--line)}.ph-img img{width:100%;height:100%;object-fit:cover;display:block}
+.clues h2{margin-bottom:8px}.clue-tip{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:var(--paper);font-size:14.5px;line-height:1.6}.clue-tip .ico{flex:none;width:20px;height:20px;margin-top:2px;color:var(--brand)}
+.clue-list{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:14px}.clue{display:flex;gap:10px;align-items:flex-start}.clue.off{opacity:.6}
+.clue-av{flex:none;width:38px;height:38px;border-radius:50%;background:var(--sheet);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;font-weight:800;color:var(--ink-3);overflow:hidden}.clue-av img{width:100%;height:100%;object-fit:cover}
+.clue-b{min-width:0;flex:1}.clue-b p{margin:0}.clue-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14.5px}.clue-h time{color:var(--ink-3);font-size:13px}
+.clue-t{white-space:pre-line;overflow-wrap:anywhere;line-height:1.65;margin-top:2px!important}.clue-a{display:flex;gap:14px;margin-top:4px!important}.clue-a button{border:0;background:none;padding:4px 0;font:inherit;font-size:13px;color:var(--ink-3);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.clue-empty{color:var(--ink-3);margin:0 0 12px}.clue-form textarea{width:100%;min-height:84px}.clue-row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:8px}.clue-row small{flex:1;line-height:1.5}
+.clue-warn{margin:8px 0 0;padding:10px 12px;border-radius:12px;background:#FDECEA;color:#8A1F17;font-size:14px;line-height:1.55}.clue-login{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0}
 .fnm{margin:12px 0;padding:14px 16px;border-radius:16px;background:var(--paper);display:flex;flex-direction:column;gap:6px}.fnm.hit{background:#FFF4D6;color:#1F2A2E}.fnm.hit .muted{color:#5B5340}.fnm p{margin:0}.fnm .btn{align-self:flex-start}.fnm-row{display:flex;gap:12px;align-items:center;background:#fff;border-radius:14px;padding:10px;margin-top:6px}.fnm-ph{flex:0 0 96px;width:96px;height:96px;border-radius:12px;overflow:hidden;display:block}.fnm-ph img{width:100%;height:100%;object-fit:cover;display:block}.fnm-t{display:flex;flex-direction:column;gap:3px;min-width:0}.fnm-t small{color:#5B5340}.fnm-t .fnm-sim{color:#1E7A55;font-weight:800}.fnm-t .btn{margin-top:4px}
 .ph-sim{position:absolute;left:8px;bottom:8px;font:800 12px/1 system-ui,sans-serif;font-style:normal;padding:5px 9px;border-radius:99px;color:#fff;background:rgba(25,20,18,.7)}.ph-sim.hi{background:#1F9D55}.ph-sim.mid{background:#C77700}
 .ph-t{display:block;padding:9px 11px 11px}.ph-t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ph-t small{display:block;margin-top:2px;font-size:12.5px;line-height:1.45;color:var(--muted)}
@@ -3132,7 +3139,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.29.0';
+const BUILD = 'v7.30.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5983,6 +5990,8 @@ async function renderCase(id){const _n=navId;
 
   <div id="foundMatches"></div>
 
+  ${c.status==='searching'?'<section id="clues" class="clues" aria-label="線索討論"></section>':''}
+
   <h2>${ic("megaphone")} ${c.status==='found'?'分享好消息':'幫忙擴散'}</h2>
   <div class="card">
     <p class="small" style="margin-top:0">${c.status==='found'?'<b>讓幫忙轉發過的朋友知道：</b>按「複製好消息」，貼到之前分享過的社團、LINE 群，大家就不用再找了。':'<b>貼到社團最有效：</b>按「複製協尋貼文」，整段（含網址）貼到當地協尋社團、LINE 群。'}</p>
@@ -6078,7 +6087,7 @@ async function renderCase(id){const _n=navId;
     }).catch(()=>{const st=$('#shelterStatus');if(!st)return;if(/正在比對/.test(st.textContent)){const box=$('#shelterBox');if(box)box.innerHTML=''}});
   }
 
-  if(c.status==='searching')casePhotoMatch(c,id,_n);
+  if(c.status==='searching'){casePhotoMatch(c,id,_n);caseClues(c,id,_n)}
   // 路人拍到／撿到的：用照片比對，只列很像的（80 分以上）；沒照片的通報才用條件比對，而且收在下面
   if(c.status==='searching'){
     let ph=[];try{const {data}=await sb.rpc('case_photo_found',{p_case:id,p_limit:6});ph=(data||[]).filter(r=>r.sim>=SEEN_SIM)}catch(_){}
@@ -6128,6 +6137,30 @@ function shNoPhoto(img){const card=img.closest('.match'),box=img.closest('#shelt
   if(!card||!box)return;const d=box.querySelector('.sm-none');if(!d)return;d.querySelector('.sm-np-list').appendChild(card);d.hidden=false;d.querySelector('.sm-np-n').textContent=d.querySelectorAll('.match').length;
   const left=box.querySelectorAll('.sm-list .match').length;if(!left&&!box.querySelector('.sm-empty'))box.querySelector('.sm-list').insertAdjacentHTML('beforeend','<p class="muted small sm-empty">目前沒有照片相似的收容動物。</p>');d.querySelectorAll('.match').forEach(()=>{});const w=box.querySelector('.sm-wait');if(w){const n=w.querySelectorAll('.match').length;w.querySelector('.sm-np-n').textContent=n;if(!n)w.hidden=true}}
 // 收容所照片比對：用牠的照片直接和全台收容所動物的照片比（不看文字描述）
+// 線索討論：案件底下的留言。登入才能留言；電話、網址由主機遮掉；常見詐騙字眼不能送出
+const CLUE_SCAM=/匯款|轉帳|訂金|保證金|押金|贖金|贖回|點數卡|遊戲點數|車馬費|運費|先付|手續費/;
+async function caseClues(c,id,_n){const box=$('#clues');if(!box)return;
+  const head=`<h2>${ic('chat')} 線索討論</h2>`;
+  const tip=`<p class="clue-tip">${ic('shield')}<span>在這裡交換找${esc(c.name)}的線索。<b>親眼看到牠，請按「我看到牠了」回報</b>，位置才會標在地圖上、通知飼主。任何人要你先付錢（車馬費、訂金、運費）都是詐騙。</span></p>`;
+  const draw=(rows,canHide,err)=>{if(_n!==navId||!box.isConnected)return;
+    const hid=lsList('wh_hidden');rows=(rows||[]).filter(r=>!hid.includes(r.id));
+    const item=r=>`<li class="clue${r.hidden?' off':''}" data-id="${esc(r.id)}"><span class="clue-av">${r.avatar&&safeU(r.avatar)?`<img loading="lazy" src="${esc(safeU(r.avatar))}" alt="">`:esc([...(r.name||'友')][0])}</span><div class="clue-b"><p class="clue-h"><b>${esc(r.name||'熱心網友')}</b>${r.poster?'<span class="tag red">發布人</span>':''}<time>${timeAgo(r.at)}</time></p><p class="clue-t">${esc(r.body)}</p>${r.hidden?'<p class="small muted">這則留言被檢舉，目前只有你看得到，等站長確認。</p>':''}<p class="clue-a">${r.mine?`<button type="button" data-del="${esc(r.id)}">刪除</button>`:`<button type="button" data-rep="${esc(r.id)}">檢舉</button>${canHide?`<button type="button" data-hide="${esc(r.id)}">隱藏這則</button>`:''}`}</p></div></li>`;
+    box.innerHTML=head+tip+(err?`<p class="small muted">留言暫時讀不到，請稍後再試。</p>`:rows.length?`<ul class="clue-list">${rows.map(item).join('')}</ul>`:`<p class="clue-empty">還沒有人留言。你住附近、常經過，或想到牠可能會去的地方，都可以寫下來。</p>`)
+      +(me()?`<form class="clue-form" id="clueForm"><label class="sr-only" for="clueIn">寫下你的線索</label><textarea id="clueIn" maxlength="500" rows="3" placeholder="例如：那一帶早上常有人餵狗的地方在⋯⋯"></textarea><p class="clue-warn" id="clueWarn" hidden>留言裡有常被用來詐騙的字眼。飼主不需要先付任何費用，這樣的留言送不出去，請改寫。</p><div class="clue-row"><small class="muted">電話和網址會自動隱藏；要聯絡飼主請用上面的聯絡方式。</small><button class="btn sm" id="clueSend">送出</button></div></form>`
+        :`<p class="clue-login"><button type="button" class="btn sm ghost" id="clueLogin">登入後留言</button><small class="muted">免費註冊只要一個 Email</small></p>`);
+    const lg=$('#clueLogin');if(lg)lg.onclick=()=>requireLogin('登入後就可以留言');
+    const fm=$('#clueForm');if(fm){const ta=$('#clueIn'),w=$('#clueWarn');
+      ta.oninput=()=>{w.hidden=!CLUE_SCAM.test(ta.value)};
+      fm.onsubmit=async e=>{e.preventDefault();const v=ta.value.trim();if(v.length<2)return toast('請寫下你的線索');const b=$('#clueSend');if(b.disabled)return;b.disabled=true;b.textContent='送出中…';
+        const {error}=await sb.rpc('case_comment_add',{p_case:id,p_body:v});
+        if(error){b.disabled=false;b.textContent='送出';return toast(friendlyErr(error.message),6000)}
+        toast('已送出，謝謝你的線索');load()}}
+    box.querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>openReport('comment',b.dataset.rep,null,load));
+    box.querySelectorAll('[data-del],[data-hide]').forEach(b=>b.onclick=async()=>{const del=!!b.dataset.del;if(!confirm(del?'確定刪除這則留言？':'隱藏這則留言？其他人就看不到了。'))return;b.disabled=true;
+      const {error}=await sb.rpc('case_comment_remove',{p_id:b.dataset.del||b.dataset.hide});if(error){b.disabled=false;return toast(friendlyErr(error.message))}toast(del?'已刪除':'已隱藏');load()})};
+  const load=async()=>{let d=null,er=null;try{const r=await sb.rpc('case_comments_list',{p_case:id});d=r.data;er=r.error}catch(e){er=e}
+    if(er||!d||!Array.isArray(d.rows)){if(box.isConnected&&!box.querySelector('.clue')){box.innerHTML='';box.hidden=true}return}box.hidden=false;draw(d.rows,!!d.can_hide,false)};
+  box.hidden=true;load()}
 async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.photos||[]).length)return;
   const d0=new Date(new Date(c.lost_at)-86400000).toISOString().slice(0,10);
   const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=45).slice(0,6);const hi=rows.filter(r=>r.sim>=85).length;
@@ -7520,7 +7553,7 @@ async function renderAdmin(){const _n=navId;
   if(tab==='bans')return admBans(box);
   return admList(box,tab,q.q||'',q.f||'all');
 }
-const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊',user:'私訊會員'};
+const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊',user:'私訊會員',comment:'線索留言'};
 const ADM_MAX={name:30,lost_place:200,place_text:200,current_place:200,contact_phone:30,reporter_phone:30,contact_line:60,reporter_line:60,direction:20};
 const FSTATUS_T={open:'等飼主中',reunited:'已回到主人身邊',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
 const admUrl=(t,id,caseId)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:`#/case/${caseId}`;
@@ -7583,7 +7616,7 @@ async function admReports(box,showAll){const _n=navId;
     <ul class="small" style="margin:8px 0 0 18px;padding:0;white-space:pre-line">${g.items.map(r=>`<li>${fmtDT(r.created_at)}　${esc(REASON_TEXT[r.reason]||r.reason)}${r.note?'：'+esc(r.note):''}</li>`).join('')}</ul>
     <div class="adm-acts">
       ${link(g.target_type,g.target_id)?`<a class="btn sm ghost" href="${link(g.target_type,g.target_id)}">查看</a>`:''}
-      ${g.target_type==='user'?'':`<a class="btn sm ghost" href="#/admin?tab=${g.target_type}&q=${g.target_id}">聯絡／編輯</a>`}
+      ${g.target_type==='user'||g.target_type==='comment'?'':`<a class="btn sm ghost" href="#/admin?tab=${g.target_type}&q=${g.target_id}">聯絡／編輯</a>`}
       ${g.target_type==='user'?'':`<button class="btn sm" data-hide="${g.target_type}|${g.target_id}|${g.target_hidden?0:1}">${g.target_hidden?'恢復顯示':(g.target_type==='sighting'?'退回目擊':'隱藏')}</button>`}
       ${g.resolved?'':`<button class="btn sm green" data-res="${g.target_id}">標記已處理</button>`}
       ${g.resolved?'':`<button class="btn sm danger" data-ban="${g.target_type}|${g.target_id}">停權發布者</button>`}
