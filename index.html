@@ -3143,7 +3143,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.5';
+const BUILD = 'v7.30.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -10442,7 +10442,7 @@ function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
       const sec=(k,t,empty)=>{const l=by(k),hi=l.filter(r=>r.sim>=PH_LOW),lo=l.filter(r=>r.sim<PH_LOW);
         return `<section class="ph-sec"><h2><span class="tag ${PH_KIND[k][1]}">${PH_KIND[k][0]}</span> ${t}</h2>${hi.length?`<div class="ph-grid">${hi.map(phCard).join('')}</div>`:`<p class="small muted">${l.length?'沒有很像的。':empty}</p>`}${lo.length?`<details class="ph-more"><summary>看比較不像的（${lo.length}）</summary><div class="ph-grid">${lo.map(phCard).join('')}</div></details>`:''}</section>`};
       const th=photoEmbed.lastThumbs||[];
-      const many=th.length>=2?`<div class="ph-pick"><p class="small"><b>照片裡有 ${th.length} 隻</b>，現在比對的是框起來的這隻。點別隻可以改比對牠：</p><div class="ph-pick-row">${th.map((u,i)=>`<button type="button" class="ph-pk${i===photoEmbed.lastPick?' on':''}" data-i="${i}" aria-label="比對第 ${i+1} 隻"${i===photoEmbed.lastPick?' aria-pressed="true"':''}><img src="${u}" alt=""></button>`).join('')}</div></div>`:'';
+      const many=th.length>=2?`<div class="ph-pick"><p class="small"><b>照片裡有 ${th.length} 隻</b>，現在比對的是有紅框的這隻。想比對別隻，點牠的小圖：</p><div class="ph-pick-row">${th.map((u,i)=>`<button type="button" class="ph-pk${i===photoEmbed.lastPick?' on':''}" data-i="${i}" aria-label="比對第 ${i+1} 隻"${i===photoEmbed.lastPick?' aria-pressed="true"':''}><img src="${u}" alt=""></button>`).join('')}</div></div>`:'';
       const tip=many+(!photoEmbed.lastBox?`<p class="ph-warn">AI 在這張照片裡沒有找到狗或貓，結果可能不準。換一張毛孩比較大、比較清楚的照片會更好。</p>`:'')
         +(auto?`<p class="small muted ph-auto">AI 判斷照片裡是<b>${auto==='cat'?'貓':'狗'}</b>，只比對${auto==='cat'?'貓':'狗'}。<button type="button" class="linkbtn" id="phBoth">兩種都找</button></p>`:'');
       window.__carryPhoto=file;   // 接下來去回報或通報，這張照片會自動帶過去
