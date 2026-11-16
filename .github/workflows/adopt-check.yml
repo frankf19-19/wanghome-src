@@ -1,0 +1,14 @@
+name: 暫時：領養頁檢查（檢查完刪除）
+on: { workflow_dispatch: {} }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for k in %E7%8B%97 %E8%B2%93; do curl -s -o /dev/null -w "api $k %{http_code} %{size_download}B %{time_total}s\n" "https://wangmiaotw.com/api/moa/adopt?kind=$k"; done
+          sleep 20
+          for k in dog cat; do curl -s -o /dev/null -w "snap $k %{http_code} %{size_download}B\n" "https://nopyhfpaykkiieudvoko.supabase.co/storage/v1/object/public/photos/cache/adopt-$k.json.gz"; done
+          curl -s -o /dev/null -w "/adopt/ %{http_code} %{time_total}s\n" https://wangmiaotw.com/adopt/
+          for u in $(curl -s https://wangmiaotw.com/adopt/%E8%87%BA%E4%B8%AD%E5%B8%82/%E7%8B%97 | grep -o 'adopt/a/[0-9]*' | head -5); do curl -s -o /dev/null -w "$u %{http_code} %{time_total}s\n" "https://wangmiaotw.com/$u"; done
+          curl -s -o /dev/null -w "a/1 (bad id) %{http_code}\n" https://wangmiaotw.com/adopt/a/1
+          curl -sI https://wangmiaotw.com/adopt/ | grep -i cf-ray
