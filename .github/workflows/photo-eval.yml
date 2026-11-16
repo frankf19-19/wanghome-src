@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       round:
-        description: '1＝裁切方法，2＝模型比較'
+        description: '1＝裁切方法，2＝模型比較，3＝多框與毛色'
         required: false
         default: '2'
       n_shelter:
@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install --quiet onnxruntime numpy pillow
-      - if: ${{ inputs.round != '1' }}
+      - if: ${{ inputs.round == '2' }}
         run: pip install --quiet torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install --quiet timm transformers
       - run: mkdir -p /tmp/det && for m in yolox_nano yolox_tiny; do curl -sSL -o /tmp/det/$m.onnx https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/$m.onnx; done
       - name: 實測
@@ -27,4 +27,4 @@ jobs:
           SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           N_SHELTER: ${{ inputs.n_shelter || '700' }}
-        run: cd scripts && python3 -u ${{ inputs.round == '1' && 'photo_eval.py' || 'photo_eval2.py' }}
+        run: cd scripts && python3 -u ${{ inputs.round == '1' && 'photo_eval.py' || (inputs.round == '3' && 'photo_eval3.py' || 'photo_eval2.py') }}
