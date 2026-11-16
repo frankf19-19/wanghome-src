@@ -52,17 +52,44 @@ def embed(url, im):
     if len(_emb) < 4000: _emb[url] = v
     return v
 
+def sq_crop(im, b):
+    """把框 b 裁成正方形（超出照片的地方補灰色）；b 是 None 就置中裁正方形"""
+    from PIL import Image
+    w, h = im.size
+    if b is None:
+        s = min(w, h); return im.crop(((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s))
+    _, _, x0, y0, x1, y1 = b; s = max(x1 - x0, y1 - y0, 8); l, t = (x0 + x1) / 2 - s / 2, (y0 + y1) / 2 - s / 2
+    bg = Image.new("RGB", (int(round(s)), int(round(s))), (124, 116, 104))
+    bg.paste(im.crop((int(round(max(0, l))), int(round(max(0, t))), int(round(min(w, l + s))), int(round(min(h, t + s))))), (int(round(max(0, -l))), int(round(max(0, -t)))))
+    return bg
+def embed_extra(im):
+    """海報這類一張照片裡有好幾張毛孩照片的：第 2～4 隻也各算一個特徵（第 1 隻就是 embed() 算的那個）"""
+    global _sess
+    from PIL import Image
+    from photo_detect import detect_multi
+    if _sess is None:
+        import onnxruntime as ort
+        _sess = ort.InferenceSession(os.path.join(AI_DIR, "dinov2s-q8.onnx"), providers=["CPUExecutionProvider"])
+    k = 640 / max(im.size)
+    if k < 1: im = im.resize((round(im.size[0] * k), round(im.size[1] * k)), Image.BICUBIC)
+    out = []
+    for b in detect_multi(im, os.path.join(AI_DIR, "yolox_nano.onnx"))[1:]:
+        c = sq_crop(im, b).resize((224, 224), Image.BICUBIC)
+        x = ((np.asarray(c, dtype=np.float32) / 255 - MEAN) / STD).transpose(2, 0, 1)[None]
+        v = _sess.run(None, {"pixel_values": x})[0][0][0]; out.append(v / np.linalg.norm(v))
+    return out
+
 def tw_city(c): c = str(c or ""); return ("臺" + c[1:]) if c.startswith("台") else c
 
 def wanted():
     """現在應該在索引裡的照片：{(kind, ref, url): info}"""
     w = {}
     for c in sb_all("cases?status=eq.searching&hidden=eq.false&select=id,name,species,photos,lost_city,lost_district,lost_at&order=lost_at.desc"):
-        for u in (c.get("photos") or [])[:2]:
+        for u in (c.get("photos") or [])[:4]:
             if u: w[("case", c["id"], u)] = {"name": c.get("name"), "sp": c.get("species"), "city": tw_city(c.get("lost_city")), "district": c.get("lost_district"), "at": c.get("lost_at")}
     for f in sb_all("found_reports?status=eq.open&select=id,kind,species,photos,city,district,seen_at,colour,hidden&order=seen_at.desc"):
         if f.get("hidden"): continue
-        for u in (f.get("photos") or [])[:2]:
+        for u in (f.get("photos") or [])[:4]:
             if u: w[("found", f["id"], u)] = {"k": f.get("kind"), "sp": f.get("species"), "city": tw_city(f.get("city")), "district": f.get("district"), "at": f.get("seen_at"), "colour": f.get("colour")}
     for kind in ("狗", "貓"):
         try:
@@ -84,11 +111,13 @@ def vec_str(v): return "[" + ",".join(f"{x:.5f}" for x in v.tolist()) + "]"
 
 def index():
     w, shelter_ok = wanted()
-    rows0 = sb_all("photo_vecs?select=id,kind,ref,url,ver")
+    rows0 = sb_all("photo_vecs?select=id,kind,ref,url,ver,mb:info->mb")
+    base = lambda u: u.split("#")[0]   # 海報裡第 2～4 隻存成「網址#2」這樣，跟著原本那張照片走
     have = {(r["kind"], r["ref"], r["url"]): r["id"] for r in rows0}
-    cur = {(r["kind"], r["ref"], r["url"]) for r in rows0 if (r.get("ver") or 1) >= VER}   # 已經用新算法算過的
+    # 已經用新算法算過的；案件和拾獲的照片還要找過「同一張裡的其他隻」（info.mb）才算完成
+    cur = {(r["kind"], r["ref"], r["url"]) for r in rows0 if (r.get("ver") or 1) >= VER and "#" not in r["url"] and (r["kind"] == "shelter" or r.get("mb"))}
     # 下架的刪掉（收容所資料讀不到時，不動收容所那部分）
-    gone = [i for k, i in have.items() if k not in w and (shelter_ok or k[0] != "shelter")]
+    gone = [i for k, i in have.items() if (k[0], k[1], base(k[2])) not in w and (shelter_ok or k[0] != "shelter")]
     for i in range(0, len(gone), 150):
         sb("DELETE", "photo_vecs?id=in.(" + ",".join(map(str, gone[i:i + 150])) + ")", prefer="return=minimal")
     todo = [k for k in w if k not in cur]
@@ -105,7 +134,14 @@ def index():
             if im is None: fail += 1; continue
             try: v = embed(k[2], im)
             except Exception: fail += 1; continue
-            rows.append({"kind": k[0], "ref": k[1], "url": k[2], "vec": vec_str(v), "info": w[k], "ver": VER})
+            info = dict(w[k])
+            if k[0] != "shelter":
+                info["mb"] = 1
+                try: extra = embed_extra(im)
+                except Exception: extra = []
+                for j, ev in enumerate(extra, 2):
+                    rows.append({"kind": k[0], "ref": k[1], "url": f"{k[2]}#{j}", "vec": vec_str(ev), "info": info, "ver": VER})
+            rows.append({"kind": k[0], "ref": k[1], "url": k[2], "vec": vec_str(v), "info": info, "ver": VER})
         if rows:
             sb("POST", "photo_vecs?on_conflict=kind,ref,url", rows, "return=minimal,resolution=merge-duplicates"); done += len(rows)
     left = len([k for k in w if k not in cur]) - done - fail
