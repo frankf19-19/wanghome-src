@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       round:
-        description: '1＝裁切方法，2＝模型比較，3＝多框與毛色'
+        description: '1＝裁切方法，2＝模型比較，3＝多框與毛色，4＝細看重新排名'
         required: false
         default: '2'
       n_shelter:
@@ -27,4 +27,4 @@ jobs:
           SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           N_SHELTER: ${{ inputs.n_shelter || '700' }}
-        run: cd scripts && python3 -u ${{ inputs.round == '1' && 'photo_eval.py' || (inputs.round == '3' && 'photo_eval3.py' || 'photo_eval2.py') }}
+        run: cd scripts && python3 -u ${{ inputs.round == '1' && 'photo_eval.py' || (inputs.round == '3' && 'photo_eval3.py' || (inputs.round == '4' && 'photo_eval4.py' || 'photo_eval2.py')) }}
