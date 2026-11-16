@@ -47,7 +47,7 @@ for dt,pre in PLAN.items():
     for o in old: api('DELETE',f"/appScreenshots/{o['id']}")
     print(dt,'removed',len(old))
     ids=[]
-    for f in sorted(glob.glob(f'app/store-assets/{pre}0*.png')):
+    for f in sorted(glob.glob(f'app/store-assets/{pre}[0-9][0-9]_*.png')):
         b=open(f,'rb').read(); n=os.path.basename(f)
         sc=api('POST','/appScreenshots',json={'data':{'type':'appScreenshots','attributes':{'fileName':n,'fileSize':len(b)},'relationships':{'appScreenshotSet':{'data':{'type':'appScreenshotSets','id':sid}}}}})['data']
         for op in sc['attributes']['uploadOperations']:
