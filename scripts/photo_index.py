@@ -161,7 +161,7 @@ def sightings():
     ids = sorted({s["case_id"] for s in ss})
     cases = {}
     for i in range(0, len(ids), 80):
-        for c in sb_all("cases?id=in.(" + ",".join(ids[i:i + 80]) + ")&select=id,photos"): cases[c["id"]] = [u for u in (c.get("photos") or [])[:3] if u]
+        for c in sb_all("cases?id=in.(" + ",".join(ids[i:i + 80]) + ")&select=id,photos"): cases[c["id"]] = [u for u in (c.get("photos") or [])[:4] if u]
     n = 0
     for s in ss[:300]:
         if time.time() - T0 > BUDGET + 240: break

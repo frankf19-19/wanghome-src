@@ -3142,7 +3142,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.3';
+const BUILD = 'v7.30.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -10302,10 +10302,20 @@ async function aiModelBytes(onProg){
   else buf=await r.arrayBuffer();
   if(cache)try{await cache.put(AI_MODEL,new Response(buf.slice(0),{headers:{'content-type':'application/octet-stream'}}))}catch(_){}
   onProg&&onProg(1,false);return buf}
+// AI 執行引擎（約 11MB）：先自己下載一次（瀏覽器會留著），這段也顯示進度，不然慢的網路會看起來卡住
+const AI_WASM=AI_BASE+'vendor/ort/ort-wasm-simd.wasm',AI_WASM_MB=10.9;
+async function aiWarmWasm(onProg){
+  try{const r=await fetch(AI_WASM,{cache:'force-cache'});if(!r.ok||!r.body||!r.body.getReader){onProg&&onProg(1);return}
+    const total=+r.headers.get('content-length')||AI_WASM_MB*1048576,rd=r.body.getReader();let got=0;
+    for(;;){const {done,value}=await rd.read();if(done)break;got+=value.length;onProg&&onProg(Math.min(.99,got/total))}}catch(_){}
+  onProg&&onProg(1)}
 async function aiSession(onProg){
   if(__aiSess)return __aiSess;
   await loadScript('vendor/ort/ort-1.16.3.min.js');
   ort.env.wasm.numThreads=1;ort.env.wasm.wasmPaths=AI_BASE+'vendor/ort/';
+  let modelCached=false;try{const c=await caches.open('wanghome-vendor');modelCached=!!(await c.match(AI_MODEL))}catch(_){}
+  if(!modelCached&&onProg){const W=AI_WASM_MB/(AI_WASM_MB+AI_MODEL_MB);   // 第一次：引擎和模型一起算進度
+    await aiWarmWasm(p=>onProg(p*W,false,'engine'));const o=onProg;onProg=(p,c)=>o(W+p*(1-W),c)}
   const buf=await aiModelBytes(onProg);
   return __aiSess=await ort.InferenceSession.create(buf,{executionProviders:['wasm'],graphOptimizationLevel:'all'})}
 // 偵測模型（YOLOX-nano，3.7MB）：先找出照片裡的狗／貓在哪裡，裁掉背景再比對，準確度高很多
@@ -10388,7 +10398,7 @@ function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
     <select id="phCity" aria-label="縣市"><option value="">全台灣</option>${Object.keys(TW).map(c=>`<option>${c}</option>`).join('')}</select></div>
   <button type="button" class="btn big block" id="phGo" disabled>開始比對</button>
   <div class="ph-prog hidden" id="phProg"><div class="ph-bar"><i id="phBar"></i></div><p id="phMsg"></p></div>
-  <p class="ph-note">${ic('shield')} 照片只在你的手機上分析，不會上傳到我們的主機。第一次使用要下載 AI 模型（約 35MB，建議用 Wi-Fi），之後就不用了。</p>
+  <p class="ph-note">${ic('shield')} 照片只在你的手機上分析，不會上傳到我們的主機。第一次使用要下載 AI 模型（約 40MB，建議用 Wi-Fi），之後就不用了。</p>
   <div id="phOut"></div></div>`;
   const $go=$('#phGo'),$out=$('#phOut'),$prog=$('#phProg'),$bar=$('#phBar'),$msg=$('#phMsg');
   // 選好照片：AI 模型已經在手機裡就直接比對；還沒下載過（要花流量）才讓人自己按
@@ -10401,7 +10411,7 @@ function renderPhoto(){const _n=navId;setTitle('用照片找毛孩');
   const prog=(p,msg)=>{$prog.classList.remove('hidden');$bar.style.width=Math.round(p*100)+'%';$msg.textContent=msg};
   $go.onclick=async()=>{if(!file||busy)return;busy=true;$go.disabled=true;$out.innerHTML='';
     try{prog(.03,'準備 AI 模型…');
-      const q=await photoEmbed(file,(p,cached)=>prog(.05+p*.75,cached?'載入 AI 模型…':`下載 AI 模型 ${Math.round(p*AI_MODEL_MB)} / ${Math.round(AI_MODEL_MB)} MB（只有第一次）`));
+      const q=await photoEmbed(file,(p,cached)=>prog(.05+p*.75,cached?'載入 AI 模型…':`下載 AI 模型 ${Math.round(p*(AI_MODEL_MB+AI_WASM_MB))} / ${Math.round(AI_MODEL_MB+AI_WASM_MB)} MB（只有第一次）`));
       if(_n!==navId)return;prog(.88,'比對照片中…');
       const auto=!sp&&!noAuto&&photoEmbed.lastSp?photoEmbed.lastSp:'';   // 選「都找」時，AI 很確定是狗或貓就只比對同一種
       const {data,error}=await sb.rpc('photo_search',{q,p_sp:sp||auto||null,p_city:city||null,p_limit:18});if(error)throw new Error(friendlyErr(error.message));
