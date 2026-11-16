@@ -1,2 +1,2 @@
-import { adoptRoute } from "../../lib/adopt.js";
-export const onRequestGet = ({ params, waitUntil }) => adoptRoute(Array.isArray(params.p) ? params.p : (params.p ? [params.p] : []), waitUntil);
+import { adoptRoute, adoptEnv } from "../../lib/adopt.js";
+export const onRequestGet = ({ params, waitUntil, env }) => (adoptEnv(env), adoptRoute(Array.isArray(params.p) ? params.p : (params.p ? [params.p] : []), waitUntil));
