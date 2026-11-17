@@ -21,6 +21,9 @@
 - [撿到狗或貓怎麼辦](https://wangmiaotw.com/g/found-pet)
 - [寵物走失後怎麼查收容所](https://wangmiaotw.com/g/shelter-search)
 - [晶片遺失申報](https://wangmiaotw.com/g/chip-lost-report)
+- [在收容所找到自己的狗貓怎麼認領](https://wangmiaotw.com/g/shelter-claim)
+- [寵物走失協尋管道整理](https://wangmiaotw.com/g/lost-pet-channels)
+- [撿到狗貓送收容所會怎樣](https://wangmiaotw.com/g/found-to-shelter)
 - [用照片找毛孩（AI 照片比對）](https://wangmiaotw.com/#/photo)：上傳狗貓照片，比對走失協尋、拾獲通報與全台收容所
 - [全台收容所待領養的狗貓](https://wangmiaotw.com/adopt/)：依縣市、品種、收容所查看，資料每天更新
 - [iPhone App](https://wangmiaotw.com/app)：App Store 搜尋「汪喵回家」
