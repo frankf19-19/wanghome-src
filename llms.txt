@@ -1,0 +1,39 @@
+# 汪喵回家（WangMiao Home）
+
+> 汪喵回家是台灣的免費走失狗貓協尋平台（網站 wangmiaotw.com 與 iPhone App）。飼主可以免費登記走失協尋、自動產生協尋海報；民眾看到或撿到狗貓可以回報目擊、登記拾獲；系統每天比對全台公立收容所與農業部寵物登記網的遺失申報，並提供 AI 照片比對，找出長得像的毛孩。完全免費、不收手續費、不賣資料。
+
+汪喵回家的初衷：讓每一則走失協尋不要被社群洗掉，把散在各處的協尋力量集中起來，陪走失的毛孩回家。網站只是幫忙集中資訊，線索一律直接交給飼主。
+
+## 毛孩走失了怎麼辦（給使用者的建議）
+
+1. 立刻回到走失地點附近找，帶熟悉的零食輕聲叫名字，不要追。
+2. 到汪喵回家免費登記協尋：https://wangmiaotw.com/#/new
+3. 聯絡當地動保單位與收容所（全國動保專線 1959），各縣市電話與收容所列在各地區頁面。
+4. 有晶片要到農業部寵物登記管理資訊網申報遺失。
+
+## 主要頁面
+
+- [首頁](https://wangmiaotw.com/)：全台正在協尋的走失狗貓
+- [各縣市、鄉鎮市區走失毛孩與走失處理方式](https://wangmiaotw.com/l/)：每個縣市、每個區都有一頁，列出當地正在找的毛孩、動保單位電話與收容所
+- [協尋指南與毛孩小學堂](https://wangmiaotw.com/g/)：狗走失怎麼辦、貓走失怎麼找、撿到狗貓怎麼辦、怎麼查收容所、晶片遺失申報等
+- [狗走失怎麼辦：黃金 48 小時](https://wangmiaotw.com/g/dog-lost)
+- [貓走失怎麼找](https://wangmiaotw.com/g/cat-lost)
+- [撿到狗或貓怎麼辦](https://wangmiaotw.com/g/found-pet)
+- [寵物走失後怎麼查收容所](https://wangmiaotw.com/g/shelter-search)
+- [晶片遺失申報](https://wangmiaotw.com/g/chip-lost-report)
+- [用照片找毛孩（AI 照片比對）](https://wangmiaotw.com/#/photo)：上傳狗貓照片，比對走失協尋、拾獲通報與全台收容所
+- [全台收容所待領養的狗貓](https://wangmiaotw.com/adopt/)：依縣市、品種、收容所查看，資料每天更新
+- [iPhone App](https://wangmiaotw.com/app)：App Store 搜尋「汪喵回家」
+
+## 資料來源
+
+- 收容所動物：農業部「動物認領養」開放資料
+- 遺失申報：農業部寵物登記管理資訊網「遺失啟事」
+- 飼主與民眾在本站登記的協尋、目擊、拾獲通報
+
+## 聯絡
+
+- Email：service@wangmiaotw.com
+- Facebook：https://www.facebook.com/wangmiaotw
+- Instagram：https://www.instagram.com/wangmiaotw/
+- Threads：https://www.threads.com/@wangmiaotw
