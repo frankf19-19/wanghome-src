@@ -3148,7 +3148,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.13';
+const BUILD = 'v7.30.14';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6160,7 +6160,7 @@ const CLUE_SCAM=/匯款|轉帳|訂金|保證金|押金|贖金|贖回|點數卡|�
 async function caseClues(c,id,_n){const box=$('#clues');if(!box)return;
   let head=`<h2>${ic('chat')} 線索討論</h2>`;
   const stat=n=>{const b=$('#clueStat'),e=$('#clueN');if(e)e.textContent=n;if(b){b.hidden=false;b.onclick=()=>{box.scrollIntoView({behavior:'smooth',block:'start'});const ta=$('#clueIn');if(ta)setTimeout(()=>{try{ta.focus({preventScroll:true})}catch(_){}},450)}}};
-  const tip=`<p class="clue-tip">${ic('shield')}<span>在這裡交換找${esc(c.name)}的線索。<b>親眼看到毛孩，請按「我看到毛孩了」回報</b>，位置才會標在地圖上、通知飼主。任何人要你先付錢（車馬費、訂金、運費）都是詐騙。</span></p>`;
+  const tip=`<p class="clue-tip">${ic('shield')}<span>在這裡交換找${esc(c.name)}的線索。<b>親眼看到${esc(c.name)}，請按「我看到${esc(c.name)}了」回報</b>，位置才會標在地圖上、通知飼主。任何人要你先付錢（車馬費、訂金、運費）都是詐騙。</span></p>`;
   const draw=(rows,canHide,err)=>{if(_n!==navId||!box.isConnected)return;
     const hid=lsList('wh_hidden');rows=(rows||[]).filter(r=>!hid.includes(r.id));
     head=`<h2>${ic('chat')} 線索討論${rows.length?`<em>${rows.length} 則</em>`:''}</h2>`;stat(rows.length);
