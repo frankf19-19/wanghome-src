@@ -3148,7 +3148,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.10';
+const BUILD = 'v7.30.11';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3420,6 +3420,9 @@ const PHONE_PAT=String.raw`[0-9０-９+＋\-－\s\(\)#＃]{8,30}`;
 function medLogFail(n){setTimeout(()=>{if(n!==navId)return;const bs=[...document.querySelectorAll('#app [data-medlog]')];if(!bs.length)return;bs.forEach(b=>{b.disabled=true;b.title='給藥紀錄沒有載入'});
   const first=bs[0].closest('.card')||bs[0].parentElement;if(first&&!document.getElementById('medLogErr'))first.insertAdjacentHTML('beforebegin','<div class="notice red" id="medLogErr"><b>今天的給藥紀錄沒有載入</b>網路不穩，看不出今天餵過了沒，請重新整理後再勾選，避免重複給藥。 <a href="javascript:location.reload()">重新整理</a></div>')},0)}
 function caseUrl(id){return CONFIG.SITE_URL+'#/case/'+id}
+// 分享用的短網址（/s/8 碼、/f/8 碼）：案件編號前 10 碼換成 36 進位，貼到 LINE／FB 會顯示照片與標題
+function shortId(id){const n=parseInt(String(id||'').replace(/-/g,'').slice(0,10),16);return isNaN(n)?String(id||''):n.toString(36).padStart(8,'0')}
+function shortUrl(kind,id){return CONFIG.SITE_URL+kind+'/'+shortId(id)}
 // 複製：新式 API → 舊式 execCommand → 最後才跳出視窗讓使用者自己複製（LINE／FB 內建瀏覽器常常沒有 clipboard）
 function copyLegacy(t){try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);const ok=document.execCommand('copy');ta.remove();return ok}catch(_){return false}}
 function copy(t){const done=()=>toast('已複製');const fallback=()=>{if(copyLegacy(t))done();else prompt('請長按下面的文字複製：',t)};
@@ -5945,7 +5948,7 @@ async function renderCase(id){const _n=navId;
   const active=c.status==='searching';
   setTitle(`${sp(c.species).short} ${c.name}`);
   const photos=c.photos||[];
-  const url=caseUrl(id);
+  const url=shortUrl('s',id);
   (_n===navId?app:_void).innerHTML=`
   <div class="pad-bottom">
   <div class="poster-head">
@@ -6010,7 +6013,7 @@ async function renderCase(id){const _n=navId;
   <div class="card">
     <p class="small" style="margin-top:0">${c.status==='found'?'<b>讓幫忙轉發過的朋友知道：</b>按「複製好消息」，貼到之前分享過的社團、LINE 群，大家就不用再找了。':'<b>貼到社團最有效：</b>按「複製協尋貼文」，整段（含網址）貼到當地協尋社團、LINE 群。'}</p>
     <details class="sharetext"><summary>看貼文內容</summary><textarea id="shareText" aria-label="分享文案" readonly style="min-height:150px;margin-top:8px">${esc(shareText(c,url))}</textarea></details>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn sm" id="btnCopyText">${c.status==='found'?'複製好消息':'複製協尋貼文'}</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a></div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><a class="btn sm line" data-share="line" target="_blank" rel="noopener" href="#">傳到 LINE</a><button class="btn sm" id="btnCopyText">${c.status==='found'?'複製好消息':'複製協尋貼文'}</button><a class="btn sm ghost" target="_blank" rel="noopener" href="https://www.facebook.com/search/groups/?q=${encodeURIComponent(c.lost_city+' 寵物 協尋')}">找 ${esc(c.lost_city)} 協尋社團</a></div>
   </div>
   </div>
       <p class="small muted casemeta">${ic('eye')} 瀏覽 ${((c.view_count||0)+(firstView?1:0)).toLocaleString()}　·　${fmtDT(c.created_at)} 登記</p><p class="small ownerline ownerfoot"><button type="button" class="linkbtn" id="btnManage">${ic("key")} 我是飼主，管理這個案件</button><button type="button" class="linkbtn" id="btnReport">${ic("flag")} 檢舉</button><button type="button" class="linkbtn" id="btnBlock">${ic("shield")} 封鎖發布者</button></p>
@@ -6035,7 +6038,7 @@ async function renderCase(id){const _n=navId;
      const io=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?vis.add(e.target):vis.delete(e.target));st.classList.toggle('show',!vis.size)},{rootMargin:'0px 0px -80px 0px'});
      inPage.forEach(a=>io.observe(a));   // 一進頁面就顯示「我看到牠了」，捲到頁面裡的回報按鈕時才收起來（不重複）
      const mo=new MutationObserver(()=>{if(!st.isConnected){io.disconnect();mo.disconnect()}});mo.observe(app,{childList:true})}}
-  const shareTitle=`${sp(c.species).poster}：${c.name}（${c.lost_city}${c.lost_district||''}）`;
+  const shareTitle=c.status==='found'?`🎉 ${c.name} 已經找到了！謝謝大家幫忙（${c.lost_city}${c.lost_district||''}）`:c.status==='closed'?`${c.name} 的協尋已結束，謝謝大家（${c.lost_city}${c.lost_district||''}）`:`${sp(c.species).poster}：${c.name}（${c.lost_city}${c.lost_district||''}）看到請拍照、記下位置回報`;
   applyShareUrl(url,shareTitle);
   getShareUrl('s',id).then(u=>{if(u===url||location.hash.split('?')[0]!=='#/case/'+id)return;applyShareUrl(u,shareTitle);const t=$('#shareText');if(t)t.value=shareText(c,u)});
   $('#btnReport').onclick=()=>openReport('case',id,c.poster);
@@ -6391,7 +6394,7 @@ async function sendVerifyMail(id,token){
 }
 const VERIFY_MSG={sent:'確認信已寄出，請到信箱按「確認信箱」。沒看到請找找垃圾郵件匣。',already_verified:'✅ 你的 Email 已確認，有人回報會馬上寄信通知你。',too_soon:'剛剛已經寄過了，請先到信箱找找（包含垃圾郵件匣），10 分鐘後才能再寄。',throttled:'今天寄太多次了，請明天再試，或先到信箱找之前寄的確認信。',not_configured:'目前無法寄信，請稍後再到管理頁按「重寄確認信」。',failed:'確認信寄送失敗，請稍後到管理頁按「重寄確認信」。'};
 function renderCreated(id,token,email,petName){const PN=esc(petName||'牠');
-  const manage=`${CONFIG.SITE_URL}#/manage/${id}?t=${token}`;const cUrl=caseUrl(id);
+  const manage=`${CONFIG.SITE_URL}#/manage/${id}?t=${token}`;const cUrl=shortUrl('s',id);
   const saveMsg=`汪喵回家｜我的走失案件管理網址（請勿外流）\n${manage}`;
   app.innerHTML=`<div class="card done-card created" data-keep="${me()?0:1}"><div class="done-ic">${pawSvg()}</div><h1>登記完成了</h1>
   <p class="lede">還差${email?'三':'兩'}件事，照著做就好。</p>
@@ -6563,7 +6566,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   // 管理頁分成「首頁」和幾個單一工作的頁面（網址 ?p=...），一次只做一件事
   const P=qs(location.hash).p||'';const go=k=>`#/manage/${id}${k?'?p='+k:''}`;
   const tile=(k,icon,title,sub,cls='')=>`<a class="mg-tile ${cls}" href="${go(k)}"><span class="mg-ic" aria-hidden="true">${icon}</span><span class="mg-tt"><b>${title}</b><small>${sub}</small></span><span class="mg-go" aria-hidden="true">›</span></a>`;
-  const shareUrl=caseUrl(id);
+  const shareUrl=shortUrl('s',id);
   const mgAnaHTML=()=>{const conf=(ss||[]).filter(x=>x.status==='confirmed'&&x.seen_at&&!x.hidden).sort((x,y)=>new Date(x.seen_at)-new Date(y.seen_at));const pts=[];if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,t:c.lost_at,cls:'start',label:'走'});conf.forEach((x,i)=>{if(x.lat)pts.push({lat:x.lat,lng:x.lng,t:x.seen_at,cls:'',label:String(i+1),where:x.place_text})});const h=sightAnaHTML(sightAnalysis(c,pts));return h?h+`<p class="small" style="margin:-6px 0 14px"><a href="#/case/${id}">看地圖上的路線和範圍 ›</a></p>`:''};
   (_n===navId?app:_void).innerHTML=`
   <div ${P?'hidden':''}>
@@ -6595,7 +6598,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
       <p class="muted">走失後前幾天最關鍵，貼越多地方越好。</p>
       <div class="mg-big">
         <a class="btn big" href="#/poster/${id}">${ic("image")} 做協尋海報（可列印、可存圖）</a>
-        <a class="btn big line" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}">分享到 LINE</a>
+        <a class="btn big line" target="_blank" rel="noopener" href="${lineShareHref(`${sp(c.species).poster}：${c.name}（${c.lost_city}${c.lost_district||''}）看到請拍照、記下位置回報\n`+shareUrl)}">分享到 LINE</a>
         <a class="btn big fb" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}">分享到 Facebook</a>
         <button type="button" class="btn big ghost" id="mgCopy">${ic("link")} 複製協尋貼文（貼到社團、群組）</button>
         <a class="btn big ghost" href="#/case/${id}">${ic("eye")} 看大家看到的公開頁</a>
@@ -7054,7 +7057,7 @@ async function renderFound(id){const _n=navId;
   if(userHidden(f)){(_n===navId?app:_void).innerHTML=`<div class="empty-card"><div class="big">${ic('flag')}</div><b>你已經檢舉或封鎖了這則內容</b><p class="small">它不會再出現在你的畫面上。</p><button type="button" class="btn ghost" id="btnUnhide">恢復顯示</button> <a class="btn" href="#/">回首頁</a></div>`;$('#btnUnhide').onclick=()=>{try{localStorage.setItem('wh_hidden',JSON.stringify(lsList('wh_hidden').filter(x=>x!==f.id)));localStorage.setItem('wh_blocked',JSON.stringify(lsList('wh_blocked').filter(x=>x!==f.poster)))}catch(_){}route()};return}
   const title=`${f.kind==='injured'?'受傷的':f.kind==='found'?'有人撿到一隻':'有人看到一隻'}${[SIZE[f.size],f.colour].filter(Boolean).join('')}${sp(f.species).name}`;
   setTitle(title);
-  const photos=f.photos||[];const url=CONFIG.SITE_URL+'#/found/'+id;
+  const photos=f.photos||[];const url=shortUrl('f',id);
   (_n===navId?app:_void).innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span class="status-pill ${f.status==='open'?(f.kind==='injured'?'injured':'found'):'closed'}">${f.status==='open'?(f.kind==='injured'?'受傷通報':f.kind==='found'?'等待飼主認領':'目擊通報'):f.status==='reunited'?'已回到主人身邊':'已結案'}</span></div>
   <h1>${esc(title)}</h1>
   ${f.kind==='injured'&&f.status==='open'?`<div class="notice red" style="margin:10px 0"><b>這隻毛孩受傷了</b>如果你在附近，請撥全國動保專線 <a href="tel:1959">1959</a>（接不通改撥 <a href="tel:1999">1999</a>）通報救援；靠近時小心，受傷的動物可能因疼痛咬人。</div>`:''}
@@ -7179,15 +7182,15 @@ async function renderFoundManage(id,token){const _n=navId;setTitle('管理我的
 const shareCache={};
 async function getShareUrl(kind,id){
   const k=kind+id;if(shareCache[k])return shareCache[k];
-  const pretty=`${CONFIG.SITE_URL}${kind}/${id}`;   // Cloudflare 會把 .html 轉址掉，直接用沒有 .html 的網址
-  if(IS_APP)return shareCache[k]=pretty;   // App 裡不能跨網域檢查（會失敗而退回 # 網址），分享頁一定存在，直接用
-  const fallback=CONFIG.SITE_URL+(kind==='s'?'#/case/':'#/found/')+id;
-  try{const r=await fetch(pretty,{method:'HEAD',cache:'no-store'});shareCache[k]=r.ok?pretty:fallback}catch(_){shareCache[k]=fallback}
+  const pretty=shortUrl(kind,id),full=`${CONFIG.SITE_URL}${kind}/${id}`;
+  if(IS_APP)return shareCache[k]=pretty;
+  // 確認短網址真的指到這一筆（極少數撞號時改用完整網址）
+  try{const r=await fetch(pretty,{cache:'no-store'});shareCache[k]=r.ok&&(await r.text()).includes(id)?pretty:full}catch(_){shareCache[k]=full}
   return shareCache[k];
 }
 function applyShareUrl(url,title){
   const enc=encodeURIComponent(url);
-  document.querySelectorAll('[data-share="line"]').forEach(a=>a.href='https://social-plugins.line.me/lineit/share?url='+enc);
+  document.querySelectorAll('[data-share="line"]').forEach(a=>a.href=lineShareHref((title?title+'\n':'')+url));
   document.querySelectorAll('[data-share="fb"]').forEach(a=>a.href='https://www.facebook.com/sharer/sharer.php?u='+enc);
   document.querySelectorAll('[data-share="copy"]').forEach(b=>b.onclick=()=>copy(url));
   document.querySelectorAll('[data-share="native"]').forEach(b=>b.onclick=()=>{share(title,url);buddyGive('share')});
