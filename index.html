@@ -1234,6 +1234,11 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .adm-ph{width:64px;height:64px;border-radius:14px;object-fit:cover;flex:none;background:var(--line)}
 .adm-ct{background:var(--beige,var(--line));border-radius:12px;padding:8px 10px;margin-top:4px;line-height:1.7;overflow-wrap:anywhere}
 .adm-acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.adm-mc{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:12px}
+.adm-mc h4{margin:0 0 6px;font-size:15px}
+.adm-mi{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)}.adm-mi:last-child{border-bottom:0}
+.adm-mi img{width:48px;height:48px;border-radius:10px;object-fit:cover;flex:none;background:var(--line)}
+.adm-mi .t{flex:1;min-width:0;display:grid;gap:2px;overflow-wrap:anywhere;line-height:1.6}.adm-mi .t .small{white-space:pre-line}
 .adm-edit{max-height:88vh;overflow:auto}
 .adm-edit .fl{display:grid;gap:4px;margin-top:10px;font-size:14px;font-weight:700;color:var(--ink-2)}
 .sheet-bg.lightbox{padding:0;align-items:flex-end;z-index:900}
@@ -3143,7 +3148,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.8';
+const BUILD = 'v7.30.9';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -7714,6 +7719,30 @@ function admEdit(t,r,after){
     const {error}=await sb.rpc('admin_update',{p_type:t,p_id:r.id,p});if(error)return toast(error.message);
     toast('已儲存');closeOverlay(el);after&&after()});
   openOverlay(el);requestAnimationFrame(()=>el.classList.add('show'))}
+// 單一會員發佈過的內容（私訊不列）
+async function admMemberContent(btn){const uid=btn.dataset.mcont;const el=document.getElementById('mc-'+uid);if(!el)return;
+  if(!el.classList.contains('hidden')){el.classList.add('hidden');btn.setAttribute('aria-expanded','false');btn.textContent='看他發佈的內容';return}
+  el.classList.remove('hidden');btn.setAttribute('aria-expanded','true');btn.textContent='收起內容';
+  if(el.dataset.ok)return;el.innerHTML='<p class="muted small">載入中…</p>';
+  const {data,error}=await sb.rpc('admin_member_content',{p_uid:uid});
+  if(error){el.innerHTML=`<p class="muted small">${esc(error.message)}</p>`;return}
+  el.dataset.ok='1';const d=data||{};
+  const sp=x=>x==='cat'?'貓':x==='dog'?'狗':'';
+  const ST={searching:'協尋中',found:'已回家',closed:'已結案',open:'等飼主中',reunited:'已回到主人身邊',pending:'待飼主確認',confirmed:'已確認',rejected:'已退回'};
+  const area=(a,b,c)=>[a,b,c].filter(Boolean).join(' ');
+  const item=(photo,title,meta,text,href)=>`<div class="adm-mi">${photo?`<img src="${esc(photo)}" alt="" loading="lazy">`:''}<div class="t"><b>${href?`<a href="${href}">${esc(title||'（未填）')}</a>`:esc(title||'（未填）')}</b><span class="small muted">${meta}</span>${text?`<span class="small">${esc(text)}</span>`:''}</div></div>`;
+  const sec=(name,list,fn)=>list&&list.length?`<div><h4>${name}（${list.length}）</h4>${list.map(fn).join('')}</div>`:'';
+  const html=[
+    sec('走失案件',d.cases,c=>item(c.photo,c.name,`${fmtDT(c.created_at)}・${sp(c.species)}・${ST[c.status]||c.status}・${esc(area(c.lost_city,c.lost_district,c.lost_place))}`,[c.features,c.notes].filter(Boolean).join('\n'),'#/case/'+c.id)),
+    sec('拾獲／看到通報',d.founds,f=>item(f.photo,(f.kind==='found'?'撿到':'看到')+(f.breed?'・'+f.breed:'')+(f.colour?'・'+f.colour:''),`${fmtDT(f.created_at)}・${ST[f.status]||f.status}・${esc(area(f.city,f.district,f.place_text))}`,[f.features,f.notes].filter(Boolean).join('\n'),'#/found/'+f.id)),
+    sec('目擊回報',d.sightings,s=>item(s.photo,'回報給「'+(s.case_name||'案件')+'」',`${fmtDT(s.created_at)}・${ST[s.status]||s.status}${s.place_text?'・'+esc(s.place_text):''}${s.direction?'・往'+esc(s.direction):''}`,s.note,s.case_id?'#/case/'+s.case_id:'')),
+    sec('交朋友名片',d.cards,k=>item(k.photo,k.name,`${fmtDT(k.created_at)}・${sp(k.species)}${k.breed?'・'+esc(k.breed):''}・${esc(area(k.city,k.district))}${k.hidden?'・已隱藏':''}`,[k.intro,(k.tags||[]).join('、')].filter(Boolean).join('\n'))),
+    sec('發起的聚會',d.meets,m=>item('',m.title,`${fmtDT(m.created_at)} 發起・${fmtDT(m.starts_at)} 在 ${esc(area(m.city,m.district,m.place))}${m.hidden?'・已隱藏':''}`,m.note)),
+    sec('聚會留言',d.meet_msgs,g=>item('','在「'+(g.meet_title||'聚會')+'」留言',fmtDT(g.created_at),g.body)),
+    sec('寵物檔案',d.pets,t=>item(t.photo,t.name,`${fmtDT(t.created_at)}・${sp(t.species)}${t.breed?'・'+esc(t.breed):''}${t.colour?'・'+esc(t.colour):''}`,''))
+  ].join('');
+  el.innerHTML=html||'<p class="muted small">這位會員還沒有發佈任何內容</p>';
+}
 async function admMembers(box,query){const _n=navId;let off=0,rows=[];
   box.innerHTML=`<form class="adm-search" id="admQ" role="search"><input type="search" name="q" value="${esc(query)}" placeholder="搜尋 Email 或暱稱…" aria-label="搜尋"><button class="btn sm">搜尋</button></form>
   <div id="admRows"><div class="empty">載入中…</div></div><div id="admMore"></div>`;
@@ -7729,13 +7758,15 @@ async function admMembers(box,query){const _n=navId;let off=0,rows=[];
       <div class="small muted">加入 ${fmtDT(m.created_at)}${m.last_sign_in_at?'　最後登入 '+fmtDT(m.last_sign_in_at):''}</div>
       <div class="small muted">走失案件 ${m.cases}・拾獲 ${m.founds}・目擊 ${m.sightings}・寵物 ${m.pets}</div>
       <div class="adm-acts">
+        <button class="btn sm ghost" data-mcont="${m.id}" aria-expanded="false">看他發佈的內容</button>
         ${m.email?`<a class="btn sm ghost" href="mailto:${esc(m.email)}?subject=${encodeURIComponent('【汪喵回家】')}">寄信</a>`:''}
         ${m.cases?`<a class="btn sm ghost" href="#/admin?tab=case&q=${encodeURIComponent(m.email||m.id)}">看他的案件</a>`:''}
         ${m.founds?`<a class="btn sm ghost" href="#/admin?tab=found&q=${encodeURIComponent(m.email||m.id)}">看他的通報</a>`:''}
         ${m.is_admin||m.banned?'':`<button class="btn sm danger" data-mban="${m.id}">停權</button>`}
-      </div></div>`).join(''):'<p class="muted">沒有符合的會員</p>';
+      </div><div class="adm-mc hidden" id="mc-${m.id}"></div></div>`).join(''):'<p class="muted">沒有符合的會員</p>';
     $('#admMore').innerHTML=got.length===50?'<button class="btn ghost" id="admMoreB" style="width:100%">載入更多</button>':'';
     const mb=$('#admMoreB');if(mb)mb.onclick=()=>{mb.disabled=true;mb.textContent='載入中…';load(false)};
+    box.querySelectorAll('[data-mcont]').forEach(b=>b.onclick=()=>admMemberContent(b));
     box.querySelectorAll('[data-mban]').forEach(b=>b.onclick=async()=>{
       const why=prompt('停權原因（會記錄在後台，不會告訴對方）：','詐騙／濫用');if(why===null)return;
       const days=admAskDays();if(days===undefined)return;
