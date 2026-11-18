@@ -3148,7 +3148,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.14';
+const BUILD = 'v7.30.15';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5536,8 +5536,8 @@ function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const
   const best=cat?'深夜 11 點～清晨 5 點':shy?'清晨 5～7 點、傍晚':'清晨與傍晚';
   const N=esc(c.name||'毛孩'),tips=[];
   if(cat){tips.push(`貓咪多半躲在家附近 ${fmtKm(rad)} 內：車底、機車坑、樓梯間、冷氣室外機後面。晚上拿手電筒照，眼睛會反光。`);tips.push('把貓砂盆、睡墊放在門口或陽台，熟悉的味道會引毛孩回來。')}
-  else{tips.push(hrs<6?`先在走失地點附近 ${fmtKm(rad)} 內慢慢走、輕聲叫「${N}」，帶毛孩愛吃的零食。`:`以走失地點為中心，先找周圍 ${fmtKm(rad)}：公園、學校、市場、河堤、工地這些地方。`)}
-  if(shy)tips.push(`${N}比較怕生：看到毛孩<b>不要追、不要大聲叫</b>，蹲低、側身，丟零食慢慢等毛孩靠近。`);
+  else{tips.push(hrs<6?`先在走失地點附近 ${fmtKm(rad)} 內慢慢走、輕聲叫「${N}」，帶${N}愛吃的零食。`:`以走失地點為中心，先找周圍 ${fmtKm(rad)}：公園、學校、市場、河堤、工地這些地方。`)}
+  if(shy)tips.push(`${N}比較怕生：看到${N}<b>不要追、不要大聲叫</b>，蹲低、側身，丟零食慢慢等${N}靠近。`);
   else if(friendly&&!cat)tips.push(`${N}親人，可能會跟著路人走：問附近店家、警衛、外送員、早餐店有沒有看到。`);
   if(hrs>=12)tips.push(`打電話問 ${esc(c.lost_city||'當地')}的收容所和附近動物醫院，${hrs>=48?'每 2～3 天':'明天'}再問一次（照片和晶片號碼準備好）。`);
   tips.push(hrs<48?'把協尋頁分享到當地 FB 社團、LINE 群組，在走失點附近貼 A4 海報。':'在常有人經過的地方補貼海報，協尋貼文每隔幾天重新分享一次。');
