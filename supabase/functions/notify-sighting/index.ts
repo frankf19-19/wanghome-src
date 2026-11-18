@@ -101,10 +101,10 @@ function mkSightingMail(name: string, manage: string, lst: any[], pub: string, w
     return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;background:${MK_SOFT};border-radius:16px"><tr><td style="padding:14px">${ph}${mkRows(rows)}${mp}</td></tr></table>`;
   }).join("");
   return mkShell({
-    pre: `有 ${lst.length} 筆新的目擊回報，請到管理頁確認`, title: `有人看到${name}了`, lead: `有 ${lst.length} 筆新的目擊回報，請看是不是牠。`, hero,
+    pre: `有 ${lst.length} 筆新的目擊回報，請到管理頁確認`, title: `有人看到${name}了`, lead: `有 ${lst.length} 筆新的目擊回報，請看是不是毛孩。`, hero,
     body: items + mkBtn(manage, "到管理頁確認這筆目擊") +
       `<p style="margin:10px 0 0;font-size:13.5px;line-height:1.65;color:${MK_MUTE}">確認後才會顯示在公開地圖上。這個按鈕 30 天內可以直接進入管理頁，<b>請不要轉寄這封信</b>。</p>` +
-      mkNote("以上是網友填寫的內容，請自行判斷真假。<br>看到牠時不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。"),
+      mkNote("以上是網友填寫的內容，請自行判斷真假。<br>看到毛孩時不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。"),
   });
 }
 // ===== MAILKIT END =====
@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
         .eq("case_id", caseId).eq("kind", "push").gte("sent_at", new Date(Date.now() - 10 * 60e3).toISOString());
       if ((fresh ?? 0) > 0 && (recent ?? 0) === 0) {
         await sb.from("case_mail_log").insert({ case_id: caseId, to_email: "push", kind: "push" });
-        await pushToUser(c.owner_id, `有人看到${c.name}了！`, "點開看目擊的時間和位置，確認是不是牠", `#/manage/${caseId}`);
+        await pushToUser(c.owner_id, `有人看到${c.name}了！`, "點開看目擊的時間和位置，確認是不是毛孩", `#/manage/${caseId}`);
       }
     } catch (_) { /* 推播失敗不影響寄信 */ }
   }
@@ -284,11 +284,11 @@ Deno.serve(async (req) => {
     const link = `${SITE}#/verify-email?c=${caseId}&k=${key}`;
     // 信裡不放使用者填的文字（案件名稱），避免被拿來夾帶廣告或詐騙訊息
     const text = [`你好，你在${SITE_NAME}登記了走失協尋，並留下這個 Email。`, "",
-      "請點下面的連結確認這是你的信箱。確認之後，有人回報看到牠，我們會馬上寄信通知你：", link, "",
+      "請點下面的連結確認這是你的信箱。確認之後，有人回報看到毛孩，我們會馬上寄信通知你：", link, "",
       "連結 7 天內有效。", "不是你登記的？直接刪除這封信就好，我們不會再寄信給你。", "", `— ${SITE_NAME}　${SITE}`].join("\n");
     const html = mkShell({
-      pre: "點按鈕確認信箱，之後有人看到牠才收得到通知", title: "請確認你的信箱",
-      lead: `你在${SITE_NAME}登記了走失協尋。確認這是你的信箱之後，有人回報看到牠，我們會馬上寄信通知你。`,
+      pre: "點按鈕確認信箱，之後有人看到毛孩才收得到通知", title: "請確認你的信箱",
+      lead: `你在${SITE_NAME}登記了走失協尋。確認這是你的信箱之後，有人回報看到毛孩，我們會馬上寄信通知你。`,
       body: mkBtn(link, "確認信箱") + `<p style="margin:12px 0 0;font-size:14px;line-height:1.65;color:${MK_MUTE}">連結 7 天內有效。</p>`,
       foot: "不是你登記的？直接刪除這封信就好，我們不會再寄信給你。<br>",
     });
@@ -345,7 +345,7 @@ Deno.serve(async (req) => {
   }
   lines.push("以上是網友填寫的內容，請自行判斷真假；本站不會要你匯款或提供密碼。",
     "確認後才會顯示在公開地圖上，點下面的網址就能直接到管理頁處理（30 天內有效，請勿轉傳）：",
-    manageUrl, "", "看到牠時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。", "", `— ${SITE_NAME}`);
+    manageUrl, "", "看到毛孩時請不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。", "", `— ${SITE_NAME}`);
 
   // 信件版面（HTML）：和排程補寄的目擊通知用同一個版面；網友填的文字一律跳脫
   const pubPrefix = (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/+$/, "") + "/storage/v1/object/public/photos/";

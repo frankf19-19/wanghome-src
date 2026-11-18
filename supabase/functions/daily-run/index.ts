@@ -194,7 +194,7 @@ async function runMatching() {
         shelter_address: a.shelter_address ?? null, found_place: a.animal_foundplace ?? null,
         colour: a.animal_colour ?? null,
         bodytype: ({ SMALL: "小型", MEDIUM: "中型", BIG: "大型" } as Record<string, string>)[a.animal_bodytype] ?? a.animal_bodytype ?? null,
-        sex: ({ M: "公", F: "母" } as Record<string, string>)[a.animal_sex] ?? "不明",
+        sex: ({ M: "男生", F: "女生" } as Record<string, string>)[a.animal_sex] ?? "不明",
         age: ages[a.animal_age] ?? a.animal_age ?? null,
         variety: a.animal_Variety || a.animal_variety || null,
         photo_url: photo.startsWith("http") ? photo : null,
@@ -496,10 +496,10 @@ function mkSightingMail(name: string, manage: string, lst: any[], pub: string, w
     return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 12px;background:${MK_SOFT};border-radius:16px"><tr><td style="padding:14px">${ph}${mkRows(rows)}${mp}</td></tr></table>`;
   }).join("");
   return mkShell({
-    pre: `有 ${lst.length} 筆新的目擊回報，請到管理頁確認`, title: `有人看到${name}了`, lead: `有 ${lst.length} 筆新的目擊回報，請看是不是牠。`, hero,
+    pre: `有 ${lst.length} 筆新的目擊回報，請到管理頁確認`, title: `有人看到${name}了`, lead: `有 ${lst.length} 筆新的目擊回報，請看是不是毛孩。`, hero,
     body: items + mkBtn(manage, "到管理頁確認這筆目擊") +
       `<p style="margin:10px 0 0;font-size:13.5px;line-height:1.65;color:${MK_MUTE}">確認後才會顯示在公開地圖上。這個按鈕 30 天內可以直接進入管理頁，<b>請不要轉寄這封信</b>。</p>` +
-      mkNote("以上是網友填寫的內容，請自行判斷真假。<br>看到牠時不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。"),
+      mkNote("以上是網友填寫的內容，請自行判斷真假。<br>看到毛孩時不要呼喊或追趕，慢慢靠近、蹲低、用食物引導。"),
   });
 }
 // ===== MAILKIT END =====
@@ -545,7 +545,7 @@ function shelterHtml(c: any, cid: string, lst: any[]) {
 function foundHtml(c: any, cid: string, lst: any[], fr: Map<string, any>) {
   const items = lst.slice(0, 10).map((m) => {
     const f = fr.get(m.found_id) ?? {};
-    const kind = f.kind === "injured" ? "有人看到牠受傷" : f.kind === "found" ? "有人撿到" : "有人看到";
+    const kind = f.kind === "injured" ? "有人看到毛孩受傷" : f.kind === "found" ? "有人撿到" : "有人看到";
     return mkItem({
       img: mkOwn((f.photos ?? [])[0]), href: `${SITE_URL}#/found/${m.found_id}`, title: `${kind}｜${f.city ?? ""}${f.district || ""}`,
       pill: m.photo_sim != null ? mkPill(`照片相似 ${m.photo_sim}%`) : mkPill("時間、地點、特徵接近", "gray"),
@@ -553,8 +553,8 @@ function foundHtml(c: any, cid: string, lst: any[], fr: Map<string, any>) {
     });
   }).join("");
   return mkShell({
-    pre: `有 ${lst.length} 筆可能是牠的拾獲／目擊通報`, title: `有人可能撿到或看到${c.name}`, hero: mkHero(c),
-    lead: `有網友登記了 ${lst.length} 筆可能是牠的通報。請點進去看照片，是牠的話直接聯絡通報者。`,
+    pre: `有 ${lst.length} 筆可能是毛孩的拾獲／目擊通報`, title: `有人可能撿到或看到${c.name}`, hero: mkHero(c),
+    lead: `有網友登記了 ${lst.length} 筆可能是毛孩的通報。請點進去看照片，是毛孩的話直接聯絡通報者。`,
     body: items + mkBtn(`${SITE_URL}#/case/${cid}`, "打開案件頁看全部") + mkNote("以上是網友填寫的內容，請自行判斷真假。對方要求先付錢才還毛孩的，都是詐騙。"),
   });
 }

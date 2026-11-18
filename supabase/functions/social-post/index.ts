@@ -83,7 +83,7 @@ function caption(c: any, forIG: boolean): string {
     feat ? `🔎 特徵：${feat}` : null,
     c.has_chip ? "💡 有晶片" : null,
     "",
-    "看到牠請不要追，拍照並記下時間、地點和牠往哪走，再回報給飼主。",
+    "看到毛孩請不要追，拍照並記下時間、地點和毛孩往哪走，再回報給飼主。",
     forIG ? `👉 回報目擊：個人簡介的連結，搜尋「${clip(c.name, 12)}」` : `👉 回報目擊：${url}`,
     "",
     `請幫忙分享，讓${clip(c.name, 12)}早點回家 🙏`,
@@ -167,7 +167,7 @@ async function runWeekly() {
   } else {
     lines.push("💪 本週還沒有毛孩回家的消息，大家繼續幫忙留意。");
   }
-  if (fresh.length) lines.push("", `這週有 ${fresh.length} 隻毛孩在汪喵回家登記協尋，請幫忙看看你家附近有沒有牠們：`, `${SITE}l/`);
+  if (fresh.length) lines.push("", `這週有 ${fresh.length} 隻毛孩在汪喵回家登記協尋，請幫忙看看你家附近有沒有毛孩們：`, `${SITE}l/`);
   lines.push("", "毛孩走失了？免費登記協尋 👉 " + SITE, "#汪喵回家 #走失協尋 #尋狗 #尋貓 #毛孩回家");
   const pg = await page();
   const j = await graph("POST", `${pg.id}/feed`, { message: lines.join("\n"), link: found.length ? SITE : `${SITE}l/` });
