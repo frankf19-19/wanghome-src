@@ -3148,7 +3148,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.9';
+const BUILD = 'v7.30.10';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -7553,7 +7553,7 @@ async function renderAdmin(){const _n=navId;
   if(_n!==navId)return;
   if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const q=qs(location.hash),TABS=[['reports','檢舉'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
@@ -7561,15 +7561,40 @@ async function renderAdmin(){const _n=navId;
   <div class="stats adm-stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已回家'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??'–'}</b>${t}</div>`).join('')}</div>
   <div class="tabs adm-tabs" role="tablist">${TABS.map(([v,t])=>`<button type="button" role="tab" data-tab="${v}" class="${v===tab?'on':''}" aria-selected="${v===tab}">${t}${v==='reports'&&st?.open_reports?`<span class="cnt">${st.open_reports}</span>`:''}</button>`).join('')}</div>
   <div id="adm"></div>`;
-  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>goReplace('#/admin?tab='+b.dataset.tab));
-  const box=$('#adm');
-  if(tab==='reports')return admReports(box,q.all==='1');
-  if(tab==='moa')return admMoa(box,q.all==='1');
-  if(tab==='shpic')return admShPic(box);
-  if(tab==='members')return admMembers(box,q.q||'');
-  if(tab==='bans')return admBans(box);
-  return admList(box,tab,q.q||'',q.f||'all');
+  const strip=app.querySelector('.adm-tabs');
+  const show=(t,qq)=>{const box=$('#adm');
+    strip.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+    const a=strip.querySelector('.on');if(a){const sr=strip.getBoundingClientRect(),ar=a.getBoundingClientRect();if(ar.left<sr.left)strip.scrollLeft-=sr.left-ar.left+16;else if(ar.right>sr.right)strip.scrollLeft+=ar.right-sr.right+32}
+    if(t==='reports')return admReports(box,qq.all==='1');
+    if(t==='site')return admSite(box);
+    if(t==='moa')return admMoa(box,qq.all==='1');
+    if(t==='shpic')return admShPic(box);
+    if(t==='members')return admMembers(box,qq.q||'');
+    if(t==='bans')return admBans(box);
+    return admList(box,t,qq.q||'',qq.f||'all')};
+  // 切換分頁：原地換內容，不重新整理整頁、不跳回頂端
+  strip.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{const t=b.dataset.tab;if(b.classList.contains('on'))return;
+    navId=++__navMax;try{history.replaceState(history.state,'',location.pathname+location.search+'#/admin?tab='+t)}catch(_){}
+    const box=$('#adm');box.style.minHeight=box.offsetHeight+'px';box.innerHTML='<div class="empty">讀取中…</div>';
+    Promise.resolve(show(t,{})).finally(()=>{box.style.minHeight=''})});
+  return show(tab,q);
 }
+// 網友在網站上發的內容（不含管理員自己發的、不含農業部同步的）
+async function admSite(box){const _n=navId;let off=0,rows=[];
+  box.innerHTML=`<p class="small muted">網友在網站上發的走失案件、拾獲通報和目擊回報，最新的在最上面。不含管理員發的，也不含農業部同步的案件。</p><div id="admSite"><div class="empty">讀取中…</div></div><div id="admSiteMore"></div>`;
+  const TL={case:'走失案件',found:'拾獲通報',sighting:'目擊'},ST={searching:'協尋中',found:'已回家',closed:'已結案',open:'等飼主中',reunited:'已回到主人身邊',pending:'待飼主確認',confirmed:'已確認',rejected:'已退回'};
+  const load=async()=>{const {data,error}=await sb.rpc('admin_site_posts',{p_offset:off});if(_n!==navId)return;
+    if(error){$('#admSite').innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
+    const got=Array.isArray(data)?data:[];rows=rows.concat(got);off+=got.length;
+    $('#admSite').innerHTML=rows.length?rows.map(r=>`<div class="card adm-card"><div class="adm-row">
+      ${r.photo?thumbImg(r.photo,'','class="adm-ph"'):''}
+      <div class="adm-main"><div class="adm-h"><span class="tag">${TL[r.type]}</span><b><a href="${admUrl(r.type,r.id,r.case_id)}">${esc(r.title||'（未填）')}</a></b>${r.status?`<span class="tag ${r.status==='searching'||r.status==='open'||r.status==='pending'?'red':'gray'}">${esc(ST[r.status]||r.status)}</span>`:''}${r.hidden?'<span class="tag gray">已隱藏</span>':''}</div>
+      <div class="small muted">${fmtDT(r.created_at)}${r.area?'・'+esc(r.area):''}</div>
+      ${r.body?`<div class="small" style="white-space:pre-line">${esc(r.body)}</div>`:''}
+      <div class="small muted">發佈者：${r.member_email?esc(r.display_name||'')+' '+admMail(r.member_email,r.title):'未登入'}${r.who?'・聯絡人 '+esc(r.who):''}${r.phone?'・'+esc(r.phone):''}</div></div></div></div>`).join(''):'<p class="muted">目前還沒有網友發佈的內容</p>';
+    $('#admSiteMore').innerHTML=got.length===50?'<button class="btn ghost" id="admSiteMoreB" style="width:100%">載入更多</button>':'';
+    const mb=$('#admSiteMoreB');if(mb)mb.onclick=()=>{mb.disabled=true;mb.textContent='載入中…';load()}};
+  load()}
 const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊',user:'私訊會員',comment:'線索留言'};
 const ADM_MAX={name:30,lost_place:200,place_text:200,current_place:200,contact_phone:30,reporter_phone:30,contact_line:60,reporter_line:60,direction:20};
 const FSTATUS_T={open:'等飼主中',reunited:'已回到主人身邊',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
