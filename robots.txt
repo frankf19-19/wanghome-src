@@ -1,4 +1,26 @@
+# 汪喵回家 wangmiaotw.com — 歡迎搜尋引擎與 AI 助理收錄，幫走失的毛孩被更多人看到
 User-agent: *
 Allow: /
 Disallow: /cdn-cgi/
+
+# AI 搜尋與助理（明確允許）
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: Bingbot
+User-agent: meta-externalagent
+User-agent: CCBot
+User-agent: DuckAssistBot
+User-agent: MistralAI-User
+Allow: /
+Disallow: /cdn-cgi/
+
 Sitemap: https://wangmiaotw.com/sitemap.xml
