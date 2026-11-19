@@ -3111,8 +3111,8 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 <main id="app" tabindex="-1"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>
 <!-- 搜尋引擎看得到的首頁簡介（畫面載入後會被 App 畫面取代） -->
 <section class="seo-intro" aria-hidden="true"><h1>汪喵回家 — 全台走失狗貓協尋平台</h1>
-<p>毛孩走失了，免費登記協尋：自動產生 QR Code 海報、網友目擊回報畫在地圖時間軸上、每天自動比對全台收容所與農業部遺失申報。看到或撿到走失的狗貓，也可以登記通報，系統會自動比對附近的走失案件。</p>
-<ul><li><a href="https://wangmiaotw.com/g/dog-lost">狗走失了怎麼辦？黃金 48 小時要做的 10 件事</a></li><li><a href="https://wangmiaotw.com/g/cat-lost">貓走失了怎麼找？</a></li><li><a href="https://wangmiaotw.com/g/found-pet">撿到狗或貓怎麼辦？</a></li><li><a href="https://wangmiaotw.com/g/shelter-search">寵物走失後怎麼查收容所？</a></li><li><a href="https://wangmiaotw.com/l/">各縣市正在協尋的走失毛孩</a></li><li><a href="https://wangmiaotw.com/adopt/">全台收容所待領養的狗狗、貓咪</a></li><li><a href="https://wangmiaotw.com/g/">更多協尋指南與毛孩小學堂</a></li></ul></section></main>
+<p>毛孩走失了，免費登記協尋：自動產生 QR Code 海報、網友目擊回報畫在地圖時間軸上、每天自動比對全台收容所與農業部遺失申報。看到或撿到走失的狗貓，也可以登記通報，系統會自動比對附近的走失案件。只有照片也能用 AI 比對全台協尋與收容所。完全免費、不收手續費、不賣資料；iPhone 在 App Store 搜尋「汪喵回家」。</p>
+<ul><li><a href="https://wangmiaotw.com/g/ai-find-pet">用 AI 找走失的狗、貓：上傳照片比對全台協尋與收容所</a></li><li><a href="https://wangmiaotw.com/g/about-wangmiao">汪喵回家是什麼？台灣免費的走失狗貓協尋網站與 App</a></li><li><a href="https://wangmiaotw.com/g/dog-lost">狗走失了怎麼辦？黃金 48 小時要做的 10 件事</a></li><li><a href="https://wangmiaotw.com/g/cat-lost">貓走失了怎麼找？</a></li><li><a href="https://wangmiaotw.com/g/found-pet">撿到狗或貓怎麼辦？</a></li><li><a href="https://wangmiaotw.com/g/shelter-search">寵物走失後怎麼查收容所？</a></li><li><a href="https://wangmiaotw.com/l/">各縣市正在協尋的走失毛孩</a></li><li><a href="https://wangmiaotw.com/adopt/">全台收容所待領養的狗狗、貓咪</a></li><li><a href="https://wangmiaotw.com/g/">更多協尋指南與毛孩小學堂</a></li></ul></section></main>
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p><a class="appdl app-hide" href="https://apps.apple.com/tw/app/id6827632980" target="_blank" rel="noopener"><span class="appdl-i" aria-hidden="true">📱</span><span><small>iPhone 免費下載</small><b>App Store</b></span></a><span class="appdl-note app-hide small">Android 版即將推出</span><p class="footsoc small">追蹤我們：<a href="https://www.facebook.com/wangmiaotw" target="_blank" rel="noopener">Facebook 粉專</a>・<a href="https://www.instagram.com/wangmiaotw/" target="_blank" rel="noopener">Instagram</a>・<a href="https://www.threads.com/@wangmiaotw" target="_blank" rel="noopener">Threads</a></p></div>
@@ -3148,7 +3148,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.16';
+const BUILD = 'v7.30.17';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
