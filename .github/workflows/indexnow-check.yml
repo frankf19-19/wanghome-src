@@ -1,0 +1,12 @@
+name: IndexNow 連線檢查
+on: workflow_dispatch
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: |
+          B='{"host":"wangmiaotw.com","key":"73080c78bdeeab41a5d6fcb7fa0d1bc7","keyLocation":"https://wangmiaotw.com/73080c78bdeeab41a5d6fcb7fa0d1bc7.txt","urlList":["https://wangmiaotw.com/g/ai-find-pet","https://wangmiaotw.com/g/about-wangmiao"]}'
+          for ep in https://api.indexnow.org/indexnow https://www.bing.com/indexnow https://yandex.com/indexnow https://search.seznam.cz/indexnow https://indexnow.naver.com/indexnow; do
+            echo "== $ep"; curl -s -o /tmp/r -w "%{http_code}\n" -X POST -H "Content-Type: application/json; charset=utf-8" -d "$B" "$ep"; head -c 300 /tmp/r; echo
+          done
