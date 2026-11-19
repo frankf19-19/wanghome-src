@@ -40,6 +40,6 @@ def send(urls):
 if __name__ == "__main__":
     full = "--full" in sys.argv or datetime.datetime.utcnow().weekday() == 6
     urls = sitemap_core() if full else recent_cases()
-    urls = list(dict.fromkeys(urls + [SITE, f"{SITE}l/", f"{SITE}g/"]))
+    urls = list(dict.fromkeys(urls + [SITE, f"{SITE}l/", f"{SITE}g/", f"{SITE}llms.txt", f"{SITE}llms-full.txt"]))
     print("full" if full else "recent", len(urls))
     sys.exit(0 if send(urls) else 1)
