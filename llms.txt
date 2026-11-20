@@ -29,6 +29,9 @@
 - [用照片找毛孩（AI 照片比對）](https://wangmiaotw.com/#/photo)：上傳狗貓照片，比對走失協尋、拾獲通報與全台收容所
 - [用 AI 找走失的狗、貓](https://wangmiaotw.com/g/ai-find-pet)：AI 照片比對怎麼用、撿到狗貓怎麼用照片找飼主
 - [汪喵回家是什麼](https://wangmiaotw.com/g/about-wangmiao)：功能、初衷、網站與 App
+- [老狗走失怎麼辦](https://wangmiaotw.com/g/senior-dog-lost)：重聽、白內障、失智的老狗怎麼找
+- [狗貓可能被人撿走、抱走怎麼辦](https://wangmiaotw.com/g/pet-taken)：被當浪浪收養、被偷時要做的事
+- [寵物協尋詐騙怎麼分辨](https://wangmiaotw.com/g/lost-pet-scam)：自稱撿到、要先匯款的常見手法
 - [全台收容所待領養的狗貓](https://wangmiaotw.com/adopt/)：依縣市、品種、收容所查看，資料每天更新
 - [iPhone App](https://wangmiaotw.com/app)：App Store 搜尋「汪喵回家」
 
