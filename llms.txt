@@ -18,8 +18,8 @@
 - [首頁](https://wangmiaotw.com/)：全台正在協尋的走失狗貓
 - [各縣市、鄉鎮市區走失毛孩與走失處理方式](https://wangmiaotw.com/l/)：每個縣市、每個區都有一頁，列出當地正在找的毛孩、動保單位電話與收容所
 - [協尋指南與毛孩小學堂](https://wangmiaotw.com/g/)：狗走失怎麼辦、貓走失怎麼找、撿到狗貓怎麼辦、怎麼查收容所、晶片遺失申報等
-- [狗走失怎麼辦：黃金 48 小時](https://wangmiaotw.com/g/dog-lost)
-- [貓走失怎麼找](https://wangmiaotw.com/g/cat-lost)
+- [狗不見了、走失了怎麼辦：黃金 48 小時](https://wangmiaotw.com/g/dog-lost)
+- [貓不見了、走失了怎麼找](https://wangmiaotw.com/g/cat-lost)
 - [撿到狗或貓怎麼辦](https://wangmiaotw.com/g/found-pet)
 - [寵物走失後怎麼查收容所](https://wangmiaotw.com/g/shelter-search)
 - [晶片遺失申報](https://wangmiaotw.com/g/chip-lost-report)
