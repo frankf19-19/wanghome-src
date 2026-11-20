@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
     inputs:
       tag: { description: "檔名前綴", required: false, default: "before" }
+permissions:
+  contents: write
 jobs:
   shots:
     runs-on: ubuntu-latest
@@ -13,5 +15,6 @@ jobs:
         with: { node-version: 20 }
       - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
       - run: mkdir -p shots && TAG=${{ github.event.inputs.tag }} node tools/ui_shots.mjs
-      - uses: actions/upload-artifact@v4
-        with: { name: shots, path: shots/ }
+      - run: |
+          cd shots && git init -q && git checkout -q -b ui-shots && git add . && git -c user.name=ci -c user.email=ci@wangmiaotw.com commit -qm "shots ${{ github.event.inputs.tag }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ui-shots
