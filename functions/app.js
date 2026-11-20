@@ -19,7 +19,7 @@ const FAQ = [
   ["不下載 App 也能登記走失嗎？", "可以，網站 wangmiaotw.com 就能登記協尋、回報目擊、查收容所。App 多了推播通知，有人回報時會馬上知道。"],
   ["資料會公開嗎？", "協尋頁會公開毛孩的照片、特徵和走失地區，方便大家幫忙找。聯絡電話要不要公開由飼主自己決定。"]];
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const CSS = `:root{--ink:#2B2326;--mute:#6F6468;--red:#B8335A;--bg:#FDF6F8;--line:#EADDE2}*{box-sizing:border-box}body{margin:0;font-family:system-ui,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+const CSS = `:root{--ink:#1A1A1A;--mute:#6F6A64;--red:#C2401F;--coral:#E8502E;--bg:#F7F6F4;--line:#ECE9E5}*{box-sizing:border-box}body{margin:0;font-family:system-ui,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
 a{color:var(--red)}header{display:flex;align-items:center;padding:14px 16px;max-width:980px;margin:0 auto}header a{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-weight:800;font-size:20px}header img{width:34px;height:34px}
 main{max-width:980px;margin:0 auto;padding:0 16px 48px}.top{display:grid;gap:24px;align-items:center;padding:12px 0 8px}@media(min-width:800px){.top{grid-template-columns:1.1fr .9fr}}
 h1{font-size:34px;line-height:1.25;margin:0 0 12px}.lede{font-size:18px;color:var(--mute);margin:0 0 20px}h2{font-size:22px;margin:40px 0 12px}

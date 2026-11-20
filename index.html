@@ -2321,6 +2321,8 @@ html{-webkit-tap-highlight-color:transparent}
   .xstats small{display:block;font-size:12.5px;color:var(--ink-3);font-weight:600}
   .xstats b{display:block;font-size:21px;font-weight:800;margin-top:2px}.xstats b span{font-size:13px;font-weight:700;margin-left:2px;color:var(--ink-2)}
   .xstats .rw b{color:var(--red-ink)}
+.xstats:has(.rw){grid-template-columns:1fr 1fr 1fr 1.4fr}.xstats .rw b{white-space:nowrap;font-size:clamp(16px,4.4vw,21px);letter-spacing:-.01em}
+.xcam{transition:transform .15s,padding .2s,width .2s}.xcam span{transition:opacity .15s}.xcam.mini{padding:0;width:54px;justify-content:center}.xcam.mini span{display:none}
   body[data-route="case"] .card{border-radius:22px!important;border:0!important;box-shadow:var(--lift)!important}
   body[data-route="case"] h2{font-size:20px!important;font-weight:800;font-family:inherit!important}
   body[data-route="case"] .sticky-cta .btn{height:56px;border-radius:999px!important;font-size:17px;background:linear-gradient(160deg,var(--brand),var(--brand-d))!important;border:0!important;box-shadow:0 10px 20px -10px rgba(217,74,38,.8)!important}
@@ -3148,7 +3150,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.20';
+const BUILD = 'v7.30.21';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5264,6 +5266,7 @@ async function renderHomeMob(){const _n=navId;
   ${mineMiniHTML()}<div class="xfeed" id="xFeed" data-v="${V}"><div id="list" class="grid">${skel(4)}</div></div>
   <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
   <label class="xcam" id="xCam"><input type="file" id="xCamIn" accept="image/*" class="sr-only" aria-label="拍照比對：拍一張或選一張毛孩的照片，看有沒有人在找毛孩">${ic('camera')}<span>拍照比對</span></label>`;
+  {const xc=$('#xCam');if(xc){const f=()=>{if(!xc.isConnected){removeEventListener('scroll',f);return}xc.classList.toggle('mini',scrollY>160)};addEventListener('scroll',f,{passive:true})}}
   {const ci=$('#xCamIn');if(ci)ci.onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;window.__photoStart=f;location.hash='#/photo'}}
   const showF=()=>{const h=homeState,srt=!h.near&&h.sort!=='act'&&!(h.tab==='found');const n=fCount()+(h.fnd?1:0)+(srt?1:0);const c=$('#fCnt');if(c){c.textContent=n||'';c.classList.toggle('on',!!n)}
     const pre=(h.fnd?`<button type="button" class="pill fact" data-rm="fnd" aria-label="取消 有人撿到">有人撿到 ✕</button>`:'')+(srt?`<button type="button" class="pill fact" data-rm="sort" aria-label="取消 ${(XSORT.find(x=>x[0]===h.sort)||XSORT[0])[1]}">${(XSORT.find(x=>x[0]===h.sort)||XSORT[0])[1]} ✕</button>`:'');
