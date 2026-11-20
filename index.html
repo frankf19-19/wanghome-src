@@ -398,9 +398,9 @@ a.ph{display:block}
 .gallery .thumbs{display:flex;gap:6px}
 .gallery .thumbs div{width:62px;height:62px;border-radius:6px;background:var(--line) center/cover;cursor:pointer;outline:2px solid transparent;outline-offset:1px;overflow:hidden}.gallery .thumbs div img{width:100%;height:100%;object-fit:cover;display:block}
 .gallery .thumbs div.on{outline-color:var(--red)}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;margin:0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:15px;margin:0}
 .kv dt{color:var(--ink-3);font-size:14px;padding-top:2px;white-space:nowrap}
-.kv dd{margin:0;white-space:pre-line}
+.kv dd{margin:0;white-space:pre-line;min-width:0;overflow-wrap:anywhere}
 .phone{font-family:var(--display);font-size:clamp(28px,5vw,36px);font-weight:900;color:var(--red);letter-spacing:.02em;text-align:center;margin:12px 0 0}
 .phone a{color:inherit}
 .status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--r-pill);font-weight:800;font-size:14.5px}
@@ -918,7 +918,7 @@ body[data-space="health"] form.steps>h3::before{background:var(--green-fill)!imp
 .ccard .reward{top:auto;right:auto;bottom:10px;left:10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* v3.11.0 中文斷行：不讓最後一行只剩一兩個字 */
 body{line-break:strict;word-break:normal;overflow-wrap:anywhere}
-.wseg body{word-break:keep-all;overflow-wrap:break-word}   /* 搭配程式在詞與詞之間放的 <wbr>：只在詞的邊界換行 */
+.wseg body{word-break:keep-all;overflow-wrap:anywhere}   /* 搭配程式在詞與詞之間放的 <wbr>：只在詞的邊界換行 */
 /* 中文不用 balance／pretty（iPhone 會提早斷行、留一大片空白）；按鈕、標籤盡量不在詞中間斷開 */
 body :is(h1,h2,h3,h4,p,li,div,small,span,dd,td,a,label){text-wrap:wrap}
 body :is(button,.btn,.chip,.tag){text-wrap:wrap;word-break:keep-all;overflow-wrap:anywhere}
@@ -3148,7 +3148,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.19';
+const BUILD = 'v7.30.20';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5407,7 +5407,7 @@ async function renderHealth(){const _n=navId;
   ${IS_APP?`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("bell")} 手機通知 <span class="muted small" id="lnSum">${lnPrefText()}提醒你</span></summary><div class="mg-body">${lnSection().replace(/<h2>[\s\S]*?<\/h2>/g,'')}
     <details class="calhelp calmore" style="margin-top:14px"><summary>也想加到手機日曆？（可以不用）</summary>${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</details></div></details>`
   :`<details class="mg-sec" id="calSec" style="margin-top:22px" ${qs(location.hash).cal||window.__calOpen?'open':''}><summary>${ic("calendar")} 加到手機日曆 <span class="muted small">到期前提醒你</span></summary><div class="mg-body">${calSection(p).replace(/<h2>[\s\S]*?<\/h2>/g,'')}</div></details>`}`;
-  if(me()&&isMobV())sb.rpc('my_cases').then(({data})=>{const el=$('#xLostBar');if(!el||_n!==navId)return;const l=(data||[]).filter(c=>c.status==='searching');el.innerHTML=l.map(c=>`<a class="xlostbar" href="#/manage/${c.id}"><span class="xlb-ph">${c.photos&&c.photos[0]?thumbImg(c.photos[0],''):spIc(c.species)}</span><span class="xlb-t"><b>${esc(c.name)} 走失中・第 ${daysSince(c.lost_at)} 天</b><small>${c.sighting_count?c.sighting_count+' 則目擊・':''}點這裡管理協尋</small></span><span class="xlb-go">管理</span></a>`).join('')}).catch(()=>{});
+  if(me()&&isMobV())sb.rpc('my_cases').then(({data})=>{const el=$('#xLostBar');if(!el||_n!==navId)return;const all=(data||[]).filter(c=>c.status==='searching'),l=all.slice(0,2);el.innerHTML=l.map(c=>`<a class="xlostbar" href="#/manage/${c.id}"><span class="xlb-ph">${c.photos&&c.photos[0]?thumbImg(c.photos[0],''):spIc(c.species)}</span><span class="xlb-t"><b>${esc(c.name)} 走失中・第 ${daysSince(c.lost_at)} 天</b><small>${c.sighting_count?c.sighting_count+' 則目擊・':''}點這裡管理協尋</small></span><span class="xlb-go">管理</span></a>`).join('')+(all.length>2?`<a class="xlostbar" href="#/me"><span class="xlb-t"><b>還有 ${all.length-2} 筆協尋中</b><small>到「我的」查看全部</small></span><span class="xlb-go">查看</span></a>`:'')}).catch(()=>{});
   app.querySelectorAll('.due[data-go]').forEach(d=>d.onclick=e=>{if(e.target.closest('button,details,a,select,input'))return;location.hash=d.dataset.go});
   {const d=$('#calSec');if(d){d.ontoggle=()=>{window.__calOpen=d.open};if(IS_APP&&qs(location.hash).cal){const c=d.querySelector('.calmore');if(c)c.open=true}}}
   bindCal(renderHealth);bindLnBtn();lnSync();bindIcs(ds,r=>petName[r.pet_id]||'毛孩');bindMedSlots(()=>rerender(renderHealth));

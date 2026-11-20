@@ -2,6 +2,9 @@
 User-agent: *
 Allow: /
 Disallow: /cdn-cgi/
+Disallow: /functions/
+Disallow: /storage/
+Disallow: /object/
 
 # AI 搜尋與助理（明確允許）
 User-agent: GPTBot
@@ -22,5 +25,8 @@ User-agent: DuckAssistBot
 User-agent: MistralAI-User
 Allow: /
 Disallow: /cdn-cgi/
+Disallow: /functions/
+Disallow: /storage/
+Disallow: /object/
 
 Sitemap: https://wangmiaotw.com/sitemap.xml
