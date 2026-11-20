@@ -2321,7 +2321,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xstats small{display:block;font-size:12.5px;color:var(--ink-3);font-weight:600}
   .xstats b{display:block;font-size:21px;font-weight:800;margin-top:2px}.xstats b span{font-size:13px;font-weight:700;margin-left:2px;color:var(--ink-2)}
   .xstats .rw b{color:var(--red-ink)}
-.xstats:has(.rw){grid-template-columns:1fr 1fr 1fr 1.45fr!important}.xstats .rw{min-width:0;padding-right:8px!important}.xstats .rw b{white-space:nowrap;font-size:clamp(15px,4.1vw,21px)!important;letter-spacing:-.02em}
+.xstats:has(.rw){grid-template-columns:1fr .8fr 1fr 1.3fr!important}.xstats small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xstats .rw{min-width:0;padding-right:8px!important}.xstats .rw b{white-space:nowrap;font-size:clamp(15px,4.1vw,21px)!important;letter-spacing:-.02em}
 .xcam{transition:transform .15s,padding .2s,width .2s}.xcam span{transition:opacity .15s}.xcam.mini{padding:0;width:54px;justify-content:center}.xcam.mini span{display:none}
   body[data-route="case"] .card{border-radius:22px!important;border:0!important;box-shadow:var(--lift)!important}
   body[data-route="case"] h2{font-size:20px!important;font-weight:800;font-family:inherit!important}
@@ -3150,7 +3150,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.22';
+const BUILD = 'v7.30.23';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
