@@ -1,0 +1,17 @@
+name: 介面截圖
+on:
+  workflow_dispatch:
+    inputs:
+      tag: { description: "檔名前綴", required: false, default: "before" }
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: mkdir -p shots && TAG=${{ github.event.inputs.tag }} node tools/ui_shots.mjs
+      - uses: actions/upload-artifact@v4
+        with: { name: shots, path: shots/ }
