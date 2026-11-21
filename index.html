@@ -425,7 +425,7 @@ a.ph{display:block}
 .tl .when{font-weight:800;font-size:15.5px}
 .tl .where{font-size:14px;color:var(--ink-2)}
 .tl .note{font-size:14px;margin-top:2px;white-space:pre-line}
-.tl .ph{margin-top:8px;width:130px;height:130px;border-radius:6px;background:var(--line) center/cover;cursor:zoom-in}
+.tl .ph{margin-top:8px;width:130px;height:130px;border-radius:6px;background:var(--line) center/cover;cursor:zoom-in}.tl .phs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tl .phs .ph{margin-top:0;width:96px;height:96px}
 .tl .ops{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 
 /* 收容所比對 */
@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.24';
+const BUILD = 'v7.30.25';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6065,7 +6065,7 @@ async function renderCase(id){const _n=navId;
   // 地圖 + 時間軸
   const pts=[];
   if(c.lost_lat&&c.lost_lng)pts.push({lat:c.lost_lat,lng:c.lost_lng,label:'走',cls:'start',t:c.lost_at,title:c.source==='moa'?'走失地區（大概位置）':'走失地點',where:c.lost_place||(c.source==='moa'?c.lost_city+(c.lost_district||''):''),dOnly:c.source==='moa'});
-  sightings.forEach((s,i)=>pts.push({lat:s.lat,lng:s.lng,label:String(i+1),cls:'',t:s.seen_at,title:`目擊 ${i+1}`,where:s.place_text,dir:s.direction,note:s.note,photo:s.photo_url,by:s.reporter_name,onote:s.owner_note,verified:s.verified,sid:s.id,poster:s.poster}));
+  sightings.forEach((s,i)=>pts.push({lat:s.lat,lng:s.lng,label:String(i+1),cls:'',t:s.seen_at,title:`目擊 ${i+1}`,where:s.place_text,dir:s.direction,note:s.note,photo:s.photo_url,phl:sightPhotos(s),by:s.reporter_name,onote:s.owner_note,verified:s.verified,sid:s.id,poster:s.poster}));
   const center=pts.find(p=>p.lat)?[pts.find(p=>p.lat).lat,pts.find(p=>p.lat).lng]:(CITY_CENTER[c.lost_city]||[23.7,121]);
   // 地圖程式還沒下載完也先把案件內容顯示出來，地圖等它好了再畫（分享連結最常開這頁）
   const ana=sightAnalysis(c,pts);{const sa=$('#sAna');if(sa)sa.innerHTML=ana?sightAnaHTML(ana):lostPlanHTML(c)}
@@ -6088,7 +6088,7 @@ async function renderCase(id){const _n=navId;
     <div class="when">${esc(p.title)} · ${p.dOnly?fmtDate(p.t):fmtDT(p.t)}</div>
     <div class="where">${ic("pin")} ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
     ${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
-    ${p.photo?`<div class="ph" style="background-image:url('${esc(safeU(p.photo))}')" data-lightbox="${esc(safeU(p.photo))}"></div>`:''}
+    ${p.phl?sightPhotosHTML(p.phl):p.photo?`<div class="ph" style="background-image:url('${esc(safeU(p.photo))}')" data-lightbox="${esc(safeU(p.photo))}"></div>`:''}
     ${(p.by||p.verified||p.sid)?`<div class="tl-meta small muted">${p.by||p.verified?`<span>${esc(p.by||'會員')}${p.verified?' · ✓ 會員':''}</span>`:''}${p.sid?`<button type="button" class="linkbtn tl-rep" aria-label="檢舉這筆目擊" data-sid="${esc(p.sid)}" data-poster="${esc(p.poster||'')}">${ic('flag')}<span>檢舉</span></button>`:''}</div>`:''}</div>`).join('');
 
   // 電腦版時間軸是可以捲動的框：內容比框高時，底部提示還有更早的紀錄
@@ -6137,6 +6137,8 @@ async function renderCase(id){const _n=navId;
 function hw(t){return String(t||'').replace(/[０-９＋－＃（）]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/　/g,' ')}
 function telNum(t){return hw(t).replace(/分機|轉|ext\.?/gi,'#').replace(/[^\d+#]/g,'').replace(/#/g,',')}
 function telClean(t){t=hw(t);return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)||[''])[0].replace(/[^\d#+]/g,'')}
+function sightPhotos(s){const l=(s.photos&&s.photos.length?s.photos:(s.photo_url?[s.photo_url]:[])).filter(Boolean);return l}
+function sightPhotosHTML(l){if(!l.length)return '';const one=u=>`<div class="ph" style="background-image:url('${esc(safeU(u))}')" data-lightbox="${esc(safeU(u))}"></div>`;return l.length===1?one(l[0]):`<div class="phs">${l.map(one).join('')}</div>`}
 function matchHTML(m){m={...m,photo_url:moaPic(m.photo_url)||__shelterPic[String(m.animal_id)]||''};
   return `<div class="match">
     ${m.photo_url?`<button type="button" class="ph mph" aria-label="放大看照片" data-photo="${esc(safeU(m.photo_url))}" data-link="${esc(shelterLink(m.animal_subid)||'')}" data-tel="${esc(telClean(m.shelter_tel))}" data-name="${esc(m.shelter_name||'收容所')}" data-sub="${esc(m.animal_subid||m.animal_id||'')}" style="background-image:url('${esc(safeU(m.photo_url))}')"><span class="mph-zoom" aria-hidden="true">${ic('search')}</span>${String(m.photo_url).startsWith(SH_STORE)||!m.animal_subid?'':`<img hidden alt="" src="${esc(safeU(m.photo_url))}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)">`}</button>`:(shelterLink(m.animal_subid)?`<div class="ph ph-try"><img loading="lazy" decoding="async" alt="收容所照片" src="${esc(CONFIG.SITE_URL+'api/shelterpic/'+String(m.animal_subid).trim()+'.jpg?v=3')}" data-sub="${esc(String(m.animal_subid).trim())}" onload="shPhotoOk(this)" onerror="shNoPhoto(this)"></div>`.replace('class="ph ph-try"',`class="ph ph-try" data-none="${esc(`${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small>`)}"`):`<div class="ph ph-none">${ic('shelter')}<small>收容所還沒放照片<br>點下面公告看</small></div>`)}
@@ -6456,7 +6458,7 @@ async function renderReport(id){const _n=navId;
   ${c.source==='moa'?`<div class="notice moa" style="margin-top:10px"><b>這位飼主沒有使用汪喵回家</b>你的回報會由汪喵回家確認後，打電話轉告飼主（農業部登記的電話），請留下聯絡方式方便飼主找你。${c.contact_phone?`<br>想更快的話，也可以直接打給飼主：<a href="tel:${esc(telNum(c.contact_phone))}">${esc(c.contact_phone)}</a>`:''}</div>`:''}
   <form onsubmit="return false" class="card steps" id="f" style="margin-top:12px">
     <h3>有拍到照片嗎？</h3>
-    <label class="uploadbtn" id="phLabel">${ic("image")} <span><b class="lbl">先選照片</b><small class="hint">建議</small></span><input type="file" name="photo" accept="image/*"></label>
+    <label class="uploadbtn" id="phLabel">${ic("image")} <span><b class="lbl">先選照片</b><small class="hint">可選多張（最多 6 張）</small></span><input type="file" name="photo" accept="image/*" multiple></label>
     <div class="exif-hint" id="exifHint">有照片的話，會自動帶入拍攝時間和地點</div>
     <div class="photos-preview" id="sPv"></div>
     <p class="small muted">沒有照片也沒關係，直接按「下一步」。</p>
@@ -6491,9 +6493,10 @@ async function renderReport(id){const _n=navId;
   $('#btnLoc').onclick=picker.locate;
   setTimeout(()=>{const cp=window.__carryPhoto;window.__carryPhoto=null;const inp=$('#f')&&$('#f').elements['photo'];if(cp&&inp&&_n===navId){try{const dt=new DataTransfer();dt.items.add(cp);inp.files=dt.files;inp.dispatchEvent(new Event('change',{bubbles:true}))}catch(_){}}},300);
   $('#f').elements['photo'].onchange=async e=>{
-    const file=e.target.files[0];$('#sPv').innerHTML='';if(!file)return;
-    const d=document.createElement('div');d.style.backgroundImage=`url('${pvUrl(file)}')`;$('#sPv').appendChild(d);
-    $('#phLabel').querySelector('span').textContent='換一張照片';
+    const files=[...e.target.files].filter(f=>f&&f.size);$('#sPv').innerHTML='';const file=files[0];if(!file)return;
+    if(files.length>6)toast('最多 6 張，先用前 6 張');
+    files.slice(0,6).forEach(f=>{const d=document.createElement('div');d.style.backgroundImage=`url('${pvUrl(f)}')`;$('#sPv').appendChild(d)});
+    $('#phLabel').querySelector('span').textContent=files.length>1?`已選 ${Math.min(files.length,6)} 張，點這裡重選`:'換照片（可選多張）';
     applyPhotoMeta(await readPhotoMeta(file),{dateInput:$('#f').elements['seen_at'],picker,hintEl:$('#exifHint')});
   };
   const draftClr=formDraft($('#f'),'wh_draft_rep_'+id.slice(0,8));
@@ -6502,8 +6505,11 @@ async function renderReport(id){const _n=navId;
     const loc=picker.get();if(!loc&&!String(fd.get('place_text')||'').trim()){toast('請在地圖上點選看到的位置，或寫下地點描述');return}
     const btn=$('#btnSubmit');btn.disabled=true;btn.textContent='送出中…';
     try{
-      let photo_url=null;const f=fd.get('photo');if(f&&f.size)photo_url=await tryUpload(f,'sightings');
-      const {error}=await sb.from('sightings').insert({case_id:id,seen_at:twParse(fd.get('seen_at')).toISOString(),lat:loc?loc.lat:null,lng:loc?loc.lng:null,place_text:fd.get('place_text'),direction:fd.get('direction'),note:fd.get('note'),photo_url,reporter_name:fd.get('reporter_name'),reporter_contact:fd.get('reporter_contact')});
+      const fl=fd.getAll('photo').filter(f=>f&&f.size).slice(0,6);if(fl.length>1)btn.textContent=`上傳照片中（${fl.length} 張）…`;
+      const photos=(await Promise.all(fl.map(f=>tryUpload(f,'sightings')))).filter(Boolean);const photo_url=photos[0]||null;
+      const row={case_id:id,seen_at:twParse(fd.get('seen_at')).toISOString(),lat:loc?loc.lat:null,lng:loc?loc.lng:null,place_text:fd.get('place_text'),direction:fd.get('direction'),note:fd.get('note'),photo_url,reporter_name:fd.get('reporter_name'),reporter_contact:fd.get('reporter_contact')};
+      let {error}=await sb.from('sightings').insert(photos.length>1?{...row,photos}:row);
+      if(error&&photos.length>1&&/photos/.test(error.message||''))({error}=await sb.from('sightings').insert(row));   // 資料庫還沒加多張照片欄位時，先只存第一張
       if(error)throw error;draftClr&&draftClr();contactSave($('#f'),CT_REP);
       // 立即寄 Email 給飼主（最多等 8 秒；失敗不影響回報）
       __dirty=false;const mailed=false;   // 已經存好：馬上顯示完成畫面，通知信在背景寄
@@ -6566,7 +6572,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
     ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
-    ${s.photo_url?`<div class="ph" style="background-image:url('${esc(safeU(s.photo_url))}')" data-lightbox="${esc(safeU(s.photo_url))}"></div>${s.photo_sim>=0&&s.photo_sim!=null?`<div class="small sg-sim ${s.photo_sim>=85?'hi':s.photo_sim>=65?'mid':'lo'}">AI 比對照片：和 ${esc(c.name)} 的相似度 <b>${s.photo_sim}%</b>${s.photo_sim>=85?'，很像，建議優先確認':s.photo_sim<65?'，看起來不太像，仍請自己判斷':''}</div>`:''}`:''}
+    ${s.photo_url?`${sightPhotosHTML(sightPhotos(s))}${s.photo_sim>=0&&s.photo_sim!=null?`<div class="small sg-sim ${s.photo_sim>=85?'hi':s.photo_sim>=65?'mid':'lo'}">AI 比對照片：和 ${esc(c.name)} 的相似度 <b>${s.photo_sim}%</b>${s.photo_sim>=85?'，很像，建議優先確認':s.photo_sim<65?'，看起來不太像，仍請自己判斷':''}</div>`:''}`:''}
     <div class="ops">${sightOps(s.id,s.status)}</div></div>`;
   const STATUS_TAG={searching:'<span class="tag red">協尋中</span>',found:'<span class="tag green">已回家</span>',closed:'<span class="tag gray">已結案</span>'};
   // 管理頁分成「首頁」和幾個單一工作的頁面（網址 ?p=...），一次只做一件事
