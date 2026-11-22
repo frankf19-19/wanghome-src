@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.31';
+const BUILD = 'v7.30.32';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5550,8 +5550,7 @@ function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const
 // 走失地點附近「先找這些地方」：公園、學校、市場、廟、河邊，加上附近動物醫院（OpenStreetMap 資料）
 async function nearbySpots(c,lp,map){let box=$('#saSpots');if(!box)return;const lat=+c.lost_lat,lng=+c.lost_lng,R1=Math.round(Math.min(Math.max(lp.rad,0.3),2)*1000);
   const key='wh_spots2_'+c.id+'_'+R1;let els=null;try{els=JSON.parse(sessionStorage.getItem(key)||'null')}catch(_){}
-  if(!els){const q=`[out:json][timeout:20];(nwr(around:${R1},${lat},${lng})[leisure~"^(park|playground|garden)$"][name];nwr(around:${R1},${lat},${lng})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${R1},${lat},${lng})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${lat},${lng})[amenity=veterinary];);out center tags 80;`;
-    for(const ep of ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']){try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),25000);const r=await fetch(ep,{method:'POST',body:'data='+encodeURIComponent(q),signal:ctl.signal});clearTimeout(tt);if(!r.ok)continue;els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}break}catch(_){}}
+  if(!els){try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),30000);const r=await fetch(`${CONFIG.SITE_URL}api/spots?lat=${lat.toFixed(4)}&lng=${lng.toFixed(4)}&r=${R1}`,{signal:ctl.signal});clearTimeout(tt);if(r.ok){els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}}}catch(_){}
     if(!els){const b2=$('#saSpots');if(b2)b2.remove();return}}
   box=$('#saSpots');if(!box)return;
   const km=(a,b)=>{const R=6371,dL=(a-lat)*Math.PI/180,dG=(b-lng)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(a*Math.PI/180)*Math.sin(dG/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
@@ -6980,7 +6979,7 @@ function renderFoundNew(){
   <p class="tipbox" id="fnTips" style="margin:6px 0 0"></p>
   <form onsubmit="return false" class="card steps" id="f" style="margin-top:12px">
     <h3>有拍到照片嗎？</h3>
-    <p class="small muted" style="margin-top:-6px">最多 4 張，會自動帶入拍照的時間和地點。沒有照片也可以直接按「下一步」。</p>
+    <p class="small muted" style="margin-top:-6px">最多 4 張，會自動帶入拍照的時間和地點。<b>有照片的話，只要再選狗或貓、確認地點就能送出。</b></p>
     <label class="uploadbtn">${ic("image")} 選擇照片<input type="file" id="photoIn" accept="image/*" multiple></label>
     <div class="photos-preview" id="pv"></div>
     <div class="exif-hint" id="exifHintF"></div>
@@ -7002,7 +7001,7 @@ function renderFoundNew(){
 
     <h3>毛孩長什麼樣子？</h3>
     <div class="seg" id="segSp" role="group" aria-label="狗還是貓"><button type="button" data-v="dog">${spIc("dog")} 狗</button><button type="button" data-v="cat">${spIc("cat")} 貓</button></div>
-    <label class="f"><span>毛色 <i class="req">*</i></span><input type="text" name="colour" required maxlength="50" placeholder="例：黑色"></label>
+    <label class="f"><span><b class="lbl">毛色</b><small class="hint">有照片可以不填</small></span><input type="text" name="colour" maxlength="50" placeholder="例：黑色"></label>
     <label class="f"><span><b class="lbl">特徵</b><small class="hint">越具體越好</small></span><textarea name="features" maxlength="1000" placeholder="例：嘴邊灰白毛、左耳下垂、很親人"></textarea></label>
     <details class="more"><summary>更多樣子（可以不填）</summary>
     <div class="row2">
@@ -7013,8 +7012,8 @@ function renderFoundNew(){
     <label class="f"><span>項圈／牽繩／衣服</span><input type="text" name="collar_desc" maxlength="200" placeholder="例：紅項圈、有鈴鐺"></label>
     </details>
 
-    <h3>怎麼聯絡你？</h3>
-      <p class="small" style="margin:-4px 0 8px"><b style="color:var(--red)">必填：</b>公開的電話或 LINE 至少一種，飼主才聯絡得到你。</p>
+    <h3 id="ctH">怎麼聯絡你？</h3>
+      <p class="small" style="margin:-4px 0 8px" id="ctNote"><b style="color:var(--red)">必填：</b>公開的電話或 LINE 至少一種，飼主才聯絡得到你。</p>
     <div class="row2">
       <label class="f"><span>怎麼稱呼你</span><input type="text" name="reporter_name" maxlength="50"></label>
       <label class="f"><span>電話</span><input type="tel" name="reporter_phone" maxlength="30" pattern="${PHONE_PAT}" inputmode="tel"></label>
@@ -7034,6 +7033,7 @@ function renderFoundNew(){
   $('#segKind').querySelectorAll('button').forEach(b=>b.onclick=()=>{kind=b.dataset.v;$('#segKind').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#curWrap').classList.toggle('hidden',kind!=='found')});
   {const k=qs(location.hash).k;
    const setLabel=()=>{const seen=kind==='seen';$('#btnSubmit').textContent=seen?'送出看到通報':'送出撿到通報';
+     $('#ctH').textContent=seen?'怎麼聯絡你？（可以不填）':'怎麼聯絡你？';$('#ctNote').innerHTML=seen?'只是路過看到的話，<b>照片、時間、地點最重要</b>，聯絡方式可以不留。願意讓飼主問細節再填。':'<b style="color:var(--red)">必填：</b>公開的電話或 LINE 至少一種，飼主才聯絡得到你。';
      $('#fnTitle').textContent=seen?'我看到一隻毛孩':'毛孩在我這裡';setTitle(seen?'我看到一隻毛孩':'毛孩在我這裡');
      const L=a=>'<ol class="tips3">'+a.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
      $('#fnTips').innerHTML=seen?'不要追，拍照、記下地點和毛孩往哪走，在這裡回報就好。':'先帶去任何動物醫院<b>免費掃晶片</b>，有晶片就能馬上找到飼主。'};
@@ -7054,7 +7054,8 @@ function renderFoundNew(){
   $('#f').onsubmit=async e=>{const _n=navId;
     e.preventDefault();const fd=new FormData(e.target);if(fd.get('website'))return;
     if(!species){toast('請先選「狗」或「貓」');return}
-    if(!(String(fd.get('reporter_phone')||'').trim()&&fd.get('phone_public'))&&!String(fd.get('reporter_line')||'').trim()){toast('請留下公開的電話或 LINE，飼主才聯絡得到你',4000);return}
+    if(!photoFiles.length&&!String(fd.get('colour')||'').trim()){toast('沒有照片的話，請填一下毛色',4000);return}
+    if(kind!=='seen'&&!(String(fd.get('reporter_phone')||'').trim()&&fd.get('phone_public'))&&!String(fd.get('reporter_line')||'').trim()){toast('請留下公開的電話或 LINE，飼主才聯絡得到你',4000);return}
     const btn=$('#btnSubmit');btn.disabled=true;btn.textContent='上傳中…';
     try{
       const photos=[];const pg=$('#pg');if(photoFiles.length)pg.classList.remove('hidden');
