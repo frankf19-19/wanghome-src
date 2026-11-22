@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.27';
+const BUILD = 'v7.30.28';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6192,7 +6192,7 @@ async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.p
   const d0=new Date(new Date(c.lost_at)-86400000).toISOString().slice(0,10);
   const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=45).slice(0,6);const hi=rows.filter(r=>r.sim>=85).length;
     box.innerHTML=`<h2>${ic('camera')} 收容所裡照片最像的 ${hi?`<span class="tag amber">很像 ${hi}</span>`:''}</h2>
-    <p class="muted small">AI 先把照片裡的${c.species==='cat'?'貓':'狗'}框出來、去掉背景，再拿${esc(c.name||'毛孩')}的照片和全台收容所在走失後收容的${c.species==='cat'?'貓':'狗'}一張一張比，把最像的排在前面。${how}</p>
+    <p class="muted small">AI 先把照片裡的${c.species==='cat'?'貓':'狗'}框出來、去掉背景，再拿${esc(c.name||'毛孩')}的照片和全台收容所在走失後收容的${c.sex==='male'?'公':c.sex==='female'?'母':''}${c.species==='cat'?'貓':'狗'}一張一張比，把最像的排在前面。${how}</p>
     ${rows.length?`<div class="ph-grid">${rows.map(r=>phCard({...r,kind:'shelter'})).join('')}</div><p class="muted small">點照片看收容所電話和地址。AI 只能幫忙把像的排前面，不能保證是毛孩：實測同一隻毛孩有九成會排在前 10 名內。請自己看照片，像的話打電話給收容所提供晶片號碼確認。</p>`:`<p class="muted small">目前全台收容所沒有照片相似的${c.species==='cat'?'貓':'狗'}。收容所每天有新動物，會持續比對。</p>`}`};
   try{const {data:ready}=await sb.rpc('case_photo_ready',{p_case:id});
     if(ready){const {data}=await sb.rpc('case_photo_matches',{p_case:id,p_limit:8});show(data,'每小時更新。');return}}catch(_){return}
@@ -6202,7 +6202,7 @@ async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.p
     try{const blob=await (await fetch(safeU(c.photos[0]))).blob();
       const q=await photoEmbed(new File([blob],'p.jpg',{type:blob.type||'image/jpeg'}),p=>{if(b.isConnected)b.textContent=p<1?`下載 AI 模型 ${Math.round(p*100)}%`:'比對中…'});
       const {data,error}=await sb.rpc('photo_search',{q,p_sp:c.species||'dog',p_city:null,p_limit:40});if(error)throw error;
-      show((data||[]).filter(r=>r.kind==='shelter'&&String((r.info||{}).at||'9999')>=d0).slice(0,8),'這次是在你的手機上比對的。')}
+      const sx=c.sex==='male'?'母':c.sex==='female'?'公':'';show((data||[]).filter(r=>r.kind==='shelter'&&String((r.info||{}).at||'9999')>=d0&&!(sx&&(r.info||{}).sex===sx)).slice(0,8),'這次是在你的手機上比對的。')}
     catch(e){if(b.isConnected){b.disabled=false;b.textContent='比對失敗，再試一次'}}}}
 function shelterBoxHTML(matches,loading){
   const list=(matches||[]).filter(m=>!m.dismissed).sort((a,b)=>b.score-a.score);
