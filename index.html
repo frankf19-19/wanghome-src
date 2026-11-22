@@ -1347,7 +1347,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .sa-slots span.top i{background:var(--red)}
 .sa-slots em{position:absolute;bottom:0;left:0;right:0;text-align:center;font-style:normal;font-size:12.5px;color:var(--ink-3)}
 .sa-slots span.top em{color:var(--red-ink);font-weight:800}
-.sa-note{margin:0;font-size:13px;line-height:1.6;color:var(--ink-3)}
+.sa-note{margin:0;font-size:13px;line-height:1.6;color:var(--ink-3)}.sa-spots{border-radius:12px;padding:10px 12px;background:var(--card,#fff);border:1px solid var(--line)}.sa-spots ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}.sa-spots li{display:flex;gap:8px;align-items:baseline;font-size:14.5px;line-height:1.45}.sa-spots li i{font-style:normal;flex:0 0 auto}.sa-spots li em{font-style:normal;color:var(--ink-3);font-size:13px;margin-left:auto;white-space:nowrap}.sa-spots h4{margin:10px 0 0;font-size:14px}.sa-spots a.tel{font-weight:800;white-space:nowrap}
 .sa-k1,.sa-k2{display:inline-block;vertical-align:middle;margin:0 3px}
 .sa-k1{width:22px;border-top:3px dashed #B8325E}
 .sa-k2{width:14px;height:14px;border-radius:50%;border:2px dashed #B8325E;background:rgba(184,50,94,.08)}
@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.29';
+const BUILD = 'v7.30.30';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5536,7 +5536,7 @@ function mgAdvice(c,pendS,ss,go,id){const N=esc(c.name||'毛孩'),d=daysSince(c.
 // ── 智慧分析：還沒有目擊時的協尋建議（依走失時間、狗／貓、個性推算） ──
 function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const hrs=Math.max(0,(Date.now()-new Date(c.lost_at))/36e5),cat=c.species==='cat';
   const txt=[c.temperament,c.features,c.notes].filter(Boolean).join(' ');const friendly=/親人|親近|愛撒嬌|不怕生|不怕人|會跟人|很乖/.test(txt),shy=/(?<!不)怕生|膽小|害怕|(?<!不)怕人|緊張|躲|敏感/.test(txt.replace(/不怕生|不怕人/g,''));
-  const rad=cat?(hrs<72?0.15:hrs<168?0.3:0.5):(hrs<6?0.5:hrs<24?1:hrs<72?2:3);
+  const szF=c.size==='small'?0.7:c.size==='large'?1.4:1;const rad=cat?(hrs<72?0.15:hrs<168?0.3:0.5):Math.round((hrs<6?0.5:hrs<24?1:hrs<72?2:3)*szF*10)/10;const outer=Math.round(rad*(cat?3:2.5)*10)/10;
   const phase=hrs<48?{k:'黃金 48 小時',d:'最容易找回的時候'}:hrs<168?{k:'第 3～7 天',d:'擴大範圍、問收容所'}:{k:'超過一週',d:'持續曝光，別放棄'};
   const best=cat?'深夜 11 點～清晨 5 點':shy?'清晨 5～7 點、傍晚':'清晨與傍晚';
   const N=esc(c.name||'毛孩'),tips=[];
@@ -5546,12 +5546,30 @@ function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const
   else if(friendly&&!cat)tips.push(`${N}親人，可能會跟著路人走：問附近店家、警衛、外送員、早餐店有沒有看到。`);
   if(hrs>=12)tips.push(`打電話問 ${esc(c.lost_city||'當地')}的收容所和附近動物醫院，${hrs>=48?'每 2～3 天':'明天'}再問一次（照片和晶片號碼準備好）。`);
   tips.push(hrs<48?'把協尋頁分享到當地 FB 社團、LINE 群組，在走失點附近貼 A4 海報。':'在常有人經過的地方補貼海報，協尋貼文每隔幾天重新分享一次。');
-  return {hrs,rad,phase,best,tips,name:N,ago:hrs<1?'不到 1 小時':hrs<24?Math.floor(hrs)+' 小時':'第 '+daysSince(c.lost_at)+' 天'}}
+  return {hrs,rad,outer,phase,best,tips,name:N,ago:hrs<1?'不到 1 小時':hrs<24?Math.floor(hrs)+' 小時':'第 '+daysSince(c.lost_at)+' 天'}}
+// 走失地點附近「先找這些地方」：公園、學校、市場、廟、河邊，加上附近動物醫院（OpenStreetMap 資料）
+async function nearbySpots(c,lp,map){const box=$('#saSpots');if(!box)return;const lat=+c.lost_lat,lng=+c.lost_lng,R1=Math.round(Math.min(Math.max(lp.rad,0.3),2)*1000);
+  const key='wh_spots2_'+c.id+'_'+R1;let els=null;try{els=JSON.parse(sessionStorage.getItem(key)||'null')}catch(_){}
+  if(!els){const q=`[out:json][timeout:20];(nwr(around:${R1},${lat},${lng})[leisure~"^(park|playground|garden)$"][name];nwr(around:${R1},${lat},${lng})[amenity~"^(school|marketplace|place_of_worship|parking)$"][name];nwr(around:${R1},${lat},${lng})[waterway~"^(river|stream|canal)$"][name];nwr(around:5000,${lat},${lng})[amenity=veterinary];);out center tags 80;`;
+    try{const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}}catch(_){if(box.isConnected)box.remove();return}}
+  if(!box.isConnected)return;
+  const km=(a,b)=>{const R=6371,dL=(a-lat)*Math.PI/180,dG=(b-lng)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(a*Math.PI/180)*Math.sin(dG/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
+  const IC=t=>t.leisure?'🌳':t.amenity==='school'?'🏫':t.amenity==='marketplace'?'🛒':t.amenity==='place_of_worship'?'⛩️':t.amenity==='parking'?'🅿️':t.waterway?'🌊':'📍';
+  const all=els.map(e=>{const la=e.lat??e.center?.lat,lo=e.lon??e.center?.lon;return la==null?null:{t:e.tags||{},la,lo,d:km(la,lo)}}).filter(Boolean);
+  const seen=new Set(),spots=all.filter(x=>x.t.amenity!=='veterinary'&&x.t.name).sort((a,b)=>a.d-b.d).filter(x=>{const k=x.t.name;if(seen.has(k))return false;seen.add(k);return true}).slice(0,8);
+  const vets=all.filter(x=>x.t.amenity==='veterinary').sort((a,b)=>a.d-b.d).slice(0,5);
+  const N=esc(c.name||'毛孩'),tel=t=>t.phone||t['contact:phone']||'';
+  box.innerHTML=`<small>地圖上的兩個圈：深色圈先找（約 ${fmtKm(lp.rad)}）、淺色圈是擴大範圍（約 ${fmtKm(lp.outer)}）。</small>
+    ${spots.length?`<h4>今天先找這些地方</h4><ul>${spots.map(x=>`<li><i aria-hidden="true">${IC(x.t)}</i><span>${esc(x.t.name)}</span><em>${fmtKm(x.d)}</em></li>`).join('')}</ul>`:''}
+    ${vets.length?`<h4>附近動物醫院（撿到${c.species==='cat'?'貓':'狗'}的人常會送去掃晶片）</h4><ul>${vets.map(x=>`<li><i aria-hidden="true">🏥</i><span>${esc(x.t.name||'動物醫院')}</span>${tel(x.t)?`<a class="tel" href="tel:${esc(String(tel(x.t)).replace(/[^\d+]/g,''))}">撥打</a>`:''}<em>${fmtKm(x.d)}</em></li>`).join('')}</ul><p class="muted small" style="margin:6px 0 0">打去問有沒有人送${N}這樣的毛孩來，留下你的電話和照片。</p>`:''}
+    ${!spots.length&&!vets.length?'<div class="muted small" style="margin-top:4px">這附近查不到地點資料，就以走失地點為中心，沿著巷弄慢慢找。</div>':''}`;
+  if(typeof L!=='undefined'&&map&&map.addLayer)spots.forEach(x=>{try{L.circleMarker([x.la,x.lo],{radius:6,color:'#fff',weight:2,fillColor:'#B8325E',fillOpacity:.9}).addTo(map).bindPopup(esc(x.t.name)+'<br>距離走失點 '+fmtKm(x.d))}catch(_){}})}
 function lostPlanHTML(c){const a=lostPlan(c);if(!a)return '';
   return `<section class="sa" aria-label="智慧協尋建議"><div class="sa-head"><span class="sa-spark" aria-hidden="true">✨</span><b>智慧協尋建議</b><small>依走失時間、${c.species==='cat'?'貓咪':'狗狗'}習性和個性推算</small></div>
   <div class="sa-hero ${a.hrs<48?'fresh':''}"><span class="sa-dot" aria-hidden="true"></span><div><small>${a.name}${a.hrs<24?'已經走失':'走失'}</small><b>${a.ago}</b><span>${esc(a.phase.k)}：${esc(a.phase.d)}</span></div></div>
   <div class="sa-stats"><div class="hi"><small>建議先找周圍</small><b>${fmtKm(a.rad)}</b></div><div><small>最容易找到的時段</small><b style="font-size:15px">${esc(a.best)}</b></div></div>
   <div class="sa-tips"><small>建議下一步</small><ol>${a.tips.slice(0,4).map(t=>`<li>${t}</li>`).join('')}</ol></div>
+  ${c.lost_lat&&c.source!=='moa'?`<div class="sa-spots" id="saSpots"><small>地圖上的兩個圈：深色圈先找、淺色圈是擴大範圍。附近可以先找的地方：</small><div class="muted small" style="margin-top:4px">載入附近地點中…</div></div>`:''}
   <p class="sa-note">${c.source==='moa'?'依走失日期和一般走失狗貓的行為推算，僅供參考。':'還沒有目擊回報，以上依一般走失狗貓的行為推算，僅供參考。有人回報目擊後，會改用實際目擊位置分析。'}</p></section>`}
 // ── 智慧分析：健康手冊（體重趨勢、疫苗、驅蟲、年齡階段、花費） ──
 function petInsights(p,rs){const out=[],now=Date.now(),cat=p.species==='cat';
@@ -6077,10 +6095,12 @@ async function renderCase(id){const _n=navId;
   // 依時間把走失點和目擊點連起來，並圈出建議先找的範圍
   if(typeof L!=='undefined'&&map&&map.addLayer){const line=pts.filter(p=>p.lat&&p.t).slice().sort((a,b)=>new Date(a.t)-new Date(b.t)).map(p=>[p.lat,p.lng]);
     if(line.length>=2){L.polyline(line,{color:'#fff',weight:6,opacity:.8}).addTo(map);L.polyline(line,{color:'#B8325E',weight:3,opacity:.9,dashArray:'6 8',lineCap:'round'}).addTo(map)}
-    if(ana)map.__anaCircle=L.circle([ana.last.lat,ana.last.lng],{radius:ana.rad*1000,color:'#B8325E',weight:2,dashArray:'4 6',fillColor:'#B8325E',fillOpacity:.07}).addTo(map)}
+    if(ana)map.__anaCircle=L.circle([ana.last.lat,ana.last.lng],{radius:ana.rad*1000,color:'#B8325E',weight:2,dashArray:'4 6',fillColor:'#B8325E',fillOpacity:.07}).addTo(map);
+    else if(c.lost_lat&&c.status==='searching'&&c.source!=='moa'){const lp=lostPlan(c);if(lp){L.circle([c.lost_lat,c.lost_lng],{radius:lp.outer*1000,color:'#E8A13A',weight:2,dashArray:'4 6',fillColor:'#E8A13A',fillOpacity:.05}).addTo(map).bindPopup('擴大範圍：約 '+fmtKm(lp.outer));
+      map.__anaCircle=L.circle([c.lost_lat,c.lost_lng],{radius:lp.rad*1000,color:'#B8325E',weight:2,fillColor:'#B8325E',fillOpacity:.1}).addTo(map).bindPopup('先找這裡：約 '+fmtKm(lp.rad));map.__anaOuter=lp.outer;nearbySpots(c,lp,map)}}}
   const bounds=[];
   pts.forEach(p=>{if(p.lat){marker([p.lat,p.lng],p.label,ana&&p===ana.last?(p.cls+' last'):p.cls).addTo(map).bindPopup(`<b>${esc(p.title)}</b><br>${p.dOnly?fmtDate(p.t):fmtDT(p.t)}<br>${esc(p.where||'')}${p.dir?'<br>往 '+esc(p.dir):''}`);bounds.push([p.lat,p.lng])}});
-  if(map.__anaCircle&&typeof L!=='undefined'){const bb=L.latLngBounds(bounds.length?bounds:[[ana.last.lat,ana.last.lng]]);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})};
+  if(map.__anaCircle&&typeof L!=='undefined'){const bb=L.latLngBounds(bounds.length?bounds:[ana?[ana.last.lat,ana.last.lng]:[c.lost_lat,c.lost_lng]]);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})};
   if(window.L||leafletGaveUp)drawMap();else waitLeaflet().then(()=>{if(_n===navId&&$('#map')&&!$('#map').classList.contains('leaflet-container'))drawMap()});
   const tl=$('#tl');
   if(!pts.length){tl.innerHTML=c.pending_count>0?'<p class="muted">目前還沒有飼主確認過的目擊。</p>':'<p class="muted">還沒有目擊回報。</p>'}
@@ -9353,7 +9373,7 @@ async function renderMeBody(){const _n=navId;
     ${'username' in p?'':`<label class="f"><span><b class="lbl">顯示名稱</b><small class="hint">回報目擊時預設使用</small></span><input type="text" id="dn" maxlength="30" value="${esc(p.display_name||'')}"></label>`}
     <label class="chk"><input type="checkbox" id="nFollow" ${p.notify_follow!==false?'checked':''}> 追蹤的案件有新目擊時，寄 Email 通知我</label>
     <label class="chk"><input type="checkbox" id="nDm" ${p.dm_open!==false?'checked':''}> 讓其他會員傳私訊給我（走失案件、通報相關的訊息不受影響）</label>
-    <label class="chk"><input type="checkbox" id="nOn" ${p.notify_enabled?'checked':''}> 我家附近有毛孩走失時，寄 Email 通知我</label>
+    <label class="chk"><input type="checkbox" id="nOn" ${p.notify_enabled?'checked':''}> 我家附近有毛孩走失時通知我（App 推播最多半天一則、晚上不推；Email 每天彙整一封）</label>
     <div id="nearBox" class="${p.notify_enabled?'':'hidden'}">
       <div class="row2">
         <label class="f"><span>範圍</span><select id="nR">${[...new Set([1,2,3,5,10,20,30,+p.home_radius_km||3])].sort((a,b)=>a-b).map(r=>`<option value="${r}" ${p.home_radius_km==r?'selected':''}>${r} 公里內</option>`).join('')}</select></label>

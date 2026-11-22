@@ -601,7 +601,7 @@ function groupBy<T extends Record<string, any>>(rows: T[], key: (r: T) => string
 
 async function runNotifications() {
   if (!MAIL_OK) { log("未設定寄信，略過通知"); return; }
-  const caseRows = await sbAll("cases", { select: "id,name,contact_email,hidden,email_verified,status,photos", status: "eq.searching", hidden: "eq.false" }, 1000, 1e6, true);
+  const caseRows = await sbAll("cases", { select: "id,name,contact_email,hidden,email_verified,status,photos,owner_id", status: "eq.searching", hidden: "eq.false" }, 1000, 1e6, true);
   const cases = new Map(caseRows.map((c) => [c.id, c]));
   const oldCut = new Date(Date.now() - 3 * 86400e3).toISOString();
   // 信箱還沒確認：先不寄、留著；超過 3 天的就標記掉，不再累積
@@ -705,6 +705,20 @@ async function runNotifications() {
     if (quiet.length) await markNotified("found_matches", quiet);
     const lstA = c ? all.filter((m) => fr.has(m.found_id) && good(m)) : [];
     if (!lstA.length) continue;
+    // 有登入建案的飼主：App 推播（同一筆通報只推一次，不受 Email 有沒有確認影響）
+    if (c && c.owner_id && c.status === "searching") {
+      try {
+        const ids = lstA.map((m) => m.found_id);
+        const done = new Set(((await sb("GET", "notify_log", undefined, { select: "ref_id", user_id: `eq.${c.owner_id}`, kind: "eq.found_push", ref_id: `in.(${ids.join(",")})` })) ?? []).map((x: any) => x.ref_id));
+        const fresh = lstA.filter((m) => !done.has(m.found_id));
+        if (fresh.length) {
+          await sb("POST", "notify_log", fresh.map((m) => ({ user_id: c.owner_id, kind: "found_push", ref_id: m.found_id })), undefined, "return=minimal,resolution=ignore-duplicates");
+          const f0 = fr.get(fresh[0].found_id) ?? {};
+          await pushToUser(c.owner_id, `有人可能${f0.kind === "found" ? "撿到" : "看到"}${c.name}`, `${fresh[0].photo_sim != null ? "照片相似 " + fresh[0].photo_sim + "%・" : ""}${f0.city ?? ""}${f0.district || ""}，點開看照片`, `#/found/${fresh[0].found_id}`);
+          log(`拾獲比對推播：${c.name} x${fresh.length}`);
+        }
+      } catch (e) { log("拾獲比對推播失敗：", errName(e)); }
+    }
     if (!c || !c.contact_email || c.status !== "searching") { await markNotified("found_matches", lstA.map((m) => m.id)); continue; }
     if (!c.email_verified) { await skipUnverified("found_matches", lstA); continue; }
     // 同一個信箱、同一筆路人通報只通知一次
@@ -762,8 +776,7 @@ async function runMemberNotifications(nearby = true) {
     try {
       if (!(await sendMail(email, `【${SITE_NAME}】你家附近有毛孩走失`, lines.join("\n"), "nearby", MAIL_CAP_LOW, nearbyHtml(lst, await casePhotoMap(lst.slice(0, 10).map((r) => r.case_id)))))) break;
       await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: "nearby", ref_id: r.case_id })), undefined, "return=minimal,resolution=ignore-duplicates");   // 全部記下來，超過 10 隻的隔天不會再寄
-      log(`附近通知：${lst.length} 筆 → 1 位會員`);
-      await pushToUser(uid, `你家附近有 ${lst.length} 隻毛孩走失`, `${lst[0].case_name}（約 ${Number(lst[0].distance_km).toFixed(1)} 公里）${lst.length > 1 ? "等" : ""}，出門時幫忙留意`, lst.length === 1 ? `#/case/${lst[0].case_id}` : "#/inbox");
+      log(`附近通知：${lst.length} 筆 → 1 位會員`);   // 推播改由白天的「附近即時推播」負責，凌晨的彙整信不再推播
     } catch (e) { log("附近通知寄送失敗：", errName(e)); }
   }
   // 追蹤案件新目擊
@@ -783,6 +796,28 @@ async function runMemberNotifications(nearby = true) {
       await pushToUser(uid, `你追蹤的${lst[0].case_name}有新目擊`, `${lst[0].place_text || "點開看位置"}`, `#/case/${lst[0].case_id}`);
     } catch (e) { log("追蹤通知寄送失敗：", errName(e)); }
   }
+}
+
+// ---------------------------------------------------------------- 附近即時推播（不吵：每人 12 小時最多一則、晚上 10 點到早上 8 點不推、多隻合併成一則）
+async function runNearbyPush() {
+  const twHour = (new Date().getUTCHours() + 8) % 24;
+  if (twHour >= 22 || twHour < 8) { log("附近即時推播：夜間不推"); return; }
+  const rows = (await sb("POST", "rpc/nearby_push_targets", { p_hours: 10 })) ?? [];
+  let users = 0;
+  for (const lst0 of groupBy(rows, (r) => r.user_id).values()) {
+    if (users >= 300) break;
+    const lst = [...lst0].sort((a, b) => a.distance_km - b.distance_km);
+    const uid = lst[0].user_id, r0 = lst[0];
+    try {
+      await sb("POST", "notify_log", lst.map((r) => ({ user_id: uid, kind: "nearby_push", ref_id: r.case_id })), undefined, "return=minimal,resolution=ignore-duplicates");
+      const km = Number(r0.distance_km), dist = km < 1 ? `${Math.max(100, Math.round(km * 10) * 100)} 公尺` : `${km.toFixed(1)} 公里`;
+      await pushToUser(uid, lst.length === 1 ? `你家附近 ${dist} 有${SP_NAME[r0.species] ?? "毛孩"}走失` : `你家附近有 ${lst.length} 隻毛孩走失`,
+        `${r0.case_name}在${r0.lost_city}${r0.lost_district || ""}走失${lst.length > 1 ? "等" : ""}，出門時幫忙看一眼，看到請拍照回報、不要追`,
+        lst.length === 1 ? `#/case/${r0.case_id}` : "#/lost?near=1");
+      users++;
+    } catch (e) { log("附近即時推播失敗：", errName(e)); }
+  }
+  if (rows.length) log(`附近即時推播：${rows.length} 筆 → ${users} 位會員`);
 }
 
 // ---------------------------------------------------------------- 健康紀錄到期提醒
@@ -911,6 +946,7 @@ async function run(mode: Mode) {
     if (full || mode === "match" || mode === "notify") await step("拾獲比對", runFoundMatching);
     if (full || mode === "notify") await step("飼主通知", runNotifications);
     if (full || mode === "notify") await step("會員通知", () => runMemberNotifications(full));
+    if (mode === "notify") await step("附近即時推播", runNearbyPush);
     if (full || mode === "notify") await step("回家通知", runReuniteNotices);
     if (full || mode === "notify") await step("檢舉通知", runReportAlerts);
     if (full) await step("到期提醒", runDueReminders);
