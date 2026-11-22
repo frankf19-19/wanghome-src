@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.34';
+const BUILD = 'v7.30.35';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4489,7 +4489,7 @@ async function renderFav(){const _n=navId;setTitle('收藏');
 /* ===== 手機推播（App，iPhone 先開）：有人看到你的毛孩、家附近有毛孩走失時，手機直接跳通知 ===== */
 let __pushBound=false,__pushToken='';
 // Android：要用有內建 Firebase 設定的 App 版本才能註冊推播（舊版 App 一註冊就會閃退），所以用 App 的建置編號把關；0＝還沒開放
-const AND_PUSH_MIN=0;let __andPush=false;
+const AND_PUSH_MIN=2391;let __andPush=false;
 function pushPlat(){try{return window.Capacitor.getPlatform()}catch(_){return ''}}
 function pushOK(){try{const p=pushPlat();return IS_APP&&(p==='ios'||(p==='android'&&__andPush))&&!!capPlugin('PushNotifications')}catch(_){return false}}
 if(IS_APP&&AND_PUSH_MIN>0&&pushPlat()==='android')setTimeout(()=>{try{capPlugin('App').getInfo().then(i=>{__andPush=(+i.build||0)>=AND_PUSH_MIN;if(__andPush)try{pushInit(false)}catch(_){}}).catch(()=>{})}catch(_){}},1500);
