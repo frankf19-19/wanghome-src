@@ -19,17 +19,17 @@ export async function onRequestGet({ request, waitUntil }) {
   const hit = await cache.match(key);
   if (hit) { const h = new Headers(hit.headers); Object.entries(cors).forEach(([k, v]) => h.set(k, v)); return new Response(hit.body, { status: 200, headers: h }); }
   const q = `[out:json][timeout:8];(nwr(around:${r},${la},${lo})[leisure~"^(park|playground|garden)$"][name];nwr(around:${r},${la},${lo})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${r},${la},${lo})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${la},${lo})[amenity=veterinary];);out center tags 80;`;
-  let data = null, src = "";
+  let data = null, src = ""; const errs = [];
   for (const ep of EPS) {
     try {
       const res = await fetch(ep, { method: "POST", body: "data=" + encodeURIComponent(q), signal: AbortSignal.timeout(9000),
         headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "WangMiaoHome/1.0 (https://wangmiaotw.com; service@wangmiaotw.com)" } });
-      if (!res.ok) continue;
+      if (!res.ok) { errs.push(new URL(ep).host + " " + res.status); continue; }
       const j = await res.json();
       if (j && Array.isArray(j.elements)) { data = j; src = new URL(ep).host; break; }
-    } catch (_) { /* 換下一台 */ }
+    } catch (e) { errs.push(new URL(ep).host + " " + String(e).slice(0, 80)); }
   }
-  if (!data) return json({ error: "upstream" }, 502);
+  if (!data) return json({ error: "upstream", errs }, url.searchParams.get("debug") ? 200 : 503);
   // 只留前端用得到的欄位
   const KEEP = ["name", "leisure", "amenity", "waterway", "phone", "contact:phone"];
   const elements = data.elements.map((e) => ({ lat: e.lat ?? e.center?.lat, lon: e.lon ?? e.center?.lon, tags: Object.fromEntries(KEEP.filter((k) => e.tags && e.tags[k]).map((k) => [k, e.tags[k]])) })).filter((e) => e.lat != null);
