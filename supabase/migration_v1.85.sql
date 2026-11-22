@@ -15,7 +15,7 @@ begin
       where s.kind = 'shelter' and s.ver = 2
         and coalesce(s.info->>'sp', 'dog') = coalesce(c.species, 'dog')
         and coalesce(s.info->>'at', '9999') >= d0
-        and not (c.sex = 'male' and s.info->>'sex' = '母') and not (c.sex = 'female' and s.info->>'sex' = '公')
+        and not (coalesce(c.sex,'') = 'male' and coalesce(s.info->>'sex','') = '母') and not (coalesce(c.sex,'') = 'female' and coalesce(s.info->>'sex','') = '公')
       group by s.ref, s.url, s.info
     ), best as (
       select distinct on (cand.ref) cand.ref, cand.url, cand.info, cand.cos from cand order by cand.ref, cand.cos desc
