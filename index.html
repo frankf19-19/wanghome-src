@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.30';
+const BUILD = 'v7.30.31';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5548,11 +5548,12 @@ function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const
   tips.push(hrs<48?'把協尋頁分享到當地 FB 社團、LINE 群組，在走失點附近貼 A4 海報。':'在常有人經過的地方補貼海報，協尋貼文每隔幾天重新分享一次。');
   return {hrs,rad,outer,phase,best,tips,name:N,ago:hrs<1?'不到 1 小時':hrs<24?Math.floor(hrs)+' 小時':'第 '+daysSince(c.lost_at)+' 天'}}
 // 走失地點附近「先找這些地方」：公園、學校、市場、廟、河邊，加上附近動物醫院（OpenStreetMap 資料）
-async function nearbySpots(c,lp,map){const box=$('#saSpots');if(!box)return;const lat=+c.lost_lat,lng=+c.lost_lng,R1=Math.round(Math.min(Math.max(lp.rad,0.3),2)*1000);
+async function nearbySpots(c,lp,map){let box=$('#saSpots');if(!box)return;const lat=+c.lost_lat,lng=+c.lost_lng,R1=Math.round(Math.min(Math.max(lp.rad,0.3),2)*1000);
   const key='wh_spots2_'+c.id+'_'+R1;let els=null;try{els=JSON.parse(sessionStorage.getItem(key)||'null')}catch(_){}
-  if(!els){const q=`[out:json][timeout:20];(nwr(around:${R1},${lat},${lng})[leisure~"^(park|playground|garden)$"][name];nwr(around:${R1},${lat},${lng})[amenity~"^(school|marketplace|place_of_worship|parking)$"][name];nwr(around:${R1},${lat},${lng})[waterway~"^(river|stream|canal)$"][name];nwr(around:5000,${lat},${lng})[amenity=veterinary];);out center tags 80;`;
-    try{const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}}catch(_){if(box.isConnected)box.remove();return}}
-  if(!box.isConnected)return;
+  if(!els){const q=`[out:json][timeout:20];(nwr(around:${R1},${lat},${lng})[leisure~"^(park|playground|garden)$"][name];nwr(around:${R1},${lat},${lng})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${R1},${lat},${lng})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${lat},${lng})[amenity=veterinary];);out center tags 80;`;
+    for(const ep of ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']){try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),25000);const r=await fetch(ep,{method:'POST',body:'data='+encodeURIComponent(q),signal:ctl.signal});clearTimeout(tt);if(!r.ok)continue;els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}break}catch(_){}}
+    if(!els){const b2=$('#saSpots');if(b2)b2.remove();return}}
+  box=$('#saSpots');if(!box)return;
   const km=(a,b)=>{const R=6371,dL=(a-lat)*Math.PI/180,dG=(b-lng)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(a*Math.PI/180)*Math.sin(dG/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
   const IC=t=>t.leisure?'🌳':t.amenity==='school'?'🏫':t.amenity==='marketplace'?'🛒':t.amenity==='place_of_worship'?'⛩️':t.amenity==='parking'?'🅿️':t.waterway?'🌊':'📍';
   const all=els.map(e=>{const la=e.lat??e.center?.lat,lo=e.lon??e.center?.lon;return la==null?null:{t:e.tags||{},la,lo,d:km(la,lo)}}).filter(Boolean);
