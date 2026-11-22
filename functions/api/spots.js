@@ -1,8 +1,7 @@
-// 走失地點附近「先找這些地方」：代查 OpenStreetMap（Overpass），並快取 14 天。
+// 走失地點附近「先找這些地方」：代查 OpenStreetMap，並快取 14 天。
 // 直接從瀏覽器查常常要等十幾秒；改由這裡查，同一個地點查過一次之後就是即時的。App 裡也只要連本站就好。
 // GET /api/spots?lat=25.0330&lng=121.5654&r=1000
 const ALLOW = ["capacitor://localhost", "https://localhost", "https://wangmiaotw.com", "https://www.wangmiaotw.com"];
-const EPS = ["https://overpass.private.coffee/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
 
 export async function onRequestGet({ request, waitUntil }) {
   const url = new URL(request.url);
@@ -18,22 +17,26 @@ export async function onRequestGet({ request, waitUntil }) {
   const cache = caches.default;
   const hit = await cache.match(key);
   if (hit) { const h = new Headers(hit.headers); Object.entries(cors).forEach(([k, v]) => h.set(k, v)); return new Response(hit.body, { status: 200, headers: h }); }
-  const q = `[out:json][timeout:8];(nwr(around:${r},${la},${lo})[leisure~"^(park|playground|garden)$"][name];nwr(around:${r},${la},${lo})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${r},${la},${lo})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${la},${lo})[amenity=veterinary];);out center tags 80;`;
-  let data = null, src = ""; const errs = [];
-  for (const ep of EPS) {
+  // 用 OpenStreetMap 的 Nominatim 分類查詢（Overpass 從雲端主機查常常逾時）：公園、學校、市場、宮廟在範圍內找，動物醫院找遠一點
+  const box = (m) => { const dLat = m / 111000, dLng = m / (111000 * Math.cos(lat * Math.PI / 180)); return `${(lng - dLng).toFixed(4)},${(lat + dLat).toFixed(4)},${(lng + dLng).toFixed(4)},${(lat - dLat).toFixed(4)}`; };
+  const CATS = [["park", r], ["school", r], ["place of worship", r], ["marketplace", r], ["veterinary", 4000]];
+  const elements = []; const errs = []; let ok = 0;
+  for (const [q, m] of CATS) {
     try {
-      const res = await fetch(ep, { method: "POST", body: "data=" + encodeURIComponent(q), signal: AbortSignal.timeout(9000),
-        headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "WangMiaoHome/1.0 (https://wangmiaotw.com; service@wangmiaotw.com)" } });
-      if (!res.ok) { errs.push(new URL(ep).host + " " + res.status); continue; }
-      const j = await res.json();
-      if (j && Array.isArray(j.elements)) { data = j; src = new URL(ep).host; break; }
-    } catch (e) { errs.push(new URL(ep).host + " " + String(e).slice(0, 80)); }
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&viewbox=${box(m)}&bounded=1&limit=15&extratags=1&accept-language=zh-TW`, {
+        headers: { "User-Agent": "WangMiaoHome/1.0 (https://wangmiaotw.com; service@wangmiaotw.com)", "Referer": "https://wangmiaotw.com/", "Accept": "application/json" }, signal: AbortSignal.timeout(8000) });
+      if (!res.ok) { errs.push(q + " " + res.status); continue; }
+      ok++;
+      for (const x of await res.json()) {
+        if (!x || !x.lat || !["leisure", "amenity"].includes(x.category)) continue;
+        const tags = { [x.category]: x.type }; if (x.name) tags.name = x.name;
+        const ph = x.extratags && (x.extratags.phone || x.extratags["contact:phone"]); if (ph) tags.phone = ph;
+        elements.push({ lat: +x.lat, lon: +x.lon, tags });
+      }
+    } catch (e) { errs.push(q + " " + String(e).slice(0, 60)); }
   }
-  if (!data) return json({ error: "upstream", errs }, url.searchParams.get("debug") ? 200 : 503);
-  // 只留前端用得到的欄位
-  const KEEP = ["name", "leisure", "amenity", "waterway", "phone", "contact:phone"];
-  const elements = data.elements.map((e) => ({ lat: e.lat ?? e.center?.lat, lon: e.lon ?? e.center?.lon, tags: Object.fromEntries(KEEP.filter((k) => e.tags && e.tags[k]).map((k) => [k, e.tags[k]])) })).filter((e) => e.lat != null);
+  if (!ok) return json({ error: "upstream", errs }, url.searchParams.get("debug") ? 200 : 503);
   const body = JSON.stringify({ elements });
   waitUntil(cache.put(key, new Response(body, { status: 200, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=1209600" } })));
-  return new Response(body, { status: 200, headers: { ...cors, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=86400", "X-Spots-Src": src } });
+  return new Response(body, { status: 200, headers: { ...cors, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=86400" } });
 }
