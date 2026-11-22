@@ -4393,7 +4393,7 @@ async function loadNearCta(_n){const el=$('#nearCta');if(!el)return;const mob=el
   if(_n!==navId||!el.isConnected||on)return;
   const href=me()?'#/me?nf=1':'#/me';
   if(mob){el.outerHTML=`<a class="mrow" id="nearCta" href="${href}"><span class="mri c2">${ic('bell')}</span><span class="mrl">家附近有毛孩走失時通知我</span>${ic('chev','mrc')}</a>`;return}
-  el.innerHTML=`<div class="near-cta">${ic('bell')}<a href="${href}" style="flex:1;color:inherit;text-decoration:none"><b>家附近有毛孩走失時通知我</b><small>${me()?'設定你家的位置，有新的走失毛孩（含農業部申報）會寄信通知你':'免費註冊會員，設定家附近，有毛孩走失就通知你'}</small></a><button type="button" class="linkbtn" aria-label="不要再顯示" style="font-size:18px;color:var(--ink-3)">✕</button></div>`;
+  el.innerHTML=`<div class="near-cta">${ic('bell')}<a href="${href}" style="flex:1;color:inherit;text-decoration:none"><b>家附近有毛孩走失時通知我</b><small>${me()?'設定你家的位置，附近有毛孩走失會通知你（最多半天一則，晚上不吵）':'免費註冊會員，設定家附近，有毛孩走失就通知你'}</small></a><button type="button" class="linkbtn" aria-label="不要再顯示" style="font-size:18px;color:var(--ink-3)">✕</button></div>`;
   el.querySelector('button').onclick=()=>{try{localStorage.setItem('wh_nearcta_x','1')}catch(_){}el.innerHTML=''}}
 async function loadMyPets(_n){const el=$('#myPets');if(!el)return;
   if(!me()){el.innerHTML='';return}   // 沒登入：四宮格裡已經有「健康手冊」，不再重複
