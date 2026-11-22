@@ -31,6 +31,13 @@ jobs:
           npm ci --no-audit --no-fund
           bash prepare-web.sh
           npx cap sync android
+      - name: Firebase 設定（Android 推播用；沒設定 Secret 就略過，App 照樣能編譯，只是沒有推播）
+        env:
+          GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GSJ" ]; then printf '%s' "$GSJ" > app/android/app/google-services.json
+            node -e 'const j=JSON.parse(require("fs").readFileSync("app/android/app/google-services.json","utf8"));const ok=(j.client||[]).some(c=>c.client_info&&c.client_info.android_client_info&&c.client_info.android_client_info.package_name==="com.wangmiaotw.app");if(!ok){console.error("::error::google-services.json 裡沒有 com.wangmiaotw.app");process.exit(1)}console.log("::notice::已放入 Firebase 設定（專案 "+j.project_info.project_id+"）")'
+          else echo "::warning::沒有 GOOGLE_SERVICES_JSON，這次編譯的 App 沒有 Android 推播"; fi
       - name: 版本號（每次編譯自動加 1）
         working-directory: app/android
         run: |

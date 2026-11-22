@@ -299,15 +299,38 @@ async function apnsAuth(): Promise<string> {
   apnsJwt = { t: Date.now(), v: data + "." + b64u(sig) };
   return apnsJwt.v;
 }
+// ===== 手機推播（Android／Firebase FCM）=====
+// 需要的 Secret：FCM_SERVICE_ACCOUNT（Firebase 服務帳戶金鑰 JSON 的內容）；沒設定就不推 Android
+let fcmSa: { project_id: string; client_email: string; private_key: string } | null = null;
+try { const raw = (Deno.env.get("FCM_SERVICE_ACCOUNT") ?? "").trim(); if (raw) { const j = JSON.parse(raw); if (j.project_id && j.client_email && j.private_key) fcmSa = j; } } catch (_) { fcmSa = null; }
+let fcmTok = { t: 0, v: "" };
+async function fcmAuth(): Promise<string> {
+  if (fcmTok.v && Date.now() - fcmTok.t < 45 * 60e3) return fcmTok.v;
+  const sa = fcmSa!;
+  const der = Uint8Array.from(atob(sa.private_key.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const u = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const enc = (o: unknown) => u(new TextEncoder().encode(JSON.stringify(o)));
+  const now = Math.floor(Date.now() / 1000);
+  const data = enc({ alg: "RS256", typ: "JWT" }) + "." + enc({ iss: sa.client_email, scope: "https://www.googleapis.com/auth/firebase.messaging", aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600 });
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(data));
+  const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: "grant_type=" + encodeURIComponent("urn:ietf:params:oauth:grant-type:jwt-bearer") + "&assertion=" + data + "." + u(sig) });
+  const j = await r.json();
+  if (!r.ok || !j.access_token) throw new Error("fcm auth " + r.status);
+  fcmTok = { t: Date.now(), v: j.access_token };
+  return fcmTok.v;
+}
 // 推給某位會員的所有 iPhone；回傳成功幾支
 async function pushToUser(userId: string, title: string, body: string, url = "#/inbox"): Promise<number> {
-  if (!APNS_P8 || !APNS_KEY_ID || !APNS_TEAM_ID || !userId) return 0;
+  const apnsOK = !!(APNS_P8 && APNS_KEY_ID && APNS_TEAM_ID);
+  if (!userId || (!apnsOK && !fcmSa)) return 0;
   const base = Deno.env.get("SUPABASE_URL")!, key = serviceKey();
   const h = { apikey: key, ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}) };
   let toks: { token: string; platform: string }[] = [];
   try { const r = await fetch(`${base}/rest/v1/push_tokens?select=token,platform&user_id=eq.${userId}`, { headers: h }); if (r.ok) toks = await r.json(); } catch (_) { return 0; }
   let n = 0;
-  for (const t of toks.filter((x) => x.platform === "ios")) {
+  if (apnsOK) for (const t of toks.filter((x) => x.platform === "ios")) {
     try {
       const r = await fetch(`https://api.push.apple.com/3/device/${t.token}`, { method: "POST",
         headers: { authorization: `bearer ${await apnsAuth()}`, "apns-topic": APNS_TOPIC, "apns-push-type": "alert", "apns-priority": "10", "content-type": "application/json" },
@@ -318,6 +341,20 @@ async function pushToUser(userId: string, title: string, body: string, url = "#/
         if (r.status === 410 || /Unregistered/.test(why))
           await fetch(`${base}/rest/v1/push_tokens?token=eq.${encodeURIComponent(t.token)}`, { method: "DELETE", headers: h }).catch(() => {});
         else console.error("APNs", r.status, why.slice(0, 200));
+      }
+    } catch (_) { /* 推播失敗不影響寄信 */ }
+  }
+  if (fcmSa) for (const t of toks.filter((x) => x.platform === "android")) {
+    try {
+      const r = await fetch(`https://fcm.googleapis.com/v1/projects/${fcmSa.project_id}/messages:send`, { method: "POST",
+        headers: { authorization: `Bearer ${await fcmAuth()}`, "content-type": "application/json" },
+        body: JSON.stringify({ message: { token: t.token, notification: { title, body }, data: { url }, android: { priority: "HIGH", notification: { sound: "default" } } } }) });
+      if (r.ok) n++;
+      else {
+        const why = await r.text().catch(() => "");
+        if (r.status === 404 || /UNREGISTERED/.test(why))   // 手機已經刪掉 App 或代碼失效：不再推
+          await fetch(`${base}/rest/v1/push_tokens?token=eq.${encodeURIComponent(t.token)}`, { method: "DELETE", headers: h }).catch(() => {});
+        else console.error("FCM", r.status, why.slice(0, 200));
       }
     } catch (_) { /* 推播失敗不影響寄信 */ }
   }

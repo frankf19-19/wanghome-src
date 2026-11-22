@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.33';
+const BUILD = 'v7.30.34';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4488,9 +4488,13 @@ async function renderFav(){const _n=navId;setTitle('收藏');
 
 /* ===== 手機推播（App，iPhone 先開）：有人看到你的毛孩、家附近有毛孩走失時，手機直接跳通知 ===== */
 let __pushBound=false,__pushToken='';
-function pushOK(){try{return IS_APP&&window.Capacitor.getPlatform()==='ios'&&!!capPlugin('PushNotifications')}catch(_){return false}}
+// Android：要用有內建 Firebase 設定的 App 版本才能註冊推播（舊版 App 一註冊就會閃退），所以用 App 的建置編號把關；0＝還沒開放
+const AND_PUSH_MIN=0;let __andPush=false;
+function pushPlat(){try{return window.Capacitor.getPlatform()}catch(_){return ''}}
+function pushOK(){try{const p=pushPlat();return IS_APP&&(p==='ios'||(p==='android'&&__andPush))&&!!capPlugin('PushNotifications')}catch(_){return false}}
+if(IS_APP&&AND_PUSH_MIN>0&&pushPlat()==='android')setTimeout(()=>{try{capPlugin('App').getInfo().then(i=>{__andPush=(+i.build||0)>=AND_PUSH_MIN;if(__andPush)try{pushInit(false)}catch(_){}}).catch(()=>{})}catch(_){}},1500);
 function pushBind(){if(__pushBound||!pushOK())return;__pushBound=true;const P=capPlugin('PushNotifications');
-  P.addListener('registration',t=>{__pushToken=t&&t.value||'';try{localStorage.setItem('wh_push_tok',__pushToken)}catch(_){}if(me()&&__pushToken)sb.rpc('save_push_token',{p_token:__pushToken,p_platform:'ios'}).then(()=>{},()=>{})});
+  P.addListener('registration',t=>{__pushToken=t&&t.value||'';try{localStorage.setItem('wh_push_tok',__pushToken)}catch(_){}if(me()&&__pushToken)sb.rpc('save_push_token',{p_token:__pushToken,p_platform:pushPlat()==='android'?'android':'ios'}).then(()=>{},()=>{})});
   P.addListener('registrationError',()=>{});
   // 點通知：已經在那個對話就直接抓新訊息（網址一樣時不會重新整理頁面）；不同對話就跳過去
   P.addListener('pushNotificationActionPerformed',a=>{const u=a&&a.notification&&a.notification.data&&a.notification.data.url;if(!(u&&/^#\/[\w\/?=&.%-]*$/.test(u)))return;if(location.hash===u){chatLiveRefresh();setTimeout(chatLiveRefresh,1500)}else{const id=(u.match(/^#\/chat\/([0-9a-f-]+)/)||[])[1];if(id)delete __chatData[id];location.hash=u}});
