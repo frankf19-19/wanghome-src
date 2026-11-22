@@ -1284,7 +1284,7 @@ body.bare header,body.bare footer,body.bare .tabbar,body.bare .mbar,body.bare #t
 .mg-pend{background:var(--mark-soft,#FFF5CC);border-radius:18px;padding:14px 16px 6px;margin:0 0 14px}.mg-pend h2{margin:0 0 6px;font-size:19px}
 .home-btn{width:100%;margin:4px 0 10px}
 .cact{display:flex;flex-direction:column;gap:10px;margin:14px 0 0}.cact .btn{width:100%;justify-content:center}
-.cact .btn.call{text-align:center;flex-wrap:wrap;gap:4px 8px}.cact-num{white-space:nowrap;font-family:var(--display);letter-spacing:.02em}
+.cact .btn.call{text-align:center;flex-wrap:wrap;gap:4px 8px}.btn.big.call{background:linear-gradient(180deg,color-mix(in srgb,var(--green-fill) 84%,#fff) 0%,var(--green-fill) 60%,color-mix(in srgb,var(--green-fill) 90%,#000) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 16px -8px color-mix(in srgb,var(--green-fill) 70%,transparent)}.cact-num{white-space:nowrap;font-family:var(--display);letter-spacing:.02em}
 .tipbox.ic-tip{display:flex;gap:10px;align-items:flex-start}.tipbox .tb-ic{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.7)}.tipbox .tb-ic .ico{width:17px;height:17px}.casemeta{margin:18px 0 0;display:flex;align-items:center;gap:6px}
 .tipbox{background:var(--mark-soft,#FFF5CC);color:var(--ink);border-radius:14px;padding:10px 14px;margin:12px 0 0;font-size:15px;line-height:1.55}
 .cact-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}.cact-sub.four{grid-template-columns:repeat(4,1fr);gap:6px}.cact-sub.four .btn{padding-left:2px;padding-right:2px;gap:4px}.cact-sub .btn.line{color:#fff}.cact-sub .btn{justify-content:center;padding-left:6px;padding-right:6px}
@@ -1594,7 +1594,7 @@ body.scrolled header{border-bottom-color:color-mix(in srgb,var(--line) 70%,trans
 .card,.ccard,.mgroup,.empty-card,.sponsor:not(.due),.pickpet a,.mg-ai{box-shadow:0 1px 2px rgba(120,40,70,.04),0 14px 30px -16px rgba(184,51,95,.22);border:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
 .card .card{box-shadow:none}
 /* 主要按鈕：微漸層 + 內側高光 + 同色系投影（去掉硬邊「遊戲按鈕」） */
-.btn:not(.ghost):not(.sm):not(.danger):not(.green){background:linear-gradient(180deg,color-mix(in srgb,var(--red-fill) 86%,#fff) 0%,var(--red-fill) 55%,color-mix(in srgb,var(--red-fill) 92%,#000) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 8px 16px -8px color-mix(in srgb,var(--red-fill) 70%,transparent)}
+.btn:not(.ghost):not(.sm):not(.danger):not(.green):not(.line):not(.call):not(.fb){background:linear-gradient(180deg,color-mix(in srgb,var(--red-fill) 86%,#fff) 0%,var(--red-fill) 55%,color-mix(in srgb,var(--red-fill) 92%,#000) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 8px 16px -8px color-mix(in srgb,var(--red-fill) 70%,transparent)}
 .btn.green:not(.ghost){background:linear-gradient(180deg,color-mix(in srgb,var(--green-fill) 86%,#fff) 0%,var(--green-fill) 55%,color-mix(in srgb,var(--green-fill) 92%,#000) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 8px 16px -8px color-mix(in srgb,var(--green-fill) 70%,transparent)}
 .btn.danger{background:linear-gradient(180deg,#D43B3B,#B71F1F);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 16px -8px rgba(183,31,31,.6)}
 .btn.ghost{background:var(--sheet);border:1px solid var(--line);box-shadow:0 1px 2px rgba(120,40,70,.05)}
@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.35';
+const BUILD = 'v7.30.36';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5773,7 +5773,7 @@ function cardHTML(c){
     <div class="b">
       <div class="t">${esc(c.name)}</div>
       <div class="m">${esc([sp(c.species).name,c.breed,SEX[c.sex],c.colour].filter(Boolean).join('、'))}</div>
-      <div class="loc">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</div>
+      <div class="loc">${ic("pin")} ${esc(locShort(c))}</div>
       <div class="chips">${fresh?`<span class="tag amber">${ic("eye")} 剛有人看到</span>`:c.sighting_count?`<span class="tag">目擊 ${c.sighting_count} 次</span>`:''}${staleTag(c)}${distText(c.lost_lat,c.lost_lng)}</div>
     </div></a>`;
 }
@@ -5986,7 +5986,7 @@ async function renderCase(id){const _n=navId;
     ${false?`<span class="tag blue">尋獲獎金 NT$${c.reward.toLocaleString()}</span>`:''}${c.source==='moa'?'<span class="tag">農業部申報</span>':''}
   </div>
   <h1>${c.status==='found'?'平安回家':sp(c.species).poster}｜${esc(c.name)}</h1>
-  <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(c.lost_city)}${esc(c.lost_district||'')} ${esc(c.lost_place||'')}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}</span></p>
+  <p class="muted meta-line"><span class="mu">${ic("pin")} ${esc(locFull(c))}</span> <span class="mu">走失於 ${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}</span></p>
   <div class="xstats"${c.status==='found'?' hidden':''}><div><small>目擊回報</small><b>${c.sighting_count||0}<span>次</span></b></div><div><small>晶片</small><b>${c.has_chip?'有':'不確定'}</b></div>${c.status==='searching'?`<button type="button" class="xs-clue" id="clueStat" hidden><small>線索留言</small><b><i id="clueN">0</i><span>則 ›</span></b></button>`:''}${c.reward>0?`<div class="rw"><small>懸賞</small><b>$${c.reward.toLocaleString()}</b></div>`:''}</div>
   ${c.source==='moa'?`<details class="notice moa"><summary><b>農業部遺失申報</b>看到毛孩請直接打給飼主 ›</summary>飼主在農業部寵物登記網申報走失，沒有使用汪喵回家。看到毛孩最快的方式是直接打電話給飼主；不方便打電話的話，也可以回報目擊位置，由汪喵回家確認後打電話轉告飼主。地圖上標的是走失地區的大概位置。</details>`:''}
   ${c.status==='found'?reunionHTML(c,id):''}
@@ -5998,7 +5998,7 @@ async function renderCase(id){const _n=navId;
     <div>
       <div class="card">
         <dl class="kv">
-          <dt>特徵</dt><dd><b>${esc([c.breed||'混種',SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,c.colour,c.age_text].filter(Boolean).join(' · '))}</b></dd>
+          <dt>特徵</dt><dd><b>${esc([c.breed,SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,c.colour,c.age_text].filter(Boolean).join(' · '))}</b></dd>
           ${c.features?`<dt>辨識</dt><dd>${esc(c.features)}</dd>`:''}
           ${c.collar_desc?`<dt>項圈</dt><dd>${esc(c.collar_desc)}</dd>`:''}
           ${c.temperament?`<dt>個性</dt><dd>${esc(c.temperament)}</dd>`:''}
@@ -6009,13 +6009,13 @@ async function renderCase(id){const _n=navId;
       </div>
       ${active?`<div class="cact">
         ${c.source==='moa'?'':`<a class="btn big cact-main" href="#/report/${id}">${ic("eye")} 我看到${esc(c.name||"毛孩")}了，回報</a>`}
-        ${c.contact_phone?`<a class="btn big call" href="tel:${esc(telNum(c.contact_phone))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(c.contact_phone)}</span></a>`:''}
+        ${c.contact_phone?`<a class="btn big call" href="tel:${esc(telNum(c.contact_phone))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(fmtPhone(c.contact_phone))}</span></a>`:''}
       </div>
       <div class="chat-ctaw" id="chatCta" hidden></div>
       <div id="caseJoin"></div>
       ${c.source==='moa'?`<p class="moa-rel"><a href="#/report/${id}">${ic("eye")} 不方便打電話？回報目擊位置，由汪喵回家轉告飼主 ›</a></p>`:''}
       ${c.contact_phone?(c.contact_line?`<p class="muted small" style="text-align:center;margin:6px 0 0">LINE：${esc(c.contact_line)}</p>`:''):`<p class="muted small" style="text-align:center;margin-top:8px">${c.contact_line?`${esc(c.contact_name||'飼主')} · LINE：${esc(c.contact_line)}<br>`:''}按上面按鈕回報，飼主會收到通知。</p>`}
-      <p class="tipbox ic-tip"><span class="tb-ic">${ic('paw')}</span><span>看到${esc(c.name||"毛孩")}：<b>不要叫、不要追</b>，拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</span></p>`:''}
+      <p class="tipbox ic-tip"><span class="tb-ic">${ic('paw')}</span><span>看到${esc(c.name||"毛孩")}：${c.temperament?'<b>先看上面飼主寫的「個性」再決定怎麼靠近</b>，':'<b>不要叫、不要追</b>，'}拍照記下時間地點，馬上回報。${c.reward>0?`<br><span class="small">獎金由飼主自己付，要你先匯款的是詐騙。</span>`:''}</span></p>`:''}
       <div class="cact-sub${active?' four':''}">
         <a class="btn line" data-share="line" target="_blank" rel="noopener" href="#" aria-label="傳到 LINE">LINE</a>
         <button class="btn ghost" id="btnShare" data-share="native">${ic("share")} 分享</button>
@@ -6162,6 +6162,10 @@ async function renderCase(id){const _n=navId;
   clearInterval(refreshTimer);refreshTimer=tm;
 }
 function hw(t){return String(t||'').replace(/[０-９＋－＃（）]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/　/g,' ')}
+function fmtPhone(t){const x=String(t||'').trim(),d=x.replace(/[^\d]/g,'');if(/^09\d{8}$/.test(d))return d.slice(0,4)+'-'+d.slice(4,7)+'-'+d.slice(7);return x}
+function locParts(c){const city=c.lost_city||'',dist=c.lost_district||'';let pl=String(c.lost_place||'').trim();for(const x of [city,city.replace(/^臺/,'台'),dist])if(x&&pl.startsWith(x))pl=pl.slice(x.length).trim();if(pl===dist||pl===city)pl='';return {city,dist,pl}}
+function locShort(c){const {city,dist,pl}=locParts(c);return (dist||city)+(pl?'・'+pl:'')}
+function locFull(c){const {city,dist,pl}=locParts(c);return city+dist+(pl?'・'+pl:'')}
 function telNum(t){return hw(t).replace(/分機|轉|ext\.?/gi,'#').replace(/[^\d+#]/g,'').replace(/#/g,',')}
 function telClean(t){t=hw(t);return (String(t||'').match(/[\d()+-]{7,}(#\d+)?/)||[''])[0].replace(/[^\d#+]/g,'')}
 function sightPhotos(s){const l=(s.photos&&s.photos.length?s.photos:(s.photo_url?[s.photo_url]:[])).filter(Boolean);return l}
@@ -6253,7 +6257,7 @@ function shareText(c,url){
   return `【${sp(c.species).poster}】${c.name}｜${c.lost_city}${c.lost_district||''}
 走失時間：${fmtDate(c.lost_at)}${c.source==='moa'?'':' '+fmtDT(c.lost_at).split(' ')[1]}
 走失地點：${c.lost_place||c.lost_city+(c.lost_district||'')}
-特徵：${[c.breed||'混種',SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,c.colour,c.age_text].filter(Boolean).join('、')}${c.features?'；'+c.features:''}
+特徵：${[c.breed,SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,c.colour,c.age_text].filter(Boolean).join('、')}${c.features?'；'+c.features:''}
 ${c.has_chip?'有晶片'+(c.chip_last4?'（末四碼 '+c.chip_last4+'）':''):'晶片：無／不確定'}${c.reward>0?'　尋獲獎金 NT$'+c.reward.toLocaleString():''}
 ${c.contact_phone?'聯絡：'+c.contact_phone+'\n':''}⚠️ 看到請勿呼喊、追趕或包圍，請拍照記下時間位置方向，到這裡回報目擊：
 ${url}`;
