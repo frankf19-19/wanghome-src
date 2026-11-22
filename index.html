@@ -3152,7 +3152,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.32';
+const BUILD = 'v7.30.33';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5551,6 +5551,9 @@ function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const
 async function nearbySpots(c,lp,map){let box=$('#saSpots');if(!box)return;const lat=+c.lost_lat,lng=+c.lost_lng,R1=Math.round(Math.min(Math.max(lp.rad,0.3),2)*1000);
   const key='wh_spots2_'+c.id+'_'+R1;let els=null;try{els=JSON.parse(sessionStorage.getItem(key)||'null')}catch(_){}
   if(!els){try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),30000);const r=await fetch(`${CONFIG.SITE_URL}api/spots?lat=${lat.toFixed(4)}&lng=${lng.toFixed(4)}&r=${R1}`,{signal:ctl.signal});clearTimeout(tt);if(r.ok){els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}}}catch(_){}
+    if(!els){   // 本站代查失敗（地圖資料伺服器忙）：改由這台裝置直接查一次
+      const q=`[out:json][timeout:20];(nwr(around:${R1},${lat},${lng})[leisure~"^(park|playground|garden)$"][name];nwr(around:${R1},${lat},${lng})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${R1},${lat},${lng})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${lat},${lng})[amenity=veterinary];);out center tags 80;`;
+      for(const ep of ['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter']){try{const r=await fetch(ep,{method:'POST',body:'data='+encodeURIComponent(q),signal:AbortSignal.timeout(25000)});if(!r.ok)continue;els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}break}catch(_){}}}
     if(!els){const b2=$('#saSpots');if(b2)b2.remove();return}}
   box=$('#saSpots');if(!box)return;
   const km=(a,b)=>{const R=6371,dL=(a-lat)*Math.PI/180,dG=(b-lng)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(a*Math.PI/180)*Math.sin(dG/2)**2;return 2*R*Math.asin(Math.sqrt(x))};

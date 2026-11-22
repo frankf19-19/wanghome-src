@@ -2,7 +2,7 @@
 // 直接從瀏覽器查常常要等十幾秒；改由這裡查，同一個地點查過一次之後就是即時的。App 裡也只要連本站就好。
 // GET /api/spots?lat=25.0330&lng=121.5654&r=1000
 const ALLOW = ["capacitor://localhost", "https://localhost", "https://wangmiaotw.com", "https://www.wangmiaotw.com"];
-const EPS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"];
+const EPS = ["https://overpass.private.coffee/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
 
 export async function onRequestGet({ request, waitUntil }) {
   const url = new URL(request.url);
@@ -18,15 +18,15 @@ export async function onRequestGet({ request, waitUntil }) {
   const cache = caches.default;
   const hit = await cache.match(key);
   if (hit) { const h = new Headers(hit.headers); Object.entries(cors).forEach(([k, v]) => h.set(k, v)); return new Response(hit.body, { status: 200, headers: h }); }
-  const q = `[out:json][timeout:20];(nwr(around:${r},${la},${lo})[leisure~"^(park|playground|garden)$"][name];nwr(around:${r},${la},${lo})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${r},${la},${lo})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${la},${lo})[amenity=veterinary];);out center tags 80;`;
-  let data = null;
+  const q = `[out:json][timeout:8];(nwr(around:${r},${la},${lo})[leisure~"^(park|playground|garden)$"][name];nwr(around:${r},${la},${lo})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${r},${la},${lo})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${la},${lo})[amenity=veterinary];);out center tags 80;`;
+  let data = null, src = "";
   for (const ep of EPS) {
     try {
-      const res = await fetch(ep, { method: "POST", body: "data=" + encodeURIComponent(q), signal: AbortSignal.timeout(22000),
+      const res = await fetch(ep, { method: "POST", body: "data=" + encodeURIComponent(q), signal: AbortSignal.timeout(9000),
         headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "WangMiaoHome/1.0 (https://wangmiaotw.com; service@wangmiaotw.com)" } });
       if (!res.ok) continue;
       const j = await res.json();
-      if (j && Array.isArray(j.elements)) { data = j; break; }
+      if (j && Array.isArray(j.elements)) { data = j; src = new URL(ep).host; break; }
     } catch (_) { /* 換下一台 */ }
   }
   if (!data) return json({ error: "upstream" }, 502);
@@ -35,5 +35,5 @@ export async function onRequestGet({ request, waitUntil }) {
   const elements = data.elements.map((e) => ({ lat: e.lat ?? e.center?.lat, lon: e.lon ?? e.center?.lon, tags: Object.fromEntries(KEEP.filter((k) => e.tags && e.tags[k]).map((k) => [k, e.tags[k]])) })).filter((e) => e.lat != null);
   const body = JSON.stringify({ elements });
   waitUntil(cache.put(key, new Response(body, { status: 200, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=1209600" } })));
-  return new Response(body, { status: 200, headers: { ...cors, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=86400" } });
+  return new Response(body, { status: 200, headers: { ...cors, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=86400", "X-Spots-Src": src } });
 }
