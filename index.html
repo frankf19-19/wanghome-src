@@ -3281,7 +3281,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.36.3';
+const BUILD = 'v7.36.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6376,7 +6376,10 @@ async function caseClues(c,id,_n){const box=$('#clues');if(!box)return;
 async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.photos||[]).length)return;
   const d0=new Date(new Date(c.lost_at)-86400000).toISOString().slice(0,10);
   // 72 分以下多半只是同品種、同體型（實測不同隻裡最像的，中位數就有 65 分），預設收起來，只放真的像的
-  const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=50).slice(0,8);const hi=rows.filter(r=>r.sim>=85).length;const weak=rows.filter(r=>r.sim<72);rows=rows.filter(r=>r.sim>=72).slice(0,6);
+  const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=50).slice(0,8);// 文字上的毛色完全對不上的（飼主寫黑色、收容所登記黃白色）也算不像
+    const cTxt=c.colour||((String(c.breed||'')+' '+String(c.name||'')).match(/黑柴|白柴|赤柴|紅貴賓|黑貴賓|白貴賓|灰貴賓/g)||[]).join(' ').replace(/赤/g,'黃'),cSet=colourSet(cTxt);
+    const colOff=r=>{const a=colourSet((r.info||{}).colour);return cSet.size&&a.size&&![...cSet].some(x=>a.has(x))};
+    const hi=rows.filter(r=>r.sim>=85&&!colOff(r)).length;const weak=rows.filter(r=>r.sim<72||colOff(r));rows=rows.filter(r=>r.sim>=72&&!colOff(r)).slice(0,6);
     const nm=c.species==='cat'?'貓':'狗',weakHTML=weak.length?`<details class="ph-more"><summary>看看比較不像的 ${weak.length} 隻</summary><p class="muted small">這幾隻只是品種、體型或姿勢有點像，多半不是${esc(c.name||'毛孩')}。有空可以掃一眼。</p><div class="ph-grid">${weak.map(r=>phCard({...r,kind:'shelter'})).join('')}</div></details>`:'';
     box.innerHTML=`<h2>${ic('camera')} 收容所裡照片最像的 ${hi?`<span class="tag amber">很像 ${hi}</span>`:''}</h2>
     <p class="muted small">AI 先把照片裡的${c.species==='cat'?'貓':'狗'}框出來、去掉背景，再拿${esc(c.name||'毛孩')}的照片和全台收容所在走失後收容的${c.species==='cat'?'貓':'狗'}${c.sex==='male'?'（只比男生）':c.sex==='female'?'（只比女生）':''}一張一張比，把最像的排在前面。${how}</p>
