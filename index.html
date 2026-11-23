@@ -1585,6 +1585,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 @media print{body.rh-printing>*:not(#rhPrintArea){display:none!important}body.rh-printing #rhPrintArea{display:block!important;font:15px/1.8 system-ui,"PingFang TC","Noto Sans TC",sans-serif;color:#000;background:#fff;padding:0 8px}#rhPrintArea h1{text-align:center;font-size:22px}#rhPrintArea .pa-t{white-space:pre-wrap}#rhPrintArea .pa-s{display:flex;gap:24px;margin-top:40px}#rhPrintArea .pa-s div{flex:1;border-top:1px solid #000;padding-top:6px}#rhPrintArea .pa-f{font-size:13px;margin-top:20px}}
 .rh-app details>summary{list-style:none}.rh-app details>summary::-webkit-details-marker{display:none}.rh-app details>summary::before{content:'▸';display:inline-block;width:1.1em;color:var(--ink-3);transition:transform .15s}.rh-app details[open]>summary::before{transform:rotate(90deg)}
 @media(min-width:900px){.rh-one{max-width:1040px}.rh-cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px;align-items:start}.rh-l{position:sticky;top:16px}.rh-l .rh-gal,.rh-l .rh-gal.many{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-columns:auto;overflow:visible;max-width:none;gap:10px}.rh-l .rh-gi{border-radius:14px}.rh-l .rh-gi:first-child{grid-column:1/-1;border-radius:22px}.rh-r .rh-title{margin-top:0}.rh-cta{position:static;background:none;padding:0}}
+.xfh{font-size:16px;margin:14px 0 8px}
 .rh-cities summary{cursor:pointer;font-weight:700;color:var(--ink-2);margin:8px 0}
 .pd-wrap{display:flex;flex-direction:column;align-items:center}
 .pd-stack{position:relative;width:100%;max-width:420px;height:min(58vh,520px);margin:2px auto 0}@media(min-width:761px){.pd-stack{max-width:380px;height:min(56vh,500px)}}
@@ -3260,7 +3261,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.33.3';
+const BUILD = 'v7.34.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4592,9 +4593,11 @@ async function renderFav(){const _n=navId;setTitle('收藏');
   <div id="favBody" class="xfavb"></div></div>`;
   $('#favMode').onclick=e=>{const b=e.target.closest('button');if(!b)return;favTab=b.dataset.f;$('#favMode').classList.toggle('adopt',favTab==='adopt');document.querySelectorAll('#favMode button').forEach(x=>x.classList.toggle('on',x===b));draw()};
   const draw=async()=>{const el=$('#favBody');if(!el)return;
-    if(favTab==='adopt'){const l=afavList();
-      el.innerHTML=l.length?`<p class="xhint">毛孩們被領養前都會留在這裡。實際狀況以收容所為準。</p><div class="xfgrid">${l.map(r=>`<a class="xfc" href="#/adopt/${esc(r.id)}"><span class="xfc-ph">${r.photo?`<img loading="lazy" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="">`:spIc(r.kind==='貓'?'cat':'dog')}<button type="button" class="xheart on" data-afav="${esc(r.id)}" aria-label="取消收藏" aria-pressed="true">${ic('heart')}</button></span><b>${esc(r.name)}${r.sex==='M'?' ・公':r.sex==='F'?' ・母':''}</b><small>${esc(r.shelter)}</small></a>`).join('')}</div>`
-        :`<div class="xempty">${ic('heart')}<b>還沒有想領養的毛孩</b><p>在「領養毛孩」看到喜歡的，按照片右上角的愛心，就會出現在這裡。</p><a class="btn" href="#/adopt">去看看領養毛孩</a></div>`;return}
+    if(favTab==='adopt'){const l=afavList(),rl=rhFavList();
+      const rhHTML=rl.length?`<h3 class="xfh">民眾送養</h3><div class="xfgrid">${rl.map(r=>`<a class="xfc" href="#/rehome/${esc(r.id)}"><span class="xfc-ph">${r.photo?thumbImg(r.photo,''):spIc(r.species)}</span><b>${esc(r.name)}</b><small>${esc((r.city||'').replace(/^臺/,'台')+(r.district||''))}・民眾送養</small></a>`).join('')}</div>${l.length?'<h3 class="xfh">收容所</h3>':''}`:'';
+      if(rl.length&&!l.length){el.innerHTML=rhHTML;return}
+      el.innerHTML=(rhHTML)+(l.length?`<p class="xhint">毛孩們被領養前都會留在這裡。實際狀況以收容所為準。</p><div class="xfgrid">${l.map(r=>`<a class="xfc" href="#/adopt/${esc(r.id)}"><span class="xfc-ph">${r.photo?`<img loading="lazy" referrerpolicy="no-referrer" src="${esc(r.photo)}" alt="">`:spIc(r.kind==='貓'?'cat':'dog')}<button type="button" class="xheart on" data-afav="${esc(r.id)}" aria-label="取消收藏" aria-pressed="true">${ic('heart')}</button></span><b>${esc(r.name)}${r.sex==='M'?' ・公':r.sex==='F'?' ・母':''}</b><small>${esc(r.shelter)}</small></a>`).join('')}</div>`
+        :`<div class="xempty">${ic('heart')}<b>還沒有想領養的毛孩</b><p>在「領養毛孩」看到喜歡的，按照片右上角的愛心，就會出現在這裡。</p><a class="btn" href="#/adopt">去看看領養毛孩</a></div>`);return}
     if(!me()){el.innerHTML=`<div class="xempty">${ic('mark')}<b>追蹤你在幫忙找的毛孩</b><p>登入後，在毛孩頁按「追蹤」，有人看到毛孩或毛孩回家了，都會通知你。</p><a class="btn" href="#/login">登入／註冊（免費）</a></div>`;return}
     el.innerHTML=`<div class="grid">${skel(2)}</div>`;
     const {data:fl,error}=await sb.from('follows').select('case_id,created_at').order('created_at',{ascending:false});if(_n!==navId||!el.isConnected||favTab!=='lost')return;
@@ -9133,6 +9136,10 @@ function palFilterBar(st,tab){return `<div class="pals-filter"><div class="pchip
 // ===== v7.31 民眾送養區：送養人刊登 → 申請問卷 → 送養人審核 → 同意見面才交換電話 → 切結書 → 完成送養 =====
 ICONS.home=ICONS.home||'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M12 17.6s-2.7-1.6-2.7-3.5a1.35 1.35 0 0 1 2.7-.5 1.35 1.35 0 0 1 2.7.5c0 1.9-2.7 3.5-2.7 3.5z"/>';
 const RH_SEX={male:'男生',female:'女生',unknown:'性別未知'};
+function rhFavList(){try{const v=JSON.parse(localStorage.getItem('wh_rhfav')||'[]');return Array.isArray(v)?v:[]}catch(_){return []}}
+function rhFavToggle(r){let l=rhFavList();const on=l.some(x=>x.id===r.id);l=on?l.filter(x=>x.id!==r.id):[{id:r.id,name:r.name,photo:(r.photos||[])[0]||'',species:r.species,city:r.city,district:r.district},...l].slice(0,100);try{localStorage.setItem('wh_rhfav',JSON.stringify(l))}catch(_){}return !on}
+function rhShareText(r){const f=rhFacts(r).filter(x=>!/^未/.test(x)),req=[r.req_visit?'需家訪':'',r.req_contract?'簽認養切結書':'',r.req_followup?'接回去後回報近況':'',(r.req_cities||[]).length?'只送養到'+r.req_cities.map(x=>x.replace(/^臺/,'台')).join('、'):''].filter(Boolean);
+  return [`【送養】${r.name}（${[rhSp(r),RH_SEX[r.sex]==='性別未知'?'':RH_SEX[r.sex],r.breed,r.age_text].filter(Boolean).join('・')}）｜${rhLoc(r)}`,r.temperament?String(r.temperament).slice(0,80):'',f.length?f.join('、'):'',req.length?'條件：'+req.join('、'):'',r.fee>0?`實際花費 NT$${r.fee}（${r.fee_note||''}，附收據）`:'免費送養','',`想給${r.name}一個家，請到汪喵回家填領養問卷，我會親自看過、聊過再決定：`,`https://wangmiaotw.com/rehome/${r.id}`,'','（汪喵回家只是刊登和聯絡的平台，送養約定由雙方自己負責）'].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n')}
 const RH_REPORT_REASONS=[['sale','其實是在賣（要收錢、問價錢、繁殖場）'],['fake','假送養、詐騙（要求先匯款、保證金、運費）'],['abuse','擔心動物受虐或被棄養'],['inappropriate','不當照片或言論'],['privacy','洩漏他人個資'],['other','其他']];
 // 公開文字不能放電話、LINE、網址（和資料庫的檢查一樣）：電話要等同意見面才交換
 const RH_SALE=/販賣|出售|販售|代售|售價|價格|價錢|配種|借種|種公|種母|繁殖場|出清|轉讓費|賣場|私訊報價/i;
@@ -9239,8 +9246,8 @@ async function renderRehomeOne(id){const _n=navId;setTitle('民眾送養');
     </div>
     <div class="rh-owner">${chatAva(r.username,r.avatar_url)}<span><b>送養人：${esc(r.contact_name)}</b><small>會員 ${esc(r.username)}・${esc(fmtDate(r.owner_joined))} 加入</small></span></div>
     <div class="rh-cta">${cta}</div>
-    ${own?`<div class="rh-ownops"><a class="btn ghost" href="#/rehome/${id}/edit">${ic('doc')} 編輯</a><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button></div>`
-      :`<div class="rh-ownops"><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button><button type="button" class="btn ghost" id="rhRep">${ic('flag')} 檢舉</button></div>`}
+    ${own?`<div class="rh-ownops"><a class="btn ghost" href="#/rehome/${id}/edit">${ic('doc')} 編輯</a><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button><button type="button" class="btn ghost" id="rhCopy">${ic('clipboard')} 複製貼文</button></div><p class="small muted" style="margin:-4px 0 8px">「複製貼文」會幫你整理好一段介紹和連結，可以直接貼到臉書、LINE 群組。</p>`
+      :`<div class="rh-ownops"><button type="button" class="btn ghost" id="rhFav" aria-pressed="${rhFavList().some(x=>x.id===id)}">${ic('heart')} ${rhFavList().some(x=>x.id===id)?'已收藏':'收藏'}</button><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button><button type="button" class="btn ghost" id="rhRep">${ic('flag')} 檢舉</button></div>`}
     </div></div>
     ${own||r.status==='adopted'?'':`<details class="pals-rules" open><summary>${ic('info')} 給想領養的人</summary><ul><li>送養人會先看你的問卷，覺得適合才會回覆「再聊聊」或「同意見面」。</li><li>同意見面之後，你們才會看到彼此的電話。</li><li>不要事先匯款。要求先付保證金、運費的，很可能是詐騙，請按「檢舉」。</li><li>第一次見面約在公開場所。</li></ul></details>`}
     <div id="rhMore"></div>
@@ -9251,6 +9258,8 @@ async function renderRehomeOne(id){const _n=navId;setTitle('民眾送養');
   app.querySelectorAll('.rh-gi').forEach(b=>b.onclick=()=>{lightbox(ph[+b.dataset.i],{list:ph})});
   $('#rhShare').onclick=()=>share(`${r.name}（${rhSp(r)}・${rhLoc(r)}）在等一個家｜汪喵回家・民眾送養`,'https://wangmiaotw.com/rehome/'+id);
   {const b=$('#rhRep');if(b)b.onclick=()=>openReport('rehome',id,r.owner_id,()=>{location.hash='#/rehome'})}
+  {const b=$('#rhCopy');if(b)b.onclick=()=>copy(rhShareText(r))}
+  {const b=$('#rhFav');if(b)b.onclick=()=>{const on=rhFavToggle(r);b.setAttribute('aria-pressed',on);b.innerHTML=`${ic('heart')} ${on?'已收藏':'收藏'}`;toast(on?'已收藏，在「收藏」→「想領養的」找得到':'已取消收藏',2500)}}
 }
 
 // ---------- 刊登／編輯 ----------
