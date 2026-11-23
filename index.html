@@ -1580,6 +1580,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .rh-up{display:flex;gap:12px;background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:10px}
 .rh-upimg{flex:none;width:92px;height:92px;padding:0;border:0;border-radius:12px;overflow:hidden;background:var(--paper);cursor:zoom-in}.rh-upimg img{width:100%;height:100%;object-fit:cover}
 .rh-up small{color:var(--ink-3)}.rh-up p{margin:2px 0 0;white-space:pre-wrap;line-height:1.6}
+.rh-stale{background:var(--mark-soft);border-radius:16px;padding:12px 14px;margin:8px 0}.rh-stale p{margin:4px 0 0;font-size:14px;color:var(--ink-2)}
 .rh-cities summary{cursor:pointer;font-weight:700;color:var(--ink-2);margin:8px 0}
 .pd-wrap{display:flex;flex-direction:column;align-items:center}
 .pd-stack{position:relative;width:100%;max-width:420px;height:min(58vh,520px);margin:2px auto 0}@media(min-width:761px){.pd-stack{max-width:380px;height:min(56vh,500px)}}
@@ -3255,7 +3256,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.32.0';
+const BUILD = 'v7.32.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5307,6 +5308,7 @@ async function inboxItems(){if(!me())return [];const out=[];const since=new Date
   const pn={},pp={};(pets||[]).forEach(x=>{pn[x.id]=x.name;pp[x.id]=(x.photos||[])[0]});
   (dues||[]).forEach(d=>{const n=Math.round((new Date(d.next_due)-new Date(todayStr()))/864e5);out.push({t:new Date(Date.now()-Math.max(0,n)*36e5).toISOString(),k:'pet',ic:'steth',col:'#8C7BF0',img:pp[d.pet_id],href:'#/pet/'+d.pet_id,h:`<b>${esc(pn[d.pet_id]||'毛孩')}的${esc(d.title||'提醒')}</b> ${n<0?'已經過期 '+(-n)+' 天':n===0?'今天到期':n+' 天後到期'}`,due:1})});
   jobs.push(sb.from('pet_card_likers').select('pet_id,pet_name,username,created_at').gte('created_at',since).order('created_at',{ascending:false}).limit(30).then(({data})=>(data||[]).forEach(x=>out.push({t:x.created_at,k:'pet',ic:'heart',col:'#E0457B',img:pp[x.pet_id],href:'#/pals/card/'+x.pet_id+'?likers=1',h:`❤️ <b>${esc(x.username)}</b> 喜歡你的${esc(x.pet_name)}`}))).catch(()=>{}));
+  jobs.push(sb.from('rehomes').select('id,name,photos,updated_at').eq('owner_id',me().id).eq('status','open').lt('updated_at',new Date(Date.now()-45*864e5).toISOString()).limit(5).then(({data})=>(data||[]).forEach(r=>out.push({t:new Date(Date.parse(r.updated_at)+45*864e5).toISOString(),k:'mine',ic:'home',col:'#B4770A',img:(r.photos||[])[0],href:'#/rehome/'+r.id+'/apps',h:`<b>${esc(r.name)}</b> 還在找家嗎？點一下更新，刊登才會留在列表上`}))).catch(()=>{}));
   jobs.push(sb.rpc('rehome_followups').then(({data})=>(data||[]).forEach(f=>{if(!f.req_followup)return;const d=rhFollowDue(f.adopted_at,f.last_update);const href='#/rehome/app/'+f.app_id;
     if(f.role==='adopter'){if(d&&d.due)out.push({t:d.at.toISOString(),k:'mine',ic:'camera',col:'#15803D',img:f.pet_photo,href,h:`接回家第 ${d.p} 天了，傳一張 <b>${esc(f.pet_name)}</b> 的近況照片給送養人吧`})}
     else{if(f.last_update&&Date.now()-Date.parse(f.last_update)<14*864e5)out.push({t:f.last_update,k:'mine',ic:'heart',col:'#15803D',img:f.last_photo||f.pet_photo,href,h:`<b>${esc(f.other_name||'領養人')}</b> 回報了 ${esc(f.pet_name)} 的近況`});
@@ -7375,7 +7377,7 @@ function openReport(type,id,poster,after){
   d.innerHTML=`<div class="card" style="max-width:460px;width:100%;margin-top:40px" onclick="event.stopPropagation()">
     <h2 style="margin-top:0">${ic('flag')} 檢舉這則內容</h2>
     <p class="muted small">站長會盡快處理。惡意檢舉不會讓內容自動下架。</p>
-    ${REPORT_REASONS.map(([v,t],i)=>`<label class="chk"><input type="radio" name="rr" value="${v}" ${i===0?'checked':''}> ${t}</label>`).join('')}
+    ${(type==='rehome'?RH_REPORT_REASONS:REPORT_REASONS).map(([v,t],i)=>`<label class="chk"><input type="radio" name="rr" value="${v}" ${i===0?'checked':''}> ${t}</label>`).join('')}
     <label class="f"><span><b class="lbl">補充說明</b><small class="hint">選填</small></span><textarea id="rn" maxlength="500" style="min-height:70px"></textarea></label>
     ${poster?'<label class="chk"><input type="checkbox" id="rb"> 也封鎖這位發布者（不再顯示他的其他內容）</label>':''}
     <p class="small muted" style="margin:10px 0 0">送出後，這則內容會立刻從你的畫面隱藏。</p>
@@ -7724,7 +7726,7 @@ async function renderAdmin(){const _n=navId;
   if(_n!==navId)return;
   if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['bans','停權名單']];
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['rehome','民眾送養'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
@@ -7742,6 +7744,7 @@ async function renderAdmin(){const _n=navId;
     if(t==='shpic')return admShPic(box);
     if(t==='members')return admMembers(box,qq.q||'');
     if(t==='bans')return admBans(box);
+    if(t==='rehome')return admRehome(box);
     return admList(box,t,qq.q||'',qq.f||'all')};
   // 切換分頁：原地換內容，不重新整理整頁、不跳回頂端
   strip.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{const t=b.dataset.tab;if(b.classList.contains('on'))return;
@@ -7750,6 +7753,10 @@ async function renderAdmin(){const _n=navId;
     Promise.resolve(show(t,{})).finally(()=>{box.style.minHeight=''})});
   return show(tab,q);
 }
+async function admRehome(box){const {data,error}=await sb.rpc('admin_rehomes');if(error){box.innerHTML=`<div class="empty">讀取失敗：${esc(error.message)}</div>`;return}
+  const L=data||[],ST={open:'開放申請',paused:'暫停',adopted:'找到家了',closed:'已下架'};
+  box.innerHTML=L.length?`<p class="muted small">共 ${L.length} 則・開放中 ${L.filter(x=>x.status==='open'&&!x.hidden).length}・找到家 ${L.filter(x=>x.status==='adopted').length}</p><div class="rh-rows">${L.map(x=>`<div class="rh-row">${x.photo?thumbImg(x.photo,''):spIc(x.species)}<span><b>${esc(x.name)}${x.hidden?'（已隱藏）':''}</b><small>${esc(ST[x.status]||x.status)}・${esc(x.city||'')}・${esc(x.owner_name||'')}（${esc(x.username||'')}）・${esc(fmtDate(x.created_at))}・申請 ${x.apps}${x.reports?`・<b style="color:var(--red)">檢舉 ${x.reports}</b>`:''}</small></span><a class="btn sm ghost" href="#/rehome/${x.id}">看</a><button type="button" class="btn sm" data-rhh="${x.id}|${x.hidden?0:1}">${x.hidden?'恢復':'隱藏'}</button></div>`).join('')}</div>`:'<div class="empty">還沒有送養刊登</div>';
+  box.querySelectorAll('[data-rhh]').forEach(b=>b.onclick=async()=>{const [id,h]=b.dataset.rhh.split('|');b.disabled=true;const {error}=await sb.rpc('admin_set_hidden',{p_type:'rehome',p_id:id,p_hidden:h==='1'});if(error){b.disabled=false;return toast(error.message)}toast(h==='1'?'已隱藏':'已恢復');admRehome(box)})}
 // 網友在網站上發的內容（不含管理員自己發的、不含農業部同步的）
 async function admSite(box){const _n=navId;let off=0,rows=[];
   box.innerHTML=`<p class="small muted">網友在網站上發的走失案件、拾獲通報和目擊回報，最新的在最上面。不含管理員發的，也不含農業部同步的案件。</p><div id="admSite"><div class="empty">讀取中…</div></div><div id="admSiteMore"></div>`;
@@ -9122,6 +9129,9 @@ function palFilterBar(st,tab){return `<div class="pals-filter"><div class="pchip
 // ===== v7.31 民眾送養區：送養人刊登 → 申請問卷 → 送養人審核 → 同意見面才交換電話 → 切結書 → 完成送養 =====
 ICONS.home=ICONS.home||'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M12 17.6s-2.7-1.6-2.7-3.5a1.35 1.35 0 0 1 2.7-.5 1.35 1.35 0 0 1 2.7.5c0 1.9-2.7 3.5-2.7 3.5z"/>';
 const RH_SEX={male:'男生',female:'女生',unknown:'性別未知'};
+const RH_REPORT_REASONS=[['sale','其實是在賣（要收錢、問價錢、繁殖場）'],['fake','假送養、詐騙（要求先匯款、保證金、運費）'],['abuse','擔心動物受虐或被棄養'],['inappropriate','不當照片或言論'],['privacy','洩漏他人個資'],['other','其他']];
+// 公開文字不能放電話、LINE、網址（和資料庫的檢查一樣）：電話要等同意見面才交換
+const RH_CONTACT=/0\s*9(\s*[-－.]?\s*[0-9０-９]){8}|０\s*９|line\s*(id)?\s*[:：]|加\s*(賴|line)|https?:\/\/|www\.|\.com\b|\.tw\b|lin\.ee|line\.me|@[a-z0-9_.]{3,}/i;
 // 推播給對方（新申請、回覆、切結書、近況）：伺服器只推「自己剛做的」事，重複呼叫也只推一次
 function rhPush(aid){try{sb.auth.getSession().then(({data})=>{const t=data&&data.session&&data.session.access_token;if(!t)return;fetch(CONFIG.SUPABASE_URL+'/functions/v1/notify-message',{method:'POST',headers:{'Content-Type':'application/json',apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:'Bearer '+t},body:JSON.stringify({rehome_app:aid})}).catch(()=>{})})}catch(_){}}
 // 接回家之後回報近況：隔天、一週、一個月，之後每三個月，滿一年
@@ -9161,14 +9171,14 @@ async function renderRehome(){const _n=navId;const q=qs(location.hash);const tab
   app.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>go({sp:b.dataset.sp}));
   {const c=$('#rhCity');if(c)c.onchange=e=>go({city:e.target.value})}
   if(tab==='mine')return rhMine(_n);
-  let qy=sb.from('rehomes_public').select('id,owner_id,species,name,sex,age_text,breed,photos,city,district,neutered,vaccine,chip,req_visit,req_contract,req_followup,req_cities,fee,status,created_at,app_count').in('status',['open','paused','adopted']).order('created_at',{ascending:false}).limit(120);
+  let qy=sb.from('rehomes_public').select('id,owner_id,species,name,sex,age_text,breed,photos,city,district,neutered,vaccine,chip,req_visit,req_contract,req_followup,req_cities,fee,status,created_at,updated_at,app_count').in('status',['open','paused','adopted']).order('created_at',{ascending:false}).limit(120);
   if(st.sp)qy=qy.eq('species',st.sp);if(st.city)qy=qy.eq('city',st.city);
   const {data,error}=await qy;if(_n!==navId)return;const box=$('#rhList');
   if(error){box.innerHTML=netErrHTML();return}
   const hd=lsList('wh_hidden'),bl=lsList('wh_blocked');
   let rows=(data||[]).filter(r=>!hd.includes(r.id)&&!bl.includes(r.owner_id));
   // 還在找家的排前面；找到家的只留最近刊登的
-  rows=rows.filter(r=>r.status!=='adopted'||Date.now()-Date.parse(r.created_at)<60*864e5).sort((a,b)=>(a.status==='adopted')-(b.status==='adopted'));
+  rows=rows.filter(r=>(r.status!=='adopted'||Date.now()-Date.parse(r.created_at)<60*864e5)&&(r.status==='adopted'||Date.now()-Date.parse(r.updated_at||r.created_at)<120*864e5)).sort((a,b)=>(a.status==='adopted')-(b.status==='adopted'));
   if(!rows.length){box.innerHTML=`<div class="empty-card"><div class="big">${ic('home')}</div><b>${st.city||st.sp?esc((st.city||'').replace(/^臺/,'台'))+'目前沒有'+(st.sp==='cat'?'貓咪':st.sp==='dog'?'狗狗':'毛孩')+'在等家':'目前還沒有毛孩在等家'}</b><p class="small">你有毛孩需要找新家嗎？刊登後，由你親自挑選領養人。</p><a class="btn ghost" href="#/rehome/new">${ic('plus')} 刊登送養</a></div>`;return}
   box.innerHTML=`<div class="rh-grid">${rows.map(rhCardHTML).join('')}</div>`;
 }
@@ -9283,6 +9293,7 @@ async function renderRehomeForm(id){if(!requireLogin('刊登送養需要登入�
     if(!new RegExp('^'+PHONE_PAT+'$').test(f.elements.contact_phone.value.trim()))return fieldErr(f.elements.contact_phone,'請填正確的手機號碼');
     const fee=Math.max(0,Math.min(5000,Math.round(+fd.get('fee')||0)));
     if(fee>0&&!String(fd.get('fee_note')||'').trim())return fieldErr(f.elements.fee_note,'請寫是哪些實際花費');
+    for(const n of ['name','breed','age_text','temperament','health','story','req_note','fee_note']){const el=f.elements[n];if(el&&RH_CONTACT.test(el.value))return fieldErr(el,'請不要放電話、LINE 或網址。同意見面之後，系統會自動交換電話')}
     if(!f.elements.agree.checked)return toast('請勾選最下面的確認',4000);
     if(!id&&!await rhNeedUsername('刊登送養'))return;
     const t=v=>String(v||'').trim()||null;
@@ -9390,10 +9401,12 @@ async function renderRehomeApps(id){if(!requireLogin())return;const _n=navId;set
   const ST={open:'開放申請中',paused:'暫停申請',adopted:'找到家了',closed:'已下架'};
   app.innerHTML=`<div class="rh narrow-in"><p class="muted"><a href="#/rehome?tab=mine">← 我的送養</a></p>
     <div class="rh-apphead">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<div><h1>${esc(r.name)}的申請</h1><p class="muted">${ST[r.status]}・${L.length} 份申請</p></div></div>
+    ${r.status==='open'&&Date.now()-Date.parse(r.updated_at)>45*864e5?`<div class="rh-stale"><b>${esc(r.name)}還在找家嗎？</b><p>超過 45 天沒有更新了。還在找的話按一下「還在找」，刊登會保留在列表上（超過 120 天沒更新會先從列表收起來）。</p><div class="rh-ownops"><button type="button" class="btn green" id="rhStill">還在找</button><a class="btn ghost" href="#/rehome/${id}/edit">已經送出／暫停</a></div></div>`:''}
     <div class="rh-ownops"><a class="btn ghost" href="#/rehome/${id}">${ic('eye')} 看刊登頁</a><a class="btn ghost" href="#/rehome/${id}/edit">${ic('doc')} 編輯／暫停</a></div>
     <p class="rh-tip">${ic('info')} 每份申請旁邊的 <b class="g">✓</b> 是加分、<b class="w">?</b> 是要多問、<b class="b">!</b> 是要特別注意。覺得可以就按「再聊聊」用站內訊息問問題；聊過放心了再按「同意見面」，雙方才會看到電話。</p>
     ${act.length?act.map(x=>rhAppCard(x,r)).join(''):`<div class="empty-card"><div class="big">${ic('clipboard')}</div><b>還沒有人申請</b><p class="small">分享刊登頁，讓更多人看到${esc(r.name)}。</p><button type="button" class="btn ghost" id="rhShare2">${ic('share')} 分享</button></div>`}
     ${old.length?`<details class="rh-old"><summary>已婉拒／撤回（${old.length}）</summary>${old.map(x=>rhAppCard(x,r)).join('')}</details>`:''}</div>`;
+  {const b=$('#rhStill');if(b)b.onclick=async()=>{b.disabled=true;const {error}=await sb.from('rehomes').update({status:'open'}).eq('id',id);if(error){b.disabled=false;return toast(error.message.replace(/^.*?:\s*/,''),4000)}toast('已更新，謝謝你',2500);route()}}
   {const b=$('#rhShare2');if(b)b.onclick=()=>share(`${r.name}在等一個家｜汪喵回家・民眾送養`,'https://wangmiaotw.com/rehome/'+id)}
   rhBindAppOps(app,()=>route());
 }
