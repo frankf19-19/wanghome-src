@@ -3200,6 +3200,13 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
   .xmode.x3.rehome .thumb{transform:translateX(200%);background:linear-gradient(160deg,#4A8BF0,#2459B8);box-shadow:0 6px 14px -6px rgba(36,89,184,.7)}
   body[data-route="rehome"]:not(.inner) .rh-hero h1{font-size:26px;margin-top:4px}
 }
+
+/* 收容所照片比對：比較不像的收起來 */
+.ph-more{margin-top:14px;border-radius:16px;background:var(--sheet);padding:4px 14px 10px}
+.ph-more>summary{cursor:pointer;padding:10px 0;font-weight:700;color:var(--ink-2)}
+.ph-more .ph-grid{margin-top:8px}
+.ph-none{display:flex;gap:10px;align-items:flex-start;background:var(--sheet);border-radius:16px;padding:12px 14px;margin:8px 0 0;font-size:14.5px;color:var(--ink-2)}
+.ph-none>.ico{flex:none;width:20px;height:20px;margin-top:2px;color:var(--ok,#1A8A5F)}
 </style>
 </head>
 <body>
@@ -3274,7 +3281,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.36.2';
+const BUILD = 'v7.36.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6368,10 +6375,12 @@ async function caseClues(c,id,_n){const box=$('#clues');if(!box)return;
   box.hidden=true;load()}
 async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.photos||[]).length)return;
   const d0=new Date(new Date(c.lost_at)-86400000).toISOString().slice(0,10);
-  const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=45).slice(0,6);const hi=rows.filter(r=>r.sim>=85).length;
+  // 72 分以下多半只是同品種、同體型（實測不同隻裡最像的，中位數就有 65 分），預設收起來，只放真的像的
+  const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=50).slice(0,8);const hi=rows.filter(r=>r.sim>=85).length;const weak=rows.filter(r=>r.sim<72);rows=rows.filter(r=>r.sim>=72).slice(0,6);
+    const nm=c.species==='cat'?'貓':'狗',weakHTML=weak.length?`<details class="ph-more"><summary>看看比較不像的 ${weak.length} 隻</summary><p class="muted small">這幾隻只是品種、體型或姿勢有點像，多半不是${esc(c.name||'毛孩')}。有空可以掃一眼。</p><div class="ph-grid">${weak.map(r=>phCard({...r,kind:'shelter'})).join('')}</div></details>`:'';
     box.innerHTML=`<h2>${ic('camera')} 收容所裡照片最像的 ${hi?`<span class="tag amber">很像 ${hi}</span>`:''}</h2>
     <p class="muted small">AI 先把照片裡的${c.species==='cat'?'貓':'狗'}框出來、去掉背景，再拿${esc(c.name||'毛孩')}的照片和全台收容所在走失後收容的${c.species==='cat'?'貓':'狗'}${c.sex==='male'?'（只比男生）':c.sex==='female'?'（只比女生）':''}一張一張比，把最像的排在前面。${how}</p>
-    ${rows.length?`<div class="ph-grid">${rows.map(r=>phCard({...r,kind:'shelter'})).join('')}</div><p class="muted small">點照片看收容所電話和地址。AI 只能幫忙把像的排前面，不能保證是毛孩：實測同一隻毛孩有九成會排在前 10 名內。請自己看照片，像的話打電話給收容所提供晶片號碼確認。</p>`:`<p class="muted small">目前全台收容所沒有照片相似的${c.species==='cat'?'貓':'狗'}。收容所每天有新動物，會持續比對。</p>`}`};
+    ${rows.length?`<div class="ph-grid">${rows.map(r=>phCard({...r,kind:'shelter'})).join('')}</div><p class="muted small">點照片看收容所電話和地址。AI 只能幫忙把像的排前面，不能保證是毛孩。請自己看照片，像的話打電話給收容所提供晶片號碼確認。</p>`:`<p class="ph-none">${ic('check')}<span>目前全台收容所沒有照片很像${esc(c.name||'毛孩')}的${nm}。收容所每天有新的毛孩，系統每小時比對，有很像的會通知飼主。</span></p>`}${weakHTML}`};
   try{const {data:ready}=await sb.rpc('case_photo_ready',{p_case:id});
     if(ready){const {data}=await sb.rpc('case_photo_matches',{p_case:id,p_limit:8});show(data,'每小時更新。');return}}catch(_){return}
   if(_n!==navId||!box.isConnected)return;
@@ -11086,7 +11095,8 @@ async function seenPhotoMatch(file,box){if(!box||!file)return;const _n=navId;
   box.innerHTML=`<div class="fnm"><b>${ic('search')} 看看有沒有人正在找毛孩</b><p class="small muted">用 AI 比對這張照片和所有協尋中的毛孩，只列出很像的。第一次要下載約 28MB 的 AI 模型，建議用 Wi-Fi。</p><button type="button" class="btn sm" id="fnmGo">比對看看</button></div>`;
   $('#fnmGo').onclick=run}
 const PH_KIND={case:['走失協尋','red'],found:['拾獲／目擊','amber'],shelter:['收容所','green']};
-function phCard(r){const i=r.info||{},k=r.kind;const where=esc((i.city||'')+(i.district||''));
+const sexTW=x=>x==='公'?'男生':x==='母'?'女生':(x||'');
+function phCard(r){const i0=r.info||{},i={...i0,sex:sexTW(i0.sex)},k=r.kind;const where=esc((i.city||'')+(i.district||''));
   const href=k==='case'?'#/case/'+r.ref:k==='found'?'#/found/'+r.ref:'https://wangmiaotw.com/adopt/a/'+encodeURIComponent(r.ref);
   const title=k==='case'?esc(i.name||'走失毛孩'):k==='found'?(i.k==='found'?'有人撿到':'有人看到'):esc(i.variety||(i.sp==='cat'?'貓':'狗'));
   const meta=k==='case'?`${where}・${fmtDate(i.at)} 走失`:k==='found'?`${where}・${fmtDate(i.at)}${i.colour?'・'+esc(i.colour):''}`:`${esc(i.shelter||where)}${i.sex?'・'+esc(i.sex):''}${i.colour?'・'+esc(i.colour):''}`;
