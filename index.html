@@ -2260,7 +2260,7 @@ html{-webkit-tap-highlight-color:transparent}
   html,body{background:var(--paper)!important;background-image:none!important}
   body::before,body::after{display:none!important}
   /* 主要分頁不顯示網站頂列，改用每頁自己的大標題 */
-  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="rehome"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner) header{display:none!important}
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner) header{display:none!important}
   /* 頂端：Logo、鈴鐺 */
   .xh{display:block;padding:4px 2px 0}
   .xbar{display:flex;align-items:center;gap:10px;height:44px}
@@ -2289,7 +2289,7 @@ html{-webkit-tap-highlight-color:transparent}
   /* 搜尋、篩選、快速篩選、排序與顯示方式（往下捲時固定在上面） */
   .xsticky{display:block;position:sticky;top:var(--safe-area-inset-top,env(safe-area-inset-top));z-index:30;margin:0 -16px;padding:10px 16px 10px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4)}
   .xsrow{display:flex;gap:10px}
-  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="rehome"],[data-route="fav"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner)::before{content:"";display:block!important;position:fixed;z-index:31;left:0;right:0;top:0;height:var(--safe-area-inset-top,env(safe-area-inset-top));background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner)::before{content:"";display:block!important;position:fixed;z-index:31;left:0;right:0;top:0;height:var(--safe-area-inset-top,env(safe-area-inset-top));background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
   .xactive [data-rm="city"]{display:none}
   .xsearch{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:48px;padding:0 18px;border-radius:999px;background:var(--sheet);box-shadow:var(--lift);color:var(--ink-2);margin:0}
   .xsearch .ico{width:19px;height:19px;flex:none}
@@ -2489,7 +2489,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xbell:active,.xwhere:active,.xchip:active,.xfbtn:active,.xnt:active,.xfc:active{opacity:.7}
 }
 @media (max-width:760px){   /* 只有手機：下方分頁、底部留白、詳細頁滿版照片 */
-  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="rehome"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner) #app{padding-top:calc(var(--safe-area-inset-top,env(safe-area-inset-top)) + 6px)!important}
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="inbox"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner) #app{padding-top:calc(var(--safe-area-inset-top,env(safe-area-inset-top)) + 6px)!important}
   body.xas-open .tabbar{display:none!important}
   body[data-route="case"] .xhero{margin:-10px -16px 0}
   body[data-route="case"] .xhero .main{border-radius:0 0 30px 30px!important;aspect-ratio:1/1;height:auto!important;max-height:62vh;box-shadow:none!important}
@@ -2721,7 +2721,7 @@ html{-webkit-tap-highlight-color:transparent}
   .xt{font-size:34px!important;white-space:normal;margin:6px 2px 14px!important}
   .xwhere>.ico{width:24px;height:24px}
   .xsticky{margin:0!important;padding:10px 0!important;top:0!important;background:color-mix(in srgb,var(--paper) 94%,transparent)!important}
-  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="rehome"],[data-route="fav"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner)::before{display:none!important}
+  body:is([data-route="home"],[data-route="lost"],[data-route="adopt"],[data-route="fav"],[data-route="health"],[data-route="pals"],[data-route="me"],[data-route="chats"]):not(.inner)::before{display:none!important}
   .xsearch{height:52px}
   .xchips{margin:12px 0 0!important;padding:0!important;flex-wrap:wrap;overflow:visible}
   .xchip{height:38px}
@@ -3190,16 +3190,6 @@ d.classList.add('booting');setTimeout(function(){d.classList.remove('booting')},
 html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 @keyframes bootShow{to{opacity:1}}
 .grid.ldim{opacity:.5;transition:opacity .15s}
-
-/* 首頁上方切換：找走失／領養／送養 三格 */
-@media (max-width:760px){
-  .xmode.x3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .xmode.x3>a{font-size:16px;gap:6px}
-  .xmode.x3 .thumb{width:calc((100% - 10px)/3)}
-  .xmode.x3.adopt .thumb{transform:translateX(100%)}
-  .xmode.x3.rehome .thumb{transform:translateX(200%);background:linear-gradient(160deg,#4A8BF0,#2459B8);box-shadow:0 6px 14px -6px rgba(36,89,184,.7)}
-  body[data-route="rehome"]:not(.inner) .rh-hero h1{font-size:26px;margin-top:4px}
-}
 </style>
 </head>
 <body>
@@ -3274,7 +3264,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.36.0';
+const BUILD = 'v7.36.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5378,8 +5368,8 @@ function xView(){try{return localStorage.getItem('wh_xv')||'big'}catch(_){return
 function xBellHTML(){const n=me()?inboxUnread():0;return `<a class="xbell" href="#/inbox" aria-label="通知${n?'，'+n+' 則未讀':''}">${XI.bell}${n?`<i class="xbadge">${n>9?'9+':n}</i>`:''}</a>`}
 function xHeadHTML(mode,title,where){return `<section class="xh">
   <div class="xbar"><a href="#/" class="xlogo"><img src="icon.svg" alt="" width="30" height="30">汪喵回家</a><a class="xbell" href="#/chats" aria-label="訊息">${tbI('chat')}<i class="xbadge" id="tbChatN"${__chatN?'':' hidden'}>${__chatN>9?'9+':__chatN}</i></a><span id="xBell">${xBellHTML()}</span></div>
-  <nav class="xmode x3 ${mode==='adopt'||mode==='rehome'?mode:''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養</a><a href="#/rehome" class="${mode==='rehome'?'on':''}" ${mode==='rehome'?'aria-current="page"':''}>${ic('home')}送養</a></nav>
-  ${title==null?'':`<h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>`}
+  <nav class="xmode ${mode==='adopt'?'adopt':''}" aria-label="切換"><i class="thumb" aria-hidden="true"></i><a href="#/" class="${mode==='lost'?'on':''}" ${mode==='lost'?'aria-current="page"':''}>${ic('search')}找走失毛孩</a><a href="#/adopt" class="${mode==='adopt'?'on':''}" ${mode==='adopt'?'aria-current="page"':''}>${XI.adopt}領養毛孩</a></nav>
+  <h1 class="xt"><button type="button" class="xwhere" id="xWhere" aria-label="換地區，目前：${esc(where)}"><span id="xWhereT">${esc(where)}</span>${XI.down}</button><span id="xTitle">${title}</span></h1>
 </section>`}
 // 首頁：在第 6 張卡片後面放一格「毛孩交朋友」，看起來就像清單裡的一張卡，不另外佔一排
 // 首頁：第 4 張卡片後面放一格「家附近有毛孩走失就通知我」（已經開通知、或按過不要的人不會看到）
@@ -9193,7 +9183,7 @@ async function renderRehome(){const _n=navId;const q=qs(location.hash);const tab
   const st={sp:['dog','cat'].includes(q.sp)?q.sp:'',city:q.city||''};
   setTitle('民眾送養');
   const go=o=>{const p=new URLSearchParams({...(tab==='mine'?{tab}:{}),...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...o});for(const [k,v] of [...p])if(!v)p.delete(k);goReplace('#/rehome'+(p.toString()?'?'+p:''))};
-  app.innerHTML=`${xHeadHTML('rehome',null,'')}<div class="rh">
+  app.innerHTML=`<div class="rh">
     <div class="rh-hero"><div><h1>民眾送養</h1><p>每一位領養人，都由送養人親自看過、聊過才決定。<span id="rhDoneN"></span></p></div><a class="btn green" href="#/rehome/new">${ic('plus')} 刊登送養</a></div>
     <div class="pals-tabs" role="tablist"><a role="tab" class="${tab==='list'?'on':''}" aria-selected="${tab==='list'}" href="#/rehome">等一個家</a><a role="tab" class="${tab==='mine'?'on':''}" aria-selected="${tab==='mine'}" href="#/rehome?tab=mine">我的送養與申請</a></div>
     ${tab==='list'?`<div class="pals-filter"><div class="pchips">${[['','全部'],['dog','狗狗'],['cat','貓咪']].map(([v,l])=>`<button type="button" class="pchip ${st.sp===v?'on':''}" data-sp="${v}">${l}</button>`).join('')}</div><select id="rhCity" aria-label="縣市">${cityOptions(st.city).replace('選擇縣市','全部縣市')}</select></div>`:''}
