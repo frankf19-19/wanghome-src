@@ -11,6 +11,9 @@ import photo_index as PI
 import photo_eval as E
 
 N_SHELTER = int(os.environ.get("N_SHELTER", "600"))
+MODELS = [m for m in os.environ.get("MODELS", "").split(",") if m]      # 只跑這幾個（分工用）；空的＝全部
+SLICE = os.environ.get("SLICE", "")                                     # "0/3"＝只算第 0 份（共 3 份）
+OUT = os.environ.get("OUT", "")                                         # 有設就把向量存檔，之後合起來算
 GREY = (124, 116, 104)
 def n(v): return v / (np.linalg.norm(v) + 1e-9)
 
@@ -55,6 +58,7 @@ def load_models():
                             ("DINOv2-large-reg", "facebook/dinov2-with-registers-large", True),
                             ("SigLIP2-base", "google/siglip2-base-patch16-224", False), ("SigLIP2-large", "google/siglip2-large-patch16-256", False),
                             ("CLIP-L", "openai/clip-vit-large-patch14", False)):
+        if MODELS and tag not in MODELS: continue
         try: M[tag] = hf(name, dino); print("載入", tag, flush=True)
         except Exception as e: print("載入失敗", tag, str(e)[:200], flush=True)
     return M
@@ -77,26 +81,35 @@ def main():
     for k in w:
         if k[0] == "case" and k[1] not in ids and k[1] not in seen: seen.add(k[1]); items.append(("c" + k[1], k[2]))
     print(f"考題：案件 {len(cs)} 隻、會員毛孩 {len(pets)} 隻有 2 張以上照片；干擾：收容所 {len(sh)}、其他案件 {len(seen)}", flush=True)
+    if SLICE:
+        a, b = map(int, SLICE.split("/")); items = [it for i, it in enumerate(items) if i % b == a]; print("這一份", len(items), "張", flush=True)
     with ThreadPoolExecutor(8) as ex: ims = list(ex.map(lambda it: fetch_img(it[1]), items))
     M = load_models()
-    G, V, base = [], {}, []
+    need_cut = (not MODELS) or any(t in SEG_FOR for t in M) or "q8" in MODELS
+    G, V, base, U = [], {}, [], []
     for (g, u), im in zip(items, ims):
         if im is None: continue
         try:
             im = im.convert("RGB")
             crop, ok = E.crop_det(im, "yolox_tiny.onnx", 0.0)
             b = n(E.toks(E.r224(crop))[0])
-            if base and float((np.stack(base) @ b).max()) > 0.97: continue
-            try: cut = cutout(crop)
-            except Exception as e: print("去背失敗", str(e)[:80]); cut = crop
-            vs = {"現在（q8，只框不去背）": b, "q8 去背": n(E.toks(E.r224(cut))[0])}
+            if not OUT and base and float((np.stack(base) @ b).max()) > 0.97: continue
+            cut = crop
+            if need_cut:
+                try: cut = cutout(crop)
+                except Exception as e: print("去背失敗", str(e)[:80])
+            vs = {"現在（q8，只框不去背）": b}
+            if need_cut and (not MODELS or "q8" in MODELS): vs["q8 去背"] = n(E.toks(E.r224(cut))[0])
             for tag, f in M.items():
                 vs[tag] = f(crop)
                 if tag in SEG_FOR: vs[tag + " 去背"] = f(cut)
         except Exception as e: print("skip", str(e)[:100]); continue
-        base.append(b); G.append(g)
+        base.append(b); G.append(g); U.append(u)
         for k, v in vs.items(): V.setdefault(k, []).append(v)
         if len(G) % 100 == 0: print("…", len(G), int(time.time() - PI.T0), "s", flush=True)
+    if OUT:
+        np.savez_compressed(OUT, G=np.array(G), U=np.array(U), **{"v%d" % i: np.stack(v) for i, v in enumerate(V.values())}, names=np.array(list(V.keys())))
+        print("已存", OUT, len(G), "張", list(V.keys()), flush=True); return
     G = np.array(G); qi = [i for i, g in enumerate(G) if (G == g).sum() >= 2]
     print(f"實際算出 {len(G)} 張（已去掉重複照片），考題照片 {len(qi)} 張，共 {len(set(G[qi]))} 隻\n")
     SIM = {}

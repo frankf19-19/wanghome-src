@@ -13,7 +13,36 @@ on:
 permissions:
   contents: read
 jobs:
+  r5:
+    if: ${{ inputs.round == '5' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        models: ['q8,DINOv2-base,DINOv2-large', 'SigLIP2-base,SigLIP2-large', 'DINOv2-large-reg,CLIP-L']
+        slice: ['0/3', '1/3', '2/3']
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --quiet onnxruntime numpy pillow
+      - run: pip install --quiet torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install --quiet transformers sentencepiece protobuf rembg
+      - run: mkdir -p /tmp/det && for m in yolox_nano yolox_tiny; do curl -sSL -o /tmp/det/$m.onnx https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/$m.onnx; done
+      - name: 實測
+        env:
+          SUPABASE_URL: https://nopyhfpaykkiieudvoko.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          N_SHELTER: ${{ inputs.n_shelter || '600' }}
+          MODELS: ${{ matrix.models }}
+          SLICE: ${{ matrix.slice }}
+          OUT: /tmp/vec.npz
+        run: cd scripts && python3 -u photo_eval5.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vec-${{ strategy.job-index }}
+          path: /tmp/vec.npz
+          retention-days: 3
   run:
+    if: ${{ inputs.round != '5' }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
