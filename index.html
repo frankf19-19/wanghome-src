@@ -1509,7 +1509,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .rh-rows{display:flex;flex-direction:column;gap:8px}
 .rh-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);color:inherit;text-decoration:none!important}
 .rh-row img,.rh-row>.sp-i{width:52px;height:52px;border-radius:12px;object-fit:cover;flex:none;background:var(--paper)}
-.rh-row span{flex:1;min-width:0;display:flex;flex-direction:column}.rh-row small{color:var(--ink-3);font-size:13px}
+.rh-row>span:not(.tag){flex:1;min-width:0;display:flex;flex-direction:column}.rh-row small{color:var(--ink-3);font-size:13px}
 .rh-row em{font-style:normal;font-weight:800;font-size:13px;color:var(--green);white-space:nowrap}
 .rh-one{max-width:720px;margin:0 auto}
 .rh-gal{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;border-radius:22px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -1546,7 +1546,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .rh-tip{font-size:14px;line-height:1.65;background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--ink-2)}
 .rh-tip b.g{color:var(--green)}.rh-tip b.w{color:var(--amber)}.rh-tip b.b{color:var(--red)}
 .rh-app{background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:14px;margin:10px 0}
-.rh-app-h{display:flex;align-items:center;gap:10px}.rh-app-h span{flex:1;min-width:0;display:flex;flex-direction:column}.rh-app-h small{color:var(--ink-3);font-size:13px}
+.rh-app-h{display:flex;align-items:center;gap:10px}.rh-app-h>span:not(.tag){flex:1;min-width:0;display:flex;flex-direction:column}.rh-app-h .tag,.rh-row .tag{flex:none;white-space:nowrap}.rh-app-h small{color:var(--ink-3);font-size:13px}
 .rh-flags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
 .rh-flags span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:9px}
 .rh-flags .good{background:var(--green-soft);color:var(--green)}
@@ -3260,7 +3260,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.33.2';
+const BUILD = 'v7.33.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -9502,7 +9502,7 @@ async function renderRehomeApp(aid){if(!requireLogin())return;const _n=navId;set
   const tel=p=>`<a href="tel:${esc(String(p).replace(/[^\d+]/g,''))}">${esc(fmtPhone(p))}</a>`;
   app.innerHTML=`<div class="rh narrow-in"><p class="muted"><a href="${own?'#/rehome/'+x.rehome_id+'/apps':'#/rehome?tab=mine'}">← ${own?'所有申請':'我的申請'}</a></p>
     <a class="rh-apphead" href="#/rehome/${x.rehome_id}">${x.pet_photo?thumbImg(x.pet_photo,''):spIc(x.pet_species)}<div><h1>${esc(x.pet_name)}</h1><p class="muted">${own?`${esc(x.applicant_name)}（${esc(x.applicant_username||'')}）的申請`:`送養人 ${esc(x.owner_name)}（${esc(x.owner_username||'')}）`}</p></div></a>
-    ${ended?`<div class="rh-ended">${rhStTag(x.status)} ${x.status==='declined'?(own?'你已婉拒這份申請。':'送養人這次沒有選擇你，謝謝你願意給毛孩一個家。也看看其他在等家的毛孩吧！'):'這份申請已撤回。'}</div>`
+    ${ended?`<div class="rh-ended">${rhStTag(x.status)} ${x.status==='declined'?(own?'你已婉拒這份申請。':'送養人這次沒有選擇你，謝謝你願意給毛孩一個家。也看看其他在等家的毛孩吧！'):'這份申請已撤回。'}${own?'':`<div class="rh-ownops" style="margin-bottom:0">${x.status==='withdrawn'?`<a class="btn ghost" href="#/rehome/${x.rehome_id}">回到${esc(x.pet_name)}的刊登</a>`:''}<a class="btn ghost" href="#/rehome">看其他在等家的毛孩</a></div>`}</div>`
       :`<ol class="rh-steps">${steps.map(([k,t],i)=>`<li class="${i<lvl||x.status==='adopted'?'done':i===lvl?'now':''}"><i>${i<lvl||x.status==='adopted'?'✓':i+1}</i><span>${t}</span></li>`).join('')}</ol>`}
     ${!ended?`<p class="rh-next">${x.status==='pending'?(own?'看看問卷，覺得可以就按「再聊聊」。':'送養人還在看你的申請，回覆後會出現在「通知」。'):x.status==='talking'?(own?'用站內訊息多聊聊。放心了再按「同意見面」。':'送養人想跟你多聊聊，可以傳訊息了。'):x.status==='meet'?(agreed?(own?'切結書雙方都同意了。交接完成後，按下面的「完成送養」。':'切結書雙方都同意了，等送養人按「完成送養」。'):'約在公開場所見面。交接時一起看下面的切結書，雙方都按同意。'):`${esc(x.pet_name)}已經到新家了 🎉`}</p>`:''}
     ${x.status==='meet'||x.status==='adopted'?`<div class="rh-contact">${ic('phone')}<span><b>${esc(other)}</b>${tel(own?x.applicant_phone:x.owner_phone)}</span></div>`:''}
