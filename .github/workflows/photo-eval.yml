@@ -6,12 +6,17 @@ on:
         description: '1＝裁切方法，2＝模型比較，3＝多框與毛色，4＝細看重新排名，5＝去背與更大的模型'
         required: false
         default: '2'
+      run_id:
+        description: '第 6 輪（合併第 5 輪的結果）用：第 5 輪那次執行的編號'
+        required: false
+        default: ''
       n_shelter:
         description: '收容所干擾照片張數'
         required: false
         default: '700'
 permissions:
   contents: read
+  actions: read
 jobs:
   r5:
     if: ${{ inputs.round == '5' }}
@@ -41,8 +46,21 @@ jobs:
           name: vec-${{ strategy.job-index }}
           path: /tmp/vec.npz
           retention-days: 3
+  merge:
+    if: ${{ inputs.round == '6' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --quiet numpy
+      - uses: actions/download-artifact@v4
+        with:
+          path: /tmp/vecs
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - run: python3 -u scripts/photo_eval5_merge.py /tmp/vecs
   run:
-    if: ${{ inputs.round != '5' }}
+    if: ${{ inputs.round != '5' && inputs.round != '6' }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
