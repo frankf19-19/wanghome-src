@@ -1528,13 +1528,13 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .rh-box h3{margin:0 0 6px!important;display:flex;align-items:center;gap:6px}.rh-box ul{margin:0;padding-left:1.2em;line-height:1.75}
 .rh-fee{margin:10px 0 0;font-weight:700;display:flex;gap:6px;align-items:flex-start}
 .rh-owner{display:flex;align-items:center;gap:12px;margin:16px 0 0}.rh-owner span{display:flex;flex-direction:column}.rh-owner small{color:var(--ink-3);font-size:13px}
-.rh-cta{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:3;margin:16px 0 0;padding:8px 0;background:linear-gradient(transparent,var(--paper) 30%)}
+.rh-cta{position:sticky;bottom:calc(var(--tabbar-h,0px) + var(--safe-area-inset-bottom,env(safe-area-inset-bottom)) + 6px);z-index:3;margin:16px 0 0;padding:8px 0;background:linear-gradient(transparent,var(--paper) 30%)}
 @media(min-width:761px){.rh-cta{bottom:12px}}
 .rh-ownops{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.rh-ownops .btn{flex:1}
 .rh-apphead{display:flex;gap:14px;align-items:center;margin:4px 0 12px;color:inherit;text-decoration:none!important}
 .rh-apphead img,.rh-apphead>.sp-i{width:72px;height:72px;border-radius:18px;object-fit:cover;flex:none;background:var(--paper)}
 .rh-apphead h1{margin:0;font-size:24px}.rh-apphead p{margin:2px 0 0;font-size:14px}
-.rh-note{color:var(--blue);margin:-4px 0 10px}
+.rh-note{color:var(--blue);margin:6px 0 12px}
 .rh-must{font-weight:700}
 .rh-q{border:0;padding:0;margin:0 0 16px}.rh-q legend{font-weight:700;margin-bottom:8px;padding:0}
 .rh-q.err legend{color:var(--red)}
@@ -3259,7 +3259,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.32.3';
+const BUILD = 'v7.32.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4081,7 +4081,7 @@ function route(){window.__lastRoute=Date.now();
   checkUsername(path);   // 登入了但還沒設定使用者名稱：先去設定
   renderChrome(path,h);
   document.body.classList.remove('has-cta','xas-open');
-  document.body.classList.toggle('formpage',/^#\/(chat\/|new$|report\/|found\/new|injured$|pet\/new|pals\/meet\/new|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
+  document.body.classList.toggle('formpage',/^#\/(chat\/|new$|report\/|found\/new|injured$|pet\/new|pals\/meet\/new|rehome\/new$|rehome\/[0-9a-f-]{36}\/(edit|apply)$|pet\/[0-9a-f-]{36}\/(edit|record|med))/.test(path));
   closeOverlays();
   const newHash=location.hash||'#/';const wasPop=navByPop;navByPop=false;
   const trav=trackDepth(wasPop);
