@@ -1478,6 +1478,102 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .msoc{cursor:default}.msoc-i{display:flex;gap:6px;margin-left:auto}.msoc-i a{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--paper);color:var(--ink-2)}.msoc-i a:hover{color:var(--ink)}.msoc-i .ico{width:20px;height:20px}
 .mlinks{text-align:center;font-size:13.5px;color:var(--ink-3);margin:18px 0 0}.mlinks a{color:var(--ink-3)}
 .pals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+/* ===== v7.31 民眾送養 ===== */
+.tile4.tr{grid-column:1/-1;background:#D4E6FF;flex-direction:row!important;gap:12px!important;min-height:0!important;padding:14px 18px!important;border-radius:22px!important;justify-content:flex-start!important;text-align:left}
+.tile4.tr::before,.tile4.tr::after{display:none}
+.tile4.tr .te{color:#2459B8;font-size:28px;margin:0!important}
+.tile4.tr b{margin:0!important;font-size:16.5px!important}.tile4.tr small{display:block!important;font-size:13px!important;margin-left:auto}
+:root[data-theme="dark"] .tile4.tr{background:#22324A}:root[data-theme="dark"] .tile4.tr .te{color:#9CC3FF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tile4.tr{background:#22324A}:root:not([data-theme="light"]) .tile4.tr .te{color:#9CC3FF}}
+.rh-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:18px 0 2px;flex-wrap:wrap}
+.rh-hero h1{font-size:clamp(30px,5vw,44px);margin:0;letter-spacing:-.01em}.rh-hero p{margin:4px 0 0;color:var(--ink-2);font-size:15px;max-width:30em}
+.rh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+@media(max-width:420px){.rh-grid{grid-template-columns:1fr 1fr;gap:10px}}
+.rh-card{display:flex;flex-direction:column;background:var(--sheet);border:1px solid var(--line);border-radius:20px;overflow:hidden;color:inherit;text-decoration:none!important}
+.rh-card:active{transform:scale(.985)}
+.rh-ph{position:relative;display:grid;place-items:center;aspect-ratio:4/5;background:color-mix(in srgb,var(--blue) 8%,var(--paper));color:var(--ink-3);overflow:hidden}
+.rh-ph img{width:100%;height:100%;object-fit:cover}.rh-ph .sp-i{width:44%;height:44%}
+.rh-card.done .rh-ph img{filter:saturate(.75)}
+.rh-ribbon{position:absolute;left:10px;top:10px;font-style:normal;font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:99px;background:var(--green);color:#fff}
+.rh-ribbon.pause{background:rgba(0,0,0,.6)}
+.rh-b{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px}
+.rh-b b{font-size:17px;line-height:1.3;display:flex;align-items:baseline;gap:6px}.rh-b b small{font-size:13px;font-weight:600;color:var(--ink-3)}
+.rh-b>small{font-size:13px;color:var(--ink-2);line-height:1.35}.rh-loc{color:var(--ink-3)!important}
+.rh-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.rh-chips i{font-style:normal;font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:7px;background:color-mix(in srgb,var(--blue) 12%,var(--sheet));color:var(--blue)}
+.rh-chips i.ok{background:var(--green-soft);color:var(--green)}
+.rh-shelter{display:flex;align-items:center;gap:12px;margin:22px 0 4px;padding:14px 16px;border-radius:18px;background:var(--sheet);border:1px solid var(--line);color:inherit;text-decoration:none!important}
+.rh-fromadopt{margin:4px 0 14px}.rh-shelter>svg.ico{display:block!important;flex:none;visibility:visible!important;opacity:1!important}.rh-fromadopt>.ico:first-child{color:#2459B8!important}
+.rh-shelter>.ico:first-child{width:26px;height:26px;color:#C2581E}.rh-shelter span{flex:1;display:flex;flex-direction:column}.rh-shelter small{color:var(--ink-3);font-size:13px}
+.rh-h2{font-size:18px;margin:20px 0 8px}
+.rh-rows{display:flex;flex-direction:column;gap:8px}
+.rh-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);color:inherit;text-decoration:none!important}
+.rh-row img,.rh-row>.sp-i{width:52px;height:52px;border-radius:12px;object-fit:cover;flex:none;background:var(--paper)}
+.rh-row span{flex:1;min-width:0;display:flex;flex-direction:column}.rh-row small{color:var(--ink-3);font-size:13px}
+.rh-row em{font-style:normal;font-weight:800;font-size:13px;color:var(--green);white-space:nowrap}
+.rh-one{max-width:720px;margin:0 auto}
+.rh-gal{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;border-radius:22px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.rh-gal.many{grid-auto-columns:86%}.rh-gal::-webkit-scrollbar{display:none}
+.rh-gi{scroll-snap-align:start;padding:0;border:0;background:var(--paper);border-radius:22px;overflow:hidden;aspect-ratio:1/1;cursor:zoom-in}
+.rh-gi img{width:100%;height:100%;object-fit:cover;display:block}
+@media(min-width:761px){.rh-gal.many{grid-auto-columns:48%}.rh-gal:not(.many){max-width:520px}}
+.rh-title{display:flex;align-items:center;gap:10px;margin-top:14px}.rh-title h1{margin:0;font-size:clamp(28px,5vw,38px)}
+.rh-sub{margin:4px 0 0;color:var(--ink-2);font-size:15.5px}.rh-sub .ico{color:var(--ink-3)}
+.rh-facts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.rh-facts span{font-size:13.5px;font-weight:700;padding:5px 11px;border-radius:99px;background:var(--line);color:var(--ink-2)}
+.rh-facts span.ok{background:var(--green-soft);color:var(--green)}
+.rh-p{white-space:pre-wrap;line-height:1.7;margin:4px 0 0;color:var(--ink)}
+.rh-one h3{margin:18px 0 2px;font-size:16px}
+.rh-box{margin:18px 0 0;padding:14px 16px;border-radius:18px;background:color-mix(in srgb,var(--blue) 7%,var(--sheet));border:1px solid color-mix(in srgb,var(--blue) 18%,var(--line))}
+.rh-box h3{margin:0 0 6px!important;display:flex;align-items:center;gap:6px}.rh-box ul{margin:0;padding-left:1.2em;line-height:1.75}
+.rh-fee{margin:10px 0 0;font-weight:700;display:flex;gap:6px;align-items:flex-start}
+.rh-owner{display:flex;align-items:center;gap:12px;margin:16px 0 0}.rh-owner span{display:flex;flex-direction:column}.rh-owner small{color:var(--ink-3);font-size:13px}
+.rh-cta{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:3;margin:16px 0 0;padding:8px 0;background:linear-gradient(transparent,var(--paper) 30%)}
+@media(min-width:761px){.rh-cta{bottom:12px}}
+.rh-ownops{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.rh-ownops .btn{flex:1}
+.rh-apphead{display:flex;gap:14px;align-items:center;margin:4px 0 12px;color:inherit;text-decoration:none!important}
+.rh-apphead img,.rh-apphead>.sp-i{width:72px;height:72px;border-radius:18px;object-fit:cover;flex:none;background:var(--paper)}
+.rh-apphead h1{margin:0;font-size:24px}.rh-apphead p{margin:2px 0 0;font-size:14px}
+.rh-note{color:var(--blue);margin:-4px 0 10px}
+.rh-must{font-weight:700}
+.rh-q{border:0;padding:0;margin:0 0 16px}.rh-q legend{font-weight:700;margin-bottom:8px;padding:0}
+.rh-q.err legend{color:var(--red)}
+.rh-opts{display:flex;flex-wrap:wrap;gap:8px}
+.rh-opts label{position:relative;cursor:pointer}.rh-opts input{position:absolute;opacity:0;pointer-events:none}
+.rh-opts span{display:block;padding:9px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--sheet);font-size:15px;color:var(--ink-2)}
+.rh-opts input:checked+span{border-color:var(--green);background:var(--green-soft);color:var(--ink);font-weight:700}
+.rh-opts input:focus-visible+span{outline:3px solid color-mix(in srgb,var(--blue) 50%,transparent);outline-offset:2px}
+.rh-tip{font-size:14px;line-height:1.65;background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--ink-2)}
+.rh-tip b.g{color:var(--green)}.rh-tip b.w{color:var(--amber)}.rh-tip b.b{color:var(--red)}
+.rh-app{background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:14px;margin:10px 0}
+.rh-app-h{display:flex;align-items:center;gap:10px}.rh-app-h span{flex:1;min-width:0;display:flex;flex-direction:column}.rh-app-h small{color:var(--ink-3);font-size:13px}
+.rh-flags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+.rh-flags span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:9px}
+.rh-flags .good{background:var(--green-soft);color:var(--green)}
+.rh-flags .warn{background:var(--mark-soft);color:var(--amber)}
+.rh-flags .bad{background:var(--red-soft);color:var(--red-ink)}
+.rh-intro{background:var(--paper);border-radius:12px;padding:10px 12px;margin-top:8px!important;font-size:15px}
+.rh-app details{margin-top:8px}.rh-app summary,.rh-old summary{cursor:pointer;font-weight:700;color:var(--ink-2);padding:4px 0}
+.rh-kv{font-size:14.5px;margin-top:6px}.rh-kv dt{color:var(--ink-3)}
+.rh-phone{margin:10px 0 0;font-weight:700}.rh-phone a{font-size:18px}
+.rh-app-ops{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.rh-app-ops:empty{display:none}
+.rh-old{margin:16px 0}
+.rh-steps{list-style:none;display:flex;padding:0;margin:8px 0 6px;counter-reset:s}
+.rh-steps li{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;font-size:12.5px;color:var(--ink-3);text-align:center}
+.rh-steps li::before{content:"";position:absolute;top:14px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.rh-steps li:first-child::before{display:none}
+.rh-steps li.done::before,.rh-steps li.now::before{background:var(--green)}
+.rh-steps i{position:relative;z-index:1;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;background:var(--sheet);border:2px solid var(--line);color:var(--ink-3)}
+.rh-steps li.done i{background:var(--green);border-color:var(--green);color:#fff}
+.rh-steps li.now i{border-color:var(--green);color:var(--green)}.rh-steps li.now{color:var(--ink);font-weight:700}
+.rh-next{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:8px 0;font-size:15px}
+.rh-ended{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;line-height:1.6}
+.rh-contact{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:var(--green-soft);margin:10px 0}
+.rh-contact>.ico{width:26px;height:26px;color:var(--green)}.rh-contact span{display:flex;flex-direction:column}.rh-contact a{font-size:22px;font-weight:800;color:var(--ink)}
+.rh-agree{white-space:pre-wrap;font:15px/1.75 var(--body);background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:6px 0;max-height:340px;overflow:auto}
+.rh-sign p{margin:4px 0;font-weight:700}
+.rh-disc{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.65;color:var(--ink-3);background:var(--sheet);border:1px dashed var(--line);border-radius:14px;padding:10px 12px;margin:14px 0}.rh-disc>svg.ico{flex:none;margin-top:3px;display:block!important}.rh-disc b{display:block;color:var(--ink-2);margin-bottom:2px}
+.rh-cities summary{cursor:pointer;font-weight:700;color:var(--ink-2);margin:8px 0}
 .pd-wrap{display:flex;flex-direction:column;align-items:center}
 .pd-stack{position:relative;width:100%;max-width:420px;height:min(58vh,520px);margin:2px auto 0}@media(min-width:761px){.pd-stack{max-width:380px;height:min(56vh,500px)}}
 .swc{position:absolute;inset:0;border-radius:26px;overflow:hidden;background:var(--sheet);box-shadow:0 12px 32px rgba(70,30,20,.18);touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s;cursor:grab;--lk:0;--np:0}
@@ -3090,7 +3186,7 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
     <span class="navlinks lost-only" style="display:contents">
       <a href="#/lost" class="link hide-sm">協尋列表</a>
       <a href="#/injured" class="link hide-sm">受傷通報</a>
-      <a href="#/adopt" class="link hide-sm">領養</a>
+      <a href="#/adopt" class="link hide-sm">領養</a><a href="#/rehome" class="link hide-sm">送養</a>
       <a href="#/fav" class="link hide-sm">收藏</a>
       <a href="#/seen" class="btn sm green hide-sm">看到／撿到</a>
       <a href="#/new" class="btn sm hide-sm">＋ 登記走失</a>
@@ -3120,7 +3216,7 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p><a class="appdl app-hide" href="https://apps.apple.com/tw/app/id6827632980" target="_blank" rel="noopener"><span class="appdl-i" aria-hidden="true">📱</span><span><small>iPhone 免費下載</small><b>App Store</b></span></a><span class="appdl-note app-hide small">Android 版即將推出</span><p class="small"><a href="/adopt/">收容所領養</a>・<a href="/stats">走失與領養統計</a>・<a href="/press">關於汪喵回家</a></p><p class="footsoc small">追蹤我們：<a href="https://www.facebook.com/wangmiaotw" target="_blank" rel="noopener">Facebook 粉專</a>・<a href="https://www.instagram.com/wangmiaotw/" target="_blank" rel="noopener">Instagram</a>・<a href="https://www.threads.com/@wangmiaotw" target="_blank" rel="noopener">Threads</a></p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="https://wangmiaotw.com/l/" class="app-hide">各縣市走失毛孩</a><a href="https://wangmiaotw.com/g/" class="app-hide">協尋指南</a><a href="https://wangmiaotw.com/adopt/" class="app-hide">各縣市待領養毛孩</a><a href="#/learn">毛孩小學堂</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/pals">毛孩交朋友</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="https://wangmiaotw.com/l/" class="app-hide">各縣市走失毛孩</a><a href="https://wangmiaotw.com/g/" class="app-hide">協尋指南</a><a href="https://wangmiaotw.com/adopt/" class="app-hide">各縣市待領養毛孩</a><a href="#/learn">毛孩小學堂</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/rehome">民眾送養</a><a href="#/pals">毛孩交朋友</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
   <p class="health-note small">毛孩健康手冊的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷。用藥與治療請依獸醫師指示。</p>
   <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><button type="button" class="linkbtn" id="themeBtn">🌓 外觀：自動</button><span>© 2026 汪喵回家 版權所有</span><span id="buildV"></span></div>
 </footer>
@@ -3152,7 +3248,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.30.37';
+const BUILD = 'v7.31.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3759,6 +3855,7 @@ function openAddSheet(){
     ${r('#/new',ic('megaphone'),'s1','我的毛孩走失了','登記協尋，自動做海報')}
     ${r('#/seen',ic('eye'),'s2','我看到／撿到毛孩','拍照回報給飼主')}
     ${r('#/injured',ic('phone'),'s5','看到受傷的狗貓','一鍵找當地動保電話')}
+    ${r('#/rehome/new',ic('home'),'s2','幫毛孩找新家','刊登送養，親自挑選領養人')}
     ${r('#/health/add?type=rec',ic('clipboard'),'s3','看診、疫苗、驅蟲','記一次，可設到期提醒')}
     ${r('#/health/add?type=med',ic('pill'),'s3','每天吃的藥、保養品','每天打勾「今天吃了沒」')}
     ${r('#/pet/new',ic('paw'),'s4','新增毛孩檔案','生日、晶片、照片')}
@@ -3778,7 +3875,7 @@ function renderChrome(path,h){
   document.querySelectorAll('.nav a.link').forEach(a=>{const hr=a.getAttribute('href');const on=hr==='#/'?(path==='#/'||path==='#'):(path===hr||path.startsWith(hr+'/'));a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   {const meOn=path==='#/me'||path==='#/login';$('#navMe')?.classList.toggle('on',meOn);document.querySelector('.hd-av')?.classList.toggle('on',meOn)}
   document.querySelectorAll('.space a').forEach(a=>{const on=a.dataset.s===space;a.classList.toggle('on',on);a.setAttribute('aria-current',on?'page':'false')});
-  const rk=/^#\/(chats|chat\/|u\/|add\/)/.test(path)?'chats':path==='#/fav'?'fav':(path==='#/lost'||path==='#/'||path==='#')?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured'||path==='#/intake')?'home':(path.startsWith('#/adopt')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path.startsWith('#/pals')?'pals':path==='#/admin'?'me':'';
+  const rk=/^#\/(chats|chat\/|u\/|add\/)/.test(path)?'chats':path==='#/fav'?'fav':(path==='#/lost'||path==='#/'||path==='#')?'home':(path.startsWith('#/health')||path.startsWith('#/pet'))?'health':path==='#/new'?'new':(path==='#/found/new'||path==='#/seen')?'found':(path==='#/me'||path==='#/login')?'me':path==='#/health/add'?'add':path==='#/health'?(qs(h).cal?'cal':'health'):path.startsWith('#/pet')?'health':(path.startsWith('#/case/')||(path.startsWith('#/found/')&&path!=='#/found/new')||path==='#/injured'||path==='#/intake')?'home':(path.startsWith('#/adopt')||path.startsWith('#/rehome')||path.startsWith('#/learn')||path==='#/resources'||path==='#/guide')?'home':path.startsWith('#/pals')?'pals':path==='#/admin'?'me':'';
   const items=space==='health'
    ?TABS():TABS();
   $('#tabbar').innerHTML=items.map(([href,r,inner,cls])=>`<a href="${href}" data-r="${r}" class="${cls||''} ${r===rk?'on':''}"${r==='add'?' role="button" aria-label="新增"':''}>${inner}</a>`).join('');
@@ -3864,13 +3961,16 @@ function trackDepth(wasPop){const st=history.state,h=location.hash||'#/';
   if(st&&typeof st.d==='number'&&st.h===h){const trav=!__firstRoute;navDepth=st.d;__firstRoute=false;__replacing=false;return trav}
   if(__firstRoute)navDepth=0;else if(!__replacing)navDepth=navDepth+1;__firstRoute=false;   // 新的一頁（瀏覽器在換 #網址時也會發 popstate，所以不能靠它判斷是不是上一頁）
   __replacing=false;try{history.replaceState(Object.assign({},st||{},{d:navDepth,h}),'')}catch(_){}return false}
-const TOP_PAGES=IS_APP?/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|pals)(\?.*)?$/:/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|pals)(\?.*)?$/;
+const TOP_PAGES=IS_APP?/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|rehome|pals)(\?.*)?$/:/^#\/?(\?.*)?$|^#\/(health|me|login|lost|fav|adopt|rehome|pals)(\?.*)?$/;
 function parentOf(h){const p=h.split('?')[0];let m;
   if((m=p.match(/^#\/(report|manage|poster)\/([0-9a-f-]{36})/)))return '#/case/'+m[2];
   if((m=p.match(/^#\/found-manage\/([0-9a-f-]{36})/)))return '#/found/'+m[1];
   if(/^#\/found\/[0-9a-f-]{36}$/.test(p))return '#/lost?tab=found';
   if(/^#\/case\/[0-9a-f-]{36}$/.test(p))return '#/lost';
   if(/^#\/adopt\/./.test(p))return '#/adopt';
+  if(/^#\/rehome\/app\//.test(p))return '#/rehome?tab=mine';
+  if((m=p.match(/^#\/rehome\/([0-9a-f-]{36})\/(apply|edit|apps)$/)))return '#/rehome/'+m[1];
+  if(/^#\/rehome\/./.test(p))return '#/rehome';
   if((m=p.match(/^#\/pet\/([0-9a-f-]{36})\/.+/)))return '#/pet/'+m[1];
   if(/^#\/(pet|health)\//.test(p))return '#/health';
   if(/^#\/admin/.test(p))return '#/me';
@@ -4007,6 +4107,13 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/look\/([a-z]{2,12})$/)))return renderLook(m[1]);
   if((m=path.match(/^#\/how\/([a-z]{2,12})$/)))return renderHow(m[1]);
   if(path==='#/buddy'){if(!BD_ON){goReplace('#/');return}return renderBuddy()}
+  if(path==='#/rehome')return renderRehome();
+  if(path==='#/rehome/new')return renderRehomeForm(null);
+  if((m=path.match(/^#\/rehome\/app\/([0-9a-f-]{36})$/)))return renderRehomeApp(m[1]);
+  if((m=path.match(/^#\/rehome\/([0-9a-f-]{36})$/)))return renderRehomeOne(m[1]);
+  if((m=path.match(/^#\/rehome\/([0-9a-f-]{36})\/edit$/)))return renderRehomeForm(m[1]);
+  if((m=path.match(/^#\/rehome\/([0-9a-f-]{36})\/apply$/)))return renderRehomeApply(m[1]);
+  if((m=path.match(/^#\/rehome\/([0-9a-f-]{36})\/apps$/)))return renderRehomeApps(m[1]);
   if(path==='#/pals')return renderPals();
   if(path==='#/pals/meet/new')return renderMeetNew();
   if((m=path.match(/^#\/pals\/meet\/([0-9a-f-]{36})$/)))return renderMeet(m[1]);
@@ -4413,6 +4520,7 @@ function deskStartHTML(){return `  <section class="bigstart" aria-label="你需�
       <button type="button" class="tile4 tb" id="bigNear"><span class="te">${ic("pin")}</span><b>附近走失</b><small>離我最近的毛孩</small></button>
       <a href="#/adopt" class="tile4 ta"><span class="te">${ic("shelter")}</span><b>領養毛孩</b><small>收容所等一個家</small></a>
       <a href="#/health" class="tile4 tl"><span class="te">${ic("steth")}</span><b>健康手冊</b><small>疫苗・回診提醒</small></a>
+      <a href="#/rehome" class="tile4 tr"><span class="te">${ic("home")}</span><b>民眾送養</b><small>幫毛孩找新家</small></a>
     </div>
     <div id="lostPrev" class="lostprev"><div class="mp-h"><b>${ic('search')} 正在協尋的毛孩</b></div><div class="lp-row">${'<span class="lp"><span class="lp-ph sk"></span><span class="sk" style="width:60%;height:14px;margin-top:6px"></span></span>'.repeat(4)}</div></div>
     <div id="nearCta"></div>
@@ -4527,7 +4635,7 @@ function drailAttach(kind){if(!matchMedia('(min-width:1280px)').matches||documen
     <p class="dr-foot"><a href="#/resources">協尋攻略</a>・<a href="#/learn">毛孩小學堂</a>・<a href="#/about">關於本站</a></p>`;
   app.classList.add('withrail');app.appendChild(r)}
 /* ===== 電腦版左側選單（手機版不顯示） ===== */
-const DSIDE=[['#/','search','找走失毛孩',/^(home|lost|case|report|found|gov-lost|map|seen|injured|intake|new|found-manage|manage|poster)$/],['#/adopt','shelter','領養毛孩',/^adopt$/],['#/fav','mark','收藏',/^fav$/],['#/health','paw','我的毛孩',/^(health|pet)$/],['#/pals','heart','毛孩交朋友',/^pals$/],['#/chats','chat','訊息',/^(chats|chat|add|u)$/],['#/inbox','bell','通知',/^inbox$/],['#/me','user','我的',/^(me|login|set-username|admin|delete-account)$/]];
+const DSIDE=[['#/','search','找走失毛孩',/^(home|lost|case|report|found|gov-lost|map|seen|injured|intake|new|found-manage|manage|poster)$/],['#/adopt','shelter','領養毛孩',/^adopt$/],['#/rehome','home','民眾送養',/^rehome$/],['#/fav','mark','收藏',/^fav$/],['#/health','paw','我的毛孩',/^(health|pet)$/],['#/pals','heart','毛孩交朋友',/^pals$/],['#/chats','chat','訊息',/^(chats|chat|add|u)$/],['#/inbox','bell','通知',/^inbox$/],['#/me','user','我的',/^(me|login|set-username|admin|delete-account)$/]];
 function dsideHTML(){return `<a class="ds-brand" href="#/"><img src="icon.svg" alt="" width="36" height="36"><b>汪喵回家</b></a>
   <nav class="ds-menu" aria-label="主選單">${DSIDE.map(([h,i,t])=>`<a href="${h}" data-ds="${h}" title="${t}" aria-label="${t}"${h==='#/chats'?' id="dsChat"':''}>${ic(i)}<span>${t}</span><i class="ds-n" hidden></i></a>`).join('')}</nav>
   <div class="ds-cta"><a class="ds-b1" href="#/new" title="登記走失" aria-label="登記走失">${ic('plus')}<span>登記走失</span></a><a class="ds-b2" href="#/seen" title="我看到／撿到一隻" aria-label="我看到／撿到一隻">${ic('eye')}<span>我看到／撿到一隻</span></a></div>
@@ -4569,7 +4677,7 @@ function chatCta(kind,ref,label){const box=$('#chatCta');if(!box)return;const n0
   sb.rpc('chat_can',{p_kind:kind,p_ref:ref}).then(({data})=>{if(n0!==navId||!data||!box.isConnected)return;
     box.innerHTML=`<button type="button" class="btn ghost block chat-cta"><span>${ic('chat')} ${esc(label)}</span><small>不用留電話，可以傳照片</small></button>`;box.hidden=false;
     box.querySelector('button').onclick=()=>chatStart(kind,ref)}).catch(()=>{})}
-function chatRowHTML(r){const name=r.other_name||'會員';const ctx=r.kind==='case'?`走失協尋・${r.title||''}`:r.kind==='found'?(r.title||'通報'):'私訊';
+function chatRowHTML(r){const name=r.other_name||'會員';const ctx=r.kind==='case'?`走失協尋・${r.title||''}`:r.kind==='found'?(r.title||'通報'):r.kind==='rehome'?`送養・${r.title||''}`:'私訊';
     return `<a class="chi ${r.unread?'new':''} ${r.muted?'muted':''} ${r.pinned?'pinned':''}" href="#/chat/${r.chat_id}" data-m="${r.muted?1:0}" data-p="${r.pinned?1:0}">${chatAva(name,r.other_avatar)}<span class="chb"><span class="cht"><b>${esc(name)}${r.muted?`<i class="chst" title="已靜音">${ic('bellOff')}</i>`:''}${r.pinned?`<i class="chst pin" title="已置頂">${ic('pinT')}</i>`:''}</b><small>${esc(chatTime(r.last_at))}</small></span><small class="chc">${esc(ctx)}</small><span class="chm">${r.last_sender===me().id?'你：':''}${esc(/^\[stk:[a-z0-9_]+\]$/.test(r.last_text||'')?'［貼圖］':/^\[loc:/.test(r.last_text||'')?'［位置］':(r.last_text||''))}</span></span>${r.unread?`<i class="chn">${r.unread>99?'99+':r.unread}</i>`:''}</a>`}
 // 電腦版（夠寬）：左邊對話列表、右邊聊天
 const chatSplit=()=>innerWidth>=1100;
@@ -4875,9 +4983,9 @@ const CHAT_ASKS=['請說出毛孩晶片號碼的末四碼','請描述毛孩身�
 const __chatData={},__chatUrls={};
 document.addEventListener('pointerdown',e=>{const a=e.target.closest&&e.target.closest('a.chi[href^="#/chat/"]');if(a&&me())try{chatFetch(a.getAttribute('href').split('/').pop())}catch(_){}},{passive:true});
 function chatFetch(id){const now=Date.now(),o=__chatData[id];if(o&&o.p&&now-o.t<15000)return o.p;
-  const p=(async()=>{const [{data:ppl,error:pe},{data:ch},{data:msgs,error:me2}]=await Promise.all([sb.rpc('chat_people',{p_chat:id}),sb.from('chats').select('id,kind,case_id,found_id').eq('id',id).maybeSingle(),sb.from('chat_messages').select('*').eq('chat_id',id).order('id',{ascending:false}).limit(80)]);let c=null,f=null;
-    if(ch&&ch.kind==='case'&&ch.case_id)c=(await sb.from('cases_public').select('id,name,photos,status').eq('id',ch.case_id).maybeSingle()).data;if(ch&&ch.kind==='found'&&ch.found_id)f=(await sb.from('found_public').select('id,kind,photos,city,district').eq('id',ch.found_id).maybeSingle()).data;
-    return {ppl,pe,ch,msgs:msgs||[],me2,c,f}})();
+  const p=(async()=>{const [{data:ppl,error:pe},{data:ch},{data:msgs,error:me2}]=await Promise.all([sb.rpc('chat_people',{p_chat:id}),sb.from('chats').select('id,kind,case_id,found_id,rehome_app_id').eq('id',id).maybeSingle(),sb.from('chat_messages').select('*').eq('chat_id',id).order('id',{ascending:false}).limit(80)]);let c=null,f=null;
+    if(ch&&ch.kind==='case'&&ch.case_id)c=(await sb.from('cases_public').select('id,name,photos,status').eq('id',ch.case_id).maybeSingle()).data;if(ch&&ch.kind==='found'&&ch.found_id)f=(await sb.from('found_public').select('id,kind,photos,city,district').eq('id',ch.found_id).maybeSingle()).data;let rh=null;if(ch&&ch.kind==='rehome'&&ch.rehome_app_id)rh=((await sb.rpc('rehome_app_get',{p_app:ch.rehome_app_id})).data||[])[0]||null;
+    return {ppl,pe,ch,msgs:msgs||[],me2,c,f,rh}})();
   __chatData[id]={p,t:now,res:o&&o.res};p.then(r=>{if(!r.pe&&!r.me2&&r.ch)__chatData[id].res=r},()=>{});return p}
 // App 聊天室：整個聊天固定在畫面上（訊息區自己捲），鍵盤上來時跟著鍵盤同步滑上去，不讓 iOS 整頁推來推去
 const winSc=()=>isMobV()&&!document.body.classList.contains('chfix');
@@ -4918,16 +5026,17 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   if(!ch||!ppl||!ppl.length){app.innerHTML=`<div class="empty-card"><b>找不到這個對話</b><p class="small">可能已經刪除了。</p><a class="btn" href="#/chats">回訊息列表</a></div>`;return}
   const mine=ppl.find(p=>p.user_id===me().id)||{},other=ppl.find(p=>p.user_id!==me().id)||{};
   const oname=other.username||'會員';setTitle(oname);let ctxHTML='';
-  const mtSub=ch.kind==='case'?'走失協尋':ch.kind==='found'?'拾獲／目擊通報':'私訊';
+  const mtSub=ch.kind==='case'?'走失協尋':ch.kind==='found'?'拾獲／目擊通報':ch.kind==='rehome'?'送養・領養':'私訊';
   const setMt=extra=>{const mt=$('#mTitle');if(mt&&_n===navId)mt.innerHTML=`<span class="mtc" ${other.username?`role="link" tabindex="0" onclick="location.hash='#/u/'+encodeURIComponent(${esc(JSON.stringify(other.username))})"`:''}>${chatAva(oname,other.avatar_url)}<span><b>${esc(oname)}</b><small>${esc(mtSub)}${extra?'・'+esc(extra):''}</small></span></span>`};setMt('');
   {const c=R.c,f=R.f;
     if(c)ctxHTML=`<a class="chctx" href="#/case/${c.id}">${c.photos&&c.photos[0]?thumbImg(c.photos[0],''):spIc('dog')}<span><b>${esc(c.name||'走失協尋')}</b><small>${c.status==='searching'?'協尋中':'已結案'}・${mine.role==='owner'?'你的協尋案件':'對方的協尋案件'}</small></span><i>›</i></a>`
+    if(R.rh){const x=R.rh;ctxHTML=`<a class="chctx" href="#/rehome/app/${x.id}">${x.pet_photo?thumbImg(x.pet_photo,''):spIc(x.pet_species)}<span><b>${esc(x.pet_name)}・${x.my_role==='owner'?'你的送養':'你的領養申請'}</b><small>${(RH_ST[x.status]||[''])[0]}・看申請和切結書</small></span><i>›</i></a>`}
     if(f)ctxHTML=`<a class="chctx" href="#/found/${f.id}">${f.photos&&f.photos[0]?thumbImg(f.photos[0],''):spIc('dog')}<span><b>${f.kind==='injured'?'受傷通報':f.kind==='found'?'撿到通報':'目擊通報'}</b><small>${esc((f.city||'')+(f.district||''))}・${mine.role==='owner'?'你的通報':'對方的通報'}</small></span><i>›</i></a>`}
   const helper=mine.role==='helper',ownerSide=mine.role==='owner';
   app.innerHTML=`<div class="chat">
-    <div class="chhead"><a class="chback" href="#/chats" aria-label="回訊息列表">‹</a>${other.username?`<a class="chwho" href="#/u/${encodeURIComponent(other.username)}">`:'<span class="chwho">'}${chatAva(oname,other.avatar_url)}<span><b>${esc(oname)}</b><small>${ch.kind==='case'?'走失協尋':ch.kind==='found'?'拾獲／目擊通報':'私訊'}${other.joined?'・'+esc(fmtDate(other.joined))+' 加入':''}</small></span>${other.username?'</a>':'</span>'}<button type="button" class="chmenu" id="chMenu" aria-label="更多">${ic('dots')}</button></div>
+    <div class="chhead"><a class="chback" href="#/chats" aria-label="回訊息列表">‹</a>${other.username?`<a class="chwho" href="#/u/${encodeURIComponent(other.username)}">`:'<span class="chwho">'}${chatAva(oname,other.avatar_url)}<span><b>${esc(oname)}</b><small>${mtSub}${other.joined?'・'+esc(fmtDate(other.joined))+' 加入':''}</small></span>${other.username?'</a>':'</span>'}<button type="button" class="chmenu" id="chMenu" aria-label="更多">${ic('dots')}</button></div>
     ${ctxHTML}
-    ${ownerSide&&ch.kind!=='dm'?`<p class="chtip">對方說看到或撿到你的毛孩？可以請他傳照片確認；你也要準備好晶片號碼、以前的照片，證明你是飼主。</p>`:''}
+    ${ownerSide&&ch.kind==='rehome'?`<p class="chtip">多問問對方的生活和照顧計畫。不要事先收錢；覺得不對勁可以隨時婉拒。</p>`:''}${ownerSide&&ch.kind!=='dm'&&ch.kind!=='rehome'?`<p class="chtip">對方說看到或撿到你的毛孩？可以請他傳照片確認；你也要準備好晶片號碼、以前的照片，證明你是飼主。</p>`:''}
     <div class="chlog" id="chLog" aria-live="polite"></div>
     ${other.blocked?`<div class="chblk">你已經封鎖這位會員。<button type="button" class="linkbtn" id="chUnblk">解除封鎖</button></div>`:`<form class="chbar" id="chForm" autocomplete="off" data-nodirty>
       <button type="button" class="chbtn chplus" id="chPlus" aria-label="傳照片、位置…" title="傳照片、位置…">${ic('plus')}</button><input type="file" accept="image/*" multiple id="chPh" hidden><input type="file" accept="image/*" capture="environment" id="chCam" hidden><span class="chin"><textarea id="chIn" rows="1" maxlength="2000" placeholder="輸入訊息…" aria-label="輸入訊息"></textarea><button type="button" class="chstk" id="chStk" aria-label="貼圖" title="貼圖">${ic('smile')}</button></span>
@@ -4936,7 +5045,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   if(_n===navId)setNavAction(`<button type="button" aria-label="對話選項">${ic('dots')}</button>`,()=>{const b=$('#chMenu');if(b)b.click()});
   {const c=app.querySelector('.chat');if(c)chatWrapSplit(c,id,false)}
   if(!document.body.classList.contains('chsplit-on'))chfixEnter();   // 手機：右上角「⋯」
-  const log=$('#chLog');const urlCache=__chatUrls;log.insertAdjacentHTML('afterbegin',`<p class="cnote">${ic('shield')}<span>${ch.kind==='dm'?'不要給對方密碼、驗證碼或匯款；見面約在人多的公共場所。':'見面約在派出所、動物醫院等公共場所。<b>要你先匯款、給驗證碼的都是詐騙。</b>'}</span></p>`);let lastId=0;const seen=new Set();
+  const log=$('#chLog');const urlCache=__chatUrls;log.insertAdjacentHTML('afterbegin',`<p class="cnote">${ic('shield')}<span>${ch.kind==='rehome'?'第一次見面約在公開場所，交接時當面核對證件。<b>不要事先匯款，要求先付保證金、運費的很可能是詐騙。</b>汪喵回家只是平台，約定由雙方自己負責。':ch.kind==='dm'?'不要給對方密碼、驗證碼或匯款；見面約在人多的公共場所。':'見面約在派出所、動物醫院等公共場所。<b>要你先匯款、給驗證碼的都是詐騙。</b>'}</span></p>`);let lastId=0;const seen=new Set();
   let relNow='none';
   const drawFrBar=rel=>{relNow=rel;setMt(rel==='friend'?'好友':'');const old=$('#chFr');if(old){const w=old.closest('.chctx-row');old.remove();if(w){w.before(w.querySelector('.chctx'));w.remove()}}if(_n!==navId||!other.user_id||!other.username||other.blocked)return;
     const talked=rel==='received'||msgs.some(m=>m.sender_id===other.user_id);if(!talked||!['none','received'].includes(rel))return;
@@ -4985,7 +5094,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
   {kbInit();const vv=window.visualViewport;const kbPin=()=>{if(_n!==navId){removeEventListener('wh-kb',kbPin);removeEventListener('resize',kbPin);if(vv)vv.removeEventListener('resize',kbPin);return}if(pinned)toBottom(false)};
     addEventListener('wh-kb',kbPin);addEventListener('resize',kbPin);if(vv)vv.removeEventListener('resize',kbPin),vv.addEventListener('resize',kbPin);
     const ta=$('#chIn');if(ta)ta.addEventListener('focus',()=>{const was=pinned||atBottom();if(was){pinned=true;requestAnimationFrame(()=>toBottom(false));setTimeout(()=>{if(pinned)toBottom(false)},350)}})}
-  if(!msgs.length)log.insertAdjacentHTML('beforeend',`<p class="cfirst"><span class="cfirst-stk">${stkSVG(ch.kind==='dm'?'hi':helper?'search':'please')}</span>${ch.kind==='dm'?`跟 ${esc(oname)} 打聲招呼吧。對方回覆前，你最多可以傳 3 則訊息。`:helper?`說說你在哪裡、什麼時候看到毛孩，可以直接傳照片給對方。`:'還沒有訊息。'}</p>`);
+  if(!msgs.length)log.insertAdjacentHTML('beforeend',`<p class="cfirst"><span class="cfirst-stk">${stkSVG(ch.kind==='dm'||ch.kind==='rehome'?'hi':helper?'search':'please')}</span>${ch.kind==='rehome'?(helper?`跟送養人打聲招呼，說說你的生活和照顧計畫。`:`問問對方的生活和照顧計畫吧。`):ch.kind==='dm'?`跟 ${esc(oname)} 打聲招呼吧。對方回覆前，你最多可以傳 3 則訊息。`:helper?`說說你在哪裡、什麼時候看到毛孩，可以直接傳照片給對方。`:'還沒有訊息。'}</p>`);
   const unreadN=(()=>{try{const r=(__chCache[me().id+':c']||[]).find(x=>x.chat_id===id);return r?+r.unread||0:0}catch(_){return 0}})();
   await add(msgs.slice().reverse(),true);
   // 未讀分隔線：「以下是未讀訊息」，並捲到那裡
@@ -5131,14 +5240,14 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
         const f={lat:p2.coords.latitude,lng:p2.coords.longitude,acc:p2.coords.accuracy||999,t:Date.now()};__fix=f;if(!best||f.acc<best.acc)best=f;if(!first)first=Date.now();if(best.acc<=80)fin(best)},{maximumAge:120000});
       const t2=setInterval(()=>{if(first&&Date.now()-first>2500&&best)fin(best)},300);
       const t1=setTimeout(()=>{if(best)return fin(best);fin(null);tmp.remove();toast('定位失敗：請確認手機已開啟定位，或到窗邊、戶外再試一次',4500)},12000)};
-    $('#chPlus').onclick=()=>{geoWarm();chatPlusSheet([['photo','image','相簿照片','一次最多 4 張'],['cam','camera','拍照',''],['loc','pin','傳送位置','傳一張小地圖'],...(helper&&ch.kind!=='dm'?[['ask','shield','請對方證明是飼主','問晶片末四碼等']]:[])],v=>{
+    $('#chPlus').onclick=()=>{geoWarm();chatPlusSheet([['photo','image','相簿照片','一次最多 4 張'],['cam','camera','拍照',''],['loc','pin','傳送位置','傳一張小地圖'],...(helper&&ch.kind!=='dm'&&ch.kind!=='rehome'?[['ask','shield','請對方證明是飼主','問晶片末四碼等']]:[])],v=>{
       if(v==='photo')$('#chPh').click();if(v==='cam')$('#chCam').click();if(v==='loc')sendLoc();if(v==='ask')askOwner()})};
     $('#chStk').onclick=()=>stkSheet(async sid=>{if(busy)return;busy=true;{const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm stk me pend pop" data-tmp><div class="cstk">${stkSVG(sid)}</div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));let {error}=await sendRPC('sticker',sid,null);
       if(error&&/格式錯誤/.test(error.message))({error}=await sendRPC('text','[stk:'+sid+']',null));   // 資料庫還沒更新時的備用格式
       if(error)toast(error.message.replace(/^.*?:\s*/,''),4500);else{await pull();ping()}tmp.remove();regroup();busy=false});
     const askOwner=()=>busy?null:xPick('請對方證明是飼主',CHAT_ASKS.map(t=>[t,t]).concat([['__own','自己寫一個問題…']]),'',async v=>{let q=v;if(v==='__own'){q=await textSheet({title:'想請對方回答什麼？',max:200,placeholder:'例：毛孩最喜歡的玩具是什麼？'});if(!q||!q.trim())return}send('ask',q.trim())});
     // 快速回覆：案件對話剛開始時
-    {const QR=ch.kind==='dm'?[]:helper?['我在附近看到很像毛孩的毛孩','毛孩現在在我這裡，很安全','可以多傳幾張毛孩的照片嗎？','方便接電話嗎？']:['謝謝你！請問在哪裡看到的？','可以傳照片給我確認嗎？','毛孩現在還在那附近嗎？','方便接電話嗎？'];
+    {const QR=ch.kind==='dm'?[]:ch.kind==='rehome'?(helper?['你好，我是申請領養的人','可以多傳幾張照片或影片嗎？','平常吃什麼、有什麼習慣？','方便約時間見面嗎？']:['可以介紹一下你家的環境嗎？','家裡還有其他動物嗎？','平常誰會照顧牠？','方便約時間見面嗎？']):helper?['我在附近看到很像毛孩的毛孩','毛孩現在在我這裡，很安全','可以多傳幾張毛孩的照片嗎？','方便接電話嗎？']:['謝謝你！請問在哪裡看到的？','可以傳照片給我確認嗎？','毛孩現在還在那附近嗎？','方便接電話嗎？'];
       if(QR.length&&!msgs.some(m=>m.sender_id===me().id)){const qb=document.createElement('div');qb.className='chquick';qb.innerHTML=QR.map(q=>`<button type="button">${esc(q)}</button>`).join('');form.before(qb);qb.onclick=async e=>{const b=e.target.closest('button');if(!b||busy)return;qb.remove();inp.value=b.textContent;form.requestSubmit()}}}}
   {const ub=$('#chUnblk');if(ub)ub.onclick=async()=>{await sb.rpc('user_block',{p_user:other.user_id,p_on:false});toast('已解除封鎖');rerender(()=>renderChat(id))}}
   const pickTheme=()=>chatThemeSheet();
@@ -5190,6 +5299,7 @@ async function inboxItems(){if(!me())return [];const out=[];const since=new Date
   const pn={},pp={};(pets||[]).forEach(x=>{pn[x.id]=x.name;pp[x.id]=(x.photos||[])[0]});
   (dues||[]).forEach(d=>{const n=Math.round((new Date(d.next_due)-new Date(todayStr()))/864e5);out.push({t:new Date(Date.now()-Math.max(0,n)*36e5).toISOString(),k:'pet',ic:'steth',col:'#8C7BF0',img:pp[d.pet_id],href:'#/pet/'+d.pet_id,h:`<b>${esc(pn[d.pet_id]||'毛孩')}的${esc(d.title||'提醒')}</b> ${n<0?'已經過期 '+(-n)+' 天':n===0?'今天到期':n+' 天後到期'}`,due:1})});
   jobs.push(sb.from('pet_card_likers').select('pet_id,pet_name,username,created_at').gte('created_at',since).order('created_at',{ascending:false}).limit(30).then(({data})=>(data||[]).forEach(x=>out.push({t:x.created_at,k:'pet',ic:'heart',col:'#E0457B',img:pp[x.pet_id],href:'#/pals/card/'+x.pet_id+'?likers=1',h:`❤️ <b>${esc(x.username)}</b> 喜歡你的${esc(x.pet_name)}`}))).catch(()=>{}));
+  jobs.push(sb.rpc('rehome_inbox').then(({data})=>(data||[]).forEach(x=>out.push({t:x.at,k:'mine',ic:'home',col:'#15803D',img:x.pet_photo,href:'#/rehome/app/'+x.app_id,h:x.role==='owner'?`<b>${esc(x.who||'有人')}</b> 想領養 ${esc(x.pet_name)}，去看看問卷`:x.status==='talking'?`送養人想跟你聊聊 <b>${esc(x.pet_name)}</b>，可以傳訊息了`:x.status==='meet'?`🎉 送養人同意跟你見面了（<b>${esc(x.pet_name)}</b>）`:x.status==='adopted'?`🎉 <b>${esc(x.pet_name)}</b> 正式成為你的家人了`:`送養人這次沒有選擇你（${esc(x.pet_name)}），謝謝你願意給毛孩一個家`}))).catch(()=>{}));
   await Promise.all(jobs);
   return out.sort((a,b)=>(b.t||'').localeCompare(a.t||''))}
 async function inboxCheck(){if(!me())return;try{const l=await inboxItems();const s=inboxSeen();const n=l.filter(x=>!x.due&&Date.parse(x.t)>s).length;localStorage.setItem('wh_inbox_n',n);const b=$('#xBell');if(b)b.innerHTML=xBellHTML();dBellSet()}catch(_){}}
@@ -7320,6 +7430,7 @@ async function renderAdopt(){const _n=navId;
   app.innerHTML=`${MV?xHeadHTML('adopt',st.city?'有 <em id="xN">…</em> 隻在等一個家':'<span id="xNt">的毛孩在等一個家</span>',st.city||'選縣市')+`<div class="xsticky"><div class="xsrow"><div class="xchips xa-k" id="xaK"><button type="button" class="xchip ${st.kind==='狗'?'on':''}" data-k="狗">${spIc('dog')} 狗狗</button><button type="button" class="xchip ${st.kind==='貓'?'on':''}" data-k="貓">${spIc('cat')} 貓咪</button></div><div class="xseg" id="xView" role="group" aria-label="顯示方式">${['big','grid'].map(v=>`<button type="button" data-v="${v}" class="${aV===v?'on':''}" aria-pressed="${aV===v}" aria-label="${{big:'大圖',grid:'格狀'}[v]}">${XI[v]}</button>`).join('')}</div><button type="button" class="xfbtn" id="xaF" aria-label="篩選">${ic('sliders')}<i class="fcnt" id="xaFc"></i></button></div></div><div class="xas-bg" id="xasBg"></div>`:''}<h1>領養毛孩</h1>
   <p class="lede">全台公立收容所有很多毛孩在等一個家。資料來自農業部，每天更新。</p>
   <p class="tipbox">📞 想領養？先打電話給收容所，確認毛孩還在、問清楚流程（通常要帶身分證）。</p>
+  <a class="rh-shelter rh-fromadopt" href="#/rehome">${ic('home')}<span><b>民眾送養</b><small>一般民眾送養的毛孩，也可以刊登幫毛孩找新家</small></span>${ic('chev')}</a>
   <a class="intake-cta" href="#/intake"><span>${ic('search')}</span><div><b>在找走失的毛孩？</b><small>看收容所最近新收的狗貓和被發現的地點</small></div></a>
   <div class="card adopt-f">
     <div class="seg" id="aKind" role="group" aria-label="狗或貓"><button type="button" data-v="狗" aria-pressed="${st.kind==='狗'}" class="${st.kind==='狗'?'on':''}">${spIc('dog')} 狗</button><button type="button" data-v="貓" aria-pressed="${st.kind==='貓'}" class="${st.kind==='貓'?'on':''}">${spIc('cat')} 貓</button></div>
@@ -7643,7 +7754,7 @@ async function admSite(box){const _n=navId;let off=0,rows=[];
     $('#admSiteMore').innerHTML=got.length===50?'<button class="btn ghost" id="admSiteMoreB" style="width:100%">載入更多</button>':'';
     const mb=$('#admSiteMoreB');if(mb)mb.onclick=()=>{mb.disabled=true;mb.textContent='載入中…';load()}};
   load()}
-const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊',user:'私訊會員',comment:'線索留言'};
+const ADM_T={case:'走失案件',found:'拾獲通報',sighting:'目擊',user:'私訊會員',comment:'線索留言',rehome:'民眾送養'};
 const ADM_MAX={name:30,lost_place:200,place_text:200,current_place:200,contact_phone:30,reporter_phone:30,contact_line:60,reporter_line:60,direction:20};
 const FSTATUS_T={open:'等飼主中',reunited:'已回到主人身邊',closed:'已結案'},SSTATUS_T={pending:'待飼主確認',confirmed:'已確認',rejected:'已退回／隱藏'};
 const admUrl=(t,id,caseId)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:`#/case/${caseId}`;
@@ -7699,14 +7810,14 @@ async function admReports(box,showAll){const _n=navId;
   if(_n!==navId)return;
   if(error){box.innerHTML=`<div class="empty">${esc(error.message)}</div>`;return}
   const groups={};(Array.isArray(rs)?rs:[]).forEach(r=>{(groups[r.target_id]=groups[r.target_id]||{...r,items:[]}).items.push(r)});
-  const link=(t,id)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:null;
+  const link=(t,id)=>t==='case'?`#/case/${id}`:t==='found'?`#/found/${id}`:t==='rehome'?`#/rehome/${id}`:null;
   box.innerHTML=`<p class="adm-bar"><a class="small" href="#/admin?tab=reports${showAll?'':'&all=1'}">${showAll?'只看待處理':'顯示已處理'}</a></p>
   ${Object.values(groups).length?Object.values(groups).map(g=>`<div class="card adm-card">
     <div class="adm-h"><span class="tag ${g.target_type==='case'?'red':g.target_type==='found'?'green':'blue'}">${ADM_T[g.target_type]||g.target_type}</span><b>${esc(g.target_title||(g.target_type==='user'?'被檢舉的會員（下方附對方最近的訊息）':'(已刪除)'))}</b>${g.target_hidden?'<span class="tag">已隱藏</span>':''}${g.resolved?'<span class="tag green">已處理</span>':''}</div>
     <ul class="small" style="margin:8px 0 0 18px;padding:0;white-space:pre-line">${g.items.map(r=>`<li>${fmtDT(r.created_at)}　${esc(REASON_TEXT[r.reason]||r.reason)}${r.note?'：'+esc(r.note):''}</li>`).join('')}</ul>
     <div class="adm-acts">
       ${link(g.target_type,g.target_id)?`<a class="btn sm ghost" href="${link(g.target_type,g.target_id)}">查看</a>`:''}
-      ${g.target_type==='user'||g.target_type==='comment'?'':`<a class="btn sm ghost" href="#/admin?tab=${g.target_type}&q=${g.target_id}">聯絡／編輯</a>`}
+      ${g.target_type==='user'||g.target_type==='comment'||g.target_type==='rehome'?'':`<a class="btn sm ghost" href="#/admin?tab=${g.target_type}&q=${g.target_id}">聯絡／編輯</a>`}
       ${g.target_type==='user'?'':`<button class="btn sm" data-hide="${g.target_type}|${g.target_id}|${g.target_hidden?0:1}">${g.target_hidden?'恢復顯示':(g.target_type==='sighting'?'退回目擊':'隱藏')}</button>`}
       ${g.resolved?'':`<button class="btn sm green" data-res="${g.target_id}">標記已處理</button>`}
       ${g.resolved?'':`<button class="btn sm danger" data-ban="${g.target_type}|${g.target_id}">停權發布者</button>`}
@@ -8995,6 +9106,342 @@ function palWhen(s){const t=tw(s),n=tw(new Date().toISOString());const wk='日�
   const day=t.y===n.y&&t.m===n.m&&t.d===n.d?'今天':`${t.m}/${t.d}（${wk}）`;return `${day} ${String(t.h).padStart(2,'0')}:${String(t.mi).padStart(2,'0')}`}
 function palFilterBar(st,tab){return `<div class="pals-filter"><div class="pchips">${[['','全部'],['dog','狗狗'],['cat','貓咪']].map(([v,l])=>`<button type="button" class="pchip ${st.sp===v?'on':''}" data-sp="${v}">${l}</button>`).join('')}</div>
   <select id="palCity" aria-label="縣市">${cityOptions(st.city).replace('選擇縣市','全部縣市')}</select>${st.city?`<select id="palDist" aria-label="區">${distOptions(st.city,st.dist).replace('選擇區','全部區域')}</select>`:''}${tab==='meets'?(()=>{let v='list';try{v=localStorage.getItem('wh_pals_mv')||'list'}catch(_){}return `<div class="xseg pal-mv" role="group" aria-label="顯示方式">${[['list','清單'],['map','地圖']].map(([k,l])=>`<button type="button" data-mv="${k}" class="${v===k?'on':''}" aria-label="${l}" aria-pressed="${v===k}">${XI[k]}</button>`).join('')}</div>`})():''}</div>`}
+
+// ===== v7.31 民眾送養區：送養人刊登 → 申請問卷 → 送養人審核 → 同意見面才交換電話 → 切結書 → 完成送養 =====
+ICONS.home=ICONS.home||'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M12 17.6s-2.7-1.6-2.7-3.5a1.35 1.35 0 0 1 2.7-.5 1.35 1.35 0 0 1 2.7.5c0 1.9-2.7 3.5-2.7 3.5z"/>';
+const RH_SEX={male:'男生',female:'女生',unknown:'性別未知'};
+const RH_DISC_T='汪喵回家只是提供刊登和聯絡的平台，不是送養或領養的任何一方，不經手金錢，也不保證刊登和申請的內容都正確。雙方的約定、交接、費用和之後的照顧，都由送養人和領養人自己負責；如果發生爭議或糾紛，請雙方自行處理，必要時請洽各縣市動保處、165 反詐騙專線或警察。';
+const RH_DISC=`<p class="rh-disc">${ic('info')}<span><b>平台聲明</b>${RH_DISC_T}</span></p>`;
+const RH_ST={pending:['待回覆','amber'],talking:['再聊聊','blue'],meet:['同意見面','green'],declined:['已婉拒','gray'],withdrawn:['已撤回','gray'],adopted:['完成送養','green']};
+const rhLoc=r=>((r.city||'').replace(/^臺/,'台')+(r.district||''));
+const rhSp=r=>r.species==='cat'?'貓咪':'狗狗';
+const rhStTag=s=>{const [t,c]=RH_ST[s]||[s,'gray'];return `<span class="tag ${c}">${t}</span>`};
+function rhFacts(r){const f=[];
+  if(r.neutered==='yes')f.push('已結紮');else if(r.neutered==='no')f.push('未結紮');
+  if(r.vaccine==='yes')f.push('疫苗已打');else if(r.vaccine==='partial')f.push('疫苗打了一部分');else if(r.vaccine==='no')f.push('未打疫苗');
+  if(r.chip==='yes')f.push('有晶片');else if(r.chip==='no')f.push('未植晶片');
+  return f}
+function rhReqChips(r){const c=[];if(r.req_visit)c.push('需家訪');if(r.req_contract)c.push('簽切結書');if(r.req_followup)c.push('需回報近況');if((r.req_cities||[]).length)c.push('限'+r.req_cities.map(x=>x.replace(/^臺/,'台').replace(/[市縣]$/,'')).join('、'));return c}
+const RH_RULES=`<details class="pals-rules rh-rules"><summary>${ic('shield')} 送養區守則</summary><ul><li>每一位領養人都由送養人親自審核，送養人可以婉拒任何申請。</li><li>送養人同意見面之前，雙方的電話都不會公開，先用站內訊息聊。</li><li>禁止買賣、配種。只能收實際花費（例如疫苗、結紮），交接時要附收據，上限 5,000 元。</li><li>不要事先匯款。要求先付「保證金、運費」的，很可能是詐騙。</li><li>第一次見面約在公開場所；交接時當面核對證件，最好到領養人家裡。</li><li>看到可疑的刊登或申請，請按「檢舉」。</li><li>汪喵回家只是平台，送養和領養的結果由雙方自己負責。</li></ul></details>`;
+async function rhNeedUsername(why){const p=await getProfile().catch(()=>null);if(p&&p.username)return true;
+  if(await askSheet({title:'先取一個會員 ID',body:why+'需要會員 ID，讓對方知道是誰在跟他聯絡。',ok:'去設定'})){setReturn(location.hash);location.hash='#/set-username'}return false}
+
+// ---------- 列表 ----------
+async function renderRehome(){const _n=navId;const q=qs(location.hash);const tab=q.tab==='mine'?'mine':'list';
+  const st={sp:['dog','cat'].includes(q.sp)?q.sp:'',city:q.city||''};
+  setTitle('民眾送養');
+  const go=o=>{const p=new URLSearchParams({...(tab==='mine'?{tab}:{}),...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...o});for(const [k,v] of [...p])if(!v)p.delete(k);goReplace('#/rehome'+(p.toString()?'?'+p:''))};
+  app.innerHTML=`<div class="rh">
+    <div class="rh-hero"><div><h1>民眾送養</h1><p>每一位領養人，都由送養人親自看過、聊過才決定。</p></div><a class="btn green" href="#/rehome/new">${ic('plus')} 刊登送養</a></div>
+    <div class="pals-tabs" role="tablist"><a role="tab" class="${tab==='list'?'on':''}" aria-selected="${tab==='list'}" href="#/rehome">等一個家</a><a role="tab" class="${tab==='mine'?'on':''}" aria-selected="${tab==='mine'}" href="#/rehome?tab=mine">我的送養與申請</a></div>
+    ${tab==='list'?`<div class="pals-filter"><div class="pchips">${[['','全部'],['dog','狗狗'],['cat','貓咪']].map(([v,l])=>`<button type="button" class="pchip ${st.sp===v?'on':''}" data-sp="${v}">${l}</button>`).join('')}</div><select id="rhCity" aria-label="縣市">${cityOptions(st.city).replace('選擇縣市','全部縣市')}</select></div>`:''}
+    <div id="rhList"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></div>
+    ${RH_DISC}
+    <a class="rh-shelter" href="#/adopt">${ic('shelter')}<span><b>也去收容所看看</b><small>全台公立收容所的毛孩，每天更新</small></span>${ic('chev')}</a>
+    ${RH_RULES}</div>`;
+  app.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>go({sp:b.dataset.sp}));
+  {const c=$('#rhCity');if(c)c.onchange=e=>go({city:e.target.value})}
+  if(tab==='mine')return rhMine(_n);
+  let qy=sb.from('rehomes_public').select('id,owner_id,species,name,sex,age_text,breed,photos,city,district,neutered,vaccine,chip,req_visit,req_contract,req_followup,req_cities,fee,status,created_at,app_count').in('status',['open','paused','adopted']).order('created_at',{ascending:false}).limit(120);
+  if(st.sp)qy=qy.eq('species',st.sp);if(st.city)qy=qy.eq('city',st.city);
+  const {data,error}=await qy;if(_n!==navId)return;const box=$('#rhList');
+  if(error){box.innerHTML=netErrHTML();return}
+  const hd=lsList('wh_hidden'),bl=lsList('wh_blocked');
+  let rows=(data||[]).filter(r=>!hd.includes(r.id)&&!bl.includes(r.owner_id));
+  // 還在找家的排前面；找到家的只留最近刊登的
+  rows=rows.filter(r=>r.status!=='adopted'||Date.now()-Date.parse(r.created_at)<60*864e5).sort((a,b)=>(a.status==='adopted')-(b.status==='adopted'));
+  if(!rows.length){box.innerHTML=`<div class="empty-card"><div class="big">${ic('home')}</div><b>${st.city||st.sp?esc((st.city||'').replace(/^臺/,'台'))+'目前沒有'+(st.sp==='cat'?'貓咪':st.sp==='dog'?'狗狗':'毛孩')+'在等家':'目前還沒有毛孩在等家'}</b><p class="small">你有毛孩需要找新家嗎？刊登後，由你親自挑選領養人。</p><a class="btn ghost" href="#/rehome/new">${ic('plus')} 刊登送養</a></div>`;return}
+  box.innerHTML=`<div class="rh-grid">${rows.map(rhCardHTML).join('')}</div>`;
+}
+function rhCardHTML(r){const chips=rhReqChips(r).slice(0,2),f=rhFacts(r).filter(x=>/^已|有晶片|疫苗已/.test(x)).slice(0,2);
+  return `<a class="rh-card ${r.status==='adopted'?'done':''}" href="#/rehome/${r.id}"><span class="rh-ph ${r.species}">${(r.photos||[])[0]?thumbImg(r.photos[0],r.name):spIc(r.species)}${r.status==='adopted'?'<i class="rh-ribbon">找到家了</i>':r.status==='paused'?'<i class="rh-ribbon pause">暫停申請</i>':''}</span>
+    <span class="rh-b"><b>${esc(r.name)}<small>${RH_SEX[r.sex]==='性別未知'?'':RH_SEX[r.sex]}</small></b><small>${esc([r.breed,r.age_text].filter(Boolean).join('・')||rhSp(r))}</small><small class="rh-loc">${ic('pin')} ${esc(rhLoc(r))}</small>
+    ${f.length||chips.length?`<span class="rh-chips">${f.map(x=>`<i class="ok">${esc(x)}</i>`).join('')}${chips.map(x=>`<i>${esc(x)}</i>`).join('')}</span>`:''}</span></a>`}
+
+async function rhMine(_n){const box=$('#rhList');
+  if(!me()){box.innerHTML=`<div class="empty-card"><div class="big">${ic('user')}</div><b>登入後看你的送養與申請</b><a class="btn" href="#/login" onclick="setReturn('#/rehome?tab=mine')">登入／註冊（免費）</a></div>`;return}
+  const [{data:mine,error:e1},{data:apps,error:e2}]=await Promise.all([sb.from('rehomes').select('id,name,species,photos,status,city,district,created_at').order('created_at',{ascending:false}),sb.rpc('rehome_my_apps')]);
+  if(_n!==navId)return;if(e1||e2){box.innerHTML=netErrHTML();return}
+  let cnt={};if((mine||[]).length){const {data}=await sb.from('rehomes_public').select('id,app_count').in('id',mine.map(x=>x.id));(data||[]).forEach(x=>cnt[x.id]=x.app_count);if(_n!==navId)return}
+  const ST={open:'開放申請中',paused:'暫停申請',adopted:'找到家了',closed:'已下架'};
+  box.innerHTML=`<h2 class="rh-h2">我刊登的</h2>${(mine||[]).length?`<div class="rh-rows">${mine.map(r=>`<a class="rh-row" href="#/rehome/${r.id}${r.status==='closed'?'/edit':'/apps'}">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<span><b>${esc(r.name)}</b><small>${ST[r.status]||''}・${esc(rhLoc(r))}</small></span>${cnt[r.id]?`<em>${cnt[r.id]} 份申請</em>`:''}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有刊登。<a href="#/rehome/new">刊登送養</a></p>`}
+  <h2 class="rh-h2">我申請的</h2>${(apps||[]).length?`<div class="rh-rows">${apps.map(a=>`<a class="rh-row" href="#/rehome/app/${a.id}">${a.pet_photo?thumbImg(a.pet_photo,''):spIc(a.pet_species)}<span><b>${esc(a.pet_name)}</b><small>${esc(a.owner_username||'')}・${esc(rhLoc(a))}</small></span>${rhStTag(a.status)}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有申請。看到喜歡的毛孩，按「我想領養」填問卷。</p>`}`;
+}
+
+// ---------- 單一送養頁 ----------
+async function renderRehomeOne(id){const _n=navId;setTitle('民眾送養');
+  app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  const {data:r,error}=await sb.from('rehomes_public').select('*').eq('id',id).maybeSingle();if(_n!==navId)return;
+  if(error){app.innerHTML=netErrHTML();return}
+  if(!r){app.innerHTML=`<div class="empty-card"><b>這則送養已經下架了</b><a class="btn" href="#/rehome">看其他毛孩</a></div>`;return}
+  const u=me(),own=u&&u.id===r.owner_id;setTitle(r.name+'・民眾送養');
+  let myApp=null;if(u&&!own){const {data}=await sb.rpc('rehome_my_apps');myApp=(data||[]).find(a=>a.rehome_id===id&&a.status!=='withdrawn')||null;if(_n!==navId)return}
+  const facts=rhFacts(r),chips=rhReqChips(r),ph=r.photos||[];
+  const cta=own?`<a class="btn big block" href="#/rehome/${id}/apps">${ic('clipboard')} 看申請（${r.app_count}）</a>`
+    :myApp?`<a class="btn big block ghost" href="#/rehome/app/${myApp.id}">你已經申請了・${RH_ST[myApp.status][0]}</a>`
+    :r.status==='open'?`<a class="btn big block green" href="#/rehome/${id}/apply">${ic('heart')} 我想領養${esc(r.name)}</a>`
+    :`<button class="btn big block ghost" disabled>${r.status==='adopted'?esc(r.name)+'已經找到家了':'送養人暫停接受申請'}</button>`;
+  app.innerHTML=`<div class="rh rh-one">
+    <p class="muted"><a href="#/rehome">← 民眾送養</a></p>
+    <div class="rh-gal ${ph.length>1?'many':''}">${ph.map((p,i)=>`<button type="button" class="rh-gi" data-i="${i}"><img src="${esc(safeU(p))}" alt="${esc(r.name)}的照片 ${i+1}" ${i?'loading="lazy"':''}></button>`).join('')}</div>
+    <div class="rh-title"><h1>${esc(r.name)}</h1>${r.status==='adopted'?'<span class="tag green">找到家了</span>':r.status==='paused'?'<span class="tag gray">暫停申請</span>':''}</div>
+    <p class="rh-sub">${esc([rhSp(r),RH_SEX[r.sex],r.breed,r.age_text].filter(Boolean).join('・'))}　${ic('pin')} ${esc(rhLoc(r))}</p>
+    ${facts.length?`<div class="rh-facts">${facts.map(x=>`<span class="${/^未/.test(x)?'':'ok'}">${esc(x)}</span>`).join('')}</div>`:''}
+    ${r.temperament?`<h3>個性</h3><p class="rh-p">${esc(r.temperament)}</p>`:''}
+    ${r.story?`<h3>${esc(r.name)}的故事</h3><p class="rh-p">${esc(r.story)}</p>`:''}
+    ${r.health?`<h3>健康狀況</h3><p class="rh-p">${esc(r.health)}</p>`:''}
+    <div class="rh-box"><h3>${ic('shield')} 送養人的條件</h3>
+      ${chips.length?`<ul>${r.req_visit?'<li>交接前會家訪，或到領養人家裡交接</li>':''}${r.req_contract?'<li>要簽認養切結書，當面核對身分證件</li>':''}${r.req_followup?'<li>接回去之後，要回報近況照片</li>':''}${(r.req_cities||[]).length?`<li>只送養到：${esc(r.req_cities.map(x=>x.replace(/^臺/,'台')).join('、'))}</li>`:''}</ul>`:''}
+      ${r.req_note?`<p class="rh-p">${esc(r.req_note)}</p>`:''}
+      <p class="rh-fee">${r.fee>0?`${ic('doc')} 實際花費 NT$${Number(r.fee).toLocaleString()}：${esc(r.fee_note||'')}（交接時附收據）`:`${ic('heart')} 免費送養`}</p>
+    </div>
+    <div class="rh-owner">${chatAva(r.username,r.avatar_url)}<span><b>送養人：${esc(r.contact_name)}</b><small>會員 ${esc(r.username)}・${esc(fmtDate(r.owner_joined))} 加入</small></span></div>
+    <div class="rh-cta">${cta}</div>
+    ${own?`<div class="rh-ownops"><a class="btn ghost" href="#/rehome/${id}/edit">${ic('doc')} 編輯</a><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button></div>`
+      :`<div class="rh-ownops"><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button><button type="button" class="btn ghost" id="rhRep">${ic('flag')} 檢舉</button></div>`}
+    <details class="pals-rules" open><summary>${ic('info')} 給想領養的人</summary><ul><li>送養人會先看你的問卷，覺得適合才會回覆「再聊聊」或「同意見面」。</li><li>同意見面之後，你們才會看到彼此的電話。</li><li>不要事先匯款。要求先付保證金、運費的，很可能是詐騙，請按「檢舉」。</li><li>第一次見面約在公開場所。</li></ul></details>
+    ${RH_DISC}${RH_RULES}</div>`;
+  app.querySelectorAll('.rh-gi').forEach(b=>b.onclick=()=>{lightbox(ph[+b.dataset.i],{list:ph})});
+  $('#rhShare').onclick=()=>share(`${r.name}（${rhSp(r)}・${rhLoc(r)}）在等一個家｜汪喵回家・民眾送養`,'https://wangmiaotw.com/#/rehome/'+id);
+  {const b=$('#rhRep');if(b)b.onclick=()=>openReport('rehome',id,r.owner_id,()=>{location.hash='#/rehome'})}
+}
+
+// ---------- 刊登／編輯 ----------
+async function renderRehomeForm(id){if(!requireLogin('刊登送養需要登入（免費註冊）'))return;const _n=navId;setTitle(id?'編輯送養':'刊登送養');
+  let r={species:'dog',sex:'unknown',neutered:'unknown',vaccine:'unknown',chip:'unknown',req_visit:false,req_contract:true,req_followup:true,req_cities:[],photos:[],fee:0,status:'open'};
+  if(id){app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+    const {data,error}=await sb.from('rehomes').select('*').eq('id',id).maybeSingle();if(_n!==navId)return;
+    if(error){app.innerHTML=netErrHTML();return}if(!data){app.innerHTML=`<div class="empty-card"><b>找不到這則送養，或你不是刊登的人</b><a class="btn" href="#/rehome">回民眾送養</a></div>`;return}r=data}
+  else{const p=await getProfile().catch(()=>null);if(_n!==navId)return;if(p&&!r.contact_name)r.contact_name=p.display_name||''}
+  const sel=(n,opts,v)=>`<select name="${n}">${opts.map(([k,l])=>`<option value="${k}" ${v===k?'selected':''}>${l}</option>`).join('')}</select>`;
+  const YN=[['unknown','不確定'],['yes','有'],['no','沒有']];
+  app.innerHTML=`<div class="rh narrow-in"><h1>${id?'編輯送養':'刊登送養'}</h1>
+    ${id?'':'<p class="muted">刊登後，想領養的人要先填問卷，由你親自決定要跟誰聊、跟誰見面。你的電話不會公開。</p>'}
+    <form id="rhf" novalidate>
+      <h3>照片<small class="hint">至少 1 張，最多 6 張</small></h3>
+      <div class="photos-preview" id="pv"></div>
+      <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
+      <h3>關於毛孩</h3>
+      <div class="row2"><label class="f"><span>名字</span><input name="name" maxlength="30" required value="${esc(r.name||'')}"></label>
+      <label class="f"><span>種類</span>${sel('species',[['dog','狗狗'],['cat','貓咪']],r.species)}</label></div>
+      <div class="row2"><label class="f"><span>性別</span>${sel('sex',[['unknown','不確定'],['male','男生'],['female','女生']],r.sex)}</label>
+      <label class="f"><span>年紀<small class="hint">大約就好</small></span><input name="age_text" maxlength="20" placeholder="例如：2 歲、6 個月" value="${esc(r.age_text||'')}"></label></div>
+      <div class="row2"><label class="f"><span>品種<small class="hint">選填</small></span><input name="breed" maxlength="30" placeholder="例如：米克斯" value="${esc(r.breed||'')}"></label>
+      <label class="f"><span>體型</span>${sel('size',[['','不確定'],['small','小型'],['medium','中型'],['large','大型']],r.size||'')}</label></div>
+      <div class="row3"><label class="f"><span>結紮</span>${sel('neutered',[['unknown','不確定'],['yes','已結紮'],['no','未結紮']],r.neutered)}</label>
+      <label class="f"><span>疫苗</span>${sel('vaccine',[['unknown','不確定'],['yes','已打'],['partial','打了一部分'],['no','沒打']],r.vaccine)}</label>
+      <label class="f"><span>晶片</span>${sel('chip',YN,r.chip)}</label></div>
+      <label class="f"><span>個性<small class="hint">親人嗎？怕什麼？跟其他狗貓處得來嗎？</small></span><textarea name="temperament" maxlength="300">${esc(r.temperament||'')}</textarea></label>
+      <label class="f"><span>健康狀況<small class="hint">有沒有慢性病、需要長期吃藥</small></span><textarea name="health" maxlength="300">${esc(r.health||'')}</textarea></label>
+      <label class="f"><span>為什麼送養、毛孩的故事<small class="hint">選填</small></span><textarea name="story" maxlength="1000">${esc(r.story||'')}</textarea></label>
+      <div class="row2"><label class="f"><span>縣市</span><select name="city" id="city" required>${cityOptions(r.city||'')}</select></label><label class="f"><span>區</span><select name="district" id="dist">${distOptions(r.city||'',r.district||'')}</select></label></div>
+      <h3>你對領養人的條件</h3>
+      <label class="chk"><input type="checkbox" name="req_contract" ${r.req_contract?'checked':''}> 要簽認養切結書（建議）</label>
+      <label class="chk"><input type="checkbox" name="req_followup" ${r.req_followup?'checked':''}> 接回去之後，要回報近況照片（建議）</label>
+      <label class="chk"><input type="checkbox" name="req_visit" ${r.req_visit?'checked':''}> 交接前要家訪，或到領養人家裡交接</label>
+      <details class="rh-cities" ${(r.req_cities||[]).length?'open':''}><summary>只送養到某些縣市（選填）</summary><div class="pal-tagpick">${Object.keys(TW).map(c=>`<label class="pchip ${(r.req_cities||[]).includes(c)?'on':''}"><input type="checkbox" name="req_cities" value="${c}" ${(r.req_cities||[]).includes(c)?'checked':''}>${c.replace(/^臺/,'台')}</label>`).join('')}</div></details>
+      <label class="f"><span>其他條件<small class="hint">選填，例如：不關籠、家人都要同意</small></span><textarea name="req_note" maxlength="300">${esc(r.req_note||'')}</textarea></label>
+      <h3>費用</h3>
+      <p class="small muted" style="margin-top:0">依動物保護法，沒有許可不能販賣貓狗。這裡只能收<b>實際花費</b>（例如疫苗、結紮、晶片），交接時要附收據。</p>
+      <div class="row2"><label class="f"><span>實際花費 NT$<small class="hint">免費就填 0</small></span><input type="number" name="fee" min="0" max="5000" step="1" inputmode="numeric" value="${r.fee||0}"></label>
+      <label class="f"><span>是哪些花費</span><input name="fee_note" maxlength="100" placeholder="例如：結紮 1,500、晶片 300" value="${esc(r.fee_note||'')}"></label></div>
+      <h3>你的聯絡方式<small class="hint">同意見面之後，才會給對方看</small></h3>
+      <div class="row2"><label class="f"><span>怎麼稱呼你</span><input name="contact_name" maxlength="20" required placeholder="例如：王小姐" value="${esc(r.contact_name||'')}"></label>
+      <label class="f"><span>手機</span><input type="tel" inputmode="tel" pattern="${PHONE_PAT}" name="contact_phone" required value="${esc(r.contact_phone||'')}"></label></div>
+      ${id&&r.status!=='adopted'?`<h3>狀態</h3>${sel('status',[['open','開放申請'],['paused','暫停申請（先不收新的申請）'],['closed','下架（不再顯示）']],r.status)}`:''}
+      ${RH_DISC}<label class="chk" style="margin-top:6px"><input type="checkbox" name="agree" ${id?'checked':''}> 我確認這不是買賣、資料都是真實的，也了解汪喵回家只是平台，送養的約定和結果由我自己負責</label>
+      <div class="submitbar"><button class="btn big block" id="rhSave">${id?'儲存':'刊登'}</button></div>
+    </form>${RH_RULES}</div>`;
+  if(!id)getProfile().then(p=>{if(p&&!p.username&&_n===navId)rhNeedUsername('刊登送養')}).catch(()=>{});
+  $('#city').onchange=e=>{$('#dist').innerHTML=distOptions(e.target.value)};
+  app.querySelectorAll('.rh-cities input').forEach(i=>i.onchange=()=>i.parentElement.classList.toggle('on',i.checked));
+  let photos=(r.photos||[]).slice();const pv=$('#pv');const drawPV=()=>pvTiles(pv,photos,safeU,drawPV);drawPV();
+  $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,6-photos.length)){if(photos.length>=6){toast('最多 6 張照片');break}toast('上傳中…');try{photos.push(await uploadPhoto(f,'cases'))}catch(err){toast('上傳失敗：'+err.message)}}drawPV();e.target.value=''};
+  $('#rhf').onsubmit=async e=>{e.preventDefault();const f=e.target,fd=new FormData(f);
+    if(!photos.length)return toast('請至少放一張照片',3500);
+    for(const n of ['name','city','contact_name','contact_phone']){const el=f.elements[n];if(!String(el.value).trim())return fieldErr(el)}
+    if(!new RegExp('^'+PHONE_PAT+'$').test(f.elements.contact_phone.value.trim()))return fieldErr(f.elements.contact_phone,'請填正確的手機號碼');
+    const fee=Math.max(0,Math.min(5000,Math.round(+fd.get('fee')||0)));
+    if(fee>0&&!String(fd.get('fee_note')||'').trim())return fieldErr(f.elements.fee_note,'請寫是哪些實際花費');
+    if(!f.elements.agree.checked)return toast('請勾選最下面的確認',4000);
+    if(!id&&!await rhNeedUsername('刊登送養'))return;
+    const t=v=>String(v||'').trim()||null;
+    const row={species:fd.get('species'),name:fd.get('name').trim(),sex:fd.get('sex'),age_text:t(fd.get('age_text')),breed:t(fd.get('breed')),size:fd.get('size')||null,
+      neutered:fd.get('neutered'),vaccine:fd.get('vaccine'),chip:fd.get('chip'),temperament:t(fd.get('temperament')),health:t(fd.get('health')),story:t(fd.get('story')),
+      photos,city:fd.get('city'),district:fd.get('district')||null,req_contract:!!fd.get('req_contract'),req_followup:!!fd.get('req_followup'),req_visit:!!fd.get('req_visit'),
+      req_cities:fd.getAll('req_cities'),req_note:t(fd.get('req_note')),fee,fee_note:fee>0?t(fd.get('fee_note')):null,contact_name:fd.get('contact_name').trim(),contact_phone:fd.get('contact_phone').trim()};
+    if(id&&fd.get('status'))row.status=fd.get('status');
+    const b=$('#rhSave');b.disabled=true;b.textContent='送出中…';
+    const res=id?await sb.from('rehomes').update(row).eq('id',id).select('id').single():await sb.from('rehomes').insert(row).select('id').single();
+    if(res.error){b.disabled=false;b.textContent=id?'儲存':'刊登';const m=res.error.message||'';return toast(/[一-鿿]/.test(m)?m.replace(/^.*?:\s*/,''):'送出失敗：'+friendlyErr(m),5500)}
+    __submitting=true;toast(id?'已儲存':'🎉 刊登好了！有人申請會出現在「通知」',3500);location.hash='#/rehome/'+res.data.id};
+}
+
+// ---------- 申請問卷 ----------
+const RH_Q=[
+  ['housing','你住的地方',[['own','自己或家人的房子'],['rent_ok','租屋，房東同意養'],['rent_unsure','租屋，還沒問房東']]],
+  ['family','同住的家人',[['all_agree','都同意養'],['alone','我一個人住'],['some_unsure','還有人不確定']]],
+  ['exp','養狗貓的經驗',[['now','現在有養'],['before','以前養過'],['none','第一次養']]],
+  ['daytime','白天家裡有人嗎',[['often','大部分時間有人'],['sometimes','有時候有人'],['rarely','上班時間都沒人']]],
+  ['sleep','毛孩平常待在哪裡',[['indoor','室內'],['yard','有圍牆的院子'],['chain','綁著或關籠']]],
+  ['cant_keep','萬一真的不能養了',[['return','聯絡送養人，還給送養人'],['find_home','自己幫忙找新家'],['shelter','送去收容所']]],
+  ['vet','願意負擔每年的疫苗、看醫生費用',[['yes','願意'],['no','沒辦法']]],
+  ['followup','願意讓送養人追蹤近況（傳照片）',[['yes','願意'],['no','不願意']]],
+  ['visit','願意讓送養人家訪，或到你家交接',[['yes','願意'],['no','不願意']]],
+  ['contract','願意簽認養切結書、當面核對證件',[['yes','願意'],['no','不願意']]],
+  ['when','希望多快接回家',[['flexible','慢慢來，配合送養人'],['soon','這一兩週'],['asap','越快越好，這幾天就要']]]
+];
+function rhFlags(a,r){const F=[],g=t=>F.push(['good',t]),w=t=>F.push(['warn',t]),bd=t=>F.push(['bad',t]);
+  if(a.housing==='rent_unsure')bd('租屋，還沒問房東');else if(a.housing==='rent_ok')w('租屋：見面時請看房東同意');else if(a.housing==='own')g('住自己或家人的房子');
+  if(a.family==='some_unsure')bd('有家人還不確定');else if(a.family==='all_agree')g('家人都同意');
+  if(a.exp==='none')w('第一次養：多聊聊照顧方式');else if(a.exp)g(a.exp==='now'?'現在有養':'以前養過');
+  if(a.daytime==='rarely')w('白天常沒人在家');
+  if(a.sleep==='chain')bd('會綁著或關籠');else if(a.sleep==='indoor')g('養在室內');
+  if(a.cant_keep==='shelter')bd('不能養時會送收容所');else if(a.cant_keep==='return')g('不能養時會還給你');else if(a.cant_keep==='find_home')w('不能養時會自己找新家');
+  if(a.vet==='no')bd('沒辦法負擔醫療費');
+  if(a.followup==='no')(r&&r.req_followup?bd:w)('不願意讓你追蹤近況');
+  if(a.visit==='no')(r&&r.req_visit?bd:w)('不願意家訪');
+  if(a.contract==='no')(r&&r.req_contract?bd:w)('不願意簽切結書');
+  if(a.when==='asap')w('急著這幾天就要帶走');
+  if(a.neuter==='no')bd('不願意帶去結紮');
+  return F}
+function rhSignals(x){const F=[];const days=(Date.now()-Date.parse(x.joined))/864e5;
+  if(days<7)F.push(['warn','剛註冊不到一週的帳號']);else if(days>180)F.push(['good','加入超過半年']);
+  if(x.apps_7d>=3)F.push(['warn',`一週內申請了 ${x.apps_7d} 隻`]);
+  if(x.reports>0)F.push(['bad',`被檢舉過 ${x.reports} 次`]);
+  if(x.has_pets)F.push(['good','有在汪喵回家建立毛孩健康手冊']);
+  return F}
+const rhFlagHTML=F=>F.length?`<div class="rh-flags">${F.slice().sort((a,b)=>({bad:0,warn:1,good:2}[a[0]])-({bad:0,warn:1,good:2}[b[0]])).map(([l,t])=>`<span class="${l}">${l==='good'?'✓':l==='bad'?'!':'?'} ${esc(t)}</span>`).join('')}</div>`:'';
+function rhAnswersHTML(a){const L=Object.fromEntries(RH_Q.map(([k,t,o])=>[k,[t,Object.fromEntries(o)]]));
+  const rows=[['住在',a.city?(a.city.replace(/^臺/,'台')):''],...RH_Q.map(([k])=>[L[k][0],L[k][1][a[k]]||'']),['結紮',a.neuter==='yes'?'願意帶去結紮':a.neuter==='no'?'不願意':''],['現在家裡的動物',a.pets||''],['一天最長獨處',a.alone_h?a.alone_h+' 小時':''],['搬家、結婚、生小孩、出國時',a.life||'']].filter(x=>x[1]);
+  return `<dl class="kv rh-kv">${rows.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`}
+
+async function renderRehomeApply(id){if(!requireLogin('申請領養需要登入（免費註冊）'))return;const _n=navId;setTitle('申請領養');
+  app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  const [{data:r},prof]=await Promise.all([sb.from('rehomes_public').select('*').eq('id',id).maybeSingle(),getProfile().catch(()=>null)]);if(_n!==navId)return;
+  if(!r||r.status!=='open'){app.innerHTML=`<div class="empty-card"><b>這隻目前沒有開放申請</b><a class="btn" href="#/rehome">看其他毛孩</a></div>`;return}
+  if(r.owner_id===me().id){goReplace('#/rehome/'+id);return}
+  const radio=([k,t,o])=>`<fieldset class="rh-q"><legend>${esc(t)}</legend><div class="rh-opts">${o.map(([v,l])=>`<label><input type="radio" name="${k}" value="${v}" required><span>${esc(l)}</span></label>`).join('')}</div></fieldset>`;
+  app.innerHTML=`<div class="rh narrow-in"><p class="muted"><a href="#/rehome/${id}">← ${esc(r.name)}</a></p>
+    <div class="rh-apphead">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<div><h1>申請領養${esc(r.name)}</h1><p class="muted">送養人 ${esc(r.contact_name)} 會看你的回答再決定。照實填寫，比較容易被選上。</p></div></div>
+    <form id="rhaf" novalidate>
+      <label class="chk rh-must"><input type="checkbox" name="adult" required> 我已經年滿 20 歲</label>
+      <label class="f"><span>你住在哪個縣市</span><select name="city" required>${cityOptions('')}</select></label>
+      ${(r.req_cities||[]).length?`<p class="small rh-note">送養人只送養到：${esc(r.req_cities.map(x=>x.replace(/^臺/,'台')).join('、'))}</p>`:''}
+      ${RH_Q.map(radio).join('')}
+      ${r.neutered!=='yes'?`<fieldset class="rh-q"><legend>${esc(r.name)}還沒結紮，願意帶去結紮嗎</legend><div class="rh-opts"><label><input type="radio" name="neuter" value="yes" required><span>願意</span></label><label><input type="radio" name="neuter" value="no"><span>不願意</span></label></div></fieldset>`:''}
+      <div class="row2"><label class="f"><span>一天最長獨處幾小時</span><input type="number" name="alone_h" min="0" max="24" inputmode="numeric"></label>
+      <label class="f"><span>現在家裡有哪些動物<small class="hint">沒有就空白</small></span><input name="pets" maxlength="100" placeholder="例如：一隻 5 歲的貓"></label></div>
+      <label class="f"><span>如果搬家、結婚、生小孩、出國，打算怎麼安排？</span><textarea name="life" maxlength="300" required></textarea></label>
+      <label class="f"><span>跟送養人介紹一下你自己<small class="hint">為什麼想領養${esc(r.name)}、平常的生活</small></span><textarea name="intro" maxlength="1000" required></textarea></label>
+      <h3>你的聯絡方式<small class="hint">送養人同意見面之後才看得到</small></h3>
+      <div class="row2"><label class="f"><span>怎麼稱呼你</span><input name="cname" maxlength="20" required placeholder="例如：陳先生" value="${esc(prof&&prof.display_name||'')}"></label>
+      <label class="f"><span>手機</span><input type="tel" inputmode="tel" pattern="${PHONE_PAT}" name="cphone" required></label></div>
+      ${RH_DISC}<label class="chk"><input type="checkbox" name="disc"> 我保證以上回答都是真實的，也了解汪喵回家只是平台，領養的約定和結果由我自己負責</label>
+      <div class="submitbar"><button class="btn big block green" id="rhaSave">送出申請</button></div>
+    </form>
+    <p class="small muted">送出後，送養人會看到你的回答和會員 ID。他回覆「再聊聊」之後，就可以用站內訊息聊天。</p></div>`;
+  if(prof&&!prof.username)rhNeedUsername('申請領養');
+  $('#rhaf').onsubmit=async e=>{e.preventDefault();const f=e.target,fd=new FormData(f);
+    if(!f.elements.adult.checked)return toast('領養人需要年滿 20 歲',3500);
+    if(!fd.get('city'))return fieldErr(f.elements.city);
+    for(const fs of f.querySelectorAll('fieldset.rh-q')){const n=fs.querySelector('input').name;if(!fd.get(n)){fs.classList.add('err');fs.scrollIntoView({block:'center',behavior:'smooth'});return toast('還有題目沒有選：'+fs.querySelector('legend').textContent,3500)}fs.classList.remove('err')}
+    for(const n of ['life','intro','cname','cphone']){const el=f.elements[n];if(!String(el.value).trim())return fieldErr(el)}
+    if(!new RegExp('^'+PHONE_PAT+'$').test(f.elements.cphone.value.trim()))return fieldErr(f.elements.cphone,'請填正確的手機號碼');
+    if(!f.elements.disc.checked)return toast('請勾選最下面的確認',3500);
+    if(!await rhNeedUsername('申請領養'))return;
+    const a={adult:'yes',city:fd.get('city'),alone_h:fd.get('alone_h')||null,pets:String(fd.get('pets')||'').trim()||null,life:String(fd.get('life')).trim()};
+    RH_Q.forEach(([k])=>a[k]=fd.get(k));if(fd.get('neuter'))a.neuter=fd.get('neuter');
+    const b=$('#rhaSave');b.disabled=true;b.textContent='送出中…';
+    const {data,error}=await sb.rpc('rehome_apply',{p_rehome:id,p_answers:a,p_intro:String(fd.get('intro')).trim(),p_name:fd.get('cname').trim(),p_phone:fd.get('cphone').trim()});
+    if(error){b.disabled=false;b.textContent='送出申請';return toast(error.message.replace(/^.*?:\s*/,''),5000)}
+    __submitting=true;toast('✅ 已送出，送養人回覆會出現在「通知」',4000);location.hash='#/rehome/app/'+data};
+}
+
+// ---------- 送養人看申請 ----------
+async function renderRehomeApps(id){if(!requireLogin())return;const _n=navId;setTitle('看申請');
+  app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  const [{data:r,error:e1},{data:list,error:e2}]=await Promise.all([sb.from('rehomes').select('*').eq('id',id).maybeSingle(),sb.rpc('rehome_apps_for',{p_rehome:id})]);if(_n!==navId)return;
+  if(e1||(e2&&!/只有送養人/.test(e2.message))){app.innerHTML=netErrHTML();return}
+  if(!r){app.innerHTML=`<div class="empty-card"><b>只有送養人看得到申請</b><a class="btn" href="#/rehome">回民眾送養</a></div>`;return}
+  const L=list||[],act=L.filter(x=>!['declined','withdrawn'].includes(x.status)),old=L.filter(x=>['declined','withdrawn'].includes(x.status));
+  const ST={open:'開放申請中',paused:'暫停申請',adopted:'找到家了',closed:'已下架'};
+  app.innerHTML=`<div class="rh narrow-in"><p class="muted"><a href="#/rehome?tab=mine">← 我的送養</a></p>
+    <div class="rh-apphead">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<div><h1>${esc(r.name)}的申請</h1><p class="muted">${ST[r.status]}・${L.length} 份申請</p></div></div>
+    <div class="rh-ownops"><a class="btn ghost" href="#/rehome/${id}">${ic('eye')} 看刊登頁</a><a class="btn ghost" href="#/rehome/${id}/edit">${ic('doc')} 編輯／暫停</a></div>
+    <p class="rh-tip">${ic('info')} 每份申請旁邊的 <b class="g">✓</b> 是加分、<b class="w">?</b> 是要多問、<b class="b">!</b> 是要特別注意。覺得可以就按「再聊聊」用站內訊息問問題；聊過放心了再按「同意見面」，雙方才會看到電話。</p>
+    ${act.length?act.map(x=>rhAppCard(x,r)).join(''):`<div class="empty-card"><div class="big">${ic('clipboard')}</div><b>還沒有人申請</b><p class="small">分享刊登頁，讓更多人看到${esc(r.name)}。</p><button type="button" class="btn ghost" id="rhShare2">${ic('share')} 分享</button></div>`}
+    ${old.length?`<details class="rh-old"><summary>已婉拒／撤回（${old.length}）</summary>${old.map(x=>rhAppCard(x,r)).join('')}</details>`:''}</div>`;
+  {const b=$('#rhShare2');if(b)b.onclick=()=>share(`${r.name}在等一個家｜汪喵回家・民眾送養`,'https://wangmiaotw.com/#/rehome/'+id)}
+  rhBindAppOps(app,()=>route());
+}
+function rhAppCard(x,r){const a=x.answers||{},F=[...rhSignals(x),...rhFlags(a,r)];
+  return `<div class="rh-app" data-app="${x.id}">
+    <div class="rh-app-h"><a href="#/u/${encodeURIComponent(x.username||'')}">${chatAva(x.username,x.avatar_url)}</a><span><b>${esc(x.contact_name)}</b><small>會員 ${esc(x.username||'')}・${esc(fmtDate(x.created_at))} 申請</small></span>${rhStTag(x.status)}</div>
+    ${rhFlagHTML(F)}
+    ${x.intro?`<p class="rh-p rh-intro">${esc(x.intro)}</p>`:''}
+    <details><summary>看完整問卷</summary>${rhAnswersHTML(a)}</details>
+    ${x.contact_phone?`<p class="rh-phone">${ic('phone')} <a href="tel:${esc(x.contact_phone.replace(/[^\d+]/g,''))}">${esc(fmtPhone(x.contact_phone))}</a>（${esc(x.contact_name)}）</p>`:''}
+    <div class="rh-app-ops">${rhOpsHTML(x.status,'owner')}<a class="btn ghost sm" href="#/rehome/app/${x.id}">詳細${x.status==='meet'?'・切結書':''}</a></div></div>`}
+function rhOpsHTML(st,role){if(role==='owner'){
+    if(st==='pending')return `<button type="button" class="btn sm" data-op="talking">再聊聊</button><button type="button" class="btn sm green" data-op="meet">同意見面</button><button type="button" class="btn sm ghost" data-op="declined">婉拒</button>`;
+    if(st==='talking')return `<button type="button" class="btn sm" data-op="chat">${ic('chat')} 傳訊息</button><button type="button" class="btn sm green" data-op="meet">同意見面</button><button type="button" class="btn sm ghost" data-op="declined">婉拒</button>`;
+    if(st==='meet')return `<button type="button" class="btn sm" data-op="chat">${ic('chat')} 傳訊息</button><button type="button" class="btn sm ghost" data-op="declined">婉拒</button>`;
+    if(st==='adopted')return `<button type="button" class="btn sm" data-op="chat">${ic('chat')} 傳訊息</button>`;return ''}
+  if(st==='talking'||st==='meet'||st==='adopted')return `<button type="button" class="btn sm" data-op="chat">${ic('chat')} 傳訊息</button>${st!=='adopted'?'<button type="button" class="btn sm ghost" data-op="withdrawn">撤回申請</button>':''}`;
+  if(st==='pending')return `<button type="button" class="btn sm ghost" data-op="withdrawn">撤回申請</button>`;return ''}
+function rhBindAppOps(root,after){root.querySelectorAll('[data-op]').forEach(b=>b.onclick=async()=>{const box=b.closest('[data-app]'),aid=box.dataset.app,op=b.dataset.op;
+  if(op==='chat')return chatStart('rehome',aid);
+  const Q={talking:['回覆「再聊聊」？','對方會收到通知，你們就可以用站內訊息聊天。電話還不會公開。','再聊聊'],meet:['同意見面？','雙方會看到彼此的電話。第一次見面請約在公開場所，交接時當面核對證件。','同意見面'],declined:['婉拒這份申請？','對方會看到「已婉拒」。婉拒後不能再改回來。','婉拒'],withdrawn:['撤回申請？','撤回後，送養人就看不到你的申請。之後還可以重新申請。','撤回']}[op];
+  if(!await askSheet({title:Q[0],body:Q[1],ok:Q[2],danger:op==='declined'||op==='withdrawn'}))return;
+  b.disabled=true;const {error}=await sb.rpc('rehome_app_set',{p_app:aid,p_status:op});
+  if(error){b.disabled=false;return toast(error.message.replace(/^.*?:\s*/,''),4500)}
+  toast({talking:'已回覆，可以傳訊息了',meet:'已同意見面，雙方都看得到電話了',declined:'已婉拒',withdrawn:'已撤回'}[op],3000);
+  if(op==='talking'){chatStart('rehome',aid);return}after()})}
+
+// ---------- 一份申請（雙方都能看）＋切結書 ----------
+function rhAgreeText(x){const fee=x.fee>0?`送養人僅收取實際花費新臺幣 ${Number(x.fee).toLocaleString()} 元（${x.fee_note||''}），交接時附收據；`:'本次為免費送養；';
+  return [`送養人：${x.owner_name}（汪喵回家會員 ${x.owner_username||''}）`,`領養人：${x.applicant_name}（汪喵回家會員 ${x.applicant_username||''}）`,`毛孩：${x.pet_name}（${x.pet_species==='cat'?'貓':'狗'}・${RH_SEX[x.pet_sex]||''}）`,'',
+  '領養人同意：','1. 已年滿 20 歲，並取得同住家人同意。','2. 以室內飼養或安全的圈養環境為原則，不長期綁著、關籠，也不放養。','3. 提供充足的食物和乾淨的水，定期施打疫苗、驅蟲，生病時帶去看醫生。',
+  x.pet_neutered==='yes'?'4. 維持毛孩已結紮的狀態，不用於繁殖。':'4. 在雙方約定的時間內，帶毛孩去結紮。',
+  '5. 依法辦理寵物登記（植入晶片），並把飼主資料改成自己。','6. 不轉送、不轉賣，也不用於繁殖或任何營利用途。',
+  `7. ${x.req_followup?'接回家後隔天、一週、一個月回報近況照片給送養人，之後至少每三個月一次，為期一年。':'送養人詢問近況時，願意回報。'}`,
+  '8. 若無法繼續飼養，先聯絡送養人並交還，不棄養、不送收容所。','9. 違反以上約定，或有虐待、棄養情形時，送養人可以要求帶回毛孩，並依動物保護法檢舉。','',
+  '送養人同意：',`如實告知毛孩的健康和個性狀況；${fee}之後在領養人需要時，提供照顧上的建議。`,'',
+  '以上是送養人和領養人雙方之間的約定，汪喵回家只是提供平台，不是本切結書的當事人，也不負擔任何責任。本切結書不影響動物保護法等法令的適用。建議另外印一份紙本，雙方簽名後各留一份。'].join('\n')}
+async function renderRehomeApp(aid){if(!requireLogin())return;const _n=navId;setTitle('領養申請');
+  app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  const {data,error}=await sb.rpc('rehome_app_get',{p_app:aid});if(_n!==navId)return;
+  if(error){app.innerHTML=netErrHTML();return}const x=(data||[])[0];
+  if(!x){app.innerHTML=`<div class="empty-card"><b>找不到這份申請</b><a class="btn" href="#/rehome?tab=mine">我的送養與申請</a></div>`;return}
+  const own=x.my_role==='owner',other=own?x.applicant_name:x.owner_name;
+  const steps=[['pending','送出申請'],['talking','再聊聊'],['meet','同意見面'],['agree','簽切結書'],['adopted','完成送養']];
+  const agreed=!!(x.owner_agree_at&&x.applicant_agree_at);
+  const lvl={pending:0,talking:1,meet:agreed?3:2,adopted:4}[x.status];
+  const ended=x.status==='declined'||x.status==='withdrawn';
+  const myAgree=own?x.owner_agree_at:x.applicant_agree_at,otherAgree=own?x.applicant_agree_at:x.owner_agree_at;
+  const tel=p=>`<a href="tel:${esc(String(p).replace(/[^\d+]/g,''))}">${esc(fmtPhone(p))}</a>`;
+  app.innerHTML=`<div class="rh narrow-in"><p class="muted"><a href="${own?'#/rehome/'+x.rehome_id+'/apps':'#/rehome?tab=mine'}">← ${own?'所有申請':'我的申請'}</a></p>
+    <a class="rh-apphead" href="#/rehome/${x.rehome_id}">${x.pet_photo?thumbImg(x.pet_photo,''):spIc(x.pet_species)}<div><h1>${esc(x.pet_name)}</h1><p class="muted">${own?`${esc(x.applicant_name)}（${esc(x.applicant_username||'')}）的申請`:`送養人 ${esc(x.owner_name)}（${esc(x.owner_username||'')}）`}</p></div></a>
+    ${ended?`<div class="rh-ended">${rhStTag(x.status)} ${x.status==='declined'?(own?'你已婉拒這份申請。':'送養人這次沒有選擇你，謝謝你願意給毛孩一個家。也看看其他在等家的毛孩吧！'):'這份申請已撤回。'}</div>`
+      :`<ol class="rh-steps">${steps.map(([k,t],i)=>`<li class="${i<lvl||x.status==='adopted'?'done':i===lvl?'now':''}"><i>${i<lvl||x.status==='adopted'?'✓':i+1}</i><span>${t}</span></li>`).join('')}</ol>`}
+    ${!ended?`<p class="rh-next">${x.status==='pending'?(own?'看看問卷，覺得可以就按「再聊聊」。':'送養人還在看你的申請，回覆後會出現在「通知」。'):x.status==='talking'?(own?'用站內訊息多聊聊。放心了再按「同意見面」。':'送養人想跟你多聊聊，可以傳訊息了。'):x.status==='meet'?(agreed?(own?'切結書雙方都同意了。交接完成後，按下面的「完成送養」。':'切結書雙方都同意了，等送養人按「完成送養」。'):'約在公開場所見面。交接時一起看下面的切結書，雙方都按同意。'):`${esc(x.pet_name)}已經到新家了 🎉`}</p>`:''}
+    ${x.status==='meet'||x.status==='adopted'?`<div class="rh-contact">${ic('phone')}<span><b>${esc(other)}</b>${tel(own?x.applicant_phone:x.owner_phone)}</span></div>`:''}
+    <div class="rh-app-ops" data-app="${x.id}">${rhOpsHTML(x.status,x.my_role)}</div>
+    ${x.status==='meet'||x.status==='adopted'?`<h2 class="rh-h2">認養切結書</h2><pre class="rh-agree">${esc(rhAgreeText(x))}</pre>
+      <div class="rh-sign"><p>${x.owner_agree_at?'✓':'○'} 送養人${x.owner_agree_at?`已核對領養人證件並同意（${esc(fmtDate(x.owner_agree_at))}）`:'還沒同意'}</p><p>${x.applicant_agree_at?'✓':'○'} 領養人${x.applicant_agree_at?`已同意（${esc(fmtDate(x.applicant_agree_at))}）`:'還沒同意'}</p></div>
+      ${x.status==='meet'&&!myAgree?`<form id="rhAg">${own?'<label class="chk"><input type="checkbox" name="idc"> 我已經當面核對過領養人的身分證件，姓名和這裡一樣</label>':''}<label class="chk"><input type="checkbox" name="ok"> 我看過並同意以上切結書</label><button class="btn block green" style="margin-top:8px">我同意</button></form>`:''}
+      <button type="button" class="btn ghost block" id="rhPrint" style="margin-top:8px">${ic('printer')} 列印紙本切結書</button>
+      ${own&&x.status==='meet'?`<button type="button" class="btn big block" id="rhDone" style="margin-top:14px" ${x.req_contract&&!agreed?'disabled':''}>${ic('home')} 完成送養</button>${x.req_contract&&!agreed?'<p class="small muted">雙方都同意切結書之後，才能按「完成送養」。</p>':''}`:''}`:''}
+    ${x.answers&&Object.keys(x.answers).length?`<details class="rh-old" ${own&&x.status==='pending'?'open':''}><summary>申請問卷</summary>${own?rhFlagHTML(rhFlags(x.answers,x)):''}${x.intro?`<p class="rh-p rh-intro">${esc(x.intro)}</p>`:''}${rhAnswersHTML(x.answers)}</details>`:''}
+    <details class="pals-rules"><summary>${ic('shield')} 見面和交接的提醒</summary><ul><li>第一次見面約在公開場所，可以帶家人或朋友一起。</li><li>交接時當面核對身分證件，最好到領養人家裡，順便看看環境。</li><li>拍一張領養人和毛孩的合照留存。</li><li>不要事先匯款；實際花費在交接時付，並附收據。</li><li>覺得不對勁可以隨時婉拒，安全最重要。</li></ul></details>${RH_DISC}</div>`;
+  rhBindAppOps(app,()=>route());
+  {const f=$('#rhAg');if(f)f.onsubmit=async e=>{e.preventDefault();if(own&&!f.elements.idc.checked)return toast('請先當面核對領養人的身分證件',3500);if(!f.elements.ok.checked)return toast('請勾選同意切結書',3000);
+    const b=f.querySelector('button');b.disabled=true;const {error}=await sb.rpc('rehome_agree',{p_app:aid,p_id_checked:own});if(error){b.disabled=false;return toast(error.message.replace(/^.*?:\s*/,''),4500)}toast('✅ 已同意切結書');route()}}
+  {const b=$('#rhPrint');if(b)b.onclick=()=>{const w=window.open('','_blank');if(!w){toast('請允許彈出視窗才能列印');return}w.document.write(`<!doctype html><meta charset="utf-8"><title>認養切結書</title><style>body{font:16px/1.8 system-ui,"PingFang TC","Noto Sans TC",sans-serif;max-width:680px;margin:32px auto;padding:0 16px;white-space:pre-wrap}h1{font-size:24px;text-align:center}.s{margin-top:40px;display:flex;justify-content:space-between;gap:20px}.s div{flex:1;border-top:1px solid #000;padding-top:6px}</style><h1>認養切結書</h1><div>${esc(rhAgreeText(x))}</div><div class="s"><div>送養人簽名／日期</div><div>領養人簽名／日期</div></div><p style="font-size:13px;color:#555">領養人身分證字號：＿＿＿＿＿＿＿＿　聯絡地址：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</p><script>print()<\/script>`);w.document.close()}}
+  {const b=$('#rhDone');if(b)b.onclick=async()=>{if(!await askSheet({title:`確定${x.pet_name}已經交接給 ${x.applicant_name}？`,body:'其他還沒處理的申請會自動婉拒，刊登頁會顯示「找到家了」。',ok:'完成送養'}))return;
+    b.disabled=true;const {error}=await sb.rpc('rehome_complete',{p_app:aid});if(error){b.disabled=false;return toast(error.message.replace(/^.*?:\s*/,''),4500)}toast(`🎉 恭喜${x.pet_name}找到家了！`,4000);route()}}
+}
 
 async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q.tab==='meets'?'meets':q.tab==='cards'?'cards':'swipe';const tq=tab==='swipe'?{}:{tab};
   if(!q.sp&&!q.city&&!q.keep){let f=null;try{f=JSON.parse(localStorage.getItem('wh_pals_f')||'null')}catch(_){}
@@ -10671,7 +11118,7 @@ function renderTerms(){
   <ul><li><b>交還毛孩前請核對身分：</b>請對方說出晶片號碼，或出示舊照片、就醫紀錄，避免被冒領。</li><li><b>見面請約在公開場所</b>（例如派出所、動物醫院），盡量有人陪同。</li></ul>
   <h2>六、免責</h2>
   <p>網友發布的內容由發布者自行負責。本站會盡力維持服務正常，但不保證不中斷或資料完全正確；收容所比對與相似度只是參考，請親自確認。</p>
-  <ul><li><b>毛孩健康手冊</b>的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷；用藥與治療請依獸醫師指示。</li><li><b>領養資料</b>來自農業部開放資料，本站不是收容或送養單位；領養請直接聯絡收容所，以收容所公告為準。</li></ul>
+  <ul><li><b>毛孩健康手冊</b>的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷；用藥與治療請依獸醫師指示。</li><li><b>領養資料</b>來自農業部開放資料，本站不是收容或送養單位；領養請直接聯絡收容所，以收容所公告為準。</li><li><b>民眾送養區</b>只是提供刊登和聯絡的平台，本站不是送養或領養的任何一方，不經手金錢，不保證刊登與申請內容正確，也不擔保送養結果。送養人與領養人之間的約定、認養切結書、交接、費用、之後的照顧與任何糾紛，由雙方自行負責處理。送養區禁止買賣動物，只能收取有收據的實際花費。</li></ul>
   <h2>七、停止使用</h2>
   <p>你可以隨時停止使用，並在「我的」頁刪除帳號。站方得因維護、違規處理或營運考量，暫停或終止部分或全部服務，並會盡量事先在網站上公告。</p>
   <h2>八、條款修改與適用法律</h2>
