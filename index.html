@@ -3248,7 +3248,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.31.0';
+const BUILD = 'v7.31.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -9216,6 +9216,7 @@ async function renderRehomeForm(id){if(!requireLogin('刊登送養需要登入�
   const sel=(n,opts,v)=>`<select name="${n}">${opts.map(([k,l])=>`<option value="${k}" ${v===k?'selected':''}>${l}</option>`).join('')}</select>`;
   const YN=[['unknown','不確定'],['yes','有'],['no','沒有']];
   app.innerHTML=`<div class="rh narrow-in"><h1>${id?'編輯送養':'刊登送養'}</h1>
+    ${r.status==='adopted'?`<p class="rh-next">🎉 ${esc(r.name)}已經完成送養，刊登頁會顯示「找到家了」。還是可以修改照片和文字。</p>`:''}
     ${id?'':'<p class="muted">刊登後，想領養的人要先填問卷，由你親自決定要跟誰聊、跟誰見面。你的電話不會公開。</p>'}
     <form id="rhf" novalidate>
       <h3>照片<small class="hint">至少 1 張，最多 6 張</small></h3>
@@ -9319,24 +9320,26 @@ function rhAnswersHTML(a){const L=Object.fromEntries(RH_Q.map(([k,t,o])=>[k,[t,O
 async function renderRehomeApply(id){if(!requireLogin('申請領養需要登入（免費註冊）'))return;const _n=navId;setTitle('申請領養');
   app.innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
   const [{data:r},prof]=await Promise.all([sb.from('rehomes_public').select('*').eq('id',id).maybeSingle(),getProfile().catch(()=>null)]);if(_n!==navId)return;
+  if(r&&r.status!=='open'&&me()){const {data:my}=await sb.rpc('rehome_my_apps');if(_n!==navId)return;const ex=(my||[]).find(a=>a.rehome_id===id&&a.status!=='withdrawn');if(ex){goReplace('#/rehome/app/'+ex.id);return}}
   if(!r||r.status!=='open'){app.innerHTML=`<div class="empty-card"><b>這隻目前沒有開放申請</b><a class="btn" href="#/rehome">看其他毛孩</a></div>`;return}
   if(r.owner_id===me().id){goReplace('#/rehome/'+id);return}
-  const radio=([k,t,o])=>`<fieldset class="rh-q"><legend>${esc(t)}</legend><div class="rh-opts">${o.map(([v,l])=>`<label><input type="radio" name="${k}" value="${v}" required><span>${esc(l)}</span></label>`).join('')}</div></fieldset>`;
+  {const {data:my}=await sb.rpc('rehome_my_apps');if(_n!==navId)return;const ex=(my||[]).find(a=>a.rehome_id===id&&a.status!=='withdrawn');if(ex){goReplace('#/rehome/app/'+ex.id);return}}
+  const radio=([k,t,o])=>`<fieldset class="rh-q"><legend>${esc(t)}</legend><div class="rh-opts">${o.map(([v,l])=>`<label><input type="radio" name="${k}" value="${v}"><span>${esc(l)}</span></label>`).join('')}</div></fieldset>`;
   app.innerHTML=`<div class="rh narrow-in"><p class="muted"><a href="#/rehome/${id}">← ${esc(r.name)}</a></p>
     <div class="rh-apphead">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<div><h1>申請領養${esc(r.name)}</h1><p class="muted">送養人 ${esc(r.contact_name)} 會看你的回答再決定。照實填寫，比較容易被選上。</p></div></div>
     <form id="rhaf" novalidate>
-      <label class="chk rh-must"><input type="checkbox" name="adult" required> 我已經年滿 20 歲</label>
-      <label class="f"><span>你住在哪個縣市</span><select name="city" required>${cityOptions('')}</select></label>
+      <label class="chk rh-must"><input type="checkbox" name="adult"> 我已經年滿 20 歲</label>
+      <label class="f"><span>你住在哪個縣市</span><select name="city">${cityOptions('')}</select></label>
       ${(r.req_cities||[]).length?`<p class="small rh-note">送養人只送養到：${esc(r.req_cities.map(x=>x.replace(/^臺/,'台')).join('、'))}</p>`:''}
       ${RH_Q.map(radio).join('')}
-      ${r.neutered!=='yes'?`<fieldset class="rh-q"><legend>${esc(r.name)}還沒結紮，願意帶去結紮嗎</legend><div class="rh-opts"><label><input type="radio" name="neuter" value="yes" required><span>願意</span></label><label><input type="radio" name="neuter" value="no"><span>不願意</span></label></div></fieldset>`:''}
+      ${r.neutered!=='yes'?`<fieldset class="rh-q"><legend>${esc(r.name)}還沒結紮，願意帶去結紮嗎</legend><div class="rh-opts"><label><input type="radio" name="neuter" value="yes"><span>願意</span></label><label><input type="radio" name="neuter" value="no"><span>不願意</span></label></div></fieldset>`:''}
       <div class="row2"><label class="f"><span>一天最長獨處幾小時</span><input type="number" name="alone_h" min="0" max="24" inputmode="numeric"></label>
       <label class="f"><span>現在家裡有哪些動物<small class="hint">沒有就空白</small></span><input name="pets" maxlength="100" placeholder="例如：一隻 5 歲的貓"></label></div>
-      <label class="f"><span>如果搬家、結婚、生小孩、出國，打算怎麼安排？</span><textarea name="life" maxlength="300" required></textarea></label>
-      <label class="f"><span>跟送養人介紹一下你自己<small class="hint">為什麼想領養${esc(r.name)}、平常的生活</small></span><textarea name="intro" maxlength="1000" required></textarea></label>
+      <label class="f"><span>如果搬家、結婚、生小孩、出國，打算怎麼安排？</span><textarea name="life" maxlength="300"></textarea></label>
+      <label class="f"><span>跟送養人介紹一下你自己<small class="hint">為什麼想領養${esc(r.name)}、平常的生活</small></span><textarea name="intro" maxlength="1000"></textarea></label>
       <h3>你的聯絡方式<small class="hint">送養人同意見面之後才看得到</small></h3>
-      <div class="row2"><label class="f"><span>怎麼稱呼你</span><input name="cname" maxlength="20" required placeholder="例如：陳先生" value="${esc(prof&&prof.display_name||'')}"></label>
-      <label class="f"><span>手機</span><input type="tel" inputmode="tel" pattern="${PHONE_PAT}" name="cphone" required></label></div>
+      <div class="row2"><label class="f"><span>怎麼稱呼你</span><input name="cname" maxlength="20" placeholder="例如：陳先生" value="${esc(prof&&prof.display_name||'')}"></label>
+      <label class="f"><span>手機</span><input type="tel" inputmode="tel" pattern="${PHONE_PAT}" name="cphone"></label></div>
       ${RH_DISC}<label class="chk"><input type="checkbox" name="disc"> 我保證以上回答都是真實的，也了解汪喵回家只是平台，領養的約定和結果由我自己負責</label>
       <div class="submitbar"><button class="btn big block green" id="rhaSave">送出申請</button></div>
     </form>
@@ -9436,6 +9439,8 @@ async function renderRehomeApp(aid){if(!requireLogin())return;const _n=navId;set
     ${x.answers&&Object.keys(x.answers).length?`<details class="rh-old" ${own&&x.status==='pending'?'open':''}><summary>申請問卷</summary>${own?rhFlagHTML(rhFlags(x.answers,x)):''}${x.intro?`<p class="rh-p rh-intro">${esc(x.intro)}</p>`:''}${rhAnswersHTML(x.answers)}</details>`:''}
     <details class="pals-rules"><summary>${ic('shield')} 見面和交接的提醒</summary><ul><li>第一次見面約在公開場所，可以帶家人或朋友一起。</li><li>交接時當面核對身分證件，最好到領養人家裡，順便看看環境。</li><li>拍一張領養人和毛孩的合照留存。</li><li>不要事先匯款；實際花費在交接時付，並附收據。</li><li>覺得不對勁可以隨時婉拒，安全最重要。</li></ul></details>${RH_DISC}</div>`;
   rhBindAppOps(app,()=>route());
+  // 對方有動作（回覆、同意切結書）時自動更新：每 15 秒看一次，有變才重畫
+  if(['pending','talking','meet'].includes(x.status)){const h0=location.hash,u0=x.updated_at;const tm=setInterval(async()=>{if(location.hash!==h0||_n!==navId){clearInterval(tm);return}if(document.hidden||document.querySelector('.sheet-bg')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)))return;const {data}=await sb.rpc('rehome_app_get',{p_app:aid});const y=(data||[])[0];if(y&&y.updated_at!==u0&&location.hash===h0&&_n===navId){clearInterval(tm);route()}},15000)}
   {const f=$('#rhAg');if(f)f.onsubmit=async e=>{e.preventDefault();if(own&&!f.elements.idc.checked)return toast('請先當面核對領養人的身分證件',3500);if(!f.elements.ok.checked)return toast('請勾選同意切結書',3000);
     const b=f.querySelector('button');b.disabled=true;const {error}=await sb.rpc('rehome_agree',{p_app:aid,p_id_checked:own});if(error){b.disabled=false;return toast(error.message.replace(/^.*?:\s*/,''),4500)}toast('✅ 已同意切結書');route()}}
   {const b=$('#rhPrint');if(b)b.onclick=()=>{const w=window.open('','_blank');if(!w){toast('請允許彈出視窗才能列印');return}w.document.write(`<!doctype html><meta charset="utf-8"><title>認養切結書</title><style>body{font:16px/1.8 system-ui,"PingFang TC","Noto Sans TC",sans-serif;max-width:680px;margin:32px auto;padding:0 16px;white-space:pre-wrap}h1{font-size:24px;text-align:center}.s{margin-top:40px;display:flex;justify-content:space-between;gap:20px}.s div{flex:1;border-top:1px solid #000;padding-top:6px}</style><h1>認養切結書</h1><div>${esc(rhAgreeText(x))}</div><div class="s"><div>送養人簽名／日期</div><div>領養人簽名／日期</div></div><p style="font-size:13px;color:#555">領養人身分證字號：＿＿＿＿＿＿＿＿　聯絡地址：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</p><script>print()<\/script>`);w.document.close()}}
