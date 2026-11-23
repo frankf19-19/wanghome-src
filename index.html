@@ -1588,6 +1588,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .xfh{font-size:16px;margin:14px 0 8px}
 .rh-cnt{color:var(--green);font-size:14px}.rh-share{margin:4px 0 10px;font-size:14px}
 .rh-meet{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:10px 0}.rh-meet>b{display:flex;align-items:center;gap:6px}.rh-meet-v{margin:6px 0;font-weight:800;font-size:17px}.rh-meetf{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.rh-meetf input{flex:1 1 180px;min-width:0}
+.rh-meetline{margin:10px 0 0;font-weight:700;color:var(--blue);display:flex;gap:6px;align-items:center}
 .rh-cities summary{cursor:pointer;font-weight:700;color:var(--ink-2);margin:8px 0}
 .pd-wrap{display:flex;flex-direction:column;align-items:center}
 .pd-stack{position:relative;width:100%;max-width:420px;height:min(58vh,520px);margin:2px auto 0}@media(min-width:761px){.pd-stack{max-width:380px;height:min(56vh,500px)}}
@@ -3263,7 +3264,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.35.0';
+const BUILD = 'v7.35.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5318,6 +5319,7 @@ async function inboxItems(){if(!me())return [];const out=[];const since=new Date
   (dues||[]).forEach(d=>{const n=Math.round((new Date(d.next_due)-new Date(todayStr()))/864e5);out.push({t:new Date(Date.now()-Math.max(0,n)*36e5).toISOString(),k:'pet',ic:'steth',col:'#8C7BF0',img:pp[d.pet_id],href:'#/pet/'+d.pet_id,h:`<b>${esc(pn[d.pet_id]||'毛孩')}的${esc(d.title||'提醒')}</b> ${n<0?'已經過期 '+(-n)+' 天':n===0?'今天到期':n+' 天後到期'}`,due:1})});
   jobs.push(sb.from('pet_card_likers').select('pet_id,pet_name,username,created_at').gte('created_at',since).order('created_at',{ascending:false}).limit(30).then(({data})=>(data||[]).forEach(x=>out.push({t:x.created_at,k:'pet',ic:'heart',col:'#E0457B',img:pp[x.pet_id],href:'#/pals/card/'+x.pet_id+'?likers=1',h:`❤️ <b>${esc(x.username)}</b> 喜歡你的${esc(x.pet_name)}`}))).catch(()=>{}));
   jobs.push(sb.from('rehomes').select('id,name,photos,updated_at').eq('owner_id',me().id).eq('status','open').lt('updated_at',new Date(Date.now()-45*864e5).toISOString()).limit(5).then(({data})=>(data||[]).forEach(r=>out.push({t:new Date(Date.parse(r.updated_at)+45*864e5).toISOString(),k:'rehome',ic:'home',col:'#B4770A',img:(r.photos||[])[0],href:'#/rehome/'+r.id+'/apps',h:`<b>${esc(r.name)}</b> 還在找家嗎？點一下更新，刊登才會留在列表上`}))).catch(()=>{}));
+  jobs.push(sb.rpc('rehome_meets').then(({data})=>(data||[]).forEach(m=>{const at=Date.parse(m.meet_at);out.push({t:new Date(Math.min(Date.now(),at-864e5)).toISOString(),k:'rehome',ic:'calendar',col:'#2459B8',img:m.pet_photo,href:'#/rehome/app/'+m.app_id,h:`<b>${esc(palWhen(m.meet_at))}</b> 要跟 ${esc(m.other_name||'對方')} 見面${m.meet_place?'：'+esc(m.meet_place):''}（${esc(m.pet_name)}）。記得約在公開場所、當面核對證件`})})).catch(()=>{}));
   jobs.push(sb.rpc('rehome_followups').then(({data})=>(data||[]).forEach(f=>{if(!f.req_followup)return;const d=rhFollowDue(f.adopted_at,f.last_update);const href='#/rehome/app/'+f.app_id;
     if(f.role==='adopter'){if(d&&d.due)out.push({t:d.at.toISOString(),k:'rehome',ic:'camera',col:'#15803D',img:f.pet_photo,href,h:`接回家第 ${d.p} 天了，傳一張 <b>${esc(f.pet_name)}</b> 的近況照片給送養人吧`})}
     else{if(f.last_update&&Date.now()-Date.parse(f.last_update)<14*864e5)out.push({t:f.last_update,k:'rehome',ic:'heart',col:'#15803D',img:f.last_photo||f.pet_photo,href,h:`<b>${esc(f.other_name||'領養人')}</b> 回報了 ${esc(f.pet_name)} 的近況`});
@@ -9220,7 +9222,7 @@ async function rhMine(_n){const box=$('#rhList');
   let cnt={};if((mine||[]).length){const {data}=await sb.from('rehomes_public').select('id,app_count').in('id',mine.map(x=>x.id));(data||[]).forEach(x=>cnt[x.id]=x.app_count);if(_n!==navId)return}
   const ST={open:'開放申請中',paused:'暫停申請',adopted:'找到家了',closed:'已下架'};
   box.innerHTML=`<h2 class="rh-h2">我刊登的</h2>${(mine||[]).length?`<div class="rh-rows">${mine.map(r=>`<a class="rh-row" href="#/rehome/${r.id}${r.status==='closed'?'/edit':'/apps'}">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<span><b>${esc(r.name)}</b><small>${ST[r.status]||''}・${esc(rhLoc(r))}${r.view_count?`・${r.view_count} 人看過`:''}</small></span>${cnt[r.id]?`<em>${cnt[r.id]} 份申請</em>`:''}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有刊登。<a href="#/rehome/new">刊登送養</a></p>`}
-  <h2 class="rh-h2">我申請的</h2>${(apps||[]).length?`<div class="rh-rows">${apps.map(a=>`<a class="rh-row" href="#/rehome/app/${a.id}">${a.pet_photo?thumbImg(a.pet_photo,''):spIc(a.pet_species)}<span><b>${esc(a.pet_name)}</b><small>${esc(a.owner_username||'')}・${esc(rhLoc(a))}</small></span>${rhStTag(a.status)}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有申請。看到喜歡的毛孩，按「我想領養」填問卷。</p>`}`;
+  <h2 class="rh-h2">我申請的</h2>${(apps||[]).length?`<div class="rh-rows">${apps.map(a=>`<a class="rh-row" href="#/rehome/app/${a.id}">${a.pet_photo?thumbImg(a.pet_photo,''):spIc(a.pet_species)}<span><b>${esc(a.pet_name)}</b><small>${esc(a.owner_username||'')}・${esc(rhLoc(a))}${a.status==='meet'&&a.meet_at?`・約 ${esc(palWhen(a.meet_at))}`:''}</small></span>${rhStTag(a.status)}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有申請。看到喜歡的毛孩，按「我想領養」填問卷。</p>`}`;
 }
 
 // ---------- 單一送養頁 ----------
@@ -9471,6 +9473,7 @@ function rhAppCard(x,r){const a=x.answers||{},F=[...rhSignals(x),...rhFlags(a,r)
     ${rhFlagHTML(F)}
     ${x.intro?`<p class="rh-p rh-intro">${esc(x.intro)}</p>`:''}
     <details><summary>看完整問卷</summary>${rhAnswersHTML(a)}</details>
+    ${x.meet_at||x.meet_place?`<p class="rh-meetline">${ic('calendar')} 約見面：${x.meet_at?esc(palWhen(x.meet_at)):''}${x.meet_place?'　'+esc(x.meet_place):''}</p>`:''}
     ${x.contact_phone?`<p class="rh-phone">${ic('phone')} <a href="tel:${esc(x.contact_phone.replace(/[^\d+]/g,''))}">${esc(fmtPhone(x.contact_phone))}</a>（${esc(x.contact_name)}）</p>`:''}
     <div class="rh-app-ops">${rhOpsHTML(x.status,'owner')}<a class="btn ghost sm" href="#/rehome/app/${x.id}">詳細${x.status==='meet'?'・切結書':''}</a></div></div>`}
 function rhOpsHTML(st,role){if(role==='owner'){
