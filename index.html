@@ -3261,7 +3261,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.34.0';
+const BUILD = 'v7.34.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -9207,11 +9207,11 @@ function rhCardHTML(r){const chips=rhReqChips(r).slice(0,2),f=rhFacts(r).filter(
 
 async function rhMine(_n){const box=$('#rhList');
   if(!me()){box.innerHTML=`<div class="empty-card"><div class="big">${ic('user')}</div><b>登入後看你的送養與申請</b><a class="btn" href="#/login" onclick="setReturn('#/rehome?tab=mine')">登入／註冊（免費）</a></div>`;return}
-  const [{data:mine,error:e1},{data:apps,error:e2}]=await Promise.all([sb.from('rehomes').select('id,name,species,photos,status,city,district,created_at').order('created_at',{ascending:false}),sb.rpc('rehome_my_apps')]);
+  const [{data:mine,error:e1},{data:apps,error:e2}]=await Promise.all([sb.from('rehomes').select('id,name,species,photos,status,city,district,created_at,view_count').order('created_at',{ascending:false}),sb.rpc('rehome_my_apps')]);
   if(_n!==navId)return;if(e1||e2){box.innerHTML=netErrHTML();return}
   let cnt={};if((mine||[]).length){const {data}=await sb.from('rehomes_public').select('id,app_count').in('id',mine.map(x=>x.id));(data||[]).forEach(x=>cnt[x.id]=x.app_count);if(_n!==navId)return}
   const ST={open:'開放申請中',paused:'暫停申請',adopted:'找到家了',closed:'已下架'};
-  box.innerHTML=`<h2 class="rh-h2">我刊登的</h2>${(mine||[]).length?`<div class="rh-rows">${mine.map(r=>`<a class="rh-row" href="#/rehome/${r.id}${r.status==='closed'?'/edit':'/apps'}">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<span><b>${esc(r.name)}</b><small>${ST[r.status]||''}・${esc(rhLoc(r))}</small></span>${cnt[r.id]?`<em>${cnt[r.id]} 份申請</em>`:''}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有刊登。<a href="#/rehome/new">刊登送養</a></p>`}
+  box.innerHTML=`<h2 class="rh-h2">我刊登的</h2>${(mine||[]).length?`<div class="rh-rows">${mine.map(r=>`<a class="rh-row" href="#/rehome/${r.id}${r.status==='closed'?'/edit':'/apps'}">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<span><b>${esc(r.name)}</b><small>${ST[r.status]||''}・${esc(rhLoc(r))}${r.view_count?`・${r.view_count} 人看過`:''}</small></span>${cnt[r.id]?`<em>${cnt[r.id]} 份申請</em>`:''}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有刊登。<a href="#/rehome/new">刊登送養</a></p>`}
   <h2 class="rh-h2">我申請的</h2>${(apps||[]).length?`<div class="rh-rows">${apps.map(a=>`<a class="rh-row" href="#/rehome/app/${a.id}">${a.pet_photo?thumbImg(a.pet_photo,''):spIc(a.pet_species)}<span><b>${esc(a.pet_name)}</b><small>${esc(a.owner_username||'')}・${esc(rhLoc(a))}</small></span>${rhStTag(a.status)}${ic('chev')}</a>`).join('')}</div>`:`<p class="muted small">還沒有申請。看到喜歡的毛孩，按「我想領養」填問卷。</p>`}`;
 }
 
@@ -9259,6 +9259,7 @@ async function renderRehomeOne(id){const _n=navId;setTitle('民眾送養');
   $('#rhShare').onclick=()=>share(`${r.name}（${rhSp(r)}・${rhLoc(r)}）在等一個家｜汪喵回家・民眾送養`,'https://wangmiaotw.com/rehome/'+id);
   {const b=$('#rhRep');if(b)b.onclick=()=>openReport('rehome',id,r.owner_id,()=>{location.hash='#/rehome'})}
   {const b=$('#rhCopy');if(b)b.onclick=()=>copy(rhShareText(r))}
+  if(!own&&r.status!=='adopted'){const k='wh_rhv_'+id,t=todayStr();let seen='';try{seen=localStorage.getItem(k)||''}catch(_){}if(seen!==t){try{localStorage.setItem(k,t)}catch(_){}sb.rpc('rehome_view',{p_id:id}).then(()=>{},()=>{})}}
   {const b=$('#rhFav');if(b)b.onclick=()=>{const on=rhFavToggle(r);b.setAttribute('aria-pressed',on);b.innerHTML=`${ic('heart')} ${on?'已收藏':'收藏'}`;toast(on?'已收藏，在「收藏」→「想領養的」找得到':'已取消收藏',2500)}}
 }
 
@@ -9348,6 +9349,7 @@ async function renderRehomeForm(id){if(!requireLogin('刊登送養需要登入�
 const RH_Q=[
   ['housing','你住的地方',[['own','自己或家人的房子'],['rent_ok','租屋，房東同意養'],['rent_unsure','租屋，還沒問房東']]],
   ['family','同住的家人',[['all_agree','都同意養'],['alone','我一個人住'],['some_unsure','還有人不確定']]],
+  ['kids','家裡有沒有小孩',[['none','沒有'],['older','有，6 歲以上'],['young','有，6 歲以下']]],
   ['exp','養狗貓的經驗',[['now','現在有養'],['before','以前養過'],['none','第一次養']]],
   ['daytime','白天家裡有人嗎',[['often','大部分時間有人'],['sometimes','有時候有人'],['rarely','上班時間都沒人']]],
   ['sleep','毛孩平常待在哪裡',[['indoor','室內'],['yard','有圍牆的院子'],['chain','綁著或關籠']]],
@@ -9361,6 +9363,7 @@ const RH_Q=[
 function rhFlags(a,r){const F=[],g=t=>F.push(['good',t]),w=t=>F.push(['warn',t]),bd=t=>F.push(['bad',t]);
   if(a.housing==='rent_unsure')bd('租屋，還沒問房東');else if(a.housing==='rent_ok')w('租屋：見面時請看房東同意');else if(a.housing==='own')g('住自己或家人的房子');
   if(a.family==='some_unsure')bd('有家人還不確定');else if(a.family==='all_agree')g('家人都同意');
+  if(a.kids==='young')w('家裡有 6 歲以下的小孩：問問毛孩跟小孩相處的情況');
   if(a.exp==='none')w('第一次養：多聊聊照顧方式');else if(a.exp)g(a.exp==='now'?'現在有養':'以前養過');
   if(a.daytime==='rarely')w('白天常沒人在家');
   if(a.sleep==='chain')bd('會綁著或關籠');else if(a.sleep==='indoor')g('養在室內');
@@ -9440,7 +9443,7 @@ async function renderRehomeApps(id){if(!requireLogin())return;const _n=navId;set
   const L=list||[],act=L.filter(x=>!['declined','withdrawn'].includes(x.status)),old=L.filter(x=>['declined','withdrawn'].includes(x.status));
   const ST={open:'開放申請中',paused:'暫停申請',adopted:'找到家了',closed:'已下架'};
   app.innerHTML=`<div class="rh narrow-in"><p class="muted"><a href="#/rehome?tab=mine">← 我的送養</a></p>
-    <div class="rh-apphead">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<div><h1>${esc(r.name)}的申請</h1><p class="muted">${ST[r.status]}・${L.length} 份申請</p></div></div>
+    <div class="rh-apphead">${(r.photos||[])[0]?thumbImg(r.photos[0],''):spIc(r.species)}<div><h1>${esc(r.name)}的申請</h1><p class="muted">${ST[r.status]}・${r.view_count||0} 人看過・${L.length} 份申請</p></div></div>
     ${r.status==='open'&&Date.now()-Date.parse(r.updated_at)>45*864e5?`<div class="rh-stale"><b>${esc(r.name)}還在找家嗎？</b><p>超過 45 天沒有更新了。還在找的話按一下「還在找」，刊登會保留在列表上（超過 120 天沒更新會先從列表收起來）。</p><div class="rh-ownops"><button type="button" class="btn green" id="rhStill">還在找</button><a class="btn ghost" href="#/rehome/${id}/edit">已經送出／暫停</a></div></div>`:''}
     <div class="rh-ownops"><a class="btn ghost" href="#/rehome/${id}">${ic('eye')} 看刊登頁</a><a class="btn ghost" href="#/rehome/${id}/edit">${ic('doc')} 編輯／暫停</a></div>
     <p class="rh-tip">${ic('info')} 每份申請旁邊的 <b class="g">✓</b> 是加分、<b class="w">?</b> 是要多問、<b class="b">!</b> 是要特別注意。覺得可以就按「再聊聊」用站內訊息問問題；聊過放心了再按「同意見面」，雙方才會看到電話。</p>
