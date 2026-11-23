@@ -1,4 +1,4 @@
-// 汪喵回家 — 私訊推播 v1.0
+// 汪喵回家 — 私訊推播 v1.1（加上民眾送養）
 // 網址：POST https://<project>.supabase.co/functions/v1/notify-message   {"chat_id":"<uuid>"} 或 {"friend":"<對方 uuid>"}（好友邀請／接受）
 // 會員送出訊息後由網頁／App 呼叫（帶登入權杖）：推播給對話裡的另一個人。
 // 安全：只推「呼叫者自己剛送出（2 分鐘內）」的訊息；對方已讀就不推；同一對話 20 秒內只推一次（連續傳很多則不會一直響）。
@@ -108,12 +108,45 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch (_) { return json({ error: "json" }, 400); }
   const chatId = String(body.chat_id ?? "");
   const friendId = String(body.friend ?? "");
-  if (!/^[0-9a-f-]{36}$/.test(chatId) && !/^[0-9a-f-]{36}$/.test(friendId)) return json({ error: "bad id" }, 400);
+  const rhApp = String(body.rehome_app ?? "");
+  if (!/^[0-9a-f-]{36}$/.test(chatId) && !/^[0-9a-f-]{36}$/.test(friendId) && !/^[0-9a-f-]{36}$/.test(rhApp)) return json({ error: "bad id" }, 400);
   const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), { auth: { persistSession: false } });
   const { data: u } = await sb.auth.getUser(jwt).catch(() => ({ data: null as any }));
   const me = u?.user?.id;
   if (!me) return json({ error: "login" }, 401);
+  // 民眾送養：新申請、送養人回覆、切結書、近況回報。只推「呼叫者自己剛做的」（2 分鐘內），同一件事只推一次
+  if (rhApp) {
+    const { data: a } = await sb.from("rehome_apps").select("id,rehome_id,applicant_id,status,contact_name,created_at,updated_at,owner_agree_at,applicant_agree_at,pushed").eq("id", rhApp).maybeSingle();
+    if (!a) return json({ sent: 0, reason: "none" });
+    const { data: r } = await sb.from("rehomes").select("owner_id,name,contact_name").eq("id", a.rehome_id).maybeSingle();
+    if (!r) return json({ sent: 0, reason: "none" });
+    const fresh = (t: string | null) => !!t && Date.now() - new Date(t).getTime() < 120e3;
+    const P: Record<string, string> = a.pushed || {};
+    const url = `#/rehome/app/${a.id}`;
+    let to = "", title = "", text = "", key = "", val = "";
+    if (me === a.applicant_id) {
+      const { data: u } = await sb.from("rehome_updates").select("id,note,photo,created_at").eq("app_id", a.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (a.status === "pending" && fresh(a.created_at) && P.apply !== a.created_at) {
+        const { data: prof } = await sb.from("profiles").select("username").eq("id", me).maybeSingle();
+        to = r.owner_id; title = "新的領養申請"; text = `${prof?.username || a.contact_name} 想領養${r.name}，去看看問卷`; key = "apply"; val = a.created_at;
+      } else if (a.status === "meet" && fresh(a.applicant_agree_at) && P.aa !== a.applicant_agree_at) {
+        to = r.owner_id; title = `${r.name}的認養切結書`; text = `${a.contact_name}同意了切結書`; key = "aa"; val = a.applicant_agree_at;
+      } else if (a.status === "adopted" && u && fresh(u.created_at) && P.u !== u.id) {
+        to = r.owner_id; title = `${r.name}的近況`; text = u.note ? String(u.note).slice(0, 100) : `${a.contact_name}傳了${r.name}的新照片`; key = "u"; val = u.id;
+      }
+    } else if (me === r.owner_id) {
+      const ST: Record<string, string> = { talking: `送養人想跟你聊聊${r.name}，可以傳訊息了`, meet: `送養人同意跟你見面了（${r.name}）`, declined: `送養人這次沒有選擇你（${r.name}），謝謝你願意給毛孩一個家`, adopted: `${r.name}正式成為你的家人了 🎉` };
+      if (a.status === "meet" && fresh(a.owner_agree_at) && P.ao !== a.owner_agree_at && P.st === "meet") {
+        to = a.applicant_id; title = `${r.name}的認養切結書`; text = `送養人${r.contact_name}同意了切結書，換你看看`; key = "ao"; val = a.owner_agree_at;
+      } else if (ST[a.status] && fresh(a.updated_at) && P.st !== a.status) {
+        to = a.applicant_id; title = "民眾送養"; text = ST[a.status]; key = "st"; val = a.status;
+      }
+    }
+    if (!to) return json({ sent: 0, reason: "old" });
+    await sb.from("rehome_apps").update({ pushed: { ...P, [key]: val } }).eq("id", a.id);
+    return json({ sent: await pushToUser(to, title, text, url) });
+  }
   // 好友邀請／接受邀請：只推「呼叫者自己剛做的」（2 分鐘內），每一筆只推一次
   if (friendId) {
     if (friendId === me) return json({ sent: 0 });
@@ -141,6 +174,12 @@ Deno.serve(async (req) => {
   ]);
   const name = prof?.username || "會員";
   let ctx = "";
+  if (chat?.kind === "rehome") {
+    const { data: ch2 } = await sb.from("chats").select("rehome_app_id").eq("id", chatId).maybeSingle();
+    const { data: ra } = ch2?.rehome_app_id ? await sb.from("rehome_apps").select("rehome_id").eq("id", ch2.rehome_app_id).maybeSingle() : { data: null };
+    const { data: rr } = ra ? await sb.from("rehomes").select("name").eq("id", ra.rehome_id).maybeSingle() : { data: null };
+    if (rr?.name) ctx = `（送養・${rr.name}）`;
+  }
   if (chat?.kind === "case" && chat.case_id) {
     const { data: c } = await sb.from("cases").select("name").eq("id", chat.case_id).maybeSingle();
     if (c?.name) ctx = `（${c.name}）`;

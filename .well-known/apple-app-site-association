@@ -2,16 +2,54 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["ZUM3ZK5KB3.com.wangmiaotw.app"],
+        "appIDs": [
+          "ZUM3ZK5KB3.com.wangmiaotw.app"
+        ],
         "components": [
-          { "/": "/line-auth/*", "comment": "LINE 登入授權完跳回 App" },
-          { "/": "/s/*", "comment": "走失案件分享頁：有裝 App 就直接打開 App" },
-          { "/": "/f/*", "comment": "拾獲／目擊通報分享頁" },
-          { "/": "/p/*", "comment": "走失案件搜尋頁" },
-          { "/": "/a/*", "comment": "好友邀請連結" },
-          { "/": "/", "#": "/case/*", "comment": "網站裡的案件網址" },
-          { "/": "/", "#": "/found/*", "comment": "網站裡的通報網址" },
-          { "/": "/", "#": "/add/*", "comment": "網站裡的加好友網址" }
+          {
+            "/": "/line-auth/*",
+            "comment": "LINE 登入授權完跳回 App"
+          },
+          {
+            "/": "/s/*",
+            "comment": "走失案件分享頁：有裝 App 就直接打開 App"
+          },
+          {
+            "/": "/f/*",
+            "comment": "拾獲／目擊通報分享頁"
+          },
+          {
+            "/": "/p/*",
+            "comment": "走失案件搜尋頁"
+          },
+          {
+            "/": "/a/*",
+            "comment": "好友邀請連結"
+          },
+          {
+            "/": "/rehome/*",
+            "comment": "民眾送養分享頁"
+          },
+          {
+            "/": "/",
+            "#": "/case/*",
+            "comment": "網站裡的案件網址"
+          },
+          {
+            "/": "/",
+            "#": "/found/*",
+            "comment": "網站裡的通報網址"
+          },
+          {
+            "/": "/",
+            "#": "/add/*",
+            "comment": "網站裡的加好友網址"
+          },
+          {
+            "/": "/",
+            "#": "/rehome/*",
+            "comment": "網站裡的送養網址"
+          }
         ]
       }
     ]
