@@ -857,6 +857,22 @@ async function runNearbyPush() {
   if (rows.length) log(`附近即時推播：${rows.length} 筆 → ${users} 位會員`);
 }
 
+// ---------------------------------------------------------------- 民眾送養：見面前一天、近況回報、刊登久沒更新（推播，一則只推一次）
+async function runRehomePush() {
+  const twHour = (new Date().getUTCHours() + 8) % 24;
+  if (twHour >= 22 || twHour < 8) { log("送養提醒：夜間不推"); return; }
+  const rows = (await sb("POST", "rpc/rehome_push_targets", {})) ?? [];
+  let n = 0;
+  for (const r of rows) {
+    try {
+      await sb("POST", "notify_log", [{ user_id: r.user_id, kind: r.kind, ref_id: r.ref_id }], undefined, "return=minimal,resolution=ignore-duplicates");
+      await pushToUser(r.user_id, r.title, r.body, r.url);
+      n++;
+    } catch (e) { log("送養提醒失敗：", errName(e)); }
+  }
+  if (rows.length) log(`送養提醒：${n} 則`);
+}
+
 // ---------------------------------------------------------------- 健康紀錄到期提醒
 async function runDueReminders() {
   if (!MAIL_OK) return;
@@ -984,6 +1000,7 @@ async function run(mode: Mode) {
     if (full || mode === "notify") await step("飼主通知", runNotifications);
     if (full || mode === "notify") await step("會員通知", () => runMemberNotifications(full));
     if (mode === "notify") await step("附近即時推播", runNearbyPush);
+    if (mode === "notify") await step("送養提醒", runRehomePush);
     if (full || mode === "notify") await step("回家通知", runReuniteNotices);
     if (full || mode === "notify") await step("檢舉通知", runReportAlerts);
     if (full) await step("到期提醒", runDueReminders);
