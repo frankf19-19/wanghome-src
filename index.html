@@ -3264,7 +3264,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.35.1';
+const BUILD = 'v7.35.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4025,7 +4025,9 @@ new MutationObserver(()=>{let ok=false;try{ok=localStorage.getItem('wh_agree')==
 // 品種、毛色：常見的點一下就填好，其他的自己打字
 const QPICK={breed:{dog:['米克斯','台灣犬','柴犬','貴賓','博美','吉娃娃','臘腸','法鬥','柯基','雪納瑞','馬爾濟斯','西施','約克夏','比熊','黃金獵犬','拉布拉多','哈士奇','邊境牧羊犬','米格魯'],cat:['米克斯','英國短毛','美國短毛','波斯','布偶','曼赤肯','蘇格蘭摺耳','暹羅','俄羅斯藍','緬因','異國短毛','孟加拉']},
   colour:{dog:['黑','白','黃','咖啡','奶油','灰','虎斑','黑白','黑黃','花色'],cat:['橘','白','黑','灰','三花','玳瑁','虎斑','黑白（賓士）','橘白','灰白','暹羅色']}};
-function qpSpecies(f){const on=f.querySelector('#segSp .on');return on?on.dataset.v:(f.dataset.sp||'dog')}
+function qpSpecies(f){const on=f.querySelector('#segSp .on');if(on)return on.dataset.v;const s=f.elements&&f.elements.species;if(s&&s.tagName==='SELECT'&&(s.value==='cat'||s.value==='dog'))return s.value;return f.dataset.sp||'dog'}
+// 用下拉選單選狗／貓的表單（刊登送養等）：換種類時，常見品種、毛色跟著換
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.name==='species'&&t.tagName==='SELECT'&&t.form)qpRedraw(t.form)});
 function qpDraw(inp){const f=inp.form;if(!f)return;const k=inp.name,sp=qpSpecies(f)==='cat'?'cat':'dog',box=inp._qp;if(!box)return;
   const cur=inp.value.split(/\s*[、,，]\s*/).filter(Boolean);
   const list=QPICK[k][sp],open=box.dataset.open==='1'||list.some(v=>k==='breed'?inp.value.trim()===v:cur.includes(v))&&list.indexOf(k==='breed'?inp.value.trim():cur.find(c=>list.includes(c)))>=8,show=open?list:list.slice(0,8);
