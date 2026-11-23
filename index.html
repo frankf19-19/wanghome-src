@@ -3259,7 +3259,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.32.4';
+const BUILD = 'v7.32.5';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -9212,7 +9212,7 @@ async function renderRehomeOne(id){const _n=navId;setTitle('民眾送養');
   let myApp=null;if(u&&!own){const {data}=await sb.rpc('rehome_my_apps');myApp=(data||[]).find(a=>a.rehome_id===id&&a.status!=='withdrawn')||null;if(_n!==navId)return}
   const facts=rhFacts(r),chips=rhReqChips(r),ph=r.photos||[];
   const cta=own?`<a class="btn big block" href="#/rehome/${id}/apps">${ic('clipboard')} 看申請（${r.app_count}）</a>`
-    :myApp?`<a class="btn big block ghost" href="#/rehome/app/${myApp.id}">你已經申請了・${RH_ST[myApp.status][0]}</a>`
+    :myApp?`<a class="btn big block ghost" href="#/rehome/app/${myApp.id}">${myApp.status==='adopted'?`${esc(r.name)}已經是你的家人了・回報近況`:`你已經申請了・${RH_ST[myApp.status][0]}`}</a>`
     :r.status==='open'?`<a class="btn big block green" href="#/rehome/${id}/apply">${ic('heart')} 我想領養${esc(r.name)}</a>`
     :`<button class="btn big block ghost" disabled>${r.status==='adopted'?esc(r.name)+'已經找到家了':'送養人暫停接受申請'}</button>`;
   app.innerHTML=`<div class="rh rh-one">
@@ -9233,7 +9233,7 @@ async function renderRehomeOne(id){const _n=navId;setTitle('民眾送養');
     <div class="rh-cta">${cta}</div>
     ${own?`<div class="rh-ownops"><a class="btn ghost" href="#/rehome/${id}/edit">${ic('doc')} 編輯</a><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button></div>`
       :`<div class="rh-ownops"><button type="button" class="btn ghost" id="rhShare">${ic('share')} 分享</button><button type="button" class="btn ghost" id="rhRep">${ic('flag')} 檢舉</button></div>`}
-    <details class="pals-rules" open><summary>${ic('info')} 給想領養的人</summary><ul><li>送養人會先看你的問卷，覺得適合才會回覆「再聊聊」或「同意見面」。</li><li>同意見面之後，你們才會看到彼此的電話。</li><li>不要事先匯款。要求先付保證金、運費的，很可能是詐騙，請按「檢舉」。</li><li>第一次見面約在公開場所。</li></ul></details>
+    ${own||r.status==='adopted'?'':`<details class="pals-rules" open><summary>${ic('info')} 給想領養的人</summary><ul><li>送養人會先看你的問卷，覺得適合才會回覆「再聊聊」或「同意見面」。</li><li>同意見面之後，你們才會看到彼此的電話。</li><li>不要事先匯款。要求先付保證金、運費的，很可能是詐騙，請按「檢舉」。</li><li>第一次見面約在公開場所。</li></ul></details>`}
     ${RH_DISC}${RH_RULES}</div>`;
   app.querySelectorAll('.rh-gi').forEach(b=>b.onclick=()=>{lightbox(ph[+b.dataset.i],{list:ph})});
   $('#rhShare').onclick=()=>share(`${r.name}（${rhSp(r)}・${rhLoc(r)}）在等一個家｜汪喵回家・民眾送養`,'https://wangmiaotw.com/rehome/'+id);
@@ -9839,7 +9839,7 @@ async function renderMeet(id){const _n=navId;setTitle('揪團約玩');
 function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'auto'}catch(_){}
   const row=(h,i,l,c)=>`<a class="mrow" href="${h}"><span class="mri ${c||''}">${ic(i)}</span><span class="mrl">${l}</span>${ic('chev','mrc')}</a>`;
   return `<div class="morelist">
-  <p class="mlh">常用</p><div class="mgroup">${me()?`<a class="mrow" href="#/chats"><span class="mri c4">${ic('chat')}</span><span class="mrl">訊息與好友</span>${__chatN?`<span class="mrv mrbadge">${__chatN>99?'99+':__chatN}</span>`:''}${ic('chev','mrc')}</a>`:''}${row('#/fav','mark','收藏','c1')}${row('#/intake','search','收容所最近新收','c2')}</div>
+  <p class="mlh">常用</p><div class="mgroup">${me()?`<a class="mrow" href="#/chats"><span class="mri c4">${ic('chat')}</span><span class="mrl">訊息與好友</span>${__chatN?`<span class="mrv mrbadge">${__chatN>99?'99+':__chatN}</span>`:''}${ic('chev','mrc')}</a>`:''}${row('#/fav','mark','收藏','c1')}${row('#/rehome?tab=mine','home','我的送養與申請','c4')}${row('#/intake','search','收容所最近新收','c2')}</div>
   <p class="mlh">學習</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}</div>
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${row('#/contact','mail','聯絡我們','c3')}${(CONFIG.SOCIAL||[]).length?`<div class="mrow msoc"><span class="mri c2">${ic('heart')}</span><span class="mrl">追蹤我們</span><span class="msoc-i">${CONFIG.SOCIAL.map(x=>`<a href="${x.u}" target="_blank" rel="noopener" aria-label="追蹤 ${esc(x.n)}">${ic(x.k)}</a>`).join('')}</span></div>`:''}${IS_APP?'':`<a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a>`}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
