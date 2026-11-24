@@ -3336,7 +3336,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.13';
+const BUILD = 'v7.38.14';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5502,7 +5502,7 @@ async function renderHomeMob(){const _n=navId;
   <div class="hidden" aria-hidden="true"><div id="lostFilters"></div><div id="tabs"><button data-t="lost"></button><button data-t="found"></button><button data-t="map"></button></div><button id="btnNear"></button><p id="nearInfo"></p><span id="cLost"></span><span id="cFound"></span><button type="button" id="xSort" tabindex="-1"><b id="xCnt"></b><span id="xSortT"></span></button></div>
   ${mineMiniHTML()}<div class="xfeed" id="xFeed" data-v="${V}"><div id="list" class="grid">${skel(4)}</div></div>
   <div class="stats hidden" id="stats"></div><a class="hidden" id="heroPoster"></a>
-  <label class="xcam" id="xCam"><input type="file" id="xCamIn" accept="image/*" class="sr-only" aria-label="拍照比對：拍一張或選一張毛孩的照片，看有沒有人在找毛孩">${ic('camera')}<span>拍照比對</span></label>`;
+  <label class="xcam" id="xCam"><input type="file" id="xCamIn" accept="image/*" capture="environment" class="sr-only" aria-label="一鍵拍照：直接打開相機拍毛孩，看有沒有人在找毛孩">${ic('camera')}<span>一鍵拍照</span></label>`;
   {const xc=$('#xCam');if(xc){const f=()=>{if(!xc.isConnected){removeEventListener('scroll',f);return}xc.classList.toggle('mini',scrollY>160)};addEventListener('scroll',f,{passive:true})}}
   {const ci=$('#xCamIn');if(ci)ci.onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;window.__photoStart=f;location.hash='#/photo'}}
   const showF=()=>{const h=homeState,srt=!h.near&&h.sort!=='act'&&!(h.tab==='found');const n=fCount()+(h.fnd?1:0)+(srt?1:0);const c=$('#fCnt');if(c){c.textContent=n||'';c.classList.toggle('on',!!n)}
