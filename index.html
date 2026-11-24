@@ -3207,6 +3207,7 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 .ph-more .ph-grid{margin-top:8px}
 .ph-none{display:flex;gap:10px;align-items:flex-start;background:var(--sheet);border-radius:16px;padding:12px 14px;margin:8px 0 0;font-size:14.5px;color:var(--ink-2)}
 .ph-none>.ico{flex:none;width:20px;height:20px;margin-top:2px;color:var(--ok,#1A8A5F)}
+.adm-stats a.stat{color:var(--ink-3);text-decoration:none;border-radius:14px;transition:background .15s}.adm-stats a.stat:active{background:rgba(0,0,0,.05)}@media(hover:hover){.adm-stats a.stat:hover{background:rgba(0,0,0,.04)}}
 </style>
 </head>
 <body>
@@ -3281,7 +3282,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.36.4';
+const BUILD = 'v7.36.5';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -7766,7 +7767,7 @@ async function renderAdmin(){const _n=navId;
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
   app.innerHTML=`<h1>管理後台</h1>
-  <div class="stats adm-stats">${[['open_reports','待處理檢舉'],['cases_searching','協尋中'],['cases_found','已回家'],['found_open','拾獲通報'],['members','會員'],['sightings_7d','7 天目擊'],['hidden','已隱藏']].map(([k,t])=>`<div class="stat"><b>${st?.[k]??'–'}</b>${t}</div>`).join('')}</div>
+  <div class="stats adm-stats">${[['open_reports','待處理檢舉','reports'],['cases_searching','協尋中','case&f=searching'],['cases_found','已回家','case&f=found'],['found_open','拾獲通報','found&f=open'],['members','會員','members'],['sightings_7d','7 天目擊','sighting'],['hidden','已隱藏','case&f=hidden']].map(([k,t,to])=>`<a class="stat" href="#/admin?tab=${to}"><b>${st?.[k]??'–'}</b>${t}</a>`).join('')}</div>
   <div class="tabs adm-tabs" role="tablist">${TABS.map(([v,t])=>`<button type="button" role="tab" data-tab="${v}" class="${v===tab?'on':''}" aria-selected="${v===tab}">${t}${v==='reports'&&st?.open_reports?`<span class="cnt">${st.open_reports}</span>`:''}</button>`).join('')}</div>
   <div id="adm"></div>`;
   const strip=app.querySelector('.adm-tabs');
