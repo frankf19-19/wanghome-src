@@ -9,7 +9,6 @@ declare
   pic text := (select u from public.cases, unnest(photos) u where u like '%/object/public/photos/cases/%' order by created_at desc limit 1);
   pid uuid; xid uuid; ch uuid; k int := 0;
   claims text;
-  procedure_dummy int;
 begin
   claims := json_build_object('sub', uid, 'role', 'authenticated')::text;
 
@@ -47,40 +46,40 @@ begin
 
   -- ---------- 登入會員 ----------
   k := k + 1; begin
-    perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
+    perform set_config('request.headers', '{"x-forwarded-for":"203.0.113.20"}', true); perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
     insert into public.rehomes (owner_id, species, name, sex, size, photos, city, contact_name, contact_phone, fee, story)
       values (uid, 'dog', '測試', 'male', 'small', array[pic], '臺北市', '測試', '0912345678', 0, '親人的小狗');
     raise exception '__ok__';
   exception when others then insert into _smoke values (k, 'member', '刊登送養 rehomes', case when sqlerrm = '__ok__' then 'ok' else sqlerrm end); end;
 
   k := k + 1; begin
-    perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
+    perform set_config('request.headers', '{"x-forwarded-for":"203.0.113.20"}', true); perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
     insert into public.pets (owner_id, species, name) values (uid, 'dog', '測試') returning id into pid;
-    insert into public.pet_records (pet_id, kind, title, record_date) values (pid, 'vet', '測試', current_date);
+    insert into public.pet_records (pet_id, kind, title, date) values (pid, 'vet', '測試', current_date);
     perform public.pet_share_create(pid, 7);
     raise exception '__ok__';
   exception when others then insert into _smoke values (k, 'member', '新增毛孩＋病歷＋分享 pets/pet_records', case when sqlerrm = '__ok__' then 'ok' else sqlerrm end); end;
 
   k := k + 1; begin
-    perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
+    perform set_config('request.headers', '{"x-forwarded-for":"203.0.113.20"}', true); perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
     perform public.case_comment_add(cid, '測試留言加油');
     raise exception '__ok__';
   exception when others then insert into _smoke values (k, 'member', '案件留言 case_comment_add', case when sqlerrm = '__ok__' then 'ok' else sqlerrm end); end;
 
   k := k + 1; begin
-    perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
+    perform set_config('request.headers', '{"x-forwarded-for":"203.0.113.20"}', true); perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
     insert into public.follows (user_id, case_id) values (uid, cid) on conflict do nothing;
     raise exception '__ok__';
   exception when others then insert into _smoke values (k, 'member', '追蹤案件 follows', case when sqlerrm = '__ok__' then 'ok' else sqlerrm end); end;
 
   k := k + 1; begin
-    perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
+    perform set_config('request.headers', '{"x-forwarded-for":"203.0.113.20"}', true); perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
     update public.profiles set notify_follow = notify_follow where id = uid;
     raise exception '__ok__';
   exception when others then insert into _smoke values (k, 'member', '存通知設定 profiles', case when sqlerrm = '__ok__' then 'ok' else sqlerrm end); end;
 
   k := k + 1; begin
-    perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
+    perform set_config('request.headers', '{"x-forwarded-for":"203.0.113.20"}', true); perform set_config('request.jwt.claims', claims, true); perform set_config('role', 'authenticated', true);
     insert into public.pet_cards (pet_id, owner_id, species, name, photo, city)
       select p.id, uid, p.species, p.name, pic, '臺北市' from public.pets p where p.owner_id = uid and not exists (select 1 from public.pet_cards c where c.pet_id = p.id) limit 1;
     raise exception '__ok__';
