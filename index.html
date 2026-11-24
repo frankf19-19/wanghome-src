@@ -3209,6 +3209,34 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 .ph-none>.ico{flex:none;width:20px;height:20px;margin-top:2px;color:var(--ok,#1A8A5F)}
 .adm-stats a.stat{color:var(--ink-3);text-decoration:none;border-radius:14px;transition:background .15s}.adm-stats a.stat:active{background:rgba(0,0,0,.05)}@media(hover:hover){.adm-stats a.stat:hover{background:rgba(0,0,0,.04)}}
 .adm-card.adm-home{background:linear-gradient(135deg,#FFF8E1,#FFF1C9);box-shadow:inset 4px 0 0 #E0A526}.tag.home{background:#E0A526;color:#fff}html[data-theme=dark] .adm-card.adm-home{background:linear-gradient(135deg,#3A2F17,#2E2614)}
+.pro-sec>summary small{font-weight:500}.pro-v{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}@media(max-width:520px){.pro-v{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pro-h{display:flex;align-items:center;gap:6px;font-size:15px;margin:16px 0 6px}.pro-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.pro-row{display:grid;gap:6px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--paper);position:relative}
+.pro-row input:not([type=checkbox]),.pro-row select{min-width:0;width:100%;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--sheet);color:var(--ink)}
+.pro-row.rx{grid-template-columns:2fr 1.2fr 1fr;padding-right:40px}.pro-row.rx [data-k=freq]{grid-column:1/3}.pro-row.rx .pro-ctrl{grid-column:1/-1;margin:0;font-size:14px;display:flex;align-items:center;gap:8px}.pro-row.rx .pro-ctrl input{width:20px;height:20px}
+.pro-row.lab{grid-template-columns:1.1fr 1fr .9fr 1.3fr;padding-right:40px;align-items:center}.pro-row.lab .pro-fl{grid-column:1/-1;min-height:0}.pro-row.lab .pro-fl:empty{display:none}
+@media(max-width:520px){.pro-row.lab{grid-template-columns:1fr 1fr}}
+.pro-x{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:0;background:var(--line);color:var(--ink-2);font-size:18px;line-height:1;cursor:pointer}
+.pro-row input.flag{border-color:#D9472B;color:#B42318;font-weight:700}.pro-fl{font-size:12.5px;font-weight:800;border-radius:99px;padding:1px 8px}.pro-fl.H{background:#FDE2DC;color:#B42318}.pro-fl.L{background:#DCEBFD;color:#1D4ED8}
+.pro-pre{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.pro-pre .fchip{padding:5px 11px;font-size:13.5px}
+.pro-line{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px}.pro-dx{font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:4px}
+.pro-blk{margin-top:4px;font-size:14px;display:flex;flex-direction:column;gap:3px}.pro-blk ul{margin:2px 0 0;padding-left:20px}.pro-blk .pre,.sum-box .pre{white-space:pre-wrap}
+.pro-lab{margin-top:6px}.pro-lab tr.flag td{background:#FFF4F1}
+.photos-preview.doc-pv>div{display:flex;flex-direction:column;justify-content:flex-end}.doc-k{margin:0;width:100%;height:26px;min-height:0;font-size:12px;line-height:1;padding:2px 4px;border:0;border-radius:0 0 12px 12px;background:rgba(20,20,20,.72);color:#fff;-webkit-appearance:none;appearance:none;text-align:center}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}.doc-it{border:0;padding:0;background:var(--paper);border-radius:12px;overflow:hidden;text-align:left;cursor:zoom-in;color:var(--ink)}.doc-it img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--line)}.doc-it small{display:block;padding:5px 7px;font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.docs-ask{background:#FFF7E0;border:1px solid #F1D88C;border-radius:18px;padding:14px 16px;margin:14px 0;color:#3A2E0B}.docs-ask .da-h{display:flex;align-items:center;gap:6px}.docs-ask .da-x{margin-left:auto;border:0;background:none;font-size:22px;line-height:1;color:inherit;cursor:pointer}.docs-ask p{margin:6px 0}.da-acts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+html[data-theme=dark] .docs-ask{background:#3A3016;border-color:#6B5822;color:#F5E7C0}
+.sum-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}.sum-tip{margin-bottom:12px}
+.sum-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.sum-top img{width:96px;height:96px;object-fit:cover;border-radius:14px}.sum-top h1{margin:0}.sum-top p{margin:3px 0}
+.sum-alert{background:#FDE2DC;color:#8A1C0B;border-radius:12px;padding:10px 14px;margin:14px 0 6px;font-weight:600}.sum-alert b{margin-right:8px}
+.sum-box{background:var(--paper);border-radius:12px;padding:10px 14px;margin:8px 0;display:flex;flex-direction:column;gap:2px}
+.sum-visit{border-top:1px solid var(--line);padding:10px 0}.sum-visit:first-of-type{border-top:0}.sv-h{font-size:15px}.sum-foot{margin-top:18px}
+.sum-share{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.sum-qr{width:160px;min-height:160px;background:#fff;border-radius:10px;padding:6px}.sum-qr:empty{display:none}.sum-share>div:last-child{flex:1;min-width:220px}
+.sum-url{display:flex;gap:6px}.sum-url input{flex:1;min-width:0;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+.ha-box{display:flex;flex-direction:column;gap:3px;background:#FDECEA;border-left:4px solid #D9472B;border-radius:14px;padding:12px 14px;margin-top:12px;color:#5C1508}.ha-box b{display:flex;align-items:center;gap:6px;color:#B42318}.ha-box small{color:#7A2E22}
+html[data-theme=dark] .ha-box{background:#3B1C17;color:#F8D9D3}html[data-theme=dark] .ha-box small{color:#E8B7AE}
+@media print{.sum-alert{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.rtable.sumt{table-layout:auto}.rtable.sumt th,.rtable.sumt td{width:auto!important;display:table-cell!important;padding:6px 8px}.pro-blk .rtable.sumt{font-size:13.5px}
 </style>
 </head>
 <body>
@@ -3283,7 +3311,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.36.6';
+const BUILD = 'v7.37.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4168,6 +4196,8 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})$/)))return renderPetView(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/edit$/)))return renderPet(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/print$/)))return renderPetPrint(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/summary$/)))return renderPetSummary(m[1]);
+  if((m=path.match(/^#\/vet\/([A-Za-z0-9]{8,24})$/)))return renderVetShare(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/album$/)))return renderAlbum(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/recap\/(\d{4}-Q[1-4])$/)))return renderRecap(m[1],m[2]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/record\/(new|[0-9a-f-]{36})$/)))return renderRecord(m[1],m[2]);
@@ -6163,6 +6193,7 @@ async function renderCase(id){const _n=navId;
           ${c.notes?`<dt>補充</dt><dd>${esc(c.notes)}</dd>`:''}
         </dl>
       </div>
+      ${c.health_alert&&c.status==='searching'?`<div class="ha-box" role="note"><b>${ic('steth')} 健康提醒</b><span>${esc(c.health_alert)}</span><small>找到${esc(c.name||'毛孩')}的話，請盡快聯絡飼主；狀況不好就先送附近的動物醫院。</small></div>`:''}
       ${active?`<div class="cact">
         ${c.source==='moa'?'':`<a class="btn big cact-main" href="#/report/${id}">${ic("eye")} 我看到${esc(c.name||"毛孩")}了，回報</a>`}
         ${c.contact_phone?`<a class="btn big call" href="tel:${esc(telNum(c.contact_phone))}">${ic('phone')} 打給${esc(c.contact_name||'飼主')}<span class="cact-num">${esc(fmtPhone(c.contact_phone))}</span></a>`:''}
@@ -6515,6 +6546,10 @@ function renderNew(){
     <label class="f"><span><b class="lbl">尋獲獎金</b><small class="hint long">由飼主自行支付，本站不經手</small></span><input type="number" name="reward" min="0" max="10000000" step="1" inputmode="numeric" placeholder="0"></label>
     <label class="f"><span>其他補充</span><textarea name="notes" placeholder="例：可以用雞肉吸引毛孩、很怕機車聲"></textarea></label>
     </details>
+    <details class="more" id="haWrap"><summary>健康提醒（有慢性病、每天要吃藥的建議填）</summary>
+    <label class="f"><span><b class="lbl">健康提醒</b><small class="hint long">會公開在協尋頁，讓撿到的人知道要盡快聯絡你或送醫</small></span><textarea name="health_alert" maxlength="200" placeholder="例：有心臟病，每天早晚要吃藥，不能太激動"></textarea></label>
+    <button type="button" class="btn sm ghost" id="haFill" hidden>${ic('steth')} 帶入健康手冊的資料</button>
+    </details>
     <input type="text" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
     <label class="chk agree"><input type="checkbox" name="agree" data-agree><span>我已閱讀並同意<a href="#/terms" target="_blank">使用條款</a>與<a href="#/privacy" target="_blank">隱私權政策</a>，並同意本站公開上述資料（Email 除外）供協尋使用</span></label>
     <div class="submitbar"><button class="btn lg block" type="submit" id="btnSubmit">送出登記</button></div>
@@ -6542,7 +6577,7 @@ function renderNew(){
     const st=form.querySelector('.wstep');if(st)st.prepend(box);else form.prepend(box)}).catch(()=>{});
   function applyPet(pid){const _an=navId;sb.from('pets').select('*').eq('id',pid).maybeSingle().then(({data:pt})=>{if(!pt||_an!==navId)return;const f=$('#f');if(!f)return;setSp(pt.species);
     const set=(n,v)=>{if(f.elements[n]!=null&&v!=null)f.elements[n].value=v};
-    set('name',pt.name);f.elements.name.dispatchEvent(new Event('input',{bubbles:true}));set('sex',pt.sex||'');set('size',pt.size||'');set('breed',pt.breed);set('colour',pt.colour);qpRedraw(f);set('features',pt.features);set('temperament',pt.temperament);
+    set('name',pt.name);f.elements.name.dispatchEvent(new Event('input',{bubbles:true}));set('sex',pt.sex||'');set('size',pt.size||'');set('breed',pt.breed);set('colour',pt.colour);qpRedraw(f);set('features',pt.features);set('temperament',pt.temperament);petHealthAlert(pt).then(t=>{const b=$('#haFill');if(!t||!b||_an!==navId)return;b.hidden=false;$('#haWrap').open=true;b.onclick=()=>{f.elements.health_alert.value=t;f.elements.health_alert.dispatchEvent(new Event('input',{bubbles:true}));toast('已帶入，公開前請再確認一下內容')}});
     if(pt.birthday){const y=Math.floor((Date.now()-new Date(pt.birthday))/31557600000);set('age_text',y>0?y+'歲':'未滿1歲')}
     f.elements['has_chip'].checked=!!pt.has_chip;if(pt.chip_no)set('chip_last4',String(pt.chip_no).slice(-4));if(pt.neutered!=null)set('neutered',String(pt.neutered));
     pics=[...(pt.photos||[]),...pics.filter(x=>typeof x!=='string')].slice(0,4);drawPV();__dirty=true;f.dispatchEvent(new Event('input',{bubbles:true}));toast(`已帶入 ${pt.name} 的資料，請補上走失時間地點`)})}
@@ -6575,6 +6610,7 @@ function renderNew(){
       sent=true;clearTimeout(dT);   // 送出成功：還在等的草稿儲存不要再寫回去
       try{localStorage.setItem('wh_token_'+data.id,data.token);localStorage.removeItem('wh_draft_new')}catch(_){}
       rememberMine('case',data.id,p.name);
+      {const ha=String(fd.get('health_alert')||'').trim();if(ha)try{await sb.rpc('set_health_alert',{p_case:data.id,p_token:data.token,p_text:ha})}catch(_){}}
       try{fetch(CONFIG.SITE_URL+'api/indexnow?id='+data.id).catch(()=>{})}catch(_){}
       if(!fd.get('social_ok'))try{sb.rpc('set_social_ok',{p_case:data.id,p_token:data.token,p_ok:false}).then(()=>{},()=>{})}catch(_){}   // 不要粉專分享   // 通知搜尋引擎來收錄這個案件頁（背景、失敗不影響）
       contactSave($('#f'),CT_NEW);__submitting=false;if(_n!==navId){toast('✅ 已登記完成。管理網址存在這支手機，到「我的」就找得到',6000);return}renderCreated(data.id,data.token,(p.contact_email||'').trim(),p.name);
@@ -6820,6 +6856,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     <div class="row2"><label class="f"><span><b class="lbl">Email</b><small class="hint">私密</small></span><input type="email" name="contact_email" value="${esc(c.contact_email||'')}"></label><label class="f"><span><b class="lbl">LINE ID</b><small class="hint">會公開</small></span><input name="contact_line" value="${esc(c.contact_line||'')}"></label></div>
     <label class="f"><span>尋獲獎金 NT$</span><input type="number" name="reward" value="${c.reward||0}" min="0" max="10000000" step="1" inputmode="numeric"></label>
     <label class="f"><span>補充</span><textarea name="notes">${esc(c.notes||'')}</textarea></label>
+    <label class="f"><span><b class="lbl">健康提醒</b><small class="hint long">選填、會公開，例：有心臟病每天要吃藥</small></span><textarea name="health_alert" maxlength="200">${esc(c.health_alert||'')}</textarea></label>
     <h3>照片</h3>
     <div class="photos-preview" id="pv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 新增照片<input type="file" id="photoIn" accept="image/*" multiple></label>
@@ -6896,6 +6933,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
     const {error}=await sb.rpc('delete_case',{p_id:id,p_token:token});if(error){__submitting=false;return toast('刪除失敗：'+error.message)}
     try{localStorage.removeItem('wh_token_'+id);sessionStorage.removeItem('wh_mkey_'+id);localStorage.setItem('wh_mine',JSON.stringify(getMine().filter(x=>x.id!==id)))}catch(_){}toast('已刪除這個案件',3000);goReplace('#/')};
   $('#fe').onsubmit=once(async e=>{e.preventDefault();const fd=new FormData(e.target);const p={photos};['name','colour','features','collar_desc','temperament','lost_place','contact_name','contact_phone','contact_email','contact_line','notes'].forEach(k=>p[k]=String(fd.get(k)??'').trim());p.contact_phone=hw(p.contact_phone);p.phone_public=!!fd.get('phone_public');p.reward=Math.max(0,Math.round(+hw(fd.get('reward')||0).replace(/[^\d]/g,''))||0);if(!p.contact_phone&&!p.contact_email&&!p.contact_line)return toast('電話、Email、LINE 請至少留一種，看到毛孩的人才聯絡得到你',5000);if(p.contact_phone&&!p.phone_public&&!p.contact_email&&!p.contact_line)return toast('電話設成不公開的話，請再留 Email 或 LINE，不然沒人聯絡得到你',5000);const {error}=await sb.rpc('update_case',{p_id:id,p_token:token,p});if(error)return toast('儲存失敗：'+error.message);
+    {const ha=String(fd.get('health_alert')||'').trim();if(ha!==String(c.health_alert||'').trim()){const {data:ok,error:he}=await sb.rpc('set_health_alert',{p_case:id,p_token:token,p_text:ha});if(he||ok===false)toast('健康提醒沒有存成功，請再試一次',4000);else c.health_alert=ha}}
     const mailChanged=p.contact_email&&p.contact_email.toLowerCase()!==String(c.contact_email||'').trim().toLowerCase();
     if(mailChanged){const why=await sendVerifyMail(id,token);toast(why==='already_verified'?'已儲存':'已儲存。'+(VERIFY_MSG[why]||VERIFY_MSG.failed),6000);rerender(()=>renderManage(id,mailOnly?null:token,mailOnly?token:undefined))}else toast('已儲存')});
   if($('#btnRev'))$('#btnRev').onclick=async()=>{const b=$('#btnRev');b.disabled=true;$('#vmsg').textContent='寄送中…';const why=await sendVerifyMail(id,token);b.disabled=false;$('#vmsg').textContent=VERIFY_MSG[why]||VERIFY_MSG.failed;if(why==='already_verified')$('#vnotice').remove()};
@@ -10083,7 +10121,10 @@ async function renderPet(id){const _n=navId;
       <label class="f" style="margin:0"><span><b class="lbl">晶片號碼</b><small class="hint">私密</small></span><input name="chip_no" maxlength="20" inputmode="numeric" value="${esc(p.chip_no||'')}"></label>
       <label class="f" style="margin:0"><span>結紮</span><select name="neutered"><option value="">不確定</option><option value="true" ${p.neutered===true?'selected':''}>已結紮</option><option value="false" ${p.neutered===false?'selected':''}>未結紮</option></select></label>
     </div>
-    <label class="f"><span><b class="lbl">過敏、慢性病與注意事項</b><small class="hint">會顯示在「完整健康資料」頁</small></span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
+    <label class="f"><span><b class="lbl">過敏</b><small class="hint long">藥物、食物、疫苗過敏，急診時最重要</small></span><input name="allergies" maxlength="300" value="${esc(p.allergies||'')}" placeholder="例：對盤尼西林過敏、吃雞肉會癢"></label>
+    <label class="f"><span><b class="lbl">慢性病／病史</b><small class="hint long">長期的病、開過的刀</small></span><textarea name="conditions" maxlength="600" placeholder="例：心臟二尖瓣疾病（2025 年確診）、2024 年結石手術">${esc(p.conditions||'')}</textarea></label>
+    <div class="row2"><label class="f"><span><b class="lbl">血型</b><small class="hint">知道再填</small></span><input name="blood_type" maxlength="20" value="${esc(p.blood_type||'')}" placeholder="例：DEA 1.1 陰性、A 型"></label><span></span></div>
+    <label class="f"><span><b class="lbl">其他注意事項</b><small class="hint long">會顯示在看診摘要和完整健康資料</small></span><textarea name="notes" maxlength="2000">${esc(p.notes||'')}</textarea></label>
     <div class="submitbar row"><button class="btn" id="btnSave">儲存</button><a class="btn ghost" href="${id==='new'?'#/me':'#/pet/'+id}">取消</a></div>${id!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDel">${ic('trash')} 刪除這份寵物檔案</button></p>`:''}
   </form>`;
   let species=p.species,photos=(p.photos||[]).slice();const origPh=photos.slice(),freshPh=[];let didSave=false;
@@ -10095,7 +10136,7 @@ async function renderPet(id){const _n=navId;
   $('#photoIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,6-photos.length)){if(photos.length>=6){toast('最多 6 張照片');break}toast('上傳中…');try{const u=await uploadPhoto(f,'pets');photos.push(u);freshPh.push(u)}catch(err){toast('上傳失敗：'+err.message)}}draw();e.target.value=''};
   $('#pf').onsubmit=once(async e=>{
     e.preventDefault();const fd=new FormData(e.target);
-    const row={species,name:fd.get('name').trim(),sex:fd.get('sex')||null,size:fd.get('size')||null,birthday:fd.get('birthday')||null,breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_no:fd.get('chip_no'),neutered:fd.get('neutered')===''?null:fd.get('neutered')==='true',notes:fd.get('notes'),photos,updated_at:new Date().toISOString()};
+    const row={species,name:fd.get('name').trim(),sex:fd.get('sex')||null,size:fd.get('size')||null,birthday:fd.get('birthday')||null,breed:fd.get('breed'),colour:fd.get('colour'),features:fd.get('features'),temperament:fd.get('temperament'),has_chip:!!fd.get('has_chip'),chip_no:fd.get('chip_no'),neutered:fd.get('neutered')===''?null:fd.get('neutered')==='true',notes:fd.get('notes'),allergies:String(fd.get('allergies')||'').trim()||null,conditions:String(fd.get('conditions')||'').trim()||null,blood_type:String(fd.get('blood_type')||'').trim()||null,photos,updated_at:new Date().toISOString()};
     const {data:saved,error}=id==='new'?await sb.from('pets').insert(row).select('id').single():await sb.from('pets').update(row).eq('id',id).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
     didSave=true;rmPh(origPh.concat(freshPh).filter(x=>!photos.includes(x)));
@@ -10351,6 +10392,7 @@ async function renderPetView(id){const _n=navId;
   const rs=recs||[];
   const filter=qs(location.hash).k||'';
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
+  let askRec=null;try{const aid=sessionStorage.getItem('wh_ask_docs');if(aid){sessionStorage.removeItem('wh_ask_docs');askRec=rs.find(x=>x.id===aid)||null}}catch(_){}
   let calPrompt=null;try{const cid=sessionStorage.getItem('wh_cal_prompt');if(cid){sessionStorage.removeItem('wh_cal_prompt');calPrompt=rs.find(x=>x.id===cid&&x.next_due&&!x.done)||null}}catch(_){}
   const weights=rs.filter(r=>r.weight_kg).map(r=>({date:r.date,w:r.weight_kg})).sort((a,b)=>a.date.localeCompare(b.date));
   const year=String(new Date().getFullYear());
@@ -10374,7 +10416,8 @@ async function renderPetView(id){const _n=navId;
       </div>
       <div class="actionbar pv-acts">
         <a class="btn" href="#/pet/${id}/record/new">${ic("plus")} 新增紀錄</a>
-        <a class="btn ghost" href="#/pet/${id}/print">${ic("clipboard")} 完整健康資料</a>
+        <a class="btn ghost" href="#/pet/${id}/summary">${ic("steth")} 看診摘要</a>
+        <a class="btn ghost" href="#/pet/${id}/print" style="grid-column:1/-1">${ic("clipboard")} 完整健康資料</a>
         <a class="btn ghost" href="#/pals/card/${id}" style="grid-column:1/-1">${ic("paw")} 放上毛孩名片牆，找玩伴</a>
         <a class="btn ghost d-only" href="#/pet/${id}/edit" style="grid-column:1/-1">${ic("edit")} 編輯毛孩資料</a>
       </div>
@@ -10389,6 +10432,7 @@ async function renderPetView(id){const _n=navId;
     </div>
   </div>
 
+  ${askRec?docsAskHTML(p.name,askRec):''}
   ${calPrompt?`<div class="calprompt" id="calPrompt"><div class="b"><b>已設定提醒：${esc(calPrompt.title)}</b><br><span class="muted">${calPrompt.next_due}・${dueText(calPrompt.next_due)}，要順便加到手機日曆嗎？</span></div><div class="acts">${calButtons(p.name,calPrompt)}<button type="button" class="btn sm ghost" id="calPromptX">不用</button></div></div>`:''}
   ${petInsightsHTML(p,rs)}
   <h2>${ic("pill")} 用藥與保養品 <a class="btn sm ghost" href="#/pet/${id}/med/new" style="margin-left:auto">${ic("plus")} 新增</a></h2>
@@ -10402,16 +10446,20 @@ async function renderPetView(id){const _n=navId;
   ${weights.length>=2?`<h2>${ic("scale")} 體重變化</h2><div class="card">${weightChart(weights)}</div>`:''}
 
   <div id="pvAlbum" class="pv-album"></div>
+  ${rs.some(r=>(r.files||[]).length)?`<details class="mg-sec docs-sec" id="docsSec"><summary>${ic("image")} 病歷文件 <span class="muted small">${rs.reduce((a,r)=>a+(r.files||[]).length,0)} 張，依種類整理</span></summary><div class="mg-body" id="docsBody"><p class="muted small">載入中…</p></div></details>`:''}
   <h2>${ic("clipboard")} 健康紀錄</h2>
   <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[e,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${recIc(k)} ${t}</button>`).join('')}</div>
   ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><button type="button" class="trash-btn tl-del" data-del-rec="${r.id}" aria-label="刪除 ${esc(r.title)}">${ic('trash')}<span>刪除</span></button><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
       <a href="#/pet/${id}/record/${r.id}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}</div>
       <div class="where">${esc([(REC_KINDS[r.kind]||[,'其他'])[1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
+      ${proLineHTML(r.pro)}
       ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
-      <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${r.files.length} 張附件</span>`:''}</div></a>
+      <div class="chips" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${dueTag(r)}${r.files?.length?`<span class="tag">${ic("image")} ${esc(docTagText(r))}</span>`:''}</div></a>
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
   {const ab=$('#pvAlbum');if(ab)albSection(ab,p)}
+  if(askRec)docsAskBind(p.name,askRec);
+  {const ds=$('#docsSec');if(ds)ds.addEventListener('toggle',async()=>{if(!ds.open||ds.dataset.ld)return;ds.dataset.ld=1;const b=$('#docsBody');b.innerHTML=await docsFolderHTML(rs)||'<p class="muted small">沒有附件</p>';b.querySelectorAll('[data-u]').forEach(x=>x.onclick=()=>x.dataset.u&&lightbox(x.dataset.u))})}
   // 垃圾桶：直接刪除用藥／健康紀錄（照片一起刪）
   app.querySelectorAll('[data-del-med]').forEach(b=>b.onclick=async e=>{e.preventDefault();e.stopPropagation();const m=(medsAll||[]).find(z=>z.id===b.dataset.delMed);if(!m)return;
     if(!await askSheet({title:`刪除「${m.name}」？`,body:'給藥紀錄也會一起刪除，無法復原。若只是不吃了，可以點進去改成「停用」。',ok:'刪除',danger:true}))return;
@@ -10460,13 +10508,16 @@ async function renderRecord(petId,recId){const _n=navId;
     <label class="f"><span>下次到期／回診日</span><input type="date" name="next_due" value="${esc(r.next_due||'')}"></label>
     <div class="seg" style="margin-top:8px"><button type="button" data-m="1">＋1 個月</button><button type="button" data-m="3">＋3 個月</button><button type="button" data-m="6">＋半年</button><button type="button" data-m="12">＋1 年</button><button type="button" data-m="0">不設定</button></div>
     ${recId!=='new'&&r.next_due?`<label class="chk"><input type="checkbox" name="done" ${r.done?'checked':''}> 下次的已經完成了（不再提醒）</label>`:''}
-    <details class="more" ${(r.files||[]).length?'open':''}><summary>收據、病歷照片（可以不放，只有你看得到）</summary>
+    ${proFormHTML(r.pro)}
+    <details class="more" ${(r.files||[]).length?'open':''}><summary>病歷、檢驗報告、收據照片（可以不放，只有你看得到）</summary>
+    <p class="muted small" style="margin:4px 0 0">每張照片下面可以選是什麼文件，之後在毛孩頁面會自動分類。</p>
     <div class="photos-preview" id="fv"></div>
     <label class="uploadbtn" style="margin-top:8px">${ic("image")} 加入照片<input type="file" id="fileIn" accept="image/*" multiple></label>
     </details>
     <div class="submitbar row"><button class="btn" id="btnSave">儲存紀錄</button><a class="btn ghost" href="#/pet/${petId}">取消</a></div>${recId!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDel">${ic('trash')} 刪除這筆紀錄</button></p>`:''}
   </form>`;
   const f=$('#rf');let kind=r.kind,files=origFiles.slice(),didSave=false;const fresh=[];
+  let docKinds=files.map((_,i)=>(r.doc_kinds||[])[i]||'other');const proGet=proBind(f,r.pro);
   // 下次到期日：記住「幾個月後」，日期改了就跟著重算；手動改過就不再自動動它
   let dueM=0,dueAuto=false;
   const setDue=m=>{dueM=m;dueAuto=!!m;f.elements.next_due.value=m?addMonths(f.elements.date.value||todayStr(),m):''};
@@ -10474,22 +10525,25 @@ async function renderRecord(petId,recId){const _n=navId;
   f.elements.date.addEventListener('change',()=>{if(dueAuto&&dueM)f.elements.next_due.value=addMonths(f.elements.date.value||todayStr(),dueM)});
   const drawPresets=()=>{const list=(REC_PRESETS[kind]||{})[p.species==='cat'?'cat':'dog']||[];$('#presets').innerHTML=list.map(([t,m])=>`<button type="button" data-t="${esc(t)}" data-pm="${m}">${esc(t)}</button>`).join('');
     $('#presets').querySelectorAll('button').forEach(b=>b.onclick=()=>{f.elements.title.value=b.dataset.t;const m=+b.dataset.pm;if(m&&(!f.elements.next_due.value||dueAuto))setDue(m)});
-    $('#wWrap').style.opacity=kind==='weight'||kind==='vet'?1:.55;$('#medHint').classList.toggle('hidden',kind!=='med')};
+    $('#wWrap').style.opacity=kind==='weight'||kind==='vet'?1:.55;$('#medHint').classList.toggle('hidden',kind!=='med');
+    $('#proSec').style.display=PRO_KINDS.includes(kind)?'':'none';$('#vacWrap').style.display=kind==='vaccine'?'':'none'};
   drawPresets();
   $('#segK').querySelectorAll('button').forEach(b=>b.onclick=()=>{kind=b.dataset.v;$('#segK').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));drawPresets()});
   f.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>setDue(+b.dataset.m));
   const fv=$('#fv');
-  const drawFiles=()=>{fv.innerHTML='';files.forEach((path,i)=>{const d=document.createElement('div');if(urls[path])d.style.backgroundImage=`url('${urls[path]}')`;d.style.cursor='zoom-in';d.onclick=()=>urls[path]&&lightbox(urls[path]);const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=e=>{e.stopPropagation();files.splice(i,1);drawFiles()};d.appendChild(x);fv.appendChild(d)})};drawFiles();
-  $('#fileIn').onchange=async e=>{for(const file of [...e.target.files].slice(0,6-files.length)){if(files.length>=6){toast('最多 6 張附件');break}toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);fresh.push(path);urls[path]=URL.createObjectURL(file)}catch(err){toast('上傳失敗：'+err.message)}}drawFiles();e.target.value=''};
+  const drawFiles=()=>{fv.innerHTML='';fv.classList.toggle('doc-pv',files.length>0);files.forEach((path,i)=>{const d=document.createElement('div');if(urls[path])d.style.backgroundImage=`url('${urls[path]}')`;d.style.cursor='zoom-in';d.onclick=()=>urls[path]&&lightbox(urls[path]);const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','移除這張');x.onclick=e=>{e.stopPropagation();files.splice(i,1);docKinds.splice(i,1);drawFiles()};d.appendChild(x);
+    const sel=document.createElement('select');sel.className='doc-k';sel.setAttribute('aria-label','這張是什麼文件');sel.innerHTML=Object.entries(DOC_KINDS).map(([k,t])=>`<option value="${k}" ${docKinds[i]===k?'selected':''}>${t}</option>`).join('');sel.onclick=e=>e.stopPropagation();sel.onchange=()=>{docKinds[i]=sel.value};d.appendChild(sel);fv.appendChild(d)})};drawFiles();
+  $('#fileIn').onchange=async e=>{for(const file of [...e.target.files].slice(0,6-files.length)){if(files.length>=6){toast('最多 6 張附件');break}toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);docKinds.push(kind==='vaccine'?'vaccine':kind==='vet'||kind==='surgery'?'summary':'other');fresh.push(path);urls[path]=URL.createObjectURL(file)}catch(err){toast('上傳失敗：'+err.message)}}drawFiles();e.target.value=''};
   f.onsubmit=once(async e=>{
     e.preventDefault();const fd=new FormData(f);
-    const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files};
+    const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files,doc_kinds:files.map((_,i)=>docKinds[i]||'other'),pro:PRO_KINDS.includes(kind)?proGet():{}};
     if(row.next_due&&row.date&&row.next_due<row.date)return toast('「下次到期」不能早於紀錄日期，請再確認一下',4000);
     if(f.elements.done)row.done=f.elements.done.checked;else if(recId==='new')row.done=false;
     if(recId!=='new'&&row.next_due&&row.next_due!==(r.next_due||null))row.done=false;   // 到期日換了＝新的一次，要重新提醒
     const {data:saved,error}=recId==='new'?await sb.from('pet_records').insert(row).select('id').single():await sb.from('pet_records').update(row).eq('id',recId).select('id').single();
     if(error)return toast('儲存失敗：'+error.message);
     didSave=true;lnSync(true);if(recId==='new')buddyGive('rec');
+    if(recId==='new'&&(kind==='vet'||kind==='surgery')&&!files.length&&saved?.id){try{if(!localStorage.getItem(DOCS_ASK_KEY))sessionStorage.setItem('wh_ask_docs',saved.id)}catch(_){}}   // 看完診：回到毛孩頁時提醒索取病歷摘要
     // 從紀錄移除的照片，也從雲端刪掉
     const dropped=origFiles.concat(fresh).filter(x=>!files.includes(x));if(dropped.length)sb.storage.from('pet-private').remove(dropped).catch(()=>{});
     const dueChanged=row.next_due&&!row.done&&(recId==='new'||row.next_due!==r.next_due);if(dueChanged)setTimeout(lnAskOnce,600);
@@ -10609,6 +10663,155 @@ async function renderMed(petId,medId){const _n=navId;
   });
   if(medId!=='new')$('#btnDelM').onclick=async()=>{if(!await askSheet({title:'刪除這筆用藥？',body:'給藥紀錄也會一起刪除。若只是不吃了，建議改成「停用」。',ok:'刪除用藥',danger:true}))return;const {error}=await sb.from('pet_meds').delete().eq('id',medId);if(error){__submitting=false;return toast(error.message)}didSave=true;{const all=origFiles.concat(fresh);if(all.length)sb.storage.from('pet-private').remove(all).catch(()=>{})}lnSync(true);goReplace('#/pet/'+petId)};
 }
+/* ============================================================
+   健康手冊專業版（v1.98）：病歷格式、文件分類、一頁摘要、分享給獸醫
+   ============================================================ */
+const DOC_KINDS={summary:'病歷摘要',diagnosis:'診斷書',lab:'檢驗報告',imaging:'X光／超音波',rx:'處方／藥袋',vaccine:'疫苗證明',receipt:'收據',other:'其他'};
+const PRO_KINDS=['vet','surgery','vaccine'];
+const RX_ROUTE=['口服','注射','外用','點眼','點耳','吸入','其他'];
+const LAB_PRESETS=[['WBC','10³/µL','6–17'],['RBC','10⁶/µL','5.5–8.5'],['HCT','%','37–55'],['PLT','10³/µL','200–500'],['BUN','mg/dL','7–27'],['CREA','mg/dL','0.5–1.8'],['SDMA','µg/dL','0–14'],['ALT','U/L','10–125'],['ALP','U/L','23–212'],['GLU','mg/dL','74–143'],['TP','g/dL','5.2–8.2'],['ALB','g/dL','2.3–4.0']];
+const LAW11='依《獸醫師法》第 11 條，獸醫師沒有正當理由，不能拒絕開立病歷摘要、診斷書、檢驗證明書、影像紀錄等診療相關文件（費用由飼主負擔）。';
+// 檢驗數值有沒有超出參考範圍：回傳 'H'、'L' 或 ''
+function labFlag(v,ref){const n=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));const m=String(ref||'').replace(/\s/g,'').match(/^(-?[\d.]+)[–~\-－至](-?[\d.]+)$/);if(isNaN(n)||!m)return '';const lo=+m[1],hi=+m[2];return n>hi?'H':n<lo?'L':''}
+function docTagText(r){const n=(r.files||[]).length;const c={};(r.doc_kinds||[]).slice(0,n).forEach(k=>{if(k&&k!=='other')c[k]=(c[k]||0)+1});const t=Object.entries(c).map(([k,v])=>DOC_KINDS[k]+(v>1?' '+v:'')).join('・');return t?t+(Object.values(c).reduce((a,b)=>a+b,0)<n?'・其他':''):n+' 張附件'}
+async function petHealthAlert(pt){const parts=[];if(pt.conditions)parts.push(String(pt.conditions).replace(/\s+/g,' ').trim());
+  try{const {data}=await sb.from('pet_meds').select('name,freq').eq('pet_id',pt.id).eq('active',true).eq('kind','med');if(data&&data.length)parts.push('每天要吃藥：'+data.map(x=>x.name).join('、'))}catch(_){}
+  if(pt.allergies)parts.push('過敏：'+String(pt.allergies).trim());return parts.join('；').slice(0,200)}
+function proFilled(pr){if(!pr)return false;const v=pr.vitals||{};return !!(v.temp||v.hr||v.rr||v.bcs||pr.s||pr.o||pr.p||pr.vet||(pr.dx||[]).length||(pr.rx||[]).length||(pr.labs||[]).length||pr.vac_brand||pr.vac_lot)}
+function proVitalsText(pr){const v=pr?.vitals||{};return [v.temp?`體溫 ${v.temp}°C`:'',v.hr?`心跳 ${v.hr}`:'',v.rr?`呼吸 ${v.rr}`:'',v.bcs?`BCS ${v.bcs}/9`:''].filter(Boolean).join('・')}
+function rxText(x){return [x.name,x.dose,x.route,x.freq,x.days?x.days+' 天':''].filter(Boolean).join('　')+(x.ctrl?'（管制藥品）':'')}
+function proFormHTML(pr){pr=pr||{};const v=pr.vitals||{};
+  return `<details class="more pro-sec" id="proSec" ${proFilled(pr)?'open':''}><summary>${ic('steth')} 病歷詳細 <small class="muted">照動物醫院病歷的格式記，知道的再填</small></summary>
+  <div class="pro-v">
+    <label class="f"><span><b class="lbl">體溫</b><small class="hint">°C</small></span><input name="pv_temp" type="number" step="0.1" min="30" max="45" inputmode="decimal" value="${v.temp??''}"></label>
+    <label class="f"><span><b class="lbl">心跳</b><small class="hint">次/分</small></span><input name="pv_hr" type="number" step="1" min="10" max="400" inputmode="numeric" value="${v.hr??''}"></label>
+    <label class="f"><span><b class="lbl">呼吸</b><small class="hint">次/分</small></span><input name="pv_rr" type="number" step="1" min="2" max="200" inputmode="numeric" value="${v.rr??''}"></label>
+    <label class="f"><span><b class="lbl">體態</b><small class="hint">BCS 1–9</small></span><select name="pv_bcs"><option value="">—</option>${[1,2,3,4,5,6,7,8,9].map(n=>`<option ${+v.bcs===n?'selected':''}>${n}</option>`).join('')}</select></label>
+  </div>
+  <label class="f"><span><b class="lbl">主訴與發病情形</b><small class="hint long">什麼時候開始、有什麼症狀</small></span><textarea name="p_s" maxlength="1000">${esc(pr.s||'')}</textarea></label>
+  <label class="f"><span><b class="lbl">理學檢查</b><small class="hint long">醫生檢查看到的狀況</small></span><textarea name="p_o" maxlength="1000">${esc(pr.o||'')}</textarea></label>
+  <label class="f"><span><b class="lbl">診斷</b><small class="hint long">有好幾個就用「、」分開</small></span><input name="p_dx" maxlength="300" value="${esc((pr.dx||[]).join('、'))}" placeholder="例：外耳炎、輕度脫水"></label>
+  <label class="f"><span><b class="lbl">治療與醫囑</b><small class="hint long">做了什麼處置、回家要注意什麼</small></span><textarea name="p_p" maxlength="1000">${esc(pr.p||'')}</textarea></label>
+  <h4 class="pro-h">${ic('pill')} 處方用藥</h4><div id="rxRows" class="pro-rows"></div><button type="button" class="btn sm ghost" id="rxAdd">${ic('plus')} 加一種藥</button>
+  <h4 class="pro-h">${ic('clipboard')} 檢驗數值</h4><div id="labRows" class="pro-rows"></div>
+  <div class="pro-pre" id="labPre">${LAB_PRESETS.map(([n])=>`<button type="button" class="fchip" data-lab="${n}">${n}</button>`).join('')}</div>
+  <button type="button" class="btn sm ghost" id="labAdd">${ic('plus')} 加其他項目</button>
+  <div class="row2" id="vacWrap"><label class="f"><span>疫苗廠牌</span><input name="p_vbrand" maxlength="40" value="${esc(pr.vac_brand||'')}"></label><label class="f"><span>疫苗批號</span><input name="p_vlot" maxlength="40" value="${esc(pr.vac_lot||'')}"></label></div>
+  <label class="f"><span>看診獸醫師</span><input name="p_vet" maxlength="30" value="${esc(pr.vet||'')}" placeholder="例：王醫師"></label>
+  </details>`}
+// 綁定病歷詳細的動態列（處方、檢驗），回傳讀取函式
+function proBind(f,pr){pr=pr||{};const rx=(pr.rx||[]).map(x=>({...x})),labs=(pr.labs||[]).map(x=>({...x}));
+  const rxBox=$('#rxRows'),labBox=$('#labRows');
+  const drawRx=()=>{rxBox.innerHTML=rx.map((x,i)=>`<div class="pro-row rx" data-i="${i}">
+    <input data-k="name" maxlength="50" placeholder="藥名" value="${esc(x.name||'')}" aria-label="藥名">
+    <input data-k="dose" maxlength="30" placeholder="每次劑量" value="${esc(x.dose||'')}" aria-label="每次劑量">
+    <select data-k="route" aria-label="給藥方式">${RX_ROUTE.map(r=>`<option ${x.route===r?'selected':''}>${r}</option>`).join('')}</select>
+    <input data-k="freq" maxlength="30" placeholder="頻率，例：一天兩次" value="${esc(x.freq||'')}" aria-label="頻率">
+    <input data-k="days" type="number" min="0" max="999" inputmode="numeric" placeholder="天數" value="${x.days??''}" aria-label="天數">
+    <label class="chk pro-ctrl"><input type="checkbox" data-k="ctrl" ${x.ctrl?'checked':''}> 管制藥品</label>
+    <button type="button" class="pro-x" data-rm aria-label="移除這種藥">×</button></div>`).join('')||'<p class="muted small" style="margin:4px 0">還沒有處方</p>'};
+  const drawLab=()=>{labBox.innerHTML=labs.map((x,i)=>{const fl=labFlag(x.value,x.ref);return `<div class="pro-row lab" data-i="${i}">
+    <input data-k="item" maxlength="30" placeholder="項目" value="${esc(x.item||'')}" aria-label="檢驗項目">
+    <input data-k="value" maxlength="20" inputmode="decimal" placeholder="數值" value="${esc(x.value??'')}" aria-label="數值" class="${fl?'flag':''}">
+    <input data-k="unit" maxlength="15" placeholder="單位" value="${esc(x.unit||'')}" aria-label="單位">
+    <input data-k="ref" maxlength="25" placeholder="參考範圍" value="${esc(x.ref||'')}" aria-label="參考範圍">
+    <span class="pro-fl ${fl}">${fl==='H'?'偏高':fl==='L'?'偏低':''}</span>
+    <button type="button" class="pro-x" data-rm aria-label="移除這一項">×</button></div>`}).join('')||'<p class="muted small" style="margin:4px 0">點下面的常見項目，或加其他項目</p>'};
+  const bindRows=(box,arr,redraw)=>{box.addEventListener('input',e=>{const row=e.target.closest('.pro-row');if(!row)return;const k=e.target.dataset.k;if(!k)return;const o=arr[+row.dataset.i];o[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;
+      if(box===labBox&&(k==='value'||k==='ref')){const fl=labFlag(o.value,o.ref);row.querySelector('[data-k=value]').classList.toggle('flag',!!fl);const s=row.querySelector('.pro-fl');s.className='pro-fl '+fl;s.textContent=fl==='H'?'偏高':fl==='L'?'偏低':''}});
+    box.addEventListener('change',e=>{const row=e.target.closest('.pro-row');const k=e.target.dataset.k;if(row&&k)arr[+row.dataset.i][k]=e.target.type==='checkbox'?e.target.checked:e.target.value});
+    box.addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;arr.splice(+b.closest('.pro-row').dataset.i,1);redraw()})};
+  bindRows(rxBox,rx,drawRx);bindRows(labBox,labs,drawLab);drawRx();drawLab();
+  $('#rxAdd').onclick=()=>{rx.push({route:'口服'});drawRx();rxBox.querySelector('.pro-row:last-child [data-k=name]')?.focus()};
+  $('#labAdd').onclick=()=>{labs.push({});drawLab();labBox.querySelector('.pro-row:last-child [data-k=item]')?.focus()};
+  $('#labPre').querySelectorAll('[data-lab]').forEach(b=>b.onclick=()=>{const p=LAB_PRESETS.find(x=>x[0]===b.dataset.lab);if(labs.some(x=>x.item===p[0]))return toast(p[0]+' 已經加過了');labs.push({item:p[0],unit:p[1],ref:p[2]});drawLab();labBox.querySelector('.pro-row:last-child [data-k=value]')?.focus()});
+  const num=(n,lo,hi)=>{const x=parseFloat(f.elements[n].value);return isNaN(x)||x<lo||x>hi?null:x};
+  return ()=>{const o={};const v={temp:num('pv_temp',30,45),hr:num('pv_hr',10,400),rr:num('pv_rr',2,200),bcs:num('pv_bcs',1,9)};Object.keys(v).forEach(k=>v[k]==null&&delete v[k]);if(Object.keys(v).length)o.vitals=v;
+    const t=n=>String(f.elements[n].value||'').trim();
+    if(t('p_s'))o.s=t('p_s');if(t('p_o'))o.o=t('p_o');if(t('p_p'))o.p=t('p_p');if(t('p_vet'))o.vet=t('p_vet');if(t('p_vbrand'))o.vac_brand=t('p_vbrand');if(t('p_vlot'))o.vac_lot=t('p_vlot');
+    const dx=t('p_dx').split(/[、，,；;\n]+/).map(s=>s.trim()).filter(Boolean).slice(0,12);if(dx.length)o.dx=dx;
+    const R=rx.filter(x=>String(x.name||'').trim()).slice(0,20).map(x=>{const y={name:String(x.name).trim()};['dose','route','freq'].forEach(k=>{if(String(x[k]||'').trim())y[k]=String(x[k]).trim()});if(+x.days>0)y.days=Math.round(+x.days);if(x.ctrl)y.ctrl=true;return y});if(R.length)o.rx=R;
+    const L=labs.filter(x=>String(x.item||'').trim()&&String(x.value??'').trim()).slice(0,40).map(x=>{const y={item:String(x.item).trim(),value:String(x.value).trim()};if(String(x.unit||'').trim())y.unit=String(x.unit).trim();if(String(x.ref||'').trim())y.ref=String(x.ref).trim();return y});if(L.length)o.labs=L;
+    return o}}
+// 時間軸上的病歷重點（診斷、生命徵象）
+function proLineHTML(pr){if(!proFilled(pr))return '';const vt=proVitalsText(pr);return `<div class="pro-line">${(pr.dx||[]).length?`<span class="pro-dx">${ic('steth')} ${esc(pr.dx.join('、'))}</span>`:''}${vt?`<span class="muted small">${esc(vt)}</span>`:''}${(pr.rx||[]).length?`<span class="muted small">處方 ${pr.rx.length} 種</span>`:''}${(pr.labs||[]).length?`<span class="muted small">檢驗 ${pr.labs.length} 項${pr.labs.some(x=>labFlag(x.value,x.ref))?'（有異常）':''}</span>`:''}</div>`}
+// 一筆紀錄的完整病歷格式（列印、一頁摘要用）
+function proBlockHTML(r){const pr=r.pro||{};if(!proFilled(pr))return r.notes?`<div class="small" style="white-space:pre-wrap">${esc(r.notes)}</div>`:'';const vt=proVitalsText(pr);
+  return `<div class="pro-blk">${vt?`<div><b>生命徵象</b>　${esc(vt)}${r.weight_kg?`・體重 ${r.weight_kg} kg`:''}</div>`:''}
+  ${pr.s?`<div><b>主訴</b>　<span class="pre">${esc(pr.s)}</span></div>`:''}${pr.o?`<div><b>理學檢查</b>　<span class="pre">${esc(pr.o)}</span></div>`:''}
+  ${(pr.dx||[]).length?`<div><b>診斷</b>　${esc(pr.dx.join('、'))}</div>`:''}${pr.p?`<div><b>治療與醫囑</b>　<span class="pre">${esc(pr.p)}</span></div>`:''}
+  ${(pr.rx||[]).length?`<div><b>處方</b><ul>${pr.rx.map(x=>`<li>${esc(rxText(x))}</li>`).join('')}</ul></div>`:''}
+  ${(pr.labs||[]).length?`<table class="rtable sumt pro-lab"><thead><tr><th>檢驗項目</th><th>數值</th><th>單位</th><th>參考範圍</th></tr></thead><tbody>${pr.labs.map(x=>{const fl=labFlag(x.value,x.ref);return `<tr class="${fl?'flag':''}"><td>${esc(x.item)}</td><td><b>${esc(x.value)}</b>${fl?` <span class="pro-fl ${fl}">${fl==='H'?'偏高':'偏低'}</span>`:''}</td><td>${esc(x.unit||'')}</td><td>${esc(x.ref||'')}</td></tr>`}).join('')}</tbody></table>`:''}
+  ${pr.vac_brand||pr.vac_lot?`<div><b>疫苗</b>　${esc([pr.vac_brand,pr.vac_lot?'批號 '+pr.vac_lot:''].filter(Boolean).join('・'))}</div>`:''}
+  ${pr.vet?`<div class="muted small">看診獸醫師：${esc(pr.vet)}</div>`:''}${r.notes?`<div class="small muted pre">${esc(r.notes)}</div>`:''}</div>`}
+// 看完診：提醒跟醫院索取病歷摘要
+const DOCS_ASK_KEY='wh_ask_docs_off';
+function docsAskHTML(petName,rec){return `<div class="docs-ask" id="docsAsk"><div class="da-h">${ic('clipboard')} <b>看完診了？記得跟醫院要病歷摘要</b><button type="button" class="da-x" id="daX" aria-label="關閉">×</button></div>
+  <p class="small">可以申請：<b>病歷摘要、診斷書、檢驗報告、X 光或超音波影像</b>。之後回診、換醫院或半夜掛急診，新的醫生一看就懂。</p>
+  <p class="small muted">${LAW11}</p>
+  <div class="da-acts"><button type="button" class="btn sm" id="daCopy">${ic('link')} 複製索取的說法</button>${rec?`<a class="btn sm ghost" href="#/pet/${rec.pet_id}/record/${rec.id}">${ic('image')} 拿到了，拍照存進這筆紀錄</a>`:''}</div>
+  <button type="button" class="linkbtn small" id="daOff">以後不要再提醒</button></div>`}
+function docsAskText(petName,rec){return `您好，想跟您申請「${petName}」${rec?.date?` ${rec.date.slice(5).replace('-','/')} `:'這次'}看診的病歷摘要${rec?.pro?.labs?.length?'和檢驗報告':''}，方便之後回診或換醫院時給醫生參考，費用我這邊付，謝謝您！`}
+function docsAskBind(petName,rec){const box=$('#docsAsk');if(!box)return;$('#daX').onclick=()=>box.remove();$('#daOff').onclick=()=>{try{localStorage.setItem(DOCS_ASK_KEY,'1')}catch(_){}box.remove();toast('好，之後不會再提醒')};
+  $('#daCopy').onclick=async()=>{const t=docsAskText(petName,rec);try{await navigator.clipboard.writeText(t);toast('已複製，可以貼給醫院或直接念給櫃台聽',4000)}catch(_){prompt('複製這段文字：',t)}}}
+// 健康紀錄附件：依文件種類整理（只有飼主看得到）
+async function docsFolderHTML(rs){const all=[];rs.forEach(r=>(r.files||[]).forEach((p,i)=>all.push({p,k:(r.doc_kinds||[])[i]||'other',r})));if(!all.length)return '';
+  const urls=await signedUrls(all.map(x=>x.p));const by={};all.forEach(x=>(by[x.k]=by[x.k]||[]).push(x));
+  return Object.keys(DOC_KINDS).filter(k=>by[k]).map(k=>`<h4 class="pro-h">${esc(DOC_KINDS[k])} <span class="muted small">${by[k].length}</span></h4><div class="doc-grid">${by[k].map(x=>`<button type="button" class="doc-it" data-u="${esc(urls[x.p]||'')}" aria-label="放大看 ${esc(x.r.title)}">${urls[x.p]?`<img loading="lazy" src="${esc(urls[x.p])}" alt="">`:''}<small>${esc(x.r.date.slice(2).replace(/-/g,'/'))}・${esc(x.r.title)}</small></button>`).join('')}</div>`).join('')}
+
+// 一頁摘要（飼主看自己的、獸醫用分享連結看的都是這一份）
+function summaryHTML(d){const p=d.pet||{},meds=d.meds||[],rs=d.records||[];const SPN=p.species==='cat'?'貓':'狗';
+  const visits=rs.filter(r=>r.kind==='vet'||r.kind==='surgery').slice(0,8);
+  const weights=rs.filter(r=>r.weight_kg);const w=weights[0];
+  const latestLabs=[];const seen=new Set();rs.forEach(r=>((r.pro||{}).labs||[]).forEach(x=>{const k=String(x.item).toUpperCase();if(seen.has(k))return;seen.add(k);latestLabs.push({...x,date:r.date})}));
+  const prev={};rs.filter(r=>r.kind==='vaccine'||r.kind==='deworm').forEach(r=>{const k=r.kind+'|'+r.title;if(!prev[k])prev[k]=r});
+  const prevList=Object.values(prev).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+  const age=p.birthday?petAge(p.birthday):p.age_text||'';
+  return `<div class="card printsheet sumsheet">
+  <div class="sum-top">${p.photo?`<img src="${esc(safeU(p.photo))}" alt="">`:''}<div><h1>${esc(p.name)}</h1>
+    <p>${esc([SPN,p.breed,SEX[p.sex],p.colour,age].filter(Boolean).join('・'))}</p>
+    <p class="small">結紮：${p.neutered===true?'是':p.neutered===false?'否':'未填'}　晶片：${p.has_chip?(esc(p.chip_no)||'有'):'無／未填'}${p.blood_type?`　血型：${esc(p.blood_type)}`:''}${w?`　體重：${w.weight_kg} kg（${w.date}）`:''}</p></div></div>
+  ${p.allergies?`<div class="sum-alert"><b>⚠️ 過敏</b>${esc(p.allergies)}</div>`:''}
+  ${p.conditions?`<div class="sum-box"><b>慢性病／病史</b><span class="pre">${esc(p.conditions)}</span></div>`:''}
+  ${p.notes?`<div class="sum-box"><b>注意事項</b><span class="pre">${esc(p.notes)}</span></div>`:''}
+  <h3>目前用藥與保養品</h3>${meds.length?`<table class="rtable sumt"><thead><tr><th>名稱</th><th>劑量與頻率</th><th>用途</th><th>開始</th></tr></thead><tbody>${meds.map(x=>`<tr><td><b>${esc(x.name)}</b>${x.kind==='supplement'?' <span class="muted small">保養品</span>':''}</td><td>${esc(medLine(x)||'')}</td><td>${esc(x.purpose||'')}</td><td style="white-space:nowrap">${esc(x.start_date||'')}</td></tr>`).join('')}</tbody></table>`:'<p class="muted small">沒有記錄</p>'}
+  <h3>最近看診</h3>${visits.length?visits.map(r=>`<div class="sum-visit"><div class="sv-h"><b>${esc(r.date)}</b>　${esc(r.title)}${r.clinic?`<span class="muted">　${esc(r.clinic)}</span>`:''}</div>${proBlockHTML(r)}</div>`).join(''):'<p class="muted small">沒有記錄</p>'}
+  ${latestLabs.length?`<h3>最近的檢驗數值</h3><table class="rtable sumt pro-lab"><thead><tr><th>項目</th><th>數值</th><th>參考範圍</th><th>日期</th></tr></thead><tbody>${latestLabs.slice(0,24).map(x=>{const fl=labFlag(x.value,x.ref);return `<tr class="${fl?'flag':''}"><td>${esc(x.item)}</td><td><b>${esc(x.value)}</b> ${esc(x.unit||'')}${fl?` <span class="pro-fl ${fl}">${fl==='H'?'偏高':'偏低'}</span>`:''}</td><td>${esc(x.ref||'')}</td><td style="white-space:nowrap">${esc(x.date)}</td></tr>`}).join('')}</tbody></table>`:''}
+  ${prevList.length?`<h3>疫苗與驅蟲</h3><table class="rtable sumt"><thead><tr><th>項目</th><th>上次</th><th>下次到期</th></tr></thead><tbody>${prevList.map(r=>`<tr><td>${esc(r.title)}${(r.pro||{}).vac_lot?` <span class="muted small">批號 ${esc(r.pro.vac_lot)}</span>`:''}</td><td style="white-space:nowrap">${esc(r.date)}</td><td style="white-space:nowrap">${r.next_due&&!r.done?esc(r.next_due)+(r.next_due<todayStr()?'（已過期）':''):'—'}</td></tr>`).join('')}</tbody></table>`:''}
+  <p class="muted small sum-foot">以上由飼主在汪喵回家健康手冊自行記錄，僅供看診參考，請以獸醫師診斷為準。產生於 ${esc(String(d.generated_at||new Date().toISOString()).slice(0,10))}</p></div>`}
+async function renderPetSummary(id){const _n=navId;
+  if(!requireLogin())return;
+  const [{data:p},{data:recs},{data:meds},{data:shares}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).neq('kind','grooming').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(60),sb.from('pet_meds').select('*').eq('pet_id',id).eq('active',true).order('kind').order('created_at'),sb.from('pet_shares').select('code,expires_at,views').eq('pet_id',id).gt('expires_at',new Date().toISOString()).limit(1)]);
+  if(_n!==navId)return;
+  if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}
+  setTitle(p.name+' 看診摘要');
+  const d={pet:{...p,photo:(p.photos||[])[0]},meds:meds||[],records:recs||[]};
+  const sh=(shares||[])[0];
+  (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><a class="btn ghost sm" href="#/pet/${id}">‹ 回 ${esc(p.name)}</a><button type="button" class="btn sm" id="sumShare">${ic('share')} 分享給獸醫</button><button type="button" class="btn sm ghost app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button></div>
+  <div class="noprint notice sum-tip"><b>急診、換醫院時用</b>把這頁直接給醫生看，或按「分享給獸醫」傳連結。${!p.allergies&&!p.conditions?` 建議先到 <a href="#/pet/${id}/edit">毛孩資料</a> 填上過敏和慢性病。`:''}</div>
+  <div id="sumShareBox" class="noprint">${sh?shareBoxHTML(sh):''}</div>
+  ${summaryHTML(d)}`;
+  const bindStop=()=>{const b=$('#sumStop');if(b)b.onclick=async()=>{if(!await askSheet({title:'停止分享？',body:'已經傳出去的連結會馬上失效，獸醫就看不到了。',ok:'停止分享',danger:true}))return;const {error}=await sb.from('pet_shares').delete().eq('pet_id',id);if(error)return toast('沒有成功：'+friendlyErr(error.message));$('#sumShareBox').innerHTML='';toast('已停止分享')}};
+  const showBox=async s=>{$('#sumShareBox').innerHTML=shareBoxHTML(s);bindStop();bindShareCopy(s);try{await loadScript(LIB.qr);const q=$('#sumQr');if(q&&window.QRCode){q.innerHTML='';new QRCode(q,{text:vetShareUrl(s.code),width:160,height:160,correctLevel:QRCode.CorrectLevel.M})}}catch(_){}};
+  if(sh)showBox(sh);
+  $('#sumShare').onclick=once(async()=>{const {data,error}=await sb.rpc('pet_share_create',{p_pet:id,p_days:30});if(error){__submitting=false;return toast('沒有成功：'+friendlyErr(error.message))}await showBox({code:data.code,expires_at:data.expires_at,views:0});__submitting=false;
+    const u=vetShareUrl(data.code);if(navigator.share)navigator.share({title:p.name+' 看診摘要',text:p.name+' 的看診摘要（過敏、用藥、最近看診）',url:u}).catch(()=>{})});
+}
+function vetShareUrl(code){return CONFIG.SITE_URL+'#/vet/'+code}
+function shareBoxHTML(s){return `<div class="card sum-share"><div id="sumQr" class="sum-qr"></div><div><b>給獸醫的連結</b><p class="small muted" style="margin:2px 0 8px">醫生用手機掃 QR 碼或打開連結就能看，不用登入。${esc(String(s.expires_at).slice(0,10))} 前有效${s.views?`，已被打開 ${s.views} 次`:''}。</p>
+  <div class="sum-url"><input readonly value="${esc(vetShareUrl(s.code))}" aria-label="分享連結"><button type="button" class="btn sm" id="sumCopy">${ic('link')} 複製</button></div>
+  <button type="button" class="linkbtn danger-text small" id="sumStop">停止分享</button></div></div>`}
+function bindShareCopy(s){const b=$('#sumCopy');if(b)b.onclick=async()=>{try{await navigator.clipboard.writeText(vetShareUrl(s.code));toast('已複製連結')}catch(_){$('#sumShareBox input').select()}}}
+async function renderVetShare(code){const _n=navId;setTitle('看診摘要');
+  (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div>';
+  const {data,error}=await sb.rpc('pet_share_get',{p_code:code});
+  if(_n!==navId)return;
+  if(error){(_n===navId?app:_void).innerHTML=netErrHTML();return}
+  if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">這個看診摘要的連結已經過期，或飼主已經停止分享。<br>請飼主在汪喵回家 App 重新產生一次。</div>';return}
+  setTitle(data.pet.name+' 看診摘要');
+  (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><button type="button" class="btn sm ghost app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button><span class="muted small">飼主分享給您的看診摘要・${esc(String(data.expires_at).slice(0,10))} 前有效</span></div>${summaryHTML(data)}`;
+}
+
 async function renderPetPrint(id){const _n=navId;
   if(!requireLogin())return;
   const [{data:p},{data:recs},{data:pmeds}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).eq('active',true).order('kind').order('created_at')]);
@@ -10619,7 +10822,7 @@ async function renderPetPrint(id){const _n=navId;
   const rs=recs||[];const ph=p.photos?.[0];
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
   const weights=rs.filter(r=>r.weight_kg);
-  const row=r=>`<tr><td style="white-space:nowrap">${r.date}</td><td style="white-space:nowrap">${(REC_KINDS[r.kind]||[,'其他'])[1]}</td><td><b>${esc(r.title)}</b>${r.notes?`<div class="small" style="white-space:pre-wrap;color:var(--ink-2)">${esc(r.notes)}</div>`:''}</td><td>${esc(r.clinic||'')}</td></tr>`;
+  const row=r=>`<tr><td style="white-space:nowrap">${r.date}</td><td style="white-space:nowrap">${(REC_KINDS[r.kind]||[,'其他'])[1]}</td><td><b>${esc(r.title)}</b>${proBlockHTML(r)}</td><td>${esc(r.clinic||'')}</td></tr>`;
   (_n===navId?app:_void).innerHTML=`<div class="noprint" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><a class="btn ghost sm" href="#/pet/${id}">← 返回</a><button class="btn sm app-hide" onclick="window.print()">${ic("printer")} 列印／存成 PDF</button><span class="muted small" style="align-self:center">看診時直接把這頁給獸醫看也可以</span></div>
   <div class="card printsheet">
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
@@ -10628,7 +10831,8 @@ async function renderPetPrint(id){const _n=navId;
       <p style="margin:4px 0">${esc([sp(p.species).name,p.breed,SEX[p.sex],p.colour,p.birthday?`生日 ${p.birthday}（${petAge(p.birthday)}）`:''].filter(Boolean).join('、'))}</p>
       <p class="small" style="margin:0">晶片：${p.has_chip?(esc(p.chip_no)||'有'):'無'}　結紮：${p.neutered===true?'是':p.neutered===false?'否':'未填'}${weights.length?`　最新體重：${weights[0].weight_kg} kg（${weights[0].date}）`:''}</p></div>
     </div>
-    ${p.notes?`<h3>過敏、慢性病與注意事項</h3><p style="white-space:pre-wrap">${esc(p.notes)}</p>`:''}
+    ${p.allergies?`<div class="sum-alert"><b>⚠️ 過敏</b>${esc(p.allergies)}</div>`:''}${p.conditions?`<h3>慢性病／病史</h3><p style="white-space:pre-wrap">${esc(p.conditions)}</p>`:''}${p.blood_type?`<p class="small">血型：${esc(p.blood_type)}</p>`:''}
+    ${p.notes?`<h3>注意事項</h3><p style="white-space:pre-wrap">${esc(p.notes)}</p>`:''}
     ${curMeds.length?`<h3>目前用藥與保養品</h3><table class="rtable"><thead><tr><th>名稱</th><th>類別</th><th>劑量與頻率</th><th>用途／期間</th></tr></thead><tbody>${curMeds.map(x=>`<tr><td><b>${esc(x.name)}</b>${x.clinic?`<div class="small">${esc(x.clinic)}</div>`:''}</td><td style="white-space:nowrap">${x.kind==='supplement'?'保養品':'藥品'}</td><td>${esc(medLine(x)||'—')}</td><td>${esc([x.purpose,`${x.start_date} 起`,x.end_date?`到 ${x.end_date}`:'持續'].filter(Boolean).join('，'))}${x.notes?`<div class="small">${esc(x.notes)}</div>`:''}</td></tr>`).join('')}</tbody></table>`:''}
     ${due.length?`<h3>待辦／到期日</h3><ul style="margin:0;padding-left:20px">${due.map(r=>`<li>${r.next_due}　${esc(r.title)}${r.next_due<todayStr()?'（已過期）':''}</li>`).join('')}</ul>`:''}
     ${['vaccine','deworm','vet','surgery','med'].map(k=>{const list=rs.filter(r=>r.kind===k);return list.length?`<h3>${REC_KINDS[k][1]}紀錄</h3><table class="rtable"><thead><tr><th>日期</th><th>類別</th><th>項目與說明</th><th>醫院</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table>`:''}).join('')}
