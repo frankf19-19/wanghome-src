@@ -3237,6 +3237,17 @@ html[data-theme=dark] .docs-ask{background:#3A3016;border-color:#6B5822;color:#F
 html[data-theme=dark] .ha-box{background:#3B1C17;color:#F8D9D3}html[data-theme=dark] .ha-box small{color:#E8B7AE}
 @media print{.sum-alert{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 .rtable.sumt{table-layout:auto}.rtable.sumt th,.rtable.sumt td{width:auto!important;display:table-cell!important;padding:6px 8px}.pro-blk .rtable.sumt{font-size:13.5px}
+.cl-intro ol{padding-left:20px;margin:8px 0 12px}.cl-intro li{margin:6px 0}.cl-code{display:flex;gap:8px}.cl-code input{flex:1;min-width:0;font-size:22px;letter-spacing:.2em;text-transform:uppercase;text-align:center;padding:10px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink)}
+.cl-pets{display:flex;flex-direction:column;gap:8px}.cl-pet{display:flex;align-items:center;gap:12px;background:var(--sheet);border-radius:16px;padding:10px 14px;color:var(--ink);text-decoration:none;box-shadow:var(--lift)}.cl-pet>span:nth-child(2){flex:1;min-width:0}.cl-pet small{display:block;color:var(--ink-3)}
+.cl-av{width:48px;height:48px;border-radius:50%;overflow:hidden;flex:none;display:grid;place-items:center;background:var(--paper)}.cl-av img{width:100%;height:100%;object-fit:cover}
+.cl-vrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;align-items:baseline}.cl-vrow:last-child{border-bottom:0}
+.cl-vrow2{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}.cl-vrow2:last-child{border-bottom:0}.cl-vrow2>a:first-child,.cl-vrow2>span:first-child{flex:1;min-width:0;color:var(--ink);text-decoration:none}
+.cl-codecard{text-align:center}.lc-code{font-size:44px;font-weight:900;letter-spacing:.18em;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.tag.cv-tag{background:#E3F1FF;color:#1D4ED8;font-size:12px}html[data-theme=dark] .tag.cv-tag{background:#1C2E4A;color:#BFD7FF}
+.visdoc .vd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:10px}.vd-head small{display:block;color:var(--ink-3);font-size:13px}.vd-clinic{font-size:20px}.vd-t{font-size:22px;font-weight:900;white-space:nowrap}
+.vd-kv{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px}.vd-kv th{text-align:left;color:var(--ink-3);font-weight:700;padding:5px 6px;white-space:nowrap;width:1%}.vd-kv td{padding:5px 6px;border-bottom:1px solid var(--line)}
+@media(max-width:520px){.vd-kv tr{display:grid;grid-template-columns:auto 1fr}.vd-kv th,.vd-kv td{width:auto}}
+.vd-sec{margin:8px 0}.vd-sec>b{display:block;font-size:14px;color:var(--ink-3)}.vd-sec p{margin:2px 0}.vd-sign{display:flex;align-items:flex-end;gap:8px;margin:28px 0 10px}.vd-line{flex:0 0 200px;border-bottom:1px solid var(--ink);height:28px}
 </style>
 </head>
 <body>
@@ -3311,7 +3322,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.37.0';
+const BUILD = 'v7.38.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4198,6 +4209,14 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/print$/)))return renderPetPrint(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/summary$/)))return renderPetSummary(m[1]);
   if((m=path.match(/^#\/vet\/([A-Za-z0-9]{8,24})$/)))return renderVetShare(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/clinics$/)))return renderPetClinics(m[1]);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/visit\/([0-9a-f-]{36})$/)))return renderVisitDoc(m[2],m[1]);
+  if(path==='#/clinic')return renderClinic();
+  if(path==='#/clinic/apply')return renderClinicApply();
+  if((m=path.match(/^#\/clinic\/link\/([A-Za-z0-9]{6})$/)))return renderClinicLinkCode(m[1].toUpperCase());
+  if((m=path.match(/^#\/clinic\/pet\/([0-9a-f-]{36})$/)))return renderClinicPet(m[1]);
+  if((m=path.match(/^#\/clinic\/visit\/(new|[0-9a-f-]{36})$/)))return renderClinicVisit(m[1]);
+  if((m=path.match(/^#\/clinic\/visit\/([0-9a-f-]{36})\/print$/)))return renderVisitDoc(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/album$/)))return renderAlbum(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/recap\/(\d{4}-Q[1-4])$/)))return renderRecap(m[1],m[2]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/record\/(new|[0-9a-f-]{36})$/)))return renderRecord(m[1],m[2]);
@@ -7801,7 +7820,7 @@ async function renderAdmin(){const _n=navId;
   if(_n!==navId)return;
   if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['rehome','民眾送養'],['bans','停權名單']];
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['rehome','民眾送養'],['clinic','醫院審核'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
@@ -7820,6 +7839,7 @@ async function renderAdmin(){const _n=navId;
     if(t==='members')return admMembers(box,qq.q||'');
     if(t==='bans')return admBans(box);
     if(t==='rehome')return admRehome(box);
+    if(t==='clinic')return admClinics(box);
     return admList(box,t,qq.q||'',qq.f||'all')};
   // 切換分頁：原地換內容，不重新整理整頁、不跳回頂端
   strip.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{const t=b.dataset.tab;if(b.classList.contains('on'))return;
@@ -9969,6 +9989,7 @@ function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'au
   return `<div class="morelist">
   <p class="mlh">常用</p><div class="mgroup">${me()?`<a class="mrow" href="#/chats"><span class="mri c4">${ic('chat')}</span><span class="mrl">訊息與好友</span>${__chatN?`<span class="mrv mrbadge">${__chatN>99?'99+':__chatN}</span>`:''}${ic('chev','mrc')}</a>`:''}${row('#/fav','mark','收藏','c1')}${row('#/rehome?tab=mine','home','我的送養與申請','c4')}${row('#/intake','search','收容所最近新收','c2')}</div>
   <p class="mlh">學習</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}</div>
+  <p class="mlh">專業</p><div class="mgroup">${row('#/clinic','steth','動物醫院專區','c2')}</div>
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${row('#/contact','mail','聯絡我們','c3')}${(CONFIG.SOCIAL||[]).length?`<div class="mrow msoc"><span class="mri c2">${ic('heart')}</span><span class="mrl">追蹤我們</span><span class="msoc-i">${CONFIG.SOCIAL.map(x=>`<a href="${x.u}" target="_blank" rel="noopener" aria-label="追蹤 ${esc(x.n)}">${ic(x.k)}</a>`).join('')}</span></div>`:''}${IS_APP?'':`<a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a>`}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
   <p class="mlinks">${IS_APP?'':'<a href="#/thanks">贊助感謝牆</a>・'}<a href="#/terms">使用條款</a>・<a href="#/privacy">隱私權政策</a></p>
@@ -10383,15 +10404,16 @@ async function renderPetView(id){const _n=navId;
   if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('pet');
   const [{data:p,error:pe},{data:recs},{data:medsAll}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).order('created_at')]);
   if(pe){(_n===navId?app:_void).innerHTML=netErrHTML();return}
+  let cvis=[];{const {data}=await sb.rpc('pet_clinic_visits',{p_pet:id});cvis=(data||[]).map(visitAsRecord)}
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   if(_n!==navId)return;
   setTitle(p.name);
   const meds=(medsAll||[]).filter(x=>x.active),medsOff=(medsAll||[]).filter(x=>!x.active);
   let mlogs=[];if(meds.length){const {data,error}=await sb.from('pet_med_logs').select('id,med_id,slot,given_at').in('med_id',meds.map(x=>x.id)).gte('given_at',todayStartISO());mlogs=data||[];if(error)medLogFail(_n)}
   const medToday=meds.map(x=>medTodayHTML(x,mlogs)).filter(Boolean);
-  const rs=recs||[];
+  const rs=(recs||[]).concat(cvis).sort((a,b)=>b.date.localeCompare(a.date)||String(b.created_at||'').localeCompare(String(a.created_at||'')));
   const filter=qs(location.hash).k||'';
-  const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
+  const due=rs.filter(r=>r.next_due&&!r.done&&!r.verified).sort((a,b)=>a.next_due.localeCompare(b.next_due));
   let askRec=null;try{const aid=sessionStorage.getItem('wh_ask_docs');if(aid){sessionStorage.removeItem('wh_ask_docs');askRec=rs.find(x=>x.id===aid)||null}}catch(_){}
   let calPrompt=null;try{const cid=sessionStorage.getItem('wh_cal_prompt');if(cid){sessionStorage.removeItem('wh_cal_prompt');calPrompt=rs.find(x=>x.id===cid&&x.next_due&&!x.done)||null}}catch(_){}
   const weights=rs.filter(r=>r.weight_kg).map(r=>({date:r.date,w:r.weight_kg})).sort((a,b)=>a.date.localeCompare(b.date));
@@ -10417,6 +10439,7 @@ async function renderPetView(id){const _n=navId;
       <div class="actionbar pv-acts">
         <a class="btn" href="#/pet/${id}/record/new">${ic("plus")} 新增紀錄</a>
         <a class="btn ghost" href="#/pet/${id}/summary">${ic("steth")} 看診摘要</a>
+        <a class="btn ghost" href="#/pet/${id}/clinics" style="grid-column:1/-1">${ic("link")} 讓醫院把病歷傳進來</a>
         <a class="btn ghost" href="#/pet/${id}/print" style="grid-column:1/-1">${ic("clipboard")} 完整健康資料</a>
         <a class="btn ghost" href="#/pals/card/${id}" style="grid-column:1/-1">${ic("paw")} 放上毛孩名片牆，找玩伴</a>
         <a class="btn ghost d-only" href="#/pet/${id}/edit" style="grid-column:1/-1">${ic("edit")} 編輯毛孩資料</a>
@@ -10449,8 +10472,8 @@ async function renderPetView(id){const _n=navId;
   ${rs.some(r=>(r.files||[]).length)?`<details class="mg-sec docs-sec" id="docsSec"><summary>${ic("image")} 病歷文件 <span class="muted small">${rs.reduce((a,r)=>a+(r.files||[]).length,0)} 張，依種類整理</span></summary><div class="mg-body" id="docsBody"><p class="muted small">載入中…</p></div></details>`:''}
   <h2>${ic("clipboard")} 健康紀錄</h2>
   <div class="seg" style="margin-bottom:12px"><button type="button" data-k="" class="${!filter?'on':''}">全部</button>${Object.entries(REC_KINDS).filter(([k])=>rs.some(r=>r.kind===k)).map(([k,[e,t]])=>`<button type="button" data-k="${k}" class="${filter===k?'on':''}">${recIc(k)} ${t}</button>`).join('')}</div>
-  ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl"><button type="button" class="trash-btn tl-del" data-del-rec="${r.id}" aria-label="刪除 ${esc(r.title)}">${ic('trash')}<span>刪除</span></button><div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
-      <a href="#/pet/${id}/record/${r.id}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}</div>
+  ${shown.length?Object.entries(byYear).sort((a,b)=>b[0].localeCompare(a[0])).map(([y,list])=>`<h3>${y}</h3><div class="timeline">${list.map(r=>`<div class="tl">${r.verified?'':`<button type="button" class="trash-btn tl-del" data-del-rec="${r.id}" aria-label="刪除 ${esc(r.title)}">${ic('trash')}<span>刪除</span></button>`}<div class="dot start" style="background:var(--sheet);color:var(--ink);box-shadow:0 0 0 2px var(--line),0 0 0 4px var(--paper);font-size:14px">${recIc(r.kind)}</div>
+      <a href="${r.verified?`#/pet/${id}/visit/${r._visit}`:`#/pet/${id}/record/${r.id}`}" style="color:inherit;display:block"><div class="when">${r.date.slice(5).replace('-','/')}　${esc(r.title)}${r.verified?' <span class="tag cv-tag">🏥 醫院開立</span>':''}</div>
       <div class="where">${esc([(REC_KINDS[r.kind]||[,'其他'])[1],r.clinic,r.weight_kg?r.weight_kg+' kg':'',r.cost?'$'+r.cost.toLocaleString():''].filter(Boolean).join('、'))}</div>
       ${proLineHTML(r.pro)}
       ${r.notes?`<div class="note" style="white-space:pre-wrap">${esc(r.notes)}</div>`:''}
@@ -10775,7 +10798,7 @@ function summaryHTML(d){const p=d.pet||{},meds=d.meds||[],rs=d.records||[];const
   ${p.conditions?`<div class="sum-box"><b>慢性病／病史</b><span class="pre">${esc(p.conditions)}</span></div>`:''}
   ${p.notes?`<div class="sum-box"><b>注意事項</b><span class="pre">${esc(p.notes)}</span></div>`:''}
   <h3>目前用藥與保養品</h3>${meds.length?`<table class="rtable sumt"><thead><tr><th>名稱</th><th>劑量與頻率</th><th>用途</th><th>開始</th></tr></thead><tbody>${meds.map(x=>`<tr><td><b>${esc(x.name)}</b>${x.kind==='supplement'?' <span class="muted small">保養品</span>':''}</td><td>${esc(medLine(x)||'')}</td><td>${esc(x.purpose||'')}</td><td style="white-space:nowrap">${esc(x.start_date||'')}</td></tr>`).join('')}</tbody></table>`:'<p class="muted small">沒有記錄</p>'}
-  <h3>最近看診</h3>${visits.length?visits.map(r=>`<div class="sum-visit"><div class="sv-h"><b>${esc(r.date)}</b>　${esc(r.title)}${r.clinic?`<span class="muted">　${esc(r.clinic)}</span>`:''}</div>${proBlockHTML(r)}</div>`).join(''):'<p class="muted small">沒有記錄</p>'}
+  <h3>最近看診</h3>${visits.length?visits.map(r=>`<div class="sum-visit"><div class="sv-h"><b>${esc(r.date)}</b>　${esc(r.title)}${r.clinic?`<span class="muted">　${esc(r.clinic)}</span>`:''}${r.verified?' <span class="tag cv-tag">🏥 醫院開立</span>':''}</div>${proBlockHTML(r)}</div>`).join(''):'<p class="muted small">沒有記錄</p>'}
   ${latestLabs.length?`<h3>最近的檢驗數值</h3><table class="rtable sumt pro-lab"><thead><tr><th>項目</th><th>數值</th><th>參考範圍</th><th>日期</th></tr></thead><tbody>${latestLabs.slice(0,24).map(x=>{const fl=labFlag(x.value,x.ref);return `<tr class="${fl?'flag':''}"><td>${esc(x.item)}</td><td><b>${esc(x.value)}</b> ${esc(x.unit||'')}${fl?` <span class="pro-fl ${fl}">${fl==='H'?'偏高':'偏低'}</span>`:''}</td><td>${esc(x.ref||'')}</td><td style="white-space:nowrap">${esc(x.date)}</td></tr>`}).join('')}</tbody></table>`:''}
   ${prevList.length?`<h3>疫苗與驅蟲</h3><table class="rtable sumt"><thead><tr><th>項目</th><th>上次</th><th>下次到期</th></tr></thead><tbody>${prevList.map(r=>`<tr><td>${esc(r.title)}${(r.pro||{}).vac_lot?` <span class="muted small">批號 ${esc(r.pro.vac_lot)}</span>`:''}</td><td style="white-space:nowrap">${esc(r.date)}</td><td style="white-space:nowrap">${r.next_due&&!r.done?esc(r.next_due)+(r.next_due<todayStr()?'（已過期）':''):'—'}</td></tr>`).join('')}</tbody></table>`:''}
   <p class="muted small sum-foot">以上由飼主在汪喵回家健康手冊自行記錄，僅供看診參考，請以獸醫師診斷為準。產生於 ${esc(String(d.generated_at||new Date().toISOString()).slice(0,10))}</p></div>`}
@@ -10785,7 +10808,8 @@ async function renderPetSummary(id){const _n=navId;
   if(_n!==navId)return;
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}
   setTitle(p.name+' 看診摘要');
-  const d={pet:{...p,photo:(p.photos||[])[0]},meds:meds||[],records:recs||[]};
+  let cvis=[];{const {data}=await sb.rpc('pet_clinic_visits',{p_pet:id});cvis=(data||[]).map(visitAsRecord)}
+  const d={pet:{...p,photo:(p.photos||[])[0]},meds:meds||[],records:(recs||[]).concat(cvis).sort((a,b)=>b.date.localeCompare(a.date))};
   const sh=(shares||[])[0];
   (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><a class="btn ghost sm" href="#/pet/${id}">‹ 回 ${esc(p.name)}</a><button type="button" class="btn sm" id="sumShare">${ic('share')} 分享給獸醫</button><button type="button" class="btn sm ghost app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button></div>
   <div class="noprint notice sum-tip"><b>急診、換醫院時用</b>把這頁直接給醫生看，或按「分享給獸醫」傳連結。${!p.allergies&&!p.conditions?` 建議先到 <a href="#/pet/${id}/edit">毛孩資料</a> 填上過敏和慢性病。`:''}</div>
@@ -10812,6 +10836,196 @@ async function renderVetShare(code){const _n=navId;setTitle('看診摘要');
   (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><button type="button" class="btn sm ghost app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button><span class="muted small">飼主分享給您的看診摘要・${esc(String(data.expires_at).slice(0,10))} 前有效</span></div>${summaryHTML(data)}`;
 }
 
+/* ============================================================
+   動物醫院專區（v1.99）：醫院申請與審核、飼主授權、醫院開病歷傳給飼主
+   ============================================================ */
+const CLINIC_ST={pending:['審核中','gray'],approved:['已通過','green'],rejected:['未通過','red'],suspended:['已停權','red']};
+async function myClinic(){const {data}=await sb.from('clinics').select('*').eq('owner_id',me().id).maybeSingle();return data||null}
+async function uploadClinicDoc(file){const blob=await compressImage(file,1600,.82);const path=`${me().id}/clinic/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;const {error}=await sb.storage.from('clinic-docs').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;return path}
+async function clinicDocUrls(paths){if(!paths||!paths.length)return {};const {data}=await sb.storage.from('clinic-docs').createSignedUrls(paths,3600);const m={};(data||[]).forEach(x=>{if(x.signedUrl)m[x.path]=x.signedUrl});return m}
+async function renderClinic(){const _n=navId;setTitle('動物醫院專區');
+  if(!requireLogin('動物醫院專區需要登入'))return;
+  (_n===navId?app:_void).innerHTML=pageSkel('pet');
+  const c=await myClinic();if(_n!==navId)return;
+  if(!c){(_n===navId?app:_void).innerHTML=`<h1>動物醫院專區</h1>
+    <div class="card cl-intro"><p><b>讓飼主的健康手冊，直接收到醫院開的病歷。</b></p>
+    <ol class="cl-steps"><li>醫院申請帳號，上傳<b>開業執照</b>和<b>獸醫師證書</b>，汪喵回家審核通過後就能使用。</li><li>飼主在 App 出示毛孩的連結碼（QR 碼），醫院掃一下就能幫這隻毛孩開病歷。</li><li>病歷照《獸醫師法》第 12 條要記載的項目填寫，開好會自動出現在飼主的健康手冊，也能直接列印病歷摘要。</li></ol>
+    <p class="small muted">完全免費。病歷只有這家醫院和飼主本人看得到；飼主可以隨時取消授權，取消後醫院已經開的病歷仍會保留在醫院這邊。</p>
+    <a class="btn block" href="#/clinic/apply">申請醫院帳號</a></div>`;return}
+  if(c.status!=='approved'){const [t,col]=CLINIC_ST[c.status]||['',''];(_n===navId?app:_void).innerHTML=`<h1>動物醫院專區</h1>
+    <div class="card"><p><b>${esc(c.name)}</b> <span class="tag ${col}">${t}</span></p>
+    ${c.status==='pending'?'<p>我們會盡快核對執照資料，通過後就能開始使用。通常 1～2 個工作天。</p>':''}
+    ${c.status==='rejected'?`<p>這次的申請沒有通過${c.review_note?`：${esc(c.review_note)}`:''}。修改資料後可以重新送出。</p>`:''}
+    ${c.status==='suspended'?`<p>這個醫院帳號目前已停權${c.review_note?`：${esc(c.review_note)}`:''}。有問題請<a href="#/contact">聯絡我們</a>。</p>`:''}
+    ${c.status!=='suspended'?'<a class="btn ghost block" href="#/clinic/apply">修改申請資料</a>':''}</div>`;return}
+  const [{data:pets},{data:visits}]=await Promise.all([sb.rpc('clinic_pets'),sb.from('clinic_visits').select('id,visit_date,title,pet_name,owner_name,vet_name,pet_id').eq('clinic_id',c.id).order('visit_date',{ascending:false}).order('created_at',{ascending:false}).limit(30)]);
+  if(_n!==navId)return;
+  const P=pets||[],V=visits||[];
+  (_n===navId?app:_void).innerHTML=`<h1>${esc(c.name)}</h1><p class="muted small">動物醫院專區・<a href="#/clinic/apply">醫院資料</a></p>
+  <div class="card cl-link"><b>${ic('camera')} 幫新的毛孩開病歷</b><p class="small muted" style="margin:4px 0 10px">請飼主打開汪喵回家 App → 毛孩頁 →「讓醫院把病歷傳進來」，出示 6 碼連結碼或 QR 碼。</p>
+    <form id="clCodeF" class="cl-code" onsubmit="return false"><input name="code" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="輸入 6 碼連結碼" aria-label="連結碼"><button class="btn">連結</button></form>
+    <button type="button" class="btn ghost block" id="clScan" style="margin-top:8px">${ic('camera')} 用相機掃 QR 碼</button></div>
+  <h2>${ic('paw')} 已授權的毛孩 <small class="muted">${P.length}</small></h2>
+  ${P.length?`<div class="cl-pets">${P.map(p=>`<a class="cl-pet" href="#/clinic/pet/${p.id}"><span class="cl-av ${p.photo?'':'noimg'}">${p.photo?thumbImg(p.photo,p.name):spIc(p.species)}</span><span><b>${esc(p.name)}</b><small>${esc([p.species==='cat'?'貓':'狗',p.breed].filter(Boolean).join('・'))}${p.last_visit?`・上次看診 ${esc(p.last_visit)}`:'・還沒有病歷'}</small></span>${ic('chev')}</a>`).join('')}</div>`:'<div class="empty-card"><b>還沒有毛孩</b><p class="small">飼主出示連結碼後，毛孩就會出現在這裡。</p></div>'}
+  ${V.length?`<h2>${ic('clipboard')} 最近開的病歷</h2><div class="card" style="padding:6px 16px">${V.map(v=>`<a class="cl-vrow" href="#/clinic/visit/${v.id}/print"><b>${esc(v.visit_date)}</b><span>${esc(v.pet_name)}・${esc(v.title)}</span><small class="muted">${esc(v.vet_name)}</small></a>`).join('')}</div>`:''}`;
+  $('#clCodeF').onsubmit=once(async e=>{e.preventDefault();const v=String(e.target.code.value||'').trim().toUpperCase();if(v.length!==6){__submitting=false;return toast('連結碼是 6 個字')}if(!await clinicLink(v))__submitting=false});
+  $('#clScan').onclick=()=>qrScanGeneric('把飼主的 QR 碼放進框框裡',t=>{const m=String(t||'').match(/#\/clinic\/link\/([A-Z0-9]{6})/i)||String(t||'').trim().match(/^([A-Z0-9]{6})$/i);return m?m[1].toUpperCase():null},code=>clinicLink(code),'這不是汪喵回家的醫院連結碼');
+}
+async function clinicLink(code){const {data,error}=await sb.rpc('clinic_link_pet',{p_code:code});if(error){toast(friendlyErr(error.message),4500);return false}__submitting=true;toast('已連結，可以開病歷了');location.hash='#/clinic/pet/'+data;return true}
+async function renderClinicLinkCode(code){const _n=navId;if(!requireLogin('請用醫院帳號登入'))return;
+  const {data:cid}=await sb.rpc('my_clinic_id');if(_n!==navId)return;
+  if(!cid){(_n===navId?app:_void).innerHTML=`<div class="empty">這是給動物醫院掃的連結碼。<br>如果你是飼主，請把這個 QR 碼給醫院掃；如果你是醫院，請先<a href="#/clinic">申請醫院帳號</a>。</div>`;return}
+  (_n===navId?app:_void).innerHTML='<div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>連結中…</div>';await clinicLink(code)}
+// 通用的 QR 掃描（parse 回傳碼或 null）
+async function qrScanGeneric(tip,parse,onHit,badMsg){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('這支手機的瀏覽器不能開相機，請改用輸入的',4500);return}
+  const el=document.createElement('div');el.className='lightbox qrscan';
+  el.innerHTML=`<video playsinline muted autoplay></video><div class="qs-frame" aria-hidden="true"></div><p class="qs-tip">${esc(tip)}</p><button type="button" class="lb-x" aria-label="關閉">✕</button>`;
+  let stream=null,stop=false,raf=0;const vid=el.querySelector('video');
+  const end=()=>{stop=true;cancelAnimationFrame(raf);try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}};
+  el.onclick=e=>{if(e.target.closest('.lb-x')){end();closeOverlay(el)}};
+  openOverlay(el);const obs=new MutationObserver(()=>{if(!el.isConnected){end();obs.disconnect()}});obs.observe(document.body,{childList:true});
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})}catch(e){end();closeOverlay(el);toast('沒有相機權限，請改用輸入的',4500);return}
+  if(stop){end();return}vid.srcObject=stream;try{await vid.play()}catch(_){}
+  let det=null;try{if('BarcodeDetector' in window&&(await BarcodeDetector.getSupportedFormats()).includes('qr_code'))det=new BarcodeDetector({formats:['qr_code']})}catch(_){}
+  if(!det)try{await loadScript(LIB.jsqr)}catch(_){}
+  const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});let last=0,warned=0;
+  const hit=txt=>{const v=parse(txt);if(!v){if(Date.now()-warned>2500){warned=Date.now();toast(badMsg,2000)}return false}end();closeOverlay(el);if(navigator.vibrate)try{navigator.vibrate(40)}catch(_){}setTimeout(()=>onHit(v),300);return true};
+  const loop=async t=>{if(stop)return;raf=requestAnimationFrame(loop);if(t-last<180||vid.readyState<2)return;last=t;
+    try{if(det){const r=await det.detect(vid);for(const c of r)if(hit(c.rawValue))return}
+      else if(window.jsQR){const w=Math.min(640,vid.videoWidth),h=Math.round(vid.videoHeight*w/vid.videoWidth);cv.width=w;cv.height=h;cx.drawImage(vid,0,0,w,h);const c=jsQR(cx.getImageData(0,0,w,h).data,w,h,{inversionAttempts:'dontInvert'});if(c)hit(c.data)}}catch(_){}};
+  raf=requestAnimationFrame(loop)}
+async function renderClinicApply(){const _n=navId;setTitle('申請醫院帳號');if(!requireLogin('申請醫院帳號需要登入'))return;
+  const c=await myClinic()||{docs:[]};if(_n!==navId)return;if(c.status==='suspended'){goReplace('#/clinic');return}
+  let docs=(c.docs||[]).slice();const urls=await clinicDocUrls(docs);
+  (_n===navId?app:_void).innerHTML=`<p class="small"><a class="backlink" href="#/clinic">‹ 動物醫院專區</a></p><h1>${c.id?'醫院資料':'申請醫院帳號'}</h1>
+  <p class="muted small">資料送出後由汪喵回家人工核對；修改資料也需要重新審核。執照照片只有你和汪喵回家看得到。</p>
+  <form class="card" id="caF" onsubmit="return false">
+    <label class="f"><span>醫院名稱 <i class="req">*</i></span><input name="name" required minlength="2" maxlength="60" value="${esc(c.name||'')}"></label>
+    <div class="row2"><label class="f"><span>縣市</span><select name="city"><option value="">選擇</option>${Object.keys(TW).map(x=>`<option ${c.city===x?'selected':''}>${x}</option>`).join('')}</select></label><label class="f"><span>電話 <i class="req">*</i></span><input name="phone" type="tel" required minlength="6" maxlength="30" value="${esc(c.phone||'')}"></label></div>
+    <label class="f"><span>地址 <i class="req">*</i></span><input name="address" required minlength="4" maxlength="120" value="${esc(c.address||'')}"></label>
+    <label class="f"><span>動物診療機構開業執照字號 <i class="req">*</i></span><input name="license_no" required minlength="2" maxlength="60" value="${esc(c.license_no||'')}"></label>
+    <div class="row2"><label class="f"><span>負責獸醫師 <i class="req">*</i></span><input name="vet_name" required maxlength="30" value="${esc(c.vet_name||'')}"></label><label class="f"><span>獸醫師證書字號 <i class="req">*</i></span><input name="vet_license" required minlength="2" maxlength="60" value="${esc(c.vet_license||'')}"></label></div>
+    <h3 class="fsec">執照照片 <small>開業執照、獸醫師證書，最多 4 張</small></h3>
+    <div class="photos-preview" id="caPv"></div>
+    <label class="uploadbtn">${ic('image')} 加入照片<input type="file" id="caIn" accept="image/*" multiple></label>
+    <div class="submitbar row"><button class="btn" id="caSave">${c.id?'送出修改':'送出申請'}</button><a class="btn ghost" href="#/clinic">取消</a></div>
+  </form>`;
+  const pv=$('#caPv');const draw=()=>{pv.innerHTML='';docs.forEach((p,i)=>{const d=document.createElement('div');if(urls[p])d.style.backgroundImage=`url('${urls[p]}')`;const x=document.createElement('button');x.type='button';x.textContent='×';x.setAttribute('aria-label','移除');x.onclick=()=>{docs.splice(i,1);draw()};d.appendChild(x);pv.appendChild(d)})};draw();
+  $('#caIn').onchange=async e=>{for(const f of [...e.target.files].slice(0,4-docs.length)){toast('上傳中…');try{const p=await uploadClinicDoc(f);docs.push(p);urls[p]=URL.createObjectURL(f)}catch(err){toast('上傳失敗：'+friendlyErr(err.message))}}draw();e.target.value=''};
+  $('#caF').onsubmit=once(async e=>{e.preventDefault();if(!docs.length){__submitting=false;return toast('請上傳開業執照照片')}const fd=new FormData(e.target);const p={docs};['name','city','address','phone','license_no','vet_name','vet_license'].forEach(k=>p[k]=String(fd.get(k)||'').trim());
+    const {error}=await sb.rpc('clinic_apply',{p});if(error){__submitting=false;return toast('送出失敗：'+friendlyErr(error.message),4500)}__submitting=true;toast('已送出，審核通過後就能開始使用',4000);goReplace('#/clinic')});
+}
+async function renderClinicPet(petId){const _n=navId;if(!requireLogin())return;
+  (_n===navId?app:_void).innerHTML=pageSkel('pet');
+  const [{data:d},{data:cid}]=await Promise.all([sb.rpc('clinic_pet',{p_pet:petId}),sb.rpc('my_clinic_id')]);if(_n!==navId)return;
+  if(!d){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻毛孩，或飼主已經取消授權。<br><a href="#/clinic">回動物醫院專區</a></div>';return}
+  const {data:vs}=await sb.from('clinic_visits').select('id,visit_date,title,vet_name,pro,shared').eq('pet_id',petId).eq('clinic_id',cid).order('visit_date',{ascending:false}).order('created_at',{ascending:false});if(_n!==navId)return;
+  const p=d.pet;setTitle(p.name+'（醫院）');const age=p.birthday?petAge(p.birthday):p.age_text||'';
+  (_n===navId?app:_void).innerHTML=`<p class="small"><a class="backlink" href="#/clinic">‹ 動物醫院專區</a></p>
+  <div class="card"><div class="sum-top">${p.photo?`<img src="${esc(safeU(p.photo))}" alt="">`:''}<div><h1>${esc(p.name)}</h1><p>${esc([p.species==='cat'?'貓':'狗',p.breed,SEX[p.sex],p.colour,age].filter(Boolean).join('・'))}</p>
+    <p class="small">結紮：${p.neutered===true?'是':p.neutered===false?'否':'未填'}　晶片：${p.has_chip?(esc(p.chip_no)||'有'):'無／未填'}${p.blood_type?`　血型：${esc(p.blood_type)}`:''}${d.weight?`　體重：${d.weight.kg} kg（${d.weight.date}）`:''}</p></div></div>
+    ${p.allergies?`<div class="sum-alert"><b>⚠️ 過敏</b>${esc(p.allergies)}</div>`:''}${p.conditions?`<div class="sum-box"><b>慢性病／病史</b><span class="pre">${esc(p.conditions)}</span></div>`:''}
+    ${(d.meds||[]).length?`<div class="sum-box"><b>飼主記錄的目前用藥</b>${d.meds.map(x=>`<span>${esc(x.name)}　<span class="muted">${esc(medLine(x)||'')}${x.purpose?'・'+esc(x.purpose):''}</span></span>`).join('')}</div>`:''}
+    <p class="muted small" style="margin:8px 0 0">以上是飼主自行填寫的資料，僅供參考。</p>
+    <a class="btn block" href="#/clinic/visit/new?pet=${petId}" style="margin-top:12px">${ic('plus')} 開新病歷</a></div>
+  <h2>${ic('clipboard')} 本院病歷 <small class="muted">${(vs||[]).length}</small></h2>
+  ${(vs||[]).length?`<div class="card" style="padding:6px 16px">${vs.map(v=>`<div class="cl-vrow2"><a href="#/clinic/visit/${v.id}/print"><b>${esc(v.visit_date)}</b>　${esc(v.title)}${(v.pro?.dx||[]).length?`<small class="muted">　${esc(v.pro.dx.join('、'))}</small>`:''}</a><span class="muted small">${esc(v.vet_name)}${v.shared?'':'・未傳給飼主'}</span><a class="btn sm ghost" href="#/clinic/visit/${v.id}">修改</a></div>`).join('')}</div>`:'<p class="muted small">還沒有病歷</p>'}`;
+}
+async function renderClinicVisit(id){const _n=navId;if(!requireLogin())return;
+  const c=await myClinic();if(_n!==navId)return;if(!c||c.status!=='approved'){goReplace('#/clinic');return}
+  let v,petId;
+  if(id==='new'){petId=qs(location.hash).pet;const {data:d}=await sb.rpc('clinic_pet',{p_pet:petId});if(!d){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻毛孩，或飼主已經取消授權。</div>';return}
+    const {data:prev}=await sb.from('clinic_visits').select('owner_name,owner_address,vet_name').eq('pet_id',petId).eq('clinic_id',c.id).order('created_at',{ascending:false}).limit(1);const pv=(prev||[])[0]||{};
+    v={visit_date:todayStr(),pet_id:petId,pet_name:d.pet.name,species:d.pet.species||'dog',breed:d.pet.breed||'',owner_name:pv.owner_name||'',owner_address:pv.owner_address||'',vet_name:pv.vet_name||c.vet_name,weight_kg:'',pro:{},shared:true}}
+  else{const {data}=await sb.from('clinic_visits').select('*').eq('id',id).maybeSingle();if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這份病歷</div>';return}v=data;petId=v.pet_id}
+  if(_n!==navId)return;setTitle((id==='new'?'開新病歷':'修改病歷')+'－'+v.pet_name);
+  (_n===navId?app:_void).innerHTML=`<p class="small"><a class="backlink" href="${petId?'#/clinic/pet/'+petId:'#/clinic'}">‹ 回 ${esc(v.pet_name)}</a></p><h1>${id==='new'?'開新病歷':'修改病歷'}</h1>
+  <form class="card" id="cvF" onsubmit="return false">
+    <h3 class="fsec">看診資料</h3>
+    <div class="row2"><label class="f"><span>看診日期 <i class="req">*</i></span><input type="date" name="visit_date" required max="${todayStr()}" value="${esc(v.visit_date)}"></label><label class="f"><span>獸醫師 <i class="req">*</i></span><input name="vet_name" required maxlength="30" value="${esc(v.vet_name||'')}"></label></div>
+    <label class="f"><span>看診原因 <i class="req">*</i></span><input name="title" required maxlength="60" value="${esc(v.title||'')}" placeholder="例：皮膚癢回診、年度健康檢查"></label>
+    <h3 class="fsec">飼主與動物 <small>獸醫師法第 12 條要記載的項目</small></h3>
+    <div class="row2"><label class="f"><span>飼主姓名 <i class="req">*</i></span><input name="owner_name" required maxlength="30" value="${esc(v.owner_name||'')}"></label><label class="f"><span>飼主地址 <i class="req">*</i></span><input name="owner_address" required minlength="2" maxlength="120" value="${esc(v.owner_address||'')}"></label></div>
+    <div class="row3"><label class="f"><span>動物名字</span><input name="pet_name" required maxlength="30" value="${esc(v.pet_name||'')}"></label><label class="f"><span>種類</span><select name="species"><option value="dog" ${v.species!=='cat'?'selected':''}>犬</option><option value="cat" ${v.species==='cat'?'selected':''}>貓</option></select></label><label class="f"><span><b class="lbl">體重</b><small class="hint">kg</small></span><input type="number" name="weight_kg" step="0.01" min="0.01" max="199.99" inputmode="decimal" value="${v.weight_kg??''}"></label></div>
+    <label class="f"><span>品種</span><input name="breed" maxlength="50" value="${esc(v.breed||'')}"></label>
+    ${proFormHTML(v.pro)}
+    <label class="f"><span><b class="lbl">其他備註</b></span><textarea name="notes" maxlength="2000">${esc(v.notes||'')}</textarea></label>
+    <div class="row2"><label class="f"><span>下次回診</span><input type="date" name="next_due" value="${esc(v.next_due||'')}"></label><label class="f"><span>回診說明</span><input name="next_due_note" maxlength="60" value="${esc(v.next_due_note||'')}" placeholder="例：複查血檢"></label></div>
+    <label class="chk"><input type="checkbox" name="shared" ${v.shared!==false?'checked':''}> 傳到飼主的健康手冊（飼主看得到這份病歷）</label>
+    <div class="submitbar row"><button class="btn" id="cvSave">${id==='new'?'儲存病歷':'儲存修改'}</button><a class="btn ghost" href="${petId?'#/clinic/pet/'+petId:'#/clinic'}">取消</a></div>
+  </form>`;
+  const f=$('#cvF');$('#proSec').open=true;const proGet=proBind(f,v.pro);
+  f.onsubmit=once(async e=>{e.preventDefault();const fd=new FormData(f);const t=k=>String(fd.get(k)||'').trim();
+    const row={visit_date:t('visit_date'),vet_name:t('vet_name'),title:t('title'),owner_name:t('owner_name'),owner_address:t('owner_address'),pet_name:t('pet_name'),species:t('species')||'dog',breed:t('breed')||null,
+      weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,pro:proGet(),notes:t('notes')||null,next_due:t('next_due')||null,next_due_note:t('next_due_note')||null,shared:!!fd.get('shared'),updated_at:new Date().toISOString()};
+    if(row.next_due&&row.next_due<row.visit_date){__submitting=false;return toast('下次回診不能早於看診日期')}
+    const res=id==='new'?await sb.from('clinic_visits').insert({...row,clinic_id:c.id,pet_id:petId}).select('id').single():await sb.from('clinic_visits').update(row).eq('id',id).select('id').single();
+    if(res.error){__submitting=false;return toast('儲存失敗：'+friendlyErr(res.error.message),4500)}
+    __submitting=true;toast(row.shared?'已儲存，飼主的健康手冊也會看到':'已儲存');goReplace('#/clinic/visit/'+res.data.id+'/print')});
+}
+// 病歷摘要（醫院和飼主看的是同一份）
+function visitDocHTML(v){const pr=v.pro||{};const vt=proVitalsText(pr);
+  return `<div class="card printsheet visdoc">
+  <div class="vd-head"><div><b class="vd-clinic">${esc(v.clinic_name||'')}</b><small>${esc(v.clinic_address||'')}${v.clinic_phone?`・${esc(v.clinic_phone)}`:''}</small>${v.clinic_license?`<small>開業執照：${esc(v.clinic_license)}</small>`:''}</div><div class="vd-t">病歷摘要</div></div>
+  <table class="vd-kv"><tr><th>看診日期</th><td>${esc(v.visit_date)}</td><th>獸醫師</th><td>${esc(v.vet_name)}</td></tr>
+  <tr><th>飼主</th><td>${esc(v.owner_name)}</td><th>地址</th><td>${esc(v.owner_address)}</td></tr>
+  <tr><th>動物</th><td>${esc(v.pet_name)}（${v.species==='cat'?'貓':'犬'}${v.breed?'・'+esc(v.breed):''}）</td><th>體重</th><td>${v.weight_kg?esc(v.weight_kg)+' kg':'—'}</td></tr></table>
+  <h3>${esc(v.title)}</h3>
+  ${vt?`<p><b>生命徵象</b>　${esc(vt)}</p>`:''}
+  <div class="vd-sec"><b>主訴與發病情形</b><p class="pre">${esc(pr.s||'—')}</p></div>
+  <div class="vd-sec"><b>理學檢查</b><p class="pre">${esc(pr.o||'—')}</p></div>
+  <div class="vd-sec"><b>診斷</b><p>${esc((pr.dx||[]).join('、')||'—')}</p></div>
+  <div class="vd-sec"><b>治療與醫囑</b><p class="pre">${esc(pr.p||'—')}</p></div>
+  ${(pr.rx||[]).length?`<div class="vd-sec"><b>處方用藥</b><table class="rtable sumt"><thead><tr><th>藥名</th><th>每次劑量</th><th>方式</th><th>頻率</th><th>天數</th></tr></thead><tbody>${pr.rx.map(x=>`<tr><td><b>${esc(x.name)}</b>${x.ctrl?' <span class="pro-fl H">管制藥品</span>':''}</td><td>${esc(x.dose||'')}</td><td>${esc(x.route||'')}</td><td>${esc(x.freq||'')}</td><td>${x.days?esc(x.days):''}</td></tr>`).join('')}</tbody></table></div>`:''}
+  ${(pr.labs||[]).length?`<div class="vd-sec"><b>檢驗</b><table class="rtable sumt pro-lab"><thead><tr><th>項目</th><th>數值</th><th>單位</th><th>參考範圍</th></tr></thead><tbody>${pr.labs.map(x=>{const fl=labFlag(x.value,x.ref);return `<tr class="${fl?'flag':''}"><td>${esc(x.item)}</td><td><b>${esc(x.value)}</b>${fl?` <span class="pro-fl ${fl}">${fl==='H'?'偏高':'偏低'}</span>`:''}</td><td>${esc(x.unit||'')}</td><td>${esc(x.ref||'')}</td></tr>`}).join('')}</tbody></table></div>`:''}
+  ${pr.vac_brand||pr.vac_lot?`<div class="vd-sec"><b>疫苗</b><p>${esc([pr.vac_brand,pr.vac_lot?'批號 '+pr.vac_lot:''].filter(Boolean).join('・'))}</p></div>`:''}
+  ${v.notes?`<div class="vd-sec"><b>備註</b><p class="pre">${esc(v.notes)}</p></div>`:''}
+  ${v.next_due?`<div class="vd-sec"><b>下次回診</b><p>${esc(v.next_due)}${v.next_due_note?'・'+esc(v.next_due_note):''}</p></div>`:''}
+  <div class="vd-sign"><span>獸醫師簽章：</span><span class="vd-line"></span></div>
+  <p class="muted small">本病歷摘要由 ${esc(v.clinic_name||'')} 透過汪喵回家開立。列印日期 ${todayStr()}</p></div>`}
+async function renderVisitDoc(id,petId){const _n=navId;if(!requireLogin())return;
+  const {data:v,error}=await sb.rpc('clinic_visit_get',{p_id:id});if(_n!==navId)return;
+  if(error||!v){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這份病歷</div>';return}
+  setTitle(v.pet_name+' 病歷摘要');const back=petId?`#/pet/${petId}`:(v.pet_id?`#/clinic/pet/${v.pet_id}`:'#/clinic');
+  (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><a class="btn ghost sm" href="${back}">‹ 返回</a><button type="button" class="btn sm app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button>${!petId?`<a class="btn sm ghost" href="#/clinic/visit/${id}">修改</a>`:''}${petId?'<span class="muted small">醫院開立的病歷，只能看、不能修改</span>':''}</div>${visitDocHTML(v)}`;
+}
+// 飼主：授權醫院、產生連結碼
+async function renderPetClinics(petId){const _n=navId;if(!requireLogin())return;
+  const [{data:p},{data:L}]=await Promise.all([sb.from('pets').select('id,name').eq('id',petId).maybeSingle(),sb.rpc('pet_clinics',{p_pet:petId})]);if(_n!==navId)return;
+  if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻毛孩</div>';return}
+  setTitle('讓醫院把病歷傳進來');const list=L||[];
+  (_n===navId?app:_void).innerHTML=`<p class="small"><a class="backlink" href="#/pet/${petId}">‹ 回 ${esc(p.name)}</a></p><h1>讓醫院把病歷傳進來</h1>
+  <p class="muted">看診時把連結碼給醫院，醫院開的病歷就會直接出現在${esc(p.name)}的健康手冊。只有通過汪喵回家審核的動物醫院才能連結。</p>
+  <div class="card cl-codecard" id="lcBox"><button type="button" class="btn block" id="lcGen">${ic('link')} 產生連結碼</button><p class="small muted" style="margin:8px 0 0">連結碼 15 分鐘內有效，只能用一次。醫院用了之後，可以在下面隨時取消。</p></div>
+  <h2>${ic('steth')} 已授權的醫院</h2>
+  ${list.length?`<div class="card" style="padding:6px 16px">${list.map(x=>`<div class="cl-vrow2"><span><b>${esc(x.name)}</b>${x.city?`<small class="muted">　${esc(x.city)}</small>`:''}<br><small class="muted">${esc(String(x.linked_at).slice(0,10))} 授權</small></span><button type="button" class="btn sm ghost" data-unlink="${x.clinic_id}" data-n="${esc(x.name)}">取消授權</button></div>`).join('')}</div>`:'<p class="muted small">還沒有授權任何醫院</p>'}
+  <p class="muted small">取消授權後，這家醫院就不能再幫${esc(p.name)}開新病歷，也看不到你填的過敏、用藥；已經開好的病歷會留在你的健康手冊和醫院那邊。</p>`;
+  $('#lcGen').onclick=once(async()=>{const {data,error}=await sb.rpc('pet_link_code',{p_pet:petId});__submitting=false;if(error)return toast('沒有成功：'+friendlyErr(error.message));
+    const url=CONFIG.SITE_URL+'#/clinic/link/'+data.code;const exp=new Date(data.expires_at);
+    $('#lcBox').innerHTML=`<p class="small muted" style="margin:0">把這個畫面給醫院看</p><div class="lc-code">${data.code}</div><div id="lcQr" class="sum-qr" style="margin:0 auto"></div><p class="small muted" id="lcLeft" style="margin:8px 0 0"></p><button type="button" class="btn ghost sm" id="lcAgain" style="margin-top:8px">重新產生</button>`;
+    try{await loadScript(LIB.qr);if(window.QRCode)new QRCode($('#lcQr'),{text:url,width:160,height:160,correctLevel:QRCode.CorrectLevel.M})}catch(_){$('#lcQr').remove()}
+    const tick=()=>{const el=$('#lcLeft');if(!el)return clearInterval(tm);const s=Math.max(0,Math.round((exp-Date.now())/1000));el.textContent=s?`還有 ${Math.floor(s/60)} 分 ${String(s%60).padStart(2,'0')} 秒有效`:'已經過期，請重新產生';if(!s)clearInterval(tm)};const tm=setInterval(tick,1000);tick();
+    $('#lcAgain').onclick=()=>{clearInterval(tm);rerender(()=>renderPetClinics(petId))}});
+  app.querySelectorAll('[data-unlink]').forEach(b=>b.onclick=async()=>{if(!await askSheet({title:`取消授權「${b.dataset.n}」？`,body:'醫院就不能再幫這隻毛孩開新病歷。已經開好的病歷會保留。',ok:'取消授權',danger:true}))return;
+    const {error}=await sb.from('pet_clinic_links').delete().eq('pet_id',petId).eq('clinic_id',b.dataset.unlink);if(error)return toast('沒有成功：'+friendlyErr(error.message));toast('已取消授權');rerender(()=>renderPetClinics(petId))});
+}
+// 醫院開的病歷 → 健康手冊用的紀錄格式
+function visitAsRecord(v){return {id:'cv-'+v.id,_visit:v.id,kind:'vet',date:v.visit_date,title:v.title,clinic:v.clinic_name,weight_kg:v.weight_kg,notes:v.notes,next_due:v.next_due,done:false,files:[],doc_kinds:[],verified:true,pro:{...(v.pro||{}),vet:v.vet_name},created_at:v.created_at}}
+// 管理後台：醫院審核
+async function admClinics(box){const {data,error}=await sb.rpc('admin_clinics');if(error){box.innerHTML=`<div class="empty">讀取失敗：${esc(error.message)}</div>`;return}
+  const L=data||[];const urls=await clinicDocUrls(L.flatMap(x=>x.docs||[]));
+  box.innerHTML=L.length?L.map(c=>{const [t,col]=CLINIC_ST[c.status]||['',''];return `<div class="card adm-card"><div class="adm-h"><b>${esc(c.name)}</b><span class="tag ${col}">${t}</span></div>
+    <div class="small">${esc(c.city||'')} ${esc(c.address)}・${esc(c.phone)}</div>
+    <div class="small">開業執照：<b>${esc(c.license_no)}</b>　負責獸醫師：<b>${esc(c.vet_name)}</b>（證書 ${esc(c.vet_license)}）</div>
+    <div class="small muted">申請人：${esc(c.username||'')}・${esc(fmtDate(c.created_at))}${c.status==='approved'?`・毛孩 ${c.pets}・病歷 ${c.visits}`:''}${c.review_note?`・備註：${esc(c.review_note)}`:''}</div>
+    <div class="doc-grid" style="margin-top:8px">${(c.docs||[]).map(p=>urls[p]?`<button type="button" class="doc-it" data-u="${esc(urls[p])}"><img src="${esc(urls[p])}" alt="執照照片"></button>`:'').join('')}</div>
+    <div class="adm-acts">${c.status!=='approved'?`<button type="button" class="btn sm" data-cr="${c.id}|approved">通過</button>`:''}${c.status==='pending'?`<button type="button" class="btn sm ghost" data-cr="${c.id}|rejected">退回</button>`:''}${c.status==='approved'?`<button type="button" class="btn sm danger ghost" data-cr="${c.id}|suspended">停權</button>`:''}</div></div>`}).join(''):'<div class="empty">還沒有醫院申請</div>';
+  box.querySelectorAll('[data-u]').forEach(x=>x.onclick=()=>lightbox(x.dataset.u));
+  box.querySelectorAll('[data-cr]').forEach(b=>b.onclick=async()=>{const [id,st]=b.dataset.cr.split('|');let note='';
+    if(st!=='approved'){note=prompt(st==='rejected'?'退回原因（會讓醫院看到）':'停權原因（會讓醫院看到）','')||'';if(note===null)return}
+    else if(!await askSheet({title:'通過這家醫院？',body:'請確認已經核對過開業執照和獸醫師證書。通過後就能幫飼主開病歷。',ok:'通過'}))return;
+    b.disabled=true;const {error}=await sb.rpc('admin_clinic_review',{p_id:id,p_status:st,p_note:note});if(error){b.disabled=false;return toast(error.message)}toast('已更新');admClinics(box)})}
+
 async function renderPetPrint(id){const _n=navId;
   if(!requireLogin())return;
   const [{data:p},{data:recs},{data:pmeds}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).eq('active',true).order('kind').order('created_at')]);
@@ -10819,7 +11033,8 @@ async function renderPetPrint(id){const _n=navId;
   if(_n!==navId)return;
   setTitle(p.name+' 完整健康資料');
   const curMeds=pmeds||[];
-  const rs=recs||[];const ph=p.photos?.[0];
+  let cvis=[];{const {data}=await sb.rpc('pet_clinic_visits',{p_pet:id});cvis=(data||[]).map(visitAsRecord)}
+  const rs=(recs||[]).concat(cvis).sort((a,b)=>b.date.localeCompare(a.date));const ph=p.photos?.[0];
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
   const weights=rs.filter(r=>r.weight_kg);
   const row=r=>`<tr><td style="white-space:nowrap">${r.date}</td><td style="white-space:nowrap">${(REC_KINDS[r.kind]||[,'其他'])[1]}</td><td><b>${esc(r.title)}</b>${proBlockHTML(r)}</td><td>${esc(r.clinic||'')}</td></tr>`;
