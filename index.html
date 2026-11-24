@@ -3323,7 +3323,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.5';
+const BUILD = 'v7.38.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4523,7 +4523,7 @@ function renderLook(key){const _n=navId;const c=LOOK[key];if(!c){goReplace('#/')
     if(typeof L!=='undefined'&&map.fitBounds){if(map.__anaCircle){const bb=L.latLngBounds(bounds);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})}};
   if(window.L||leafletGaveUp)drawMap();else waitLeaflet().then(drawMap);
   $('#tl').innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div><div class="when">${esc(p.title)} · ${p.dOnly?fmtDate(p.t):fmtDT(p.t)}</div>
-    <div class="where">${ic('pin')} ${esc(p.where)}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>${p.note?`<div class="note">${escLink(p.note)}</div>`:''}${p.by?`<div class="tl-meta small muted"><span>${esc(p.by)}</span></div>`:''}</div>`).join('')}
+    <div class="where">${ic('pin')} ${escLink(p.where)}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>${p.note?`<div class="note">${escLink(p.note)}</div>`:''}${p.by?`<div class="tl-meta small muted"><span>${esc(p.by)}</span></div>`:''}</div>`).join('')}
 // 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
 function howToHTML(){const U=id=>unsU(id,420),P={shiba:U('c0VTrbsXtFU'),shiba2:U('c0VTrbsXtFU'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('1Gj9tFSLCmk'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
   const bg=u=>`style="background-image:url('${u}')"`;const MAPBG=`style="background-image:url('${CONFIG.SITE_URL}api/tile/16/54892/28056.png')"`;
@@ -6323,7 +6323,7 @@ async function renderCase(id){const _n=navId;
   if(!pts.length){tl.innerHTML=c.pending_count>0?'<p class="muted">目前還沒有飼主確認過的目擊。</p>':'<p class="muted">還沒有目擊回報。</p>'}
   else tl.innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div>
     <div class="when">${esc(p.title)} · ${p.dOnly?fmtDate(p.t):fmtDT(p.t)}</div>
-    <div class="where">${ic("pin")} ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
+    <div class="where">${ic("pin")} ${escLink(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
     ${p.note?`<div class="note">${escLink(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
     ${p.phl?sightPhotosHTML(p.phl):p.photo?`<div class="ph" style="background-image:url('${esc(safeU(p.photo))}')" data-lightbox="${esc(safeU(p.photo))}"></div>`:''}
     ${(p.by||p.verified||p.sid)?`<div class="tl-meta small muted">${p.by||p.verified?`<span>${esc(p.by||'會員')}${p.verified?' · ✓ 會員':''}</span>`:''}${p.sid?`<button type="button" class="linkbtn tl-rep" aria-label="檢舉這筆目擊" data-sid="${esc(p.sid)}" data-poster="${esc(p.poster||'')}">${ic('flag')}<span>檢舉</span></button>`:''}</div>`:''}</div>`).join('');
@@ -6820,7 +6820,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   const pendS=(ss||[]).filter(s=>s.status==='pending'),doneS=(ss||[]).filter(s=>s.status!=='pending');
   const sItem=(s,i)=>`<div class="tl"><div class="dot ${s.status==='pending'?'pending':s.status==='rejected'?'start':''}">${s.status==='pending'?'?':s.status==='rejected'?'×':'✓'}</div>
     <div class="when">${fmtDT(s.seen_at)} <span class="tag ${s.status==='pending'?'amber':s.status==='rejected'?'gray':'green'}">${s.status==='pending'?'待確認':s.status==='rejected'?'已退回':'已確認'}</span></div>
-    <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
+    <div class="where">${ic("pin")} ${escLink(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
     ${s.note?`<div class="note">${escLink(s.note)}</div>`:''}
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
     ${s.photo_url?`${sightPhotosHTML(sightPhotos(s))}${s.photo_sim>=0&&s.photo_sim!=null?`<div class="small sg-sim ${s.photo_sim>=85?'hi':s.photo_sim>=65?'mid':'lo'}">AI 比對照片：和 ${esc(c.name)} 的相似度 <b>${s.photo_sim}%</b>${s.photo_sim>=85?'，很像，建議優先確認':s.photo_sim<65?'，看起來不太像，仍請自己判斷':''}</div>`:''}`:''}
