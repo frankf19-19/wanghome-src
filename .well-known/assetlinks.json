@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.wangmiaotw.app",
+    "sha256_cert_fingerprints": ["3A:39:58:DA:9A:BB:E2:FE:6E:0D:38:BB:76:6C:9D:56:9C:86:F1:A7:93:7A:BC:8B:80:16:B7:BB:5D:BE:4C:EC"]
+  }
+}]
