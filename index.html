@@ -3213,11 +3213,11 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 .pro-h{display:flex;align-items:center;gap:6px;font-size:15px;margin:16px 0 6px}.pro-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
 .pro-row{display:grid;gap:6px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--paper);position:relative}
 .pro-row input:not([type=checkbox]),.pro-row select{min-width:0;width:100%;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--sheet);color:var(--ink)}
-.pro-row.rx{grid-template-columns:2fr 1.2fr 1fr;padding-right:40px}.pro-row.rx [data-k=freq]{grid-column:1/3}.pro-row.rx .pro-ctrl{grid-column:1/-1;margin:0;font-size:14px;display:flex;align-items:center;gap:8px}.pro-row.rx .pro-ctrl input{width:20px;height:20px}
+.pro-row.rx{grid-template-columns:1fr 1fr;padding-right:40px}.pro-row.rx [data-k=name]{grid-column:1/-1}@media(min-width:700px){.pro-row.rx{grid-template-columns:1.3fr 1fr 1.3fr .7fr}}.pro-row.rx .pro-ctrl{grid-column:1/-1;margin:0;font-size:14px;display:flex;align-items:center;gap:8px}.pro-row.rx .pro-ctrl input{width:20px;height:20px}
 .pro-row.lab{grid-template-columns:1.1fr 1fr .9fr 1.3fr;padding-right:40px;align-items:center}.pro-row.lab .pro-fl{grid-column:1/-1;min-height:0}.pro-row.lab .pro-fl:empty{display:none}
 @media(max-width:520px){.pro-row.lab{grid-template-columns:1fr 1fr}}
 .pro-x{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:0;background:var(--line);color:var(--ink-2);font-size:18px;line-height:1;cursor:pointer}
-.pro-row input.flag{border-color:#D9472B;color:#B42318;font-weight:700}.pro-fl{font-size:12.5px;font-weight:800;border-radius:99px;padding:1px 8px}.pro-fl.H{background:#FDE2DC;color:#B42318}.pro-fl.L{background:#DCEBFD;color:#1D4ED8}
+.pro-row input.flag{border-color:#D9472B;color:#B42318;font-weight:700}.pro-fl{font-size:12.5px;font-weight:800;border-radius:99px;padding:1px 8px}.pro-fl.H{background:#FDE2DC;color:#B42318}.pro-fl.L{background:#DCEBFD;color:#1D4ED8}html[data-theme=dark] .pro-fl.H{background:#4A1D16;color:#FFB4A5}html[data-theme=dark] .pro-fl.L{background:#172B4D;color:#A9C8FF}html[data-theme=dark] .pro-lab tr.flag td{background:#2E1A16}
 .pro-pre{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.pro-pre .fchip{padding:5px 11px;font-size:13.5px}
 .pro-line{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px}.pro-dx{font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:4px}
 .pro-blk{margin-top:4px;font-size:14px;display:flex;flex-direction:column;gap:3px}.pro-blk ul{margin:2px 0 0;padding-left:20px}.pro-blk .pre,.sum-box .pre{white-space:pre-wrap}
@@ -3322,7 +3322,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.2';
+const BUILD = 'v7.38.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -10403,9 +10403,10 @@ function weightChart(points){
 async function renderPetView(id){const _n=navId;
   if(!requireLogin())return;
   if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('pet');
+  const cvisP=petClinicVisits(id);
   const [{data:p,error:pe},{data:recs},{data:medsAll}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}).order('created_at',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).order('created_at')]);
   if(pe){(_n===navId?app:_void).innerHTML=netErrHTML();return}
-  let cvis=[];{const {data}=await sb.rpc('pet_clinic_visits',{p_pet:id});cvis=(data||[]).map(visitAsRecord)}
+  const cvis=await cvisP;
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   if(_n!==navId)return;
   setTitle(p.name);
@@ -10550,7 +10551,7 @@ async function renderRecord(petId,recId){const _n=navId;
   const drawPresets=()=>{const list=(REC_PRESETS[kind]||{})[p.species==='cat'?'cat':'dog']||[];$('#presets').innerHTML=list.map(([t,m])=>`<button type="button" data-t="${esc(t)}" data-pm="${m}">${esc(t)}</button>`).join('');
     $('#presets').querySelectorAll('button').forEach(b=>b.onclick=()=>{f.elements.title.value=b.dataset.t;const m=+b.dataset.pm;if(m&&(!f.elements.next_due.value||dueAuto))setDue(m)});
     $('#wWrap').style.opacity=kind==='weight'||kind==='vet'?1:.55;$('#medHint').classList.toggle('hidden',kind!=='med');
-    $('#proSec').style.display=PRO_KINDS.includes(kind)?'':'none';$('#vacWrap').style.display=kind==='vaccine'?'':'none'};
+    $('#proSec').style.display=PRO_KINDS.includes(kind)||proFilled(proGet())?'':'none';$('#vacWrap').style.display=kind==='vaccine'?'':'none'};
   drawPresets();
   $('#segK').querySelectorAll('button').forEach(b=>b.onclick=()=>{kind=b.dataset.v;$('#segK').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));drawPresets()});
   f.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>setDue(+b.dataset.m));
@@ -10560,7 +10561,7 @@ async function renderRecord(petId,recId){const _n=navId;
   $('#fileIn').onchange=async e=>{for(const file of [...e.target.files].slice(0,6-files.length)){if(files.length>=6){toast('最多 6 張附件');break}toast('上傳中…');try{const path=await uploadPrivate(file,petId);files.push(path);docKinds.push(kind==='vaccine'?'vaccine':kind==='vet'||kind==='surgery'?'summary':'other');fresh.push(path);urls[path]=URL.createObjectURL(file)}catch(err){toast('上傳失敗：'+err.message)}}drawFiles();e.target.value=''};
   f.onsubmit=once(async e=>{
     e.preventDefault();const fd=new FormData(f);
-    const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files,doc_kinds:files.map((_,i)=>docKinds[i]||'other'),pro:PRO_KINDS.includes(kind)?proGet():{}};
+    const row={pet_id:petId,kind,date:fd.get('date'),title:fd.get('title').trim(),clinic:fd.get('clinic')||null,weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,cost:fd.get('cost')?Math.round(+fd.get('cost')):null,notes:fd.get('notes')||null,next_due:fd.get('next_due')||null,files,doc_kinds:files.map((_,i)=>docKinds[i]||'other'),pro:proGet()};
     if(row.next_due&&row.date&&row.next_due<row.date)return toast('「下次到期」不能早於紀錄日期，請再確認一下',4000);
     if(f.elements.done)row.done=f.elements.done.checked;else if(recId==='new')row.done=false;
     if(recId!=='new'&&row.next_due&&row.next_due!==(r.next_due||null))row.done=false;   // 到期日換了＝新的一次，要重新提醒
@@ -10696,7 +10697,8 @@ const RX_ROUTE=['口服','注射','外用','點眼','點耳','吸入','其他'];
 const LAB_PRESETS=[['WBC','10³/µL','6–17'],['RBC','10⁶/µL','5.5–8.5'],['HCT','%','37–55'],['PLT','10³/µL','200–500'],['BUN','mg/dL','7–27'],['CREA','mg/dL','0.5–1.8'],['SDMA','µg/dL','0–14'],['ALT','U/L','10–125'],['ALP','U/L','23–212'],['GLU','mg/dL','74–143'],['TP','g/dL','5.2–8.2'],['ALB','g/dL','2.3–4.0']];
 const LAW11='依《獸醫師法》第 11 條，獸醫師沒有正當理由，不能拒絕開立病歷摘要、診斷書、檢驗證明書、影像紀錄等診療相關文件（費用由飼主負擔）。';
 // 檢驗數值有沒有超出參考範圍：回傳 'H'、'L' 或 ''
-function labFlag(v,ref){const n=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));const m=String(ref||'').replace(/\s/g,'').match(/^(-?[\d.]+)[–~\-－至](-?[\d.]+)$/);if(isNaN(n)||!m)return '';const lo=+m[1],hi=+m[2];return n>hi?'H':n<lo?'L':''}
+function labFlag(v,ref){const n=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));if(isNaN(n))return '';const r=String(ref||'').replace(/\s/g,'');let m=r.match(/^(-?[\d.]+)[–~\-－至](-?[\d.]+)$/);if(m){const lo=+m[1],hi=+m[2];return n>hi?'H':n<lo?'L':''}
+  if((m=r.match(/^[<≤＜]=?(-?[\d.]+)$/))||(m=r.match(/^(-?[\d.]+)以下$/)))return n>+m[1]?'H':'';if((m=r.match(/^[>≥＞]=?(-?[\d.]+)$/))||(m=r.match(/^(-?[\d.]+)以上$/)))return n<+m[1]?'L':'';return ''}
 function docTagText(r){const n=(r.files||[]).length;const c={};(r.doc_kinds||[]).slice(0,n).forEach(k=>{if(k&&k!=='other')c[k]=(c[k]||0)+1});const t=Object.entries(c).map(([k,v])=>DOC_KINDS[k]+(v>1?' '+v:'')).join('・');return t?t+(Object.values(c).reduce((a,b)=>a+b,0)<n?'・其他':''):n+' 張附件'}
 async function petHealthAlert(pt){const parts=[];if(pt.conditions)parts.push(String(pt.conditions).replace(/\s+/g,' ').trim());
   try{const {data}=await sb.from('pet_meds').select('name,freq').eq('pet_id',pt.id).eq('active',true).eq('kind','med');if(data&&data.length)parts.push('每天要吃藥：'+data.map(x=>x.name).join('、'))}catch(_){}
@@ -10751,7 +10753,7 @@ function proBind(f,pr){pr=pr||{};const rx=(pr.rx||[]).map(x=>({...x})),labs=(pr.
   $('#labPre').querySelectorAll('[data-lab]').forEach(b=>b.onclick=()=>{const p=LAB_PRESETS.find(x=>x[0]===b.dataset.lab);if(labs.some(x=>x.item===p[0]))return toast(p[0]+' 已經加過了');labs.push({item:p[0],unit:p[1],ref:p[2]});drawLab();labBox.querySelector('.pro-row:last-child [data-k=value]')?.focus()});
   const num=(n,lo,hi)=>{const x=parseFloat(f.elements[n].value);return isNaN(x)||x<lo||x>hi?null:x};
   return ()=>{const o={};const v={temp:num('pv_temp',30,45),hr:num('pv_hr',10,400),rr:num('pv_rr',2,200),bcs:num('pv_bcs',1,9)};Object.keys(v).forEach(k=>v[k]==null&&delete v[k]);if(Object.keys(v).length)o.vitals=v;
-    const t=n=>String(f.elements[n].value||'').trim();
+    const t=n=>String(f.elements[n]?.value||'').trim();
     if(t('p_s'))o.s=t('p_s');if(t('p_o'))o.o=t('p_o');if(t('p_p'))o.p=t('p_p');if(t('p_vet'))o.vet=t('p_vet');if(t('p_vbrand'))o.vac_brand=t('p_vbrand');if(t('p_vlot'))o.vac_lot=t('p_vlot');
     const dx=t('p_dx').split(/[、，,；;\n]+/).map(s=>s.trim()).filter(Boolean).slice(0,12);if(dx.length)o.dx=dx;
     const R=rx.filter(x=>String(x.name||'').trim()).slice(0,20).map(x=>{const y={name:String(x.name).trim()};['dose','route','freq'].forEach(k=>{if(String(x[k]||'').trim())y[k]=String(x[k]).trim()});if(+x.days>0)y.days=Math.round(+x.days);if(x.ctrl)y.ctrl=true;return y});if(R.length)o.rx=R;
@@ -10805,21 +10807,24 @@ function summaryHTML(d){const p=d.pet||{},meds=d.meds||[],rs=d.records||[];const
   <p class="muted small sum-foot">以上由飼主在汪喵回家健康手冊自行記錄，僅供看診參考，請以獸醫師診斷為準。產生於 ${esc(String(d.generated_at||new Date().toISOString()).slice(0,10))}</p></div>`}
 async function renderPetSummary(id){const _n=navId;
   if(!requireLogin())return;
+  const cvisP=petClinicVisits(id);
   const [{data:p},{data:recs},{data:meds},{data:shares}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).neq('kind','grooming').order('date',{ascending:false}).order('created_at',{ascending:false}).limit(60),sb.from('pet_meds').select('*').eq('pet_id',id).eq('active',true).order('kind').order('created_at'),sb.from('pet_shares').select('code,expires_at,views').eq('pet_id',id).gt('expires_at',new Date().toISOString()).limit(1)]);
   if(_n!==navId)return;
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}
   setTitle(p.name+' 看診摘要');
-  let cvis=[];{const {data}=await sb.rpc('pet_clinic_visits',{p_pet:id});cvis=(data||[]).map(visitAsRecord)}
+  const cvis=await cvisP;
   const d={pet:{...p,photo:(p.photos||[])[0]},meds:meds||[],records:(recs||[]).concat(cvis).sort((a,b)=>b.date.localeCompare(a.date))};
   const sh=(shares||[])[0];
   (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><a class="btn ghost sm" href="#/pet/${id}">‹ 回 ${esc(p.name)}</a><button type="button" class="btn sm" id="sumShare">${ic('share')} 分享給獸醫</button><button type="button" class="btn sm ghost app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button></div>
   <div class="noprint notice sum-tip"><b>急診、換醫院時用</b>把這頁直接給醫生看，或按「分享給獸醫」傳連結。${!p.allergies&&!p.conditions?` 建議先到 <a href="#/pet/${id}/edit">毛孩資料</a> 填上過敏和慢性病。`:''}</div>
   <div id="sumShareBox" class="noprint">${sh?shareBoxHTML(sh):''}</div>
   ${summaryHTML(d)}`;
-  const bindStop=()=>{const b=$('#sumStop');if(b)b.onclick=async()=>{if(!await askSheet({title:'停止分享？',body:'已經傳出去的連結會馬上失效，獸醫就看不到了。',ok:'停止分享',danger:true}))return;const {error}=await sb.from('pet_shares').delete().eq('pet_id',id);if(error)return toast('沒有成功：'+friendlyErr(error.message));$('#sumShareBox').innerHTML='';toast('已停止分享')}};
+  const bindStop=()=>{const b=$('#sumStop');if(b)b.onclick=async()=>{if(!await askSheet({title:'停止分享？',body:'已經傳出去的連結會馬上失效，獸醫就看不到了。',ok:'停止分享',danger:true}))return;const {error}=await sb.from('pet_shares').delete().eq('pet_id',id);if(error)return toast('沒有成功：'+friendlyErr(error.message));curShare=null;$('#sumShareBox').innerHTML='';toast('已停止分享')}};
   const showBox=async s=>{$('#sumShareBox').innerHTML=shareBoxHTML(s);bindStop();bindShareCopy(s);try{await loadScript(LIB.qr);const q=$('#sumQr');if(q&&window.QRCode){q.innerHTML='';new QRCode(q,{text:vetShareUrl(s.code),width:160,height:160,correctLevel:QRCode.CorrectLevel.M})}}catch(_){}};
   if(sh)showBox(sh);
-  $('#sumShare').onclick=once(async()=>{const {data,error}=await sb.rpc('pet_share_create',{p_pet:id,p_days:30});if(error){__submitting=false;return toast('沒有成功：'+friendlyErr(error.message))}await showBox({code:data.code,expires_at:data.expires_at,views:0});__submitting=false;
+  let curShare=sh||null;
+  $('#sumShare').onclick=once(async()=>{if(curShare&&new Date(curShare.expires_at)>new Date()){__submitting=false;const u=vetShareUrl(curShare.code);if(navigator.share)navigator.share({title:p.name+' 看診摘要',url:u}).catch(()=>{});else{try{await navigator.clipboard.writeText(u);toast('已複製給獸醫的連結')}catch(_){}}$('#sumShareBox').scrollIntoView({behavior:'smooth',block:'center'});return}
+    const {data,error}=await sb.rpc('pet_share_create',{p_pet:id,p_days:30});if(error){__submitting=false;return toast('沒有成功：'+friendlyErr(error.message))}curShare={code:data.code,expires_at:data.expires_at,views:0};await showBox(curShare);__submitting=false;
     const u=vetShareUrl(data.code);if(navigator.share)navigator.share({title:p.name+' 看診摘要',text:p.name+' 的看診摘要（過敏、用藥、最近看診）',url:u}).catch(()=>{})});
 }
 function vetShareUrl(code){return CONFIG.SITE_URL+'#/vet/'+code}
@@ -10962,7 +10967,7 @@ async function renderClinicVisit(id){const _n=navId;if(!requireLogin())return;
     <label class="chk"><input type="checkbox" name="shared" ${v.shared!==false?'checked':''}> 傳到飼主的健康手冊（飼主看得到這份病歷）</label>
     <div class="submitbar row"><button class="btn" id="cvSave">${id==='new'?'儲存病歷':'儲存修改'}</button><a class="btn ghost" href="${petId?'#/clinic/pet/'+petId:'#/clinic'}">取消</a></div>
   </form>`;
-  const f=$('#cvF');$('#proSec').open=true;const proGet=proBind(f,v.pro);
+  const f=$('#cvF');$('#proSec').open=true;{const vl=f.elements.p_vet&&f.elements.p_vet.closest('label');if(vl)vl.remove()}const proGet0=proBind(f,v.pro);const proGet=()=>{const o=proGet0();delete o.vet;return o};
   f.onsubmit=once(async e=>{e.preventDefault();const fd=new FormData(f);const t=k=>String(fd.get(k)||'').trim();
     const row={visit_date:t('visit_date'),vet_name:t('vet_name'),title:t('title'),owner_name:t('owner_name'),owner_address:t('owner_address'),pet_name:t('pet_name'),species:t('species')||'dog',breed:t('breed')||null,
       weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,pro:proGet(),notes:t('notes')||null,next_due:t('next_due')||null,next_due_note:t('next_due_note')||null,shared:!!fd.get('shared'),updated_at:new Date().toISOString()};
@@ -11018,6 +11023,7 @@ async function renderPetClinics(petId){const _n=navId;if(!requireLogin())return;
     const {error}=await sb.from('pet_clinic_links').delete().eq('pet_id',petId).eq('clinic_id',b.dataset.unlink);if(error)return toast('沒有成功：'+friendlyErr(error.message));toast('已取消授權');rerender(()=>renderPetClinics(petId))});
 }
 // 醫院開的病歷 → 健康手冊用的紀錄格式
+async function petClinicVisits(id){if(!CLINIC_ON&&!__clinicPv)return [];try{const {data}=await sb.rpc('pet_clinic_visits',{p_pet:id});return (data||[]).map(visitAsRecord)}catch(_){return []}}
 function visitAsRecord(v){return {id:'cv-'+v.id,_visit:v.id,kind:'vet',date:v.visit_date,title:v.title,clinic:v.clinic_name,weight_kg:v.weight_kg,notes:v.notes,next_due:v.next_due,done:false,files:[],doc_kinds:[],verified:true,pro:{...(v.pro||{}),vet:v.vet_name},created_at:v.created_at}}
 // 管理後台：醫院審核
 async function admClinics(box){const {data,error}=await sb.rpc('admin_clinics');if(error){box.innerHTML=`<div class="empty">讀取失敗：${esc(error.message)}</div>`;return}
@@ -11036,12 +11042,13 @@ async function admClinics(box){const {data,error}=await sb.rpc('admin_clinics');
 
 async function renderPetPrint(id){const _n=navId;
   if(!requireLogin())return;
+  const cvisP=petClinicVisits(id);
   const [{data:p},{data:recs},{data:pmeds}]=await Promise.all([sb.from('pets').select('*').eq('id',id).maybeSingle(),sb.from('pet_records').select('*').eq('pet_id',id).order('date',{ascending:false}),sb.from('pet_meds').select('*').eq('pet_id',id).eq('active',true).order('kind').order('created_at')]);
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這筆寵物檔案</div>';return}
   if(_n!==navId)return;
   setTitle(p.name+' 完整健康資料');
   const curMeds=pmeds||[];
-  let cvis=[];{const {data}=await sb.rpc('pet_clinic_visits',{p_pet:id});cvis=(data||[]).map(visitAsRecord)}
+  const cvis=await cvisP;
   const rs=(recs||[]).concat(cvis).sort((a,b)=>b.date.localeCompare(a.date));const ph=p.photos?.[0];
   const due=rs.filter(r=>r.next_due&&!r.done).sort((a,b)=>a.next_due.localeCompare(b.next_due));
   const weights=rs.filter(r=>r.weight_kg);
