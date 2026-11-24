@@ -3290,7 +3290,7 @@ html[data-theme=dark] .ha-box{background:#3B1C17;color:#F8D9D3}html[data-theme=d
 
 <footer>
   <div class="fb"><b id="footName">汪喵回家</b><p>全台走失狗貓協尋平台。<br>免費、不收手續費，每一則目擊都直接交給飼主。</p><a class="appdl app-hide" href="https://apps.apple.com/tw/app/id6827632980" target="_blank" rel="noopener"><span class="appdl-i" aria-hidden="true">📱</span><span><small>iPhone 免費下載</small><b>App Store</b></span></a><span class="appdl-note app-hide small">Android 版即將推出</span><p class="small"><a href="/adopt/">收容所領養</a>・<a href="/stats">走失與領養統計</a>・<a href="/press">關於汪喵回家</a></p><p class="footsoc small">追蹤我們：<a href="https://www.facebook.com/wangmiaotw" target="_blank" rel="noopener">Facebook 粉專</a>・<a href="https://www.instagram.com/wangmiaotw/" target="_blank" rel="noopener">Instagram</a>・<a href="https://www.threads.com/@wangmiaotw" target="_blank" rel="noopener">Threads</a></p></div>
-  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="#/clinic">動物醫院專區</a><a href="https://wangmiaotw.com/l/" class="app-hide">各縣市走失毛孩</a><a href="https://wangmiaotw.com/g/" class="app-hide">協尋指南</a><a href="https://wangmiaotw.com/adopt/" class="app-hide">各縣市待領養毛孩</a><a href="#/learn">毛孩小學堂</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/rehome">民眾送養</a><a href="#/pals">毛孩交朋友</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
+  <nav aria-label="網站資訊"><a href="#/about">關於本站</a><a href="#/resources">協尋攻略</a><a href="https://wangmiaotw.com/l/" class="app-hide">各縣市走失毛孩</a><a href="https://wangmiaotw.com/g/" class="app-hide">協尋指南</a><a href="https://wangmiaotw.com/adopt/" class="app-hide">各縣市待領養毛孩</a><a href="#/learn">毛孩小學堂</a><a href="#/injured">受傷毛孩通報</a><a href="#/adopt">領養毛孩</a><a href="#/rehome">民眾送養</a><a href="#/pals">毛孩交朋友</a><a href="#/thanks" class="app-hide">贊助感謝牆</a><a href="#/contact">聯絡我們</a><a href="#/terms">使用條款</a><a href="#/privacy">隱私權政策</a></nav>
   <p class="health-note small">毛孩健康手冊的紀錄與提醒由飼主自行填寫，僅供參考，不能取代獸醫師的診斷。用藥與治療請依獸醫師指示。</p>
   <div class="fm small"><span>收容所資料：農業部「動物認領養」開放資料</span><span>地圖 © OpenStreetMap 貢獻者</span><button type="button" class="linkbtn" id="themeBtn">🌓 外觀：自動</button><span>© 2026 汪喵回家 版權所有</span><span id="buildV"></span></div>
 </footer>
@@ -3322,7 +3322,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.1';
+const BUILD = 'v7.38.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4209,6 +4209,7 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/print$/)))return renderPetPrint(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/summary$/)))return renderPetSummary(m[1]);
   if((m=path.match(/^#\/vet\/([A-Za-z0-9]{8,24})$/)))return renderVetShare(m[1]);
+  if(!CLINIC_ON&&(/^#\/clinic(\/|$)/.test(path)||/^#\/pet\/[0-9a-f-]{36}\/clinics$/.test(path)))return clinicPreviewGate(path);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/clinics$/)))return renderPetClinics(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/visit\/([0-9a-f-]{36})$/)))return renderVisitDoc(m[2],m[1]);
   if(path==='#/clinic')return renderClinic();
@@ -7820,7 +7821,7 @@ async function renderAdmin(){const _n=navId;
   if(_n!==navId)return;
   if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['rehome','民眾送養'],['clinic','醫院審核'],['bans','停權名單']];
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['rehome','民眾送養'],['clinic','醫院審核（未開放）'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
@@ -9989,7 +9990,7 @@ function moreListHTML(){let t='auto';try{t=localStorage.getItem('wh_theme')||'au
   return `<div class="morelist">
   <p class="mlh">常用</p><div class="mgroup">${me()?`<a class="mrow" href="#/chats"><span class="mri c4">${ic('chat')}</span><span class="mrl">訊息與好友</span>${__chatN?`<span class="mrv mrbadge">${__chatN>99?'99+':__chatN}</span>`:''}${ic('chev','mrc')}</a>`:''}${row('#/fav','mark','收藏','c1')}${row('#/rehome?tab=mine','home','我的送養與申請','c4')}${row('#/intake','search','收容所最近新收','c2')}</div>
   <p class="mlh">學習</p><div class="mgroup">${row('#/resources','clipboard','協尋攻略','c1')}${row('#/learn','star','毛孩小學堂','c3')}</div>
-  <p class="mlh">專業</p><div class="mgroup">${row('#/clinic','steth','動物醫院專區','c2')}</div>
+  ${CLINIC_ON?`<p class="mlh">專業</p><div class="mgroup">${row('#/clinic','steth','動物醫院專區','c2')}</div>`:''}
   <p class="mlh">關於汪喵回家</p><div class="mgroup">${row('#/about','info',IS_APP?'關於汪喵回家':'關於本站','c4')}${row('#/contact','mail','聯絡我們','c3')}${(CONFIG.SOCIAL||[]).length?`<div class="mrow msoc"><span class="mri c2">${ic('heart')}</span><span class="mrl">追蹤我們</span><span class="msoc-i">${CONFIG.SOCIAL.map(x=>`<a href="${x.u}" target="_blank" rel="noopener" aria-label="追蹤 ${esc(x.n)}">${ic(x.k)}</a>`).join('')}</span></div>`:''}${IS_APP?'':`<a class="mrow" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener"><span class="mri c2">${ic('mobile')}</span><span class="mrl">下載 iPhone App</span><span class="mrv">App Store</span>${ic('chev','mrc')}</a>`}</div>
   <p class="mlh">設定</p><div class="mgroup"><button type="button" class="mrow" data-cycle-theme><span class="mri c5">${ic('moon')}</span><span class="mrl">外觀</span><span class="mrv themeLbl">${(THEMES.find(x=>x[0]===t)||THEMES[0])[1]}</span>${ic('chev','mrc')}</button></div>
   <p class="mlinks">${IS_APP?'':'<a href="#/thanks">贊助感謝牆</a>・'}<a href="#/terms">使用條款</a>・<a href="#/privacy">隱私權政策</a></p>
@@ -10439,7 +10440,7 @@ async function renderPetView(id){const _n=navId;
       <div class="actionbar pv-acts">
         <a class="btn" href="#/pet/${id}/record/new">${ic("plus")} 新增紀錄</a>
         <a class="btn ghost" href="#/pet/${id}/summary">${ic("steth")} 看診摘要</a>
-        <a class="btn ghost" href="#/pet/${id}/clinics" style="grid-column:1/-1">${ic("link")} 讓醫院把病歷傳進來</a>
+        ${CLINIC_ON?`<a class="btn ghost" href="#/pet/${id}/clinics" style="grid-column:1/-1">${ic("link")} 讓醫院把病歷傳進來</a>`:''}
         <a class="btn ghost" href="#/pet/${id}/print" style="grid-column:1/-1">${ic("clipboard")} 完整健康資料</a>
         <a class="btn ghost" href="#/pals/card/${id}" style="grid-column:1/-1">${ic("paw")} 放上毛孩名片牆，找玩伴</a>
         <a class="btn ghost d-only" href="#/pet/${id}/edit" style="grid-column:1/-1">${ic("edit")} 編輯毛孩資料</a>
@@ -10839,6 +10840,13 @@ async function renderVetShare(code){const _n=navId;setTitle('看診摘要');
 /* ============================================================
    動物醫院專區（v1.99）：醫院申請與審核、飼主授權、醫院開病歷傳給飼主
    ============================================================ */
+const CLINIC_ON=false;   // 動物醫院專區：站長確認前先不開放，只有管理員可以預覽
+let __clinicPv=false;
+async function clinicPreviewGate(path){const _n=navId;if(me()){const {data}=await sb.rpc('is_admin');if(_n!==navId)return;if(data){__clinicPv=true;const m=path.match(/^#\/pet\/([0-9a-f-]{36})\/clinics$/);if(m)return renderPetClinics(m[1]);
+  if(path==='#/clinic')return renderClinic();if(path==='#/clinic/apply')return renderClinicApply();let x;
+  if((x=path.match(/^#\/clinic\/link\/([A-Za-z0-9]{6})$/)))return renderClinicLinkCode(x[1].toUpperCase());if((x=path.match(/^#\/clinic\/pet\/([0-9a-f-]{36})$/)))return renderClinicPet(x[1]);
+  if((x=path.match(/^#\/clinic\/visit\/(new|[0-9a-f-]{36})$/)))return renderClinicVisit(x[1]);if((x=path.match(/^#\/clinic\/visit\/([0-9a-f-]{36})\/print$/)))return renderVisitDoc(x[1])}}
+  goReplace('#/')}
 const CLINIC_ST={pending:['審核中','gray'],approved:['已通過','green'],rejected:['未通過','red'],suspended:['已停權','red']};
 async function myClinic(){const {data}=await sb.from('clinics').select('*').eq('owner_id',me().id).maybeSingle();return data||null}
 async function uploadClinicDoc(file){const blob=await compressImage(file,1600,.82);const path=`${me().id}/clinic/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;const {error}=await sb.storage.from('clinic-docs').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;return path}
