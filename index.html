@@ -2662,6 +2662,7 @@ html{-webkit-tap-highlight-color:transparent}
 .ph-t{display:block;padding:9px 11px 11px}.ph-t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ph-t small{display:block;margin-top:2px;font-size:12.5px;line-height:1.45;color:var(--muted)}
 .ph-next{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0 8px}
 .sg-sim{margin-top:6px;padding:7px 10px;border-radius:10px;background:var(--line)}.sg-sim.hi{background:#E3F5EA;color:#14532D}.sg-sim.lo{color:var(--muted)}
+.ulink{word-break:break-all;text-decoration:underline;font-weight:700}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -3322,7 +3323,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.4';
+const BUILD = 'v7.38.5';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3569,6 +3570,8 @@ const app = $('#app');let navId=0;const _void=document.createElement('div');
 let sb = null;
 function safeU(u){u=String(u??'');return /^https:\/\/[^\s'"()\\<>]+$/.test(u)?u:''}
 function esc(s){return String(s??'').replace(/[\u202A-\u202E\u2066-\u2069]/g,'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+// 使用者寫的文字（目擊備註、留言）：網址變成可以點的連結，另開分頁；只認 http(s)，其他照樣只顯示文字
+function escLink(s){return esc(s).replace(/https?:\/\/[^\s<>"'）」』】，。！？、]+/g,u=>{let t='';const m=u.match(/[.,;:!?)\]]+$/);if(m&&!/&amp;$|&#39;$/.test(u)){t=m[0];u=u.slice(0,-t.length)}let host='';try{host=new URL(u.replace(/&amp;/g,'&')).host.replace(/^www\./,'')}catch(_){return u+t}const show=u.length>48?host+'/…':u;return `<a class="ulink" href="${u}" target="_blank" rel="noopener noreferrer nofollow ugc">${show}</a>${t}`})}
 function friendlyErr(m){m=String(m??'');if(/cases_email_ok/.test(m))return 'Email 格式不對，請檢查一下（例如 name@gmail.com）';if(/row-level security/i.test(m)&&/storage|object/i.test(m))return '照片上傳太頻繁，請過一會兒再試';if(/violates check constraint/i.test(m))return m.replace(/new row[\s\S]*|[^：:]*violates check constraint[\s\S]*/i,'')+'有欄位內容太長或格式不對，請檢查後再送出';if(/value too long/i.test(m))return '有欄位內容太長，請縮短後再送出';if(/violates (not-null|foreign key)/i.test(m))return '資料不完整，請重新整理後再試';if(/duplicate key/i.test(m))return '這筆資料已經存在';if(/Failed to fetch|NetworkError|Load failed/i.test(m))return m.replace(/(TypeError|Error):\s*/g,'').replace(/[（(]?\s*(Failed to fetch|NetworkError[^ ]*|Load failed).*/,'')+(/網路/.test(m)?'':'網路連線不穩，請確認網路後再試一次');if(/JWT|jwt expired|invalid claim/i.test(m))return '登入已過期，請重新登入';if(/row-level security/i.test(m))return '沒有權限進行這個操作（可能需要重新登入）';
   if(/照片上傳逾時/.test(m))return m.replace(/(TypeError|Error):\s*/g,'');
   if(/\b429\b|Too many requests|rate limit/i.test(m)){const pre=(m.match(/^([^：:\s]{1,8}失敗)[：:]/)||[])[1];return (pre?pre+'：':'')+'送出太頻繁，請等一分鐘再試'}
@@ -4520,7 +4523,7 @@ function renderLook(key){const _n=navId;const c=LOOK[key];if(!c){goReplace('#/')
     if(typeof L!=='undefined'&&map.fitBounds){if(map.__anaCircle){const bb=L.latLngBounds(bounds);try{bb.extend(map.__anaCircle.getBounds())}catch(_){}map.fitBounds(bb,{padding:[20,20]})}else if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]})}};
   if(window.L||leafletGaveUp)drawMap();else waitLeaflet().then(drawMap);
   $('#tl').innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div><div class="when">${esc(p.title)} · ${p.dOnly?fmtDate(p.t):fmtDT(p.t)}</div>
-    <div class="where">${ic('pin')} ${esc(p.where)}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.by?`<div class="tl-meta small muted"><span>${esc(p.by)}</span></div>`:''}</div>`).join('')}
+    <div class="where">${ic('pin')} ${esc(p.where)}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>${p.note?`<div class="note">${escLink(p.note)}</div>`:''}${p.by?`<div class="tl-meta small muted"><span>${esc(p.by)}</span></div>`:''}</div>`).join('')}
 // 首頁：「登記後會長這樣」——用畫面介紹每個功能，點了直接去用那個功能（不是真的案件，不進協尋名單、地圖和統計）
 function howToHTML(){const U=id=>unsU(id,420),P={shiba:U('c0VTrbsXtFU'),shiba2:U('c0VTrbsXtFU'),cat:U('kPJSB1D_HzI'),black:U('lyC6JP6tSXg'),happy:U('1Gj9tFSLCmk'),pup:U('ngqyo2AYYnE'),a2:U('t6mHvgZHTeI'),a3:U('YsWrfgEO1cM'),a4:U('TL5U0zXhcEQ')};
   const bg=u=>`style="background-image:url('${u}')"`;const MAPBG=`style="background-image:url('${CONFIG.SITE_URL}api/tile/16/54892/28056.png')"`;
@@ -6321,7 +6324,7 @@ async function renderCase(id){const _n=navId;
   else tl.innerHTML=pts.slice().reverse().map(p=>`<div class="tl"><div class="dot ${p.cls}">${p.label}</div>
     <div class="when">${esc(p.title)} · ${p.dOnly?fmtDate(p.t):fmtDT(p.t)}</div>
     <div class="where">${ic("pin")} ${esc(p.where||(p.lat?'（見地圖）':'未標示位置'))}${p.dir?` · 往${esc(p.dir)}移動`:''}</div>
-    ${p.note?`<div class="note">${esc(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
+    ${p.note?`<div class="note">${escLink(p.note)}</div>`:''}${p.onote?`<div class="note muted small">飼主備註：${esc(p.onote)}</div>`:''}
     ${p.phl?sightPhotosHTML(p.phl):p.photo?`<div class="ph" style="background-image:url('${esc(safeU(p.photo))}')" data-lightbox="${esc(safeU(p.photo))}"></div>`:''}
     ${(p.by||p.verified||p.sid)?`<div class="tl-meta small muted">${p.by||p.verified?`<span>${esc(p.by||'會員')}${p.verified?' · ✓ 會員':''}</span>`:''}${p.sid?`<button type="button" class="linkbtn tl-rep" aria-label="檢舉這筆目擊" data-sid="${esc(p.sid)}" data-poster="${esc(p.poster||'')}">${ic('flag')}<span>檢舉</span></button>`:''}</div>`:''}</div>`).join('');
 
@@ -6409,7 +6412,7 @@ async function caseClues(c,id,_n){const box=$('#clues');if(!box)return;
   const draw=(rows,canHide,err)=>{if(_n!==navId||!box.isConnected)return;
     const hid=lsList('wh_hidden');rows=(rows||[]).filter(r=>!hid.includes(r.id));
     head=`<h2>${ic('chat')} 線索討論${rows.length?`<em>${rows.length} 則</em>`:''}</h2>`;stat(rows.length);
-    const item=r=>`<li class="clue${r.hidden?' off':''}" data-id="${esc(r.id)}"><span class="clue-av">${r.avatar&&safeU(r.avatar)?`<img loading="lazy" src="${esc(safeU(r.avatar))}" alt="">`:esc([...(r.name||'友')][0])}</span><div class="clue-b"><p class="clue-h"><b>${esc(r.name||'熱心網友')}</b>${r.poster?'<span class="tag red">發布人</span>':''}<time>${timeAgo(r.at)}</time></p><p class="clue-t">${esc(r.body)}</p>${r.hidden?'<p class="small muted">這則留言被檢舉，目前只有你看得到，等站長確認。</p>':''}<p class="clue-a">${r.mine?`<button type="button" data-del="${esc(r.id)}">刪除</button>`:`<button type="button" data-rep="${esc(r.id)}">檢舉</button>${canHide?`<button type="button" data-hide="${esc(r.id)}">隱藏這則</button>`:''}`}</p></div></li>`;
+    const item=r=>`<li class="clue${r.hidden?' off':''}" data-id="${esc(r.id)}"><span class="clue-av">${r.avatar&&safeU(r.avatar)?`<img loading="lazy" src="${esc(safeU(r.avatar))}" alt="">`:esc([...(r.name||'友')][0])}</span><div class="clue-b"><p class="clue-h"><b>${esc(r.name||'熱心網友')}</b>${r.poster?'<span class="tag red">發布人</span>':''}<time>${timeAgo(r.at)}</time></p><p class="clue-t">${escLink(r.body)}</p>${r.hidden?'<p class="small muted">這則留言被檢舉，目前只有你看得到，等站長確認。</p>':''}<p class="clue-a">${r.mine?`<button type="button" data-del="${esc(r.id)}">刪除</button>`:`<button type="button" data-rep="${esc(r.id)}">檢舉</button>${canHide?`<button type="button" data-hide="${esc(r.id)}">隱藏這則</button>`:''}`}</p></div></li>`;
     box.innerHTML=head+tip+(err?`<p class="small muted">留言暫時讀不到，請稍後再試。</p>`:rows.length?`<ul class="clue-list">${rows.map(item).join('')}</ul>`:`<p class="clue-empty">還沒有人留言。你住附近、常經過，或想到毛孩可能會去的地方，都可以寫下來。</p>`)
       +(me()?`<form class="clue-form" id="clueForm"><label class="sr-only" for="clueIn">寫下你的線索</label><textarea id="clueIn" maxlength="500" rows="3" placeholder="例如：那一帶早上常有人餵狗的地方在⋯⋯"></textarea><p class="clue-warn" id="clueWarn" hidden>留言裡有常被用來詐騙的字眼。飼主不需要先付任何費用，這樣的留言送不出去，請改寫。</p><div class="clue-row"><small class="muted">電話和網址會自動隱藏；要聯絡飼主請用上面的聯絡方式。</small><button class="btn" id="clueSend">送出線索</button></div></form>`
         :`<p class="clue-login"><button type="button" class="btn sm ghost" id="clueLogin">登入後留言</button><small class="muted">免費註冊只要一個 Email</small></p>`);
@@ -6818,7 +6821,7 @@ async function renderManage(id,token,mkey){const _n=navId;setTitle('管理我的
   const sItem=(s,i)=>`<div class="tl"><div class="dot ${s.status==='pending'?'pending':s.status==='rejected'?'start':''}">${s.status==='pending'?'?':s.status==='rejected'?'×':'✓'}</div>
     <div class="when">${fmtDT(s.seen_at)} <span class="tag ${s.status==='pending'?'amber':s.status==='rejected'?'gray':'green'}">${s.status==='pending'?'待確認':s.status==='rejected'?'已退回':'已確認'}</span></div>
     <div class="where">${ic("pin")} ${esc(s.place_text||'（見地圖）')}${s.direction?` · 往${esc(s.direction)}`:''} ${s.lat!=null?`<a class="small" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${s.lat},${s.lng}">Google 地圖 ↗</a>`:''}</div>
-    ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
+    ${s.note?`<div class="note">${escLink(s.note)}</div>`:''}
     <div class="small">回報者：${esc(s.reporter_name||'匿名')}${s.reporter_contact?` · <b>${esc(s.reporter_contact)}</b>`:''} · 回報於 ${fmtDT(s.created_at)}</div>
     ${s.photo_url?`${sightPhotosHTML(sightPhotos(s))}${s.photo_sim>=0&&s.photo_sim!=null?`<div class="small sg-sim ${s.photo_sim>=85?'hi':s.photo_sim>=65?'mid':'lo'}">AI 比對照片：和 ${esc(c.name)} 的相似度 <b>${s.photo_sim}%</b>${s.photo_sim>=85?'，很像，建議優先確認':s.photo_sim<65?'，看起來不太像，仍請自己判斷':''}</div>`:''}`:''}
     <div class="ops">${sightOps(s.id,s.status)}</div></div>`;
