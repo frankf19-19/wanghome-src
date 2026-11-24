@@ -3323,7 +3323,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.6';
+const BUILD = 'v7.38.7';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -7824,7 +7824,7 @@ async function renderAdmin(){const _n=navId;
   if(_n!==navId)return;
   if(aErr){app.innerHTML=netErrHTML();return}
   if(!isA){app.innerHTML='<div class="empty">需要管理員權限</div>';return}
-  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','農業部目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['rehome','民眾送養'],['clinic','醫院審核（未開放）'],['bans','停權名單']];
+  const q=qs(location.hash),TABS=[['reports','檢舉'],['site','網友發佈'],['moa','待轉告目擊'],['shpic','收容所照片'],['case','走失案件'],['found','拾獲通報'],['sighting','目擊'],['members','會員'],['rehome','民眾送養'],['clinic','醫院審核（未開放）'],['bans','停權名單']];
   const tab=TABS.some(t=>t[0]===q.tab)?q.tab:'reports';
   const {data:st}=await sb.rpc('admin_stats');
   if(_n!==navId)return;
@@ -7906,12 +7906,12 @@ async function admShPic(box){const _n=navId;box.innerHTML='<div class="empty">�
   $('#shGo').onclick=async()=>{const b=$('#shGo');b.disabled=true;const st=$('#shSt');
     await shPicRun(subs,(i,ok,none)=>{if(st)st.textContent=`進度 ${i}/${subs.length}：存好 ${ok}、沒有照片或略過 ${none}`},()=>_n!==navId);
     if(st&&_n===navId)st.textContent+=`。完成！下一次排程（每 6 小時）會用這些照片做 AI 比對。`}}
-// 農業部申報案件的目擊：飼主沒有使用本站，由站長打電話轉告飼主後標記
+// 飼主收不到通知的目擊（農業部申報、或網站登記但沒帳號也沒驗證 Email）：由站長打電話轉告飼主後標記
 async function admMoa(box,showAll){const _n=navId;box.innerHTML='<div class="empty">讀取中…</div>';
   const {data:rs,error}=await sb.rpc('admin_moa_sightings',{p_include_done:showAll});if(_n!==navId)return;
   if(error){box.innerHTML=`<div class="empty-card"><b>讀取失敗</b><p class="small">${esc(error.message)}</p></div>`;return}
   const ST={pending:'待轉告',confirmed:'已轉告（公開到地圖）',rejected:'不像／無效'};
-  box.innerHTML=`<p class="small muted">農業部遺失申報的飼主沒有使用汪喵回家。收到目擊回報時，請打電話告訴飼主，再按「已轉告」（目擊會公開到協尋頁地圖）。</p>
+  box.innerHTML=`<p class="small muted">這裡是飼主收不到通知的目擊：農業部遺失申報的案件，以及網站上登記、但沒有會員帳號也沒驗證 Email 的案件。請打電話告訴飼主，再按「已轉告」（目擊會公開到協尋頁地圖）。</p>
   <p><a class="small" href="#/admin?tab=moa${showAll?'':'&all=1'}">${showAll?'只看待轉告':'也顯示已處理的'}</a></p>
   ${(rs||[]).length?rs.map(r=>`<div class="card adm-row" style="margin-bottom:10px">
     <div style="display:flex;gap:12px">${r.photo_url?thumbImg(r.photo_url,'','style="width:84px;height:84px;object-fit:cover;border-radius:12px"'):''}<div style="flex:1;min-width:0">
