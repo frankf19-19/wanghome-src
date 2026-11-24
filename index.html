@@ -3336,7 +3336,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.9';
+const BUILD = 'v7.38.10';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6443,7 +6443,7 @@ async function caseClues(c,id,_n){const box=$('#clues');if(!box)return;
     if(er||!d||!Array.isArray(d.rows)){if(box.isConnected&&!box.querySelector('.clue')){box.innerHTML='';box.hidden=true}return}box.hidden=false;draw(d.rows,!!d.can_hide,false)};
   box.hidden=true;load()}
 async function casePhotoMatch(c,id,_n){const box=$('#photoMatch');if(!box||!(c.photos||[]).length)return;
-  const d0=new Date(new Date(c.lost_at)-86400000).toISOString().slice(0,10);
+  const d0=new Date(Date.parse(c.lost_at)+8*3600e3-86400000).toISOString().slice(0,10);   // 台灣日期的前一天
   // 72 分以下多半只是同品種、同體型（實測不同隻裡最像的，中位數就有 65 分），預設收起來，只放真的像的
   const show=(rows,how)=>{if(_n!==navId||!box.isConnected)return;rows=(rows||[]).filter(r=>r.sim>=50).slice(0,8);// 文字上的毛色完全對不上的（飼主寫黑色、收容所登記黃白色）也算不像
     const cTxt=c.colour||((String(c.breed||'')+' '+String(c.name||'')).match(/黑柴|白柴|赤柴|紅貴賓|黑貴賓|白貴賓|灰貴賓/g)||[]).join(' ').replace(/赤/g,'黃'),cSet=colourSet(cTxt);
@@ -10844,7 +10844,7 @@ async function renderPetSummary(id){const _n=navId;
     const u=vetShareUrl(data.code);if(navigator.share)navigator.share({title:p.name+' 看診摘要',text:p.name+' 的看診摘要（過敏、用藥、最近看診）',url:u}).catch(()=>{})});
 }
 function vetShareUrl(code){return CONFIG.SITE_URL+'#/vet/'+code}
-function shareBoxHTML(s){return `<div class="card sum-share"><div id="sumQr" class="sum-qr"></div><div><b>給獸醫的連結</b><p class="small muted" style="margin:2px 0 8px">醫生用手機掃 QR 碼或打開連結就能看，不用登入。${esc(String(s.expires_at).slice(0,10))} 前有效${s.views?`，已被打開 ${s.views} 次`:''}。</p>
+function shareBoxHTML(s){return `<div class="card sum-share"><div id="sumQr" class="sum-qr"></div><div><b>給獸醫的連結</b><p class="small muted" style="margin:2px 0 8px">醫生用手機掃 QR 碼或打開連結就能看，不用登入。${esc(fmtDate(s.expires_at))} 前有效${s.views?`，已被打開 ${s.views} 次`:''}。</p>
   <div class="sum-url"><input readonly value="${esc(vetShareUrl(s.code))}" aria-label="分享連結"><button type="button" class="btn sm" id="sumCopy">${ic('link')} 複製</button></div>
   <button type="button" class="linkbtn danger-text small" id="sumStop">停止分享</button></div></div>`}
 function bindShareCopy(s){const b=$('#sumCopy');if(b)b.onclick=async()=>{try{await navigator.clipboard.writeText(vetShareUrl(s.code));toast('已複製連結')}catch(_){$('#sumShareBox input').select()}}}
@@ -10855,7 +10855,7 @@ async function renderVetShare(code){const _n=navId;setTitle('看診摘要');
   if(error){(_n===navId?app:_void).innerHTML=netErrHTML();return}
   if(!data){(_n===navId?app:_void).innerHTML='<div class="empty">這個看診摘要的連結已經過期，或飼主已經停止分享。<br>請飼主在汪喵回家 App 重新產生一次。</div>';return}
   setTitle(data.pet.name+' 看診摘要');
-  (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><button type="button" class="btn sm ghost app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button><span class="muted small">飼主分享給您的看診摘要・${esc(String(data.expires_at).slice(0,10))} 前有效</span></div>${summaryHTML(data)}`;
+  (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><button type="button" class="btn sm ghost app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button><span class="muted small">飼主分享給您的看診摘要・${esc(fmtDate(data.expires_at))} 前有效</span></div>${summaryHTML(data)}`;
 }
 
 /* ============================================================
@@ -11027,7 +11027,7 @@ async function renderPetClinics(petId){const _n=navId;if(!requireLogin())return;
   <p class="muted">看診時把連結碼給醫院，醫院開的病歷就會直接出現在${esc(p.name)}的健康手冊。只有通過汪喵回家審核的動物醫院才能連結。</p>
   <div class="card cl-codecard" id="lcBox"><button type="button" class="btn block" id="lcGen">${ic('link')} 產生連結碼</button><p class="small muted" style="margin:8px 0 0">連結碼 15 分鐘內有效，只能用一次。醫院用了之後，可以在下面隨時取消。</p></div>
   <h2>${ic('steth')} 已授權的醫院</h2>
-  ${list.length?`<div class="card" style="padding:6px 16px">${list.map(x=>`<div class="cl-vrow2"><span><b>${esc(x.name)}</b>${x.city?`<small class="muted">　${esc(x.city)}</small>`:''}<br><small class="muted">${esc(String(x.linked_at).slice(0,10))} 授權</small></span><button type="button" class="btn sm ghost" data-unlink="${x.clinic_id}" data-n="${esc(x.name)}">取消授權</button></div>`).join('')}</div>`:'<p class="muted small">還沒有授權任何醫院</p>'}
+  ${list.length?`<div class="card" style="padding:6px 16px">${list.map(x=>`<div class="cl-vrow2"><span><b>${esc(x.name)}</b>${x.city?`<small class="muted">　${esc(x.city)}</small>`:''}<br><small class="muted">${esc(fmtDate(x.linked_at))} 授權</small></span><button type="button" class="btn sm ghost" data-unlink="${x.clinic_id}" data-n="${esc(x.name)}">取消授權</button></div>`).join('')}</div>`:'<p class="muted small">還沒有授權任何醫院</p>'}
   <p class="muted small">取消授權後，這家醫院就不能再幫${esc(p.name)}開新病歷，也看不到你填的過敏、用藥；已經開好的病歷會留在你的健康手冊和醫院那邊。</p>`;
   $('#lcGen').onclick=once(async()=>{const {data,error}=await sb.rpc('pet_link_code',{p_pet:petId});__submitting=false;if(error)return toast('沒有成功：'+friendlyErr(error.message));
     const url=CONFIG.SITE_URL+'#/clinic/link/'+data.code;const exp=new Date(data.expires_at);
