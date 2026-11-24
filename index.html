@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-itunes-app" content="app-id=6827632980">
 <script>
+/* 使用者端錯誤紀錄（獨立一段：主程式有錯也會執行）：只送錯誤訊息、版本、頁面路徑（ID 和密碼換成 :x）、瀏覽器類型，不送個人資料。
+   同一個錯誤每次開啟只送一次、最多 5 筆；瀏覽器外掛、跨網域「Script error.」不送。每日健檢會看同一個錯誤是否大量出現。 */
+(function(){var sent={},n=0;function send(msg,src,line){try{msg=String(msg||'').slice(0,300);if(!msg||n>=5||sent[msg])return;
+  if(/^Script error\.?$|ResizeObserver loop|extension:\/\/|Non-Error promise rejection|AbortError|Load failed|Failed to fetch|NetworkError|cancelled|已取消/i.test(msg+' '+(src||'')))return;
+  if(src&&!/^https:\/\/(wangmiaotw\.com|localhost)|^capacitor:|^ionic:/.test(src))return;
+  sent[msg]=1;n++;var b;try{b=BUILD}catch(_){b=''}
+  var body=JSON.stringify({p:{build:b,route:String(location.hash||'#/').split('?')[0].replace(/\/[A-Za-z0-9_-]{16,}/g,'/:x').slice(0,80),msg:msg,src:String(src||'').split('?')[0].slice(0,160),line:line||null,ua:(/iPhone|iPad/.test(navigator.userAgent)?'iOS':/Android/.test(navigator.userAgent)?'Android':/Mac/.test(navigator.userAgent)?'Mac':/Windows/.test(navigator.userAgent)?'Windows':'other')+((window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())?'-app':'')}});
+  fetch('https://nopyhfpaykkiieudvoko.supabase.co/rest/v1/rpc/log_client_error',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:'sb_publishable_WCeVQIAPH0UEEzhTwovqkg_lJ8Qjydb'},body:body}).catch(function(){})}catch(_){}}
+  window.addEventListener('error',function(e){if(e&&e.message)send(e.message,e.filename,e.lineno)});
+  window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;send(r&&(r.message||r.toString&&r.toString())||'',r&&r.stack&&(String(r.stack).match(/https?:\/\/[^\s)]+/)||[''])[0],null)});
+})();
+</script>
+<script>
 /* App 線上更新的安全網（獨立的一段程式：主程式就算有錯也會執行）
    App 改用線上下載的新畫面後，如果連續 3 次開啟都沒有畫好第一頁，就退回上一個能用的版本。 */
 (function(){try{var C=window.Capacitor;if(!(C&&C.isNativePlatform&&C.isNativePlatform()))return;
@@ -3323,7 +3336,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.7';
+const BUILD = 'v7.38.8';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
