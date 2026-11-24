@@ -25,7 +25,7 @@ const MAIL_OK = !!RESEND_KEY;
 const MOA_API_URL = (Deno.env.get("MOA_API_URL") ?? "").trim();
 const ADMIN_EMAIL = (Deno.env.get("ADMIN_EMAIL") ?? Deno.env.get("GMAIL_USER") ?? "").trim() || REPLY_TO;
 const UA = "WangHome/2.0 (+lost-dog-matcher)";
-const VERSION = "2.2.0";
+const VERSION = "2.3.0";
 
 function serviceKey(): string {
   try {
@@ -1026,7 +1026,14 @@ async function run(mode: Mode) {
       log("保活 OK", n?.length ? "有資料" : "空");
     } catch (e) { failed.push("保活"); log("保活失敗：", errName(e)); }
   }
-  if (failed.length) log("這次有步驟失敗：", failed.join("、"));
+  if (failed.length) {
+    log("這次有步驟失敗：", failed.join("、"));
+    // 每晚的排程（nightly、cleanup）有步驟失敗就寄信給站長；每 2 小時的 notify 偶爾失敗不寄，免得太吵
+    if ((full || mode === "cleanup") && MAIL_OK && ADMIN_EMAIL) {
+      const body = [`排程「${mode}」有 ${failed.length} 個步驟失敗：${failed.join("、")}`, "", ...LOG.slice(-25), "", "請把這封信轉給 Claude 處理。", `— ${SITE_NAME}`];
+      try { await sendMail(ADMIN_EMAIL, `【${SITE_NAME}】每晚排程有步驟失敗`, body.join("\n"), "admin"); } catch (_) { /* ignore */ }
+    }
+  }
   return { ok: !failed.length, failed, log: LOG };
 }
 
