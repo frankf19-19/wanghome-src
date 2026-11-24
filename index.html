@@ -3336,7 +3336,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.11';
+const BUILD = 'v7.38.12';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3804,7 +3804,10 @@ function autoFillPlace(mapEl,lat,lng,now){clearTimeout(__afT);const seq=++__afSe
 let __fix=null;   // 最近一次定位 {lat,lng,acc,t}
 function geoWatch(cb,opt){   // 回傳停止函式
   const G=IS_APP&&capPlugin('Geolocation');
-  if(G&&G.watchPosition){let id=null,stopped=false;G.watchPosition({enableHighAccuracy:true,timeout:20000,maximumAge:opt&&opt.maximumAge||300000},(p,err)=>{if(stopped)return;if(err){const m=String(err&&err.message||err);cb(null,/denied|permission|權限/i.test(m)?1:/time ?out|逾時/i.test(m)?3:2);return}if(p&&p.coords)cb(p)}).then(x=>{id=x;if(stopped)G.clearWatch({id})}).catch(()=>cb(null,2));return()=>{stopped=true;if(id)G.clearWatch({id}).catch(()=>{})}}
+  // 有些 App 版本的原生定位 watchPosition 不回傳 Promise（直接回 id 或 undefined），一律包成 Promise，失敗就改用一般定位
+  if(G&&G.watchPosition){let id=null,stopped=false,r;const clr=()=>{try{const c=G.clearWatch({id});if(c&&c.catch)c.catch(()=>{})}catch(_){}};
+    try{r=G.watchPosition({enableHighAccuracy:true,timeout:20000,maximumAge:opt&&opt.maximumAge||300000},(p,err)=>{if(stopped)return;if(err){const m=String(err&&err.message||err);cb(null,/denied|permission|權限/i.test(m)?1:/time ?out|逾時/i.test(m)?3:2);return}if(p&&p.coords)cb(p)})}catch(_){r=undefined}
+    if(r!==undefined){Promise.resolve(r).then(x=>{id=x;if(stopped&&id!=null)clr()}).catch(()=>cb(null,2));return()=>{stopped=true;if(id!=null)clr()}}}
   if(!navigator.geolocation){cb(null,2);return()=>{}}
   const id=navigator.geolocation.watchPosition(p=>cb(p),e=>cb(null,e&&e.code||2),{enableHighAccuracy:true,timeout:20000,maximumAge:opt&&opt.maximumAge||300000});
   return()=>navigator.geolocation.clearWatch(id)}
