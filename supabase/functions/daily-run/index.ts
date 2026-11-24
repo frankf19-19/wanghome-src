@@ -25,7 +25,7 @@ const MAIL_OK = !!RESEND_KEY;
 const MOA_API_URL = (Deno.env.get("MOA_API_URL") ?? "").trim();
 const ADMIN_EMAIL = (Deno.env.get("ADMIN_EMAIL") ?? Deno.env.get("GMAIL_USER") ?? "").trim() || REPLY_TO;
 const UA = "WangHome/2.0 (+lost-dog-matcher)";
-const VERSION = "2.0.0";
+const VERSION = "2.1.0";
 
 function serviceKey(): string {
   try {
@@ -973,6 +973,17 @@ async function runPhotoCleanup(dry = false) {
   for (const part of chunks(stale, 100)) await storage("DELETE", "object/photos", { prefixes: part });
 }
 
+// ---------------------------------------------------------------- 正式站健檢（每天 nightly 一次；有問題才寄信給站長）
+async function runHealthCheck() {
+  const probs: string[] = await sb("POST", "rpc/health_check", {});
+  if (!Array.isArray(probs) || !probs.length) { log("正式站健檢：一切正常"); return; }
+  log(`正式站健檢：發現 ${probs.length} 個問題`, probs.join("；"));
+  if (!(MAIL_OK && ADMIN_EMAIL)) return;
+  const lines = [`每日自動健檢發現 ${probs.length} 個問題，可能有功能壞掉了：`, "", ...probs.slice(0, 40).map((x) => `・${x}`), "",
+    "這封信每天會寄，直到問題修好為止。請把這封信轉給 Claude 處理。", `— ${SITE_NAME}`];
+  await sendMail(ADMIN_EMAIL, `【${SITE_NAME}】健檢發現 ${probs.length} 個問題`, lines.join("\n"), "admin");
+}
+
 // ---------------------------------------------------------------- 主流程
 const MODES = ["all", "nightly", "notify", "match", "probe", "cleanup", "cleanup-dry"] as const;
 type Mode = typeof MODES[number];
@@ -1004,6 +1015,7 @@ async function run(mode: Mode) {
     if (full || mode === "notify") await step("回家通知", runReuniteNotices);
     if (full || mode === "notify") await step("檢舉通知", runReportAlerts);
     if (full) await step("到期提醒", runDueReminders);
+    if (full) await step("正式站健檢", runHealthCheck);
     if (full) {
       await step("定期清理", async () => log("定期清理：", await sb("POST", "rpc/retention_cleanup", {})));
       await step("清除舊網路位址", async () => log("清除 30 天前的網路位址：", await sb("POST", "rpc/clear_old_ips", {})));
