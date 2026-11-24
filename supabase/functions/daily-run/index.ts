@@ -25,7 +25,7 @@ const MAIL_OK = !!RESEND_KEY;
 const MOA_API_URL = (Deno.env.get("MOA_API_URL") ?? "").trim();
 const ADMIN_EMAIL = (Deno.env.get("ADMIN_EMAIL") ?? Deno.env.get("GMAIL_USER") ?? "").trim() || REPLY_TO;
 const UA = "WangHome/2.0 (+lost-dog-matcher)";
-const VERSION = "2.1.0";
+const VERSION = "2.2.0";
 
 function serviceKey(): string {
   try {
@@ -939,11 +939,9 @@ async function runPhotoCleanup(dry = false) {
       used.add(k); used.add(k.replace(/\.jpg$/, "_t.jpg"));
     }
   };
-  for (const r of await sbAll("cases", { select: "id,photos,found_photo" }, 1000, 1e7, true)) { for (const u of r.photos ?? []) add(u); add(r.found_photo); }
-  for (const r of await sbAll("found_reports", { select: "id,photos" }, 1000, 1e7, true)) for (const u of r.photos ?? []) add(u);
-  for (const r of await sbAll("sightings", { select: "id,photo_url" }, 1000, 1e7, true)) add(r.photo_url);
-  // 毛孩交朋友名片、揪團：舊的名片照片可能放在 cases/，不能刪
-  for (const r of await sbAll("pet_cards", { select: "pet_id,photo" }, 1000, 1e7, true)) add(r.photo);
+  // 使用中的照片：資料庫掃 public 所有欄位（migration v1.104 photo_refs），以後新增欄位也不會漏
+  const refs: string[] = (await sb("POST", "rpc/photo_refs", {})) ?? [];
+  for (const k of refs) add(PUBLIC_PREFIX + k);
   if (!used.size) { log("照片清理：找不到任何使用中的照片，為了安全這次不刪"); return; }
   const cutoff = Date.now() - 12 * 3600e3;
   const stale: string[] = [];
