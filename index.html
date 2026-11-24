@@ -3322,7 +3322,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.3';
+const BUILD = 'v7.38.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -6471,7 +6471,7 @@ function shareText(c,url){
 走失地點：${c.lost_place||c.lost_city+(c.lost_district||'')}
 特徵：${[c.breed,SEX[c.sex],SIZE[c.size]&&SIZE[c.size]+sp(c.species).unit,c.colour,c.age_text].filter(Boolean).join('、')}${c.features?'；'+c.features:''}
 ${c.has_chip?'有晶片'+(c.chip_last4?'（末四碼 '+c.chip_last4+'）':''):'晶片：無／不確定'}${c.reward>0?'　尋獲獎金 NT$'+c.reward.toLocaleString():''}
-${c.contact_phone?'聯絡：'+c.contact_phone+'\n':''}⚠️ 看到請勿呼喊、追趕或包圍，請拍照記下時間位置方向，到這裡回報目擊：
+${c.health_alert?'健康提醒：'+c.health_alert+'\n':''}${c.contact_phone?'聯絡：'+c.contact_phone+'\n':''}⚠️ 看到請勿呼喊、追趕或包圍，請拍照記下時間位置方向，到這裡回報目擊：
 ${url}`;
 }
 const MAXLEN={name:30,breed:50,colour:50,age_text:30,collar_desc:200,temperament:200,lost_place:200,features:1000,notes:1000,note:1000,place_text:200,reporter_name:50,reporter_contact:100,reporter_email:120,contact_name:50,contact_phone:30,contact_line:60,contact_email:120,website:200,current_place:200,injury:200,direction:20};
@@ -10542,7 +10542,7 @@ async function renderRecord(petId,recId){const _n=navId;
     <div class="submitbar row"><button class="btn" id="btnSave">儲存紀錄</button><a class="btn ghost" href="#/pet/${petId}">取消</a></div>${recId!=='new'?`<p class="del-row"><button type="button" class="linkbtn danger-text" id="btnDel">${ic('trash')} 刪除這筆紀錄</button></p>`:''}
   </form>`;
   const f=$('#rf');let kind=r.kind,files=origFiles.slice(),didSave=false;const fresh=[];
-  let docKinds=files.map((_,i)=>(r.doc_kinds||[])[i]||'other');const proGet=proBind(f,r.pro);
+  let docKinds=files.map((_,i)=>(r.doc_kinds||[])[i]||'other');const proGet=proBind(f,r.pro,p.species);
   // 下次到期日：記住「幾個月後」，日期改了就跟著重算；手動改過就不再自動動它
   let dueM=0,dueAuto=false;
   const setDue=m=>{dueM=m;dueAuto=!!m;f.elements.next_due.value=m?addMonths(f.elements.date.value||todayStr(),m):''};
@@ -10694,7 +10694,7 @@ async function renderMed(petId,medId){const _n=navId;
 const DOC_KINDS={summary:'病歷摘要',diagnosis:'診斷書',lab:'檢驗報告',imaging:'X光／超音波',rx:'處方／藥袋',vaccine:'疫苗證明',receipt:'收據',other:'其他'};
 const PRO_KINDS=['vet','surgery','vaccine'];
 const RX_ROUTE=['口服','注射','外用','點眼','點耳','吸入','其他'];
-const LAB_PRESETS=[['WBC','10³/µL','6–17'],['RBC','10⁶/µL','5.5–8.5'],['HCT','%','37–55'],['PLT','10³/µL','200–500'],['BUN','mg/dL','7–27'],['CREA','mg/dL','0.5–1.8'],['SDMA','µg/dL','0–14'],['ALT','U/L','10–125'],['ALP','U/L','23–212'],['GLU','mg/dL','74–143'],['TP','g/dL','5.2–8.2'],['ALB','g/dL','2.3–4.0']];
+const LAB_PRESETS=[['WBC','10³/µL','5.05–16.76','3.9–19'],['RBC','10⁶/µL','5.65–8.87','7.1–11.5'],['HCT','%','37.3–61.7','28.2–52.7'],['PLT','10³/µL','148–484','155–641'],['BUN','mg/dL','7–27','16–36'],['CREA','mg/dL','0.5–1.8','0.8–2.4'],['SDMA','µg/dL','0–14','0–14'],['ALT','U/L','10–125','12–130'],['ALP','U/L','23–212','14–111'],['GLU','mg/dL','74–143','71–159'],['TP','g/dL','5.2–8.2','5.7–8.9'],['ALB','g/dL','2.3–4.0','2.2–4.0']];   // [項目, 單位, 狗常見參考範圍, 貓常見參考範圍]
 const LAW11='依《獸醫師法》第 11 條，獸醫師沒有正當理由，不能拒絕開立病歷摘要、診斷書、檢驗證明書、影像紀錄等診療相關文件（費用由飼主負擔）。';
 // 檢驗數值有沒有超出參考範圍：回傳 'H'、'L' 或 ''
 function labFlag(v,ref){const n=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));if(isNaN(n))return '';const r=String(ref||'').replace(/\s/g,'');let m=r.match(/^(-?[\d.]+)[–~\-－至](-?[\d.]+)$/);if(m){const lo=+m[1],hi=+m[2];return n>hi?'H':n<lo?'L':''}
@@ -10719,14 +10719,14 @@ function proFormHTML(pr){pr=pr||{};const v=pr.vitals||{};
   <label class="f"><span><b class="lbl">診斷</b><small class="hint long">有好幾個就用「、」分開</small></span><input name="p_dx" maxlength="300" value="${esc((pr.dx||[]).join('、'))}" placeholder="例：外耳炎、輕度脫水"></label>
   <label class="f"><span><b class="lbl">治療與醫囑</b><small class="hint long">做了什麼處置、回家要注意什麼</small></span><textarea name="p_p" maxlength="1000">${esc(pr.p||'')}</textarea></label>
   <h4 class="pro-h">${ic('pill')} 處方用藥</h4><div id="rxRows" class="pro-rows"></div><button type="button" class="btn sm ghost" id="rxAdd">${ic('plus')} 加一種藥</button>
-  <h4 class="pro-h">${ic('clipboard')} 檢驗數值</h4><div id="labRows" class="pro-rows"></div>
+  <h4 class="pro-h">${ic('clipboard')} 檢驗數值</h4><p class="muted small" style="margin:-2px 0 6px">點常見項目會帶入一般參考範圍，請改成檢驗報告上寫的。</p><div id="labRows" class="pro-rows"></div>
   <div class="pro-pre" id="labPre">${LAB_PRESETS.map(([n])=>`<button type="button" class="fchip" data-lab="${n}">${n}</button>`).join('')}</div>
   <button type="button" class="btn sm ghost" id="labAdd">${ic('plus')} 加其他項目</button>
   <div class="row2" id="vacWrap"><label class="f"><span>疫苗廠牌</span><input name="p_vbrand" maxlength="40" value="${esc(pr.vac_brand||'')}"></label><label class="f"><span>疫苗批號</span><input name="p_vlot" maxlength="40" value="${esc(pr.vac_lot||'')}"></label></div>
   <label class="f"><span>看診獸醫師</span><input name="p_vet" maxlength="30" value="${esc(pr.vet||'')}" placeholder="例：王醫師"></label>
   </details>`}
 // 綁定病歷詳細的動態列（處方、檢驗），回傳讀取函式
-function proBind(f,pr){pr=pr||{};const rx=(pr.rx||[]).map(x=>({...x})),labs=(pr.labs||[]).map(x=>({...x}));
+function proBind(f,pr,spf){pr=pr||{};const isCat=()=>(typeof spf==='function'?spf():spf)==='cat';const rx=(pr.rx||[]).map(x=>({...x})),labs=(pr.labs||[]).map(x=>({...x}));
   const rxBox=$('#rxRows'),labBox=$('#labRows');
   const drawRx=()=>{rxBox.innerHTML=rx.map((x,i)=>`<div class="pro-row rx" data-i="${i}">
     <input data-k="name" maxlength="50" placeholder="藥名" value="${esc(x.name||'')}" aria-label="藥名">
@@ -10750,7 +10750,7 @@ function proBind(f,pr){pr=pr||{};const rx=(pr.rx||[]).map(x=>({...x})),labs=(pr.
   bindRows(rxBox,rx,drawRx);bindRows(labBox,labs,drawLab);drawRx();drawLab();
   $('#rxAdd').onclick=()=>{rx.push({route:'口服'});drawRx();rxBox.querySelector('.pro-row:last-child [data-k=name]')?.focus()};
   $('#labAdd').onclick=()=>{labs.push({});drawLab();labBox.querySelector('.pro-row:last-child [data-k=item]')?.focus()};
-  $('#labPre').querySelectorAll('[data-lab]').forEach(b=>b.onclick=()=>{const p=LAB_PRESETS.find(x=>x[0]===b.dataset.lab);if(labs.some(x=>x.item===p[0]))return toast(p[0]+' 已經加過了');labs.push({item:p[0],unit:p[1],ref:p[2]});drawLab();labBox.querySelector('.pro-row:last-child [data-k=value]')?.focus()});
+  $('#labPre').querySelectorAll('[data-lab]').forEach(b=>b.onclick=()=>{const p=LAB_PRESETS.find(x=>x[0]===b.dataset.lab);if(labs.some(x=>x.item===p[0]))return toast(p[0]+' 已經加過了');labs.push({item:p[0],unit:p[1],ref:isCat()?p[3]:p[2]});drawLab();labBox.querySelector('.pro-row:last-child [data-k=value]')?.focus()});
   const num=(n,lo,hi)=>{const x=parseFloat(f.elements[n].value);return isNaN(x)||x<lo||x>hi?null:x};
   return ()=>{const o={};const v={temp:num('pv_temp',30,45),hr:num('pv_hr',10,400),rr:num('pv_rr',2,200),bcs:num('pv_bcs',1,9)};Object.keys(v).forEach(k=>v[k]==null&&delete v[k]);if(Object.keys(v).length)o.vitals=v;
     const t=n=>String(f.elements[n]?.value||'').trim();
@@ -10760,7 +10760,7 @@ function proBind(f,pr){pr=pr||{};const rx=(pr.rx||[]).map(x=>({...x})),labs=(pr.
     const L=labs.filter(x=>String(x.item||'').trim()&&String(x.value??'').trim()).slice(0,40).map(x=>{const y={item:String(x.item).trim(),value:String(x.value).trim()};if(String(x.unit||'').trim())y.unit=String(x.unit).trim();if(String(x.ref||'').trim())y.ref=String(x.ref).trim();return y});if(L.length)o.labs=L;
     return o}}
 // 時間軸上的病歷重點（診斷、生命徵象）
-function proLineHTML(pr){if(!proFilled(pr))return '';const vt=proVitalsText(pr);return `<div class="pro-line">${(pr.dx||[]).length?`<span class="pro-dx">${ic('steth')} ${esc(pr.dx.join('、'))}</span>`:''}${vt?`<span class="muted small">${esc(vt)}</span>`:''}${(pr.rx||[]).length?`<span class="muted small">處方 ${pr.rx.length} 種</span>`:''}${(pr.labs||[]).length?`<span class="muted small">檢驗 ${pr.labs.length} 項${pr.labs.some(x=>labFlag(x.value,x.ref))?'（有異常）':''}</span>`:''}</div>`}
+function proLineHTML(pr){if(!proFilled(pr))return '';const vt=proVitalsText(pr);return `<div class="pro-line">${(pr.dx||[]).length?`<span class="pro-dx">${ic('steth')} ${esc(pr.dx.join('、'))}</span>`:''}${vt?`<span class="muted small">${esc(vt)}</span>`:''}${(pr.rx||[]).length?`<span class="muted small">處方 ${pr.rx.length} 種</span>`:''}${(pr.labs||[]).length?`<span class="muted small">檢驗 ${pr.labs.length} 項${pr.labs.some(x=>labFlag(x.value,x.ref))?'（有異常）':''}</span>`:''}${pr.vac_brand||pr.vac_lot?`<span class="muted small">${esc([pr.vac_brand,pr.vac_lot?'批號 '+pr.vac_lot:''].filter(Boolean).join('・'))}</span>`:''}</div>`}
 // 一筆紀錄的完整病歷格式（列印、一頁摘要用）
 function proBlockHTML(r){const pr=r.pro||{};if(!proFilled(pr))return r.notes?`<div class="small" style="white-space:pre-wrap">${esc(r.notes)}</div>`:'';const vt=proVitalsText(pr);
   return `<div class="pro-blk">${vt?`<div><b>生命徵象</b>　${esc(vt)}${r.weight_kg?`・體重 ${r.weight_kg} kg`:''}</div>`:''}
@@ -10967,7 +10967,7 @@ async function renderClinicVisit(id){const _n=navId;if(!requireLogin())return;
     <label class="chk"><input type="checkbox" name="shared" ${v.shared!==false?'checked':''}> 傳到飼主的健康手冊（飼主看得到這份病歷）</label>
     <div class="submitbar row"><button class="btn" id="cvSave">${id==='new'?'儲存病歷':'儲存修改'}</button><a class="btn ghost" href="${petId?'#/clinic/pet/'+petId:'#/clinic'}">取消</a></div>
   </form>`;
-  const f=$('#cvF');$('#proSec').open=true;{const vl=f.elements.p_vet&&f.elements.p_vet.closest('label');if(vl)vl.remove()}const proGet0=proBind(f,v.pro);const proGet=()=>{const o=proGet0();delete o.vet;return o};
+  const f=$('#cvF');$('#proSec').open=true;{const vl=f.elements.p_vet&&f.elements.p_vet.closest('label');if(vl)vl.remove()}const proGet0=proBind(f,v.pro,()=>f.elements.species.value);const proGet=()=>{const o=proGet0();delete o.vet;return o};
   f.onsubmit=once(async e=>{e.preventDefault();const fd=new FormData(f);const t=k=>String(fd.get(k)||'').trim();
     const row={visit_date:t('visit_date'),vet_name:t('vet_name'),title:t('title'),owner_name:t('owner_name'),owner_address:t('owner_address'),pet_name:t('pet_name'),species:t('species')||'dog',breed:t('breed')||null,
       weight_kg:+fd.get('weight_kg')>0?+fd.get('weight_kg'):null,pro:proGet(),notes:t('notes')||null,next_due:t('next_due')||null,next_due_note:t('next_due_note')||null,shared:!!fd.get('shared'),updated_at:new Date().toISOString()};
