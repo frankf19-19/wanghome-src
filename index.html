@@ -3208,6 +3208,7 @@ html.booting #app>.loading{opacity:0;animation:bootShow .2s .7s forwards}
 .ph-none{display:flex;gap:10px;align-items:flex-start;background:var(--sheet);border-radius:16px;padding:12px 14px;margin:8px 0 0;font-size:14.5px;color:var(--ink-2)}
 .ph-none>.ico{flex:none;width:20px;height:20px;margin-top:2px;color:var(--ok,#1A8A5F)}
 .adm-stats a.stat{color:var(--ink-3);text-decoration:none;border-radius:14px;transition:background .15s}.adm-stats a.stat:active{background:rgba(0,0,0,.05)}@media(hover:hover){.adm-stats a.stat:hover{background:rgba(0,0,0,.04)}}
+.adm-card.adm-home{background:linear-gradient(135deg,#FFF8E1,#FFF1C9);box-shadow:inset 4px 0 0 #E0A526}.tag.home{background:#E0A526;color:#fff}html[data-theme=dark] .adm-card.adm-home{background:linear-gradient(135deg,#3A2F17,#2E2614)}
 </style>
 </head>
 <body>
@@ -3282,7 +3283,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.36.5';
+const BUILD = 'v7.36.6';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -7922,9 +7923,11 @@ function admRow(t,r){
   const stt=t==='case'?STATUS[r.status]:t==='found'?FSTATUS_T[r.status]:SSTATUS_T[r.status];
   const place=t==='case'?[r.lost_city,r.lost_district,r.lost_place]:t==='found'?[r.city,r.district,r.place_text]:[r.place_text];
   const ph=r.photo||r.photo_url;const hidden=t==='sighting'?r.status==='rejected':r.hidden;
-  return `<div class="card adm-card">
+  const home=!hidden&&((t==='case'&&r.status==='found')||(t==='found'&&r.status==='reunited'));   // 已回家：換成金色樣式，一眼就分得出來
+  const tcls=hidden?'':home?'home':(t==='case'&&r.status==='searching')||(t==='found'&&r.status==='open')||(t==='sighting'&&r.status==='pending')?'green':'gray';
+  return `<div class="card adm-card${home?' adm-home':''}">
     <div class="adm-row">${ph?`<img class="adm-ph" src="${esc(thumbUrl(ph))}" data-full="${esc(safeU(ph))}" onerror="if(this.dataset.full&&this.src!==this.dataset.full){this.src=this.dataset.full;this.dataset.full=''}else{this.style.visibility='hidden'}" alt="" loading="lazy">`:''}<div class="adm-main">
-      <div class="adm-h"><b>${esc(title||'(未命名)')}</b><span class="tag ${hidden?'':'green'}">${esc(stt||r.status)}</span>${r.hidden?'<span class="tag">已隱藏</span>':''}${r.open_reports>0?`<span class="tag red">檢舉 ${r.open_reports}</span>`:''}</div>
+      <div class="adm-h"><b>${esc(title||'(未命名)')}</b><span class="tag ${tcls}">${home?'🏠 ':''}${esc(stt||r.status)}</span>${r.hidden?'<span class="tag">已隱藏</span>':''}${r.open_reports>0?`<span class="tag red">檢舉 ${r.open_reports}</span>`:''}</div>
       <div class="small muted">${fmtDT(r.created_at)} 登記${place.filter(Boolean).length?'　'+esc(place.filter(Boolean).join(' ')):''}${t==='case'?`　瀏覽 ${r.view_count||0}・目擊 ${r.sightings||0}`:''}</div>
       ${t==='sighting'&&r.note?`<div class="small">${esc(r.note)}</div>`:''}
       ${admContact(r)}
