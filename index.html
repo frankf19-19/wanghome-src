@@ -1642,6 +1642,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pm-map{height:min(62vh,520px);border-radius:20px;overflow:hidden}.pm-pop{display:flex;flex-direction:column;gap:2px;color:var(--ink)!important;text-decoration:none;min-width:170px}.pm-pop b{font-size:15px}.pm-pop small{color:var(--ink-2)}.pm-pop em{font-style:normal;color:var(--red);font-weight:700;margin-top:2px}
 .pal-mv{margin-left:auto;flex:none}.pals-tabs a{font-size:15px}
 
+.pal-newbar{display:flex;align-items:center;gap:8px;width:100%;margin:10px 0 4px;padding:12px 14px;border:0;border-radius:14px;background:color-mix(in srgb,#F28C38 14%,var(--sheet));color:var(--ink);font:inherit;text-align:left;cursor:pointer}.pal-newbar>.ico{color:#E0457B;flex:none}.pal-newbar b{flex:1}.pal-newbar span{color:var(--muted,#777);font-size:14px;white-space:nowrap}.pal-new{font-style:normal;font-size:11px;font-weight:800;color:#fff;background:#E0457B;border-radius:99px;padding:1px 6px;vertical-align:2px}
 .pal-cw{position:relative;display:flex}.pal-badge{position:absolute;top:10px;left:10px;z-index:1;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:800;color:#fff;background:var(--green);pointer-events:none}.pal-badge.mu{background:#E0457B}.pal-badge.lk{background:#F28C38}
 .pal-mu{margin:8px 0 2px;padding:9px 12px;border-radius:14px;background:color-mix(in srgb,#E0457B 12%,var(--sheet));color:#C2306A;font-weight:800;text-align:center}.pal-mu.lk{background:color-mix(in srgb,#F28C38 14%,var(--sheet));color:#B8601D}.pal-cw .pal-card{flex:1;width:100%}
 .pal-like{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;min-width:40px;height:34px;padding:0 9px;border-radius:99px;border:0;background:color-mix(in srgb,var(--sheet) 88%,transparent);box-shadow:0 1px 4px rgba(0,0,0,.12);color:var(--ink-3);font:700 13px/1 var(--body);cursor:pointer}
@@ -3336,7 +3337,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.14';
+const BUILD = 'v7.38.15';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -9688,10 +9689,11 @@ async function renderPals(){const _n=navId;const q=qs(location.hash);const tab=q
   app.innerHTML=`${petSegHTML('pals')}<div class="pals">
     <div class="health-hero row"><div><h1>毛孩交朋友</h1></div>${tab!=='meets'?`<button type="button" class="btn green" id="palMine">${ic('plus')} 放上我的毛孩</button>`:`<a class="btn green" href="#/pals/meet/new">${ic('plus')} 發起揪團</a>`}</div>
     <div class="pals-tabs" role="tablist">${[['swipe','認識新朋友'],['cards','名片牆'],['meets','揪團約玩']].map(([t,l])=>{const p=new URLSearchParams({...(t==='swipe'?{}:{tab:t}),...(st.sp?{sp:st.sp}:{}),...(st.city?{city:st.city}:{}),...(st.dist?{dist:st.dist}:{})});if(!p.get('sp')&&!p.get('city'))p.set('keep','1');return `<a role="tab" class="${tab===t?'on':''}" aria-selected="${tab===t}" href="#/pals?${p}">${l}</a>`}).join('')}</div>
+    <div id="palNew"></div>
     ${palFilterBar(st,tab)}
     <div id="palList"><div class="empty loading" role="status"><span class="spin" aria-hidden="true"></span>載入中…</div></div>
     ${PAL_RULES}</div>`;
-  palSegBadge();
+  palSegBadge().then(()=>{const h=$('#palNew');if(!h||_n!==navId||!__palN)return;h.innerHTML=`<button type="button" class="pal-newbar">${ic('heart')}<b>有 ${__palN} 位新朋友喜歡你家毛孩</b><span>看是誰 ${ic('chev')}</span></button>`;h.firstChild.onclick=palNewLikesSheet});
   app.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>go({sp:b.dataset.sp}));
   $('#palCity').onchange=e=>go({city:e.target.value,dist:''});
   {const d=$('#palDist');if(d)d.onchange=e=>go({dist:e.target.value})}
@@ -9858,6 +9860,17 @@ async function palLikeTap(c,btn){
   catch(err){set(was);toast(friendlyErr(err.message||err),4000)}
   finally{c.__busy=0;if(!btn)palGridSync(c)}}
 function palGridSync(c){const rows=document.querySelectorAll('.pal-cw');rows.forEach(w=>{const b=w.querySelector('.pal-like');const n=w.querySelector('.pal-card b');if(!b||!n||n.textContent!==c.name)return;const on=__palLiked.has(c.pet_id);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.innerHTML=`${palHeart(on)}<b>${c.likes||''}</b>`})}
+// 交朋友分頁紅點點進來：列出所有喜歡我家毛孩的人，新的標「新」
+async function palNewLikesSheet(){const seen=(()=>{try{return localStorage.getItem('wh_likes_seen')||''}catch(_){return ''}})();
+  const {data,error}=await sb.from('pet_card_likers').select('user_id,username,avatar_url,created_at,pet_name').order('created_at',{ascending:false}).limit(200);
+  if(error)return toast(friendlyErr(error.message));
+  palLikesSeen();{const h=$('#palNew');if(h)h.innerHTML=''}
+  const rows=data||[];const d=document.createElement('div');d.className='lightbox sheet-bg';d.setAttribute('aria-label','誰喜歡你家毛孩');
+  d.innerHTML=`<div class="sheet pal-sheet" onclick="event.stopPropagation()"><h2>${ic('heart')} 誰喜歡你家毛孩</h2>
+    ${rows.length?`<p class="muted small">點名字可以看會員頁、加好友或打招呼。</p><div class="pal-likers">${rows.map(r=>`<a href="#/u/${encodeURIComponent(r.username)}">${chatAva(r.username,r.avatar_url)}<b>${esc(r.username)}${r.created_at>seen?' <i class="pal-new">新</i>':''}</b><small>${r.pet_name?'喜歡'+esc(r.pet_name)+'・':''}${esc(timeAgo(r.created_at))}</small>${ic('chev','mrc')}</a>`).join('')}</div>`:'<p class="muted">按喜歡的人已經取消了。</p>'}
+    <div class="btns"><button type="button" class="btn ghost" data-x>關閉</button></div></div>`;
+  d.onclick=()=>closeOverlay(d);openOverlay(d);requestAnimationFrame(()=>d.classList.add('show'));
+  d.querySelector('[data-x]').onclick=()=>closeOverlay(d);d.querySelectorAll('.pal-likers a').forEach(a=>a.addEventListener('click',()=>closeOverlay(d)))}
 async function palLikersSheet(petId,name){palLikesSeen();
   const {data,error}=await sb.from('pet_card_likers').select('user_id,username,avatar_url,created_at').eq('pet_id',petId).order('created_at',{ascending:false}).limit(200);
   if(error)return toast(friendlyErr(error.message));
