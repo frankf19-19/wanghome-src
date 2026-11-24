@@ -3336,7 +3336,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.10';
+const BUILD = 'v7.38.11';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3584,6 +3584,10 @@ let sb = null;
 function safeU(u){u=String(u??'');return /^https:\/\/[^\s'"()\\<>]+$/.test(u)?u:''}
 function esc(s){return String(s??'').replace(/[\u202A-\u202E\u2066-\u2069]/g,'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 // 使用者寫的文字（目擊備註、留言）：網址變成可以點的連結，另開分頁；只認 http(s)，其他照樣只顯示文字
+// 搜尋字拆成幾個詞：空白、頓號、逗號隔開都算；「台／臺」「米克斯／混種」通用；公母、狗貓直接當條件（最多 4 個詞）
+function kwTerms(raw){const ws=String(raw||'').replace(/[%()*\\"'.:]/g,' ').split(/[\s,，、;；\/]+/).map(w=>w.trim()).filter(Boolean).slice(0,4);
+  const SEX={'公':'male','男生':'male','公的':'male','母':'female','女生':'female','母的':'female'},SP={'狗':'dog','狗狗':'dog','犬':'dog','貓':'cat','貓咪':'cat'};
+  return ws.map(w=>SEX[w]?{w,sex:SEX[w]}:SP[w]?{w,sp:SP[w]}:{w,vs:[...new Set([w,w.replace(/台/g,'臺'),w.replace(/臺/g,'台'),w.replace(/米克斯/g,'混種'),w.replace(/混種/g,'米克斯')])]})}
 function escLink(s){return esc(s).replace(/https?:\/\/[^\s<>"'）」』】，。！？、]+/g,u=>{let t='';const m=u.match(/[.,;:!?)\]]+$/);if(m&&!/&amp;$|&#39;$/.test(u)){t=m[0];u=u.slice(0,-t.length)}let host='';try{host=new URL(u.replace(/&amp;/g,'&')).host.replace(/^www\./,'')}catch(_){return u+t}const show=u.length>48?host+'/…':u;return `<a class="ulink" href="${u}" target="_blank" rel="noopener noreferrer nofollow ugc">${show}</a>${t}`})}
 function friendlyErr(m){m=String(m??'');if(/cases_email_ok/.test(m))return 'Email 格式不對，請檢查一下（例如 name@gmail.com）';if(/row-level security/i.test(m)&&/storage|object/i.test(m))return '照片上傳太頻繁，請過一會兒再試';if(/violates check constraint/i.test(m))return m.replace(/new row[\s\S]*|[^：:]*violates check constraint[\s\S]*/i,'')+'有欄位內容太長或格式不對，請檢查後再送出';if(/value too long/i.test(m))return '有欄位內容太長，請縮短後再送出';if(/violates (not-null|foreign key)/i.test(m))return '資料不完整，請重新整理後再試';if(/duplicate key/i.test(m))return '這筆資料已經存在';if(/Failed to fetch|NetworkError|Load failed/i.test(m))return m.replace(/(TypeError|Error):\s*/g,'').replace(/[（(]?\s*(Failed to fetch|NetworkError[^ ]*|Load failed).*/,'')+(/網路/.test(m)?'':'網路連線不穩，請確認網路後再試一次');if(/JWT|jwt expired|invalid claim/i.test(m))return '登入已過期，請重新登入';if(/row-level security/i.test(m))return '沒有權限進行這個操作（可能需要重新登入）';
   if(/照片上傳逾時/.test(m))return m.replace(/(TypeError|Error):\s*/g,'');
@@ -5884,10 +5888,11 @@ async function loadList(){
   if(homeState.near){const {lat,lng}=homeState.near;q=q.gte('lost_lat',lat-.55).lte('lost_lat',lat+.55).gte('lost_lng',lng-.6).lte('lost_lng',lng+.6)}
   if(homeState.reward)q=q.gt('reward',0);
   // 搜尋：名字、品種、毛色、地點、縣市、特徵都找；「台」「臺」都算；4 位數字同時比對晶片末四碼
-  const kw=(homeState.q||homeState.chip||'').replace(/[%,()*\\]/g,'').trim();
-  if(kw){const vs=[...new Set([kw,kw.replace(/台/g,'臺'),kw.replace(/臺/g,'台')])];const ors=[];
-    vs.forEach(v=>{const k=`%${v}%`;ors.push(`name.ilike.${k}`,`breed.ilike.${k}`,`colour.ilike.${k}`,`lost_place.ilike.${k}`,`lost_district.ilike.${k}`,`lost_city.ilike.${k}`,`features.ilike.${k}`)});
-    if(/^\d{4}$/.test(kw))ors.push(`chip_last4.eq.${kw}`);
+  // 多個字（「台北 柴犬」）：每個字都要符合（各自在名字、品種、毛色、地點、特徵裡找）
+  for(const t of kwTerms(homeState.q||homeState.chip||'')){
+    if(t.sex){q=q.eq('sex',t.sex);continue}if(t.sp){q=q.eq('species',t.sp);continue}
+    const ors=[];t.vs.forEach(v=>{const k=`%${v}%`;ors.push(`name.ilike.${k}`,`breed.ilike.${k}`,`colour.ilike.${k}`,`lost_place.ilike.${k}`,`lost_district.ilike.${k}`,`lost_city.ilike.${k}`,`features.ilike.${k}`)});
+    if(/^\d{4}$/.test(t.w))ors.push(`chip_last4.eq.${t.w}`);
     q=q.or(ors.join(','))}
   return q};
   // 有照片的先列（依最新動態），不夠再接沒有照片的；「我附近」照距離排
@@ -5973,7 +5978,8 @@ async function loadMapAll(el){const my=listSeq;
   let qf=sb.from('found_public').select('id,species,kind,lat,lng,city,district,colour,size,photos,seen_at,poster').eq('status','open').order('seen_at',{ascending:false}).limit(500);
   qc=fIn(qc,'lost_city',homeState.city);qf=fIn(qf,'city',homeState.city);qc=fSp(qc);qc=fExtra(qc);qf=fSp(qf);
   if(homeState.reward)qc=qc.gt('reward',0);
-  {const kw=(homeState.q||'').replace(/[%,()*\\]/g,'').trim();if(kw){const vs=[...new Set([kw,kw.replace(/台/g,'臺'),kw.replace(/臺/g,'台')])];const ors=[];vs.forEach(v=>{const k=`%${v}%`;ors.push(`name.ilike.${k}`,`breed.ilike.${k}`,`colour.ilike.${k}`,`lost_place.ilike.${k}`,`lost_district.ilike.${k}`,`lost_city.ilike.${k}`)});qc=qc.or(ors.join(','));qf=qf.or(vs.flatMap(v=>[`colour.ilike.%${v}%`,`city.ilike.%${v}%`,`district.ilike.%${v}%`,`place_text.ilike.%${v}%`]).join(','))}}   // 地圖也套用搜尋字
+  for(const t of kwTerms(homeState.q||'')){if(t.sex){qc=qc.eq('sex',t.sex);qf=qf.eq('sex',t.sex);continue}if(t.sp){qc=qc.eq('species',t.sp);qf=qf.eq('species',t.sp);continue}
+    const ors=[];t.vs.forEach(v=>{const k=`%${v}%`;ors.push(`name.ilike.${k}`,`breed.ilike.${k}`,`colour.ilike.${k}`,`lost_place.ilike.${k}`,`lost_district.ilike.${k}`,`lost_city.ilike.${k}`)});qc=qc.or(ors.join(','));qf=qf.or(t.vs.flatMap(v=>[`colour.ilike.%${v}%`,`city.ilike.%${v}%`,`district.ilike.%${v}%`,`place_text.ilike.%${v}%`]).join(','))}   // 地圖也套用搜尋字
   const [{data:cs,error:e1},{data:fs,error:e2},{data:ls}]=await Promise.all([qc,qf,sb.from('sightings_public').select('case_id,lat,lng,seen_at').order('seen_at',{ascending:false}).limit(1000)]);if(my!==listSeq||!el.isConnected)return;
   if(e1&&e2){el.insertAdjacentHTML('afterbegin',netErrHTML());return}
   const last={};(ls||[]).forEach(s=>{if(!last[s.case_id]&&s.lat)last[s.case_id]=s});
