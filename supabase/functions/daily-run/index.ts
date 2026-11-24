@@ -25,7 +25,7 @@ const MAIL_OK = !!RESEND_KEY;
 const MOA_API_URL = (Deno.env.get("MOA_API_URL") ?? "").trim();
 const ADMIN_EMAIL = (Deno.env.get("ADMIN_EMAIL") ?? Deno.env.get("GMAIL_USER") ?? "").trim() || REPLY_TO;
 const UA = "WangHome/2.0 (+lost-dog-matcher)";
-const VERSION = "2.3.0";
+const VERSION = "2.3.1";
 
 function serviceKey(): string {
   try {
@@ -144,7 +144,8 @@ function score(c: any, a: any): number {
   const place = normCity(a.animal_foundplace) + normCity(a.shelter_address) + normCity(a.animal_place);
   if (!city || !place.includes(city)) return -1;   // 跨縣市先不比對
   s += 30;
-  const lostDt = String(c.lost_at ?? "").slice(0, 10);
+  const lt = Date.parse(String(c.lost_at ?? ""));
+  const lostDt = Number.isNaN(lt) ? "" : new Date(lt + 8 * 3600e3).toISOString().slice(0, 10);   // 台灣日期（直接切 UTC 字串，早上 8 點前走失會少算一天）
   const foundDt = String(a.animal_createtime || a.animal_opendate || "").slice(0, 10).replaceAll("/", "-");
   let lostM1 = lostDt;
   const t = Date.parse(lostDt + "T00:00:00Z");

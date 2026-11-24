@@ -133,7 +133,10 @@ def score(case, a):
     if not same_city: return -1          # 跨縣市先不比對，避免雜訊
     s += 30
     # 拾獲時間必須在走失之後（用 animal_createtime / opendate）
-    lost_dt = case["lost_at"][:10]
+    try:   # 台灣日期（直接切 UTC 字串，早上 8 點前走失會少算一天）
+        lost_dt = (dt.datetime.fromisoformat(case["lost_at"].replace("Z", "+00:00")) + dt.timedelta(hours=8)).date().isoformat()
+    except Exception:
+        lost_dt = case["lost_at"][:10]
     found_dt = (a.get("animal_createtime") or a.get("animal_opendate") or "")[:10].replace("/", "-")
     # 走失當天前後一天的誤差也算（資料日期常以進收容所當天為準）
     try:
