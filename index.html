@@ -3336,7 +3336,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.12';
+const BUILD = 'v7.38.13';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3367,6 +3367,8 @@ function wsegWalk(root){if(!WSEG||!root)return;if(root.nodeType===3)return wsegT
 if(WSEG){document.documentElement.classList.add('wseg');
   const startWseg=()=>{wsegWalk(document.body);new MutationObserver(ms=>{for(const m of ms)m.addedNodes.forEach(wsegWalk)}).observe(document.body,{childList:true,subtree:true})};
   if(document.body)startWseg();else document.addEventListener('DOMContentLoaded',startWseg)}
+// iOS 15.0～15.3 沒有 crypto.randomUUID：改用 getRandomValues 產生一樣長度的隨機字串
+function uuidHex(){try{if(crypto.randomUUID)return crypto.randomUUID().replace(/-/g,'')}catch(_){}const a=new Uint8Array(16);crypto.getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function capPlugin(n){try{const C=window.Capacitor;return (C&&C.Plugins&&C.Plugins[n])||(C&&C.registerPlugin?C.registerPlugin(n):null)}catch(_){return null}}
 // ---- 網站上的「下載 App」入口（App 裡不顯示）----
 const IS_IOS_WEB=!IS_APP&&(/iPhone|iPad|iPod/.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
@@ -4432,7 +4434,7 @@ function mineHTML(excl){const l=getMine().filter(x=>!(excl&&excl.has(x.id)));if(
   return `<div class="mine card"><b>${ic("paw")} ${excl?'這支手機登記過、還沒存到帳號':'你在這支手機登記過'}</b>${excl?'<p class="small muted" style="margin:4px 0 6px">點進管理頁按「存到我的帳號」，換手機也能管理。</p>':''}${l.slice(0,5).map(x=>`<a class="mine-row" href="#/${x.t==='case'?'manage':'found-manage'}/${esc(x.id)}"><span>${esc(x.name||'我的通報')}<small>${x.t==='case'?'走失協尋':'拾獲／目擊通報'}</small></span><em>${x.t==='case'?'管理・標記找到了':'管理・標記已回家'} ›</em></a>`).join('')}</div>`}
 // 信裡的驗證碼是 8 位數（Supabase 設定）：多出來的數字（iPhone 自動填入有時會重複貼上一段）一律只取前 8 位
 const OTP_LEN=8;
-function otpDigits(s){s=String(s||'').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));{const e=s.match(/(?<!\d)\d{8}(?!\d)/);if(e)return e[0]}const m=s.match(/\d[\d\s-]{4,30}\d/g);if(m){const c=m.map(x=>x.replace(/\D/g,'')).find(x=>x.length>=6);if(c)return c.slice(0,OTP_LEN)}return s.replace(/\D/g,'').slice(0,OTP_LEN)}
+function otpDigits(s){s=String(s||'').replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));{const e=s.match(/(?:^|\D)(\d{8})(?!\d)/);if(e)return e[1]}const m=s.match(/\d[\d\s-]{4,30}\d/g);if(m){const c=m.map(x=>x.replace(/\D/g,'')).find(x=>x.length>=6);if(c)return c.slice(0,OTP_LEN)}return s.replace(/\D/g,'').slice(0,OTP_LEN)}
 function extractToken(v){v=String(v||'').trim();const m=v.match(/[?&]t=([^&\s]+)/);if(!m)return v;try{return decodeURIComponent(m[1])}catch(_){return m[1]}}
 
 // 飼主／通報者管理入口：最簡單的方式是用登記時填的 Email 收驗證碼；有管理網址的也可以貼
@@ -5309,7 +5311,7 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
       else{tmp.remove();regroup();if(!ok){inp.value=v;grow()}}busy=false;b.disabled=false;if(document.activeElement!==inp)try{inp.focus({preventScroll:true})}catch(_){}};
     const sendPhoto=async f=>{const pv=URL.createObjectURL(f);
       {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span class="cmph"><img src="${pv}" alt=""></span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
-      try{const blob=await compressImage(f,1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
+      try{const blob=await compressImage(f,1280,.82);const path=`${id}/${uuidHex()}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;
         urlCache[path]=pv;urlCache['_t'+path]=Date.now();const cap=inp.value.trim();if(await send('photo',cap,path)){inp.value='';grow()}}catch(err){toast('照片沒有傳成功：'+(err.message||'網路不穩'),4500)}tmp.remove();regroup()};
     // 語音：按麥克風開始錄，最長 60 秒；可以取消或送出
     const voiceRecord=async()=>{if(busy)return;let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){return toast(/NotAllowed|Permission/i.test(String(e&&e.name||e))?'沒有麥克風權限：請到手機設定允許汪喵回家使用麥克風':'打不開麥克風',4500)}
@@ -5323,13 +5325,13 @@ async function renderChat(id){const _n=navId;setTitle('訊息');chatThemeApply()
       rec.onstop=async()=>{clearInterval(tick);stream.getTracks().forEach(t=>t.stop());bar.remove();if(cancel)return;const dur=Math.max(1,Math.round((Date.now()-t0)/1000));
         const type=(rec.mimeType||mt||'audio/webm').split(';')[0];const ext=/mp4|m4a|aac/.test(type)?'m4a':/ogg/.test(type)?'ogg':'webm';const blob=new Blob(chunks,{type});
         {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb cvoice"><span class="cvplay">${ic('mic')}</span><span class="cvbars">${voiceBars(dur)}</span><span class="cvdur">${Math.floor(dur/60)}:${String(dur%60).padStart(2,'0')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
-        busy=true;try{const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.${ext}`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:type});if(error)throw error;
+        busy=true;try{const path=`${id}/${uuidHex()}.${ext}`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:type});if(error)throw error;
           const r=await sendRPC('voice',String(dur),path);if(r.error)throw r.error;await pull();ping()}catch(err){toast(/格式錯誤|mime|type/i.test(err.message||'')?'語音功能還在更新中，請稍後再試':'語音沒有傳成功：'+(err.message||'網路不穩'),4500)}busy=false;tmp.remove();regroup()};
       rec.start(250);if(navigator.vibrate)try{navigator.vibrate(30)}catch(_){}};
     // 一次多張：上傳好再當成一則訊息送出（排成相簿格）；資料庫還沒更新時改成一張一張傳
     const sendPhotos=async fs=>{if(fs.length===1)return sendPhoto(fs[0]);const pvs=fs.map(f=>URL.createObjectURL(f));
       {const f0=log.querySelector('.cfirst');if(f0)f0.remove()}log.insertAdjacentHTML('beforeend',`<div class="cm me pend pop" data-tmp><div class="cmb"><span class="cmgrid n${fs.length}">${pvs.map(u=>`<span class="cmph"><img src="${u}" alt=""></span>`).join('')}</span></div><time>傳送中…</time></div>`);const tmp=log.lastElementChild;requestAnimationFrame(()=>toBottom(false));
-      try{const paths=[];for(let i=0;i<fs.length;i++){const blob=await compressImage(fs[i],1280,.82);const path=`${id}/${crypto.randomUUID().replace(/-/g,'')}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;urlCache[path]=pvs[i];urlCache['_t'+path]=Date.now();paths.push(path)}
+      try{const paths=[];for(let i=0;i<fs.length;i++){const blob=await compressImage(fs[i],1280,.82);const path=`${id}/${uuidHex()}.jpg`;const {error}=await sb.storage.from('chat').upload(path,blob,{contentType:'image/jpeg'});if(error)throw error;urlCache[path]=pvs[i];urlCache['_t'+path]=Date.now();paths.push(path)}
         const cap=inp.value.trim();const r=await sendRPC('photo',cap,paths.join(','));
         if(r.error&&/照片格式/.test(r.error.message)){for(const pth of paths)await sendRPC('photo','',pth)}else if(r.error)throw r.error;
         inp.value='';grow();await pull();ping()}catch(err){toast('照片沒有傳成功：'+(err.message||'網路不穩'),4500)}tmp.remove();regroup()};
@@ -5768,7 +5770,7 @@ function mgAdvice(c,pendS,ss,go,id){const N=esc(c.name||'毛孩'),d=daysSince(c.
   return `<div class="mg-ai"><div class="sa-head"><span class="sa-spark" aria-hidden="true">✨</span><b>今天建議你做</b></div>${out.slice(0,3).map(([h,i,t,sub])=>`<a class="mg-ai-row" href="${h}" ${h.startsWith('#/')?'':'data-jump'}><span aria-hidden="true">${i}</span><span><b>${t}</b><small>${sub}</small></span><em aria-hidden="true">›</em></a>`).join('')}</div>`}
 // ── 智慧分析：還沒有目擊時的協尋建議（依走失時間、狗／貓、個性推算） ──
 function lostPlan(c){if(!c||c.status!=='searching'||!c.lost_at)return null;const hrs=Math.max(0,(Date.now()-new Date(c.lost_at))/36e5),cat=c.species==='cat';
-  const txt=[c.temperament,c.features,c.notes].filter(Boolean).join(' ');const friendly=/親人|親近|愛撒嬌|不怕生|不怕人|會跟人|很乖/.test(txt),shy=/(?<!不)怕生|膽小|害怕|(?<!不)怕人|緊張|躲|敏感/.test(txt.replace(/不怕生|不怕人/g,''));
+  const txt=[c.temperament,c.features,c.notes].filter(Boolean).join(' ');const friendly=/親人|親近|愛撒嬌|不怕生|不怕人|會跟人|很乖/.test(txt),shy=/怕生|膽小|害怕|怕人|緊張|躲|敏感/.test(txt.replace(/不怕生|不怕人/g,''));
   const szF=c.size==='small'?0.7:c.size==='large'?1.4:1;const rad=cat?(hrs<72?0.15:hrs<168?0.3:0.5):Math.round((hrs<6?0.5:hrs<24?1:hrs<72?2:3)*szF*10)/10;const outer=Math.round(rad*(cat?3:2.5)*10)/10;
   const phase=hrs<48?{k:'黃金 48 小時',d:'最容易找回的時候'}:hrs<168?{k:'第 3～7 天',d:'擴大範圍、問收容所'}:{k:'超過一週',d:'持續曝光，別放棄'};
   const best=cat?'深夜 11 點～清晨 5 點':shy?'清晨 5～7 點、傍晚':'清晨與傍晚';
@@ -5786,7 +5788,7 @@ async function nearbySpots(c,lp,map){let box=$('#saSpots');if(!box)return;const 
   if(!els){try{const ctl=new AbortController();const tt=setTimeout(()=>ctl.abort(),30000);const r=await fetch(`${CONFIG.SITE_URL}api/spots?lat=${lat.toFixed(4)}&lng=${lng.toFixed(4)}&r=${R1}`,{signal:ctl.signal});clearTimeout(tt);if(r.ok){els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}}}catch(_){}
     if(!els){   // 本站代查失敗（地圖資料伺服器忙）：改由這台裝置直接查一次
       const q=`[out:json][timeout:20];(nwr(around:${R1},${lat},${lng})[leisure~"^(park|playground|garden)$"][name];nwr(around:${R1},${lat},${lng})[amenity~"^(school|marketplace|place_of_worship)$"][name];nwr(around:${R1},${lat},${lng})[waterway~"^(river|stream|canal)$"][name];nwr(around:4000,${lat},${lng})[amenity=veterinary];);out center tags 80;`;
-      for(const ep of ['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter']){try{const r=await fetch(ep,{method:'POST',body:'data='+encodeURIComponent(q),signal:AbortSignal.timeout(25000)});if(!r.ok)continue;els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}break}catch(_){}}}
+      for(const ep of ['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter']){try{const r=await fetch(ep,{method:'POST',body:'data='+encodeURIComponent(q),signal:(()=>{const c=new AbortController();setTimeout(()=>c.abort(),25000);return c.signal})()});if(!r.ok)continue;els=(await r.json()).elements||[];try{sessionStorage.setItem(key,JSON.stringify(els))}catch(_){}break}catch(_){}}}
     if(!els){const b2=$('#saSpots');if(b2)b2.remove();return}}
   box=$('#saSpots');if(!box)return;
   const km=(a,b)=>{const R=6371,dL=(a-lat)*Math.PI/180,dG=(b-lng)*Math.PI/180;const x=Math.sin(dL/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(a*Math.PI/180)*Math.sin(dG/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
