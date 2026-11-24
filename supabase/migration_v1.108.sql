@@ -57,7 +57,7 @@ begin
   select coalesce(jsonb_agg(to_jsonb(r) order by r.sim desc), '[]') into j from public.case_photo_matches_raw(p_case, 20) r;
   insert into public.case_photo_cache (case_id, at, sig, rows) values (p_case, now(), public.case_photo_sig(p_case), j)
     on conflict (case_id) do update set at = excluded.at, sig = excluded.sig, rows = excluded.rows;
-  return query select x.ref, x.url, x.info, x.sim from jsonb_to_recordset(j) with ordinality as x(ref text, url text, info jsonb, sim real, o int) order by x.o;
+  return query select e.v->>'ref', e.v->>'url', e.v->'info', (e.v->>'sim')::real from jsonb_array_elements(j) with ordinality as e(v, o) order by e.o;
 exception when foreign_key_violation then return;   -- 案件剛好被刪掉
 end $$;
 revoke all on function public.case_photo_refresh(uuid) from public, anon, authenticated;
@@ -70,7 +70,7 @@ declare n int := greatest(1, least(coalesce(p_limit, 8), 20)); k record;
 begin
   select * into k from public.case_photo_cache where case_id = p_case;
   if found and k.at > now() - interval '1 hour' and k.sig = public.case_photo_sig(p_case) then
-    return query select x.ref, x.url, x.info, x.sim from jsonb_to_recordset(k.rows) with ordinality as x(ref text, url text, info jsonb, sim real, o int) order by x.o limit n;
+    return query select e.v->>'ref', e.v->>'url', e.v->'info', (e.v->>'sim')::real from jsonb_array_elements(k.rows) with ordinality as e(v, o) order by e.o limit n;
     return;
   end if;
   return query select * from public.case_photo_refresh(p_case) limit n;
