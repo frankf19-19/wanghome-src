@@ -2,7 +2,7 @@
 // 由 scripts/daily.py v1.9.0 移植而來；改由 Supabase 自己的排程（pg_cron）呼叫，不再吃 GitHub Actions 額度。
 //
 // 網址：POST https://<project>.supabase.co/functions/v1/daily-run
-//   body：{"mode":"nightly" | "notify" | "cleanup" | "cleanup-dry" | "match" | "all" | "probe"}
+//   body：{"mode":"nightly" | "notify" | "cleanup" | "cleanup-dry" | "match" | "all" | "probe" | "health"}（health＝只跑正式站健檢）
 //   header：x-run-secret: <Vault 裡的 daily_run_secret>（排程 SQL 會自動帶上）
 //
 // mode 說明
@@ -985,7 +985,7 @@ async function runHealthCheck() {
 }
 
 // ---------------------------------------------------------------- 主流程
-const MODES = ["all", "nightly", "notify", "match", "probe", "cleanup", "cleanup-dry"] as const;
+const MODES = ["all", "nightly", "notify", "match", "probe", "cleanup", "cleanup-dry", "health"] as const;
 type Mode = typeof MODES[number];
 
 async function run(mode: Mode) {
@@ -1015,7 +1015,7 @@ async function run(mode: Mode) {
     if (full || mode === "notify") await step("回家通知", runReuniteNotices);
     if (full || mode === "notify") await step("檢舉通知", runReportAlerts);
     if (full) await step("到期提醒", runDueReminders);
-    if (full) await step("正式站健檢", runHealthCheck);
+    if (full || mode === "health") await step("正式站健檢", runHealthCheck);
     if (full) {
       await step("定期清理", async () => log("定期清理：", await sb("POST", "rpc/retention_cleanup", {})));
       await step("清除舊網路位址", async () => log("清除 30 天前的網路位址：", await sb("POST", "rpc/clear_old_ips", {})));
