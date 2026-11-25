@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.39.3';
+const BUILD = 'v7.39.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11733,6 +11733,7 @@ function renderPrivacy(){
     <li><b>登記走失：</b>毛孩名字、種類、外觀特徵、照片、走失時間與地點；飼主稱呼、電話、Email（可不填）、LINE ID（可不填）。</li>
     <li><b>目擊／拾獲／受傷通報：</b>時間、地點（你點選或同意定位的位置）、照片、狀況說明、通報者稱呼與聯絡方式（可不填）。</li>
     <li><b>會員（可不註冊）：</b>Email、使用者名稱、大頭貼、通知設定與「家附近」中心點、毛孩檔案、健康紀錄、用藥紀錄、收據與病歷照片、追蹤的案件。用 LINE、Google、Apple 登入時，我們只會收到對方提供的帳號識別碼、Email 與名稱，不會拿到你在那些服務的密碼。</li>
+    <li><b>QR 名牌：</b>飼主替毛孩開啟名牌時，名牌頁會顯示毛孩的名字、外觀、第一張照片，以及飼主自己選擇要放的電話和留言；知道名牌網址或掃到 QR Code 的人都看得到，飼主可以隨時關閉。撿到的人按下「傳位置」或送出留言時，他同意傳送的位置、留言與聯絡方式只有該毛孩的飼主看得到，最多保存 180 天。</li>
     <li><b>會員私訊：</b>你和其他會員之間的訊息與照片。只有對話雙方看得到（照片存在私密空間）；站長平常看不到內容，只有在你或對方按「檢舉」時，站長會收到被檢舉者最近 10 則訊息，用來判斷是否違規。封鎖名單也會保存，讓被封鎖的人不能再傳訊息給你。</li>
     <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址、還沒送出的草稿、領養篩選條件、你檢舉或封鎖而不想再看到的內容、外觀設定，只存在你的手機裡，不會上傳。</li>
     <li><b>定位與相機：</b>只有在你按下「用我目前位置」或選擇照片時才會使用，並會先徵求你的同意。照片的拍攝時間與地點只用來幫你自動填表。</li>
