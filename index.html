@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.39.2';
+const BUILD = 'v7.39.3';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11101,10 +11101,11 @@ async function renderPetTag(id){const _n=navId;if(!requireLogin())return;
     g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#E8502E';g.fillRect(0,0,W,170);
     g.textAlign='center';g.fillStyle='#fff';g.font='900 72px system-ui,"PingFang TC","Noto Sans TC",sans-serif';g.fillText('掃我找主人',W/2,112);
     g.drawImage(q,130,210,640,640);
-    g.fillStyle='#1F1B18';let fs=84;const nm=String(p.name);g.font=`900 ${fs}px system-ui,"PingFang TC","Noto Sans TC",sans-serif`;while(fs>40&&g.measureText(nm).width>W-120){fs-=4;g.font=`900 ${fs}px system-ui,"PingFang TC","Noto Sans TC",sans-serif`}
-    g.fillText(nm,W/2,960);
+    g.fillStyle='#1F1B18';let fs=84;const nm=String(p.name);g.font=`900 ${fs}px system-ui,"PingFang TC","Noto Sans TC",sans-serif`;while(fs>36&&g.measureText(nm).width>W-120){fs-=4;g.font=`900 ${fs}px system-ui,"PingFang TC","Noto Sans TC",sans-serif`}
+    let shown=nm;while(shown.length>1&&g.measureText(shown===nm?nm:shown+'…').width>W-120)shown=shown.slice(0,-1);
+    g.fillText(shown===nm?nm:shown+'…',W/2,960);
     g.fillStyle='#6F6A64';g.font='600 34px system-ui,"PingFang TC","Noto Sans TC",sans-serif';g.fillText('汪喵回家 wangmiaotw.com',W/2,1050);
-    const dataUrl=c.toDataURL('image/png'),fname=`QR名牌-${nm}.png`;
+    const dataUrl=c.toDataURL('image/png'),fname=`QR名牌-${nm.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,24)}.png`;
     if(IS_APP){try{if(await appShareFile(dataUrl.split(',')[1],fname,`${nm}的 QR 名牌`,url))return}catch(e){return toast('無法分享圖片：'+(e.message||e),4000)}}
     const a=document.createElement('a');a.download=fname;a.href=dataUrl;document.body.appendChild(a);a.click();a.remove();toast('已下載名牌圖片')}}
 async function renderPetClinics(petId){const _n=navId;if(!requireLogin())return;
