@@ -1,0 +1,42 @@
+name: Auto reel for lost-pet posts
+
+# 網友登記的協尋案件：自動做 Reel 和貼文海報，上傳到 Supabase；Edge Function social-post 再拿去發 FB／IG／Threads
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auto-reel
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/reel
+            icon-512.png
+          sparse-checkout-cone-mode: false
+      - name: Check
+        id: chk
+        env:
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python3 scripts/reel/run_auto_reel.py --check
+      - name: Install
+        if: steps.chk.outputs.n != '0'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fonts-dejavu-core >/dev/null
+          pip install -q pillow
+      - name: Render & upload
+        if: steps.chk.outputs.n != '0'
+        env:
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python3 scripts/reel/run_auto_reel.py

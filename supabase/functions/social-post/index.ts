@@ -1,5 +1,6 @@
 // 汪喵回家 — 自動發粉專貼文 v2.0.0
-//   cases  ：每 30 分鐘。網友新登記、有照片、飼主同意分享的協尋案件 → FB 粉專＋IG（同一張照片）＋Threads（主題「狗狗走失／貓咪走失」）
+//   cases  ：每 10 分鐘。網友新登記、有照片、飼主同意分享的協尋案件 → FB 粉專＋IG 圖文（海報）＋FB／IG Reel＋Threads（主題「狗狗走失／貓咪走失」）
+//            Reel 和海報由 GitHub Actions auto-reel.yml 先做好（cases.social_reel_url / social_poster_url）；登記 90 分鐘還沒做好就先發照片
 //            站長（is_admin）自己登記的案件不自動發（站長會手動發整套）
 //   comments：每 20 分鐘。看協尋貼文底下的留言，像是線索的（看到、在哪裡、撿到…）自動轉成目擊回報，飼主會收到通知
 //   weekly ：每週日晚上。「本週找回」整理 → 發到 FB 粉專
@@ -18,7 +19,8 @@ const GRAPH = "https://graph.facebook.com/v21.0";
 const TOKEN = (Deno.env.get("FB_PAGE_TOKEN") ?? "").trim();
 const TH_TOKEN = (Deno.env.get("THREADS_TOKEN") ?? "").trim();
 const THREADS = "https://graph.threads.net/v1.0";
-const PER_RUN = 3;               // 每次最多發幾則，避免洗版
+const PER_RUN = 1;               // 每次最多發幾則（Reel 要處理時間，一次一則）
+const REEL_WAIT_MIN = 90;        // 等 Reel 最多等多久
 const WAIT_MIN = 20;             // 登記後至少等幾分鐘才發（給飼主改資料、給站方檢查）
 const MAX_AGE_H = 72;            // 超過這麼久還沒發的就不補發
 
@@ -164,9 +166,29 @@ async function igImage(caseId: string, url: string): Promise<string> {
 }
 
 // ---------------------------------------------------------------- 新案件
+async function finishPendingReels() {
+  if (!TOKEN) return;
+  // deno-lint-ignore no-explicit-any
+  const rows: any[] = await sb("GET", `cases?select=id,social_post&social_post->>ig_reel_pending=not.is.null&limit=5`) ?? [];
+  if (!rows.length) return;
+  const pg = await page();
+  for (const c of rows) {
+    const out = { ...c.social_post }; const id = out.ig_reel_pending;
+    try {
+      const s2 = await graph("GET", id, { fields: "status_code" });
+      if (s2.status_code === "FINISHED") { const p = await graph("POST", `${pg.ig}/media_publish`, { creation_id: id }); out.ig_reel = p.id; delete out.ig_reel_pending; }
+      else if (s2.status_code === "ERROR" || s2.status_code === "EXPIRED") { out.ig_reel_err = s2.status_code; delete out.ig_reel_pending; }
+      else continue;
+    } catch (e) { out.ig_reel_err = String(e).slice(0, 200); delete out.ig_reel_pending; }
+    log("IG Reel 補發佈", c.id, out.ig_reel ?? out.ig_reel_err);
+    await sb("PATCH", `cases?id=eq.${c.id}`, { social_post: out }, "return=minimal");
+  }
+}
+
 async function runCases() {
+  await finishPendingReels();
   const now = Date.now();
-  const rows = await sb("GET", `cases?select=id,name,species,sex,age_text,breed,colour,features,collar_desc,has_chip,lost_at,lost_city,lost_district,lost_place,photos,created_at,owner_id,contact_name,contact_phone,phone_public` +
+  const rows = await sb("GET", `cases?select=id,name,species,sex,age_text,breed,colour,features,collar_desc,has_chip,lost_at,lost_city,lost_district,lost_place,photos,created_at,owner_id,contact_name,contact_phone,phone_public,social_reel_url,social_poster_url` +
     `&status=eq.searching&social_ok=is.true&social_posted_at=is.null&hidden=not.is.true&or=(source.is.null,source.eq.site)` +
     `&created_at=lt.${new Date(now - WAIT_MIN * 60e3).toISOString()}&created_at=gt.${new Date(now - MAX_AGE_H * 3600e3).toISOString()}` +
     `&order=created_at.asc&limit=${PER_RUN * 3}`);
@@ -180,6 +202,7 @@ async function runCases() {
     if (!(c.photos ?? []).some(okImg) || !String(c.name ?? "").trim() || !c.lost_city) return false;
     if (c.owner_id && admins.has(c.owner_id)) return false;                       // 站長自己登記的：手動發
     if (now - Date.parse(c.lost_at) > 30 * 864e5) return false;                   // 走失超過 30 天才登記的不自動發
+    if (!c.social_reel_url && now - Date.parse(c.created_at) < REEL_WAIT_MIN * 60e3) return false;   // 等 Reel 做好
     const ph = String(c.contact_phone ?? "").replace(/\D/g, "");
     if (ph && seenPh.has(ph)) return false;
     if (ph) seenPh.add(ph);
@@ -189,7 +212,7 @@ async function runCases() {
   if (!todo.length) return;
   const pg = TOKEN ? await page() : null;
   for (const c of todo) {
-    const photo = (c.photos as string[]).find(okImg)!;
+    const photo = (c.social_poster_url && okImg(c.social_poster_url)) ? c.social_poster_url : (c.photos as string[]).find(okImg)!;
     // 先標記（避免下一輪重複發）；失敗時記錄原因
     await sb("PATCH", `cases?id=eq.${c.id}&social_posted_at=is.null`, { social_posted_at: new Date().toISOString() }, "return=minimal");
     // deno-lint-ignore no-explicit-any
@@ -212,6 +235,29 @@ async function runCases() {
         const p = await graph("POST", `${pg.ig}/media_publish`, { creation_id: m.id });
         out.ig = p.id;
       } catch (e) { out.ig_err = String(e).slice(0, 200); }
+    }
+    if (pg && c.social_reel_url) {
+      // FB Reel：start → 用網址上傳 → finish 發佈
+      try {
+        const st = await graph("POST", `${pg.id}/video_reels`, { upload_phase: "start" });
+        const up = await fetch(`https://rupload.facebook.com/video-upload/v21.0/${st.video_id}`, { method: "POST", headers: { Authorization: `OAuth ${TOKEN}`, file_url: c.social_reel_url }, signal: AbortSignal.timeout(60_000) });
+        if (!up.ok) throw new Error("upload " + up.status + " " + (await up.text()).slice(0, 120));
+        await graph("POST", `${pg.id}/video_reels`, { upload_phase: "finish", video_id: st.video_id, video_state: "PUBLISHED", description: caption(c, "fb") });
+        out.fb_reel = st.video_id;
+      } catch (e) { out.fb_reel_err = String(e).slice(0, 200); }
+    }
+    if (pg?.ig && c.social_reel_url) {
+      // IG Reel：處理要一點時間；這輪等不到就記下來，下一輪再發佈
+      try {
+        const m = await graph("POST", `${pg.ig}/media`, { media_type: "REELS", video_url: c.social_reel_url, caption: caption(c, "ig"), share_to_feed: "true" });
+        out.ig_reel_pending = m.id;
+        for (let i = 0; i < 12; i++) {
+          await new Promise((r) => setTimeout(r, 5000));
+          const s2 = await graph("GET", m.id, { fields: "status_code" });
+          if (s2.status_code === "ERROR") throw new Error("ig reel error");
+          if (s2.status_code === "FINISHED") { const p = await graph("POST", `${pg.ig}/media_publish`, { creation_id: m.id }); out.ig_reel = p.id; delete out.ig_reel_pending; break; }
+        }
+      } catch (e) { out.ig_reel_err = String(e).slice(0, 200); delete out.ig_reel_pending; }
     }
     if (TH_TOKEN) {
       try {
@@ -261,9 +307,17 @@ async function runComments() {
         for (const x of j.data ?? []) if (x.from?.id !== pg.id) got.push({ id: "fb:" + x.id, plat: "FB", who: x.from?.name ?? "FB 網友", text: x.message, at: x.created_time, link: x.permalink_url ?? "" });
       } catch (e) { log("FB 留言讀取失敗", c.id, String(e).slice(0, 120)); }
     }
-    if (TOKEN && sp.ig) {
+    if (TOKEN && sp.fb_reel) {
       try {
-        const j = await graph("GET", `${sp.ig}/comments`, { fields: "id,text,username,timestamp", limit: "100" });
+        const j = await graph("GET", `${sp.fb_reel}/comments`, { fields: "id,message,from{name,id},created_time,permalink_url", filter: "stream", limit: "100" });
+        const pg = await page();
+        // deno-lint-ignore no-explicit-any
+        for (const x of j.data ?? []) if (x.from?.id !== pg.id) got.push({ id: "fb:" + x.id, plat: "FB", who: x.from?.name ?? "FB 網友", text: x.message, at: x.created_time, link: x.permalink_url ?? "" });
+      } catch (e) { log("FB Reel 留言讀取失敗", c.id, String(e).slice(0, 120)); }
+    }
+    for (const igId of [sp.ig, sp.ig_reel].filter(Boolean)) if (TOKEN) {
+      try {
+        const j = await graph("GET", `${igId}/comments`, { fields: "id,text,username,timestamp", limit: "100" });
         // deno-lint-ignore no-explicit-any
         for (const x of j.data ?? []) if (x.username !== "wangmiaotw") got.push({ id: "ig:" + x.id, plat: "IG", who: x.username ?? "IG 網友", text: x.text, at: x.timestamp, link: "" });
       } catch (e) { log("IG 留言讀取失敗", c.id, String(e).slice(0, 120)); }
