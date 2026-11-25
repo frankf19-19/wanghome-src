@@ -29,6 +29,7 @@ create index if not exists pet_tag_scans_pet_idx on public.pet_tag_scans(pet_id,
 alter table public.pet_tag_scans enable row level security;
 revoke all on public.pet_tag_scans from anon, authenticated;
 grant select on public.pet_tag_scans to authenticated;
+grant select, update on public.pet_tag_scans to service_role;   -- notify-sighting 通知飼主用
 drop policy if exists "own tag scans" on public.pet_tag_scans;
 create policy "own tag scans" on public.pet_tag_scans for select to authenticated
   using (exists (select 1 from public.pets p where p.id = pet_id and p.owner_id = (select auth.uid())));

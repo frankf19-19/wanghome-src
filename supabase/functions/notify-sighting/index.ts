@@ -236,10 +236,12 @@ Deno.serve(async (req) => {
     if (ip2.includes(":")) ip2 = v6net64(ip2);
     const { data: rok } = await sb2.rpc("edge_rate_ok", { p_kind: "edge_tag", p_ip: ip2, p_max: 20, p_window: "1 hour" });
     if (rok !== true) return json({ sent: false, reason: "throttled" }, 429);
-    const { data: got } = await sb2.from("pet_tag_scans").update({ pushed: true }).eq("id", sid).eq("pushed", false)
+    const { data: got, error: ge } = await sb2.from("pet_tag_scans").update({ pushed: true }).eq("id", sid).eq("pushed", false)
       .gte("created_at", new Date(Date.now() - 10 * 60e3).toISOString()).select("id,pet_id,lat,lng,msg,contact").maybeSingle();
+    if (ge) { console.error("tag scan lookup", ge.message); return json({ sent: false, reason: "lookup" }, 500); }
     if (!got) return json({ sent: false, reason: "none" });
-    const { data: pet } = await sb2.from("pets").select("id,name,owner_id,tag_on").eq("id", got.pet_id).maybeSingle();
+    const { data: pet, error: pe2 } = await sb2.from("pets").select("id,name,owner_id,tag_on").eq("id", got.pet_id).maybeSingle();
+    if (pe2) { console.error("tag pet lookup", pe2.message); return json({ sent: false, reason: "lookup" }, 500); }
     if (!pet || !pet.tag_on) return json({ sent: false, reason: "off" });
     const nm = String(pet.name ?? "毛孩").slice(0, 30), hasLoc = got.lat != null && got.lng != null;
     const link = `${SITE}#/pet/${pet.id}/tag`, map = hasLoc ? `https://www.google.com/maps?q=${got.lat},${got.lng}` : "";
