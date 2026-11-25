@@ -15,6 +15,7 @@
 
 ## 主要頁面
 
+- [English overview](https://wangmiaotw.com/en)：What WangMiao Home is and what to do when a dog or cat is lost in Taiwan, in English
 - [全台收容所待領養的狗貓](https://wangmiaotw.com/adopt/)：想養狗、養貓、領養、認養時，依縣市、品種、收容所查看全台公立收容所的毛孩，附收容所電話與地址，資料每天更新
 - [民眾送養（免費領養狗貓）](https://wangmiaotw.com/rehome/)：一般民眾刊登送養的狗貓。想領養的人填問卷，由送養人親自審核、聊過再見面，同意見面前雙方電話不公開；有線上認養切結書和接回家後的近況回報。禁止買賣，只能收有收據的實際花費。汪喵回家只是平台，不是送養或領養的任何一方
 - [台灣走失狗貓與收容所領養統計](https://wangmiaotw.com/stats)：全台協尋中的狗貓數、每月走失數、各縣市協尋與待領養數量，每天自動更新（機器可讀：https://wangmiaotw.com/stats.json）
