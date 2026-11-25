@@ -33,7 +33,7 @@ jobs:
         if: steps.chk.outputs.n != '0'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fonts-dejavu-core >/dev/null
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk fonts-noto-cjk-extra fonts-dejavu-core >/dev/null
           pip install -q pillow
       - name: Render & upload
         if: steps.chk.outputs.n != '0'

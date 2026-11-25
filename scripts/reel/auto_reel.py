@@ -12,7 +12,10 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 CJK = '/usr/share/fonts/opentype/noto/NotoSansCJK-{}.ttc'
-def F(sz, w='Bold'): return ImageFont.truetype(CJK.format(w), sz, index=3)
+def F(sz, w='Bold'):
+    for x in (w, 'Bold', 'Regular'):
+        if os.path.exists(CJK.format(x)): return ImageFont.truetype(CJK.format(x), sz, index=3)
+    raise OSError('找不到 Noto Sans CJK 字型')
 def NUM(sz):
     for p in ['/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf']:
         if os.path.exists(p): return ImageFont.truetype(p, sz)
