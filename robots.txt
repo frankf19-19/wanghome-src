@@ -29,4 +29,5 @@ Disallow: /functions/
 Disallow: /storage/
 Disallow: /object/
 
+Sitemap: https://wangmiaotw.com/sitemap-core.xml
 Sitemap: https://wangmiaotw.com/sitemap.xml
