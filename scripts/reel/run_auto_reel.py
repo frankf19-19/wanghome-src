@@ -1,7 +1,7 @@
 # 汪喵回家 — 找出要自動發文、還沒有 Reel 的網友協尋案件，做 Reel＋海報，上傳到 Supabase Storage
 # 由 .github/workflows/auto-reel.yml 執行。之後 Edge Function social-post 會拿這兩個檔案發 FB／IG／Threads。
 # 篩選條件和 social-post 一樣：協尋中、飼主同意分享、還沒發、沒隱藏、網站登記、72 小時內、不是站長自己登記、有照片
-import json, os, subprocess, sys, tempfile, urllib.request, urllib.parse
+import json, os, subprocess, sys, tempfile, urllib.error, urllib.request, urllib.parse
 from datetime import datetime, timedelta, timezone
 
 SB = "https://nopyhfpaykkiieudvoko.supabase.co"
@@ -17,9 +17,12 @@ def req(method, path, body=None, ctype="application/json", extra=None):
     if KEY.startswith("eyJ"): r.add_header("Authorization", "Bearer " + KEY)
     if data is not None: r.add_header("Content-Type", ctype)
     for k, v in (extra or {}).items(): r.add_header(k, v)
-    with urllib.request.urlopen(r, timeout=60) as resp:
-        t = resp.read()
-        return json.loads(t) if t and resp.headers.get("content-type", "").startswith("application/json") else None
+    try:
+        with urllib.request.urlopen(r, timeout=120) as resp:
+            t = resp.read()
+            return json.loads(t) if t and resp.headers.get("content-type", "").startswith("application/json") else None
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"{method} {path.split('?')[0]} HTTP {e.code} {e.read()[:200].decode('utf-8', 'replace')}")
 
 def todo():
     now = datetime.now(timezone.utc)
