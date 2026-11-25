@@ -68,9 +68,9 @@ def main():
                 if r.returncode: raise RuntimeError(r.stderr[-400:])
                 urls = {}
                 for name, ct in (("reel.mp4", "video/mp4"), ("poster.jpg", "image/jpeg")):
-                    path = f"social/{c['id']}_{name}"
-                    req("POST", f"/storage/v1/object/photos/{path}", open(os.path.join(d, "out", name), "rb").read(), ct, {"x-upsert": "true"})
-                    urls[name] = f"{SB}/storage/v1/object/public/photos/{path}"
+                    bucket, path = ("social", f"reel/{c['id']}.mp4") if name == "reel.mp4" else ("photos", f"social/{c['id']}_poster.jpg")
+                    req("POST", f"/storage/v1/object/{bucket}/{path}", open(os.path.join(d, "out", name), "rb").read(), ct, {"x-upsert": "true"})
+                    urls[name] = f"{SB}/storage/v1/object/public/{bucket}/{path}"
                 req("PATCH", f"/rest/v1/cases?id=eq.{c['id']}", {"social_reel_url": urls["reel.mp4"], "social_poster_url": urls["poster.jpg"]}, extra={"Prefer": "return=minimal"})
                 print("完成", c["id"], r.stdout.strip())
         except Exception as e:
