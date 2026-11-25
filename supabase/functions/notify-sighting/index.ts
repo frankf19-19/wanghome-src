@@ -250,7 +250,10 @@ Deno.serve(async (req) => {
     try {
       const { data: u } = await sb2.auth.admin.getUserById(pet.owner_id);
       const to = u?.user?.email ?? "";
-      if (to && (resendKey || (gUser && gPass))) {
+      // 寄信上限：同一隻毛孩一天 4 封；名牌通知全站一天 12 封（和其他通知共用一天 60 封的額度）
+      const { data: petOk } = await sb2.rpc("edge_rate_ok", { p_kind: "tag_mail", p_ip: String(pet.id), p_max: 4, p_window: "1 day" });
+      const { data: budOk } = petOk === true ? await sb2.rpc("mail_budget_take", { p_kind: "tag", p_cap: 60, p_kind_cap: 12 }) : { data: false };
+      if (to && petOk === true && budOk === true && (resendKey || (gUser && gPass))) {
         const lines = [`有人掃了${nm}項圈上的 QR 名牌。`, "",
           hasLoc ? `對方的位置：${map}` : "對方沒有傳位置。",
           got.msg ? `留言：${got.msg}` : "", got.contact ? `對方留的聯絡方式：${got.contact}` : "", "",
