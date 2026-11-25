@@ -1,6 +1,7 @@
 // 汪喵回家 — 自動發粉專貼文 v2.0.0
 //   cases  ：每 30 分鐘。網友新登記、有照片、飼主同意分享的協尋案件 → FB 粉專＋IG（同一張照片）＋Threads（主題「狗狗走失／貓咪走失」）
 //            站長（is_admin）自己登記的案件不自動發（站長會手動發整套）
+//   comments：每 20 分鐘。看協尋貼文底下的留言，像是線索的（看到、在哪裡、撿到…）自動轉成目擊回報，飼主會收到通知
 //   weekly ：每週日晚上。「本週找回」整理 → 發到 FB 粉專
 //   probe  ：只檢查權杖能不能用（不發文）
 //
@@ -231,6 +232,72 @@ async function runCases() {
   }
 }
 
+// ---------------------------------------------------------------- 貼文留言 → 目擊回報
+// 像線索：提到看到／撿到／地點／時間；不像線索：只是分享、加油、祝福
+const CLUE = /(看到|看見|有看過|遇到|撿到|抓到|收留|出現|躲在|跑到|跑去|在.{0,8}(路|街|巷|弄|口|橋|公園|學校|國小|國中|市場|超商|7-?11|全家|萊爾富|加油站|廟|田|河|山|附近|門口|停車場)|剛剛|剛才|今天|昨天|早上|中午|下午|晚上|凌晨|\d{1,2}\s*[:點]|收容所|動保|疑似|好像是|很像|長得像)/;
+const NOISE = /^[\s\S]{0,4}$|^(分享|已分享|轉發|加油|幫分享|幫轉|祝福|希望|早日|平安|🙏|❤️|💛|\s|[!！。.~～])+$/;
+function isClue(t: string): boolean {
+  t = String(t ?? "").trim();
+  if (t.length < 6 || NOISE.test(t)) return false;
+  const core = t.replace(/(分享|加油|祝福|希望|早日回家|平安回家|快回家|🙏|❤️|💛|[!！。.~～\s])/g, "");
+  if (core.length < 4) return false;
+  return CLUE.test(t);
+}
+async function runComments() {
+  const since = new Date(Date.now() - 30 * 864e5).toISOString();
+  // deno-lint-ignore no-explicit-any
+  const cs: any[] = await sb("GET", `cases?select=id,name,social_post&status=eq.searching&social_post=not.is.null&social_posted_at=gt.${since}&limit=200`) ?? [];
+  log("追蹤留言的案件", cs.length);
+  let fwd = 0;
+  for (const c of cs) {
+    const sp = c.social_post ?? {};
+    // deno-lint-ignore no-explicit-any
+    const got: { id: string; plat: string; who: string; text: string; at: string; link: string }[] = [];
+    if (TOKEN && sp.fb) {
+      try {
+        const j = await graph("GET", `${sp.fb}/comments`, { fields: "id,message,from{name,id},created_time,permalink_url", filter: "stream", limit: "100" });
+        const pg = await page();
+        // deno-lint-ignore no-explicit-any
+        for (const x of j.data ?? []) if (x.from?.id !== pg.id) got.push({ id: "fb:" + x.id, plat: "FB", who: x.from?.name ?? "FB 網友", text: x.message, at: x.created_time, link: x.permalink_url ?? "" });
+      } catch (e) { log("FB 留言讀取失敗", c.id, String(e).slice(0, 120)); }
+    }
+    if (TOKEN && sp.ig) {
+      try {
+        const j = await graph("GET", `${sp.ig}/comments`, { fields: "id,text,username,timestamp", limit: "100" });
+        // deno-lint-ignore no-explicit-any
+        for (const x of j.data ?? []) if (x.username !== "wangmiaotw") got.push({ id: "ig:" + x.id, plat: "IG", who: x.username ?? "IG 網友", text: x.text, at: x.timestamp, link: "" });
+      } catch (e) { log("IG 留言讀取失敗", c.id, String(e).slice(0, 120)); }
+    }
+    if (TH_TOKEN && sp.th) {
+      try {
+        const j = await threads("GET", `${sp.th}/replies`, { fields: "id,text,username,timestamp,permalink", limit: "100" });
+        // deno-lint-ignore no-explicit-any
+        for (const x of j.data ?? []) if (x.username !== "wangmiaotw") got.push({ id: "th:" + x.id, plat: "Threads", who: x.username ?? "Threads 網友", text: x.text, at: x.timestamp, link: x.permalink ?? "" });
+      } catch (e) { log("Threads 回覆讀取失敗", c.id, String(e).slice(0, 120)); }
+    }
+    if (!got.length) continue;
+    const ids = got.map((g) => g.id);
+    const seen = new Set(((await sb("GET", `social_comments_seen?select=id&id=in.(${ids.map((i) => `"${i}"`).join(",")})`)) ?? []).map((x: { id: string }) => x.id));
+    for (const g of got) {
+      if (seen.has(g.id)) continue;
+      const clue = isClue(g.text);
+      if (clue) {
+        try {
+          await sb("POST", "sightings", {
+            case_id: c.id, seen_at: g.at || new Date().toISOString(),
+            note: clip(`【${g.plat} 留言】${scrub(g.text)}`, 500),
+            reporter_name: clip(`${g.plat}：${g.who}`, 40),
+            reporter_contact: g.link ? `留言連結：${g.link}` : `${g.plat} 帳號：${g.who}`,
+          }, "return=minimal");
+          fwd++;
+        } catch (e) { log("轉目擊失敗", c.id, String(e).slice(0, 160)); }
+      }
+      await sb("POST", "social_comments_seen", { id: g.id, case_id: c.id, platform: g.plat, forwarded: clue }, "resolution=ignore-duplicates,return=minimal");
+    }
+  }
+  log("轉成目擊回報", fwd);
+}
+
 // ---------------------------------------------------------------- 每週找回
 async function runWeekly() {
   const since = new Date(Date.now() - 7 * 864e5).toISOString();
@@ -269,6 +336,7 @@ Deno.serve(async (req) => {
   try {
     if (mode === "probe") { if (TOKEN) await page(); if (TH_TOKEN) await thUser(); }
     else if (mode === "weekly") await runWeekly();
+    else if (mode === "comments") await runComments();
     else await runCases();
     return Response.json({ ok: true, log: LOG });
   } catch (e) {
