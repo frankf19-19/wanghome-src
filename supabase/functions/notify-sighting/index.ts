@@ -8,6 +8,7 @@
 //       v1.7：每個網路位址另有每天上限（目擊通知 15、確認信 6）；IPv6 位址分組修正。
 //       v1.8：目擊通知改成有版面的信：照片直接顯示、地圖與管理頁用大按鈕。
 //       v1.9：信裡的管理按鈕附 30 天有效的信件專用鑰匙，點了直接進管理頁。
+//       v1.10：QR 名牌掃描通知（{"tag_scan":"<uuid>"}）：推播＋寄信給飼主。
 // 需關閉 JWT 驗證（訪客也能回報）。
 // Secrets（Supabase → Edge Functions → Secrets）：RESEND_API_KEY（建議）；或舊方式 GMAIL_USER、GMAIL_APP_PASSWORD
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -225,6 +226,39 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405);
   let body: Record<string, unknown> = {};
   try { body = await req.json(); } catch (_) { /* ignore */ }
+  // QR 名牌：撿到的人在名牌頁按了「傳位置／送留言」→ 推播＋寄信給飼主
+  //   只處理 10 分鐘內、還沒通知過的掃描紀錄；每個網路位址每小時 20 次
+  if (body.tag_scan) {
+    const sid = String(body.tag_scan);
+    if (!/^[0-9a-f-]{36}$/.test(sid)) return json({ error: "bad tag_scan" }, 400);
+    const sb2 = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey(), { auth: { persistSession: false } });
+    let ip2 = (req.headers.get("cf-connecting-ip") ?? "unknown").trim();
+    if (ip2.includes(":")) ip2 = v6net64(ip2);
+    const { data: rok } = await sb2.rpc("edge_rate_ok", { p_kind: "edge_tag", p_ip: ip2, p_max: 20, p_window: "1 hour" });
+    if (rok !== true) return json({ sent: false, reason: "throttled" }, 429);
+    const { data: got } = await sb2.from("pet_tag_scans").update({ pushed: true }).eq("id", sid).eq("pushed", false)
+      .gte("created_at", new Date(Date.now() - 10 * 60e3).toISOString()).select("id,pet_id,lat,lng,msg,contact").maybeSingle();
+    if (!got) return json({ sent: false, reason: "none" });
+    const { data: pet } = await sb2.from("pets").select("id,name,owner_id,tag_on").eq("id", got.pet_id).maybeSingle();
+    if (!pet || !pet.tag_on) return json({ sent: false, reason: "off" });
+    const nm = String(pet.name ?? "毛孩").slice(0, 30), hasLoc = got.lat != null && got.lng != null;
+    const link = `${SITE}#/pet/${pet.id}/tag`, map = hasLoc ? `https://www.google.com/maps?q=${got.lat},${got.lng}` : "";
+    let pushed = 0, mailed = false;
+    try { pushed = await pushToUser(pet.owner_id, `有人掃了${nm}的名牌`, hasLoc ? "對方傳來了位置，點開看在哪裡" : "對方留了話，點開看內容", `#/pet/${pet.id}/tag`); } catch (_) { /* ignore */ }
+    try {
+      const { data: u } = await sb2.auth.admin.getUserById(pet.owner_id);
+      const to = u?.user?.email ?? "";
+      if (to && (resendKey || (gUser && gPass))) {
+        const lines = [`有人掃了${nm}項圈上的 QR 名牌。`, "",
+          hasLoc ? `對方的位置：${map}` : "對方沒有傳位置。",
+          got.msg ? `留言：${got.msg}` : "", got.contact ? `對方留的聯絡方式：${got.contact}` : "", "",
+          `在 App 或網站看全部紀錄：${link}`, "", "如果毛孩在你身邊，可以忽略這封信。"].filter((x, i, a) => x !== "" || a[i - 1] !== "");
+        await sendMail(to, `有人掃了${nm}的 QR 名牌`, lines.join("\n"));
+        mailed = true;
+      }
+    } catch (e) { console.error("tag mail", String(e).slice(0, 200)); }
+    return json({ sent: pushed > 0 || mailed, pushed, mailed });
+  }
   const caseId = String(body.case_id ?? "");
   if (!/^[0-9a-f-]{36}$/.test(caseId)) return json({ error: "bad case_id" }, 400);
   if (!resendKey && (!gUser || !gPass)) return json({ sent: false, reason: "not_configured" });

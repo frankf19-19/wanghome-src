@@ -1643,6 +1643,7 @@ html.is-app .lightbox{transition:padding-bottom .25s cubic-bezier(.38,.7,.125,1)
 .pal-mv{margin-left:auto;flex:none}.pals-tabs a{font-size:15px}
 
 .pal-newbar{display:flex;align-items:center;gap:8px;width:100%;margin:10px 0 4px;padding:12px 14px;border:0;border-radius:14px;background:color-mix(in srgb,#F28C38 14%,var(--sheet));color:var(--ink);font:inherit;text-align:left;cursor:pointer}.pal-newbar>.ico{color:#E0457B;flex:none}.pal-newbar b{flex:1}.pal-newbar span{color:var(--muted,#777);font-size:14px;white-space:nowrap}.pal-new{font-style:normal;font-size:11px;font-weight:800;color:#fff;background:#E0457B;border-radius:99px;padding:1px 6px;vertical-align:2px}
+.qtag .card{margin-top:14px}.qtag label{display:block;font-weight:800;margin:14px 0 6px}.qtag .check-row{display:flex;gap:12px;align-items:flex-start;margin:0;cursor:pointer}.qtag .check-row input{width:24px;height:24px;margin-top:2px;flex:none;accent-color:var(--red)}.qtag .check-row small{display:block;font-weight:400;color:var(--muted,#777);font-size:13.5px}.qtag input[type=tel],.qtag textarea{width:100%}.qtag #tagSave{margin-top:16px}.qtag-qr{text-align:center}.qtag-qr #tagQr{display:inline-block;background:#fff;padding:12px;border-radius:14px}.qtag-qr #tagQr img,.qtag-qr #tagQr canvas{display:block}.qtag-it b{display:block;margin-bottom:8px}.qtag-it p{margin:8px 0 0;overflow-wrap:anywhere}
 .pal-cw{position:relative;display:flex}.pal-badge{position:absolute;top:10px;left:10px;z-index:1;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:800;color:#fff;background:var(--green);pointer-events:none}.pal-badge.mu{background:#E0457B}.pal-badge.lk{background:#F28C38}
 .pal-mu{margin:8px 0 2px;padding:9px 12px;border-radius:14px;background:color-mix(in srgb,#E0457B 12%,var(--sheet));color:#C2306A;font-weight:800;text-align:center}.pal-mu.lk{background:color-mix(in srgb,#F28C38 14%,var(--sheet));color:#B8601D}.pal-cw .pal-card{flex:1;width:100%}
 .pal-like{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;min-width:40px;height:34px;padding:0 9px;border-radius:99px;border:0;background:color-mix(in srgb,var(--sheet) 88%,transparent);box-shadow:0 1px 4px rgba(0,0,0,.12);color:var(--ink-3);font:700 13px/1 var(--body);cursor:pointer}
@@ -3337,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.38.16';
+const BUILD = 'v7.39.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -4236,6 +4237,7 @@ function route(){window.__lastRoute=Date.now();
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/summary$/)))return renderPetSummary(m[1]);
   if((m=path.match(/^#\/vet\/([A-Za-z0-9]{8,24})$/)))return renderVetShare(m[1]);
   if(!CLINIC_ON&&(/^#\/clinic(\/|$)/.test(path)||/^#\/pet\/[0-9a-f-]{36}\/clinics$/.test(path)))return clinicPreviewGate(path);
+  if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/tag$/)))return renderPetTag(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/clinics$/)))return renderPetClinics(m[1]);
   if((m=path.match(/^#\/pet\/([0-9a-f-]{36})\/visit\/([0-9a-f-]{36})$/)))return renderVisitDoc(m[2],m[1]);
   if(path==='#/clinic')return renderClinic();
@@ -5404,6 +5406,9 @@ function inboxUnread(){try{return +localStorage.getItem('wh_inbox_n')||0}catch(_
 async function inboxItems(){if(!me())return [];const out=[];const since=new Date(Date.now()-14*864e5).toISOString();
   const [{data:cs,error:e1},{data:fl,error:e2},prof,{data:pets,error:e3},{data:dues,error:e4}]=await Promise.all([sb.rpc('my_cases'),sb.from('follows').select('case_id'),getProfile().catch(()=>null),sb.from('pets').select('id,name,photos'),sb.from('pet_records').select('id,pet_id,title,kind,next_due').eq('done',false).not('next_due','is',null).lte('next_due',addDays(todayStr(),14)).order('next_due').limit(10)]);
   if(e1||e2||e3||e4)out.err=true;
+  // QR 名牌被掃：有人傳了位置或留言
+  if((pets||[]).length){try{const pm={};pets.forEach(x=>pm[x.id]=x);const {data:ts}=await sb.from('pet_tag_scans').select('id,pet_id,created_at,lat,msg').gte('created_at',since).order('created_at',{ascending:false}).limit(10);
+    (ts||[]).forEach(x=>{const pt=pm[x.pet_id];if(!pt)return;out.push({t:x.created_at,k:'mine',ic:'pin',col:'#E8502E',img:(pt.photos||[])[0],href:'#/pet/'+x.pet_id+'/tag',h:`<b>有人掃了 ${esc(pt.name)} 的 QR 名牌</b>${x.lat!=null?'，並傳來位置':''}${x.msg?'：'+esc(String(x.msg).slice(0,40)):''}`})})}catch(_){}}
   const mine=(cs||[]).filter(c=>c.status==='searching'),mid=mine.map(c=>c.id),byId={};mine.forEach(c=>byId[c.id]=c);
   const fid=(fl||[]).map(f=>f.case_id).filter(id=>!byId[id]);
   const jobs=[];
@@ -10483,6 +10488,7 @@ async function renderPetView(id){const _n=navId;
         <a class="btn ghost" href="#/pet/${id}/summary">${ic("steth")} 看診摘要</a>
         ${CLINIC_ON?`<a class="btn ghost" href="#/pet/${id}/clinics" style="grid-column:1/-1">${ic("link")} 讓醫院把病歷傳進來</a>`:''}
         <a class="btn ghost" href="#/pet/${id}/print" style="grid-column:1/-1">${ic("clipboard")} 完整健康資料</a>
+        <a class="btn ghost" href="#/pet/${id}/tag" id="pvTag" style="grid-column:1/-1" ${TAG_ON?'':'hidden'}>${ic("link")} QR 名牌：走失時讓撿到的人聯絡你</a>
         <a class="btn ghost" href="#/pals/card/${id}" style="grid-column:1/-1">${ic("paw")} 放上毛孩名片牆，找玩伴</a>
         <a class="btn ghost d-only" href="#/pet/${id}/edit" style="grid-column:1/-1">${ic("edit")} 編輯毛孩資料</a>
       </div>
@@ -10523,6 +10529,7 @@ async function renderPetView(id){const _n=navId;
     </div>`).join('')}</div>`).join(''):`<div class="empty-card"><div class="big">${ic("clipboard")}</div><b>還沒有健康紀錄</b><p class="small">打針、看診、驅蟲、量體重都可以記下來，換醫院時就不用重新解釋病史。</p><div class="btns"><a class="btn" href="#/pet/${id}/record/new">新增第一筆</a></div></div>`}`;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
   {const ab=$('#pvAlbum');if(ab)albSection(ab,p)}
+  if(!TAG_ON)amAdmin().then(ok=>{const t=$('#pvTag');if(ok&&t&&_n===navId)t.hidden=false});
   if(askRec)docsAskBind(p.name,askRec);
   {const ds=$('#docsSec');if(ds)ds.addEventListener('toggle',async()=>{if(!ds.open||ds.dataset.ld)return;ds.dataset.ld=1;const b=$('#docsBody');b.innerHTML=await docsFolderHTML(rs)||'<p class="muted small">沒有附件</p>';b.querySelectorAll('[data-u]').forEach(x=>x.onclick=()=>x.dataset.u&&lightbox(x.dataset.u))})}
   // 垃圾桶：直接刪除用藥／健康紀錄（照片一起刪）
@@ -11043,6 +11050,63 @@ async function renderVisitDoc(id,petId){const _n=navId;if(!requireLogin())return
   (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><a class="btn ghost sm" href="${back}">‹ 返回</a><button type="button" class="btn sm app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button>${!petId?`<a class="btn sm ghost" href="#/clinic/visit/${id}">修改</a>`:''}${petId?'<span class="muted small">醫院開立的病歷，只能看、不能修改</span>':''}</div>${visitDocHTML(v)}`;
 }
 // 飼主：授權醫院、產生連結碼
+const TAG_ON=false;   // QR 名牌：站長確認前先不開放，只有管理員可以預覽
+// ── QR 名牌：替毛孩產生專屬 QR Code，貼在項圈上；撿到的人掃了就能聯絡飼主、回傳位置 ──
+async function renderPetTag(id){const _n=navId;if(!requireLogin())return;
+  if(!window.__quiet)app.innerHTML=pageSkel('pet');
+  if(!TAG_ON&&!(await amAdmin())){if(_n===navId)goReplace('#/pet/'+id);return}
+  const [{data:p,error:pe},{data:scans}]=await Promise.all([sb.from('pets').select('id,name,species,photos,tag_code,tag_on,tag_phone,tag_note').eq('id',id).maybeSingle(),sb.from('pet_tag_scans').select('id,created_at,lat,lng,acc,msg,contact').eq('pet_id',id).order('created_at',{ascending:false}).limit(30)]);
+  if(_n!==navId)return;
+  if(pe){app.innerHTML=netErrHTML();return}
+  if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
+  setTitle(p.name+'的 QR 名牌');
+  const N=esc(p.name),on=!!(p.tag_on&&p.tag_code),url=p.tag_code?CONFIG.SITE_URL+'t/'+p.tag_code:'';
+  try{localStorage.setItem('wh_tag_seen_'+id,new Date().toISOString())}catch(_){}
+  app.innerHTML=`<p class="small"><a class="backlink" href="#/pet/${id}">‹ 回${N}的檔案</a></p>
+  <div class="narrow-in qtag">
+    <h1>${N}的 QR 名牌</h1>
+    <p class="muted">把這個 QR Code 印出來貼在項圈或名牌上。撿到${N}的人用手機一掃，不用裝 App，就能打電話給你、把位置傳給你。</p>
+    <form class="card" id="tagF">
+      <label class="check-row"><input type="checkbox" id="tagOn" ${on?'checked':''}><span><b>啟用${N}的 QR 名牌</b><small>關掉之後，掃到的人只會看到「名牌沒有啟用」</small></span></label>
+      <label for="tagPh">掃到的人可以打的電話</label>
+      <input id="tagPh" type="tel" inputmode="tel" maxlength="20" value="${esc(p.tag_phone||'')}" placeholder="例如 0912-345-678">
+      <p class="muted small" style="margin:4px 0 0">這支電話會出現在名牌頁上，任何掃到的人都看得到。不想公開就留空，對方還是可以傳位置和留言給你。</p>
+      <label for="tagNote">想跟撿到的人說的話（不一定要填）</label>
+      <textarea id="tagNote" maxlength="200" rows="3" placeholder="例如：${N}很膽小，請不要追，蹲下來等一下就會靠近">${esc(p.tag_note||'')}</textarea>
+      <button type="submit" class="btn block" id="tagSave">${on?'儲存':'啟用並產生 QR Code'}</button>
+    </form>
+    ${on?`<div class="card qtag-qr"><div id="tagQr" aria-label="${N}的 QR Code"></div>
+      <p class="small muted" style="overflow-wrap:anywhere;margin:10px 0 0">${esc(url)}</p>
+      <div class="btns" style="margin-top:12px"><button type="button" class="btn" id="tagDl">${ic('download')} 下載名牌圖片</button><a class="btn ghost" href="${esc(url)}" target="_blank" rel="noopener">看掃到的人會看到什麼</a></div>
+      <p class="small muted" style="margin:10px 0 0">列印時 QR Code 的邊長至少 2 公分，才掃得到。可以護貝、用防水貼紙，或拿去刻印店做成吊牌。</p></div>
+    <h2 style="margin-top:22px">掃描紀錄</h2>
+    ${(scans||[]).length?`<div class="qtag-list">${scans.map(x=>`<div class="card qtag-it"><b>${esc(fmtDT(x.created_at))}</b>
+      ${x.lat!=null?`<a class="btn sm ghost" href="https://www.google.com/maps?q=${(+x.lat).toFixed(6)},${(+x.lng).toFixed(6)}" target="_blank" rel="noopener">${ic('pin')} 看對方傳來的位置${x.acc?`（誤差約 ${Math.round(x.acc)} 公尺）`:''}</a>`:'<span class="muted small">對方沒有傳位置</span>'}
+      ${x.msg?`<p>${escLink(x.msg)}</p>`:''}${x.contact?`<p class="small">對方留的聯絡方式：<b>${esc(x.contact)}</b></p>`:''}</div>`).join('')}</div>`:`<p class="muted">還沒有人掃過。有人按下「傳位置」或送出留言時，這裡會出現紀錄，App 也會通知你。</p>`}`:''}
+  </div>`;
+  $('#tagF').onsubmit=async e=>{e.preventDefault();const b=$('#tagSave');if(b.disabled)return;b.disabled=true;
+    const {error}=await sb.rpc('pet_tag_set',{p_pet:id,p_on:$('#tagOn').checked,p_phone:hw($('#tagPh').value||'').trim(),p_note:$('#tagNote').value.trim()});
+    if(_n!==navId)return;
+    if(error){b.disabled=false;return toast('沒有存到：'+friendlyErr(error.message||error),4000)}
+    toast($('#tagOn').checked?'已儲存，QR 名牌啟用中':'已儲存，QR 名牌已關閉');window.__quiet=1;try{await renderPetTag(id)}finally{window.__quiet=0}};
+  if(!on)return;
+  try{await loadScript(LIB.qr)}catch(_){}
+  if(_n!==navId||!$('#tagQr'))return;
+  if(!window.QRCode){$('#tagQr').innerHTML='<p class="muted">QR Code 產生不出來，請檢查網路後再開一次這一頁。</p>';$('#tagDl').disabled=true;return}
+  new QRCode($('#tagQr'),{text:url,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});
+  $('#tagDl').onclick=async()=>{
+    const big=document.createElement('div');new QRCode(big,{text:url,width:640,height:640,correctLevel:QRCode.CorrectLevel.M});await new Promise(r=>setTimeout(r,120));
+    const q=big.querySelector('canvas')||big.querySelector('img');if(!q)return toast('圖片產生不出來，請再試一次');
+    const W=900,H=1120,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+    g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#E8502E';g.fillRect(0,0,W,170);
+    g.textAlign='center';g.fillStyle='#fff';g.font='900 72px system-ui,"PingFang TC","Noto Sans TC",sans-serif';g.fillText('掃我找主人',W/2,112);
+    g.drawImage(q,130,210,640,640);
+    g.fillStyle='#1F1B18';let fs=84;const nm=String(p.name);g.font=`900 ${fs}px system-ui,"PingFang TC","Noto Sans TC",sans-serif`;while(fs>40&&g.measureText(nm).width>W-120){fs-=4;g.font=`900 ${fs}px system-ui,"PingFang TC","Noto Sans TC",sans-serif`}
+    g.fillText(nm,W/2,960);
+    g.fillStyle='#6F6A64';g.font='600 34px system-ui,"PingFang TC","Noto Sans TC",sans-serif';g.fillText('汪喵回家 wangmiaotw.com',W/2,1050);
+    const dataUrl=c.toDataURL('image/png'),fname=`QR名牌-${nm}.png`;
+    if(IS_APP){try{if(await appShareFile(dataUrl.split(',')[1],fname,`${nm}的 QR 名牌`,url))return}catch(e){return toast('無法分享圖片：'+(e.message||e),4000)}}
+    const a=document.createElement('a');a.download=fname;a.href=dataUrl;document.body.appendChild(a);a.click();a.remove();toast('已下載名牌圖片')}}
 async function renderPetClinics(petId){const _n=navId;if(!requireLogin())return;
   const [{data:p},{data:L}]=await Promise.all([sb.from('pets').select('id,name').eq('id',petId).maybeSingle(),sb.rpc('pet_clinics',{p_pet:petId})]);if(_n!==navId)return;
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻毛孩</div>';return}
