@@ -95,7 +95,9 @@ const twTime = (ts: string) => {
   const d = new Date(new Date(ts).getTime() + 8 * 3600e3), h = d.getUTCHours(), m = d.getUTCMinutes();
   const part = h < 5 ? "凌晨" : h < 11 ? "上午" : h < 13 ? "中午" : h < 18 ? "下午" : "晚上";
   const hh = h > 12 ? h - 12 : h;
-  return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${part}${h === 0 && m === 0 ? "" : ` ${hh} 點${m ? m + " 分" : ""}左右`}`;
+  // 只填日期的（00:00 或 12:00 整點）只寫日期
+  if (m === 0 && (h === 0 || h === 12)) return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+  return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${part} ${hh} 點${m ? m + " 分" : ""}左右`;
 };
 const fmtPhone = (p: string) => { const d = String(p ?? "").replace(/\D/g, "").replace(/^886/, "0"); return /^09\d{8}$/.test(d) ? `${d.slice(0, 4)}-${d.slice(4, 7)}-${d.slice(7)}` : String(p ?? "").trim(); };
 
@@ -106,17 +108,18 @@ function caption(c: any, where: "fb" | "ig" | "th"): string {
   const sp = SP(c.species), city = CITY_SHORT(c.lost_city), area = `${(c.lost_city ?? "").replace(/^臺/, "台")}${c.lost_district ?? ""}`;
   const name = clip(c.name, 12);
   const kid = c.sex === "male" ? "男生" : c.sex === "female" ? "女生" : (c.species === "cat" ? "貓咪" : "狗狗");
-  const who = [c.age_text ? clip(c.age_text, 10) : "", c.breed ? clip(c.breed, 12) : "", kid].filter(Boolean).join("的");
+  const who = `${c.age_text ? clip(c.age_text, 10) + "的" : ""}${c.breed ? clip(c.breed, 12) : ""}${kid}`;
   const look = [c.colour ? clip(scrub(c.colour), 20) : "", c.has_chip ? "有晶片" : ""].filter(Boolean).join("、");
   const feat = clip(scrub(c.features || c.collar_desc || ""), 70);
   const place = c.lost_place ? clip(scrub(c.lost_place), 30) : "";
   const phone = c.phone_public && c.contact_phone ? fmtPhone(c.contact_phone) : "";
-  const callName = clip(c.contact_name, 10) || `${name}家人`;
+  const cn = clip(c.contact_name, 10);
+  const callName = cn && !/^(飼主|主人|我|本人|家人)$/.test(cn) ? cn : `${name}家人`;
   const url = `${SITE}p/${c.id}`;
   const open = pick([
     `${area}，${who}「${name}」走失了，請大家幫忙留意 🙏`,
     `🆘 協尋｜${area}走失的${who}「${name}」`,
-    `找${name}！${area}一隻${who}在 ${twTime(c.lost_at)} 走失了`,
+    `找${name}！${area}的${who}，${twTime(c.lost_at)} 走失了`,
     `${name}還沒回家｜${area}・${who}`,
   ]);
   const report = where === "fb" ? `線索可以到汪喵回家回報：${url}` : where === "ig" ? "線索可以到汪喵回家回報（網址在個人簡介）" : "線索也可以到汪喵回家網站回報";
