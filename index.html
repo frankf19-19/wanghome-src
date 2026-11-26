@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.46.3';
+const BUILD = 'v7.46.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -3765,7 +3765,8 @@ function mapKit(m,base){const el=m.getContainer();
   if(IS_TOUCH){m.dragging.disable();let one=false;el.addEventListener('touchstart',e=>{one=e.touches.length===1&&!el.classList.contains('mapfs')},{passive:true});el.addEventListener('touchmove',e=>{if(one&&e.touches.length===1&&!svOn)hint('用兩指移動地圖，或按右上角 ⛶ 全螢幕')},{passive:true})}
   else{el.addEventListener('wheel',()=>{if(!m.scrollWheelZoom.enabled())hint('點一下地圖，就能用滑鼠滾輪縮放',1400)},{passive:true});m.on('click',()=>m.scrollWheelZoom.enable());el.addEventListener('mouseleave',()=>{if(!el.classList.contains('mapfs'))m.scrollWheelZoom.disable()})}
 }
-function makeMap(el,center,zoom=14){if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}window.__maps=(window.__maps||[]).filter(x=>{if(x.getContainer().isConnected)return true;try{x.remove()}catch(_){}return false});   // 換頁後留下的舊地圖要清掉（不然越積越多）
+function leafletGuard(){try{if(typeof L==='undefined'||L.__wmGuard)return;L.__wmGuard=1;const gp=L.DomUtil.getPosition;L.DomUtil.getPosition=el=>(el&&gp(el))||new L.Point(0,0)}catch(_){}}
+function makeMap(el,center,zoom=14){leafletGuard();if(typeof L==='undefined'){const e=typeof el==='string'?document.getElementById(el):el;if(e){e.classList.add('nomap');e.innerHTML='<div class="nomap-msg">地圖載入失敗（網路不穩）。<br>可以用「定位」按鈕，或在下方用文字描述地點。</div>'}return NOMAP}window.__maps=(window.__maps||[]).filter(x=>{if(x.getContainer().isConnected)return true;try{x.remove()}catch(_){}return false});   // 換頁後留下的舊地圖要清掉（不然越積越多）
   const m=L.map(el,{scrollWheelZoom:false,maxBounds:TW_BOUNDS,maxBoundsViscosity:1,minZoom:6,worldCopyJump:false}).setView(center,zoom);const base=(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);__maps.push(m);try{mapKit(m,base)}catch(e){console.warn(e)}window.__maps.push(m);return m}
 function marker(latlng,label,cls=''){if(typeof L==='undefined')return NOMAP;return L.marker(latlng,{icon:L.divIcon({className:'mk-wrap',html:`<div class="mk ${cls}">${label}</div>`,iconSize:[40,40],iconAnchor:[20,20]})})}
 /* 地點選取器：回傳 {get(), set(lat,lng)} */
@@ -5615,7 +5616,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
       <li>${ic("calendar")}<span><b>到期提醒</b>${IS_APP?'手機直接跳通知，也能同步到日曆':'寄 Email，也能同步到 iPhone、Google 日曆'}</span></li>
       <li>${ic("printer")}<span><b>完整健康資料</b>一頁看完病史、用藥和疫苗，看醫生直接給獸醫看</span></li>
       <li>${ic("siren")}<span><b>走失一鍵協尋</b>照片和特徵已建好，按「走失了」就能發出協尋</span></li>
-      <li>${ic("link")}<span><b>QR 名牌</b>印出來貼在項圈上，撿到的人一掃就能打給你、把位置傳給你</span></li>
+      <li>${ic("link")}<span><b>QR 名牌</b>印出來貼在項圈上，撿到的人一掃就能打給你、把位置傳給你</span></li>${WALK_ON?`<li>${ic("paw")}<span><b>散步日記</b>用地圖記下路線、公里和天氣，每天蓋印章、收集徽章</span></li>`:''}
     </ul>
     <div class="promo-btns">${me()?`<a class="btn green" href="#/health">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費開始使用</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">免費註冊（Email、LINE、Google、Apple 都可以）</span>`}</div>
   </div>
@@ -9165,7 +9166,7 @@ function renderLogin(){
     <p class="small" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
     <p class="lg2-alt"><button type="button" class="linkbtn" id="btnMode">${pwMode?'沒有密碼？改用 Email 驗證碼':'我有設定密碼，用密碼登入'}</button></p>
     <p class="lg2-note">${pwMode?'':'我們會寄一組驗證碼到你的信箱，輸入後就登入了。第一次使用會自動幫你建立帳號。'}</p>
-    <div class="lg2-perks"><b>會員可以免費用</b><ul><li>${ic('link')}<span><b>QR 名牌</b>貼在項圈上，撿到的人一掃就能聯絡你</span></li><li>${ic('steth')}<span><b>毛孩健康手冊</b>疫苗、回診、用藥到期前提醒</span></li><li>${ic('bell')}<span><b>走失通知</b>有人看到你的毛孩、家附近有毛孩走失，馬上知道</span></li><li>${ic('chat')}<span><b>傳訊息</b>直接和飼主、送養人聯絡</span></li></ul></div>
+    <div class="lg2-perks"><b>會員可以免費用</b><ul><li>${ic('link')}<span><b>QR 名牌</b>貼在項圈上，撿到的人一掃就能聯絡你</span></li>${WALK_ON?`<li>${ic('paw')}<span><b>散步日記</b>記路線、公里和天氣，每天蓋印章</span></li>`:''}<li>${ic('steth')}<span><b>毛孩健康手冊</b>疫苗、回診、用藥到期前提醒</span></li><li>${ic('bell')}<span><b>走失通知</b>有人看到你的毛孩、家附近有毛孩走失，馬上知道</span></li><li>${ic('chat')}<span><b>傳訊息</b>直接和飼主、送養人聯絡</span></li></ul></div>
     ${IS_APP?'':`<details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。</p></details>`}
   </div>`;
     if(keep.em)$('#em').value=keep.em;
@@ -10167,6 +10168,7 @@ function petCardHTML(p){
     <div class="b"><a href="#/pet/${p.id}" class="t" style="color:inherit">${spIc(p.species)} ${esc(p.name)}</a>
       <div class="m">${esc([p.breed,SEX[p.sex],petAge(p.birthday)].filter(Boolean).join('、'))||'&nbsp;'}</div>${bdayChip(p.birthday)}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><a class="btn sm ghost" href="#/pet/${p.id}">${ic("clipboard")} 健康紀錄</a><button class="btn sm ghost lost-btn" data-lost="${p.id}">${ic("siren")} 走失了</button></div>
+      ${WALK_ON?`<a class="tagchip" href="#/pet/${p.id}/walks">散步日記：今天蓋印章了嗎？ ›</a>`:''}
       ${TAG_ON?`<a class="tagchip ${p.tag_on&&p.tag_code?'on':''}" href="#/pet/${p.id}/tag">${p.tag_on&&p.tag_code?'<i></i>QR 名牌使用中':'做一張 QR 名牌，走失時撿到的人能聯絡你 ›'}</a>`:''}
     </div></div>`;
 }
@@ -11207,7 +11209,7 @@ const WALK_WX=c=>c===0?['☀️','晴']:c<=2?['🌤️','晴時多雲']:c===3?['
 function walkWxText(w){if(!w||typeof w.code!=='number')return '';const x=WALK_WX(w.code);return `${x[0]} ${x[1]}${typeof w.t==='number'?' '+Math.round(w.t)+'°C':''}`}
 async function walkWeather(lat,lng){try{const r=await fetch(`${IS_APP?CONFIG.SITE_URL:'/'}api/weather?lat=${(+lat).toFixed(2)}&lon=${(+lng).toFixed(2)}`);if(!r.ok)return null;const j=await r.json();return typeof j.code==='number'?{t:typeof j.t==='number'?j.t:null,code:j.code}:null}catch(_){return null}}
 function walkDist(a,b){const R=6371000,p=Math.PI/180,dl=(b[0]-a[0])*p,dn=(b[1]-a[1])*p,x=Math.sin(dl/2)**2+Math.cos(a[0]*p)*Math.cos(b[0]*p)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
-function walkMap(el,c,z){if(typeof L==='undefined')return null;window.__maps=(window.__maps||[]).filter(x=>{if(x.getContainer().isConnected)return true;try{x.remove()}catch(_){}return false});
+function walkMap(el,c,z){if(typeof L==='undefined')return null;leafletGuard();window.__maps=(window.__maps||[]).filter(x=>{if(x.getContainer().isConnected)return true;try{x.remove()}catch(_){}return false});
   const m=L.map(el,{zoomControl:false}).setView(c,z);try{m.attributionControl.setPrefix(false)}catch(_){}(IS_APP?L.tileLayer(CONFIG.SITE_URL+'api/tile/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}):L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'})).addTo(m);window.__maps.push(m);return m}
 function walkRouteDraw(m,route,spots){if(!m)return;const ll=(route||[]).map(x=>[x[0],x[1]]);if(ll.length){const ln=L.polyline(ll,{color:'#D42A1E',weight:6,opacity:.85,lineJoin:'round'}).addTo(m);L.circleMarker(ll[0],{radius:7,color:'#141E22',weight:3,fillColor:'#fff',fillOpacity:1}).addTo(m);walkPaws(ll).forEach(q=>L.marker(q,{icon:L.divIcon({className:'',html:'<div class="wg-paw">🐾</div>',iconSize:[22,22],iconAnchor:[11,11]}),interactive:false}).addTo(m));L.circleMarker(ll[ll.length-1],{radius:7,color:'#141E22',weight:3,fillColor:'#D42A1E',fillOpacity:1}).addTo(m);if(ll.length>1)m.fitBounds(ln.getBounds(),{padding:[24,24],maxZoom:18})}
   (spots||[]).forEach(s=>{const u=safeU(s.photo);if(u&&typeof s.lat==='number')L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:`<div class="wg-spot"><img src="${esc(u)}" alt=""></div>`,iconSize:[44,44],iconAnchor:[22,22]})}).addTo(m)})}
@@ -12030,6 +12032,7 @@ function renderPrivacy(){
     <li><b>目擊／拾獲／受傷通報：</b>時間、地點（你點選或同意定位的位置）、照片、狀況說明、通報者稱呼與聯絡方式（可不填）。</li>
     <li><b>會員（可不註冊）：</b>Email、使用者名稱、大頭貼、通知設定與「家附近」中心點、毛孩檔案、健康紀錄、用藥紀錄、收據與病歷照片、追蹤的案件。用 LINE、Google、Apple 登入時，我們只會收到對方提供的帳號識別碼、Email 與名稱，不會拿到你在那些服務的密碼。</li>
     <li><b>QR 名牌：</b>飼主替毛孩開啟名牌時，名牌頁會顯示毛孩的名字、外觀、第一張照片，以及飼主自己選擇要放的電話和留言；知道名牌網址或掃到 QR Code 的人都看得到，飼主可以隨時關閉。撿到的人按下「傳位置」或送出留言時，他同意傳送的位置、留言與聯絡方式只有該毛孩的飼主看得到，最多保存 180 天。</li>
+    ${WALK_ON?`<li><b>散步日記：</b>你記下的散步日期、時間長度、公里數、路線、天氣、照片和文字，只有你自己看得到，其他會員和訪客都看不到，隨時可以刪除。用地圖記錄時，會在你開著那個畫面的期間使用手機定位；查天氣時，會把大約 1 公里精度的位置送到天氣服務（Open-Meteo）。分享用的圖片只畫路線的形狀，不含地圖。</li>`:''}
     <li><b>會員私訊：</b>你和其他會員之間的訊息與照片。只有對話雙方看得到（照片存在私密空間）；站長平常看不到內容，只有在你或對方按「檢舉」時，站長會收到被檢舉者最近 10 則訊息，用來判斷是否違規。封鎖名單也會保存，讓被封鎖的人不能再傳訊息給你。</li>
     <li><b>手機上的紀錄：</b>你在這支手機登記過的案件與管理網址、還沒送出的草稿、領養篩選條件、你檢舉或封鎖而不想再看到的內容、外觀設定，只存在你的手機裡，不會上傳。</li>
     <li><b>定位與相機：</b>只有在你按下「用我目前位置」或選擇照片時才會使用，並會先徵求你的同意。照片的拍攝時間與地點只用來幫你自動填表。</li>
