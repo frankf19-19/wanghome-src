@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.47.0';
+const BUILD = 'v7.47.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11258,8 +11258,9 @@ function wkLoadLive(){try{const j=JSON.parse(localStorage.getItem('wm_walk_live'
 function wkClearLive(){try{localStorage.removeItem('wm_walk_live')}catch(_){}}
 function wkPendSet(v){__wkPending=v;try{v?localStorage.setItem('wm_walk_pend',JSON.stringify({...v,at:Date.now()})):localStorage.removeItem('wm_walk_pend')}catch(_){}}
 function wkPendGet(id){if(__wkPending&&__wkPending.petId===id)return __wkPending;try{const j=JSON.parse(localStorage.getItem('wm_walk_pend')||'null');if(j&&j.petId===id&&typeof j.km==='number'&&typeof j.minutes==='number'&&Date.now()-j.at<24*3600e3){__wkPending=j;return j}}catch(_){}return null}
-async function wkWake(){try{if(WKL&&navigator.wakeLock&&document.visibilityState==='visible')WKL.wl=await navigator.wakeLock.request('screen')}catch(_){}}
-document.addEventListener('visibilitychange',()=>{if(WKL)wkWake()});
+async function wkWake(){if(!WKL)return;try{const K=IS_APP&&capPlugin('KeepAwake');if(K&&K.keepAwake){await K.keepAwake();WKL.awake=1}}catch(_){}   // 新版 App 才有；沒有就用下面瀏覽器的方式
+  try{if(WKL&&navigator.wakeLock&&document.visibilityState==='visible'){WKL.wl=await navigator.wakeLock.request('screen');WKL.awake=1}}catch(_){}}
+document.addEventListener('visibilitychange',()=>{if(!WKL)return;if(document.visibilityState==='hidden'){WKL.hidAt=Date.now();return}wkWake();if(WKL.hidAt&&Date.now()-WKL.hidAt>20000&&WKL.pts.length)WKL.gapNote=1;WKL.hidAt=0;try{WKL.onUi&&WKL.onUi()}catch(_){}});
 function wkOnPos(p,err){if(!WKL)return;const ui=()=>{try{WKL&&WKL.onUi&&WKL.onUi()}catch(_){}};if(!p){WKL.err=err||2;return ui()}
   // GPS 站著不動也會飄：先把位置平滑化（訊號越差、平滑越多），再要求「真的移動超過誤差範圍」才算一段，不然公里數會灌水
   const c=p.coords,now=Date.now(),raw=[c.latitude,c.longitude],acc=c.accuracy||999;WKL.err=0;WKL.acc=acc;
@@ -11271,7 +11272,7 @@ function wkOnPos(p,err){if(!WKL)return;const ui=()=>{try{WKL&&WKL.onUi&&WKL.onUi
   if(!last){WKL.pts.push(pt);if(!WKL.wx&&!WKL.wxAsk){WKL.wxAsk=1;walkWeather(pt[0],pt[1]).then(w=>{if(WKL&&w){WKL.wx=w;wkSaveLive();ui()}})}}
   else{const d=walkDist(last,pt),dt=Math.max(1,(pt[2]-last[2])/1000);if(d<Math.max(12,acc*1.2)||d/dt>7)return ui();WKL.m+=d;WKL.pts.push(pt);WKL.pawAcc=(WKL.pawAcc||0)+d;if(WKL.pawAcc>=100){WKL.pawAcc=0;(WKL.paws=WKL.paws||[]).push([pt[0],pt[1]])}}
   wkSaveLive();ui()}
-function wkStop(){if(!WKL)return;try{WKL.stop&&WKL.stop()}catch(_){}try{WKL.wl&&WKL.wl.release&&WKL.wl.release().catch(()=>{})}catch(_){}WKL=null}
+function wkStop(){if(!WKL)return;try{const K=IS_APP&&capPlugin('KeepAwake');if(K&&K.allowSleep)K.allowSleep().catch(()=>{})}catch(_){}try{WKL.stop&&WKL.stop()}catch(_){}try{WKL.wl&&WKL.wl.release&&WKL.wl.release().catch(()=>{})}catch(_){}WKL=null}
 function wkStart(petId,resume){if(WKL&&WKL.petId===petId)return;if(WKL)wkStop();
   WKL=resume?{petId,t0:resume.t0,pts:resume.pts||[],m:resume.m||0,spots:resume.spots||[],wx:resume.wx||null}:{petId,t0:Date.now(),pts:[],m:0,spots:[],wx:null};
   WKL.stop=geoWatch(wkOnPos,{maximumAge:1000});wkWake();wkSaveLive()}
@@ -11300,6 +11301,7 @@ async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
   const map=typeof L!=='undefined'?walkMap('wgMap',WKL.cur||WKL.pts[WKL.pts.length-1]||[23.7,121],WKL.pts.length?17:7):null;if(!map)$('#wgMap').innerHTML='<div class="nomap-msg">地圖沒有載入，但公里數和時間照常記錄。</div>';
   let line=null,meMk=null,follow=true,first=true,pawN=0,lastHalf=Math.floor((WKL.m/1000)/0.5);const spotMk=[];
   const ui=()=>{if(_n!==navId||!$('#wgKm')||!WKL)return;
+    if(WKL.gapNote){WKL.gapNote=0;toast('歡迎回來！螢幕關掉的那一段，會用直線接起來。',4000)}
     const kmNow=WKL.m/1000;$('#wgKm').textContent=kmNow.toFixed(2);$('#wgSay').textContent=walkGoSay(kmNow,cat);
     const half=Math.floor(kmNow/0.5);if(half>lastHalf){lastHalf=half;toast(`走了 ${(half*0.5).toFixed(1)} 公里！🐾`);walkParty($('#wgKm'));try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}}
     if(WKL.wx&&$('#wgTip').hidden){$('#wgTip').textContent=walkWxTip(WKL.wx,p.name);$('#wgTip').hidden=false}if(WKL.wx){const x=WALK_WX(WKL.wx.code);$('#wgW').textContent=x[0]+(typeof WKL.wx.t==='number'?' '+Math.round(WKL.wx.t)+'°':'');$('#wgWL').textContent=x[1]}
