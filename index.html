@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.46.4';
+const BUILD = 'v7.47.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11261,11 +11261,15 @@ function wkPendGet(id){if(__wkPending&&__wkPending.petId===id)return __wkPending
 async function wkWake(){try{if(WKL&&navigator.wakeLock&&document.visibilityState==='visible')WKL.wl=await navigator.wakeLock.request('screen')}catch(_){}}
 document.addEventListener('visibilitychange',()=>{if(WKL)wkWake()});
 function wkOnPos(p,err){if(!WKL)return;const ui=()=>{try{WKL&&WKL.onUi&&WKL.onUi()}catch(_){}};if(!p){WKL.err=err||2;return ui()}
-  const c=p.coords,pt=[+c.latitude.toFixed(6),+c.longitude.toFixed(6),Date.now()],acc=c.accuracy||999;WKL.err=0;WKL.acc=acc;WKL.cur=pt;
-  if(acc>(WKL.pts.length?45:80))return ui();
+  // GPS 站著不動也會飄：先把位置平滑化（訊號越差、平滑越多），再要求「真的移動超過誤差範圍」才算一段，不然公里數會灌水
+  const c=p.coords,now=Date.now(),raw=[c.latitude,c.longitude],acc=c.accuracy||999;WKL.err=0;WKL.acc=acc;
+  if(acc>(WKL.pts.length?40:80)){if(!WKL.cur)WKL.cur=[+raw[0].toFixed(6),+raw[1].toFixed(6),now];return ui()}
+  const a=Math.min(1,Math.max(.04,.15*8/Math.max(acc,4)));
+  WKL.f=WKL.f&&now-(WKL.fixT||0)<15000?[WKL.f[0]+a*(raw[0]-WKL.f[0]),WKL.f[1]+a*(raw[1]-WKL.f[1])]:raw;WKL.fixT=now;   // 中斷超過 15 秒（螢幕關過）就從新的位置重新開始，不要慢慢追
+  const pt=[+WKL.f[0].toFixed(6),+WKL.f[1].toFixed(6),now];WKL.cur=pt;
   const last=WKL.pts[WKL.pts.length-1];
   if(!last){WKL.pts.push(pt);if(!WKL.wx&&!WKL.wxAsk){WKL.wxAsk=1;walkWeather(pt[0],pt[1]).then(w=>{if(WKL&&w){WKL.wx=w;wkSaveLive();ui()}})}}
-  else{const d=walkDist(last,pt),dt=Math.max(1,(pt[2]-last[2])/1000);if(d<5||d/dt>7)return ui();WKL.m+=d;WKL.pts.push(pt);WKL.pawAcc=(WKL.pawAcc||0)+d;if(WKL.pawAcc>=100){WKL.pawAcc=0;(WKL.paws=WKL.paws||[]).push([pt[0],pt[1]])}}
+  else{const d=walkDist(last,pt),dt=Math.max(1,(pt[2]-last[2])/1000);if(d<Math.max(12,acc*1.2)||d/dt>7)return ui();WKL.m+=d;WKL.pts.push(pt);WKL.pawAcc=(WKL.pawAcc||0)+d;if(WKL.pawAcc>=100){WKL.pawAcc=0;(WKL.paws=WKL.paws||[]).push([pt[0],pt[1]])}}
   wkSaveLive();ui()}
 function wkStop(){if(!WKL)return;try{WKL.stop&&WKL.stop()}catch(_){}try{WKL.wl&&WKL.wl.release&&WKL.wl.release().catch(()=>{})}catch(_){}WKL=null}
 function wkStart(petId,resume){if(WKL&&WKL.petId===petId)return;if(WKL)wkStop();
@@ -11299,9 +11303,9 @@ async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
     const kmNow=WKL.m/1000;$('#wgKm').textContent=kmNow.toFixed(2);$('#wgSay').textContent=walkGoSay(kmNow,cat);
     const half=Math.floor(kmNow/0.5);if(half>lastHalf){lastHalf=half;toast(`走了 ${(half*0.5).toFixed(1)} 公里！🐾`);walkParty($('#wgKm'));try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}}
     if(WKL.wx&&$('#wgTip').hidden){$('#wgTip').textContent=walkWxTip(WKL.wx,p.name);$('#wgTip').hidden=false}if(WKL.wx){const x=WALK_WX(WKL.wx.code);$('#wgW').textContent=x[0]+(typeof WKL.wx.t==='number'?' '+Math.round(WKL.wx.t)+'°':'');$('#wgWL').textContent=x[1]}
-    $('#wgMsg').textContent=WKL.err===1?'沒有定位權限。請到手機設定允許汪喵回家使用位置，再回來這一頁。':WKL.err?'暫時抓不到位置，走到比較空曠的地方再試試。':!WKL.pts.length?(WKL.acc?'訊號還不夠準，再等一下…':'正在找你的位置…'):(WKL.acc>45?'訊號有點弱，這一段先不記。':'記錄中，慢慢走。');
+    $('#wgMsg').textContent=WKL.err===1?'沒有定位權限。請到手機設定允許汪喵回家使用位置，再回來這一頁。':WKL.err?'暫時抓不到位置，走到比較空曠的地方再試試。':!WKL.pts.length?(WKL.acc?'訊號還不夠準，再等一下…':'正在找你的位置…'):(WKL.acc>40?'訊號有點弱，這一段先不記。':'記錄中，慢慢走。');
     $('#wgSpots').innerHTML=WKL.spots.map(s=>`<img src="${esc(thumbUrl(safeU(s.photo)))}" alt="風景照" onerror="this.onerror=null;this.src='${esc(safeU(s.photo))}'">`).join('');
-    if(!map)return;const ll=WKL.pts.map(x=>[x[0],x[1]]);if(!line)line=L.polyline(ll,{color:'#D42A1E',weight:6,opacity:.85,lineJoin:'round'}).addTo(map);else line.setLatLngs(ll);
+    if(!map)return;const ll=WKL.pts.map(x=>[x[0],x[1]]);if(ll.length&&WKL.cur&&WKL.acc<=40)ll.push([WKL.cur[0],WKL.cur[1]]);if(!line)line=L.polyline(ll,{color:'#D42A1E',weight:6,opacity:.85,lineJoin:'round'}).addTo(map);else line.setLatLngs(ll);
     const c=WKL.cur||WKL.pts[WKL.pts.length-1];if(c){if(!meMk)meMk=L.marker([c[0],c[1]],{icon:L.divIcon({className:'',html:`<div class="wg-me">${cat?'🐈':'🐕'}</div>`,iconSize:[44,44],iconAnchor:[22,22]}),interactive:false,zIndexOffset:1000}).addTo(map);else meMk.setLatLng([c[0],c[1]]);
       if(follow){map.setView([c[0],c[1]],first?17:map.getZoom(),{animate:!first});first=false}}
     const pw=WKL.paws||[];while(pawN<pw.length&&pawN<80){L.marker(pw[pawN],{icon:L.divIcon({className:'',html:'<div class="wg-paw">🐾</div>',iconSize:[22,22],iconAnchor:[11,11]}),interactive:false}).addTo(map);pawN++}
