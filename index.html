@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.44.0';
+const BUILD = 'v7.44.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11214,7 +11214,7 @@ async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId;if(!require
   if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   setTitle(p.name+'的散步日記');
   const N=esc(p.name),ws=rows||[],st=walkStats(allRows||[],total,today),isCur=ym===today.slice(0,7),cat=p.species==='cat';
-  const stamps={};[...ws].reverse().forEach(w=>{if(!stamps[w.walked_on]){const x=WALK_MOODS.find(a=>a[0]===(w.moods||[])[0]);stamps[w.walked_on]=x?x[1]:'🐾'}});
+  const stamps={};[...ws].reverse().forEach(w=>{const x=WALK_MOODS.find(a=>a[0]===(w.moods||[])[0]);if(!stamps[w.walked_on]||(stamps[w.walked_on]==='🐾'&&x))stamps[w.walked_on]=x?x[1]:'🐾'});
   const nDays=Object.keys(stamps).length,mMin=ws.reduce((a,w)=>a+(w.minutes||0),0);
   const dow=new Date(Date.UTC(Y,M-1,1)).getUTCDay(),cells=[];
   for(let i=0;i<dow;i++)cells.push('<span class="wk-d off"></span>');
