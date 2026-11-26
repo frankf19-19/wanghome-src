@@ -2794,7 +2794,7 @@ html{-webkit-tap-highlight-color:transparent}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .dr-tip{background:#3A2D10}}
 .lg2{max-width:440px;margin:20px auto;text-align:center;padding:28px 24px!important}
 .lg2 h1{margin:6px 0 4px!important;font-size:30px!important}
-.lg2-sub{color:var(--ink-3);font-size:15px;margin:0 0 18px}
+.lg2-sub{color:var(--ink-3);font-size:15px;margin:0 0 18px}.lg2-perks{text-align:left;margin:20px 0 4px;padding-top:16px;border-top:1px solid var(--line)}.lg2-perks>b{font-size:15px}.lg2-perks ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px}.lg2-perks li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink-2)}.lg2-perks li .ico{flex:none;margin-top:3px;color:var(--red)}.lg2-perks li b{display:block;color:var(--ink)}
 .lg2-soc .sl-btns{display:flex;flex-direction:column;gap:10px}
 .lg2-or{display:flex;align-items:center;gap:12px;margin:18px 0 14px;color:var(--ink-3);font-size:14px}.lg2-or::before,.lg2-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .lg2 form{text-align:left}
@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.40.0';
+const BUILD = 'v7.40.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5613,6 +5613,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
       <li>${ic("calendar")}<span><b>到期提醒</b>${IS_APP?'手機直接跳通知，也能同步到日曆':'寄 Email，也能同步到 iPhone、Google 日曆'}</span></li>
       <li>${ic("printer")}<span><b>完整健康資料</b>一頁看完病史、用藥和疫苗，看醫生直接給獸醫看</span></li>
       <li>${ic("siren")}<span><b>走失一鍵協尋</b>照片和特徵已建好，按「走失了」就能發出協尋</span></li>
+      <li>${ic("link")}<span><b>QR 名牌</b>印出來貼在項圈上，撿到的人一掃就能打給你、把位置傳給你</span></li>
     </ul>
     <div class="promo-btns">${me()?`<a class="btn green" href="#/health">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費開始使用</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">免費註冊（Email、LINE、Google、Apple 都可以）</span>`}</div>
   </div>
@@ -9159,6 +9160,7 @@ function renderLogin(){
     <p class="small" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
     <p class="lg2-alt"><button type="button" class="linkbtn" id="btnMode">${pwMode?'沒有密碼？改用 Email 驗證碼':'我有設定密碼，用密碼登入'}</button></p>
     <p class="lg2-note">${pwMode?'':'我們會寄一組驗證碼到你的信箱，輸入後就登入了。第一次使用會自動幫你建立帳號。'}</p>
+    <div class="lg2-perks"><b>會員可以免費用</b><ul><li>${ic('link')}<span><b>QR 名牌</b>貼在項圈上，撿到的人一掃就能聯絡你</span></li><li>${ic('steth')}<span><b>毛孩健康手冊</b>疫苗、回診、用藥到期前提醒</span></li><li>${ic('bell')}<span><b>走失通知</b>有人看到你的毛孩、家附近有毛孩走失，馬上知道</span></li><li>${ic('chat')}<span><b>傳訊息</b>直接和飼主、送養人聯絡</span></li></ul></div>
     ${IS_APP?'':`<details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。</p></details>`}
   </div>`;
     if(keep.em)$('#em').value=keep.em;
@@ -10048,7 +10050,7 @@ async function renderMe(){const _n=navId;await renderMeBody();if(_n===navId&&loc
 async function renderMeBody(){const _n=navId;
   setTitle('我的');
   if(!me()){app.innerHTML=`<h1>我的</h1>${mineHTML()||'<p class="lede">這支手機還沒有登記過案件。</p>'}
-    <div class="card" style="margin-top:14px"><b>登入後可以做更多事</b><p class="small muted">換手機也能管理案件、用毛孩健康手冊、收到附近走失通知、和飼主傳訊息。用 LINE、Google、Apple 或 Email 都可以，一分鐘完成。</p><div class="bigacts"><a class="btn big" href="#/login" onclick="setReturn('#/me')">登入或註冊（免費）</a></div></div>`;return}
+    <div class="card" style="margin-top:14px"><b>登入後可以做更多事</b><p class="small muted">換手機也能管理案件、用毛孩健康手冊、替毛孩做 QR 名牌（撿到的人一掃就能聯絡你）、收到附近走失通知、和飼主傳訊息。用 LINE、Google、Apple 或 Email 都可以，一分鐘完成。</p><div class="bigacts"><a class="btn big" href="#/login" onclick="setReturn('#/me')">登入或註冊（免費）</a></div></div>`;return}
   if(!window.__quiet)(_n===navId?app:_void).innerHTML=pageSkel('me');
   const [prof,{data:cs,error:ce1},{data:fs},{data:pend},{data:fl},{data:pets,error:pe1},{data:dues}]=await Promise.all([
     getProfile(true).then(d=>({d}),e=>({e})), sb.rpc('my_cases'), sb.rpc('my_found'), sb.rpc('my_pending_counts'),

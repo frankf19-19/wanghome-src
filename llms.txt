@@ -13,6 +13,12 @@
 
 完整內容版（所有協尋指南全文、常見問題、目前正在協尋的毛孩清單，每小時更新）：https://wangmiaotw.com/llms-full.txt
 
+## 會員功能（免費註冊）
+
+- QR 名牌：飼主替毛孩產生專屬 QR Code，印出來貼在項圈或吊牌上。撿到的人用手機一掃，不用裝 App 就能打電話給飼主、把目前位置和留言傳給飼主。
+- 毛孩健康手冊：疫苗、回診、驅蟲、用藥紀錄與到期提醒。
+- 走失通知：有人回報目擊、家附近有毛孩走失時通知。
+
 ## 主要頁面
 
 - [English overview](https://wangmiaotw.com/en)：What WangMiao Home is and what to do when a dog or cat is lost in Taiwan, in English
