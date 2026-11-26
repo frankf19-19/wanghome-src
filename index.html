@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.44.3';
+const BUILD = 'v7.44.4';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11142,7 +11142,7 @@ async function renderPetTag(id){const _n=navId;if(!requireLogin())return;
   $('#tagA4').onclick=()=>tagSave('a4',url,String(p.name))}
 // ── 散步日記：每次散步蓋一個印章；月曆像集點卡，有徽章、小任務、可以存成集點卡圖 ──
 const WALK_ON=false;   // 站長確認前只有管理員看得到；改成 true 就開放給所有會員
-const WALK_MOODS=[['sniff','👃','聞很久'],['friend','🐕','遇到朋友'],['run','💨','跑跑跳跳'],['poop','💩','順利便便'],['rain','🌧️','下雨也去'],['lazy','😴','懶懶的走'],['night','🌙','晚上散步'],['sun','☀️','天氣很好']];
+const WALK_MOODS=[['sniff','👃','聞很久'],['friend','🐕','遇到朋友'],['run','🎾','跑跑跳跳'],['poop','💩','順利便便'],['rain','🌧️','下雨也去'],['lazy','😴','懶懶的走'],['night','🌙','晚上散步'],['sun','☀️','天氣很好']];
 const WALK_GOAL=20;
 const WALK_TASKS=['走一條平常不走的路','讓{N}想聞多久就聞多久','出門前先摸摸{N}的頭','找一塊草地讓{N}踩一踩','今天走慢一點，跟著{N}的速度','幫{N}拍一張散步照','散步回家後一起喝水休息','路上遇到別的毛孩，打個招呼','試試看多走 5 分鐘','找一個有樹蔭的地方坐一下','讓{N}自己選一次方向','回家前在門口誇獎{N}一下'];
 function walkTask(name,ds,id){let h=0;for(const c of ds+id)h=(h*31+c.charCodeAt(0))>>>0;return WALK_TASKS[h%WALK_TASKS.length].replace('{N}',name)}
@@ -11200,7 +11200,8 @@ async function walkCardSave(p,ym,stamps,st){let c;try{c=await walkCardImage(p,ym
 function walkParty(el){if(matchMedia('(prefers-reduced-motion: reduce)').matches||!el)return;const r=el.getBoundingClientRect(),box=document.createElement('div');box.className='wk-party';box.setAttribute('aria-hidden','true');
   for(let i=0;i<10;i++){const s=document.createElement('span');s.textContent=['🐾','🦴','✨','🐾','💛'][i%5];s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+r.height/2)+'px';s.style.setProperty('--dx',(Math.cos(i/10*6.283)*(70+i*6)).toFixed(0)+'px');s.style.setProperty('--dy',(Math.sin(i/10*6.283)*(70+i*6)-40).toFixed(0)+'px');box.appendChild(s)}
   document.body.appendChild(box);setTimeout(()=>box.remove(),1300)}
-async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId;if(!requireLogin())return;
+let __wkSeq=0;
+async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId,seq=++__wkSeq;if(!requireLogin())return;
   if(!window.__quiet)app.innerHTML=pageSkel('pet');
   if(!WALK_ON&&!(await amAdmin())){if(_n===navId)goReplace('#/pet/'+id);return}
   const today=todayStr();ym=/^\d{4}-\d{2}$/.test(ym||'')?ym:today.slice(0,7);
@@ -11210,7 +11211,7 @@ async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId;if(!require
     sb.from('pet_walks').select('*').eq('pet_id',id).gte('walked_on',first).lte('walked_on',last).order('walked_on',{ascending:false}).order('created_at',{ascending:false}),
     sb.from('pet_walks').select('walked_on,minutes,moods').eq('pet_id',id).order('walked_on',{ascending:false}).limit(1000),
     sb.from('pet_walks').select('id',{count:'exact',head:true}).eq('pet_id',id)]);
-  if(_n!==navId)return;
+  if(_n!==navId||seq!==__wkSeq)return;
   if(pe||we){app.innerHTML=netErrHTML();return}
   if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   setTitle(p.name+'的散步日記');
@@ -11260,9 +11261,11 @@ async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId;if(!require
   $('#wkMin').onclick=e=>{const b=e.target.closest('.wk-chip');if(!b)return;mins=+b.dataset.n;$('#wkMin').querySelectorAll('.wk-chip').forEach(x=>{const o=x===b;x.classList.toggle('on',o);x.setAttribute('aria-pressed',o)})};
   $('#wkMood').onclick=e=>{const b=e.target.closest('.wk-chip');if(!b)return;const k=b.dataset.k,i=moods.indexOf(k);i<0?moods.push(k):moods.splice(i,1);b.classList.toggle('on',i<0);b.setAttribute('aria-pressed',i<0)};
   app.querySelectorAll('.wk-d[data-d]').forEach(b=>b.onclick=()=>{if(b.disabled)return;$('#wkDate').value=b.dataset.d;$('#wkFT').textContent=b.dataset.d===today?'今天散步了嗎？':`補記 ${b.dataset.d.slice(5).replace('-','/')} 的散步`;$('#wkF').scrollIntoView({behavior:'smooth',block:'start'})});
-  $('#wkPh').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#wkPhT').textContent='上傳中…';try{photo=await uploadPhoto(f,'pets');if(_n!==navId)return;$('#wkPhP').innerHTML=`<img src="${esc(safeU(photo))}" alt="" class="wk-prev">`;$('#wkPhT').textContent='換一張'}catch(er){$('#wkPhT').textContent='加一張照片';toast('照片沒有上傳成功：'+friendlyErr(er.message||er),4000)}e.target.value=''};
+  let upBusy=false;
+  $('#wkPh').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#wkPhT').textContent='上傳中…';upBusy=true;try{photo=await uploadPhoto(f,'pets');if(_n!==navId)return;$('#wkPhP').innerHTML=`<img src="${esc(safeU(photo))}" alt="" class="wk-prev">`;$('#wkPhT').textContent='換一張'}catch(er){$('#wkPhT').textContent='加一張照片';toast('照片沒有上傳成功：'+friendlyErr(er.message||er),4000)}finally{upBusy=false}e.target.value=''};
   $('#wkF').onsubmit=async e=>{e.preventDefault();const btn=$('#wkSave');if(btn.disabled)return;const ds=$('#wkDate').value;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(ds)||ds>today)return toast('日期請選今天或以前');
+    if(upBusy)return toast('照片還在上傳，等一下再按一次');
     btn.disabled=true;const {error}=await sb.from('pet_walks').insert({pet_id:id,walked_on:ds,minutes:mins,moods:[...moods],note:$('#wkNote').value.trim()||null,photo});
     if(_n!==navId)return;if(error){btn.disabled=false;return toast('沒有存到：'+friendlyErr(error.message||error),4000)}
     const st2=walkStats([...(allRows||[]),{walked_on:ds,minutes:mins,moods:[...moods]}],(total||0)+1,today),had=new Set(badges.filter(b=>b[3]).map(b=>b[1]));
