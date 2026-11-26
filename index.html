@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.39.5';
+const BUILD = 'v7.40.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11050,7 +11050,7 @@ async function renderVisitDoc(id,petId){const _n=navId;if(!requireLogin())return
   (_n===navId?app:_void).innerHTML=`<div class="noprint sum-bar"><a class="btn ghost sm" href="${back}">‹ 返回</a><button type="button" class="btn sm app-hide" onclick="window.print()">${ic('printer')} 列印／存 PDF</button>${!petId?`<a class="btn sm ghost" href="#/clinic/visit/${id}">修改</a>`:''}${petId?'<span class="muted small">醫院開立的病歷，只能看、不能修改</span>':''}</div>${visitDocHTML(v)}`;
 }
 // 飼主：授權醫院、產生連結碼
-const TAG_ON=false;   // QR 名牌：站長確認前先不開放，只有管理員可以預覽
+const TAG_ON=true;   // QR 名牌：2026-11-26 站長確認後開放給所有會員（改回 false 就只剩管理員看得到）
 // ── QR 名牌：替毛孩產生專屬 QR Code，貼在項圈上；撿到的人掃了就能聯絡飼主、回傳位置 ──
 // 畫一張名牌（上方橘色「掃我找主人」、中間 QR、下方名字）；w 是名牌寬度（像素），高度是 w*1.26
 function tagDraw(g,x,y,w,q,name,cut){const h=Math.round(w*1.26),F='system-ui,"PingFang TC","Noto Sans TC",sans-serif';
