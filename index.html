@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.42.0';
+const BUILD = 'v7.42.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11073,21 +11073,21 @@ function tagDraw(g,x,y,w,q,name,cut){const h=Math.round(w*1.26),F='system-ui,"Pi
   if(cut){g.save();g.strokeStyle='#9A948C';g.lineWidth=2;g.setLineDash([10,8]);g.strokeRect(x-1,y-1,w+2,h+2);g.restore()}
   return h}
 async function tagQrCanvas(url){await loadScript(LIB.qr);if(!window.QRCode)throw new Error('qr');const d=document.createElement('div');new QRCode(d,{text:url,width:870,height:870,correctLevel:QRCode.CorrectLevel.M});await new Promise(r=>setTimeout(r,150));const q=d.querySelector('canvas')||d.querySelector('img');if(!q)throw new Error('qr');return q}
-// kind='one'：一張名牌圖片；kind='a4'：A4 列印版（300dpi，三種大小各兩排，沿虛線剪下）
+// kind='one'：一張名牌圖片；kind='a4'：4×6 相片版（10×15 公分、300dpi，一張有 2.5／3／3.5 公分三種大小，沿虛線剪下）
 async function tagImage(kind,url,name){const q=await tagQrCanvas(url),c=document.createElement('canvas'),g=c.getContext('2d');
   if(kind==='one'){c.width=900;c.height=Math.round(900*1.26);tagDraw(g,0,0,900,q,name,false);return c}
-  const CM=118.11,W=2480,H=3508,M=150;c.width=W;c.height=H;g.fillStyle='#fff';g.fillRect(0,0,W,H);
-  g.textAlign='left';g.fillStyle='#1F1B18';g.font='900 56px system-ui,"PingFang TC","Noto Sans TC",sans-serif';g.fillText(`${name} 的 QR 名牌`,M,M+30);
-  g.fillStyle='#6F6A64';g.font='500 36px system-ui,"PingFang TC","Noto Sans TC",sans-serif';g.fillText('列印時請選「實際大小」或「100%」，不要選「符合頁面」。沿虛線剪下，護貝或貼上透明膠帶比較耐用。',M,M+95);
-  let y=M+170;for(const cm of [3,3.5,4.5]){const w=Math.round(cm*CM),h=Math.round(w*1.26),gap=46,n=Math.floor((W-2*M+gap)/(w+gap));
-    g.textAlign='left';g.fillStyle='#6F6A64';g.font='600 34px system-ui,"PingFang TC","Noto Sans TC",sans-serif';g.fillText(`寬 ${cm} 公分（${cm<=3?'小型犬、貓':cm<=3.5?'中型犬':'大型犬，或貼在外出籠、牽繩'}）`,M,y+34);y+=62;
-    for(let r=0;r<(cm>4?1:2);r++){for(let k=0;k<n;k++)tagDraw(g,M+k*(w+gap),y,w,q,name,true);y+=h+gap}
-    y+=40}
+  const CM=118.11,W=1200,H=1800,M=60,GAP=30,F='system-ui,"PingFang TC","Noto Sans TC",sans-serif';c.width=W;c.height=H;g.fillStyle='#fff';g.fillRect(0,0,W,H);
+  g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle='#1F1B18';g.font=`900 44px ${F}`;let hd=`${name} 的 QR 名牌`;while(hd.length>8&&g.measureText(hd).width>W-2*M)hd=hd.slice(0,-2)+'…';g.fillText(hd,M,M+44);
+  g.fillStyle='#6F6A64';g.font=`500 29px ${F}`;g.fillText('沿虛線剪下，挑一個合適的大小掛在項圈上。護貝或貼透明膠帶比較耐用。',M,M+96);
+  let y=M+140;for(const [cm,n] of [[2.5,3],[3,2],[3.5,2]]){const w=Math.round(cm*CM),h=Math.round(w*1.26);
+    for(let k=0;k<n;k++)tagDraw(g,M+k*(w+GAP),y,w,q,name,true);
+    g.textAlign='left';g.fillStyle='#6F6A64';g.font=`700 30px ${F}`;g.fillText(`寬 ${cm} 公分`,M+n*(w+GAP)+4,y+40);
+    y+=h+GAP}
   return c}
 async function tagSave(kind,url,name){let c;try{c=await tagImage(kind,url,name)}catch(_){return toast('圖片產生不出來，請檢查網路後再試一次',4000)}
-  const safe=name.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,24),fname=kind==='a4'?`QR名牌-${safe}-A4列印.png`:`QR名牌-${safe}.png`,dataUrl=c.toDataURL('image/png');
+  const safe=name.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,24),fname=kind==='a4'?`QR名牌-${safe}-4x6相片.png`:`QR名牌-${safe}.png`,dataUrl=c.toDataURL('image/png');
   if(IS_APP){try{if(await appShareFile(dataUrl.split(',')[1],fname,`${name}的 QR 名牌`,url))return}catch(e){return toast('無法分享圖片：'+(e.message||e),4000)}}
-  const a=document.createElement('a');a.download=fname;a.href=dataUrl;document.body.appendChild(a);a.click();a.remove();toast(kind==='a4'?'已下載 A4 列印版':'已下載名牌圖片')}
+  const a=document.createElement('a');a.download=fname;a.href=dataUrl;document.body.appendChild(a);a.click();a.remove();toast(kind==='a4'?'已下載 4×6 相片版':'已下載名牌圖片')}
 async function renderPetTag(id){const _n=navId;if(!requireLogin())return;
   if(!window.__quiet)app.innerHTML=pageSkel('pet');
   if(!TAG_ON&&!(await amAdmin())){if(_n===navId)goReplace('#/pet/'+id);return}
@@ -11109,8 +11109,8 @@ async function renderPetTag(id){const _n=navId;if(!requireLogin())return;
     ${on?`<p class="qtag-on"><span aria-hidden="true"></span>啟用中：掃到的人可以聯絡你</p>
     <div class="card qtag-qr"><div id="tagQr" aria-label="${N}的 QR Code"></div>
       <ol class="qtag-steps">
-        <li><b>存下來</b><div class="btns"><button type="button" class="btn" id="tagDl">${ic('download')} 存成圖片</button><button type="button" class="btn ghost" id="tagA4">A4 列印版（三種大小）</button></div></li>
-        <li><b>印出來，貼在項圈或吊牌上</b><small>QR Code 邊長至少 2 公分。護貝或貼透明膠帶比較耐用。</small></li>
+        <li><b>存下來</b><div class="btns"><button type="button" class="btn" id="tagDl">${ic('download')} 存成圖片</button><button type="button" class="btn ghost" id="tagA4">4×6 相片版（一張三種大小）</button></div><small>名牌很小，寬只有 2.5～3.5 公分，剛好掛在項圈上。4×6 相片版把三種大小排在一張相片上，洗一張就有 7 個可以剪。</small></li>
+        <li><b>印出來，剪下來掛在項圈上</b><small>用洗相片的方式印成 4×6（相片店、超商的相片列印、家裡印表機都可以）。護貝或貼透明膠帶比較耐用。</small></li>
         <li><b>用手機相機掃一次，確認掃得到</b><small>也可以先<a href="${esc(url)}" target="_blank" rel="noopener">看看掃到的人會看到什麼</a>。</small></li>
       </ol></div>
     <details class="card qtag-edit"><summary>修改電話和留言</summary><form id="tagF">${fields}<button type="submit" class="btn block" id="tagSave">儲存</button></form></details>
