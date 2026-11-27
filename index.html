@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.55.1';
+const BUILD = 'v7.55.2';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11298,11 +11298,11 @@ function walkLevel(xp){let i=0;while(i+1<WALK_LV.length&&xp>=WALK_LV[i+1][0])i++
 // 地圖上的寶物：出現在前進方向 40～90 公尺的地方，走到 22 公尺內就撿起來；一次最多 3 個、每個放 4 分鐘
 // ── 配合真實地圖：用 OpenStreetMap 找附近的公園、遊樂場、飲水機、狗狗公園當補給站，寶物和小怪只放在人行道、巷弄、公園步道上 ──
 const WALK_ST={park:['st_park','公園'],playground:['st_play','遊樂場'],water:['st_water','飲水站'],dog_park:['st_dogpark','狗狗公園']};
-// 資料由 /api/osm 轉接並快取（約 550 公尺一格）；一次拿目前這格和周圍 8 格
+// 資料由 /api/osm 轉接並快取（約 550 公尺一格）；一次拿目前這格和最靠近的 3 格
 const WALK_TILE=0.005;
 async function walkOSMTile(ty,tx){try{const r=await fetch(`${IS_APP?CONFIG.SITE_URL:'/'}api/osm?lat=${((ty+.5)*WALK_TILE).toFixed(4)}&lon=${((tx+.5)*WALK_TILE).toFixed(4)}`);if(!r.ok)return null;const j=await r.json();return j&&Array.isArray(j.st)?j:null}catch(_){return null}}
 async function walkOSM(lat,lng){const ty=Math.floor(lat/WALK_TILE),tx=Math.floor(lng/WALK_TILE),o=WKL&&WKL.osm&&WKL.osm.tiles?WKL.osm:{tiles:{},st:[],ways:[]};
-  const want=[];for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const k=(ty+dy)+'_'+(tx+dx);if(!o.tiles[k])want.push([ty+dy,tx+dx,k])}
+  const fy=lat/WALK_TILE-ty<.5?-1:1,fx=lng/WALK_TILE-tx<.5?-1:1,want=[];for(const [dy,dx] of [[0,0],[fy,0],[0,fx],[fy,fx]]){const k=(ty+dy)+'_'+(tx+dx);if(!o.tiles[k])want.push([ty+dy,tx+dx,k])}
   const got=await Promise.all(want.map(t=>walkOSMTile(t[0],t[1]).then(j=>[t[2],j])));let any=!want.length;
   for(const [k,j] of got){if(!j)continue;any=true;o.tiles[k]=1;for(const a of j.st)o.st.push({id:a[0],k:a[1],p:[a[2],a[3]],n:a[4]||''});for(const f of j.w){const w=[];for(let i=0;i+1<f.length;i+=2)w.push([f[i],f[i+1]]);o.ways.push(w)}}
   if(!any)return null;
@@ -11316,7 +11316,7 @@ function walkSnap(pt,ways){const k=Math.cos(pt[0]*Math.PI/180),X=p=>[(p[1]-pt[1]
 function walkSpawnPt(cur,head,dMin,dMax,spread){const ways=WKL.osm&&WKL.osm.ways;
   for(let i=0;i<6;i++){const b=(head===null?Math.random()*2*Math.PI:head+(Math.random()-.5)*spread),d=dMin+Math.random()*(dMax-dMin);
     const p=[cur[0]+d*Math.cos(b)/111320,cur[1]+d*Math.sin(b)/(111320*Math.cos(cur[0]*Math.PI/180))];
-    if(!ways||!ways.length){if(WKL.osmBusy&&!WKL.osm)return null;return [+p[0].toFixed(6),+p[1].toFixed(6)]}
+    if(!ways||!ways.length){if(WKL.osmBusy&&!WKL.osm&&Date.now()-(WKL.osmTry||0)<15000)return null;return [+p[0].toFixed(6),+p[1].toFixed(6)]}
     const s=walkSnap(p,ways);if(s&&walkDist(cur,s)>=dMin*.6)return s}
   return null}
 function walkOSMTick(){if(!WKL||!WKL.cur||WKL.osmBusy)return;const o=WKL.osm;if(o&&o.full&&walkDist(o.c,WKL.cur)<200)return;if(WKL.osmTry&&Date.now()-WKL.osmTry<60000)return;
