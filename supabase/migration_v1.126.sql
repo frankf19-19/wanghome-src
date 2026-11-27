@@ -12,7 +12,7 @@ language sql stable security definer set search_path = public as $$
      where f.status = 'accepted' and me.uid in (f.a, f.b)
   ),
   agg as (
-    select w.pet_id, round(coalesce(sum(least(w.km, 60)), 0), 1) as km, count(distinct w.walked_on)::int as days, coalesce(sum(w.minutes), 0)::int as minutes
+    select w.pet_id, round(coalesce(sum(least(coalesce(w.km, 0), 60)), 0), 1) as km, count(distinct w.walked_on)::int as days, coalesce(sum(w.minutes), 0)::int as minutes
       from public.pet_walks w, wk where w.walked_on >= wk.d0 and w.walked_on < wk.d0 + 7 group by w.pet_id
   )
   select p.id, p.name, p.species, p.breed, p.colour, p.art,
