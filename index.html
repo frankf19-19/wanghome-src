@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.52.0';
+const BUILD = 'v7.53.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11252,10 +11252,10 @@ async function walkCardImage(p,ym,stamps,st){const [Y,M]=ym.split('-').map(Numbe
   const c=document.createElement('canvas'),g=c.getContext('2d'),W=1080,H=1350,F='system-ui,"PingFang TC","Noto Sans TC","Noto Sans CJK TC",sans-serif';c.width=W;c.height=H;
   const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
   g.fillStyle='#FFF3B8';g.fillRect(0,0,W,H);g.fillStyle='#fff';g.strokeStyle='#141E22';g.lineWidth=6;rr(40,40,W-80,H-80,48);g.fill();g.stroke();
-  const ph=safeU((p.photos||[])[0]||'');let im=null;if(ph){try{im=await new Promise((ok,no)=>{const i=new Image();i.crossOrigin='anonymous';const to=setTimeout(()=>no(new Error('t')),10000);i.onload=()=>{clearTimeout(to);ok(i)};i.onerror=()=>{clearTimeout(to);no(new Error('e'))};i.src=ph})}catch(_){im=null}}
+  const ph=WALK_ART_OK(p.art)?'':safeU((p.photos||[])[0]||'');let im=null;if(ph){try{im=await new Promise((ok,no)=>{const i=new Image();i.crossOrigin='anonymous';const to=setTimeout(()=>no(new Error('t')),10000);i.onload=()=>{clearTimeout(to);ok(i)};i.onerror=()=>{clearTimeout(to);no(new Error('e'))};i.src=ph})}catch(_){im=null}}
   const cx=170,cy=190,R=90;g.save();g.beginPath();g.arc(cx,cy,R,0,Math.PI*2);g.closePath();g.fillStyle='#FFD9C7';g.fill();if(im){g.clip();const s=Math.max(2*R/im.width,2*R/im.height);g.drawImage(im,cx-im.width*s/2,cy-im.height*s/2,im.width*s,im.height*s)}g.restore();
   g.beginPath();g.arc(cx,cy,R,0,Math.PI*2);g.strokeStyle='#141E22';g.lineWidth=6;g.stroke();
-  if(!im){try{g.drawImage(await waImg(p.species==='cat'?'cat':'dog'),cx-72,cy-72,144,144)}catch(_){}}
+  if(!im){try{g.drawImage(await walkLoadImg(walkPetURL(p,'')),cx-72,cy-72,144,144)}catch(_){}}
   g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle='#141E22';let fs=68,nm=String(p.name);g.font=`900 ${fs}px ${F}`;while(fs>40&&g.measureText(nm+'的散步集點卡').width>W-380){fs-=2;g.font=`900 ${fs}px ${F}`}
   while(nm.length>2&&g.measureText(nm+'的散步集點卡').width>W-380)nm=nm.slice(0,-2)+'…';g.fillText(nm+'的散步集點卡',290,185);
   g.fillStyle='#D42A1E';g.font=`800 40px ${F}`;g.fillText(`${Y} 年 ${M} 月`,292,245);
@@ -11323,10 +11323,10 @@ async function walkPngSave(c,fname,title){let dataUrl;try{dataUrl=c.toDataURL('i
 async function walkResultImage(p,w){const c=document.createElement('canvas'),g=c.getContext('2d'),W=1080,H=1350,F='system-ui,"PingFang TC","Noto Sans TC","Noto Sans CJK TC",sans-serif';c.width=W;c.height=H;
   const rr=(x,y,w2,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w2,y,x+w2,y+h,r);g.arcTo(x+w2,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w2,y,r);g.closePath()};
   g.fillStyle='#D42A1E';g.fillRect(0,0,W,H);g.fillStyle='#fff';g.strokeStyle='#141E22';g.lineWidth=6;rr(40,40,W-80,H-80,48);g.fill();g.stroke();
-  const ph=safeU((p.photos||[])[0]||'');let im=null;if(ph){try{im=await walkLoadImg(ph)}catch(_){im=null}}
+  const ph=WALK_ART_OK(p.art)?'':safeU((p.photos||[])[0]||'');let im=null;if(ph){try{im=await walkLoadImg(ph)}catch(_){im=null}}
   const cx=170,cy=190,R=90;g.save();g.beginPath();g.arc(cx,cy,R,0,Math.PI*2);g.closePath();g.fillStyle='#FFD9C7';g.fill();if(im){g.clip();const sc=Math.max(2*R/im.width,2*R/im.height);g.drawImage(im,cx-im.width*sc/2,cy-im.height*sc/2,im.width*sc,im.height*sc)}g.restore();
   g.beginPath();g.arc(cx,cy,R,0,Math.PI*2);g.strokeStyle='#141E22';g.lineWidth=6;g.stroke();
-  if(!im){try{g.drawImage(await waImg(p.species==='cat'?'cat':'dog'),cx-72,cy-72,144,144)}catch(_){}}
+  if(!im){try{g.drawImage(await walkLoadImg(walkPetURL(p,'')),cx-72,cy-72,144,144)}catch(_){}}
   g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle='#141E22';let fs=68,nm=String(p.name);g.font=`900 ${fs}px ${F}`;const T=()=>'和'+nm+'去散步';while(fs>40&&g.measureText(T()).width>W-380){fs-=2;g.font=`900 ${fs}px ${F}`}
   while(nm.length>2&&g.measureText(T()).width>W-380)nm=nm.slice(0,-2)+'…';g.fillText(T(),290,185);
   const dd=String(w.walked_on||'').split('-');g.fillStyle='#D42A1E';g.font=`800 40px ${F}`;g.fillText(dd.length===3?`${+dd[0]} 年 ${+dd[1]} 月 ${+dd[2]} 日`:'',292,245);
@@ -11335,7 +11335,7 @@ async function walkResultImage(p,w){const c=document.createElement('canvas'),g=c
   if(rt.length>1){const la0=rt[0][0],k=Math.cos(la0*Math.PI/180),xs=rt.map(a=>a[1]*k),ys=rt.map(a=>-a[0]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),pad=90,sc=Math.min((BW-2*pad)/Math.max(x1-x0,1e-9),(BH-2*pad)/Math.max(y1-y0,1e-9)),ox=BX+(BW-(x1-x0)*sc)/2,oy=BY+(BH-(y1-y0)*sc)/2,P=i=>[ox+(xs[i]-x0)*sc,oy+(ys[i]-y0)*sc];
     g.lineJoin='round';g.lineCap='round';g.strokeStyle='#141E22';g.lineWidth=26;g.beginPath();rt.forEach((_,i)=>{const q=P(i);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});g.stroke();g.strokeStyle='#D42A1E';g.lineWidth=16;g.stroke();
     const a=P(0),b=P(rt.length-1);g.beginPath();g.arc(a[0],a[1],20,0,Math.PI*2);g.fillStyle='#fff';g.fill();g.strokeStyle='#141E22';g.lineWidth=6;g.stroke();
-    try{g.drawImage(await waImg(p.species==='cat'?'cat':'dog'),b[0]-50,b[1]-50,100,100)}catch(_){}}
+    try{g.drawImage(await walkLoadImg(walkPetURL(p,'')),b[0]-50,b[1]-50,100,100)}catch(_){}}
   else{try{g.drawImage(await waImg('paw',512),BX+BW/2-130,BY+BH/2-130,260,260)}catch(_){}}
   const km=+w.km||0,st=[[km>0?km.toFixed(km<10?2:1):'—','公里'],[w.minutes?String(w.minutes):'—','分鐘'],[w.weather&&typeof w.weather.code==='number'?(typeof w.weather.t==='number'?Math.round(w.weather.t)+'°':''):'—',w.weather&&typeof w.weather.code==='number'?WALK_WX(w.weather.code)[1]:'天氣']],SY=BY+BH+30,sw=(BW-40)/3;
   let wxI=null;if(w.weather&&typeof w.weather.code==='number'){try{wxI=await waImg(WALK_WX(w.weather.code)[2])}catch(_){}}
@@ -11368,6 +11368,10 @@ function wkStart(petId,resume){if(WKL&&WKL.petId===petId)return;if(WKL)wkStop();
   WKL=resume?{petId,t0:resume.t0,pts:resume.pts||[],m:resume.m||0,spots:resume.spots||[],wx:resume.wx||null,loot:resume.loot||{},items:Array.isArray(resume.items)?resume.items:[],mon:resume.mon||null,monM:+resume.monM||0}:{petId,t0:Date.now(),pts:[],m:0,spots:[],wx:null,loot:{},items:[]};
   WKL.stop=geoWatch(wkOnPos,{maximumAge:1000});wkWake();wkSaveLive()}
 function wkRoute(pts){const a=pts.map(x=>[+x[0].toFixed(5),+x[1].toFixed(5)]);if(a.length<=400)return a;const k=Math.ceil(a.length/400),o=a.filter((_,i)=>i%k===0);if(o[o.length-1]!==a[a.length-1])o.push(a[a.length-1]);return o}
+// 毛孩自己的可愛版（照上傳的照片畫的）；沒有的話用通用的狗／貓
+const WALK_ART_OK=u=>typeof u==='string'&&/^(\/art\/pet\/[0-9a-f-]{36}|https:\/\/nopyhfpaykkiieudvoko\.supabase\.co\/storage\/v1\/object\/public\/photos\/pets\/[\w\/.-]{10,200})$/.test(u);
+function walkPetURL(p,st){return WALK_ART_OK(p.art)?`${p.art}${st?'_'+st:''}.webp?${WA_V}`:`/art/${p.species==='cat'?'cat':'dog'}${st?'_'+st:''}.webp?${WA_V}`}
+function waPet(p,st){return `<img class="wa" src="${walkPetURL(p,st)}" alt="" aria-hidden="true" decoding="async" draggable="false">`}
 function waImg(k,px){if(WA_IMG.has(k))return walkLoadImg('/art/'+k+'.webp?'+WA_V);return walkLoadImg('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(wa(k).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="'+(px||256)+'" height="'+(px||256)+'" ')))}
 // ── 散步冒險：地圖上會出現小怪，走近就開打；贏了拿金幣，金幣可以買裝備、強化裝備；寶物和裝備可以賣掉 ──
 const WALK_SELL={bone:2,ball:5,frisbee:9,toy:14,stick:18,star:40};
@@ -11393,13 +11397,13 @@ function walkMonPick(lv,wx){const h=new Date().getHours(),night=h>=18||h<5,code=
 function walkFight(p,done){const mon=(b=>{const sc=1+.12*Math.max(0,(WKL.lv||1)-b[6]);return [b[0],b[1],Math.round(b[2]*sc),Math.round(b[3]*sc),Math.round(b[4]*sc),Math.round(b[5]*sc)]})(WALK_MON.find(x=>x[0]===WKL.fight)||WALK_MON[0]),cat=p.species==='cat',pw=walkPower(WKL.lv||1,WKL.g),N=esc(p.name);let php=pw.hp,mhp=mon[2],over=false;
   const el=document.createElement('div');el.className='wf';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','遇到'+mon[1]);
   el.innerHTML=`<div class="wf-box"><p class="wf-t">遇到${mon[1]}了！</p>
-    <div class="wf-row"><div class="wf-side" id="wfP">${wa(cat?'cat':'dog')}<b>${N} <small>Lv.${WKL.lv||1}</small></b><div class="wf-gear">${WALK_SLOT.map(s=>WKL.g.eq[s[0]]?wa('g_'+WKL.g.eq[s[0]]):'').join('')}</div><div class="wf-hp"><i id="wfPB" style="width:100%"></i></div><small id="wfPT">${php}／${pw.hp}</small></div><span class="wf-vs">VS</span><div class="wf-side" id="wfM">${wa('m_'+mon[0])}<b>${mon[1]}</b><div class="wf-hp m"><i id="wfMB" style="width:100%"></i></div><small id="wfMT">${mhp}／${mon[2]}</small></div></div>
+    <div class="wf-row"><div class="wf-side" id="wfP">${waPet(p)}<b>${N} <small>Lv.${WKL.lv||1}</small></b><div class="wf-gear">${WALK_SLOT.map(s=>WKL.g.eq[s[0]]?wa('g_'+WKL.g.eq[s[0]]):'').join('')}</div><div class="wf-hp"><i id="wfPB" style="width:100%"></i></div><small id="wfPT">${php}／${pw.hp}</small></div><span class="wf-vs">VS</span><div class="wf-side" id="wfM">${wa('m_'+mon[0])}<b>${mon[1]}</b><div class="wf-hp m"><i id="wfMB" style="width:100%"></i></div><small id="wfMT">${mhp}／${mon[2]}</small></div></div>
     <p class="wf-log" id="wfLog" role="status">先站到安全、不擋路的地方，再按出擊。</p>
     <div class="wf-acts"><button type="button" class="btn wf-hit" id="wfHit">${wa('atk')} 出擊！</button><button type="button" class="btn wf-sk" id="wfSk" disabled>${wa('star')} <span id="wfSkT">必殺技（再 3 下）</span></button></div><button type="button" class="wk-link" id="wfRun">先不打，繞過去</button></div>`;
   addEventListener('hashchange',()=>el.remove(),{once:true});document.body.appendChild(el);const q=s=>el.querySelector(s),close=()=>{el.remove();done()},bump=x=>{x.classList.remove('hit');void x.offsetWidth;x.classList.add('hit')};
-  const PK=cat?'cat':'dog',MK='m_'+mon[0],AU=k=>`/art/${k}.webp?${WA_V}`,face=(side,k,ms,back)=>{const im=side.querySelector('img.wa');if(!im||!WA_IMG.has(k))return;im.src=AU(k);clearTimeout(im._t);if(ms)im._t=setTimeout(()=>{if(im.isConnected)im.src=AU(back)},ms)},fx=(side,k)=>{const d=document.createElement('span');d.className='wf-fx';d.innerHTML=wa(k);side.appendChild(d);setTimeout(()=>d.remove(),450)};
-  [PK+'_atk',PK+'_hit',PK+'_win',MK+'_hit','fx_pow','fx_skill'].forEach(k=>{if(WA_IMG.has(k))new Image().src=AU(k)});
-  const end=async win=>{over=true;face(q('#wfP'),PK+(win?'_win':'_hit'),0);if(win)face(q('#wfM'),MK+'_hit',0);q('#wfRun').remove();q('#wfSk').remove();const b=q('#wfHit');b.parentNode.style.gridTemplateColumns='1fr';let msg;
+  const PK=cat?'cat':'dog',MK='m_'+mon[0],AU=k=>`/art/${k}.webp?${WA_V}`,face=(side,u,ms,back)=>{const im=side.querySelector('img.wa');if(!im)return;im.src=u;clearTimeout(im._t);if(ms)im._t=setTimeout(()=>{if(im.isConnected)im.src=back},ms)},PU=st=>walkPetURL(p,st),MH=AU(MK+'_hit'),fx=(side,k)=>{const d=document.createElement('span');d.className='wf-fx';d.innerHTML=wa(k);side.appendChild(d);setTimeout(()=>d.remove(),450)};
+  [PU('atk'),PU('hit'),PU('win'),MH,AU('fx_pow'),AU('fx_skill')].forEach(u=>{new Image().src=u});
+  const end=async win=>{over=true;face(q('#wfP'),PU(win?'win':'hit'),0);if(win)face(q('#wfM'),MH,0);q('#wfRun').remove();q('#wfSk').remove();const b=q('#wfHit');b.parentNode.style.gridTemplateColumns='1fr';let msg;
     if(win){const g=WKL.g,lv0=walkLevel(WKL.xp||0).lv;g.coins+=mon[4];g.bxp+=mon[5];g.kills[mon[0]]=(+g.kills[mon[0]]||0)+1;WKL.xp=(WKL.xp||0)+mon[5];const lv1=walkLevel(WKL.xp).lv;WKL.lv=lv1;
       let drop='';if(Math.random()<.3&&walkLootCount(WKL.loot)<30){const k=walkLootPick(),x=WALK_LOOT.find(a=>a[0]===k);WKL.loot[k]=(+WKL.loot[k]||0)+1;drop=`<br>還掉了一個${x[2]} ${wa(k)}`}
       msg=`<b>贏了！${mon[1]}跑走了</b><br>${wa('coin')} ＋${mon[4]} 金幣　＋${mon[5]} 經驗值${drop}${lv1>lv0?`<br>${wa('lvup')} <b>升級了！Lv.${lv1} ${walkLevel(WKL.xp).name}</b>`:''}`;
@@ -11408,15 +11412,15 @@ function walkFight(p,done){const mon=(b=>{const sc=1+.12*Math.max(0,(WKL.lv||1)-
     else msg=`<b>${N}累了，先休息一下</b><br>${mon[1]}趁機溜走了，沒有損失。<br>升級或換更好的裝備再來！`;
     q('#wfLog').innerHTML=msg;b.disabled=false;b.innerHTML='繼續散步';b.onclick=close;b.focus()};
   let ch=0;const pop=(side,t,c)=>{const d=document.createElement('span');d.className='wf-dmg'+(c?' '+c:'');d.textContent=t;side.appendChild(d);setTimeout(()=>d.remove(),800)},skUI=()=>{const b=q('#wfSk');if(!b)return;b.disabled=ch<3;q('#wfSkT').textContent=ch>=3?'必殺技！':`必殺技（再 ${3-ch} 下）`;b.classList.toggle('rdy',ch>=3)};
-  const strike=sk=>{if(over)return;const crit=!sk&&Math.random()<.15,d=Math.max(1,Math.round(pw.atk*(.8+Math.random()*.4)*(sk?2.6:crit?2:1)));ch=sk?0:ch+1;skUI();mhp=Math.max(0,mhp-d);q('#wfMB').style.width=(mhp/mon[2]*100)+'%';q('#wfMT').textContent=mhp+'／'+mon[2];bump(q('#wfM'));pop(q('#wfM'),'－'+d,sk?'sk':crit?'crit':'');face(q('#wfP'),PK+'_atk',450,PK);face(q('#wfM'),MK+'_hit',600,MK);fx(q('#wfM'),sk?'fx_skill':'fx_pow');
-    if(mhp<=0)return end(true);const md=Math.max(1,Math.round(mon[3]*(.7+Math.random()*.4)));php=Math.max(0,php-md);q('#wfPB').style.width=(php/pw.hp*100)+'%';q('#wfPT').textContent=php+'／'+pw.hp;setTimeout(()=>{if(el.isConnected){bump(q('#wfP'));pop(q('#wfP'),'－'+md,'');if(!over)face(q('#wfP'),PK+'_hit',550,PK)}},180);
+  const strike=sk=>{if(over)return;const crit=!sk&&Math.random()<.15,d=Math.max(1,Math.round(pw.atk*(.8+Math.random()*.4)*(sk?2.6:crit?2:1)));ch=sk?0:ch+1;skUI();mhp=Math.max(0,mhp-d);q('#wfMB').style.width=(mhp/mon[2]*100)+'%';q('#wfMT').textContent=mhp+'／'+mon[2];bump(q('#wfM'));pop(q('#wfM'),'－'+d,sk?'sk':crit?'crit':'');face(q('#wfP'),PU('atk'),450,PU(''));face(q('#wfM'),MH,600,AU(MK));fx(q('#wfM'),sk?'fx_skill':'fx_pow');
+    if(mhp<=0)return end(true);const md=Math.max(1,Math.round(mon[3]*(.7+Math.random()*.4)));php=Math.max(0,php-md);q('#wfPB').style.width=(php/pw.hp*100)+'%';q('#wfPT').textContent=php+'／'+pw.hp;setTimeout(()=>{if(el.isConnected){bump(q('#wfP'));pop(q('#wfP'),'－'+md,'');if(!over)face(q('#wfP'),PU('hit'),550,PU(''))}},180);
     q('#wfLog').textContent=`${sk?'必殺技！':crit?'爆擊！':''}${p.name}打出 ${d}，${mon[1]}回了 ${md}。`;if(php<=0)end(false)};
   q('#wfHit').onclick=()=>strike(false);q('#wfSk').onclick=()=>{if(ch>=3)strike(true)};
   q('#wfRun').onclick=close;q('#wfHit').focus()}
 // 裝備和商店
 async function renderWalkShop(id){const _n=navId;if(!requireLogin())return;if(!window.__quiet)app.innerHTML=pageSkel('pet');
   if(!WALK_ON&&!(await amAdmin())){if(_n===navId)goReplace('#/pet/'+id);return}
-  let p,rows,g;try{const r=await Promise.all([sb.from('pets').select('id,name,species').eq('id',id).maybeSingle(),sb.from('pet_walks').select('walked_on,minutes,moods,km,loot').eq('pet_id',id).limit(1000),walkGLoad(id)]);if(r[0].error||r[1].error)throw 0;p=r[0].data;rows=r[1].data||[];g=r[2]}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}
+  let p,rows,g;try{const r=await Promise.all([sb.from('pets').select('id,name,species,art').eq('id',id).maybeSingle(),sb.from('pet_walks').select('walked_on,minutes,moods,km,loot').eq('pet_id',id).limit(1000),walkGLoad(id)]);if(r[0].error||r[1].error)throw 0;p=r[0].data;rows=r[1].data||[];g=r[2]}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}
   if(_n!==navId)return;if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   setTitle(p.name+'的裝備和商店');const N=esc(p.name),st=walkStats(rows,rows.length,todayStr()),lv=walkLevel(st.xp+g.bxp).lv;
   const draw=()=>{const pw=walkPower(lv,g),bag=walkBag(st.lootAll,g),own=WALK_GEAR.filter(x=>x[0] in g.gear),y=window.scrollY;
@@ -11437,7 +11441,7 @@ async function renderWalkShop(id){const _n=navId;if(!requireLogin())return;if(!w
 async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
   app.innerHTML=pageSkel('pet');
   if(!WALK_ON&&!(await amAdmin())){if(_n===navId)goReplace('#/pet/'+id);return}
-  const [{data:p,error}]=await Promise.all([sb.from('pets').select('id,name,species').eq('id',id).maybeSingle(),waitLeaflet()]);
+  const [{data:p,error}]=await Promise.all([sb.from('pets').select('id,name,species,art').eq('id',id).maybeSingle(),waitLeaflet()]);
   if(_n!==navId)return;if(error){app.innerHTML=netErrHTML();return}
   if(!p){app.innerHTML='<div class="empty">找不到這筆寵物檔案<br><a href="#/health">回健康手冊</a></div>';return}
   setTitle('和'+p.name+'散步中');
@@ -11451,7 +11455,7 @@ async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
     <p class="wg-msg" id="wgMsg" role="status">正在找你的位置…</p>
     <p class="wg-bag" id="wgBag"><b>背包</b><span id="wgBagT">空的。地圖上出現寶物時，走近就會撿起來</span></p>
     <div class="wg-btns"><label class="btn ghost" for="wgPh">${ic('camera')} <span id="wgPhT">拍風景</span></label><input id="wgPh" type="file" accept="image/*" capture="environment" hidden><button type="button" class="btn" id="wgEnd">${ic('check')} 結束散步</button></div>
-    <div class="wg-say">${wa(cat?'cat':'dog')}<p id="wgSay">出發！今天想聞什麼味道？</p></div>
+    <div class="wg-say">${waPet(p)}<p id="wgSay">出發！今天想聞什麼味道？</p></div>
     <p class="wg-tip" id="wgTip" hidden></p>
     <div id="wgSpots" class="wg-spots"></div>
     <p class="muted small" style="margin-top:14px">記錄的時候請讓這個畫面開著、螢幕不要關。螢幕關掉的那一段記不到，回來後會用直線接起來。路線只有你自己看得到。天氣資料來自 Open-Meteo。</p>
@@ -11471,7 +11475,7 @@ async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
     $('#wgMsg').textContent=WKL.err===1?'沒有定位權限。請到手機設定允許汪喵回家使用位置，再回來這一頁。':WKL.err?'暫時抓不到位置，走到比較空曠的地方再試試。':!WKL.pts.length?(WKL.acc?'訊號還不夠準，再等一下…':'正在找你的位置…'):(WKL.acc>40?'訊號有點弱，這一段先不記。':'記錄中，慢慢走。');
     $('#wgSpots').innerHTML=WKL.spots.map(s=>`<img src="${esc(thumbUrl(safeU(s.photo)))}" alt="風景照" onerror="this.onerror=null;this.src='${esc(safeU(s.photo))}'">`).join('');
     if(!map)return;const ll=WKL.pts.map(x=>[x[0],x[1]]);if(ll.length&&WKL.cur&&WKL.acc<=40)ll.push([WKL.cur[0],WKL.cur[1]]);if(!line)line=L.polyline(ll,{color:'#D42A1E',weight:6,opacity:.85,lineJoin:'round'}).addTo(map);else line.setLatLngs(ll);
-    const c=WKL.cur||WKL.pts[WKL.pts.length-1];if(c){if(!meMk)meMk=L.marker([c[0],c[1]],{icon:L.divIcon({className:'',html:`<div class="wg-me">${wa(cat?'cat':'dog')}</div>`,iconSize:[44,44],iconAnchor:[22,22]}),interactive:false,zIndexOffset:1000}).addTo(map);else meMk.setLatLng([c[0],c[1]]);
+    const c=WKL.cur||WKL.pts[WKL.pts.length-1];if(c){if(!meMk)meMk=L.marker([c[0],c[1]],{icon:L.divIcon({className:'',html:`<div class="wg-me">${waPet(p)}</div>`,iconSize:[44,44],iconAnchor:[22,22]}),interactive:false,zIndexOffset:1000}).addTo(map);else meMk.setLatLng([c[0],c[1]]);
       if(follow){map.setView([c[0],c[1]],first?17:map.getZoom(),{animate:!first});first=false}}
     const its=WKL.items||[];for(const k in itemMk)if(!its.some(x=>String(x.id)===k)){try{map.removeLayer(itemMk[k])}catch(_){}delete itemMk[k]}
     for(const it of its)if(!itemMk[it.id]){const x=WALK_LOOT.find(a=>a[0]===it.k)||WALK_LOOT[0];itemMk[it.id]=L.marker(it.p,{icon:L.divIcon({className:'',html:`<div class="wg-item">${wa(x[0])}</div>`,iconSize:[40,40],iconAnchor:[20,20]}),interactive:false,zIndexOffset:500}).addTo(map)}
@@ -11497,7 +11501,7 @@ async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId,seq=++__wkS
   const today=todayStr();ym=/^\d{4}-\d{2}$/.test(ym||'')?ym:today.slice(0,7);
   const [Y,M]=ym.split('-').map(Number),first=ym+'-01',dim=new Date(Date.UTC(Y,M,0)).getUTCDate(),last=ym+'-'+String(dim).padStart(2,'0');
   const [{data:p,error:pe},{data:rows,error:we},{data:allRows},{count:total},{data:gRow}]=await Promise.all([
-    sb.from('pets').select('id,name,species,photos').eq('id',id).maybeSingle(),
+    sb.from('pets').select('id,name,species,photos,art').eq('id',id).maybeSingle(),
     sb.from('pet_walks').select('*').eq('pet_id',id).gte('walked_on',first).lte('walked_on',last).order('walked_on',{ascending:false}).order('created_at',{ascending:false}),
     sb.from('pet_walks').select('walked_on,minutes,moods,km,loot').eq('pet_id',id).order('walked_on',{ascending:false}).limit(1000),
     sb.from('pet_walks').select('id',{count:'exact',head:true}).eq('pet_id',id),
@@ -11520,14 +11524,14 @@ async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId,seq=++__wkS
   app.innerHTML=`<p class="small"><a class="backlink" href="#/pet/${id}">‹ 回${N}的檔案</a></p>
   <div class="narrow-in wk">
     <h1>${N}的散步日記</h1>
-    <div class="wk-hero"><span class="wk-ava">${ph?thumbImg(ph,''):`${wa((cat?'cat':'dog')+(st.set.has(today)?'_win':''))}`}</span><p class="wk-bub">${esc(walkSay(p.name,st.streak,st.set.has(today),cat))}</p></div>
+    <div class="wk-hero"><span class="wk-ava">${ph&&!WALK_ART_OK(p.art)?thumbImg(ph,''):waPet(p,st.set.has(today)?'win':'')}</span><p class="wk-bub">${esc(walkSay(p.name,st.streak,st.set.has(today),cat))}</p></div>
     <div class="wk-stats"><div><b>${isCur?st.month:nDays}</b><span>${isCur?'本月':M+' 月'}天數</span></div><div><b>${st.streak}</b><span>連續天數</span></div>${(isCur?st.kmMonth:mKm)>0?`<div><b>${isCur?st.kmMonth:mKm}</b><span>${isCur?'本月':M+' 月'}公里</span></div>`:`<div><b>${st.wkMin}</b><span>7 天分鐘</span></div>`}</div>
     ${(()=>{const lv=walkLevel(st.xp);return `<div class="wk-lv"><div class="wk-lv-h"><b>Lv.${lv.lv} ${lv.name}</b><span>${st.xp} 經驗值・累積 ${st.total} 次${st.kmAll>0?'・'+st.kmAll+' 公里':''}</span></div><div class="wk-lv-bar"><i style="width:${Math.max(4,lv.pct)}%"></i></div><small>${lv.next?`再 ${lv.need} 經驗值，升級成「${lv.next}」`:'已經是最高等級，太厲害了！'}</small></div>`})()}
     ${isCur?(()=>{const qs=walkQuests(st.day),done=qs.filter(q=>q[1]).length;return `<div class="wk-q"><div class="wk-q-h"><b>今日任務</b><span>${done===3?'全部完成，多拿 15 經驗值！':`完成 ${done}／3・全破多 15 經驗值`}</span></div>${done===3?(G.meta.qd===today?'<p class="wk-q-r muted small">今天的任務獎勵領過了，明天再來。</p>':`<button type="button" class="btn wk-q-b" id="wkQR">${wa('coin')} 領任務獎勵 30 金幣</button>`):''}${qs.map(q=>`<div class="wk-q-i${q[1]?' ok':''}">${wa(q[1]?'ok':'todo')}<span>${q[0]}</span><em>${q[2]}</em></div>`).join('')}</div>`})():''}
     ${(()=>{const pw=walkPower(walkLevel(st.xp).lv,G);return `<div class="wk-adv"><div class="wk-adv-h"><b>冒險</b><span class="ws-coin">${wa('coin')}<b>${G.coins}</b> 金幣</span></div><div class="wk-adv-st"><span>${wa('atk')} 攻擊 <b>${pw.atk}</b></span><span>${wa('hp')} 血量 <b>${pw.hp}</b></span></div><div class="wk-eq">${WALK_SLOT.map(s=>{const k=G.eq[s[0]],x=k&&walkGear(k);return `<div class="wk-eq-i${x?' on':''}">${x?wa('g_'+k):'<i aria-hidden="true">＋</i>'}<small>${x?x[2]+(+G.gear[k]?' ＋'+G.gear[k]:''):'還沒有'+s[1]}</small></div>`}).join('')}</div><a class="btn" href="#/pet/${id}/walks/shop">裝備和商店</a><p class="muted small" style="margin:8px 0 0">用地圖散步時，路上會遇到小怪，走近就能開打。贏了拿金幣和經驗值，金幣可以買裝備。</p></div>`})()}
     ${isCur?'<p class="wg-tip" id="wkWxTip" hidden></p>':''}
-    ${isCur?`<a class="wk-go" href="#/pet/${id}/walks/go"><span aria-hidden="true">${wa(cat?'cat':'dog')}</span><span><b>${live?'散步記錄中，回到地圖':'開始散步'}</b><small>${live?'剛剛的路線還在，點這裡繼續':'用地圖記下路線、公里數和天氣，沿路可以拍風景'}</small></span><i aria-hidden="true">›</i></a>`:''}
-    <div class="wk-goal" role="img" aria-label="這個月目標 ${WALK_GOAL} 天，已經 ${st.month} 天"><div class="wk-track"><i style="width:${pct}%"></i><span class="wk-run" style="left:${Math.max(6,pct)}%">${wa(cat?'cat':'dog')}</span><span class="wk-bone">${wa('bone')}</span></div><small>${st.month>=WALK_GOAL?`這個月的目標 ${WALK_GOAL} 天達成了，${N}吃到骨頭了！`:`這個月的目標是 ${WALK_GOAL} 天，再 ${WALK_GOAL-st.month} 天就吃到骨頭了`}</small></div>
+    ${isCur?`<a class="wk-go" href="#/pet/${id}/walks/go"><span aria-hidden="true">${waPet(p)}</span><span><b>${live?'散步記錄中，回到地圖':'開始散步'}</b><small>${live?'剛剛的路線還在，點這裡繼續':'用地圖記下路線、公里數和天氣，沿路可以拍風景'}</small></span><i aria-hidden="true">›</i></a>`:''}
+    <div class="wk-goal" role="img" aria-label="這個月目標 ${WALK_GOAL} 天，已經 ${st.month} 天"><div class="wk-track"><i style="width:${pct}%"></i><span class="wk-run" style="left:${Math.max(6,pct)}%">${waPet(p)}</span><span class="wk-bone">${wa('bone')}</span></div><small>${st.month>=WALK_GOAL?`這個月的目標 ${WALK_GOAL} 天達成了，${N}吃到骨頭了！`:`這個月的目標是 ${WALK_GOAL} 天，再 ${WALK_GOAL-st.month} 天就吃到骨頭了`}</small></div>
     <div class="card wk-card">
       <div class="wk-nav"><button type="button" class="btn sm ghost" id="wkPrev" aria-label="上個月">‹</button><b>${Y} 年 ${M} 月</b><button type="button" class="btn sm ghost" id="wkNext" aria-label="下個月" ${isCur?'disabled':''}>›</button></div>
       <div class="wk-grid wk-head">${['日','一','二','三','四','五','六'].map(x=>`<span>${x}</span>`).join('')}</div>
