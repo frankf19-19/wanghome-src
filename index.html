@@ -11298,19 +11298,17 @@ function walkLevel(xp){let i=0;while(i+1<WALK_LV.length&&xp>=WALK_LV[i+1][0])i++
 // 地圖上的寶物：出現在前進方向 40～90 公尺的地方，走到 22 公尺內就撿起來；一次最多 3 個、每個放 4 分鐘
 // ── 配合真實地圖：用 OpenStreetMap 找附近的公園、遊樂場、飲水機、狗狗公園當補給站，寶物和小怪只放在人行道、巷弄、公園步道上 ──
 const WALK_ST={park:['st_park','公園'],playground:['st_play','遊樂場'],water:['st_water','飲水站'],dog_park:['st_dogpark','狗狗公園']};
-async function walkOSM(lat,lng){const L1=lat.toFixed(5),L2=lng.toFixed(5);
-  const q=`[out:json][timeout:20];(nwr(around:700,${L1},${L2})["leisure"~"^(park|dog_park|playground)$"];node(around:700,${L1},${L2})["amenity"="drinking_water"];);out center 80;way(around:350,${L1},${L2})["highway"~"^(footway|path|pedestrian|living_street|residential|service|cycleway|track|steps)$"];out geom 250;`;
-  for(const ep of ['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter']){
-    try{const c=new AbortController(),to=setTimeout(()=>c.abort(),20000);const r=await fetch(ep,{method:'POST',body:'data='+encodeURIComponent(q),signal:c.signal});clearTimeout(to);if(!r.ok)continue;const j=await r.json();
-      const st=[],ways=[];for(const e of j.elements||[]){const t=e.tags||{};
-        if(e.type==='way'&&t.highway&&Array.isArray(e.geometry)){if(e.geometry.length>1)ways.push(e.geometry.map(g=>[g.lat,g.lon]));continue}
-        const kind=t.leisure==='dog_park'?'dog_park':t.leisure==='playground'?'playground':t.leisure==='park'?'park':t.amenity==='drinking_water'?'water':null;
-        const la=e.lat!=null?e.lat:e.center&&e.center.lat,lo=e.lon!=null?e.lon:e.center&&e.center.lon;if(!kind||la==null)continue;
-        st.push({id:e.type[0]+e.id,k:kind,p:[+la.toFixed(6),+lo.toFixed(6)],n:String(t.name||'').slice(0,20)})}
-      // 太近的補給站只留一個（同一個公園常有好幾個點）
-      const keep=[];for(const s of st.sort((a,b)=>(a.k==='park'?0:1)-(b.k==='park'?0:1)))if(!keep.some(x=>walkDist(x.p,s.p)<60))keep.push(s);
-      return {c:[lat,lng],t:Date.now(),st:keep.slice(0,25),ways}}catch(_){}}
-  return null}
+// 資料由 /api/osm 轉接並快取（約 550 公尺一格）；一次拿目前這格和周圍 8 格
+const WALK_TILE=0.005;
+async function walkOSMTile(ty,tx){try{const r=await fetch(`${IS_APP?CONFIG.SITE_URL:'/'}api/osm?lat=${((ty+.5)*WALK_TILE).toFixed(4)}&lon=${((tx+.5)*WALK_TILE).toFixed(4)}`);if(!r.ok)return null;const j=await r.json();return j&&Array.isArray(j.st)?j:null}catch(_){return null}}
+async function walkOSM(lat,lng){const ty=Math.floor(lat/WALK_TILE),tx=Math.floor(lng/WALK_TILE),o=WKL&&WKL.osm&&WKL.osm.tiles?WKL.osm:{tiles:{},st:[],ways:[]};
+  const want=[];for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const k=(ty+dy)+'_'+(tx+dx);if(!o.tiles[k])want.push([ty+dy,tx+dx,k])}
+  const got=await Promise.all(want.map(t=>walkOSMTile(t[0],t[1]).then(j=>[t[2],j])));let any=!want.length;
+  for(const [k,j] of got){if(!j)continue;any=true;o.tiles[k]=1;for(const a of j.st)o.st.push({id:a[0],k:a[1],p:[a[2],a[3]],n:a[4]||''});for(const f of j.w){const w=[];for(let i=0;i+1<f.length;i+=2)w.push([f[i],f[i+1]]);o.ways.push(w)}}
+  if(!any)return null;
+  o.full=got.every(g=>g[1]);
+  const keep=[];for(const s of o.st.sort((a,b)=>(a.k==='park'?0:1)-(b.k==='park'?0:1)))if(!keep.some(x=>x.id===s.id||walkDist(x.p,s.p)<60))keep.push(s);
+  o.st=keep.slice(0,80);if(o.ways.length>3000)o.ways=o.ways.slice(-3000);o.c=[lat,lng];o.t=Date.now();return o}
 // 把一個點貼到最近的小路上（60 公尺內）；找不到就回傳 null
 function walkSnap(pt,ways){const k=Math.cos(pt[0]*Math.PI/180),X=p=>[(p[1]-pt[1])*111320*k,(p[0]-pt[0])*111320];let best=null,bd=60;
   for(const w of ways)for(let i=1;i<w.length;i++){const a=X(w[i-1]),b=X(w[i]),dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,-(a[0]*dx+a[1]*dy)/L)),x=a[0]+t*dx,y=a[1]+t*dy,d=Math.hypot(x,y);
@@ -11321,7 +11319,7 @@ function walkSpawnPt(cur,head,dMin,dMax,spread){const ways=WKL.osm&&WKL.osm.ways
     if(!ways||!ways.length){if(WKL.osmBusy&&!WKL.osm)return null;return [+p[0].toFixed(6),+p[1].toFixed(6)]}
     const s=walkSnap(p,ways);if(s&&walkDist(cur,s)>=dMin*.6)return s}
   return null}
-function walkOSMTick(){if(!WKL||!WKL.cur||WKL.osmBusy)return;const o=WKL.osm;if(o&&walkDist(o.c,WKL.cur)<300)return;if(WKL.osmTry&&Date.now()-WKL.osmTry<60000)return;
+function walkOSMTick(){if(!WKL||!WKL.cur||WKL.osmBusy)return;const o=WKL.osm;if(o&&o.full&&walkDist(o.c,WKL.cur)<200)return;if(WKL.osmTry&&Date.now()-WKL.osmTry<60000)return;
   WKL.osmBusy=1;WKL.osmTry=Date.now();const c=WKL.cur.slice();walkOSM(c[0],c[1]).then(r=>{if(WKL&&r){WKL.osm=r;WKL.osmTry=Date.now()}}).finally(()=>{if(WKL)WKL.osmBusy=0})}
 function walkStUsed(id){const m=WKL&&WKL.g&&WKL.g.meta&&WKL.g.meta.st;return !!(m&&m.d===todayStr()&&(m.ids||[]).includes(id))}
 function walkStMark(id){const g=WKL.g;g.meta=g.meta||{};const t=todayStr();if(!g.meta.st||g.meta.st.d!==t)g.meta.st={d:t,ids:[]};g.meta.st.ids=g.meta.st.ids.concat(id).slice(-60)}
