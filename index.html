@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.79.6';
+const BUILD = 'v7.80.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -5617,7 +5617,7 @@ function promoHTML(page){return `  <section class="promo ${page?'on-page':''}" a
       <li>${ic("calendar")}<span><b>到期提醒</b>${IS_APP?'手機直接跳通知，也能同步到日曆':'寄 Email，也能同步到 iPhone、Google 日曆'}</span></li>
       <li>${ic("printer")}<span><b>完整健康資料</b>一頁看完病史、用藥和疫苗，看醫生直接給獸醫看</span></li>
       <li>${ic("siren")}<span><b>走失一鍵協尋</b>照片和特徵已建好，按「走失了」就能發出協尋</span></li>
-      <li>${ic("link")}<span><b>QR 名牌</b>印出來貼在項圈上，撿到的人一掃就能打給你、把位置傳給你</span></li>${WALK_ON?`<li>${ic("paw")}<span><b>散步日記</b>用地圖記下路線、公里和天氣，每天蓋印章、收集徽章</span></li>`:''}
+      <li>${ic("link")}<span><b>QR 名牌</b>印出來貼在項圈上，撿到的人一掃就能打給你、把位置傳給你</span></li>${WALK_ON?`<li>${ic("paw")}<span><b>散步冒險（App）</b>帶毛孩出門用地圖記路線、打怪尋寶，每天蓋印章、收集徽章</span></li>`:''}
     </ul>
     <div class="promo-btns">${me()?`<a class="btn green" href="#/health">前往我的毛孩</a><a class="btn ghost" href="#/pet/new">${ic("plus")} 新增毛孩</a>`:`<a class="btn green" href="#/pet/new">免費開始使用</a>${page?'':'<a class="btn ghost" href="#/health">看看怎麼用</a>'}<span class="muted small">免費註冊（Email、LINE、Google、Apple 都可以）</span>`}</div>
   </div>
@@ -9167,7 +9167,7 @@ function renderLogin(){
     <p class="small" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
     <p class="lg2-alt"><button type="button" class="linkbtn" id="btnMode">${pwMode?'沒有密碼？改用 Email 驗證碼':'我有設定密碼，用密碼登入'}</button></p>
     <p class="lg2-note">${pwMode?'':'我們會寄一組驗證碼到你的信箱，輸入後就登入了。第一次使用會自動幫你建立帳號。'}</p>
-    <div class="lg2-perks"><b>會員可以免費用</b><ul><li>${ic('link')}<span><b>QR 名牌</b>貼在項圈上，撿到的人一掃就能聯絡你</span></li>${WALK_ON?`<li>${ic('paw')}<span><b>散步日記</b>記路線、公里和天氣，每天蓋印章</span></li>`:''}<li>${ic('steth')}<span><b>毛孩健康手冊</b>疫苗、回診、用藥到期前提醒</span></li><li>${ic('bell')}<span><b>走失通知</b>有人看到你的毛孩、家附近有毛孩走失，馬上知道</span></li><li>${ic('chat')}<span><b>傳訊息</b>直接和飼主、送養人聯絡</span></li></ul></div>
+    <div class="lg2-perks"><b>會員可以免費用</b><ul><li>${ic('link')}<span><b>QR 名牌</b>貼在項圈上，撿到的人一掃就能聯絡你</span></li>${WALK_ON?`<li>${ic('paw')}<span><b>散步冒險（App）</b>記路線、打怪尋寶，每天蓋印章</span></li>`:''}<li>${ic('steth')}<span><b>毛孩健康手冊</b>疫苗、回診、用藥到期前提醒</span></li><li>${ic('bell')}<span><b>走失通知</b>有人看到你的毛孩、家附近有毛孩走失，馬上知道</span></li><li>${ic('chat')}<span><b>傳訊息</b>直接和飼主、送養人聯絡</span></li></ul></div>
     ${IS_APP?'':`<details class="pwmore"><summary>點了信裡的連結打不開？</summary><p class="small muted" style="text-align:left">在 LINE 或 Gmail App 裡點開若失敗，請長按連結選「用瀏覽器開啟」，或回到這裡輸入信裡的數字驗證碼。</p></details>`}
   </div>`;
     if(keep.em)$('#em').value=keep.em;
@@ -10169,7 +10169,7 @@ function petCardHTML(p){
     <div class="b"><a href="#/pet/${p.id}" class="t" style="color:inherit">${spIc(p.species)} ${esc(p.name)}</a>
       <div class="m">${esc([p.breed,SEX[p.sex],petAge(p.birthday)].filter(Boolean).join('、'))||'&nbsp;'}</div>${bdayChip(p.birthday)}
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><a class="btn sm ghost" href="#/pet/${p.id}">${ic("clipboard")} 健康紀錄</a><button class="btn sm ghost lost-btn" data-lost="${p.id}">${ic("siren")} 走失了</button></div>
-      ${WALK_ON?`<a class="tagchip" href="#/pet/${p.id}/walks">散步日記：今天蓋印章了嗎？ ›</a>`:''}
+      ${WALK_ON&&!walkAppOnly()?`<a class="tagchip" href="#/pet/${p.id}/walks">散步日記：今天蓋印章了嗎？ ›</a>`:''}
       ${TAG_ON?`<a class="tagchip ${p.tag_on&&p.tag_code?'on':''}" href="#/pet/${p.id}/tag">${p.tag_on&&p.tag_code?'<i></i>QR 名牌使用中':'做一張 QR 名牌，走失時撿到的人能聯絡你 ›'}</a>`:''}
     </div></div>`;
 }
@@ -10503,7 +10503,7 @@ async function renderPetView(id){const _n=navId;
         <a class="btn ghost" href="#/pet/${id}/summary">${ic("steth")} 看診摘要</a>
         ${CLINIC_ON?`<a class="btn ghost" href="#/pet/${id}/clinics" style="grid-column:1/-1">${ic("link")} 讓醫院把病歷傳進來</a>`:''}
         <a class="btn ghost" href="#/pet/${id}/print" style="grid-column:1/-1">${ic("clipboard")} 完整健康資料</a>
-        <a class="btn ghost" href="#/pet/${id}/walks" id="pvWalk" style="grid-column:1/-1" ${WALK_ON?'':'hidden'}>${ic("paw")} 散步日記：記路線、公里、天氣，每天蓋一個印章</a>
+        <a class="btn ghost" href="#/pet/${id}/walks" id="pvWalk" style="grid-column:1/-1" ${WALK_ON&&!walkAppOnly()?'':'hidden'}>${ic("paw")} 散步日記：記路線、公里、天氣，每天蓋一個印章</a>
         <a class="btn ghost" href="#/pals/card/${id}" style="grid-column:1/-1">${ic("paw")} 放上毛孩名片牆，找玩伴</a>
         <a class="btn ghost d-only" href="#/pet/${id}/edit" style="grid-column:1/-1">${ic("edit")} 編輯毛孩資料</a>
       </div>
@@ -10545,7 +10545,7 @@ async function renderPetView(id){const _n=navId;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
   {const ab=$('#pvAlbum');if(ab)albSection(ab,p)}
   if(!TAG_ON)amAdmin().then(ok=>{const t=$('#pvTag');if(ok&&t&&_n===navId)t.hidden=false});
-  if(!WALK_ON)amAdmin().then(ok=>{const t=$('#pvWalk');if(ok&&t&&_n===navId){t.hidden=false;(window.requestIdleCallback||(f=>setTimeout(f,2000)))(()=>{loadWalk().catch(()=>{})})}});
+  if(!WALK_ON&&!walkAppOnly())amAdmin().then(ok=>{const t=$('#pvWalk');if(ok&&t&&_n===navId){t.hidden=false;(window.requestIdleCallback||(f=>setTimeout(f,2000)))(()=>{loadWalk().catch(()=>{})})}});
   if(askRec)docsAskBind(p.name,askRec);
   {const ds=$('#docsSec');if(ds)ds.addEventListener('toggle',async()=>{if(!ds.open||ds.dataset.ld)return;ds.dataset.ld=1;const b=$('#docsBody');b.innerHTML=await docsFolderHTML(rs)||'<p class="muted small">沒有附件</p>';b.querySelectorAll('[data-u]').forEach(x=>x.onclick=()=>x.dataset.u&&lightbox(x.dataset.u))})}
   // 垃圾桶：直接刪除用藥／健康紀錄（照片一起刪）
@@ -11147,10 +11147,13 @@ async function renderPetTag(id){const _n=navId;if(!requireLogin())return;
 // ── 散步日記：每次散步蓋一個印章；月曆像集點卡，有徽章、小任務、可以存成集點卡圖 ──
 const WALK_ON=false;   // 站長確認前只有管理員看得到；改成 true 就開放給所有會員
 // 散步冒險的程式另外放在 /walk.js（約 160KB），用到時才下載，其他頁面不用載入
+// 散步冒險只在手機 App 裡玩（Frank 2026-11-27 決定）；網站上顯示請下載 App。管理員測試用：localStorage wm_walk_web=1
+const walkAppOnly=()=>{if(IS_APP)return false;try{return localStorage.getItem('wm_walk_web')!=='1'}catch(_){return true}};
+function walkAppOnlyPage(id){setTitle('散步冒險');app.innerHTML=`<div class="narrow-in" style="text-align:center;padding:28px 6px"><p class="small" style="text-align:left"><a class="backlink" href="#/pet/${esc(id)}">‹ 回毛孩檔案</a></p><img src="/art/dog_win.webp?5" alt="" style="width:140px;height:140px"><h1 style="margin:10px 0 6px">散步冒險在 App 裡玩</h1><p class="muted">帶毛孩出門時用手機定位記路線、打怪、撿寶物，需要在汪喵回家 App 裡使用。</p><p style="margin-top:16px"><a class="btn" href="${CONFIG.APP_STORE}" target="_blank" rel="noopener">App Store 下載汪喵回家</a></p><p class="muted small" style="margin-top:10px">完全免費。iPhone 在 App Store 搜尋「汪喵回家」。</p></div>`}
 let __walkP=null;function loadWalk(){return __walkP||(__walkP=Promise.all([loadScript('walk.js?'+BUILD),(async()=>{const el=document.getElementById('wkcss');if(!el||el.textContent)return;const r=await fetch('walk.css?'+BUILD);if(!r.ok)throw new Error('css');el.textContent=await r.text()})()]).catch(e=>{__walkP=null;throw e}))}
-async function renderPetWalks(...a){const _n=navId;if(typeof _renderPetWalks!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderPetWalks(...a)}
-async function renderWalkGo(...a){const _n=navId;if(typeof _renderWalkGo!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkGo(...a)}
-async function renderWalkShop(...a){const _n=navId;if(typeof _renderWalkShop!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkShop(...a)}
+async function renderPetWalks(...a){const _n=navId;if(walkAppOnly())return walkAppOnlyPage(a[0]);if(typeof _renderPetWalks!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderPetWalks(...a)}
+async function renderWalkGo(...a){const _n=navId;if(walkAppOnly())return walkAppOnlyPage(a[0]);if(typeof _renderWalkGo!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkGo(...a)}
+async function renderWalkShop(...a){const _n=navId;if(walkAppOnly())return walkAppOnlyPage(a[0]);if(typeof _renderWalkShop!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkShop(...a)}
 async function renderPetClinics(petId){const _n=navId;if(!requireLogin())return;
   const [{data:p},{data:L}]=await Promise.all([sb.from('pets').select('id,name').eq('id',petId).maybeSingle(),sb.rpc('pet_clinics',{p_pet:petId})]);if(_n!==navId)return;
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻毛孩</div>';return}
