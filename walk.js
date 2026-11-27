@@ -710,7 +710,7 @@ async function _renderPetWalks(id,ym,justDs,newBadges){const _n=navId,seq=++__wk
     if($('#wkKm')&&$('#wkKm').value.trim()&&!(Number.isFinite(kmIn)&&kmIn>=0&&kmIn<=200))return toast('公里數請填 0 到 200 之間的數字');
     let loot=pend?pend.loot:null,chest='';if(!pend){loot={};for(let i=0;i<(mins>=30?2:1);i++){const k=walkLootPick();loot[k]=(loot[k]||0)+1}chest=walkLootText(loot)}
     btn.disabled=true;const {error}=await sb.from('pet_walks').insert({loot,pet_id:id,walked_on:ds,minutes:mins,moods:[...moods],note:$('#wkNote').value.trim()||null,photo:photo||(pend&&pend.spots&&pend.spots[0]?pend.spots[0].photo:null),km,route:pend?pend.route:null,weather:wx||null,spots:pend?pend.spots:null});
-    if(_n!==navId)return;if(error){btn.disabled=false;return toast('沒有存到：'+friendlyErr(error.message||error),4000)}
+    if(_n!==navId)return;if(error){btn.disabled=false;const em=String(error.message||error);if(/walk_day_limit/.test(em))return toast('同一天最多記 4 次散步，這一筆沒有存',4000);if(/walk_day_minutes/.test(em))return toast('同一天合計最多 720 分鐘，請檢查時間',4000);if(/loot_n_chk|walk_loot_ok/.test(em))return toast('這次的寶物數量不對，請重新整理再試一次',4000);return toast('沒有存到：'+friendlyErr(error.message||error),4000)}
     if(pend)wkPendSet(null);
     const st2=walkStats([...(allRows||[]),{walked_on:ds,minutes:mins,moods:[...moods],km,loot}],(total||0)+1,today);st2.xp+=G.bxp;st2.kills=G.kills;const lvA=walkLevel(st.xp),lvB=walkLevel(st2.xp);if(lvB.lv>lvA.lv)setTimeout(()=>walkLvUp(p,lvB.lv,lvB.name),900);
     __wkFlash=[chest?`打開散步寶箱：${chest}`:'',`＋${st2.xp-st.xp} 經驗值`+(lvB.lv>lvA.lv?`，升級了！Lv.${lvB.lv} ${lvB.name} 🎉`:'')].filter(Boolean);
