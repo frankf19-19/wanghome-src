@@ -1,0 +1,30 @@
+name: art-pull
+# 把暫存在 Supabase 的遊戲圖原稿抓進 art-raw 分支（手動觸發）
+on:
+  workflow_dispatch:
+    inputs:
+      names:
+        description: 檔名（不含副檔名，空白分隔）
+        required: true
+permissions:
+  contents: write
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下載並推到 art-raw
+        env:
+          NAMES: ${{ inputs.names }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          mkdir w && cd w && git init -q -b art-raw
+          git remote add o "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch -q o art-raw && git reset -q --hard FETCH_HEAD || true
+          for n in $NAMES; do
+            case "$n" in *[!A-Za-z0-9_-]*) echo "skip $n"; continue;; esac
+            curl -fsS -o "$n.webp" "https://nopyhfpaykkiieudvoko.supabase.co/storage/v1/object/public/photos/sightings/zz-gameart/$n.webp"
+          done
+          git add -A
+          git -c user.name=art-bot -c user.email=art-bot@users.noreply.github.com commit -qm "art raw: $NAMES" || exit 0
+          git push -q -f o art-raw
