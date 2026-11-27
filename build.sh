@@ -22,6 +22,7 @@ mkdir -p dist/vendor && cp vendor/*.js vendor/*.css dist/vendor/
 # 散步冒險的插圖
 mkdir -p dist/art && cp art/*.webp dist/art/
 mkdir -p dist/art/pet && cp art/pet/*.webp dist/art/pet/
+mkdir -p dist/art/k && cp art/k/*.webp dist/art/k/
 # 照片找毛孩：AI 模型（DINOv2-small 量化版）和執行環境（onnxruntime-web），使用者第一次用到才下載
 mkdir -p dist/vendor/ort dist/ai && cp vendor/ort/* dist/vendor/ort/ && cp ai/dinov2s-q8.onnx ai/yolox_nano.onnx dist/ai/
 # iOS 通用連結（LINE 登入跳回 App）與它的備用頁
