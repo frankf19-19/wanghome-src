@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.65.0';
+const BUILD = 'v7.66.0';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -11454,6 +11454,14 @@ function walkGearStatText(v){return [v.atk?'攻擊 +'+v.atk:'',v.hp?'血量 +'+v
 async function walkGLoad(id){const {data,error}=await sb.from('pet_game').select('coins,bxp,gear,eq,sold,kills,meta').eq('pet_id',id).maybeSingle();if(error)throw error;return walkG(data)}
 // 金幣、裝備都由伺服器的 walk_game() 計算（價格和每日上限在伺服器），回傳最新存檔
 async function walkGAct(id,act,arg){try{const {data,error}=await sb.rpc('walk_game',{p_pet:id,p_act:act,p_arg:arg||{}});return error||!data?null:data}catch(_){return null}}
+// 網路斷掉時，打怪／補給站／里程寶箱的金幣先記在手機，連上網路再自動補存（伺服器仍會檢查上限）
+const WQK='wm_wk_q';let walkQBusy=false;const walkQ=()=>{try{const a=JSON.parse(localStorage.getItem(WQK)||'[]');return Array.isArray(a)?a:[]}catch(_){return []}},walkQSet=a=>{try{a.length?localStorage.setItem(WQK,JSON.stringify(a.slice(-40))):localStorage.removeItem(WQK)}catch(_){}},walkWait=ms=>new Promise(r=>setTimeout(r,ms));
+async function walkQFlush(){if(walkQBusy||!navigator.onLine)return;let a=walkQ();if(!a.length)return;walkQBusy=true;const day=todayStr(),keep=[];let n=0;
+  try{for(const x of a){if(!x||x.d!==day||!x.id||!x.act)continue;let res=await walkGAct(x.id,x.act,x.arg);if(res&&!res.ok&&res.why==='too_fast'){await walkWait(8500);res=await walkGAct(x.id,x.act,x.arg)}if(!res){keep.push(x);continue}if(res.ok)n++}}finally{walkQSet(keep);walkQBusy=false}
+  if(n)toast(`剛才沒存到的 ${n} 筆冒險金幣已經補存好了`,3000)}
+async function walkGActQ(id,act,arg){let res=await walkGAct(id,act,arg);if(res&&!res.ok&&res.why==='too_fast'&&act==='fight'){await walkWait(8500);res=await walkGAct(id,act,arg)}
+  if(!res){const a=walkQ();a.push({id,act,arg,d:todayStr()});walkQSet(a);return {queued:true,ok:false}}if(walkQ().length)walkQFlush();return res}
+addEventListener('online',()=>{walkQFlush()});
 const WALK_WHY={coins:'金幣不夠',bones:'骨頭不夠',cap:'今天的上限到了，明天再來',too_fast:'太快了，等一下再試',used:'今天已經領過了',owned:'已經有這件了',not_owned:'還沒有這件',max:'已經強化到最高',not_enough:'數量不夠'};
 function walkMonPick(lv,wx){const h=new Date().getHours(),night=h>=18||h<5,code=wx&&typeof wx.code==='number'?wx.code:-1,rain=(code>=51&&code<=67)||(code>=80&&code<=82),storm=code>=95;
   const c=WALK_MON.filter(x=>x[6]<=lv).map(x=>[x[0],x[0]==='owl'?(night?28:0):x[0]==='slime'&&rain?x[7]*3:x[0]==='thunder'&&(storm||rain)?x[7]*3:x[7]]);let r=Math.random()*c.reduce((a,x)=>a+x[1],0);for(const x of c){if((r-=x[1])<0)return x[0]}return 'leaf'}
@@ -11502,7 +11510,7 @@ function walkFight(p,done){const BOSS=WKL.fight==='mower',SH=!BOSS&&!!(WKL.mon&&
       let drop='';if(Math.random()<(SH?1:.3)&&walkLootCount(WKL.loot)<30){const k=walkLootPick(),x=WALK_LOOT.find(a=>a[0]===k);WKL.loot[k]=(+WKL.loot[k]||0)+1;drop=`<br>還掉了一個${x[2]} ${wa(k)}`}
       msg=`<b>贏了！${mon[1]}跑走了</b>${perf?`<br><small>完美一擊 ${perf} 次${dodged?`・閃開 ${dodged} 次`:''}</small>`:dodged?`<br><small>閃開 ${dodged} 次</small>`:''}<br>${wa('coin')} ＋${CO} 金幣　＋${mon[5]} 經驗值${drop}${lv1>lv0?`<br>${wa('lvup')} <b>升級了！Lv.${lv1} ${walkLevel(WKL.xp).name}</b>`:''}`;
       q('#wfM').classList.add('out');walkParty(q('#wfP'));walkSnd(lv1>lv0?'lvup':'win');try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}
-      b.disabled=true;const res=await walkGAct(p.id,'fight',{mon:KK,coins:CO,xp:mon[5]});if(res)Object.assign(g,walkG(res));if(!res)msg+='<br><small>網路不穩，這次的金幣沒存到。</small>';else if(!res.ok)msg+=`<br><small>${WALK_WHY[res.why]||'這次的金幣沒有算進去'}。</small>`;wkSaveLive()}
+      b.disabled=true;const res=await walkGActQ(p.id,'fight',{mon:KK,coins:CO,xp:mon[5]});if(res.queued)msg+='<br><small>網路不穩，金幣先記在手機，連上網路會自動補存。</small>';else{Object.assign(g,walkG(res));if(!res.ok)msg+=`<br><small>${WALK_WHY[res.why]||'這次的金幣沒有算進去'}。</small>`}wkSaveLive()}
     else{walkSnd('lose');if(BOSS)WKL.bossCd=Date.now()+120000;msg=`<b>${N}累了，先休息一下</b><br>${mon[1]}趁機溜走了，沒有損失。<br>${dodged?'':'看到「蓄力中」記得按閃避！'}升級或換更好的裝備再來！`;}
     q('#wfLog').innerHTML=msg;b.disabled=false;b.innerHTML='繼續散步';b.onclick=close;b.focus();if(AR){arSync();AR.end(win,msg)}const ab=q('#wfAR');if(ab)ab.remove()};
   let ch=0,AR=null,turn=0,nextChg=BOSS?3:3+Math.round(Math.random()),chg=false,perf=0,dodged=0,ate=0,combo=0;const arSync=()=>{if(!AR)return;AR.sync(q('#wfMB').style.width||'100%',q('#wfPB').style.width||'100%',ch>=3,ch>=3?'必殺技！':`必殺技（再 ${3-ch} 下）`,chg)};const pop=(side,t,c)=>{const d=document.createElement('span');d.className='wf-dmg'+(c?' '+c:'');d.textContent=t;side.appendChild(d);setTimeout(()=>d.remove(),800)},skUI=()=>{const b=q('#wfSk');if(!b)return;const r=Math.max(0,3-ch);b.disabled=ch<3;q('#wfSkT').textContent=ch>=3?'必殺技！':`必殺技（再 ${r} 下）`;b.classList.toggle('rdy',ch>=3)};
@@ -11600,7 +11608,7 @@ async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
     const bagN=walkLootCount(WKL.loot);$('#wgBagT').innerHTML=bagN?walkLootHTML(WKL.loot):'空的。地圖上出現寶物時，走近就會撿起來';
     if(WKL.gapNote){WKL.gapNote=0;toast('歡迎回來！螢幕關掉的那一段，會用直線接起來。',4000)}
     const kmNow=WKL.m/1000;$('#wgKm').textContent=kmNow.toFixed(2);$('#wgSay').textContent=walkGoSay(kmNow,cat);
-    const half=Math.floor(kmNow/0.5);if(half>lastHalf){lastHalf=half;if(WKL.g){const c=10+Math.floor(Math.random()*16),k=walkLootPick(),x=WALK_LOOT.find(a=>a[0]===k);const its=[];if(walkLootCount(WKL.loot)<30){WKL.loot[k]=(+WKL.loot[k]||0)+1;its.push(k)}const before=WKL.g.coins,kmT=`走了 ${(half*0.5).toFixed(1)} 公里，發現寶箱！`;walkGAct(id,'km',{coins:c*walkCoinX()}).then(res=>{if(!WKL)return;if(res)Object.assign(WKL.g,walkG(res));walkChest(kmT,res&&res.ok?Math.max(0,res.coins-before):0,its)})}else toast(`走了 ${(half*0.5).toFixed(1)} 公里！`);walkParty($('#wgKm'));try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}}
+    const half=Math.floor(kmNow/0.5);if(half>lastHalf){lastHalf=half;if(WKL.g){const c=10+Math.floor(Math.random()*16),k=walkLootPick(),x=WALK_LOOT.find(a=>a[0]===k);const its=[];if(walkLootCount(WKL.loot)<30){WKL.loot[k]=(+WKL.loot[k]||0)+1;its.push(k)}const before=WKL.g.coins,kmT=`走了 ${(half*0.5).toFixed(1)} 公里，發現寶箱！`;walkGActQ(id,'km',{coins:c*walkCoinX()}).then(res=>{if(!WKL)return;if(res.queued){WKL.g.coins+=c*walkCoinX();walkChest(kmT,c*walkCoinX(),its);return}Object.assign(WKL.g,walkG(res));walkChest(kmT,res.ok?Math.max(0,res.coins-before):0,its)})}else toast(`走了 ${(half*0.5).toFixed(1)} 公里！`);walkParty($('#wgKm'));try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}}
     if(WKL.wx&&$('#wgTip').hidden){$('#wgTip').textContent=walkWxTip(WKL.wx,p.name);$('#wgTip').hidden=false}if(WKL.wx){const x=WALK_WX(WKL.wx.code);$('#wgW').innerHTML=wa(x[2])+(typeof WKL.wx.t==='number'?' '+Math.round(WKL.wx.t)+'°':'');$('#wgWL').textContent=x[1]}
     $('#wgMsg').textContent=WKL.err===1?'沒有定位權限。請到手機設定允許汪喵回家使用位置，再回來這一頁。':WKL.err?'暫時抓不到位置，走到比較空曠的地方再試試。':!WKL.pts.length?(WKL.acc?'訊號還不夠準，再等一下…':'正在找你的位置…'):(WKL.acc>40?'訊號有點弱，這一段先不記。':'記錄中，慢慢走。');
     $('#wgSpots').innerHTML=WKL.spots.map(s=>`<img src="${esc(thumbUrl(safeU(s.photo)))}" alt="風景照" onerror="this.onerror=null;this.src='${esc(safeU(s.photo))}'">`).join('');
@@ -11613,7 +11621,7 @@ async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
     walkOSMTick();
     const sts=(WKL.osm&&WKL.osm.st)||[];for(const s of sts){const used=walkStUsed(s.id),k=used?'st_used':WALK_ST[s.k][0],key=s.id+(used?'u':'');if(stMk[s.id]&&stMk[s.id]._k===key)continue;if(stMk[s.id]){try{map.removeLayer(stMk[s.id])}catch(_){}}stMk[s.id]=L.marker(s.p,{icon:L.divIcon({className:'',html:`<div class="wg-st${used?' used':''}">${wa(k)}</div>`,iconSize:[46,52],iconAnchor:[23,48]}),interactive:false,zIndexOffset:400}).addTo(map);stMk[s.id]._k=key}
     if(WKL.osm&&walkStLeft()<=0)$('#wgRadT').textContent=`今天的 ${WALK_ST_MAX} 次補給都領完了，明天再來；小怪和寶物還是會出現`;else if(WKL.osm){const here=WKL.cur||WKL.osm.c,left=sts.filter(s=>!walkStUsed(s.id)),near=left.map(s=>[s,walkDist(WKL.cur||WKL.osm.c,s.p)]).sort((a,b)=>a[1]-b[1])[0];$('#wgRadT').textContent=sts.length?(left.length?`附近有 ${left.filter(s=>walkDist(here,s.p)<=700).length} 個補給站（今天還能領 ${walkStLeft()} 次）${near?`，最近的${WALK_ST[near[0].k][1]}${near[0].n?'「'+near[0].n+'」':''}在 ${Math.round(near[1])} 公尺外`:''}`:'附近的補給站今天都領過了，明天再來'):'附近沒有找到公園或補給站，寶物還是會出現在路上'}else if(WKL.osmTry&&!WKL.osmBusy)$('#wgRadT').textContent='地圖資料暫時讀不到，寶物先隨機出現'
-    if(WKL.stGot){const s=WKL.stGot,boss=WKL.stBoss;WKL.stGot=null;WKL.stBoss=0;if(!boss)walkStMark(s.id);const c=((boss?25:8)+Math.floor(Math.random()*8))*walkCoinX(),n=s.k==='park'?2:1,got=[];for(let i=0;i<n;i++){const k=walkLootPick();if(walkLootCount(WKL.loot)<30){WKL.loot[k]=(+WKL.loot[k]||0)+1;got.push(k)}}wkSaveLive();const before=WKL.g.coins;walkGAct(p.id,'station',{st:s.id,coins:c}).then(res=>{if(!WKL)return;if(res)Object.assign(WKL.g,walkG(res));walkChest(`${s.n||WALK_ST[s.k][1]}補給站`,res&&res.ok?Math.max(0,res.coins-before):0,got);if(res&&!res.ok&&res.why!=='used')toast(WALK_WHY[res.why]||'這次的金幣沒有算進去',3500);try{ui()}catch(_){}})}
+    if(WKL.stGot){const s=WKL.stGot,boss=WKL.stBoss;WKL.stGot=null;WKL.stBoss=0;if(!boss)walkStMark(s.id);const c=((boss?25:8)+Math.floor(Math.random()*8))*walkCoinX(),n=s.k==='park'?2:1,got=[];for(let i=0;i<n;i++){const k=walkLootPick();if(walkLootCount(WKL.loot)<30){WKL.loot[k]=(+WKL.loot[k]||0)+1;got.push(k)}}wkSaveLive();const before=WKL.g.coins;walkGActQ(p.id,'station',{st:s.id,coins:c}).then(res=>{if(!WKL)return;if(res.queued){WKL.g.coins+=c}else Object.assign(WKL.g,walkG(res));walkChest(`${s.n||WALK_ST[s.k][1]}補給站`,res.queued?c:res.ok?Math.max(0,res.coins-before):0,got);if(res&&!res.queued&&!res.ok&&res.why!=='used')toast(WALK_WHY[res.why]||'這次的金幣沒有算進去',3500);try{ui()}catch(_){}})}
     const pw=WKL.paws||[];while(pawN<pw.length&&pawN<80){L.marker(pw[pawN],{icon:L.divIcon({className:'',html:'<div class="wg-paw">'+wa('paw')+'</div>',iconSize:[22,22],iconAnchor:[11,11]}),interactive:false}).addTo(map);pawN++}
     while(spotMk.length<WKL.spots.length){const s=WKL.spots[spotMk.length];spotMk.push(L.marker([s.lat,s.lng],{icon:L.divIcon({className:'',html:`<div class="wg-spot"><img src="${esc(safeU(s.photo))}" alt=""></div>`,iconSize:[44,44],iconAnchor:[22,22]})}).addTo(map))}};
   WKL.onUi=ui;ui();
@@ -11631,7 +11639,7 @@ async function renderWalkGo(id){const _n=navId;if(!requireLogin())return;
     wkStop();wkClearLive();location.hash='#/pet/'+id+'/walks'};
   $('#wgQuit').onclick=async()=>{if(!(await askSheet({title:'放棄這一次？',body:'這次的路線和公里數不會存下來。',ok:'放棄',danger:true})))return;wkStop();wkClearLive();location.hash='#/pet/'+id+'/walks'}}
 let __wkSeq=0;
-async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId,seq=++__wkSeq;if(!requireLogin())return;
+async function renderPetWalks(id,ym,justDs,newBadges){const _n=navId,seq=++__wkSeq;if(!requireLogin())return;walkQFlush();
   if(!window.__quiet)app.innerHTML=pageSkel('pet');
   if(!WALK_ON&&!(await amAdmin())){if(_n===navId)goReplace('#/pet/'+id);return}
   const today=todayStr();ym=/^\d{4}-\d{2}$/.test(ym||'')?ym:today.slice(0,7);
