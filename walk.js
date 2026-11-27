@@ -712,7 +712,7 @@ async function _renderPetWalks(id,ym,justDs,newBadges){const _n=navId,seq=++__wk
     btn.disabled=true;const {error}=await sb.from('pet_walks').insert({loot,pet_id:id,walked_on:ds,minutes:mins,moods:[...moods],note:$('#wkNote').value.trim()||null,photo:photo||(pend&&pend.spots&&pend.spots[0]?pend.spots[0].photo:null),km,route:pend?pend.route:null,weather:wx||null,spots:pend?pend.spots:null});
     if(_n!==navId)return;if(error){btn.disabled=false;return toast('沒有存到：'+friendlyErr(error.message||error),4000)}
     if(pend)wkPendSet(null);
-    const st2=walkStats([...(allRows||[]),{walked_on:ds,minutes:mins,moods:[...moods],km,loot}],(total||0)+1,today);st2.xp+=G.bxp;st2.kills=G.kills;const lvA=walkLevel(st.xp),lvB=walkLevel(st2.xp);
+    const st2=walkStats([...(allRows||[]),{walked_on:ds,minutes:mins,moods:[...moods],km,loot}],(total||0)+1,today);st2.xp+=G.bxp;st2.kills=G.kills;const lvA=walkLevel(st.xp),lvB=walkLevel(st2.xp);if(lvB.lv>lvA.lv)setTimeout(()=>walkLvUp(p,lvB.lv,lvB.name),900);
     __wkFlash=[chest?`打開散步寶箱：${chest}`:'',`＋${st2.xp-st.xp} 經驗值`+(lvB.lv>lvA.lv?`，升級了！Lv.${lvB.lv} ${lvB.name} 🎉`:'')].filter(Boolean);
     const had=new Set(badges.filter(b=>b[3]).map(b=>b[1]));
     try{const HP=IS_APP&&capPlugin('Haptics');if(HP)HP.notification({type:'SUCCESS'}).catch(()=>{})}catch(_){}
