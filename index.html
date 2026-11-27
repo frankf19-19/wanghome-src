@@ -3338,7 +3338,7 @@ const CONFIG = {
   // 分享連結、QR Code 一律用正式網址；只有在自己電腦測試時用目前網址
   SITE_URL: (!window.Capacitor && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol==='file:' || /\.pages\.dev$/.test(location.hostname))) ? location.origin + location.pathname : 'https://wangmiaotw.com/'
 };
-const BUILD = 'v7.77.0';
+const BUILD = 'v7.77.1';
 const BD_ON=false;     // 電子毛孩：先關閉（做好再打開）
 
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -10545,7 +10545,7 @@ async function renderPetView(id){const _n=navId;
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{goReplace(`#/pet/${id}`+(b.dataset.k?`?k=${b.dataset.k}`:''))});
   {const ab=$('#pvAlbum');if(ab)albSection(ab,p)}
   if(!TAG_ON)amAdmin().then(ok=>{const t=$('#pvTag');if(ok&&t&&_n===navId)t.hidden=false});
-  if(!WALK_ON)amAdmin().then(ok=>{const t=$('#pvWalk');if(ok&&t&&_n===navId)t.hidden=false});
+  if(!WALK_ON)amAdmin().then(ok=>{const t=$('#pvWalk');if(ok&&t&&_n===navId){t.hidden=false;(window.requestIdleCallback||(f=>setTimeout(f,2000)))(()=>{loadWalk().catch(()=>{})})}});
   if(askRec)docsAskBind(p.name,askRec);
   {const ds=$('#docsSec');if(ds)ds.addEventListener('toggle',async()=>{if(!ds.open||ds.dataset.ld)return;ds.dataset.ld=1;const b=$('#docsBody');b.innerHTML=await docsFolderHTML(rs)||'<p class="muted small">沒有附件</p>';b.querySelectorAll('[data-u]').forEach(x=>x.onclick=()=>x.dataset.u&&lightbox(x.dataset.u))})}
   // 垃圾桶：直接刪除用藥／健康紀錄（照片一起刪）
@@ -11148,9 +11148,9 @@ async function renderPetTag(id){const _n=navId;if(!requireLogin())return;
 const WALK_ON=false;   // 站長確認前只有管理員看得到；改成 true 就開放給所有會員
 // 散步冒險的程式另外放在 /walk.js（約 160KB），用到時才下載，其他頁面不用載入
 let __walkP=null;function loadWalk(){return __walkP||(__walkP=Promise.all([loadScript('walk.js?'+BUILD),(async()=>{const el=document.getElementById('wkcss');if(!el||el.textContent)return;const r=await fetch('walk.css?'+BUILD);if(!r.ok)throw new Error('css');el.textContent=await r.text()})()]).catch(e=>{__walkP=null;throw e}))}
-async function renderPetWalks(...a){const _n=navId;try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderPetWalks(...a)}
-async function renderWalkGo(...a){const _n=navId;try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkGo(...a)}
-async function renderWalkShop(...a){const _n=navId;try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkShop(...a)}
+async function renderPetWalks(...a){const _n=navId;if(typeof _renderPetWalks!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderPetWalks(...a)}
+async function renderWalkGo(...a){const _n=navId;if(typeof _renderWalkGo!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkGo(...a)}
+async function renderWalkShop(...a){const _n=navId;if(typeof _renderWalkShop!=='function'&&!window.__quiet)app.innerHTML=pageSkel('pet');try{await loadWalk()}catch(_){if(_n===navId)app.innerHTML=netErrHTML();return}if(_n!==navId)return;return _renderWalkShop(...a)}
 async function renderPetClinics(petId){const _n=navId;if(!requireLogin())return;
   const [{data:p},{data:L}]=await Promise.all([sb.from('pets').select('id,name').eq('id',petId).maybeSingle(),sb.rpc('pet_clinics',{p_pet:petId})]);if(_n!==navId)return;
   if(!p){(_n===navId?app:_void).innerHTML='<div class="empty">找不到這隻毛孩</div>';return}

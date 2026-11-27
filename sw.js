@@ -36,6 +36,12 @@ self.addEventListener('fetch', e => {
       .catch(() => caches.match('./')));
     return;
   }
+  if (url.pathname === scope + 'walk.js' || url.pathname === scope + 'walk.css') {
+    // 散步冒險的程式：先拿最新版，沒網路時用上次存的（散步途中訊號不好也能打開）
+    const key = scope + url.pathname.slice(scope.length);
+    e.respondWith(fetch(req).then(r => { if (r.ok && r.type === 'basic') { const c = r.clone(); caches.open(CACHE).then(x => x.put(key, c)); } return r; }).catch(() => caches.match(key).then(c => c || Response.error())));
+    return;
+  }
   if (url.pathname.startsWith(scope + 'vendor/')) {
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(res => { if (res.ok && res.type === 'basic') { const c = res.clone(); caches.open(VENDOR).then(x => x.put(req, c)); } return res; })));
     return;
