@@ -18,6 +18,8 @@
   Cache-Control: public, max-age=86400
 /*.svg
   Cache-Control: public, max-age=86400
+/osm/*
+  Cache-Control: public, max-age=86400
 /art/*
   Cache-Control: public, max-age=2592000
 /vendor/*

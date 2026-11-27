@@ -1,0 +1,26 @@
+name: osm-tw
+# 每月整理一次全台灣的公園、遊樂場、狗狗公園、飲水站（散步冒險的補給站），存到 osm/st/
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 19 3 * *"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 下載台灣 OSM 資料
+        run: curl -fsSL -o tw.osm.pbf https://download.geofabrik.de/asia/taiwan-latest.osm.pbf && ls -la tw.osm.pbf
+      - name: 整理補給站
+        run: |
+          pip install --quiet osmium==4.0.2
+          python3 scripts/osm/build_tw.py tw.osm.pbf osm/st
+          du -sh osm/st
+      - name: 存回
+        run: |
+          git config user.name osm-bot && git config user.email osm-bot@users.noreply.github.com
+          git add osm/st
+          git commit -qm "散步冒險補給站資料更新（OpenStreetMap）" || exit 0
+          git pull -q --rebase && git push -q
