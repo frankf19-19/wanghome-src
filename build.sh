@@ -20,6 +20,10 @@ cp google*.html BingSiteAuth.xml 73080c78bdeeab41a5d6fcb7fa0d1bc7.txt dist/ 2>/d
 cp ./*.png ./*.svg ./shot-*.jpg dist/
 mkdir -p dist/vendor && cp vendor/*.js vendor/*.css dist/vendor/
 # 散步冒險的插圖
+# 散步冒險的程式和樣式（進到散步日記才下載）
+node -e 'new (require("vm").Script)(require("fs").readFileSync("walk.js","utf8"),{filename:"walk.js"});console.log("walk.js syntax ok")'
+if npx --yes terser@5.31.0 walk.js -c -m -o dist/walk.js 2>/tmp/terser.log && [ -s dist/walk.js ]; then echo "minified walk.js: $(wc -c < walk.js) -> $(wc -c < dist/walk.js)"; else echo 'terser failed, using original'; cat /tmp/terser.log || true; cp walk.js dist/walk.js; fi
+cp walk.css dist/walk.css
 mkdir -p dist/art && cp art/*.webp dist/art/
 mkdir -p dist/art/pet && cp art/pet/*.webp dist/art/pet/
 mkdir -p dist/art/k && cp art/k/*.webp dist/art/k/
