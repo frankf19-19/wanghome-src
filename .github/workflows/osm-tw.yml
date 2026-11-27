@@ -11,11 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: 下載台灣 OSM 資料
         run: curl -fsSL -o tw.osm.pbf https://download.geofabrik.de/asia/taiwan-latest.osm.pbf && ls -la tw.osm.pbf
       - name: 整理補給站
         run: |
-          pip install --quiet osmium==4.0.2
+          pip install --quiet --only-binary=:all: osmium
           python3 scripts/osm/build_tw.py tw.osm.pbf osm/st
           du -sh osm/st
       - name: 存回
