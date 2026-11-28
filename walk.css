@@ -59,3 +59,12 @@
 .wlv-tw{display:block;width:150px!important;height:150px!important;margin:0 auto;position:relative;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25));animation:wkTwPop .5s cubic-bezier(.3,1.6,.5,1) both}
 @keyframes wkTwPop{from{transform:scale(.3) rotate(-20deg)}}
 @media (prefers-reduced-motion:reduce){.wk-tw-pet,.wk-tw-dot.nx,.wlv-tw{animation:none}}
+
+.wg-tw{display:flex;align-items:center;gap:8px;margin:8px 0 0;padding:6px 12px;border-radius:14px;background:#FFF6E0;border:2px solid #FFB547;font-size:14px;color:#141E22}
+.wg-tw .wa{width:34px;height:34px;flex:none}
+.wg-tw b{color:#E8622A;font-size:16px}
+.wk-twc{display:inline-flex;align-items:center;gap:4px;margin:0 0 4px;padding:2px 10px 2px 2px;border-radius:999px;background:#FFF1DE;border:2px solid #FFB547;color:#8A4A10;font-size:12px;font-weight:900}
+.wk-twc .wa{width:24px;height:24px}
+.wk-tws{font:inherit;color:inherit;cursor:pointer;width:100%}
+.wk-tws:focus-visible{outline:3px solid #FF7A3D;outline-offset:2px}
+.wk-tw-more{margin-top:6px;padding:6px 12px;border-radius:999px;border:2px solid var(--line);background:var(--paper);color:inherit;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
