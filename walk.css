@@ -127,3 +127,11 @@
 .wk-ev.ny{background:linear-gradient(135deg,#2A2F5C,#5B3A7A);color:#fff;border-color:#141E22}
 .wk-ev.ny small{color:#E9E4FF}
 .wk-ev.cny{background:linear-gradient(135deg,#FFE3D6,#FFD36B)}
+
+.wk-fc-t{display:inline-flex;align-items:center;gap:4px}
+.wk-fc-t .wa{width:24px;height:24px}
+.wk-rem{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0;padding:10px 14px;border-radius:16px;border:2px solid var(--line);background:var(--sheet)}
+.wk-rem>.wa{width:40px;height:40px;flex:none}
+.wk-rem>span{display:flex;flex-direction:column;flex:1;min-width:150px}
+.wk-rem small{color:var(--ink-3);font-size:12.5px}
+.wk-rem input{width:auto;min-width:0;padding:6px 8px;font:inherit}
