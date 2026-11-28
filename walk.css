@@ -123,3 +123,7 @@
 .wk-fc-i small{font-size:12px;color:var(--ink-3)}
 .wk-fc-i.on small{color:#E8622A;font-weight:800}
 .wk-fc-i em{font-style:normal;font-size:11.5px;color:#2E9B57;font-weight:800}
+
+.wk-ev.ny{background:linear-gradient(135deg,#2A2F5C,#5B3A7A);color:#fff;border-color:#141E22}
+.wk-ev.ny small{color:#E9E4FF}
+.wk-ev.cny{background:linear-gradient(135deg,#FFE3D6,#FFD36B)}
