@@ -25,3 +25,7 @@
 .wg-tgt{display:flex;align-items:center;gap:8px;margin:8px 0 0;padding:8px 12px;border-radius:14px;background:#FFF1F0;border:2px solid #E5432F;font-size:14px}.wg-tgt .wa{width:28px;height:28px;flex:none}.wg-tgt.done{background:#E8F7EE;border-color:#27AE60}
 .wg-tgtmk{width:44px;height:44px;animation:wgBob .8s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}.wg-tgtmk .wa{width:44px;height:44px}
 .wg-phm{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:13.5px}.wg-phm .wa{width:24px;height:24px;flex:none}.wg-phm.done{opacity:.6;text-decoration:line-through}
+
+.wkh-aura{position:absolute;left:50%;top:66px;width:184px!important;height:184px!important;max-width:none!important;max-height:none!important;object-fit:contain;transform:translate(-50%,-50%);pointer-events:none;animation:wkhAura 8s linear infinite;opacity:.9}@keyframes wkhAura{to{transform:translate(-50%,-50%) rotate(360deg)}}.wkh-pet>.wpe{position:relative}
+.wk-dex{display:flex;align-items:center;gap:10px;margin:14px 0 4px;padding:10px 12px;border-radius:14px;border:2px dashed var(--line)}.wk-dex .wa{width:44px;height:44px;flex:none}.wk-dex b{display:block}.wk-dex small{color:var(--ink-3)}.wk-dex.all{border:2px solid #F2A900;background:#FFF6D6;color:#5A3D00}
+@media (prefers-reduced-motion:reduce){.wkh-aura{animation:none}}
