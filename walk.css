@@ -150,3 +150,4 @@
 .wk-rt .s{fill:#fff;stroke:#141E22;stroke-width:1.5}
 .wk-rt .e{fill:#FF7A3D;stroke:#141E22;stroke-width:1.5}
 .wk-bd-td{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#E4F7E8;color:#1E6B38;font-size:11px;font-style:normal;font-weight:900;vertical-align:2px}
+.wg-acts>button:last-child:nth-child(3n+1){grid-column:1/-1}
