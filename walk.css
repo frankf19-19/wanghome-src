@@ -142,9 +142,9 @@
 .wk-badge.on .wk-bp{display:none}
 .wk-h2i{display:flex;align-items:center;gap:6px}
 .wk-h2i>.wa{width:30px;height:30px}
-.wk-jump{position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 2px;margin:4px -2px 0;background:var(--paper);scrollbar-width:none}
+.wk-jump{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:8px 2px;margin:4px -2px 0;background:var(--paper);scrollbar-width:none}
 .wk-jump::-webkit-scrollbar{display:none}
-.wk-jump button{flex:none;padding:6px 14px;border-radius:999px;border:2px solid var(--line);background:var(--sheet);color:inherit;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
+.wk-jump button{min-width:0;padding:6px 0;border-radius:999px;border:2px solid var(--line);background:var(--sheet);color:inherit;font:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
 .wk-rt{width:56px;height:56px;flex:none;border-radius:12px;background:#FFF3B8;border:2px solid #141E22;margin-right:4px}
 .wk-rt polyline{fill:none;stroke:#D42A1E;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
 .wk-rt .s{fill:#fff;stroke:#141E22;stroke-width:1.5}
