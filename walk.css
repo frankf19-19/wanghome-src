@@ -104,6 +104,6 @@
 .wg .wg-hud span{font-size:10.5px}
 .wg .wg-rad{bottom:6px;left:6px;right:6px;padding:3px 8px;font-size:12px}
 .wg .wg-rad .wa{width:18px;height:18px;flex:none}
-.wg .wg-rad span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.wg .wg-rad span{line-height:1.3}
 .wg .wg-map{height:clamp(260px,calc(100svh - 290px),520px)}
 }
