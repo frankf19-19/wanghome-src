@@ -69,7 +69,7 @@
 .wk-tws:focus-visible{outline:3px solid #FF7A3D;outline-offset:2px}
 .wk-tw-more{margin-top:6px;padding:6px 12px;border-radius:999px;border:2px solid var(--line);background:var(--paper);color:inherit;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
 
-.wkh-want{display:inline-flex;align-items:center;gap:6px;margin:-2px 0 8px;padding:3px 12px 3px 8px;border-radius:999px;background:rgba(255,255,255,.92);border:2px solid #141E22;font-size:13px;font-weight:900;color:#141E22}
+.wkh-want{display:inline-flex;align-items:center;gap:6px;margin:4px 0 8px;padding:3px 12px 3px 8px;border-radius:999px;background:rgba(255,255,255,.92);border:2px solid #141E22;font-size:13px;font-weight:900;color:#141E22}
 .wkh-paws{display:inline-flex;gap:2px}
 .wkh-paws i{width:10px;height:10px;border-radius:50%;background:#D9D2C5}
 .wkh-paws i.on{background:#FF7A3D}
@@ -89,3 +89,21 @@
 .wk-yr .btn svg{stroke:#fff}
 @media (max-width:360px){.wk-yr-g{grid-template-columns:repeat(2,1fr)}}
 @media (prefers-reduced-motion:reduce){.wkh-want.lv5 .wkh-paws i.on{animation:none}}
+
+@media (max-height:740px){
+.wg .wg-top~.wk-ev{padding:4px 10px;margin-top:4px;border-radius:12px}
+.wg .wg-top~.wk-ev small{display:none}
+.wg .wg-top~.wk-ev b{font-size:13.5px}
+.wg .wg-top~.wk-ev .wa{width:24px;height:24px}
+.wg .wg-mapbox{margin-top:6px}
+.wg .wg-hud{top:6px;left:6px;right:6px;gap:5px}
+.wg .wg-hud>div{padding:3px 4px;border-radius:10px}
+.wg .wg-hud b{font-size:17px}
+.wg .wg-hud b.wg-wx{font-size:15px}
+.wg .wg-hud .wg-wx .wa{width:18px;height:18px;vertical-align:-3px}
+.wg .wg-hud span{font-size:10.5px}
+.wg .wg-rad{bottom:6px;left:6px;right:6px;padding:3px 8px;font-size:12px}
+.wg .wg-rad .wa{width:18px;height:18px;flex:none}
+.wg .wg-rad span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.wg .wg-map{height:clamp(260px,calc(100svh - 290px),520px)}
+}
