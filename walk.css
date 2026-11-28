@@ -151,3 +151,15 @@
 .wk-rt .e{fill:#FF7A3D;stroke:#141E22;stroke-width:1.5}
 .wk-bd-td{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#E4F7E8;color:#1E6B38;font-size:11px;font-style:normal;font-weight:900;vertical-align:2px}
 .wg-acts>button:last-child:nth-child(3n+1){grid-column:1/-1}
+
+.wkh-perk{margin-top:4px;font-size:13px}
+.wkh-perk summary{cursor:pointer;font-weight:800;color:#C2410C;list-style:none;display:inline-flex;align-items:center;gap:4px}
+.wkh-perk summary::-webkit-details-marker{display:none}
+.wkh-perk summary::after{content:'▾';font-size:11px}
+.wkh-perk[open] summary::after{content:'▴'}
+.wkh-perk ul{margin:6px 0 2px;padding:0;list-style:none;display:grid;gap:4px}
+.wkh-perk li{padding:4px 8px;border-radius:10px;background:rgba(0,0,0,.04);color:#8A8F93}
+.wkh-perk li.on{background:#FFF1DE;color:#141E22}
+.wkh-perk li b{margin-right:6px;font-size:12px;color:#E8622A}
+.wkh-perk li:not(.on) b{color:#8A8F93}
+.wkh-perk small{margin-left:4px}
