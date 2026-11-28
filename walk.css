@@ -112,3 +112,14 @@
 .wk-tw-claim{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:6px 12px;border-radius:999px;border:2px solid #141E22;background:linear-gradient(90deg,#FFE58A,#FFC24A);color:#141E22;font:inherit;font-size:13px;font-weight:900;cursor:pointer;box-shadow:2px 2px 0 #141E22}
 .wk-tw-claim .wa{width:20px;height:20px}
 .wk-tw-claim:disabled{opacity:.6}
+
+.wk-fc{margin:12px 0;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--sheet)}
+.wk-fc-l{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.wk-fc-i{display:flex;gap:6px;align-items:center;padding:6px;border-radius:12px;background:var(--paper);opacity:.6}
+.wk-fc-i.on{opacity:1;box-shadow:inset 0 0 0 2px #FF7A3D}
+.wk-fc-i .wa{width:44px;height:44px;flex:none}
+.wk-fc-i span{display:flex;flex-direction:column;min-width:0}
+.wk-fc-i b{font-size:14px}
+.wk-fc-i small{font-size:12px;color:var(--ink-3)}
+.wk-fc-i.on small{color:#E8622A;font-weight:800}
+.wk-fc-i em{font-style:normal;font-size:11.5px;color:#2E9B57;font-weight:800}
